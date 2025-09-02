@@ -8,7 +8,7 @@ export interface PantryItem {
   createdAt: number;
 }
 
-export type Page = 'chef' | 'pantry' | 'recipes' | 'meal-planner' | 'shopping-list' | 'settings' | 'help' | 'readme';
+export type Page = 'chef' | 'pantry' | 'recipes' | 'meal-planner' | 'shopping-list' | 'settings' | 'help' | 'about';
 
 export interface IngredientItem {
   quantity: string;

@@ -16,7 +16,7 @@ const MealPlanner = lazy(() => import('@/components/MealPlanner'));
 const ShoppingList = lazy(() => import('@/components/ShoppingList'));
 const Settings = lazy(() => import('@/components/Settings'));
 const Help = lazy(() => import('@/components/Help'));
-const ReadmePage = lazy(() => import('@/components/ReadmePage'));
+const AboutPage = lazy(() => import('@/components/AboutPage'));
 
 
 interface Toast {
@@ -158,10 +158,8 @@ const App: React.FC = () => {
 
   const renderPage = () => {
     const payload = voiceAction?.payload?.split('#')[0];
-    const key = voiceAction?.payload;
     
     const pageProps = {
-        key: key || currentPage,
         focusAction,
         onActionHandled: () => setFocusAction(null),
         addToast,
@@ -187,7 +185,7 @@ const App: React.FC = () => {
                     />;
         case 'settings': return <Settings {...pageProps} />;
         case 'help': return <Help setCurrentPage={setCurrentPage} />;
-        case 'readme': return <ReadmePage onBack={() => setCurrentPage('help')} />;
+        case 'about': return <AboutPage onBack={() => setCurrentPage('help')} />;
         default: return <PantryManager {...pageProps} />;
     }
   }

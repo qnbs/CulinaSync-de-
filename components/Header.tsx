@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { Bot, ChefHat, Milk, BookOpen, CalendarDays, ShoppingCart, Settings, HelpCircle, Mic, TerminalSquare } from 'lucide-react';
 import { Page } from '@/types';
@@ -60,22 +61,27 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, isListenin
                 <Mic className="h-5 w-5" />
               </button>
             )}
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setCurrentPage(item.id as Page)}
-                title={item.label}
-                className={`flex items-center space-x-2 px-2 sm:px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                  currentPage === item.id
-                    ? 'bg-amber-500 text-zinc-900'
-                    : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
-                }`}
-                aria-current={currentPage === item.id ? 'page' : undefined}
-              >
-                <item.icon className="h-4 w-4" />
-                <span className="hidden md:inline">{item.label}</span>
-              </button>
-            ))}
+            {navItems.map((item) => {
+              const isIconOnly = item.id === 'settings' || item.id === 'help';
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setCurrentPage(item.id as Page)}
+                  title={item.label}
+                  className={`flex items-center py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                    isIconOnly ? 'px-2' : 'space-x-2 px-2 sm:px-3'
+                  } ${
+                    currentPage === item.id
+                      ? 'bg-amber-500 text-zinc-900'
+                      : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
+                  }`}
+                  aria-current={currentPage === item.id ? 'page' : undefined}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {!isIconOnly && <span className="hidden md:inline">{item.label}</span>}
+                </button>
+              );
+            })}
           </div>
         </div>
       </nav>

@@ -14,7 +14,7 @@ import {
   TerminalSquare,
   Mic,
   Lightbulb,
-  Link,
+  Info as InfoIcon,
 } from 'lucide-react';
 
 const FaqItem = ({ question, children }: { question: string, children: React.ReactNode }) => (
@@ -157,8 +157,8 @@ const Help: React.FC<HelpProps> = ({ setCurrentPage }) => {
                 <p className="font-semibold text-zinc-200">Version: 1.0.0 (Audit-Build)</p>
                 <p>CulinaSync ist eine Vision für die Zukunft des digitalen Kochens. Eine intelligente, datenschutzfreundliche und nahtlose Erfahrung, die dir hilft, kreativer, organisierter und nachhaltiger in deiner eigenen Küche zu sein. </p>
                 <p>Diese App wurde als Demonstrationsprojekt entwickelt und nutzt modernste Web-Technologien, um zu zeigen, was heute möglich ist. Sie ist dein kollaborativer kulinarischer Hub.</p>
-                <button onClick={() => setCurrentPage('readme')} className="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 font-semibold pt-2">
-                    <Link size={16} /> Zur vollständigen Projekt-Dokumentation (README)
+                <button onClick={() => setCurrentPage('about')} className="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 font-semibold pt-2">
+                    <InfoIcon size={16} /> Über die App & Technische Details
                 </button>
             </div>
         </div>

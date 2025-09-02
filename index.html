@@ -36,6 +36,24 @@
       .favorite-glow {
         animation: favorite-glow 3s ease-in-out infinite;
       }
+      .prose-styles h1, .prose-styles h2, .prose-styles h3 { color: #f59e0b; }
+      .prose-styles h1 { font-size: 2.25rem; font-weight: bold; margin-bottom: 1.5rem; margin-top: 0.5rem; }
+      .prose-styles h2 { font-size: 1.5rem; font-weight: bold; margin-top: 2.5rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #3f3f46; }
+      .prose-styles h3 { font-size: 1.25rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.75rem; }
+      .prose-styles p { color: #d4d4d8; line-height: 1.6; margin-bottom: 1rem; }
+      .prose-styles a { color: #fbbf24; text-decoration: underline; }
+      .prose-styles a:hover { color: #f59e0b; }
+      .prose-styles ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; color: #d4d4d8; }
+      .prose-styles li { margin-bottom: 0.5rem; }
+      .prose-styles code { background-color: #3f3f46; color: #fbbf24; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.9em; }
+      .prose-styles pre { background-color: #18181b; border: 1px solid #3f3f46; border-radius: 0.5rem; padding: 1rem; overflow-x: auto; }
+      .prose-styles pre code { background-color: transparent; padding: 0; }
+      .prose-styles strong { color: #fafafa; font-weight: 600; }
+      .prose-styles table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+      .prose-styles th { color: #fbbf24; border-bottom: 2px solid #52525b; padding: 0.75rem; text-align: left; }
+      .prose-styles td { border-bottom: 1px solid #3f3f46; padding: 0.75rem; }
+      .prose-styles tr:last-child td { border-bottom: none; }
+      .prose-styles hr { border-top: 1px solid #3f3f46; margin: 2rem 0; }
     </style>
   <script type="importmap">
 {
@@ -45,15 +63,17 @@
     "react": "https://aistudiocdn.com/react@^19.1.1",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
     "react/": "https://aistudiocdn.com/react@^19.1.1/",
-    "vite": "https://aistudiocdn.com/vite@^7.1.4",
-    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.0.2",
-    "vite-plugin-pwa": "https://aistudiocdn.com/vite-plugin-pwa@^1.0.3",
-    "path": "https://aistudiocdn.com/path@^0.12.7",
-    "url": "https://aistudiocdn.com/url@^0.11.4",
     "dexie": "https://aistudiocdn.com/dexie@^4.2.0",
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.16.0",
     "lucide-react": "https://aistudiocdn.com/lucide-react@^0.542.0",
-    "dexie-react-hooks": "https://aistudiocdn.com/dexie-react-hooks@^4.2.0"
+    "dexie-react-hooks": "https://aistudiocdn.com/dexie-react-hooks@^4.2.0",
+    "react-markdown": "https://aistudiocdn.com/react-markdown@^9.0.1",
+    "rehype-raw": "https://aistudiocdn.com/rehype-raw@^7.0.0",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.0.2",
+    "vite": "https://aistudiocdn.com/vite@^7.1.4",
+    "url": "https://aistudiocdn.com/url@^0.11.4",
+    "vite-plugin-pwa": "https://aistudiocdn.com/vite-plugin-pwa@^1.0.3",
+    "path": "https://aistudiocdn.com/path@^0.12.7"
   }
 }
 </script>
