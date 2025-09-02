@@ -1,0 +1,7 @@
+{
+  "name": "CulinaSync (de)",
+  "description": "Eine intelligente, Local-First Progressive Web App (PWA), die als kollaborativer kulinarischer Hub für deinen Haushalt dient. Sie hilft dir bei der Verwaltung deiner Vorräte, der Essensplanung und der Erstellung neuer Rezepte mit KI – alles nahtlos offline und mit Fokus auf deine Privatsphäre.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

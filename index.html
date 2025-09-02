@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CulinaSync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#111827" />
+    <style>
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .page-fade-in {
+        animation: fadeIn 0.4s ease-out forwards;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+      }
+      .animate-pulse {
+        animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      @keyframes favorite-glow {
+        0%, 100% {
+          box-shadow: 0 0 5px rgba(251, 191, 36, 0.3), 0 0 10px rgba(251, 191, 36, 0.2);
+          border-color: rgba(251, 191, 36, 0.8);
+        }
+        50% {
+          box-shadow: 0 0 15px rgba(251, 191, 36, 0.5), 0 0 25px rgba(251, 191, 36, 0.3);
+          border-color: rgba(251, 191, 36, 1);
+        }
+      }
+      .favorite-glow {
+        animation: favorite-glow 3s ease-in-out infinite;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "jspdf": "https://aistudiocdn.com/jspdf@^2.5.1",
+    "papaparse": "https://aistudiocdn.com/papaparse@^5.4.1",
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "react/": "https://aistudiocdn.com/react@^19.1.1/",
+    "vite": "https://aistudiocdn.com/vite@^7.1.4",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.0.2",
+    "vite-plugin-pwa": "https://aistudiocdn.com/vite-plugin-pwa@^1.0.3",
+    "path": "https://aistudiocdn.com/path@^0.12.7",
+    "url": "https://aistudiocdn.com/url@^0.11.4",
+    "dexie": "https://aistudiocdn.com/dexie@^4.2.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.16.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.542.0",
+    "dexie-react-hooks": "https://aistudiocdn.com/dexie-react-hooks@^4.2.0"
+  }
+}
+</script>
+</head>
+  <body class="bg-zinc-900 text-zinc-100 font-sans">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
