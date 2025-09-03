@@ -172,9 +172,6 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelec
     setPantryFilter(false);
   };
 
-  // FIX: Replaced faulty filtering logic with a correct Dexie query.
-  // The new implementation chains Dexie's .filter() method for multiple criteria,
-  // which is the correct approach for applying multiple optional filters.
   const filteredRecipes = useLiveQuery(
     async () => {
       if (!pantryItems) return [];
@@ -261,66 +258,24 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelec
 
       {savedRecipes && savedRecipes.length > 0 && (
         <div className="space-y-4 p-4 bg-zinc-950/50 border border-zinc-800 rounded-lg">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="relative md:col-span-2">
+          <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-grow">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={20} />
                   <input 
                       ref={searchInputRef}
                       type="text" 
-                      placeholder="Rezepte nach Titel durchsuchen..." 
+                      placeholder="Rezepte durchsuchen..." 
                       value={searchTerm} 
                       onChange={e => setSearchTerm(e.target.value)} 
                       className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 pl-10 focus:ring-2 focus:ring-amber-500" 
                       aria-label="Rezepte durchsuchen"
                   />
               </div>
+              <div className='flex gap-2'>
+                <button onClick={() => {}} className="flex-grow flex items-center justify-center gap-2 p-2 rounded-md bg-zinc-800 text-zinc-300 hover:bg-zinc-700"><ListFilter size={20} /> Filter</button>
+                <button onClick={handleToggleSelectMode} className={`p-2 rounded-md transition-colors ${isSelectMode ? 'bg-amber-500 text-zinc-900' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`} title="Auswählen"><CheckSquare size={20} /></button>
+              </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <select onChange={e => setSortBy(e.target.value)} value={sortBy} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" aria-label="Sortieren nach">
-                <option value="newest">Sortieren: Neueste zuerst</option>
-                <option value="favorites">Sortieren: Favoriten zuerst</option>
-                <option value="a-z">Sortieren: Name (A-Z)</option>
-                <option value="z-a">Sortieren: Name (Z-A)</option>
-            </select>
-            <select onChange={e => setCourseFilter(e.target.value)} value={courseFilter} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" aria-label="Nach Gang filtern">
-              <option value="">Alle Gänge</option>
-              {filterOptions.courses.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <select onChange={e => setCuisineFilter(e.target.value)} value={cuisineFilter} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" aria-label="Nach Küche filtern">
-              <option value="">Alle Küchen</option>
-              {filterOptions.cuisines.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <select onChange={e => setMainIngredientFilter(e.target.value)} value={mainIngredientFilter} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" aria-label="Nach Hauptzutat filtern">
-              <option value="">Alle Hauptzutaten</option>
-              {filterOptions.mainIngredients.map(i => <option key={i} value={i}>{i}</option>)}
-            </select>
-            <select onChange={e => setDifficultyFilter(e.target.value)} value={difficultyFilter} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" aria-label="Nach Schwierigkeit filtern">
-              <option value="">Alle Schwierigkeiten</option>
-              {filterOptions.difficulties.map(d => <option key={d} value={d}>{d}</option>)}
-            </select>
-             <select onChange={e => setDietFilter(e.target.value)} value={dietFilter} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" aria-label="Nach Ernährungsweise filtern">
-              <option value="">Alle Ernährungsweisen</option>
-              {filterOptions.diets.map(d => <option key={d} value={d}>{d}</option>)}
-            </select>
-          </div>
-          <div className="pt-3 border-t border-zinc-800 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <button onClick={clearFilters} disabled={!hasActiveFilters} className="flex items-center gap-2 text-sm text-amber-400 hover:text-amber-300 font-semibold disabled:text-zinc-600 disabled:cursor-not-allowed">
-                    <X size={16} /> Alle Filter zurücksetzen
-                </button>
-                <div className="flex items-center gap-4 flex-wrap justify-center sm:justify-end">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" checked={pantryFilter} onChange={() => setPantryFilter(!pantryFilter)} className="h-4 w-4 rounded bg-zinc-700 border-zinc-600 text-amber-500 focus:ring-amber-500"/>
-                        <span className="text-zinc-300 text-sm font-medium flex items-center gap-1"><CookingPot size={14} className="text-amber-400" /> Nur Kochbereite</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" checked={showFavoritesOnly} onChange={() => setShowFavoritesOnly(!showFavoritesOnly)} className="h-4 w-4 rounded bg-zinc-700 border-zinc-600 text-amber-500 focus:ring-amber-500"/>
-                        <span className="text-zinc-300 text-sm font-medium flex items-center gap-1"><Star size={14} className="text-amber-400" /> Nur Favoriten</span>
-                    </label>
-                     <button onClick={handleToggleSelectMode} className={`flex items-center gap-2 text-sm font-semibold py-1 px-3 rounded-md transition-colors ${isSelectMode ? 'bg-amber-500 text-zinc-900' : 'text-amber-400 hover:text-amber-300'}`}>
-                        <CheckSquare size={16} /> {isSelectMode ? 'Abbrechen' : 'Auswählen'}
-                    </button>
-                </div>
-            </div>
         </div>
       )}
 

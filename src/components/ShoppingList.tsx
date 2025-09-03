@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, updateShoppingListItem, clearShoppingList, addShoppingListItem, moveCheckedToPantry, renameShoppingListCategory, batchAddShoppingListItems, generateListFromMealPlan } from '@/services/db';
 import { ShoppingListItem, Recipe, PantryItem } from '@/types';
-import { Trash2, FileDown, Plus, CheckCircle, Edit3, X, Save, ChevronDown, Bot, LoaderCircle, Archive, Send, GripVertical, TextQuote, ListCollapse, ListTree, RefreshCw, ArrowLeft, CheckSquare, Square } from 'lucide-react';
+import { Trash2, FileDown, Plus, CheckCircle, Edit3, X, Save, ChevronDown, Bot, LoaderCircle, Archive, Send, GripVertical, TextQuote, ListCollapse, ListTree, RefreshCw, ArrowLeft, CheckSquare, Square, MoreVertical } from 'lucide-react';
 import { exportShoppingListToCsv, exportShoppingListToPdf, exportShoppingListToMarkdown, exportShoppingListToTxt, exportShoppingListToJson } from '@/services/exportService';
 import { generateShoppingList } from '@/services/geminiService';
 import { parseShoppingItemString } from '@/services/utils';
@@ -238,7 +239,7 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
   const [editingItem, setEditingItem] = useState<ShoppingListItem | null>(null);
   const [editingCategory, setEditingCategory] = useState<{ oldName: string; newName: string } | null>(null);
   const [isCompletedVisible, setIsCompletedVisible] = useState(true);
-  const [isExportOpen, setExportOpen] = useState(false);
+  const [isActionsMenuOpen, setActionsMenuOpen] = useState(false);
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -248,6 +249,19 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
 
   const addItemInputRef = useRef<HTMLInputElement>(null);
   const recipesById = useMemo(() => new Map<number, Recipe>((recipes || []).map(r => [r.id!, r])), [recipes]);
+  const actionsMenuRef = useRef<HTMLDivElement>(null);
+
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+        if (actionsMenuRef.current && !actionsMenuRef.current.contains(event.target as Node)) {
+            setActionsMenuOpen(false);
+        }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
 
   const handleToggle = useCallback(async (item: ShoppingListItem) => {
     await updateShoppingListItem({...item, isChecked: !item.isChecked });
@@ -290,6 +304,7 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
   }, [addToast]);
   
   const handleGenerateFromPlan = useCallback(async () => {
+    setActionsMenuOpen(false);
     setIsGenerating(true);
     try {
         const { added, existing } = await generateListFromMealPlan();
@@ -377,6 +392,7 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
   // #endregion
 
   const handleClearList = async () => {
+    setActionsMenuOpen(false);
     if (window.confirm('Möchtest du die Einkaufsliste wirklich komplett leeren?')) {
         const count = await clearShoppingList();
         if (count > 0) addToast('Liste geleert.');
@@ -384,14 +400,16 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
   };
 
   const handleExport = (format: 'pdf' | 'csv' | 'json' | 'md' | 'txt') => {
-    setExportOpen(false);
+    setActionsMenuOpen(false);
     if (!shoppingList?.length) return;
-    switch(format) {
-        case 'pdf': exportShoppingListToPdf(shoppingList); break;
-        case 'csv': exportShoppingListToCsv(shoppingList); break;
-        case 'json': exportShoppingListToJson(shoppingList); break;
-        case 'md': exportShoppingListToMarkdown(shoppingList); break;
-        case 'txt': exportShoppingListToTxt(shoppingList); break;
+    if (window.confirm(`Möchtest du die Einkaufsliste wirklich als ${format.toUpperCase()}-Datei exportieren?`)) {
+      switch(format) {
+          case 'pdf': exportShoppingListToPdf(shoppingList); break;
+          case 'csv': exportShoppingListToCsv(shoppingList); break;
+          case 'json': exportShoppingListToJson(shoppingList); break;
+          case 'md': exportShoppingListToMarkdown(shoppingList); break;
+          case 'txt': exportShoppingListToTxt(shoppingList); break;
+      }
     }
   };
 
@@ -406,9 +424,9 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
   }, {} as Record<string, ShoppingListItem[]>), [activeItems]);
 
   const handleMoveToPantry = async () => {
-      if(completedItems.length > 0 && window.confirm(`${completedItems.length} gekaufte(r) Artikel in den Vorrat verschieben?`)){
+      if (completedItems.length > 0 && window.confirm(`${completedItems.length} gekaufte(r) Artikel in den Vorrat verschieben?`)) {
         const movedCount = await moveCheckedToPantry();
-        if(movedCount > 0) addToast(`${movedCount} Artikel in den Vorrat verschoben.`, 'success');
+        if (movedCount > 0) addToast(`${movedCount} Artikel in den Vorrat verschoben.`, 'success');
       }
   };
 
@@ -425,32 +443,28 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
         <p className="text-zinc-400 mt-1">Verwalte, organisiere und übertrage deine Einkäufe.</p>
       </div>
 
-      <div className="bg-zinc-950/50 border border-zinc-800 rounded-lg p-4 space-y-4">
-          <div className="flex flex-wrap gap-2 justify-between items-center">
+      <div className="bg-zinc-950/50 border border-zinc-800 rounded-lg p-4">
+          <div className="flex gap-2 justify-between items-center">
              <div className="flex items-center gap-2">
-                <button onClick={expandAll} className="flex items-center gap-2 p-2 rounded-md bg-zinc-700 text-sm hover:bg-zinc-600" title="Alle ausklappen"><ListTree size={16}/></button>
-                <button onClick={collapseAll} className="flex items-center gap-2 p-2 rounded-md bg-zinc-700 text-sm hover:bg-zinc-600" title="Alle einklappen"><ListCollapse size={16}/></button>
+                <button onClick={expandAll} className="p-2 rounded-md bg-zinc-800 text-sm hover:bg-zinc-700 text-zinc-300" title="Alle ausklappen"><ListTree size={18}/></button>
+                <button onClick={collapseAll} className="p-2 rounded-md bg-zinc-800 text-sm hover:bg-zinc-700 text-zinc-300" title="Alle einklappen"><ListCollapse size={18}/></button>
              </div>
-             <div className="flex flex-wrap gap-2 justify-end">
-                <button onClick={handleGenerateFromPlan} disabled={isGenerating} className="flex items-center gap-2 bg-zinc-700 font-semibold py-2 px-3 rounded-md hover:bg-zinc-600 text-sm disabled:bg-zinc-800 disabled:text-zinc-500">
-                    {isGenerating ? <LoaderCircle size={16} className="animate-spin"/> : <RefreshCw size={16}/>} Aus Plan generieren
-                </button>
-                <button onClick={() => setBulkAddModalOpen(true)} className="flex items-center gap-2 bg-zinc-700 font-semibold py-2 px-3 rounded-md hover:bg-zinc-600 text-sm"><TextQuote size={16}/> Liste einfügen</button>
-                <button onClick={() => setAiModalOpen(true)} className="flex items-center gap-2 bg-zinc-700 font-semibold py-2 px-3 rounded-md hover:bg-zinc-600 text-sm"><Bot size={16} /> KI-Liste</button>
-                <div className="relative inline-block">
-                    <button onClick={() => setExportOpen(!isExportOpen)} className="w-full flex items-center gap-2 bg-zinc-700 font-semibold py-2 px-3 rounded-md hover:bg-zinc-600 text-sm">
-                        <FileDown size={16} /> Exportieren <ChevronDown size={16} className={`transition-transform ${isExportOpen ? 'rotate-180' : ''}`} />
-                    </button>
-                    {isExportOpen && (
-                        <div className="absolute top-full right-0 mt-2 w-40 bg-zinc-800 border border-zinc-700 rounded-md shadow-lg z-10">
-                            <a onClick={() => handleExport('pdf')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">PDF</a>
-                            <a onClick={() => handleExport('json')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">JSON</a>
-                            <a onClick={() => handleExport('md')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">Markdown</a>
-                        </div>
-                    )}
-                </div>
-                <button onClick={handleClearList} disabled={!shoppingList?.length} className="flex items-center gap-2 bg-red-900/80 font-semibold py-2 px-3 rounded-md hover:bg-red-800 disabled:bg-zinc-800 disabled:text-zinc-500 text-sm"><Trash2 size={16}/> Leeren</button>
-            </div>
+             <div className="relative" ref={actionsMenuRef}>
+                 <button onClick={() => setActionsMenuOpen(prev => !prev)} className="p-2 rounded-md bg-zinc-800 text-sm hover:bg-zinc-700 text-zinc-300" title="Weitere Aktionen"><MoreVertical size={18}/></button>
+                 {isActionsMenuOpen && (
+                    <div className="absolute top-full right-0 mt-2 w-56 bg-zinc-800 border border-zinc-700 rounded-md shadow-lg z-10 page-fade-in">
+                        <button onClick={handleGenerateFromPlan} disabled={isGenerating} className="w-full text-left text-sm flex items-center gap-3 px-3 py-2 hover:bg-zinc-700 disabled:opacity-50">
+                           {isGenerating ? <LoaderCircle size={16} className="animate-spin"/> : <RefreshCw size={16}/>} Aus Plan generieren
+                        </button>
+                        <button onClick={() => {setBulkAddModalOpen(true); setActionsMenuOpen(false);}} className="w-full text-left text-sm flex items-center gap-3 px-3 py-2 hover:bg-zinc-700"><TextQuote size={16}/> Liste einfügen</button>
+                        <button onClick={() => {setAiModalOpen(true); setActionsMenuOpen(false);}} className="w-full text-left text-sm flex items-center gap-3 px-3 py-2 hover:bg-zinc-700"><Bot size={16} /> KI-Liste erstellen</button>
+                        <div className='border-t border-zinc-700 my-1' />
+                        <button onClick={() => handleExport('pdf')} className="w-full text-left text-sm flex items-center gap-3 px-3 py-2 hover:bg-zinc-700"><FileDown size={16}/> Als PDF exportieren</button>
+                        <div className='border-t border-zinc-700 my-1' />
+                        <button onClick={handleClearList} disabled={!shoppingList?.length} className="w-full text-left text-sm flex items-center gap-3 px-3 py-2 hover:bg-zinc-700 text-red-400 disabled:opacity-50"><Trash2 size={16}/> Liste leeren</button>
+                    </div>
+                 )}
+             </div>
           </div>
       </div>
 
@@ -510,7 +524,7 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
           )}
       </div>
 
-       <div className="fixed bottom-0 left-0 right-0 bg-zinc-950/80 backdrop-blur-sm border-t border-zinc-800 p-3 z-30">
+       <div className="fixed bottom-16 md:bottom-0 left-0 right-0 bg-zinc-950/80 backdrop-blur-sm border-t border-zinc-800 p-3 z-30">
             <div className="max-w-4xl mx-auto px-4">
                 {completedItems.length > 0 ? (
                     <button onClick={handleMoveToPantry} className="w-full flex items-center justify-center gap-3 bg-amber-500 text-zinc-900 font-bold py-3 px-4 rounded-md hover:bg-amber-400 transition-colors shadow-lg">

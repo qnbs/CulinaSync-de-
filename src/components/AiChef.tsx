@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { db } from '@/services/db';
 import { generateRecipeIdeas, generateRecipe } from '@/services/geminiService';

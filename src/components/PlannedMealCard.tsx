@@ -70,7 +70,7 @@ const PlannedMealCard = React.memo<{
                     </div>
                 </div>
                  <div className="relative" ref={menuRef}>
-                    <button onClick={() => setMenuOpen(p => !p)} className={`p-1 rounded-full ${isMenuOpen ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:text-white group-hover:opacity-100'}`}><MoreVertical size={16}/></button>
+                    <button onClick={() => setMenuOpen(p => !p)} className={`p-1 rounded-full ${isMenuOpen ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:text-white'}`}><MoreVertical size={16}/></button>
                     {isMenuOpen && (
                         <div className="absolute top-full right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg w-48 z-20 page-fade-in">
                             <button onClick={() => { onAction('view', recipe); setMenuOpen(false); }} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2 hover:bg-zinc-700"><BookOpen size={14}/> Ansehen</button>

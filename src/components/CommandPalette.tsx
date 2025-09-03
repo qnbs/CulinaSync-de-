@@ -51,7 +51,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
         );
     }, [searchTerm, commands]);
     
-    const showGlobalSearch = useMemo(() => filteredCommands.length === 0 && searchTerm.trim().length > 0, [filteredCommands, searchTerm]);
+    const showGlobalSearch = useMemo(() => filteredCommands.length === 0 && searchTerm.trim().length > 1 && dbSearchResults.recipes.length === 0 && dbSearchResults.pantry.length === 0, [filteredCommands, searchTerm, dbSearchResults]);
 
     const groupedCommands = useMemo(() => {
         return filteredCommands.reduce((acc, cmd) => {
@@ -154,7 +154,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
                 </div>
 
                 <div className="max-h-[60vh] overflow-y-auto p-2">
-                    {flatCommandList.length === 0 && !showGlobalSearch ? (
+                    {flatCommandList.length === 0 ? (
                          <p className="text-center text-zinc-500 p-8">Keine Ergebnisse gefunden.</p>
                     ): null}
 
