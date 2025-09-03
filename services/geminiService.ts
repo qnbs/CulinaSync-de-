@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import { AppSettings, PantryItem, Recipe, ShoppingListItem } from "@/types";
 
 const API_KEY = process.env.API_KEY;
@@ -136,7 +136,7 @@ export const generateRecipe = async (
     Bitte generiere ein vollständiges Rezept und antworte NUR mit einem einzigen, gültigen JSON-Objekt, das dem bereitgestellten Schema entspricht. Füge keinen anderen Text, keine Markdown-Formatierung oder Erklärungen vor oder nach dem JSON-Objekt hinzu.
   `;
   
-  let response;
+  let response: GenerateContentResponse;
   try {
     response = await ai.models.generateContent({
         model: model,
@@ -151,15 +151,11 @@ export const generateRecipe = async (
     throw new Error("API_ERROR: Failed to communicate with the AI service. It might be down, or there could be a network issue.");
   }
 
-  let jsonText;
-  try {
-    jsonText = response.text.trim();
-    if (!jsonText) {
-        throw new Error("Empty response from AI");
-    }
-  } catch (error) {
-    console.error("Gemini response was empty or not text.");
-    throw new Error("INVALID_RESPONSE: The AI returned an empty or invalid response.");
+  // FIX: More robust handling of the API response.
+  const jsonText = response.text.trim();
+  if (!jsonText) {
+      console.error("Gemini response was empty.");
+      throw new Error("INVALID_RESPONSE: The AI returned an empty or invalid response.");
   }
 
   let recipeData;
@@ -214,7 +210,13 @@ export const generateShoppingList = async (
             }
         });
         
+        // FIX: More robust handling of the API response.
         const jsonText = response.text.trim();
+        if (!jsonText) {
+            console.error("Gemini response for shopping list was empty.");
+            throw new Error("INVALID_RESPONSE: The AI returned an empty response.");
+        }
+
         const parsedData = JSON.parse(jsonText);
         
         if (parsedData.items && Array.isArray(parsedData.items)) {

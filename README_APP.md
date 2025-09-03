@@ -1,4 +1,6 @@
-<img src="https://raw.githubusercontent.com/user-attachments/assets/dd38b52e-07f9-46e2-9854-3e9a4f6612d7" alt="CulinaSync Logo" width="150">
+<div align="center">
+  <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmYmJmMjQiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTEuNSA5LjVMOSAxMkwxMSA1bDIgN1oiLz48cGF0aCBkPSJNMTggMTBsLTIuNS0yLjVMMTggNWwyIDcgWiIvPjxwYXRoIGQ9Ik0yIDhsMTItMTIgMTIgMTIiLz48cGF0aCBkPSJNNCAxNGguMyIvPjxwYXRoIGQ9Ik0yMCAxNGgtLjMiLz48cGF0aCBkPSJNNi4zIDE4LjRIMTcuNyIvPjxwYXRoIGQ9Ik02IDVIMyIvPjxwYXRoIGQ9Ik0yMSA1di0zIi8+PC9zdmc+" alt="CulinaSync Logo" width="150">
+</div>
 
 # Willkommen bei CulinaSync
 
@@ -13,21 +15,6 @@ Ihr persönlicher, intelligenter Küchenassistent, der den kulinarischen Alltag 
 CulinaSync ist mehr als nur eine weitere Rezept-App. Es ist ein proaktiver, intelligenter Küchenassistent, der als zentraler Hub für Ihren Haushalt dient. Die App wurde entwickelt, um den gesamten kulinarischen Prozess zu unterstützen – von der Inspiration und Essensplanung über den intelligenten Einkauf bis hin zur Zubereitung und Vorratshaltung.
 
 Im Gegensatz zu traditionellen, Cloud-abhängigen Anwendungen basiert CulinaSync auf einer **Local-First-Architektur**. Ihre Daten – Ihre Rezepte, Vorräte und Pläne – residieren primär auf Ihrem Gerät. Das Resultat ist eine blitzschnelle, permanent verfügbare und absolut private Nutzererfahrung, die sich wie eine native App anfühlt.
-
-## 🚀 Kernfunktionen im Überblick
-
-Die Anwendung deckt den gesamten kulinarischen Workflow ab, intelligent und nahtlos.
-
-| Feature                | Beschreibung                                                                                                                                                            | Status      |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| 🥫 **Intelligente Vorratskammer** | Verwalten Sie Ihre Lebensmittelvorräte. Artikel, Mengen und Ablaufdaten werden für intelligente Rezeptvorschläge und Einkaufslisten genutzt.                  | ✅ Verfügbar |
-| 🤖 **KI-Chef (Gemini API)**     | Erhalten Sie personalisierte Rezeptvorschläge basierend auf Vorräten, Vorlieben und Ernährungszielen. Verwandeln Sie "Was koche ich heute?" in "Das koche ich heute!". | ✅ Verfügbar |
-| 📚 **Persönliches Rezeptbuch**  | Sammeln, organisieren und filtern Sie Ihre Lieblingsrezepte. Jedes gespeicherte Rezept wird Teil Ihrer persönlichen, durchsuchbaren Kochbibliothek.         | ✅ Verfügbar |
-| 📅 **Dynamischer Essensplaner**  | Planen Sie Mahlzeiten per Drag-and-Drop. Erkennen Sie auf einen Blick, welche Zutaten für geplante Gerichte noch fehlen.                                      | ✅ Verfügbar |
-| 🛒 **Automatisierte Einkaufsliste** | Generieren Sie eine Einkaufsliste, die Ihren Essensplan automatisch mit Ihrer Vorratskammer abgleicht. Fügen Sie Artikel auch manuell oder per KI hinzu.     | ✅ Verfügbar |
-| 🗣️ **Sprachsteuerung**         | Steuern Sie die App freihändig – fügen Sie Artikel hinzu, navigieren Sie oder haken Sie Zutaten von der Einkaufsliste ab.                                         | ✅ Verfügbar |
-| ⚙️ **Daten-Management**          | Exportieren und importieren Sie all Ihre Daten als JSON-Backup. Sie behalten die volle Kontrolle.                                                               | ✅ Verfügbar |
-
 
 ## ✨ Unsere Philosophie: Ihre Daten gehören Ihnen (Local-First)
 

@@ -142,9 +142,9 @@ interface ShoppingListProps {
 
 const ShoppingList: React.FC<ShoppingListProps> = ({ focusAction, onActionHandled, triggerCheckItem, addToast }) => {
   const shoppingList: ShoppingListItem[] | undefined = useLiveQuery(() => db.shoppingList.toArray(), []);
-  // FIX: Correctly type `pantryItems` as `PantryItem[]` since it queries the pantry table,
-  // resolving the type mismatch error when passed to `generateShoppingList`.
-  const pantryItems: PantryItem[] | undefined = useLiveQuery(() => db.pantry.toArray(), []);
+  // FIX: Use nullish coalescing operator to ensure pantryItems is always an array,
+  // preventing type errors when passed to generateShoppingList.
+  const pantryItems = useLiveQuery(() => db.pantry.toArray(), []) ?? [];
   const recipes: Recipe[] | undefined = useLiveQuery(() => db.recipes.toArray(), []);
   const allMealPlans: MealPlanItem[] | undefined = useLiveQuery(() => db.mealPlan.toArray(), []);
 

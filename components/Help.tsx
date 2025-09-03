@@ -45,9 +45,10 @@ const HelpCard = ({ icon: Icon, title, children }: { icon: React.FC<any>, title:
 
 interface HelpProps {
   setCurrentPage: (page: Page) => void;
+  appVersion: string;
 }
 
-const Help: React.FC<HelpProps> = ({ setCurrentPage }) => {
+const Help: React.FC<HelpProps> = ({ setCurrentPage, appVersion }) => {
   return (
     <div className="space-y-12">
       <div>
@@ -154,7 +155,7 @@ const Help: React.FC<HelpProps> = ({ setCurrentPage }) => {
         <h3 className="text-xl font-semibold text-amber-400 border-b border-zinc-700 pb-2 mb-4 flex items-center gap-3"><Info /> Über CulinaSync</h3>
         <div className="bg-zinc-800/50 p-6 rounded-lg text-zinc-400 text-sm">
             <div className="space-y-3">
-                <p className="font-semibold text-zinc-200">Version: 1.0.0 (Audit-Build)</p>
+                <p className="font-semibold text-zinc-200">Version: {appVersion}</p>
                 <p>CulinaSync ist eine Vision für die Zukunft des digitalen Kochens. Eine intelligente, datenschutzfreundliche und nahtlose Erfahrung, die dir hilft, kreativer, organisierter und nachhaltiger in deiner eigenen Küche zu sein. </p>
                 <p>Diese App wurde als Demonstrationsprojekt entwickelt und nutzt modernste Web-Technologien, um zu zeigen, was heute möglich ist. Sie ist dein kollaborativer kulinarischer Hub.</p>
                 <button onClick={() => setCurrentPage('about')} className="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 font-semibold pt-2">

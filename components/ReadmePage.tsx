@@ -1,14 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
-import readmeText from '../README_APP.md?raw';
 
 interface ReadmePageProps {
   onBack: () => void;
 }
 
 const ReadmePage: React.FC<ReadmePageProps> = ({ onBack }) => {
+  const [readmeText, setReadmeText] = useState('Lade Inhalt...');
+
+  useEffect(() => {
+    fetch('/README_APP.md')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.text();
+      })
+      .then(text => setReadmeText(text))
+      .catch(error => {
+        console.error('Error fetching README:', error);
+        setReadmeText('Fehler beim Laden des Inhalts.');
+      });
+  }, []);
+
   return (
     <div className="animate-fade-in">
       <button onClick={onBack} className="flex items-center text-amber-400 hover:text-amber-300 mb-6 font-semibold">

@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import { Bot, ChefHat, Milk, BookOpen, CalendarDays, ShoppingCart, Settings, HelpCircle, Mic, TerminalSquare } from 'lucide-react';
 import { Page } from '@/types';
@@ -14,16 +12,17 @@ interface HeaderProps {
   onCommandPaletteToggle: () => void;
 }
 
+const navItems = [
+  { id: 'pantry', label: 'Vorratskammer', icon: Milk },
+  { id: 'chef', label: 'KI-Chef', icon: Bot },
+  { id: 'recipes', label: 'Rezepte', icon: BookOpen },
+  { id: 'meal-planner', label: 'Essensplaner', icon: CalendarDays },
+  { id: 'shopping-list', label: 'Einkaufsliste', icon: ShoppingCart },
+  { id: 'settings', label: 'Einstellungen', icon: Settings },
+  { id: 'help', label: 'Hilfe', icon: HelpCircle },
+];
+
 const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, isListening, startListening, stopListening, hasRecognitionSupport, onCommandPaletteToggle }) => {
-  const navItems = [
-    { id: 'pantry', label: 'Vorratskammer', icon: Milk },
-    { id: 'chef', label: 'KI-Chef', icon: Bot },
-    { id: 'recipes', label: 'Rezepte', icon: BookOpen },
-    { id: 'meal-planner', label: 'Essensplaner', icon: CalendarDays },
-    { id: 'shopping-list', label: 'Einkaufsliste', icon: ShoppingCart },
-    { id: 'settings', label: 'Einstellungen', icon: Settings },
-    { id: 'help', label: 'Hilfe', icon: HelpCircle },
-  ];
 
   const handleMicClick = () => {
     if (isListening) {

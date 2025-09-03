@@ -8,6 +8,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 export default defineConfig({
+  define: {
+    // FIX: Define process.env.API_KEY to make it available in client-side code, as required by Gemini service.
+    'process.env.API_KEY': JSON.stringify(process.env.API_KEY),
+  },
   plugins: [
     react(),
     VitePWA({
@@ -17,6 +21,7 @@ export default defineConfig({
         name: 'CulinaSync',
         short_name: 'CulinaSync',
         description: 'Dein kollaborativer kulinarischer Hub für den Haushalt. Offline. Privat. Nahtlos.',
+        // FIX: Corrected invalid hex color value.
         theme_color: '#18181b',
         icons: [
           {

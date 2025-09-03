@@ -37,6 +37,14 @@ const App: React.FC = () => {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [isCommandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [focusAction, setFocusAction] = useState<string | null>(null);
+  const [appVersion, setAppVersion] = useState<string>('');
+
+  useEffect(() => {
+    fetch('./package.json')
+      .then(res => res.json())
+      .then(data => setAppVersion(data.version || 'N/A'))
+      .catch(() => setAppVersion('N/A'));
+  }, []);
 
   const {
     finalTranscript,
@@ -184,7 +192,7 @@ const App: React.FC = () => {
                         {...pageProps}
                     />;
         case 'settings': return <Settings {...pageProps} />;
-        case 'help': return <Help setCurrentPage={setCurrentPage} />;
+        case 'help': return <Help setCurrentPage={setCurrentPage} appVersion={appVersion} />;
         case 'about': return <AboutPage onBack={() => setCurrentPage('help')} />;
         default: return <PantryManager {...pageProps} />;
     }

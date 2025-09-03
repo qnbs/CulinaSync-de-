@@ -1,111 +1,114 @@
 <div align="center">
-  <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmYmJmMjQiIHN0cm9rZS1widthD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNNiAxMy44N0E0IDQgMCAwIDEgNy40MSAxMWE0IDQgMCAwIDEgNS4xOC0yLjg3QTQgNCAwIDAgMSAxNi41OSAxMWExIDQgMCAwIDEgMS40MSAyLjg3Ii8+PHBhdGggZD0iTTggMThjMC0yLjY1IDIuNDItNC4yMiA1LTUuMjZzNS0yLjYxIDUtNS4yNmMwLTIuMi0xLjgtNC00LTQtMS41IDAtMi44Ljg0LTMuNSAyLjA2QzkuOCAzLjg0IDguNSAzIDcgM2MtMi4yIDAtNCAxLjgtNCA0IDAgMi42NSAyLjQyIDQuMjIgNSA1LjI2czUgMi42MSA1IDUuMjYiLz48cGF0aCBkPSJNNiAyMWgxMiIvPjwvc3ZnPg==" alt="CulinaSync Logo" width="150">
-  <h1>CulinaSync: Your Smart Kitchen Assistant</h1>
+  <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmYmJmMjQiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTEuNSA5LjVMOSAxMkwxMSA1bDIgN1oiLz48cGF0aCBkPSJNMTggMTBsLTIuNS0yLjVMMTggNWwyIDcgWiIvPjxwYXRoIGQ9Ik0yIDhsMTItMTIgMTIgMTIiLz48cGF0aCBkPSJNNCAxNGguMyIvPjxwYXRoIGQ9Ik0yMCAxNGgtLjMiLz48cGF0aCBkPSJNNi4zIDE4LjRIMTcuNyIvPjxwYXRoIGQ9Ik02IDVIMyIvPjxwYXRoIGQ9Ik0yMSA1di0zIi8+PC9zdmc+" alt="CulinaSync Logo" width="150">
+  <h1>CulinaSync (de): Dein intelligenter Küchenassistent</h1>
   <p>
-    <strong>Offline-First. Privacy-Centric. Seamless.</strong>
+    <strong>Offline. Privat. Nahtlos.</strong>
     <br />
-    A Local-First Progressive Web App (PWA) to revolutionize your household's entire culinary lifecycle.
+    Eine Local-First Progressive Web App (PWA), die den gesamten kulinarischen Alltag in Ihrem Haushalt revolutioniert.
   </p>
   <p>
-    <em>This project was developed and refined in a dialogue with <a href="https://ai.studio/apps/drive/1bQgaay6IODal47GVGZcn-65xgfu_PIDC">Google's AI Studio</a>.</em>
+    <em>Dieses Projekt wurde im Dialog mit <a href="https://ai.studio/apps/drive/1bQgaay6IODal47GVGZcn-65xgfu_PIDC">Google's AI Studio</a> entwickelt und verfeinert.</em>
   </p>
 </div>
 
 ---
 
-## 🚀 Core Vision: From Recipe Archive to Proactive Kitchen Partner
+## 🎯 Vision: Vom Rezeptarchiv zum proaktiven Küchenpartner
 
-CulinaSync is more than just another recipe app. It's a proactive, intelligent kitchen assistant designed to be the central hub for your household's culinary needs. The app supports the entire cooking process—from inspiration and meal planning to smart shopping, preparation, and pantry management.
+CulinaSync ist mehr als nur eine weitere Rezept-App. Es ist ein proaktiver, intelligenter Küchenassistent, der als zentraler Hub für Ihren Haushalt dient. Die App wurde entwickelt, um den gesamten kulinarischen Prozess zu unterstützen – von der Inspiration und Essensplanung über den intelligenten Einkauf bis hin zur Zubereitung und Vorratshaltung.
 
-Unlike traditional cloud-dependent applications, CulinaSync is built on a **local-first architecture**. Your data—your recipes, inventory, and plans—resides primarily on your device. The result is a lightning-fast, always-available, and completely private user experience that feels like a native app.
+Im Gegensatz zu traditionellen, Cloud-abhängigen Anwendungen basiert CulinaSync auf einer **Local-First-Architektur**. Ihre Daten – Ihre Rezepte, Vorräte und Pläne – residieren primär auf Ihrem Gerät. Das Resultat ist eine blitzschnelle, permanent verfügbare und absolut private Nutzererfahrung, die sich wie eine native App anfühlt.
 
-## ✨ Key Features
+## ✨ Kernfunktionen
 
-| Feature                | Description                                                                                                                                                            | Status      |
+Die Anwendung deckt den gesamten kulinarischen Workflow ab, intelligent und nahtlos.
+
+| Feature                | Beschreibung                                                                                                                                                            | Status      |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| 🥫 **Smart Pantry** | Manage your food inventory. Items, quantities, and expiration dates are used for intelligent recipe suggestions and shopping lists.                  | ✅ Available |
-| 🤖 **AI Chef (Gemini API)**     | Get personalized recipe suggestions based on your pantry, preferences, and dietary goals. Turn "What should I cook?" into "This is what I'm cooking!". | ✅ Available |
-| 📚 **Collaborative Cookbook**  | Collect, organize, and filter your favorite recipes. Every saved recipe becomes part of your personal, searchable cooking library.         | ✅ Available |
-| 📅 **Dynamic Meal Planner**  | Plan meals with a drag-and-drop interface. Instantly see which ingredients are missing for planned dishes.                                      | ✅ Available |
-| 🛒 **Automated Shopping List** | Generate a shopping list that automatically checks your meal plan against your pantry. Add items manually or with AI assistance.     | ✅ Available |
-| 🗣️ **Voice Control**         | Control the app hands-free—add items, navigate, or check ingredients off your shopping list.                                         | ✅ Available |
-| ⚙️ **Data Management**          | Export and import all your data as a JSON backup. You remain in full control.                                                               | ✅ Available |
+| 🥫 **Intelligente Vorratskammer** | Verwalten Sie Ihre Lebensmittelvorräte. Artikel, Mengen und Ablaufdaten werden für intelligente Rezeptvorschläge und Einkaufslisten genutzt.                  | ✅ Verfügbar |
+| 🤖 **KI-Chef (Gemini API)**     | Erhalten Sie personalisierte Rezeptvorschläge basierend auf Vorräten, Vorlieben und Ernährungszielen. Verwandeln Sie "Was koche ich heute?" in "Das koche ich heute!". | ✅ Verfügbar |
+| 📚 **Persönliches Rezeptbuch**  | Sammeln, organisieren und filtern Sie Ihre Lieblingsrezepte. Jedes gespeicherte Rezept wird Teil Ihrer persönlichen, durchsuchbaren Kochbibliothek.         | ✅ Verfügbar |
+| 📅 **Dynamischer Essensplaner**  | Planen Sie Mahlzeiten per Drag-and-Drop. Erkennen Sie auf einen Blick, welche Zutaten für geplante Gerichte noch fehlen.                                      | ✅ Verfügbar |
+| 🛒 **Automatisierte Einkaufsliste** | Generieren Sie eine Einkaufsliste, die Ihren Essensplan automatisch mit Ihrer Vorratskammer abgleicht. Fügen Sie Artikel auch manuell oder per KI hinzu.     | ✅ Verfügbar |
+| 🗣️ **Sprachsteuerung**         | Steuern Sie die App freihändig – fügen Sie Artikel hinzu, navigieren Sie oder haken Sie Zutaten von der Einkaufsliste ab.                                         | ✅ Verfügbar |
+| ⚙️ **Daten-Management**          | Exportieren und importieren Sie all Ihre Daten als JSON-Backup. Sie behalten die volle Kontrolle.                                                               | ✅ Verfügbar |
 
-## 🛠️ Tech Stack & Architecture
 
-CulinaSync utilizes a modern, performant, and robust tech stack optimized for its local-first philosophy.
+## 🛠️ Technologischer Stack & Architektur
 
--   **Frontend:** [React](https://reactjs.org/) & [TypeScript](https://www.typescriptlang.org/) for a type-safe, component-based UI.
--   **Styling:** [Tailwind CSS](https://tailwindcss.com/) for a rapid, consistent, and customizable design system.
--   **Local Database:** [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) as a powerful, browser-native database.
--   **DB Abstraction:** [Dexie.js](https://dexie.org/) as an elegant and powerful wrapper for IndexedDB, simplifying database interaction and integrating seamlessly with React Hooks (`dexie-react-hooks`).
--   **AI & Generative AI:** [Google Gemini API](https://ai.google.dev/) (`@google/genai`) for creating smart, context-aware recipes.
--   **PWA Functionality:** [VitePWA](https://vite-pwa-org.netlify.app/) for transforming the web app into an installable, offline-capable application.
--   **Build Tool:** [Vite](https://vitejs.dev/) for a lightning-fast development experience and optimized production builds.
--   **Icons:** [Lucide React](https://lucide.dev/) for a beautiful and consistent icon set.
+CulinaSync nutzt einen modernen, performanten und robusten Tech-Stack, der für die Local-First-Philosophie optimiert ist.
 
-## 🏛️ The Local-First Philosophy
+-   **Frontend:** [React](https://reactjs.org/) & [TypeScript](https://www.typescriptlang.org/) für eine typsichere, komponentengestützte UI.
+-   **Styling:** [Tailwind CSS](https://tailwindcss.com/) für ein schnelles, konsistentes und anpassbares Design-System.
+-   **Lokale Datenbank:** [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) als leistungsstarker Browser-Speicher.
+-   **DB-Wrapper:** [Dexie.js](https://dexie.org/) als eleganter und leistungsfähiger Wrapper für IndexedDB, der die Datenbankinteraktion vereinfacht und mit React Hooks (`dexie-react-hooks`) integriert ist.
+-   **KI & Generative Rezepte:** [Google Gemini API](https://ai.google.dev/) (`@google/genai`) für die Erstellung intelligenter und kontextbezogener Rezepte.
+-   **PWA-Funktionalität:** [VitePWA](https://vite-pwa-org.netlify.app/) zur Umwandlung der Web-App in eine installierbare, offline-fähige Anwendung.
+-   **Build-Tool:** [Vite](https://vitejs.dev/) für eine blitzschnelle Entwicklungsumgebung und optimierte Produktions-Builds.
+-   **Icons:** [Lucide React](https://lucide.dev/) für ein schönes und konsistentes Icon-Set.
 
-The choice of a local-first architecture is the technical and ideological foundation of CulinaSync. It offers transformative advantages over cloud-centric models:
+## 🏛️ Die Local-First-Philosophie
 
-1.  **🚀 Performance & Zero Latency:** Actions execute instantly against the local IndexedDB. There are no loading spinners waiting for a network response.
-2.  **🌐 True Offline Functionality:** Whether you're in a basement grocery store with no signal or on a plane, CulinaSync is always fully functional. An internet connection is only required for AI features.
-3.  **🔐 Privacy & Data Ownership:** Your culinary data is private. With the source of truth on your device, sensitive information is not unnecessarily sent to third-party servers. You own your data.
+Die Entscheidung für eine Local-First-Architektur ist das technische und ideologische Fundament von CulinaSync. Sie bietet transformative Vorteile gegenüber Cloud-zentrierten Modellen:
 
-## 🏁 Getting Started
+1.  **🚀 Performance & Latenzfreiheit:** Aktionen werden sofort gegen die lokale IndexedDB ausgeführt. Es gibt keine Lade-Spinner, die auf eine Netzwerkantwort warten.
+2.  **🌐 Echte Offline-Funktionalität:** Ob im Supermarkt im Keller ohne Empfang oder im Flugzeug – CulinaSync ist immer voll funktionsfähig. Eine Internetverbindung wird nur für KI-Funktionen benötigt.
+3.  **🔐 Datenschutz & Datenhoheit:** Ihre kulinarischen Daten sind privat. Da die "Source of Truth" auf Ihrem Gerät liegt, werden sensible Informationen nicht unnötig an Server von Drittanbietern gesendet. Sie besitzen Ihre Daten.
 
-Follow these steps to run the project locally:
+## 🏁 Erste Schritte
 
-1.  **Clone the Repository**
+Folgen Sie diesen Schritten, um das Projekt lokal auszuführen:
+
+1.  **Repository klonen**
     ```sh
-    git clone https://github.com/qnbs/culinasync.git
-    cd culinasync
+    git clone https://github.com/qnbs/CulinaSync-de-.git
+    cd CulinaSync-de-
     ```
 
-2.  **Install Dependencies**
+2.  **Abhängigkeiten installieren**
     ```sh
     npm install
     ```
 
-3.  **Configure Environment Variables**
-    A Google Gemini API key is required for the AI features. Create a `.env.local` file in the project root and add your API key:
+3.  **Umgebungsvariablen konfigurieren**
+    Für die KI-Funktionen wird ein Google Gemini API-Schlüssel benötigt. Erstellen Sie eine `.env.local`-Datei im Projektstammverzeichnis und fügen Sie Ihren API-Schlüssel hinzu:
     ```env
-    # Replace YOUR_API_KEY with your actual Google Gemini API Key
+    # Ersetzen Sie YOUR_API_KEY durch Ihren tatsächlichen Google Gemini API-Schlüssel
     API_KEY=YOUR_API_KEY
     ```
 
-4.  **Run the Development Server**
+4.  **Entwicklungsserver starten**
     ```sh
     npm run dev
     ```
-    The application will be available at `http://localhost:5173` (or the next available port).
+    Die Anwendung ist dann unter `http://localhost:5173` (oder dem nächsten verfügbaren Port) erreichbar.
 
-## 📂 Project Structure
+## 📂 Projektstruktur
 
-The codebase is structured modularly by feature and responsibility to ensure maintainability and scalability.
+Die Codebasis ist modular nach Funktionen und Verantwortlichkeiten strukturiert, um Wartbarkeit und Skalierbarkeit zu gewährleisten.
 
 ```
 /
-├── public/                # Static assets (icons, manifest)
+├── public/                # Statische Assets (Icons, Manifest)
 ├── src/
-│   ├── components/        # Reusable React components (UI)
-│   ├── data/              # Static data (e.g., seed recipes)
-│   ├── hooks/             # Custom React hooks (e.g., useDebounce, useSpeechRecognition)
-│   ├── services/          # Business logic, API calls, DB interactions
-│   ├── types/             # TypeScript type definitions
-│   ├── App.tsx            # Main application component and routing
-│   └── index.tsx          # React application entry point
-├── .env.local             # Example for local environment variables (unversioned)
-├── vite.config.ts         # Vite build and plugin configuration
-└── tsconfig.json          # TypeScript compiler configuration
+│   ├── components/        # Wiederverwendbare React-Komponenten (UI)
+│   ├── data/              # Statische Daten (z.B. Seed-Rezepte)
+│   ├── hooks/             # Eigene React-Hooks (z.B. useDebounce, useSpeechRecognition)
+│   ├── services/          # Geschäftslogik, API-Aufrufe, DB-Interaktionen
+│   ├── types/             # TypeScript-Typdefinitionen
+│   ├── App.tsx            # Hauptanwendungskomponente und Routing
+│   └── index.tsx          # Einstiegspunkt der React-Anwendung
+├── .env.local             # Beispiel für lokale Umgebungsvariablen (nicht versioniert)
+├── vite.config.ts         # Vite Build- und Plugin-Konfiguration
+└── tsconfig.json          # TypeScript-Compiler-Konfiguration
 ```
 
 ## 🗺️ Roadmap
 
-CulinaSync is a living project. Future planned enhancements include:
+CulinaSync ist ein lebendiges Projekt. Geplante zukünftige Erweiterungen umfassen:
 
--   [ ] **Barcode Scanner:** Quickly add items to the pantry by scanning their EAN code.
--   [ ] **Multi-Device Sync (Optional):** A secure, end-to-end encrypted sync option for using the app across multiple devices.
--   [ ] **Recipe Importer:** Import recipes from popular cooking websites via URL.
--   [ ] **Nutrition Tracking:** Analyze and visualize nutritional information from the meal plan.
--   [ ] **Collaborative Households:** Share shopping lists and meal plans with other household members.
+-   [ ] **Barcode-Scanner:** Artikel durch Scannen des EAN-Codes schnell zur Vorratskammer hinzufügen.
+-   [ ] **Multi-Device-Sync (Optional):** Eine sichere, Ende-zu-Ende-verschlüsselte Synchronisierungsoption für die Nutzung auf mehreren Geräten.
+-   [ ] **Rezept-Import:** Importieren von Rezepten von populären Koch-Websites über deren URL.
+-   [ ] **Ernährungstracking:** Analyse und Visualisierung von Nährwertinformationen über den Essensplan.
+-   [ ] **Kollaborative Haushalts-Features:** Teilen von Einkaufslisten und Essensplänen mit anderen Haushaltsmitgliedern.
