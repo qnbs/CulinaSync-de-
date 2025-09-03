@@ -121,7 +121,6 @@ const Settings: React.FC<SettingsProps> = ({ focusAction, onActionHandled, addTo
 
     const handleResetData = () => {
         setResetModalOpen(false);
-        // FIX: Cast `db` to `any` to resolve TypeScript error where Dexie methods are not found on the subclass type.
         (db as any).delete().then(() => {
             localStorage.clear();
             addToast('Alle Daten zurückgesetzt. App wird neu geladen...', 'info');

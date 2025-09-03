@@ -246,7 +246,7 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ addToast }) => {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-8rem-2rem)] pb-16 lg:pb-0">
+    <div className="flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-8rem-2rem)]">
          {isCookMode && recipeForCookMode && <CookModeView recipe={recipeForCookMode} currentStep={currentStep} setCurrentStep={setCurrentStep} onExit={() => setIsCookMode(false)} />}
          {noteModalState?.isOpen && (
             <AddMealNoteModal
@@ -275,45 +275,79 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ addToast }) => {
             </div>
        
             <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden flex-grow flex flex-col">
-                <div className="flex-grow overflow-y-auto">
-                    <div className="lg:grid lg:grid-cols-7 lg:divide-x lg:divide-zinc-800 h-full">
-                        {week.map(date => {
-                            const dateString = date.toISOString().split('T')[0];
-                            const today = isToday(date);
-                            return (
-                                <div key={dateString} className={`flex flex-col border-b border-zinc-800 lg:border-b-0 ${today ? 'bg-zinc-800/30' : ''}`}>
-                                    <div className={`text-center py-2 font-semibold text-sm border-b border-zinc-800 ${today ? 'text-amber-400' : 'text-zinc-300'}`}>
-                                        <div>{date.toLocaleDateString('de-DE', { weekday: 'short' })}</div>
-                                        <div className="text-xs text-zinc-400">{date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}</div>
-                                    </div>
-                                    <div className="flex flex-col gap-px flex-grow">
-                                        {(['Frühstück', 'Mittagessen', 'Abendessen'] as const).map(mealType => {
-                                            const meal = mealsByDate[`${dateString}-${mealType}`];
-                                            const recipe = meal?.recipeId ? recipesById.get(meal.recipeId) : undefined;
-                                            const isDropTarget = dropTarget?.date === dateString && dropTarget.mealType === mealType;
-                                            return (
-                                                <div 
-                                                    key={mealType} 
-                                                    className={`p-2 min-h-[120px] flex flex-col justify-start transition-colors group flex-grow ${isDropTarget ? 'bg-amber-500/20' : ''}`}
-                                                    onDragOver={e => { e.preventDefault(); setDropTarget({ date: dateString, mealType }); }}
-                                                    onDragLeave={() => setDropTarget(null)}
-                                                    onDrop={handleDrop}
-                                                >
-                                                    <span className="text-xs text-zinc-500">{mealType}</span>
-                                                    {meal ? <PlannedMealCard meal={meal} recipe={recipe} pantryStatus={getPantryStatus(recipe, pantryMap)} onAction={handleMealAction} />
-                                                    : <div className="w-full h-full flex items-center justify-center text-zinc-600 rounded-md ">
-                                                        <button onClick={() => setNoteModalState({ isOpen: true, date: dateString, mealType })} title="Notiz hinzufügen" className="opacity-50 hover:opacity-100 transition-opacity p-2 rounded-full hover:bg-zinc-700/50 hover:text-amber-400">
-                                                            <PlusCircle size={20}/>
-                                                        </button>
-                                                        </div>}
-                                                </div>
-                                            )
-                                        })}
-                                    </div>
+                {/* Desktop Grid View */}
+                <div className="hidden lg:grid lg:grid-cols-7 lg:divide-x lg:divide-zinc-800 h-full">
+                    {week.map(date => {
+                        const dateString = date.toISOString().split('T')[0];
+                        const today = isToday(date);
+                        return (
+                            <div key={dateString} className={`flex flex-col ${today ? 'bg-zinc-800/30' : ''}`}>
+                                <div className={`text-center py-2 font-semibold text-sm border-b border-zinc-800 ${today ? 'text-amber-400' : 'text-zinc-300'}`}>
+                                    <div>{date.toLocaleDateString('de-DE', { weekday: 'short' })}</div>
+                                    <div className="text-xs text-zinc-400">{date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}</div>
                                 </div>
-                            )
-                        })}
-                    </div>
+                                <div className="flex flex-col gap-px flex-grow">
+                                    {(['Frühstück', 'Mittagessen', 'Abendessen'] as const).map(mealType => {
+                                        const meal = mealsByDate[`${dateString}-${mealType}`];
+                                        const recipe = meal?.recipeId ? recipesById.get(meal.recipeId) : undefined;
+                                        const isDropTarget = dropTarget?.date === dateString && dropTarget.mealType === mealType;
+                                        return (
+                                            <div 
+                                                key={mealType} 
+                                                className={`p-2 min-h-[120px] flex flex-col justify-start transition-colors group flex-grow ${isDropTarget ? 'bg-amber-500/20' : ''}`}
+                                                onDragOver={e => { e.preventDefault(); setDropTarget({ date: dateString, mealType }); }}
+                                                onDragLeave={() => setDropTarget(null)}
+                                                onDrop={handleDrop}
+                                            >
+                                                <span className="text-xs text-zinc-500">{mealType}</span>
+                                                {meal ? <PlannedMealCard meal={meal} recipe={recipe} pantryStatus={getPantryStatus(recipe, pantryMap)} onAction={handleMealAction} />
+                                                : <div className="w-full h-full flex items-center justify-center text-zinc-600 rounded-md ">
+                                                    <button onClick={() => setNoteModalState({ isOpen: true, date: dateString, mealType })} title="Notiz hinzufügen" className="opacity-50 hover:opacity-100 transition-opacity p-2 rounded-full hover:bg-zinc-700/50 hover:text-amber-400">
+                                                        <PlusCircle size={20}/>
+                                                    </button>
+                                                    </div>}
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+
+                 {/* Mobile List View */}
+                <div className="lg:hidden flex-grow overflow-y-auto">
+                    {week.map(date => {
+                         const dateString = date.toISOString().split('T')[0];
+                         const today = isToday(date);
+                         return (
+                            <div key={dateString} className={`border-b border-zinc-800 ${today ? 'bg-zinc-800/30' : ''}`}>
+                                <div className={`text-left py-2 px-4 font-semibold text-sm sticky top-0 bg-zinc-900 border-b border-zinc-800 ${today ? 'text-amber-400' : 'text-zinc-300'}`}>
+                                   {date.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long' })}
+                                </div>
+                                <div className="flex flex-col gap-2 p-2">
+                                    {(['Frühstück', 'Mittagessen', 'Abendessen'] as const).map(mealType => {
+                                         const meal = mealsByDate[`${dateString}-${mealType}`];
+                                         const recipe = meal?.recipeId ? recipesById.get(meal.recipeId) : undefined;
+                                         return(
+                                            <div key={mealType} className="flex items-start gap-3">
+                                                <span className="text-xs text-zinc-500 w-16 text-right pt-2">{mealType}</span>
+                                                <div className="flex-grow">
+                                                {meal ? <PlannedMealCard meal={meal} recipe={recipe} pantryStatus={getPantryStatus(recipe, pantryMap)} onAction={handleMealAction} />
+                                                    : <div className="w-full min-h-[60px] flex items-center justify-center text-zinc-700 rounded-md ">
+                                                         <button onClick={() => setNoteModalState({ isOpen: true, date: dateString, mealType })} title="Notiz hinzufügen" className="opacity-50 hover:opacity-100 transition-opacity p-2 rounded-full hover:bg-zinc-700/50 hover:text-amber-400">
+                                                            <PlusCircle size={20}/>
+                                                         </button>
+                                                       </div>
+                                                }
+                                                </div>
+                                            </div>
+                                         )
+                                    })}
+                                </div>
+                            </div>
+                         )
+                    })}
                 </div>
             </div>
         </div>

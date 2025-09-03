@@ -435,7 +435,7 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
   }
 
   return (
-    <div className="space-y-8 pb-24">
+    <div className="space-y-8 pb-24 md:pb-8">
         <AiModal isOpen={isAiModalOpen} onClose={() => setAiModalOpen(false)} onAdd={handleAiAdd} pantryItems={pantryItems} currentListItems={activeItems} />
         <BulkAddModal isOpen={isBulkAddModalOpen} onClose={() => setBulkAddModalOpen(false)} onAdd={handleBulkAdd} />
       <div>

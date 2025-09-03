@@ -162,7 +162,6 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelec
   }, [savedRecipes]);
 
   const clearFilters = () => {
-    setSearchTerm('');
     setSortBy('newest');
     setCourseFilter('');
     setCuisineFilter('');
