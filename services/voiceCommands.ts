@@ -1,4 +1,4 @@
-import { Page, ShoppingListItem } from '@/types';
+import { Page, ShoppingListItem } from '../types';
 
 export interface CommandAction {
   type: 'NAVIGATE' | 'SEARCH' | 'ADD_PANTRY_ITEM' | 'REMOVE_PANTRY_ITEM' | 'ADD_SHOPPING_ITEM' | 'CHECK_SHOPPING_ITEM' | 'GENERATE_RECIPE' | 'UNKNOWN';

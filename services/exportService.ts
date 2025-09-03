@@ -1,7 +1,9 @@
 import jsPDF from 'jspdf';
 import Papa from 'papaparse';
-import { Recipe, ShoppingListItem } from '@/types';
-import { getCategoryForItem } from '@/services/utils';
+import { Recipe, ShoppingListItem } from '../types';
+import { getCategoryForItem } from './utils';
+import { db } from './db';
+import { loadSettings } from './settingsService';
 
 // =======================================================================
 // RECIPE EXPORT
@@ -157,6 +159,11 @@ export const exportRecipeToCsv = (recipe: Recipe) => {
     downloadFile(csv, `${recipe.recipeTitle.replace(/\s/g, '_')}.csv`, 'text/csv;charset=utf-8;');
 };
 
+export const exportRecipeToJson = (recipe: Recipe) => {
+    const content = JSON.stringify(recipe, null, 2);
+    downloadFile(content, `${recipe.recipeTitle.replace(/\s/g, '_')}.json`, 'application/json;charset=utf-8;');
+};
+
 export const exportRecipeToMarkdown = (recipe: Recipe) => {
     const content = generateRecipeMarkdown(recipe);
     downloadFile(content, `${recipe.recipeTitle.replace(/\s/g, '_')}.md`, 'text/markdown;charset=utf-8;');
@@ -172,7 +179,7 @@ export const exportRecipeToTxt = (recipe: Recipe) => {
 // =======================================================================
 
 const groupShoppingList = (items: ShoppingListItem[]) => items.reduce((acc, item) => {
-    const category = getCategoryForItem(item.name);
+    const category = item.category || getCategoryForItem(item.name);
     if (!acc[category]) acc[category] = [];
     acc[category].push(item);
     return acc;
@@ -240,11 +247,17 @@ export const exportShoppingListToCsv = (items: ShoppingListItem[]) => {
         'Menge': item.quantity,
         'Einheit': item.unit,
         'Artikel': item.name,
-        'Kategorie': getCategoryForItem(item.name)
+        'Kategorie': item.category || getCategoryForItem(item.name)
     }));
     const csv = Papa.unparse(dataToExport);
     downloadFile(csv, 'einkaufsliste.csv', 'text/csv;charset=utf-8;');
 }
+
+export const exportShoppingListToJson = (items: ShoppingListItem[]) => {
+    if (items.length === 0) return;
+    const content = JSON.stringify(items, null, 2);
+    downloadFile(content, `einkaufsliste.json`, 'application/json;charset=utf-8;');
+};
 
 export const exportShoppingListToMarkdown = (items: ShoppingListItem[]) => {
     if (items.length === 0) return;
@@ -257,6 +270,99 @@ export const exportShoppingListToTxt = (items: ShoppingListItem[]) => {
     const content = generateShoppingListText(items);
     downloadFile(content, 'einkaufsliste.txt', 'text/plain;charset=utf-8;');
 };
+
+// =======================================================================
+// FULL DATA BACKUP
+// =======================================================================
+
+export const exportFullDataAsJson = async () => {
+    try {
+        const allData = {
+            pantry: await db.pantry.toArray(),
+            recipes: await db.recipes.toArray(),
+            mealPlan: await db.mealPlan.toArray(),
+            shoppingList: await db.shoppingList.toArray(),
+            settings: loadSettings(),
+        };
+        const dataStr = JSON.stringify(allData, null, 2);
+        downloadFile(dataStr, `culinasync_backup_${new Date().toISOString().split('T')[0]}.json`, "application/json");
+        return true;
+    } catch (error) {
+        console.error("Data export failed:", error);
+        return false;
+    }
+}
+
+export const exportFullDataAsTxt = async () => {
+     try {
+        const data = {
+            pantry: await db.pantry.toArray(),
+            recipes: await db.recipes.toArray(),
+            mealPlan: await db.mealPlan.toArray(),
+            shoppingList: await db.shoppingList.toArray(),
+            settings: loadSettings(),
+        };
+        
+        let content = `CulinaSync Backup - ${new Date().toLocaleString('de-DE', { dateStyle: 'full', timeStyle: 'short' })}\n`;
+        content += "===================================================\n\n";
+
+        content += `VORRATSKAMMER (${data.pantry.length} Artikel)\n------------------------\n`;
+        if (data.pantry.length > 0) {
+            data.pantry.forEach(p => {
+                const expiry = p.expiryDate ? ` | MHD: ${new Date(p.expiryDate).toLocaleDateString('de-DE')}` : '';
+                content += `- ${p.name} (${p.quantity} ${p.unit})${expiry}\n`;
+            });
+        } else {
+            content += "Keine Artikel im Vorrat.\n";
+        }
+        
+        content += `\n\nREZEPTE (${data.recipes.length} gespeichert)\n------------------------\n`;
+         if (data.recipes.length > 0) {
+            data.recipes.forEach(r => {
+                content += `- ${r.recipeTitle} (${r.difficulty}, ${r.totalTime})\n`;
+            });
+        } else {
+            content += "Keine Rezepte gespeichert.\n";
+        }
+
+
+        content += `\n\nESSENSPLAN (${data.mealPlan.length} Einträge)\n------------------------\n`;
+        if (data.mealPlan.length > 0) {
+            data.mealPlan.sort((a,b) => a.date.localeCompare(b.date)).forEach(m => {
+                const recipeTitle = data.recipes.find(r => r.id === m.recipeId)?.recipeTitle || m.note;
+                const formattedDate = new Date(m.date);
+                formattedDate.setMinutes(formattedDate.getMinutes() + formattedDate.getTimezoneOffset());
+                const dateString = formattedDate.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
+                content += `- ${dateString} (${m.mealType}): ${recipeTitle}\n`;
+            });
+        } else {
+            content += "Keine Mahlzeiten geplant.\n";
+        }
+        
+        content += `\n\nEINKAUFSLISTE (${data.shoppingList.length} Artikel)\n------------------------\n`;
+        if (data.shoppingList.length > 0) {
+            content += "Offen:\n";
+            data.shoppingList.filter(s => !s.isChecked).forEach(s => {
+                content += `  [ ] ${s.name} (${s.quantity} ${s.unit})\n`;
+            });
+            content += "\nErledigt:\n";
+             data.shoppingList.filter(s => s.isChecked).forEach(s => {
+                content += `  [x] ${s.name} (${s.quantity} ${s.unit})\n`;
+            });
+        } else {
+            content += "Einkaufsliste ist leer.\n";
+        }
+
+        content += `\n\nEINSTELLUNGEN\n------------------------\n`;
+        content += JSON.stringify(data.settings, null, 2);
+
+        downloadFile(content, `culinasync_backup_${new Date().toISOString().split('T')[0]}.txt`, "text/plain");
+        return true;
+    } catch (error) {
+        console.error("Data export failed:", error);
+        return false;
+    }
+}
 
 // =======================================================================
 // HELPER FUNCTIONS

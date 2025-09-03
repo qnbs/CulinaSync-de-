@@ -1,3 +1,5 @@
+import { Recipe, PantryItem } from '../types';
+
 // Improved heuristic for category mapping
 export const getCategoryForItem = (itemName: string): string => {
     const name = itemName.toLowerCase();
@@ -64,33 +66,68 @@ export const scaleIngredientQuantity = (originalQuantity: string, scaleFactor: n
 
 export const parseShoppingItemString = (input: string): { name: string; quantity: number; unit: string } => {
     const text = input.trim();
-    const units = ['g', 'kg', 'mg', 'l', 'ml', 'cl', 'stk', 'stück', 'stueck', 'bund', 'pck', 'packung', 'dose', 'dosen', 'fl', 'flasche', 'flaschen', 'zehe', 'zehen', 'el', 'tl'];
-    const unitRegexPart = units.join('|');
+    if (!text) return { name: '', quantity: 1, unit: 'Stk.' };
 
-    // Case 1: "2kg Mehl" or "2 kg Mehl"
-    let match = text.match(new RegExp(`^(\\d+[\\.,]?\\d*)\\s*(${unitRegexPart})?\\s+(.+)`, 'i'));
+    const units = ['g', 'kg', 'mg', 'l', 'ml', 'cl', 'stk', 'stück', 'stueck', 'bund', 'pck', 'packung', 'dose', 'dosen', 'fl', 'flasche', 'flaschen', 'zehe', 'zehen', 'el', 'tl', 'prise'];
+    const unitRegexPart = units.join('|');
+    // Handles integers, decimals (with . or ,), and fractions (e.g., 1/2)
+    const quantityRegexPart = '(\\d+\\/\\d+|\\d+[\\.,]?\\d*)';
+
+    const parseQuantity = (qStr: string): number => {
+        if (!qStr) return 1;
+        if (qStr.includes('/')) {
+            const parts = qStr.split('/');
+            const numerator = parseInt(parts[0], 10);
+            const denominator = parseInt(parts[1], 10);
+            if (denominator !== 0) {
+                return numerator / denominator;
+            }
+        }
+        return parseFloat(qStr.replace(',', '.')) || 1;
+    };
+
+    // Case 1: Starts with quantity, e.g., "1/2 kg Mehl" or "2 kg Mehl"
+    let match = text.match(new RegExp(`^${quantityRegexPart}\\s*(${unitRegexPart})?\\s+(.+)`, 'i'));
     if (match) {
         return {
-            quantity: parseFloat(match[1].replace(',', '.')) || 1,
+            quantity: parseQuantity(match[1]),
             unit: match[2] || 'Stk.',
             name: match[3].trim()
         };
     }
 
-    // Case 2: "Mehl 2kg" or "Mehl 2 kg"
-    match = text.match(new RegExp(`^(.+?)\\s+(\\d+[\\.,]?\\d*)\\s*(${unitRegexPart})?$`, 'i'));
+    // Case 2: Ends with quantity, e.g., "Mehl 1/2 kg" or "Mehl 2 kg"
+    match = text.match(new RegExp(`^(.+?)\\s+${quantityRegexPart}\\s*(${unitRegexPart})?$`, 'i'));
     if (match) {
         return {
             name: match[1].trim(),
-            quantity: parseFloat(match[2].replace(',', '.')) || 1,
+            quantity: parseQuantity(match[2]),
             unit: match[3] || 'Stk.'
         };
     }
 
-    // Fallback: No specific pattern, just the text
+    // Fallback: No specific pattern found, assume the whole string is the name.
     return {
         name: text,
         quantity: 1,
         unit: 'Stk.'
     };
+};
+
+export const checkRecipePantryMatch = (recipe: Recipe, pantryItems: PantryItem[]): { have: number, total: number } => {
+    const allIngredients = recipe.ingredients.flatMap(g => g.items);
+    if (!pantryItems || pantryItems.length === 0) {
+        return { have: 0, total: allIngredients.length };
+    }
+    const pantryMap = new Map(pantryItems.map(item => [item.name.toLowerCase(), item.quantity]));
+    let haveCount = 0;
+
+    for (const ingredient of allIngredients) {
+        const requiredQty = parseFloat(ingredient.quantity.replace(',', '.')) || 0;
+        const pantryQty = pantryMap.get(ingredient.name.toLowerCase()) || 0;
+        if (pantryQty >= requiredQty) {
+            haveCount++;
+        }
+    }
+    return { have: haveCount, total: allIngredients.length };
 };

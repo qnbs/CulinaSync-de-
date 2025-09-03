@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { AppSettings } from '@/types';
-import { loadSettings as load, saveSettings as save } from '@/services/settingsService';
+import { AppSettings } from '../types';
+import { loadSettings as load, saveSettings as save } from '../services/settingsService';
 
 interface SettingsContextType {
   settings: AppSettings;

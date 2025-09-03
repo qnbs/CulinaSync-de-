@@ -6,6 +6,7 @@ export interface PantryItem {
   expiryDate?: string;
   category?: string;
   createdAt: number;
+  updatedAt: number;
   minQuantity?: number; // For "running low" alerts
   notes?: string; // For extra details like "buy organic"
 }
@@ -57,6 +58,7 @@ export interface Recipe {
   };
   expertTips: ExpertTip[];
   isFavorite?: boolean;
+  updatedAt?: number;
 }
 
 export interface MealPlanItem {
@@ -77,6 +79,8 @@ export interface ShoppingListItem {
     unit: string;
     isChecked: boolean;
     recipeId?: number; // Optional: to trace back to recipe
+    category: string;
+    sortOrder: number;
 }
 
 export interface AppSettings {

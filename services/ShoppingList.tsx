@@ -10,6 +10,7 @@ import { generateShoppingList } from '@/services/geminiService';
 import { getCategoryForItem, parseShoppingItemString } from '@/services/utils';
 
 // #region Modals
+// FIX: Added currentListItems to props to provide context to the AI service.
 const AiModal = ({ isOpen, onClose, onAdd, pantryItems, currentListItems }: { isOpen: boolean, onClose: () => void, onAdd: (items: Omit<ShoppingListItem, 'id' | 'isChecked' | 'category' | 'sortOrder'>[]) => void, pantryItems: PantryItem[], currentListItems: ShoppingListItem[] }) => {
     const [prompt, setPrompt] = useState('');
     const [isLoading, setIsLoading] = useState(false);

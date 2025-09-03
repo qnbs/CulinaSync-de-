@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { db, addOrUpdatePantryItem, addPantryItemsToShoppingList } from '@/services/db';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -102,7 +103,7 @@ interface PantryManagerProps {
     initialSearchTerm?: string;
     focusAction?: string | null;
     onActionHandled?: () => void;
-    addToast: (message: string, type?: 'success' | 'error') => void;
+    addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
 const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, focusAction, onActionHandled, addToast }) => {
@@ -117,7 +118,11 @@ const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, focusA
   
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { if(initialSearchTerm) setSearchTerm(initialSearchTerm) }, [initialSearchTerm]);
+  useEffect(() => {
+    if (initialSearchTerm) {
+        setSearchTerm(initialSearchTerm.split('#')[0]);
+    }
+  }, [initialSearchTerm]);
   
   useEffect(() => {
     if (focusAction) {
@@ -149,6 +154,9 @@ const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, focusA
     if (sortOrder === 'createdAt') {
         return [...items].sort((a, b) => b.createdAt - a.createdAt);
     }
+     if (sortOrder === 'updatedAt') {
+        return [...items].sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
+    }
     return items; // Already sorted by name from query
   }, [pantryItems, debouncedSearchTerm, expiryFilter, sortOrder]);
 
@@ -178,13 +186,14 @@ const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, focusA
   
   const adjustQuantity = useCallback(async (item: PantryItem, amount: number) => {
     const newQuantity = item.quantity + amount;
-    if (newQuantity <= 0) {
+    if (newQuantity < 0) return;
+    if (newQuantity === 0) {
         if (window.confirm(`Soll "${item.name}" wirklich aus dem Vorrat entfernt werden?`)) {
             await db.pantry.delete(item.id!);
             addToast(`"${item.name}" entfernt.`);
         }
     }
-    else await db.pantry.update(item.id!, { quantity: newQuantity });
+    else await db.pantry.update(item.id!, { quantity: newQuantity, updatedAt: Date.now() });
   }, [addToast]);
 
   const toggleSelectItem = useCallback((id: number) => setSelectedItems(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]), []);
@@ -205,7 +214,7 @@ const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, focusA
         if (count > 0) {
             addToast(`${count} Artikel zur Einkaufsliste hinzugefügt.`);
         } else {
-            addToast("Alle ausgewählten Artikel sind bereits auf der Einkaufsliste.", "info" as any);
+            addToast("Alle ausgewählten Artikel sind bereits auf der Einkaufsliste.", "info");
         }
         setIsSelectMode(false); setSelectedItems([]);
     }
@@ -221,6 +230,11 @@ const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, focusA
               onStartEdit={(itemToEdit) => setModalState({ isOpen: true, item: itemToEdit })}
               onAdjustQuantity={adjustQuantity}
               onToggleSelect={toggleSelectItem}
+              onAddToShoppingList={async () => {
+                  const count = await addPantryItemsToShoppingList([item.id!]);
+                  if (count > 0) addToast(`"${item.name}" zur Einkaufsliste hinzugefügt.`, 'success');
+                  else addToast(`"${item.name}" ist bereits auf der Liste.`, 'info');
+              }}
           />
       ));
   };
@@ -245,7 +259,7 @@ const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, focusA
            <div className="relative flex-grow"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={20} /><input type="text" placeholder="Vorratskammer durchsuchen..." value={searchTerm} ref={searchInputRef} onChange={e => setSearchTerm(e.target.value)} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 pl-10 focus:ring-2 focus:ring-amber-500" /></div>
             <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
                <div className="relative"><select value={expiryFilter} onChange={e => setExpiryFilter(e.target.value as any)} className="appearance-none w-full md:w-auto bg-zinc-800 border-zinc-700 rounded-md py-2 pl-3 pr-8 focus:ring-2 focus:ring-amber-500"><option value="all">Alle</option><option value="nearing">Läuft bald ab</option><option value="expired">Abgelaufen</option></select><Filter className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16}/></div>
-               <div className="relative"><select value={sortOrder} onChange={e => setSortOrder(e.target.value)} className="appearance-none w-full md:w-auto bg-zinc-800 border-zinc-700 rounded-md py-2 pl-3 pr-8 focus:ring-2 focus:ring-amber-500"><option value="name">Name (A-Z)</option><option value="expiryDate">Ablaufdatum</option><option value="createdAt">Hinzugefügt</option></select><ArrowUpDown className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16}/></div>
+               <div className="relative"><select value={sortOrder} onChange={e => setSortOrder(e.target.value)} className="appearance-none w-full md:w-auto bg-zinc-800 border-zinc-700 rounded-md py-2 pl-3 pr-8 focus:ring-2 focus:ring-amber-500"><option value="name">Name (A-Z)</option><option value="expiryDate">Ablaufdatum</option><option value="updatedAt">Zuletzt geändert</option><option value="createdAt">Hinzugefügt</option></select><ArrowUpDown className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16}/></div>
                <button onClick={() => setIsGrouped(!isGrouped)} className={`p-2 rounded-md transition-colors ${isGrouped ? 'bg-amber-500 text-zinc-900' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`} title="Nach Kategorie gruppieren"><ListTree size={20} /></button>
                <button onClick={toggleSelectMode} className={`p-2 rounded-md transition-colors ${isSelectMode ? 'bg-amber-500 text-zinc-900' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`} title="Auswählen"><CheckSquare size={20} /></button>
             </div>

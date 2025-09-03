@@ -1,4 +1,4 @@
-import { Recipe } from '@/types';
+import { Recipe } from '../types';
 import { allSeedRecipes } from './recipes';
 
 // This file contains a comprehensive list of recipes to seed the database.

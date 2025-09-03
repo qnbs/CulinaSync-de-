@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { db, importData } from '@/services/db';
 import { AppSettings } from '@/types';
-import { Save, Trash2, Download, Upload, AlertTriangle, User, Settings as SettingsIcon, Bot, Info, CheckCircle, RotateCcw, Database, BookOpen, Milk, CalendarDays, ShoppingCart } from 'lucide-react';
+import { Save, Trash2, Download, Upload, AlertTriangle, User, Settings as SettingsIcon, Bot, Info, CheckCircle, RotateCcw, Database, BookOpen, Milk, CalendarDays, ShoppingCart, ChevronDown, LucideProps } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import TagInput from '@/components/TagInput';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { exportFullDataAsJson, exportFullDataAsTxt } from '@/services/exportService';
 
 
 const ResetConfirmationModal: React.FC<{
@@ -53,7 +54,7 @@ const ResetConfirmationModal: React.FC<{
     );
 };
 
-const StatCard: React.FC<{ label: string; value: number | undefined; icon: React.FC<any> }> = ({ label, value, icon: Icon }) => (
+const StatCard: React.FC<{ label: string; value: number | undefined; icon: React.FC<LucideProps> }> = ({ label, value, icon: Icon }) => (
     <div className="bg-zinc-800/50 p-4 rounded-lg flex items-center gap-4">
         <Icon className="text-amber-400" size={24} />
         <div>
@@ -74,14 +75,15 @@ const DIETARY_SUGGESTIONS = ['Vegetarisch', 'Vegan', 'Glutenfrei', 'Laktosefrei'
 interface SettingsProps {
     focusAction?: string | null;
     onActionHandled?: () => void;
+    addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
-const Settings: React.FC<SettingsProps> = ({ focusAction, onActionHandled }) => {
+const Settings: React.FC<SettingsProps> = ({ focusAction, onActionHandled, addToast }) => {
     const { settings: globalSettings, saveSettings: setGlobalSettings } = useSettings();
     const [settings, setSettings] = useState<AppSettings>(globalSettings);
-    const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
     const [isResetModalOpen, setResetModalOpen] = useState(false);
     const [activeSection, setActiveSection] = useState('preferences');
+    const [isExportMenuOpen, setExportMenuOpen] = useState(false);
     
     const fileInputRef = useRef<HTMLInputElement>(null);
     
@@ -96,14 +98,9 @@ const Settings: React.FC<SettingsProps> = ({ focusAction, onActionHandled }) => 
 
     const isDirty = useMemo(() => JSON.stringify(settings) !== JSON.stringify(globalSettings), [settings, globalSettings]);
 
-    const showFeedback = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
-        setFeedback({ message, type });
-        setTimeout(() => setFeedback(null), 4000);
-    };
-    
     const handleSave = () => {
         setGlobalSettings(settings);
-        showFeedback('Einstellungen erfolgreich gespeichert!', 'success');
+        addToast('Einstellungen erfolgreich gespeichert!', 'success');
     };
 
     const handleDiscard = () => {
@@ -123,79 +120,70 @@ const Settings: React.FC<SettingsProps> = ({ focusAction, onActionHandled }) => 
 
     const handleResetData = () => {
         setResetModalOpen(false);
-        // FIX: Corrected db.delete() which was not found on the previous incorrect db type.
-        // The fix in services/db.ts ensures `db` is a proper Dexie instance with a `delete()` method.
-        db.delete().then(() => {
+        // FIX: Cast `db` to `any` to resolve TypeScript error where Dexie methods are not found on the subclass type.
+        (db as any).delete().then(() => {
             localStorage.clear();
-            showFeedback('Alle Daten zurückgesetzt. App wird neu geladen...', 'info');
+            addToast('Alle Daten zurückgesetzt. App wird neu geladen...', 'info');
             setTimeout(() => window.location.reload(), 2000);
         }).catch(err => {
-            showFeedback('Fehler beim Zurücksetzen der Daten.', 'error');
+            addToast('Fehler beim Zurücksetzen der Daten.', 'error');
             console.error(err);
         });
     };
     
-    const handleExportData = async () => {
-        try {
-            const allData = {
-                pantry: await db.pantry.toArray(),
-                recipes: await db.recipes.toArray(),
-                mealPlan: await db.mealPlan.toArray(),
-                shoppingList: await db.shoppingList.toArray(),
-                settings: globalSettings,
-            };
-            const dataStr = JSON.stringify(allData, null, 2);
-            const blob = new Blob([dataStr], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `culinasync_backup_${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-            showFeedback('Daten erfolgreich exportiert.', 'success');
-        } catch (error) {
-            showFeedback('Daten-Export fehlgeschlagen.', 'error');
-            console.error(error);
+    const handleExport = async (format: 'json' | 'txt') => {
+        setExportMenuOpen(false);
+        const formatName = format === 'json' ? 'JSON-Backup' : 'Text-Backup';
+        if (window.confirm(`Möchtest du wirklich ein vollständiges ${formatName} deiner Daten erstellen?`)) {
+            const success = format === 'json' ? await exportFullDataAsJson() : await exportFullDataAsTxt();
+            if (success) {
+                addToast('Daten erfolgreich exportiert.', 'success');
+            } else {
+                addToast('Daten-Export fehlgeschlagen.', 'error');
+            }
         }
-    }
+    };
+
 
     const handleImportData = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            try {
-                const text = e.target?.result;
-                if (typeof text !== 'string') throw new Error("File could not be read");
-                const data = JSON.parse(text);
+        if (window.confirm('Möchtest du wirklich die Daten importieren? Alle aktuellen Daten werden überschrieben.')) {
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const text = e.target?.result;
+                    if (typeof text !== 'string') throw new Error("File could not be read");
+                    const data = JSON.parse(text);
 
-                if (window.confirm('Möchtest du wirklich die Daten importieren? Alle aktuellen Daten werden überschrieben.')) {
                     await importData(data);
                     if (data.settings) {
                         setGlobalSettings(data.settings);
                     }
-                    showFeedback('Daten erfolgreich importiert. App wird neu geladen.', 'info');
+                    addToast('Daten erfolgreich importiert. App wird neu geladen.', 'info');
                     setTimeout(() => window.location.reload(), 2000);
+                } catch (error) {
+                    addToast('Import fehlgeschlagen. Bitte stelle sicher, dass es eine gültige CulinaSync-Backup-Datei ist.', 'error');
+                    console.error(error);
+                } finally {
+                    if (fileInputRef.current) fileInputRef.current.value = "";
                 }
-            } catch (error) {
-                showFeedback('Import fehlgeschlagen. Bitte stelle sicher, dass es eine gültige CulinaSync-Backup-Datei ist.', 'error');
-                console.error(error);
-            } finally {
-                if (fileInputRef.current) fileInputRef.current.value = "";
-            }
-        };
-        reader.readAsText(file);
+            };
+            reader.readAsText(file);
+        } else {
+             if (fileInputRef.current) fileInputRef.current.value = "";
+        }
     };
 
-    const triggerFileSelect = () => fileInputRef.current?.click();
+    const triggerFileSelect = () => {
+        fileInputRef.current?.click();
+    };
     
     useEffect(() => {
         if (focusAction) {
             if (focusAction === 'import') { setActiveSection('data'); triggerFileSelect(); }
-            else if (focusAction === 'export') { setActiveSection('data'); handleExportData(); }
+            else if (focusAction === 'export') { setActiveSection('data'); setExportMenuOpen(true); }
             onActionHandled?.();
         }
     }, [focusAction, onActionHandled]);
@@ -209,16 +197,6 @@ const Settings: React.FC<SettingsProps> = ({ focusAction, onActionHandled }) => 
                 <h2 className="text-3xl font-bold tracking-tight text-zinc-100">Einstellungen</h2>
                 <p className="text-zinc-400 mt-1">Passe CulinaSync an deine Bedürfnisse an.</p>
             </div>
-            
-            {feedback && (
-                <div role="status" aria-live="polite" className={`p-3 rounded-md text-sm font-medium flex items-center gap-3 page-fade-in ${
-                    feedback.type === 'success' ? 'bg-green-900/50 text-green-300' : 
-                    feedback.type === 'error' ? 'bg-red-900/50 text-red-300' : 'bg-blue-900/50 text-blue-300'
-                }`}>
-                    {feedback.type === 'success' ? <CheckCircle size={20} /> : <Info size={20} />}
-                    {feedback.message}
-                </div>
-            )}
             
             <div className="flex flex-col md:flex-row gap-8 lg:gap-12">
                 <nav className="flex flex-row overflow-x-auto md:flex-col gap-1 md:w-1/4 lg:w-1/5 border-b-2 md:border-b-0 md:border-r-2 border-zinc-800 pb-2 md:pb-0 md:pr-8">
@@ -299,7 +277,17 @@ const Settings: React.FC<SettingsProps> = ({ focusAction, onActionHandled }) => 
                                     <div className="flex gap-2 w-full md:w-auto flex-shrink-0">
                                         <input type="file" ref={fileInputRef} onChange={handleImportData} className="hidden" accept="application/json" />
                                         <button onClick={triggerFileSelect} className="w-full flex items-center justify-center gap-2 bg-zinc-700 text-white font-bold py-2 px-4 rounded-md hover:bg-zinc-600 transition-colors"><Upload size={18}/> Import</button>
-                                        <button onClick={handleExportData} className="w-full flex items-center justify-center gap-2 bg-zinc-700 text-white font-bold py-2 px-4 rounded-md hover:bg-zinc-600 transition-colors"><Download size={18}/> Export</button>
+                                         <div className="relative inline-block">
+                                            <button onClick={() => setExportMenuOpen(!isExportMenuOpen)} className="w-full flex items-center justify-center gap-2 bg-zinc-700 text-white font-bold py-2 px-4 rounded-md hover:bg-zinc-600 transition-colors">
+                                                <Download size={18}/> Export <ChevronDown size={16} />
+                                            </button>
+                                            {isExportMenuOpen && (
+                                                <div className="absolute bottom-full right-0 mb-2 w-56 bg-zinc-800 border border-zinc-700 rounded-md shadow-lg z-10">
+                                                    <a onClick={() => handleExport('json')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">JSON Backup (Maschinenlesbar)</a>
+                                                    <a onClick={() => handleExport('txt')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">Text Backup (Lesbar)</a>
+                                                </div>
+                                            )}
+                                         </div>
                                     </div>
                                 </div>
                                 <div className="border-t border-zinc-700"></div>

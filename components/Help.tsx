@@ -13,6 +13,7 @@ import {
   TerminalSquare,
   Mic,
   Lightbulb,
+  LucideProps,
 } from 'lucide-react';
 
 const FaqItem = ({ question, children }: { question: string, children: React.ReactNode }) => (
@@ -27,7 +28,7 @@ const FaqItem = ({ question, children }: { question: string, children: React.Rea
   </details>
 );
 
-const HelpCard = ({ icon: Icon, title, children }: { icon: React.FC<any>, title: string, children: React.ReactNode }) => (
+const HelpCard = ({ icon: Icon, title, children }: { icon: React.FC<LucideProps>, title: string, children: React.ReactNode }) => (
     <div className="bg-zinc-950/50 border border-zinc-800 rounded-lg p-6">
         <div className="flex items-center gap-4 mb-4">
             <div className="bg-amber-500/10 p-2 rounded-full">
@@ -86,9 +87,6 @@ const FaqView: React.FC<{appVersion: string, onShowAbout: () => void}> = ({ appV
 const AboutView: React.FC = () => (
     <article className="bg-zinc-950/50 border border-zinc-800 rounded-lg shadow-xl p-6 md:p-8">
         <div className="prose-styles">
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmYmJmMjQiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTEuNSA5LjVMOSAxMkwxMSA1bDIgN1oiLz48cGF0aCBkPSJNMTggMTBsLTIuNS0yLjVMMTggNWwyIDcgWiIvPjxwYXRoIGQ9Ik0yIDhsMTItMTIgMTIgMTIiLz48cGF0aCBkPSJNNCAxNGguMyIvPjxwYXRoIGQ9Ik0yMCAxNGgtLjMiLz48cGF0aCBkPSJNNi4zIDE4LjRIMTcuNyIvPjxwYXRoIGQ9Ik02IDVIMyIvPjxwYXRoIGQ9Ik0yMSA1di0zIi8+PC9zdmc+" alt="CulinaSync Logo" width="120" />
-          </div>
           <h1>Willkommen bei CulinaSync</h1>
           <p><strong>Offline. Privat. Nahtlos.</strong><br/>Ihr persönlicher, intelligenter Küchenassistent, der den kulinarischen Alltag in Ihrem Haushalt revolutioniert.</p>
           <hr />

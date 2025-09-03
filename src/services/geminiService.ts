@@ -1,7 +1,6 @@
 
-
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
-import { AppSettings, PantryItem, Recipe, StructuredPrompt, ShoppingListItem, RecipeIdea } from "../types";
+import { AppSettings, PantryItem, Recipe, StructuredPrompt, ShoppingListItem, RecipeIdea } from "@/types";
 
 const API_KEY = process.env.API_KEY;
 
@@ -269,7 +268,6 @@ export const generateShoppingList = async (
 
     const model = "gemini-2.5-flash";
     const pantryList = pantryItems.map(item => item.name).join(', ') || 'keine';
-    // FIX: Add current shopping list items to the prompt context.
     const currentShoppingList = currentListItems.map(item => item.name).join(', ') || 'keine';
 
     const fullPrompt = `

@@ -2,11 +2,11 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, markMealAsCooked, removeRecipeFromMealPlan, addRecipeToMealPlan } from '@/services/db';
 import { Recipe, MealPlanItem, PantryItem } from '@/types';
-import { ChevronLeft, ChevronRight, Search, PlusCircle, ChevronsRight, ChevronDown, FileText, Save } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, PlusCircle, ChevronsRight, FileText, Save } from 'lucide-react';
 import RecipeCard from '@/components/RecipeCard';
 import RecipeDetail from '@/components/RecipeDetail';
 import { useSettings } from '@/contexts/SettingsContext';
-import PlannedMealCard from '@/data/PlannedMealCard';
+import PlannedMealCard from '@/components/PlannedMealCard';
 import { checkRecipePantryMatch } from '@/services/utils';
 
 const AddMealNoteModal: React.FC<{
@@ -132,8 +132,6 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ addToast }) => {
   const [dropTarget, setDropTarget] = useState<{ date: string; mealType: string } | null>(null);
   const [noteModalState, setNoteModalState] = useState<{isOpen: boolean; date: string; mealType: string} | null>(null);
   
-  // FIX: Explicitly type the lambda parameter `p` to ensure correct type inference for `pantryMap`.
-  // FIX: Explicitly type Map to ensure correct type inference.
   const pantryMap: Map<string, number> = useMemo(() => new Map(pantryItems?.map((p: PantryItem) => [p.name.toLowerCase(), p.quantity]) || []), [pantryItems]);
   const recipesById = useMemo(() => new Map<number, Recipe>(recipes?.map(r => [r.id!, r]) || []), [recipes]);
   
@@ -237,7 +235,10 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ addToast }) => {
 
             <div className="flex items-center justify-between p-2 bg-zinc-950/50 border border-zinc-800 rounded-lg">
                 <button onClick={() => setCurrentDate(d => new Date(d.setDate(d.getDate() - 7)))} className="p-2 rounded-md hover:bg-zinc-700"><ChevronLeft/></button>
-                <h3 className="font-semibold text-lg text-zinc-100 tabular-nums">{weekString}</h3>
+                <div className="flex items-center gap-4">
+                  <h3 className="font-semibold text-lg text-zinc-100 tabular-nums">{weekString}</h3>
+                  <button onClick={() => setCurrentDate(new Date())} className="text-sm font-semibold py-1 px-3 rounded-md bg-zinc-700 hover:bg-zinc-600 text-amber-300">Heute</button>
+                </div>
                 <button onClick={() => setCurrentDate(d => new Date(d.setDate(d.getDate() + 7)))} className="p-2 rounded-md hover:bg-zinc-700"><ChevronRight/></button>
             </div>
        

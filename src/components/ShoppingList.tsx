@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, updateShoppingListItem, clearShoppingList, addShoppingListItem, moveCheckedToPantry, renameShoppingListCategory, batchAddShoppingListItems, generateListFromMealPlan } from '@/services/db';
@@ -7,7 +5,7 @@ import { ShoppingListItem, Recipe, PantryItem } from '@/types';
 import { Trash2, FileDown, Plus, CheckCircle, Edit3, X, Save, ChevronDown, Bot, LoaderCircle, Archive, Send, GripVertical, TextQuote, ListCollapse, ListTree, RefreshCw, ArrowLeft, CheckSquare, Square } from 'lucide-react';
 import { exportShoppingListToCsv, exportShoppingListToPdf, exportShoppingListToMarkdown, exportShoppingListToTxt, exportShoppingListToJson } from '@/services/exportService';
 import { generateShoppingList } from '@/services/geminiService';
-import { getCategoryForItem, parseShoppingItemString } from '@/services/utils';
+import { parseShoppingItemString } from '@/services/utils';
 
 // #region Modals
 const AiModal = ({ isOpen, onClose, onAdd, pantryItems, currentListItems }: { isOpen: boolean, onClose: () => void, onAdd: (items: Omit<ShoppingListItem, 'id' | 'isChecked' | 'category' | 'sortOrder'>[]) => void, pantryItems: PantryItem[], currentListItems: ShoppingListItem[] }) => {
@@ -21,7 +19,6 @@ const AiModal = ({ isOpen, onClose, onAdd, pantryItems, currentListItems }: { is
         setIsLoading(true);
         setError('');
         try {
-            // FIX: Pass the currentListItems to the AI service to avoid duplicate suggestions.
             const items = await generateShoppingList(prompt, pantryItems, currentListItems);
             setReviewItems(items);
             setSelectedItems(new Map(items.map(item => [item.name, true])));
@@ -42,7 +39,6 @@ const AiModal = ({ isOpen, onClose, onAdd, pantryItems, currentListItems }: { is
     const handleAddSelected = () => {
         if (!reviewItems) return;
         const itemsToAdd = reviewItems.filter(item => selectedItems.get(item.name));
-        // FIX: The `onAdd` function expects items without a `category` property, so we strip it before passing.
         onAdd(itemsToAdd.map(({ category, ...rest }) => rest));
         handleClose();
     };
@@ -380,6 +376,13 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
   }, []);
   // #endregion
 
+  const handleClearList = async () => {
+    if (window.confirm('Möchtest du die Einkaufsliste wirklich komplett leeren?')) {
+        const count = await clearShoppingList();
+        if (count > 0) addToast('Liste geleert.');
+    }
+  };
+
   const handleExport = (format: 'pdf' | 'csv' | 'json' | 'md' | 'txt') => {
     setExportOpen(false);
     if (!shoppingList?.length) return;
@@ -403,8 +406,10 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
   }, {} as Record<string, ShoppingListItem[]>), [activeItems]);
 
   const handleMoveToPantry = async () => {
-    const movedCount = await moveCheckedToPantry();
-    if(movedCount > 0) addToast(`${movedCount} Artikel in den Vorrat verschoben.`, 'success');
+      if(completedItems.length > 0 && window.confirm(`${completedItems.length} gekaufte(r) Artikel in den Vorrat verschieben?`)){
+        const movedCount = await moveCheckedToPantry();
+        if(movedCount > 0) addToast(`${movedCount} Artikel in den Vorrat verschoben.`, 'success');
+      }
   };
 
   if (shoppingList === undefined) {
@@ -444,7 +449,7 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
                         </div>
                     )}
                 </div>
-                <button onClick={() => clearShoppingList().then(c => c > 0 && addToast('Liste geleert.'))} disabled={!shoppingList?.length} className="flex items-center gap-2 bg-red-900/80 font-semibold py-2 px-3 rounded-md hover:bg-red-800 disabled:bg-zinc-800 disabled:text-zinc-500 text-sm"><Trash2 size={16}/> Leeren</button>
+                <button onClick={handleClearList} disabled={!shoppingList?.length} className="flex items-center gap-2 bg-red-900/80 font-semibold py-2 px-3 rounded-md hover:bg-red-800 disabled:bg-zinc-800 disabled:text-zinc-500 text-sm"><Trash2 size={16}/> Leeren</button>
             </div>
           </div>
       </div>

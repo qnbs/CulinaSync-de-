@@ -1,6 +1,6 @@
 import React from 'react';
 import { PantryItem } from '@/types';
-import { Minus, Plus, Square, CheckSquare, Edit3, AlertTriangle } from 'lucide-react';
+import { Minus, Plus, Square, CheckSquare, Edit3, AlertTriangle, ShoppingCart } from 'lucide-react';
 
 export const getExpiryStatus = (expiryDate?: string): 'expired' | 'nearing' | 'ok' => {
   if (!expiryDate) return 'ok';
@@ -23,18 +23,20 @@ interface PantryListItemProps {
     onStartEdit: (item: PantryItem) => void;
     onAdjustQuantity: (item: PantryItem, amount: number) => void;
     onToggleSelect: (id: number) => void;
+    onAddToShoppingList: (item: PantryItem) => void;
 }
 
 const PantryListItem = React.memo<PantryListItemProps>(({
     item, isSelectMode, isSelected,
-    onStartEdit, onAdjustQuantity, onToggleSelect
+    onStartEdit, onAdjustQuantity, onToggleSelect, onAddToShoppingList
 }) => {
     const status = getExpiryStatus(item.expiryDate);
-    const isRunningLow = item.minQuantity && item.quantity <= item.minQuantity;
+    const isRunningLow = item.minQuantity != null && item.quantity <= item.minQuantity;
 
     let indicatorClasses = 'border-l-4 transition-colors ';
     if (status === 'expired') indicatorClasses += 'border-red-500 bg-red-900/20';
     else if (status === 'nearing') indicatorClasses += 'border-yellow-500 bg-yellow-900/20';
+    else if (isRunningLow) indicatorClasses += 'border-yellow-500 bg-yellow-900/20';
     else if (isSelected) indicatorClasses += 'border-amber-500 bg-amber-900/20';
     else indicatorClasses += 'border-zinc-800';
 
@@ -48,7 +50,7 @@ const PantryListItem = React.memo<PantryListItemProps>(({
           <div className="flex-grow cursor-pointer" onClick={() => onStartEdit(item)}>
             <div className="flex items-center gap-2">
                 <p className="font-medium text-zinc-100">{item.name}</p>
-                {isRunningLow && <span title={`Wird knapp! Mindestmenge: ${item.minQuantity} ${item.unit}`}><AlertTriangle size={14} className="text-yellow-400"/></span>}
+                {(isRunningLow || status !== 'ok') && <span title={status === 'expired' ? 'Abgelaufen!' : (status === 'nearing' ? 'Läuft bald ab!' : `Wird knapp! Mindestmenge: ${item.minQuantity} ${item.unit}`)}><AlertTriangle size={14} className={status === 'expired' ? 'text-red-400' : 'text-yellow-400'}/></span>}
             </div>
             <p className="text-zinc-400 text-sm">
               {item.category && <span className="mr-3">{item.category}</span>}
@@ -60,9 +62,12 @@ const PantryListItem = React.memo<PantryListItemProps>(({
             <span className="font-mono w-20 text-center text-lg tabular-nums">{item.quantity} <span className="text-base text-zinc-400">{item.unit}</span></span>
             <button onClick={() => onAdjustQuantity(item, 1)} aria-label={`Increase quantity of ${item.name}`} className="p-1.5 rounded-full bg-zinc-700/50 hover:bg-zinc-700 transition-colors"><Plus size={14}/></button>
           </div>
-          <button onClick={() => onStartEdit(item)} aria-label={`Edit ${item.name}`} className="p-2 rounded-full text-zinc-500 opacity-0 group-hover:opacity-100 hover:bg-zinc-700 hover:text-zinc-100 transition-opacity">
-            <Edit3 size={16} />
-          </button>
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+            {isRunningLow && <button onClick={() => onAddToShoppingList(item)} aria-label={`Add ${item.name} to shopping list`} className="p-2 rounded-full text-zinc-400 hover:bg-zinc-700 hover:text-amber-400"><ShoppingCart size={16} /></button>}
+            <button onClick={() => onStartEdit(item)} aria-label={`Edit ${item.name}`} className="p-2 rounded-full text-zinc-400 hover:bg-zinc-700 hover:text-zinc-100">
+              <Edit3 size={16} />
+            </button>
+          </div>
         </li>
     );
 });

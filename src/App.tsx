@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import Header from '@/components/Header';
 import CommandPalette, { Command } from '@/components/CommandPalette';

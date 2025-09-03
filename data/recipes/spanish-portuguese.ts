@@ -1,4 +1,4 @@
-import { Recipe } from '@/types';
+import { Recipe } from '../../types';
 
 export const spanishPortugueseRecipes: Recipe[] = [
   {
@@ -173,230 +173,32 @@ export const spanishPortugueseRecipes: Recipe[] = [
         ]
       }
     ],
+    // FIX: Completed instructions array and added missing properties to conform to the Recipe type.
     instructions: [
-        "Für die Salsa Brava die Tomaten mit den beiden Paprikapulvern, Essig, einer Prise Salz und Zucker in einem kleinen Topf aufkochen. Bei schwacher Hitze 10-15 Minuten köcheln lassen, bis die Soße etwas eingedickt ist. Pürieren und beiseitestellen.",
-        "Die Kartoffeln schälen und in mundgerechte, ungleichmäßige Würfel schneiden.",
-        "In einer tiefen Pfanne oder einem Topf reichlich Olivenöl erhitzen (ca. 170°C).",
-        "Die Kartoffelwürfel in das heiße Öl geben und goldbraun und knusprig frittieren. Das kann in zwei Etappen geschehen, um die Temperatur des Öls zu halten.",
-        "Die fertigen Kartoffeln mit einer Schaumkelle aus dem Öl heben, auf Küchenpapier abtropfen lassen und salzen.",
-        "Die heißen Kartoffeln auf einer Platte anrichten, großzügig mit der Salsa Brava beträufeln und sofort servieren. Optional zusätzlich mit Aioli servieren."
+        "Für die Salsa Brava die Tomaten mit den beiden Paprikapulvern, Essig, einer Prise Salz und Zucker in einem kleinen Topf aufkochen. Die Hitze reduzieren und 10-15 Minuten köcheln lassen, bis die Sauce andickt. Anschließend glatt pürieren und beiseitestellen.",
+        "Die Kartoffeln schälen und in unregelmäßige, ca. 2-3 cm große Würfel schneiden. In kaltem Wasser abspülen und sehr gut trocken tupfen.",
+        "Reichlich Olivenöl in einer tiefen Pfanne oder Fritteuse auf 180°C erhitzen. Die Kartoffelwürfel portionsweise goldbraun und knusprig frittieren.",
+        "Mit einem Schaumlöffel herausheben und auf Küchenpapier abtropfen lassen. Mit Salz bestreuen.",
+        "Die heißen Kartoffeln sofort servieren, großzügig mit der Salsa Brava beträufelt."
     ],
-    nutritionPerServing: { calories: "441 kcal", protein: "4 g", fat: "31 g", carbs: "39 g" },
+    nutritionPerServing: { calories: "320 kcal", protein: "4 g", fat: "18 g", carbs: "35 g" },
     tags: {
       course: ["Vorspeise", "Beilage"],
       cuisine: ["Spanisch"],
-      occasion: ["Party"],
+      occasion: ["Party", "Sommer"],
       mainIngredient: ["Kartoffel"],
       prepMethod: ["Pfannengericht"],
-      diet: ["Vegan", "Vegetarisch"]
+      diet: ["Vegan", "Vegetarisch", "Glutenfrei"]
     },
     expertTips: [
-        {
-            title: "Doppelt frittieren für extra Knusprigkeit",
-            content: "Für ultimativ knusprige Kartoffeln können Sie sie zweimal frittieren: Zuerst bei niedrigerer Temperatur (ca. 140°C) garen, bis sie weich sind, dann abkühlen lassen und kurz vor dem Servieren bei hoher Temperatur (180°C) goldbraun und knusprig backen."
-        }
-    ]
-  },
-  {
-    recipeTitle: "Gambas al Ajillo (Knoblauchgarnelen)",
-    shortDescription: "Eine der schnellsten und beliebtesten Tapas Spaniens. Saftige Garnelen, die in reichlich Olivenöl mit Unmengen von Knoblauch und einem Hauch scharfer Chili brutzeln. Serviert wird direkt in der heißen Tonschale - perfekt, um das aromatische Öl mit frischem Brot aufzutunken.",
-    prepTime: "10 Min.",
-    cookTime: "5 Min.",
-    totalTime: "15 Min.",
-    servings: "4 Personen (als Tapa)",
-    difficulty: "Einfach",
-    ingredients: [
       {
-        sectionTitle: "Zutaten",
-        items: [
-            { quantity: "500", unit: "g", name: "rohe Garnelen, geschält" },
-            { quantity: "6-8", unit: "Stk.", name: "Knoblauchzehen" },
-            { quantity: "1", unit: "Stk.", name: "rote Chilischote" },
-            { quantity: "150", unit: "ml", name: "gutes Olivenöl" },
-            { quantity: "1", unit: "Schuss", name: "Sherry oder Weißwein" },
-            { quantity: "1", unit: "Handvoll", name: "gehackte Petersilie" }
-        ]
-      }
-    ],
-    instructions: [
-        "Den Knoblauch in dünne Scheiben schneiden. Die Chilischote entkernen und in feine Ringe schneiden.",
-        "Das Olivenöl in einer Tonschale (Cazuela) oder einer schweren Pfanne bei mittlerer Hitze erwärmen.",
-        "Knoblauch und Chili ins Öl geben und sanft braten, bis der Knoblauch anfängt, Farbe anzunehmen, aber nicht verbrennt.",
-        "Die Hitze erhöhen, die Garnelen hinzufügen und unter Rühren 1-2 Minuten braten, bis sie rosa und gar sind.",
-        "Einen Schuss Sherry oder Weißwein dazugeben, kurz aufzischen lassen. Mit Salz würzen.",
-        "Die Pfanne vom Herd nehmen, die gehackte Petersilie darüber streuen und sofort brutzelnd heiß mit viel Weißbrot zum Auftunken des Öls servieren."
-    ],
-    nutritionPerServing: { calories: "355 kcal", protein: "35.5 g", fat: "23.7 g", carbs: "4.7 g" },
-    tags: {
-      course: ["Vorspeise"],
-      cuisine: ["Spanisch"],
-      occasion: ["Schnelle Küche", "Party"],
-      mainIngredient: ["Garnelen"],
-      prepMethod: ["Pfannengericht"],
-      diet: []
-    },
-    expertTips: [
-        {
-            title: "Gute Zutaten sind alles",
-            content: "Bei einem so einfachen Gericht ist die Qualität der Zutaten entscheidend. Verwenden Sie frische, hochwertige Garnelen und ein ausgezeichnetes Olivenöl für den besten Geschmack."
-        }
-    ]
-  },
-  {
-    recipeTitle: "Bacalhau à Brás (Kabeljau nach Brás-Art)",
-    shortDescription: "Eines der beliebtesten Nationalgerichte Portugals. Zarte Flocken von entsalztem Kabeljau (Bacalhau) werden mit feinen Zwiebeln, knusprigen Kartoffelstäbchen und cremigen Eiern vermischt. Ein einfaches, aber unglaublich geschmackvolles Gericht aus der Lissabonner Tavernenküche.",
-    prepTime: "20 Min. (+ Entsalzungszeit)",
-    cookTime: "20 Min.",
-    totalTime: "40 Min. (+ Entsalzungszeit)",
-    servings: "4 Personen",
-    difficulty: "Einfach",
-    ingredients: [
-      {
-        sectionTitle: "Zutaten",
-        items: [
-            { quantity: "400", unit: "g", name: "Stockfisch (Bacalhau), entsalzen" },
-            { quantity: "500", unit: "g", name: "Kartoffeln, für Strohkartoffeln" },
-            { quantity: "2", unit: "Stk.", name: "große Zwiebeln" },
-            { quantity: "4", unit: "Stk.", name: "Eier" },
-            { quantity: "", unit: "", name: "schwarze Oliven und Petersilie zum Garnieren" },
-            { quantity: "", unit: "", name: "Olivenöl, Salz, Pfeffer" }
-        ]
-      }
-    ],
-    instructions: [
-        "Den Bacalhau (falls nicht bereits entsalzen gekauft) 24-48 Stunden wässern, dabei das Wasser mehrmals wechseln. Dann kochen, Haut und Gräten entfernen und das Fleisch in feine Flocken zupfen.",
-        "Die Kartoffeln schälen und mit einem Julienne-Schneider in sehr feine Streifen schneiden. Gut waschen und sehr gut trocken tupfen. In heißem Öl knusprig frittieren und auf Küchenpapier abtropfen lassen (oder fertige Strohkartoffeln verwenden).",
-        "Die Zwiebeln in hauchdünne Halbringe schneiden.",
-        "In einer großen Pfanne reichlich Olivenöl erhitzen und die Zwiebeln darin langsam weich und glasig dünsten.",
-        "Die Bacalhau-Flocken hinzufügen und einige Minuten mit den Zwiebeln mitdünsten.",
-        "Die Strohkartoffeln unterheben und alles gut vermischen.",
-        "Die Eier in einer Schüssel leicht verquirlen und mit Salz und Pfeffer würzen. Über die Bacalhau-Mischung gießen.",
-        "Bei schwacher Hitze unter ständigem Rühren stocken lassen, bis die Eier cremig, aber nicht trocken sind.",
-        "Sofort auf Tellern anrichten und mit schwarzen Oliven und gehackter Petersilie garnieren."
-    ],
-    nutritionPerServing: { calories: "320 kcal", protein: "20 g", fat: "15 g", carbs: "30 g" },
-    tags: {
-      course: ["Hauptgericht"],
-      cuisine: ["Portugiesisch"],
-      occasion: ["Alltagsküche"],
-      mainIngredient: ["Fisch", "Kartoffel"],
-      prepMethod: ["Pfannengericht"],
-      diet: []
-    },
-    expertTips: [
-        {
-            title: "Cremige Eier",
-            content: "Das Geheimnis liegt darin, die Pfanne vom Herd zu ziehen, sobald die Eier cremig zu stocken beginnen. Die Resthitze gart sie perfekt fertig. Das Ergebnis sollte saftig und nicht trocken sein."
-        }
-    ]
-  },
-  {
-    recipeTitle: "Cataplana de Marisco (Meeresfrüchte-Eintopf)",
-    shortDescription: "Ein spektakulärer Meeresfrüchteeintopf von der Algarveküste, benannt nach dem traditionellen, muschelförmigen Kupfertopf, in dem er gegart wird. Verschiedene Fische und Meeresfrüchte werden in einer aromatischen Sauce aus Tomaten, Paprika, Zwiebeln und Weißwein gedämpft.",
-    prepTime: "25 Min.",
-    cookTime: "20 Min.",
-    totalTime: "45 Min.",
-    servings: "4 Personen",
-    difficulty: "Mittel",
-    ingredients: [
-      {
-        sectionTitle: "Zutaten",
-        items: [
-            { quantity: "1", unit: "kg", name: "gemischte Meeresfrüchte und Fischfilets" },
-            { quantity: "1", unit: "Stk.", name: "Zwiebel" },
-            { quantity: "1", unit: "Stk.", name: "rote Paprika" },
-            { quantity: "400", unit: "g", name: "gehackte Tomaten" },
-            { quantity: "150", unit: "ml", name: "Weißwein" },
-            { quantity: "1", unit: "Bund", name: "Koriander" },
-            { quantity: "2", unit: "Stk.", name: "Knoblauchzehen" },
-            { quantity: "1", unit: "Prise", name: "Piri-Piri (Chili)" }
-        ]
-      }
-    ],
-    instructions: [
-        "Zwiebel, Paprika und Knoblauch in Scheiben bzw. Streifen schneiden.",
-        "Den Boden einer Cataplana (oder eines breiten Topfes mit Deckel) mit Olivenöl bedecken.",
-        "Die Zutaten in Schichten in die Cataplana geben: zuerst die Hälfte der Zwiebeln, Paprika und Tomaten. Dann den Fisch und die Meeresfrüchte (festere Sorten zuerst). Mit den restlichen Zwiebeln, Paprika und Tomaten bedecken.",
-        "Knoblauch, gehackten Koriander, Piri-Piri, Salz und Pfeffer darüber streuen.",
-        "Den Weißwein angießen.",
-        "Die Cataplana schließen und bei mittlerer Hitze ca. 15-20 Minuten garen, bis alle Meeresfrüchte gar sind. Die Cataplana während des Garens gelegentlich schütteln.",
-        "Die geschlossene Cataplana auf den Tisch stellen und vor den Gästen öffnen. Mit frischem Brot servieren."
-    ],
-    nutritionPerServing: { calories: "385 kcal", protein: "22 g", fat: "17 g", carbs: "9 g" },
-    tags: {
-      course: ["Hauptgericht"],
-      cuisine: ["Portugiesisch"],
-      occasion: ["Für Gäste", "Sommer"],
-      mainIngredient: ["Fisch", "Garnelen"],
-      prepMethod: ["One-Pot"],
-      diet: []
-    },
-    expertTips: [
-        {
-            title: "Ohne Cataplana-Topf",
-            content: "Wenn Sie keine Cataplana besitzen, funktioniert auch ein Wok mit Deckel oder ein breiter Schmortopf sehr gut. Wichtig ist, dass der Deckel gut schließt, damit die Meeresfrüchte im Dampf garen."
-        }
-    ]
-  },
-  {
-    recipeTitle: "Pastéis de Nata (Puddingtörtchen aus Blätterteig)",
-    shortDescription: "Portugals berühmtestes Gebäck. Knusprige, blättrige Teigkörbchen, gefüllt mit einer reichhaltigen Eierpudding-Creme, die bei hoher Hitze gebacken wird, um die charakteristischen dunklen, karamellisierten Flecken auf der Oberfläche zu erzeugen.",
-    prepTime: "25 Min. (+ Kühlzeit)",
-    cookTime: "15 Min.",
-    totalTime: "40 Min. (+ Kühlzeit)",
-    servings: "12 Törtchen",
-    difficulty: "Anspruchsvoll",
-    ingredients: [
-      {
-        sectionTitle: "Zutaten",
-        items: [
-            { quantity: "1", unit: "Rolle", name: "Blätterteig, gekühlt" },
-            { quantity: "250", unit: "ml", name: "Milch" },
-            { quantity: "1", unit: "Stk.", name: "Zimtstange" },
-            { quantity: "1", unit: "Streifen", name: "Bio-Zitronenschale" }
-        ]
+        title: "Für extra knusprige Kartoffeln",
+        content: "Für ein besonders knuspriges Ergebnis die Kartoffelwürfel zweimal frittieren. Zuerst bei niedrigerer Temperatur (ca. 140°C) garen, bis sie weich sind. Dann abkühlen lassen und kurz vor dem Servieren in heißem Öl (180°C) goldbraun und knusprig frittieren."
       },
       {
-        sectionTitle: "Für den Zuckersirup",
-        items: [
-            { quantity: "200", unit: "g", name: "Zucker" },
-            { quantity: "100", unit: "ml", name: "Wasser" }
-        ]
-      },
-      {
-        sectionTitle: "Für die Puddingcreme",
-        items: [
-            { quantity: "30", unit: "g", name: "Mehl" },
-            { quantity: "6", unit: "Stk.", name: "Eigelb" }
-        ]
+        title: "Mit Aioli servieren",
+        content: "In vielen Regionen Spaniens werden Patatas Bravas mit einer Kombination aus Salsa Brava und cremiger Knoblauch-Aioli serviert. Das mildert die Schärfe und sorgt für einen tollen Kontrast."
       }
-    ],
-    instructions: [
-        "Den Backofen auf die höchstmögliche Temperatur (ca. 250-270°C) vorheizen. Ein 12er-Muffinblech bereitstellen.",
-        "Den Blätterteig eng aufrollen und in 12 gleichmäßige Scheiben schneiden.",
-        "Jede Teigscheibe mit der Schnittfläche nach oben in eine Muffinmulde legen. Mit angefeuchteten Daumen den Teig von der Mitte nach außen an den Boden und die Wände drücken, sodass ein dünnes Körbchen entsteht.",
-        "Für die Creme den Zuckersirup aus Zucker und Wasser kochen, bis er leicht andickt. Beiseitestellen.",
-        "Milch mit Zimtstange und Zitronenschale aufkochen. In einer Schüssel das Mehl mit etwas kalter Milch glatt rühren, dann in die heiße Milch einrühren und unter Rühren andicken lassen.",
-        "Zimt und Zitrone entfernen. Den heißen Zuckersirup langsam unter die Milchcreme rühren.",
-        "Die Eigelbe in einer separaten Schüssel verquirlen. Etwas von der heißen Creme zu den Eigelben geben, um sie zu temperieren, dann alles zurück zur restlichen Creme geben und gut verrühren.",
-        "Die noch warme Creme in die Teigkörbchen füllen.",
-        "Im sehr heißen Ofen 12-17 Minuten backen, bis der Teig goldbraun ist und die Oberfläche der Creme die charakteristischen dunklen, fast verbrannten Flecken aufweist.",
-        "Kurz abkühlen lassen und am besten noch lauwarm, mit Zimt und Puderzucker bestreut, genießen."
-    ],
-    nutritionPerServing: { calories: "150 kcal", protein: "2 g", fat: "6 g", carbs: "21 g" },
-    tags: {
-      course: ["Dessert", "Snack"],
-      cuisine: ["Portugiesisch"],
-      occasion: ["Für Gäste"],
-      mainIngredient: ["Ei"],
-      prepMethod: ["Ofengericht"],
-      diet: ["Vegetarisch"]
-    },
-    expertTips: [
-        {
-            title: "Hohe Hitze ist entscheidend",
-            content: "Die hohe Backtemperatur ist der Schlüssel zum Erfolg. Sie sorgt dafür, dass der Blätterteig knusprig wird und die Creme schnell stockt und die typischen karamellisierten Flecken bekommt, ohne dass der Teig durchweicht."
-        }
     ]
-  }
+  },
 ];

@@ -23,13 +23,12 @@ const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, onClose
     const handleSave = async () => {
         setIsSaving(true);
         const date = new Date(startDate);
-        // Adjust for timezone offset
         date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
 
         for (const recipeId of recipeIds) {
             const dateString = date.toISOString().split('T')[0];
             await db.mealPlan.add({ recipeId, date: dateString, mealType, isCooked: false });
-            date.setDate(date.getDate() + 1); // Increment day for the next recipe
+            date.setDate(date.getDate() + 1); 
         }
         setIsSaving(false);
         onSave(recipeIds.length);
@@ -78,11 +77,10 @@ interface RecipeBookProps {
 
 const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction, onActionHandled, addToast }) => {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
-  const savedRecipes = useLiveQuery(() => db.recipes.toArray(), []);
+  const allRecipes = useLiveQuery(() => db.recipes.toArray(), []);
   const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Filter & Sort states
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [sortBy, setSortBy] = useState('newest');
@@ -94,14 +92,13 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction,
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [pantryFilter, setPantryFilter] = useState(false);
 
-  // Bulk add state
   const [isSelectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [isBulkModalOpen, setBulkModalOpen] = useState(false);
 
   const handleToggleSelectMode = () => {
     setSelectMode(!isSelectMode);
-    setSelectedIds([]); // Reset selection when toggling mode
+    setSelectedIds([]);
   };
 
   const handleToggleSelect = (id: number) => {
@@ -125,14 +122,14 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction,
   }, [focusAction, onActionHandled]);
 
   const filterOptions = useMemo(() => {
-    if (!savedRecipes) return { courses: [], cuisines: [], mainIngredients: [], difficulties: [], diets: [] };
+    if (!allRecipes) return { courses: [], cuisines: [], mainIngredients: [], difficulties: [], diets: [] };
     const courses = new Set<string>();
     const cuisines = new Set<string>();
     const mainIngredients = new Set<string>();
     const difficulties = new Set<string>();
     const diets = new Set<string>();
 
-    savedRecipes.forEach(recipe => {
+    allRecipes.forEach(recipe => {
       recipe.tags.course?.forEach(c => courses.add(c));
       recipe.tags.cuisine?.forEach(c => cuisines.add(c));
       recipe.tags.mainIngredient?.forEach(m => mainIngredients.add(m));
@@ -147,7 +144,7 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction,
       difficulties: Array.from(difficulties).sort(),
       diets: Array.from(diets).sort(),
     };
-  }, [savedRecipes]);
+  }, [allRecipes]);
 
   const clearFilters = () => {
     setSearchTerm('');
@@ -161,53 +158,46 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction,
     setPantryFilter(false);
   };
 
-  const filteredRecipes = useMemo(() => {
-    if (!savedRecipes || !pantryItems) return [];
+  const filteredRecipes = useLiveQuery(async () => {
+    if (!pantryItems) return []; 
     
-    let recipes = [...savedRecipes];
+    let collection = db.recipes.toCollection();
 
+    if (showFavoritesOnly) {
+        collection = collection.filter(r => !!r.isFavorite);
+    }
+    if (courseFilter) collection = collection.filter(r => r.tags.course.includes(courseFilter));
+    if (cuisineFilter) collection = collection.filter(r => r.tags.cuisine.includes(cuisineFilter));
+    if (mainIngredientFilter) collection = collection.filter(r => r.tags.mainIngredient.includes(mainIngredientFilter));
+    if (difficultyFilter) collection = collection.filter(r => r.difficulty === difficultyFilter);
+    if (dietFilter) collection = collection.filter(r => r.tags.diet.includes(dietFilter));
+
+    let recipes = await collection.toArray();
+    
     if(pantryFilter) {
         recipes = recipes.filter(recipe => {
             const match = checkRecipePantryMatch(recipe, pantryItems);
             return match.have === match.total;
         });
     }
-    if (showFavoritesOnly) {
-        recipes = recipes.filter(recipe => recipe.isFavorite);
-    }
+
     if (debouncedSearchTerm) {
       const lowerCaseSearch = debouncedSearchTerm.toLowerCase();
       recipes = recipes.filter(recipe => 
         recipe.recipeTitle.toLowerCase().includes(lowerCaseSearch)
       );
     }
-    recipes = recipes.filter(recipe => {
-      const courseMatch = courseFilter ? recipe.tags.course?.includes(courseFilter) : true;
-      const cuisineMatch = cuisineFilter ? recipe.tags.cuisine?.includes(cuisineFilter) : true;
-      const mainIngredientMatch = mainIngredientFilter ? recipe.tags.mainIngredient?.includes(mainIngredientFilter) : true;
-      const difficultyMatch = difficultyFilter ? recipe.difficulty === difficultyFilter : true;
-      const dietMatch = dietFilter ? recipe.tags.diet?.includes(dietFilter) : true;
-      return courseMatch && cuisineMatch && mainIngredientMatch && difficultyMatch && dietMatch;
-    });
 
     switch (sortBy) {
-        case 'a-z':
-            recipes.sort((a, b) => a.recipeTitle.localeCompare(b.recipeTitle));
-            break;
-        case 'z-a':
-            recipes.sort((a, b) => b.recipeTitle.localeCompare(a.recipeTitle));
-            break;
-        case 'favorites':
-            recipes.sort((a, b) => (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0));
-            break;
-        case 'newest':
-        default:
-             recipes.sort((a, b) => (b.updatedAt ?? b.id ?? 0) - (a.updatedAt ?? a.id ?? 0));
-            break;
+        case 'a-z': recipes.sort((a, b) => a.recipeTitle.localeCompare(b.recipeTitle)); break;
+        case 'z-a': recipes.sort((a, b) => b.recipeTitle.localeCompare(a.recipeTitle)); break;
+        case 'favorites': recipes.sort((a, b) => (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0)); break;
+        case 'newest': default: recipes.sort((a, b) => (b.updatedAt ?? b.id ?? 0) - (a.updatedAt ?? a.id ?? 0)); break;
     }
 
     return recipes;
-  }, [savedRecipes, pantryItems, debouncedSearchTerm, sortBy, courseFilter, cuisineFilter, mainIngredientFilter, difficultyFilter, dietFilter, showFavoritesOnly, pantryFilter]);
+  }, [pantryItems, debouncedSearchTerm, sortBy, courseFilter, cuisineFilter, mainIngredientFilter, difficultyFilter, dietFilter, showFavoritesOnly, pantryFilter], []);
+
 
   if (selectedRecipe) {
     return (
@@ -230,7 +220,7 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction,
         onSave={(count) => {
             addToast(`${count} Rezepte zum Plan hinzugefügt.`);
             setBulkModalOpen(false);
-            handleToggleSelectMode(); // Exit select mode
+            handleToggleSelectMode(); 
         }}
       />
 
@@ -239,7 +229,7 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction,
         <p className="text-zinc-400 mt-1">Deine Sammlung von generierten und gespeicherten Rezepten.</p>
       </div>
 
-      {savedRecipes && savedRecipes.length > 0 && (
+      {allRecipes && allRecipes.length > 0 && (
         <div className="space-y-4 p-4 bg-zinc-950/50 border border-zinc-800 rounded-lg">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="relative md:col-span-2">
@@ -318,12 +308,12 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction,
             <div className="text-center py-20 bg-zinc-950/50 border border-zinc-800 rounded-lg">
                 <BookOpen className="mx-auto h-12 w-12 text-zinc-600" />
                 <h3 className="mt-4 text-lg font-medium text-zinc-300">
-                {savedRecipes && savedRecipes.length > 0 ? 'Keine Rezepte entsprechen deiner Suche' : 'Dein Kochbuch ist leer'}
+                {allRecipes && allRecipes.length > 0 ? 'Keine Rezepte entsprechen deiner Suche' : 'Dein Kochbuch ist leer'}
                 </h3>
                 <p className="mt-1 text-sm text-zinc-500 max-w-md mx-auto">
-                {savedRecipes && savedRecipes.length > 0 ? 'Versuche, deine Filterauswahl anzupassen oder die Suche zurückzusetzen.' : 'Gehe zum KI-Chef, generiere ein Rezept und speichere es, um es hier zu finden.'}
+                {allRecipes && allRecipes.length > 0 ? 'Versuche, deine Filterauswahl anzupassen oder die Suche zurückzusetzen.' : 'Gehe zum KI-Chef, generiere ein Rezept und speichere es, um es hier zu finden.'}
                 </p>
-                {savedRecipes && savedRecipes.length > 0 && hasActiveFilters && (
+                {allRecipes && allRecipes.length > 0 && hasActiveFilters && (
                     <button onClick={clearFilters} className="mt-6 flex mx-auto items-center gap-2 bg-amber-500 text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-amber-400 transition-colors">
                         <ListFilter size={18} /> Filter zurücksetzen
                     </button>

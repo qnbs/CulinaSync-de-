@@ -1,4 +1,4 @@
-import { Recipe } from '../../types';
+import { Recipe } from '@/types';
 import { germanAustrianRecipes } from './german-austrian';
 import { frenchRecipes } from './french';
 import { italianRecipes } from './italian';
