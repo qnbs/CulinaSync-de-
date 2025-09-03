@@ -4,8 +4,69 @@ import { db } from '@/services/db';
 import { Recipe } from '@/types';
 import RecipeList from '@/components/RecipeList';
 import RecipeDetail from '@/components/RecipeDetail';
-import { BookOpen, Search, X, ListFilter, Star } from 'lucide-react';
+import { BookOpen, Search, X, ListFilter, Star, CheckSquare, CalendarPlus, LoaderCircle } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
+
+interface BulkAddToPlanModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    recipeIds: number[];
+    onSave: (count: number) => void;
+}
+
+const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, onClose, recipeIds, onSave }) => {
+    const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+    const [mealType, setMealType] = useState<'Frühstück' | 'Mittagessen' | 'Abendessen'>('Abendessen');
+    const [isSaving, setIsSaving] = useState(false);
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        const date = new Date(startDate);
+        // Adjust for timezone offset
+        date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
+
+        for (const recipeId of recipeIds) {
+            const dateString = date.toISOString().split('T')[0];
+            await db.mealPlan.add({ recipeId, date: dateString, mealType, isCooked: false });
+            date.setDate(date.getDate() + 1); // Increment day for the next recipe
+        }
+        setIsSaving(false);
+        onSave(recipeIds.length);
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 page-fade-in" onClick={onClose}>
+            <div className="bg-zinc-800 rounded-lg p-6 w-full max-w-sm shadow-xl" onClick={e => e.stopPropagation()}>
+                <h3 className="text-lg font-bold mb-4">Rezepte zum Plan hinzufügen</h3>
+                <div className="space-y-4">
+                    <div>
+                        <label htmlFor="startDate" className="block text-sm font-medium text-zinc-400 mb-1">Startdatum</label>
+                        <input type="date" id="startDate" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-amber-500"/>
+                    </div>
+                    <div>
+                        <label htmlFor="mealType" className="block text-sm font-medium text-zinc-400 mb-1">Mahlzeit</label>
+                        <select id="mealType" value={mealType} onChange={e => setMealType(e.target.value as any)} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-amber-500">
+                            <option>Abendessen</option>
+                            <option>Mittagessen</option>
+                            <option>Frühstück</option>
+                        </select>
+                    </div>
+                    <p className="text-xs text-zinc-500">Die {recipeIds.length} Rezepte werden ab dem {new Date(startDate).toLocaleDateString('de-DE')} als aufeinanderfolgende '{mealType}' geplant.</p>
+                </div>
+                <div className="flex justify-end gap-3 pt-4 mt-4 border-t border-zinc-700">
+                    <button onClick={onClose} className="py-2 px-4 rounded-md text-zinc-300 hover:bg-zinc-700">Abbrechen</button>
+                    <button onClick={handleSave} disabled={isSaving} className="py-2 px-4 rounded-md bg-amber-500 text-zinc-900 font-bold hover:bg-amber-400 flex items-center gap-2 disabled:bg-zinc-600">
+                        {isSaving && <LoaderCircle size={18} className="animate-spin" />}
+                        Hinzufügen
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 interface RecipeBookProps {
     focusAction?: string | null;
@@ -26,7 +87,25 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ focusAction, onActionHandled, a
   const [cuisineFilter, setCuisineFilter] = useState('');
   const [mainIngredientFilter, setMainIngredientFilter] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('');
+  const [dietFilter, setDietFilter] = useState('');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+
+  // Bulk add state
+  const [isSelectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [isBulkModalOpen, setBulkModalOpen] = useState(false);
+
+  const handleToggleSelectMode = () => {
+    setSelectMode(!isSelectMode);
+    setSelectedIds([]); // Reset selection when toggling mode
+  };
+
+  const handleToggleSelect = (id: number) => {
+    if(!isSelectMode) return;
+    setSelectedIds(prev =>
+        prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
 
   useEffect(() => {
     if (focusAction === 'search' && searchInputRef.current) {
@@ -35,19 +114,20 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ focusAction, onActionHandled, a
     }
   }, [focusAction, onActionHandled]);
 
-  // Generate filter options from saved recipes
   const filterOptions = useMemo(() => {
-    if (!savedRecipes) return { courses: [], cuisines: [], mainIngredients: [], difficulties: [] };
+    if (!savedRecipes) return { courses: [], cuisines: [], mainIngredients: [], difficulties: [], diets: [] };
     const courses = new Set<string>();
     const cuisines = new Set<string>();
     const mainIngredients = new Set<string>();
     const difficulties = new Set<string>();
+    const diets = new Set<string>();
 
     savedRecipes.forEach(recipe => {
       recipe.tags.course?.forEach(c => courses.add(c));
       recipe.tags.cuisine?.forEach(c => cuisines.add(c));
       recipe.tags.mainIngredient?.forEach(m => mainIngredients.add(m));
-      recipe.tags.difficulty?.forEach(d => difficulties.add(d));
+      if (recipe.difficulty) difficulties.add(recipe.difficulty);
+      recipe.tags.diet?.forEach(d => diets.add(d));
     });
 
     return {
@@ -55,6 +135,7 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ focusAction, onActionHandled, a
       cuisines: Array.from(cuisines).sort(),
       mainIngredients: Array.from(mainIngredients).sort(),
       difficulties: Array.from(difficulties).sort(),
+      diets: Array.from(diets).sort(),
     };
   }, [savedRecipes]);
 
@@ -65,38 +146,32 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ focusAction, onActionHandled, a
     setCuisineFilter('');
     setMainIngredientFilter('');
     setDifficultyFilter('');
+    setDietFilter('');
     setShowFavoritesOnly(false);
   };
 
-  // Filter and sort recipes based on state
   const filteredRecipes = useMemo(() => {
     if (!savedRecipes) return [];
     
     let recipes = [...savedRecipes];
-
-    // 1. Filter by favorites
     if (showFavoritesOnly) {
         recipes = recipes.filter(recipe => recipe.isFavorite);
     }
-    
-    // 2. Filter by search term
     if (debouncedSearchTerm) {
       const lowerCaseSearch = debouncedSearchTerm.toLowerCase();
       recipes = recipes.filter(recipe => 
         recipe.recipeTitle.toLowerCase().includes(lowerCaseSearch)
       );
     }
-    
-    // 3. Filter by categories
     recipes = recipes.filter(recipe => {
       const courseMatch = courseFilter ? recipe.tags.course?.includes(courseFilter) : true;
       const cuisineMatch = cuisineFilter ? recipe.tags.cuisine?.includes(cuisineFilter) : true;
       const mainIngredientMatch = mainIngredientFilter ? recipe.tags.mainIngredient?.includes(mainIngredientFilter) : true;
-      const difficultyMatch = difficultyFilter ? recipe.tags.difficulty?.includes(difficultyFilter) : true;
-      return courseMatch && cuisineMatch && mainIngredientMatch && difficultyMatch;
+      const difficultyMatch = difficultyFilter ? recipe.difficulty === difficultyFilter : true;
+      const dietMatch = dietFilter ? recipe.tags.diet?.includes(dietFilter) : true;
+      return courseMatch && cuisineMatch && mainIngredientMatch && difficultyMatch && dietMatch;
     });
 
-    // 4. Sort
     switch (sortBy) {
         case 'a-z':
             recipes.sort((a, b) => a.recipeTitle.localeCompare(b.recipeTitle));
@@ -114,7 +189,7 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ focusAction, onActionHandled, a
     }
 
     return recipes;
-  }, [savedRecipes, debouncedSearchTerm, sortBy, courseFilter, cuisineFilter, mainIngredientFilter, difficultyFilter, showFavoritesOnly]);
+  }, [savedRecipes, debouncedSearchTerm, sortBy, courseFilter, cuisineFilter, mainIngredientFilter, difficultyFilter, dietFilter, showFavoritesOnly]);
 
   if (selectedRecipe) {
     return (
@@ -125,10 +200,21 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ focusAction, onActionHandled, a
     );
   }
   
-  const hasActiveFilters = searchTerm || sortBy !== 'newest' || courseFilter || cuisineFilter || mainIngredientFilter || difficultyFilter || showFavoritesOnly;
+  const hasActiveFilters = searchTerm || sortBy !== 'newest' || courseFilter || cuisineFilter || mainIngredientFilter || difficultyFilter || dietFilter || showFavoritesOnly;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-24">
+      <BulkAddToPlanModal 
+        isOpen={isBulkModalOpen}
+        onClose={() => setBulkModalOpen(false)}
+        recipeIds={selectedIds}
+        onSave={(count) => {
+            addToast(`${count} Rezepte zum Plan hinzugefügt.`);
+            setBulkModalOpen(false);
+            handleToggleSelectMode(); // Exit select mode
+        }}
+      />
+
       <div>
         <h2 className="text-3xl font-bold tracking-tight text-zinc-100">Mein Kochbuch</h2>
         <p className="text-zinc-400 mt-1">Deine Sammlung von generierten und gespeicherten Rezepten.</p>
@@ -150,7 +236,7 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ focusAction, onActionHandled, a
                   />
               </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <select onChange={e => setSortBy(e.target.value)} value={sortBy} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" aria-label="Sortieren nach">
                 <option value="newest">Sortieren: Neueste zuerst</option>
                 <option value="favorites">Sortieren: Favoriten zuerst</option>
@@ -173,26 +259,41 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ focusAction, onActionHandled, a
               <option value="">Alle Schwierigkeiten</option>
               {filterOptions.difficulties.map(d => <option key={d} value={d}>{d}</option>)}
             </select>
+             <select onChange={e => setDietFilter(e.target.value)} value={dietFilter} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" aria-label="Nach Ernährungsweise filtern">
+              <option value="">Alle Ernährungsweisen</option>
+              {filterOptions.diets.map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
           </div>
-          <div className="pt-3 border-t border-zinc-800 flex justify-between items-center">
+          <div className="pt-3 border-t border-zinc-800 flex flex-col sm:flex-row justify-between items-center gap-4">
                 <button onClick={clearFilters} disabled={!hasActiveFilters} className="flex items-center gap-2 text-sm text-amber-400 hover:text-amber-300 font-semibold disabled:text-zinc-600 disabled:cursor-not-allowed">
                     <X size={16} /> Alle Filter zurücksetzen
                 </button>
-                 <label className="flex items-center gap-2 cursor-pointer">
-                    <input 
-                        type="checkbox" 
-                        checked={showFavoritesOnly} 
-                        onChange={() => setShowFavoritesOnly(!showFavoritesOnly)}
-                        className="h-4 w-4 rounded bg-zinc-700 border-zinc-600 text-amber-500 focus:ring-amber-500"
-                    />
-                    <span className="text-zinc-300 text-sm font-medium flex items-center gap-1"><Star size={14} className="text-amber-400" /> Nur Favoriten</span>
-                </label>
+                <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                        <input 
+                            type="checkbox" 
+                            checked={showFavoritesOnly} 
+                            onChange={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                            className="h-4 w-4 rounded bg-zinc-700 border-zinc-600 text-amber-500 focus:ring-amber-500"
+                        />
+                        <span className="text-zinc-300 text-sm font-medium flex items-center gap-1"><Star size={14} className="text-amber-400" /> Nur Favoriten</span>
+                    </label>
+                     <button onClick={handleToggleSelectMode} className={`flex items-center gap-2 text-sm font-semibold py-1 px-3 rounded-md transition-colors ${isSelectMode ? 'bg-amber-500 text-zinc-900' : 'text-amber-400 hover:text-amber-300'}`}>
+                        <CheckSquare size={16} /> {isSelectMode ? 'Abbrechen' : 'Auswählen'}
+                    </button>
+                </div>
             </div>
         </div>
       )}
 
       {filteredRecipes && filteredRecipes.length > 0 ? (
-        <RecipeList recipes={filteredRecipes} onSelectRecipe={setSelectedRecipe} />
+        <RecipeList 
+            recipes={filteredRecipes} 
+            onSelectRecipe={setSelectedRecipe} 
+            isSelectMode={isSelectMode}
+            selectedIds={selectedIds}
+            onToggleSelect={handleToggleSelect}
+        />
       ) : (
         <div className="text-center py-20 bg-zinc-950/50 border border-zinc-800 rounded-lg">
           <BookOpen className="mx-auto h-12 w-12 text-zinc-600" />
@@ -208,6 +309,15 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ focusAction, onActionHandled, a
               </button>
           )}
         </div>
+      )}
+
+      {isSelectMode && selectedIds.length > 0 && (
+          <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-zinc-800/80 backdrop-blur-md border border-zinc-700 rounded-lg p-3 flex justify-between items-center w-full max-w-sm shadow-xl page-fade-in z-20">
+              <span className="font-semibold text-zinc-200">{selectedIds.length} Rezept(e) ausgewählt</span>
+              <button onClick={() => setBulkModalOpen(true)} className="flex items-center gap-2 bg-amber-500 text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-amber-400 transition-colors">
+                  <CalendarPlus size={18}/> Zum Plan
+              </button>
+          </div>
       )}
     </div>
   );

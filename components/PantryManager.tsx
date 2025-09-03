@@ -1,89 +1,101 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { db, addOrUpdatePantryItem } from '@/services/db';
+import { db, addOrUpdatePantryItem, addPantryItemsToShoppingList } from '@/services/db';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { PantryItem } from '@/types';
-import { PlusCircle, Trash2, Search, ArrowUpDown, ListTree, Filter, Check, Minus, Plus, Square, CheckSquare, Edit3, X } from 'lucide-react';
+import { PlusCircle, Trash2, Search, ArrowUpDown, ListTree, Filter, Check, Minus, Plus, Square, CheckSquare, Edit3, X, Save, ShoppingCart, Info } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
+import PantryListItem, { getExpiryStatus } from './PantryListItem';
+import { getCategoryForItem } from '@/services/utils';
 
-const getExpiryStatus = (expiryDate?: string): 'expired' | 'nearing' | 'ok' => {
-  if (!expiryDate) return 'ok';
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const expiry = new Date(expiryDate);
-  expiry.setHours(0,0,0,0);
-  const diffTime = expiry.getTime() - today.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+const DEFAULT_UNITS = ["Stück", "g", "kg", "ml", "l", "TL", "EL", "Dose", "Bund", "Zehen", "Flasche", "Packung"];
 
-  if (diffDays < 0) return 'expired';
-  if (diffDays <= 3) return 'nearing';
-  return 'ok';
-};
+// Sophisticated Add/Edit Modal Component
+const PantryItemModal: React.FC<{
+    isOpen: boolean;
+    item?: PantryItem | null;
+    onClose: () => void;
+    onSave: (item: PantryItem) => void;
+    pantryItems: PantryItem[];
+}> = ({ isOpen, item, onClose, onSave, pantryItems }) => {
+    const [formData, setFormData] = useState<Partial<PantryItem>>({});
+    const nameInputRef = useRef<HTMLInputElement>(null);
 
-interface PantryListItemProps {
-    item: PantryItem;
-    isEditing: boolean;
-    editingItem: PantryItem | null;
-    isSelectMode: boolean;
-    isSelected: boolean;
-    onStartEdit: (item: PantryItem) => void;
-    onCancelEdit: () => void;
-    onSaveEdit: () => void;
-    onUpdateEditingItem: (field: keyof PantryItem, value: any) => void;
-    onAdjustQuantity: (item: PantryItem, amount: number) => void;
-    onToggleSelect: (id: number) => void;
-}
+    const existingCategories = useMemo(() => Array.from(new Set(pantryItems.map(p => p.category).filter(Boolean))), [pantryItems]);
 
-const PantryListItem = React.memo<PantryListItemProps>(({
-    item, isEditing, editingItem, isSelectMode, isSelected,
-    onStartEdit, onCancelEdit, onSaveEdit, onUpdateEditingItem, onAdjustQuantity, onToggleSelect
-}) => {
-    if (isEditing) {
-      return (
-        <li className="p-2 sm:p-4 bg-zinc-800 border-l-4 border-amber-500 space-y-3">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <input type="text" value={editingItem!.name} onChange={e => onUpdateEditingItem('name', e.target.value)} className="w-full bg-zinc-700 col-span-2 rounded p-2 focus:ring-1 focus:ring-amber-500" />
-            <input type="number" value={editingItem!.quantity} onChange={e => onUpdateEditingItem('quantity', e.target.value)} className="w-full bg-zinc-700 rounded p-2 focus:ring-1 focus:ring-amber-500" />
-            <input type="text" value={editingItem!.unit} onChange={e => onUpdateEditingItem('unit', e.target.value)} className="w-full bg-zinc-700 rounded p-2 focus:ring-1 focus:ring-amber-500" />
-            <input type="text" value={editingItem!.category || ''} onChange={e => onUpdateEditingItem('category', e.target.value)} placeholder="Kategorie" className="w-full bg-zinc-700 col-span-2 rounded p-2 focus:ring-1 focus:ring-amber-500" list="common-categories"/>
-            <input type="date" value={editingItem!.expiryDate || ''} onChange={e => onUpdateEditingItem('expiryDate', e.target.value)} className="w-full bg-zinc-700 col-span-2 rounded p-2 focus:ring-1 focus:ring-amber-500" />
-          </div>
-          <div className="flex justify-end gap-3">
-            <button onClick={onCancelEdit} className="flex items-center gap-2 py-1 px-3 rounded bg-zinc-600 hover:bg-zinc-500"><X size={16}/> Abbrechen</button>
-            <button onClick={onSaveEdit} className="flex items-center gap-2 py-1 px-3 rounded bg-amber-500 text-zinc-900 font-bold hover:bg-amber-400"><Check size={16}/> Speichern</button>
-          </div>
-        </li>
-      );
-    }
+    useEffect(() => {
+        if (isOpen) {
+            setFormData(item ? { ...item } : { name: '', quantity: 1, unit: 'Stück', category: '', expiryDate: '', minQuantity: undefined, notes: '' });
+            setTimeout(() => nameInputRef.current?.focus(), 100);
+        }
+    }, [isOpen, item]);
     
-    const status = getExpiryStatus(item.expiryDate);
-    let itemClasses = 'p-2 sm:p-4 flex items-center gap-3 transition-all duration-300';
-    if (status === 'nearing') itemClasses += ' bg-yellow-900/20 border-l-4 border-yellow-500';
-    if (status === 'expired') itemClasses += ' bg-red-900/20 border-l-4 border-red-500 opacity-80';
+    const handleChange = (field: keyof PantryItem, value: any) => {
+        setFormData(prev => ({...prev, [field]: value}));
+    };
+    
+    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const name = e.target.value;
+        const category = getCategoryForItem(name);
+        setFormData(prev => ({ ...prev, name, category: prev.category || category }));
+    };
+
+    const handleSave = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!formData.name?.trim()) return;
+        onSave(formData as PantryItem);
+    };
+
+    if (!isOpen) return null;
 
     return (
-        <li className={`${itemClasses} group`}>
-          {isSelectMode && (
-            <button onClick={() => onToggleSelect(item.id!)} className="p-1 text-zinc-400">
-              {isSelected ? <CheckSquare className="text-amber-400"/> : <Square/>}
-            </button>
-          )}
-          <div className="flex-grow cursor-pointer" onClick={() => onStartEdit(item)}>
-            <p className="font-medium">{item.name}</p>
-            <p className="text-zinc-400 text-sm">
-              {item.expiryDate && <span>Läuft ab: {new Date(item.expiryDate).toLocaleDateString('de-DE')}</span>}
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-zinc-300">
-            <button onClick={() => onAdjustQuantity(item, -1)} className="p-1.5 rounded-full bg-zinc-700/50 hover:bg-zinc-700 transition-colors"><Minus size={14}/></button>
-            <span className="font-mono w-16 text-center">{item.quantity} {item.unit}</span>
-            <button onClick={() => onAdjustQuantity(item, 1)} className="p-1.5 rounded-full bg-zinc-700/50 hover:bg-zinc-700 transition-colors"><Plus size={14}/></button>
-          </div>
-          <button onClick={() => onStartEdit(item)} className="p-2 rounded-full text-zinc-500 opacity-0 group-hover:opacity-100 hover:bg-zinc-700 hover:text-zinc-100 transition-opacity">
-            <Edit3 size={16} />
-          </button>
-        </li>
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 page-fade-in" onClick={onClose} role="dialog" aria-modal="true">
+            <div className="bg-zinc-800 rounded-lg p-6 w-full max-w-lg shadow-xl" onClick={e => e.stopPropagation()}>
+                <h3 className="text-xl font-bold mb-6">{item ? 'Artikel bearbeiten' : 'Neuer Artikel im Vorrat'}</h3>
+                <form onSubmit={handleSave} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="sm:col-span-2">
+                           <label htmlFor="itemName" className="block text-sm font-medium text-zinc-400 mb-1">Name</label>
+                           <input id="itemName" ref={nameInputRef} type="text" value={formData.name || ''} onChange={handleNameChange} className="w-full bg-zinc-700 rounded p-2 focus:ring-2 focus:ring-amber-500" required />
+                        </div>
+                        <div>
+                           <label htmlFor="itemCategory" className="block text-sm font-medium text-zinc-400 mb-1">Kategorie</label>
+                           <input id="itemCategory" type="text" value={formData.category || ''} onChange={e => handleChange('category', e.target.value)} className="w-full bg-zinc-700 rounded p-2 focus:ring-2 focus:ring-amber-500" list="categories-list" />
+                           <datalist id="categories-list">{existingCategories.map(c => <option key={c} value={c} />)}</datalist>
+                        </div>
+                    </div>
+                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div>
+                           <label htmlFor="itemQuantity" className="block text-sm font-medium text-zinc-400 mb-1">Menge</label>
+                           <input id="itemQuantity" type="number" value={formData.quantity || ''} onChange={e => handleChange('quantity', parseFloat(e.target.value))} className="w-full bg-zinc-700 rounded p-2 focus:ring-2 focus:ring-amber-500" required min="0" step="any" />
+                        </div>
+                        <div>
+                            <label htmlFor="itemUnit" className="block text-sm font-medium text-zinc-400 mb-1">Einheit</label>
+                            <input id="itemUnit" type="text" value={formData.unit || ''} onChange={e => handleChange('unit', e.target.value)} className="w-full bg-zinc-700 rounded p-2 focus:ring-2 focus:ring-amber-500" required list="units-list"/>
+                            <datalist id="units-list">{DEFAULT_UNITS.map(u => <option key={u} value={u}/>)}</datalist>
+                        </div>
+                        <div className="col-span-2">
+                           <label htmlFor="itemExpiry" className="block text-sm font-medium text-zinc-400 mb-1">Ablaufdatum (optional)</label>
+                           <input id="itemExpiry" type="date" value={formData.expiryDate || ''} onChange={e => handleChange('expiryDate', e.target.value)} className="w-full bg-zinc-700 rounded p-2 focus:ring-2 focus:ring-amber-500" />
+                        </div>
+                    </div>
+                     <div>
+                        <label htmlFor="minQuantity" className="block text-sm font-medium text-zinc-400 mb-1">Mindestmenge (optional)</label>
+                        <input id="minQuantity" type="number" placeholder="z.B. 1" value={formData.minQuantity || ''} onChange={e => handleChange('minQuantity', parseFloat(e.target.value) || undefined)} className="w-full bg-zinc-700 rounded p-2 focus:ring-2 focus:ring-amber-500" min="0" step="any" />
+                        <p className="text-xs text-zinc-500 mt-1">Wenn die Menge darunter fällt, wird eine Warnung angezeigt.</p>
+                    </div>
+                     <div>
+                        <label htmlFor="itemNotes" className="block text-sm font-medium text-zinc-400 mb-1">Notizen (optional)</label>
+                        <textarea id="itemNotes" value={formData.notes || ''} onChange={e => handleChange('notes', e.target.value)} className="w-full bg-zinc-700 rounded p-2 focus:ring-2 focus:ring-amber-500" rows={2}></textarea>
+                    </div>
+                    <div className="flex justify-end gap-3 pt-4">
+                        <button type="button" onClick={onClose} className="py-2 px-4 rounded-md text-zinc-300 hover:bg-zinc-700">Abbrechen</button>
+                        <button type="submit" className="flex items-center gap-2 py-2 px-4 rounded bg-amber-500 text-zinc-900 font-bold hover:bg-amber-400"><Save size={16}/> Speichern</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     );
-});
+};
 
 
 interface PantryManagerProps {
@@ -94,30 +106,28 @@ interface PantryManagerProps {
 }
 
 const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, focusAction, onActionHandled, addToast }) => {
-  const [quickAddItem, setQuickAddItem] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [sortOrder, setSortOrder] = useState('name');
-  const [isGrouped, setIsGrouped] = useState(false);
+  const [isGrouped, setIsGrouped] = useState(true);
   const [expiryFilter, setExpiryFilter] = useState<'all' | 'nearing' | 'expired'>('all');
-  const [editingItem, setEditingItem] = useState<PantryItem | null>(null);
+  const [modalState, setModalState] = useState<{ isOpen: boolean; item?: PantryItem | null }>({ isOpen: false, item: null });
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   
-  const addItemInputRef = useRef<HTMLInputElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { if(initialSearchTerm) setSearchTerm(initialSearchTerm) }, [initialSearchTerm]);
   
   useEffect(() => {
     if (focusAction) {
-        if (focusAction === 'addItem' && addItemInputRef.current) addItemInputRef.current.focus();
+        if (focusAction === 'addItem') setModalState({ isOpen: true, item: null });
         else if (focusAction === 'search' && searchInputRef.current) searchInputRef.current.focus();
         onActionHandled?.();
     }
   }, [focusAction, onActionHandled]);
 
-  const pantryItems: PantryItem[] | undefined = useLiveQuery(() => db.pantry.orderBy(sortOrder).toArray(), [sortOrder]);
+  const pantryItems: PantryItem[] | undefined = useLiveQuery(() => db.pantry.orderBy('name').toArray(), []);
 
   const filteredItems = useMemo(() => {
     if (!pantryItems) return [];
@@ -127,19 +137,19 @@ const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, focusA
     }
     if (debouncedSearchTerm) {
       const lowerCaseSearch = debouncedSearchTerm.toLowerCase();
-      items = items.filter(item => item.name.toLowerCase().includes(lowerCaseSearch));
+      items = items.filter(item => item.name.toLowerCase().includes(lowerCaseSearch) || item.category?.toLowerCase().includes(lowerCaseSearch));
     }
     if (sortOrder === 'expiryDate') {
-        return items.sort((a, b) => {
+        return [...items].sort((a, b) => {
             if (!a.expiryDate) return 1;
             if (!b.expiryDate) return -1;
             return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
         });
     }
     if (sortOrder === 'createdAt') {
-        return items.sort((a, b) => b.createdAt - a.createdAt);
+        return [...items].sort((a, b) => b.createdAt - a.createdAt);
     }
-    return items;
+    return items; // Already sorted by name from query
   }, [pantryItems, debouncedSearchTerm, expiryFilter, sortOrder]);
 
   const groupedItems = useMemo(() => {
@@ -152,54 +162,19 @@ const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, focusA
     }, {} as Record<string, PantryItem[]>);
   }, [isGrouped, filteredItems]);
 
-  const parseQuickAddItem = (input: string): Omit<PantryItem, 'id' | 'createdAt'> => {
-    const defaultItem = { name: input.trim(), quantity: 1, unit: 'Stück' };
-    if (!input.trim()) return defaultItem;
-
-    const regex = /^\s*(\d+[\.,]?\d*)\s*([a-zA-ZäöüÄÖÜß]+)?\s*(.+)\s*$/;
-    const match = input.match(regex);
-
-    if (match) {
-        const [, quantityStr, unit, name] = match;
-        return {
-            quantity: parseFloat(quantityStr.replace(',', '.')) || 1,
-            unit: unit || 'Stück',
-            name: name.trim(),
-        };
-    }
-    return defaultItem;
-  };
-
-  const handleAddItem = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!quickAddItem.trim()) return;
-
-    const parsedItem = parseQuickAddItem(quickAddItem);
-    
+  const handleSaveItem = async (itemToSave: PantryItem) => {
     try {
-      const { status, item } = await addOrUpdatePantryItem(parsedItem);
-      const message = status === 'added'
-          ? `"${item.name.trim()}" hinzugefügt!`
-          : `Vorrat für "${item.name.trim()}" aktualisiert!`;
-      addToast(message);
-      setQuickAddItem('');
-    } catch (error) { 
-        addToast('Hinzufügen fehlgeschlagen.', 'error'); 
+        const { status, item } = await addOrUpdatePantryItem(itemToSave);
+        const message = status === 'added'
+            ? `"${item.name.trim()}" hinzugefügt.`
+            : `"${item.name.trim()}" aktualisiert.`;
+        addToast(message);
+        setModalState({ isOpen: false, item: null });
+    } catch (error) {
+        addToast('Speichern fehlgeschlagen.', 'error');
         console.error(error);
     }
   };
-  
-  const handleStartEdit = useCallback((item: PantryItem) => { setIsSelectMode(false); setEditingItem({ ...item }); }, []);
-  const handleCancelEdit = useCallback(() => setEditingItem(null), []);
-  const handleSaveEdit = useCallback(async () => {
-    if (!editingItem) return;
-    try {
-      await db.pantry.update(editingItem.id!, editingItem);
-      addToast(`"${editingItem.name}" aktualisiert.`);
-      setEditingItem(null);
-    } catch (error) { addToast('Speichern fehlgeschlagen.', 'error'); }
-  }, [editingItem, addToast]);
-  const handleUpdateEditingItem = useCallback((field: keyof PantryItem, value: any) => setEditingItem(prev => prev ? { ...prev, [field]: value } : null), []);
   
   const adjustQuantity = useCallback(async (item: PantryItem, amount: number) => {
     const newQuantity = item.quantity + amount;
@@ -215,6 +190,7 @@ const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, focusA
   const toggleSelectItem = useCallback((id: number) => setSelectedItems(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]), []);
   
   const toggleSelectMode = () => { setIsSelectMode(prev => !prev); setSelectedItems([]); };
+
   const handleDeleteSelected = async () => {
     if (selectedItems.length > 0 && window.confirm(`${selectedItems.length} Artikel wirklich löschen?`)) {
       await db.pantry.bulkDelete(selectedItems);
@@ -222,20 +198,27 @@ const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, focusA
       setIsSelectMode(false); setSelectedItems([]);
     }
   };
+  
+  const handleAddSelectedToShoppingList = async () => {
+    if (selectedItems.length > 0) {
+        const count = await addPantryItemsToShoppingList(selectedItems);
+        if (count > 0) {
+            addToast(`${count} Artikel zur Einkaufsliste hinzugefügt.`);
+        } else {
+            addToast("Alle ausgewählten Artikel sind bereits auf der Einkaufsliste.", "info" as any);
+        }
+        setIsSelectMode(false); setSelectedItems([]);
+    }
+  }
 
   const renderItems = (itemsToRender: PantryItem[]) => {
       return itemsToRender.map(item => (
           <PantryListItem
               key={item.id}
               item={item}
-              isEditing={editingItem?.id === item.id}
-              editingItem={editingItem}
               isSelectMode={isSelectMode}
               isSelected={selectedItems.includes(item.id!)}
-              onStartEdit={handleStartEdit}
-              onCancelEdit={handleCancelEdit}
-              onSaveEdit={handleSaveEdit}
-              onUpdateEditingItem={handleUpdateEditingItem}
+              onStartEdit={(itemToEdit) => setModalState({ isOpen: true, item: itemToEdit })}
               onAdjustQuantity={adjustQuantity}
               onToggleSelect={toggleSelectItem}
           />
@@ -245,35 +228,22 @@ const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, focusA
 
   return (
     <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight text-zinc-100">Meine Vorratskammer</h2>
-        <p className="text-zinc-400 mt-1">Verwalte deine Zutaten für intelligentere Rezeptvorschläge.</p>
-      </div>
+      <PantryItemModal isOpen={modalState.isOpen} item={modalState.item} onClose={() => setModalState({ isOpen: false, item: null })} onSave={handleSaveItem} pantryItems={pantryItems || []} />
 
-      <div className="bg-zinc-950/50 border border-zinc-800 rounded-lg p-4 sm:p-6 space-y-4">
-        <h3 className="text-lg font-semibold">Schnelleingabe</h3>
-        <form onSubmit={handleAddItem} className="flex gap-4">
-            <input 
-                id="quickAddItem" 
-                type="text" 
-                value={quickAddItem} 
-                ref={addItemInputRef} 
-                onChange={e => setQuickAddItem(e.target.value)} 
-                placeholder="z.B. 500g Mehl, 1 Bund Petersilie, Eier..." 
-                className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-amber-500" 
-                required 
-            />
-            <button type="submit" className="flex-shrink-0 flex items-center justify-center gap-2 bg-amber-500 text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-amber-400 transition-colors"><PlusCircle size={18} /> Hinzufügen</button>
-        </form>
-        <datalist id="common-units"><option value="Stück" /><option value="g" /><option value="kg" /><option value="ml" /><option value="l" /><option value="TL" /><option value="EL" /><option value="Dose" /><option value="Bund" /></datalist>
-        <datalist id="common-categories"><option value="Frischeprodukte"/><option value="Milchprodukte"/><option value="Backwaren"/><option value="Fleisch & Fisch"/><option value="Trockenwaren"/><option value="Konserven"/><option value="Gewürze"/><option value="Öle & Essige"/></datalist>
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight text-zinc-100">Meine Vorratskammer</h2>
+          <p className="text-zinc-400 mt-1">Verwalte deine Zutaten für intelligentere Rezeptvorschläge.</p>
+        </div>
+        <button onClick={() => setModalState({ isOpen: true, item: null })} className="flex-shrink-0 flex items-center justify-center gap-2 bg-amber-500 text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-amber-400 transition-colors">
+            <PlusCircle size={18} /> Neuen Artikel hinzufügen
+        </button>
       </div>
       
       <div className="space-y-4">
-         <h3 className="text-lg font-semibold">Aktueller Vorrat</h3>
-         <div className="flex flex-col md:flex-row gap-4">
+         <div className="flex flex-col md:flex-row gap-4 p-4 bg-zinc-950/50 border border-zinc-800 rounded-lg">
            <div className="relative flex-grow"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={20} /><input type="text" placeholder="Vorratskammer durchsuchen..." value={searchTerm} ref={searchInputRef} onChange={e => setSearchTerm(e.target.value)} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 pl-10 focus:ring-2 focus:ring-amber-500" /></div>
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
                <div className="relative"><select value={expiryFilter} onChange={e => setExpiryFilter(e.target.value as any)} className="appearance-none w-full md:w-auto bg-zinc-800 border-zinc-700 rounded-md py-2 pl-3 pr-8 focus:ring-2 focus:ring-amber-500"><option value="all">Alle</option><option value="nearing">Läuft bald ab</option><option value="expired">Abgelaufen</option></select><Filter className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16}/></div>
                <div className="relative"><select value={sortOrder} onChange={e => setSortOrder(e.target.value)} className="appearance-none w-full md:w-auto bg-zinc-800 border-zinc-700 rounded-md py-2 pl-3 pr-8 focus:ring-2 focus:ring-amber-500"><option value="name">Name (A-Z)</option><option value="expiryDate">Ablaufdatum</option><option value="createdAt">Hinzugefügt</option></select><ArrowUpDown className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16}/></div>
                <button onClick={() => setIsGrouped(!isGrouped)} className={`p-2 rounded-md transition-colors ${isGrouped ? 'bg-amber-500 text-zinc-900' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`} title="Nach Kategorie gruppieren"><ListTree size={20} /></button>
@@ -285,23 +255,28 @@ const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, focusA
              {isGrouped && groupedItems ? (
                 Object.entries(groupedItems).sort(([catA], [catB]) => catA.localeCompare(catB)).map(([category, items]) => (
                     <div key={category}>
-                        <h4 className="font-bold text-amber-400 bg-zinc-900 px-4 py-2 border-b border-t border-zinc-800">{category}</h4>
+                        <h4 className="font-bold text-amber-400 bg-zinc-900 px-4 py-2 border-b border-t border-zinc-800 sticky top-0 z-10">{category}</h4>
                         <ul className="divide-y divide-zinc-800">{renderItems(items)}</ul>
                     </div>
                 ))
              ) : (
                 <ul className="divide-y divide-zinc-800">
                 {filteredItems && filteredItems.length > 0 ? renderItems(filteredItems)
-                  : (<li className="p-12 text-center text-zinc-500 space-y-2"><Edit3 size={32} className="mx-auto text-zinc-600"/><h4 className="font-semibold text-zinc-400">{pantryItems?.length ? "Keine Artikel entsprechen deinen Filtern." : "Deine Vorratskammer ist leer."}</h4><p className="text-sm">{pantryItems?.length ? "Versuche, die Filter zu ändern." : "Füge oben deinen ersten Artikel hinzu!"}</p></li>)}
+                  : (<li className="p-12 text-center text-zinc-500 space-y-2"><Info size={32} className="mx-auto text-zinc-600"/><h4 className="font-semibold text-zinc-400">{pantryItems?.length ? "Keine Artikel entsprechen deinen Filtern." : "Deine Vorratskammer ist leer."}</h4><p className="text-sm">{pantryItems?.length ? "Versuche, die Filter zu ändern." : "Füge oben deinen ersten Artikel hinzu!"}</p></li>)}
                </ul>
              )}
          </div>
          {isSelectMode && (
-          <div className="sticky bottom-4 z-10 bg-zinc-800/80 backdrop-blur-md border border-zinc-700 rounded-lg p-3 flex justify-between items-center max-w-lg mx-auto shadow-xl page-fade-in">
+          <div className="sticky bottom-4 z-20 bg-zinc-800/80 backdrop-blur-md border border-zinc-700 rounded-lg p-3 flex justify-between items-center w-full max-w-lg mx-auto shadow-xl page-fade-in">
               <span className="font-medium text-zinc-200">{selectedItems.length} Artikel ausgewählt</span>
-              <button onClick={handleDeleteSelected} disabled={selectedItems.length === 0} className="flex items-center gap-2 bg-red-800/80 text-white font-bold py-2 px-4 rounded-md hover:bg-red-700 transition-colors disabled:bg-zinc-600 disabled:cursor-not-allowed">
-                  <Trash2 size={18}/> Löschen
-              </button>
+              <div className="flex gap-2">
+                <button onClick={handleAddSelectedToShoppingList} disabled={selectedItems.length === 0} className="flex items-center gap-2 bg-amber-500 text-zinc-900 font-bold py-2 px-3 rounded-md hover:bg-amber-400 transition-colors disabled:bg-zinc-600 disabled:cursor-not-allowed text-sm">
+                    <ShoppingCart size={16}/> Zur Liste
+                </button>
+                <button onClick={handleDeleteSelected} disabled={selectedItems.length === 0} className="flex items-center gap-2 bg-red-800/80 text-white font-bold py-2 px-3 rounded-md hover:bg-red-700 transition-colors disabled:bg-zinc-600 disabled:cursor-not-allowed text-sm">
+                    <Trash2 size={16}/> Löschen
+                </button>
+              </div>
           </div>
          )}
       </div>

@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 
-// FIX: Define types for the Web Speech API to resolve TypeScript errors,
-// as these are not part of the standard DOM typings.
 interface SpeechRecognitionEvent extends Event {
   readonly resultIndex: number;
   readonly results: SpeechRecognitionResultList;
@@ -49,7 +47,6 @@ interface SpeechRecognitionHook {
   error: string | null;
 }
 
-// FIX: Cast window to `any` to access non-standard properties `SpeechRecognition` and `webkitSpeechRecognition`.
 const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
 export const useSpeechRecognition = (): SpeechRecognitionHook => {
@@ -57,7 +54,6 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
   const [finalTranscript, setFinalTranscript] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
   const [error, setError] = useState<string | null>(null);
-  // FIX: Use the custom `ISpeechRecognition` interface to type the ref and avoid name collision.
   const recognitionRef = useRef<ISpeechRecognition | null>(null);
 
   useEffect(() => {

@@ -6,9 +6,11 @@ export interface PantryItem {
   expiryDate?: string;
   category?: string;
   createdAt: number;
+  minQuantity?: number; // For "running low" alerts
+  notes?: string; // For extra details like "buy organic"
 }
 
-export type Page = 'chef' | 'pantry' | 'recipes' | 'meal-planner' | 'shopping-list' | 'settings' | 'help' | 'about';
+export type Page = 'chef' | 'pantry' | 'recipes' | 'meal-planner' | 'shopping-list' | 'settings' | 'help';
 
 export interface IngredientItem {
   quantity: string;
@@ -51,8 +53,7 @@ export interface Recipe {
     occasion: string[];
     mainIngredient: string[];
     prepMethod: string[];
-    difficulty: string[];
-    totalTime: string[];
+    diet: string[];
   };
   expertTips: ExpertTip[];
   isFavorite?: boolean;
@@ -62,7 +63,9 @@ export interface MealPlanItem {
   id?: number;
   date: string; // YYYY-MM-DD
   mealType: 'Frühstück' | 'Mittagessen' | 'Abendessen';
-  recipeId: number;
+  recipeId?: number; // Optional: A meal can be a note instead of a recipe
+  note?: string; // For entries like "Eating Out" or "Leftovers"
+  servings?: number; // To override the default recipe servings for this specific meal
   isCooked?: boolean;
   cookedDate?: string;
 }
@@ -85,4 +88,16 @@ export interface AppSettings {
     preferredCuisines: string[];
     customInstruction: string;
   };
+}
+
+export interface StructuredPrompt {
+  craving: string;
+  includeIngredients: string[];
+  excludeIngredients: string[];
+  modifiers: string[];
+}
+
+export interface RecipeIdea {
+  recipeTitle: string;
+  shortDescription: string;
 }

@@ -1,15 +1,12 @@
 
-
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
-// FIX: __dirname is not available in ES modules. Use import.meta.url instead.
 import { fileURLToPath } from 'url';
 
 export default defineConfig({
   define: {
-    // FIX: Define process.env.API_KEY to make it available in client-side code, as required by Gemini service.
     'process.env.API_KEY': JSON.stringify(process.env.API_KEY),
   },
   plugins: [
@@ -21,7 +18,6 @@ export default defineConfig({
         name: 'CulinaSync',
         short_name: 'CulinaSync',
         description: 'Dein kollaborativer kulinarischer Hub für den Haushalt. Offline. Privat. Nahtlos.',
-        // FIX: Corrected invalid hex color value.
         theme_color: '#18181b',
         icons: [
           {

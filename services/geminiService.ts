@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
-import { AppSettings, PantryItem, Recipe, ShoppingListItem } from "@/types";
+import { AppSettings, PantryItem, Recipe, StructuredPrompt, ShoppingListItem, RecipeIdea } from "@/types";
 
 const API_KEY = process.env.API_KEY;
 
@@ -76,7 +76,31 @@ const recipeSchema = {
             }
         }
     },
+    propertyOrdering: [
+        "recipeTitle", "shortDescription", "prepTime", "cookTime", "totalTime",
+        "servings", "difficulty", "ingredients", "instructions",
+        "nutritionPerServing", "tags", "expertTips"
+    ],
     required: ["recipeTitle", "shortDescription", "totalTime", "servings", "difficulty", "ingredients", "instructions"]
+};
+
+const recipeIdeasSchema = {
+    type: Type.OBJECT,
+    properties: {
+        ideas: {
+            type: Type.ARRAY,
+            description: "Eine Liste von 3 unterschiedlichen, kreativen Rezeptideen.",
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    recipeTitle: { type: Type.STRING, description: "Ein kreativer und ansprechender Titel für die Rezeptidee auf Deutsch." },
+                    shortDescription: { type: Type.STRING, description: "Eine kurze, verlockende Beschreibung des Gerichts in einem Satz auf Deutsch." }
+                },
+                required: ["recipeTitle", "shortDescription"]
+            }
+        }
+    },
+    required: ["ideas"]
 };
 
 const shoppingListSchema = {
@@ -100,41 +124,98 @@ const shoppingListSchema = {
     required: ["items"]
 };
 
-export const generateRecipe = async (
-  prompt: string,
+const constructBasePrompt = (
+    prompt: StructuredPrompt,
+    pantryItems: PantryItem[],
+    aiPreferences: AppSettings['aiPreferences']
+): string => {
+  const pantryList = pantryItems.map(item => `${item.quantity} ${item.unit} ${item.name}`).join(', ') || 'leer';
+  const userPromptParts: string[] = [];
+  userPromptParts.push(`Ein Nutzer möchte etwas kochen. Hier sind die Spezifikationen:`);
+  userPromptParts.push(`- Hauptwunsch: "${prompt.craving}"`);
+
+  if (prompt.includeIngredients.length > 0) {
+      userPromptParts.push(`- Muss folgende Zutaten enthalten: ${prompt.includeIngredients.join(', ')}`);
+  }
+  if (prompt.excludeIngredients.length > 0) {
+      userPromptParts.push(`- Darf folgende Zutaten NICHT enthalten: ${prompt.excludeIngredients.join(', ')}`);
+  }
+  if (prompt.modifiers.length > 0) {
+      userPromptParts.push(`- Gewünschte Eigenschaften des Gerichts: ${prompt.modifiers.join(', ')}`);
+  }
+
+  userPromptParts.push(`\n**Globale Nutzereinstellungen, die IMMER zu beachten sind:**`);
+  if (aiPreferences.dietaryRestrictions.length > 0) {
+    userPromptParts.push(`- Zwingend erforderliche Ernährungsbeschränkungen: ${aiPreferences.dietaryRestrictions.join(', ')}.`);
+  }
+  if (aiPreferences.preferredCuisines.length > 0) {
+    userPromptParts.push(`- Bevorzugte Küchen: ${aiPreferences.preferredCuisines.join(', ')}.`);
+  }
+  if (aiPreferences.customInstruction) {
+    userPromptParts.push(`- Generelle Anweisung des Nutzers: "${aiPreferences.customInstruction}".`);
+  }
+  
+  userPromptParts.push(`\n**Verfügbare Zutaten in der Vorratskammer:**`);
+  userPromptParts.push(pantryList);
+  
+  userPromptParts.push(`\nBitte erstelle basierend auf ALL diesen Informationen eine passende, kreative Antwort.`);
+
+  return userPromptParts.join('\n');
+}
+
+export const generateRecipeIdeas = async (
+  prompt: StructuredPrompt,
   pantryItems: PantryItem[],
   aiPreferences: AppSettings['aiPreferences']
+): Promise<RecipeIdea[]> => {
+    if (!API_KEY) throw new Error("API_KEY_MISSING");
+    
+    const model = "gemini-2.5-flash";
+    const systemInstruction = `Du bist Culina, ein Weltklasse-Koch und kulinarischer Assistent. Deine Aufgabe ist es, 3 köstliche, unterschiedliche und plausible Rezeptideen auf Deutsch zu entwickeln, die genau auf die Wünsche des Nutzers zugeschnitten sind. Antworte IMMER NUR mit einem einzigen, gültigen JSON-Objekt, das dem Schema entspricht.`;
+    const fullPrompt = constructBasePrompt(prompt, pantryItems, aiPreferences);
+
+    try {
+        const response = await ai.models.generateContent({
+            model,
+            contents: fullPrompt,
+            config: { systemInstruction, responseMimeType: 'application/json', responseSchema: recipeIdeasSchema }
+        });
+        const jsonText = response.text.trim();
+        if (!jsonText) throw new Error("INVALID_RESPONSE: Empty");
+        
+        const parsedData = JSON.parse(jsonText);
+        if (parsedData.ideas && Array.isArray(parsedData.ideas) && parsedData.ideas.length > 0) {
+            return parsedData.ideas;
+        } else {
+            throw new Error("INVALID_STRUCTURE: Missing 'ideas' array.");
+        }
+    } catch (e: any) {
+        console.error("Error calling Gemini for ideas:", e);
+        if (e.message.startsWith("API_KEY")) throw e;
+        throw new Error("API_ERROR");
+    }
+};
+
+export const generateRecipe = async (
+  prompt: StructuredPrompt,
+  pantryItems: PantryItem[],
+  aiPreferences: AppSettings['aiPreferences'],
+  chosenIdea: RecipeIdea
 ): Promise<Recipe> => {
   if (!API_KEY) {
     throw new Error("API_KEY_MISSING: Gemini API key is not configured. Please set the API_KEY environment variable.");
   }
 
   const model = "gemini-2.5-flash";
-  const pantryList = pantryItems.map(item => `${item.quantity} ${item.unit} ${item.name}`).join(', ') || 'leer';
+  let fullPrompt = constructBasePrompt(prompt, pantryItems, aiPreferences);
 
-  let preferencesPrompt = '';
-  if (aiPreferences.dietaryRestrictions.length > 0) {
-    preferencesPrompt += ` Beachte zwingend folgende Ernährungsbeschränkungen: ${aiPreferences.dietaryRestrictions.join(', ')}.`;
-  }
-  if (aiPreferences.preferredCuisines.length > 0) {
-    preferencesPrompt += ` Bevorzuge Rezepte aus folgenden Küchen: ${aiPreferences.preferredCuisines.join(', ')}.`;
-  }
-  if (aiPreferences.customInstruction) {
-    preferencesPrompt += ` Beachte außerdem diese generelle Anweisung: "${aiPreferences.customInstruction}".`;
-  }
-
-
-  const fullPrompt = `
-    Du bist ein erfahrener Koch und kulinarischer Assistent für die App CulinaSync.
-    Ein Benutzer möchte etwas kochen und hat folgende Anfrage gestellt: "${prompt}".
-    ${preferencesPrompt}
-
-    Folgende Zutaten sind in der Vorratskammer verfügbar: ${pantryList}.
-
-    Deine Aufgabe ist es, ein köstliches, stimmiges und plausibles Rezept auf Deutsch zu erstellen, das hauptsächlich die verfügbaren Zutaten verwendet. Du kannst jedoch einige gängige Grundzutaten (wie Salz, Pfeffer, Wasser) hinzufügen, falls erforderlich.
-
-    Bitte generiere ein vollständiges Rezept und antworte NUR mit einem einzigen, gültigen JSON-Objekt, das dem bereitgestellten Schema entspricht. Füge keinen anderen Text, keine Markdown-Formatierung oder Erklärungen vor oder nach dem JSON-Objekt hinzu.
-  `;
+  fullPrompt += `\n\n**Spezifische Anforderung:**\nErstelle nun das VOLLSTÄNDIGE und detaillierte Rezept für die folgende, zuvor von dir vorgeschlagene Idee. Halte dich eng an Titel und Beschreibung der Idee.`;
+  fullPrompt += `\n- Titel: "${chosenIdea.recipeTitle}"`;
+  fullPrompt += `\n- Beschreibung: "${chosenIdea.shortDescription}"`;
+  
+  const systemInstruction = `Du bist Culina, ein Weltklasse-Koch und kulinarischer Assistent für die App CulinaSync. Deine Aufgabe ist es, ein köstliches, stimmiges und plausibles Rezept auf Deutsch zu erstellen, das genau auf die Wünsche des Nutzers zugeschnitten ist. Antworte IMMER NUR mit einem einzigen, gültigen JSON-Objekt, das dem bereitgestellten Schema entspricht. Füge keinen anderen Text, keine Markdown-Formatierung oder Erklärungen vor oder nach dem JSON-Objekt hinzu.`;
+  
+  console.log("Sending prompt to Gemini for full recipe:", fullPrompt);
   
   let response: GenerateContentResponse;
   try {
@@ -142,6 +223,7 @@ export const generateRecipe = async (
         model: model,
         contents: fullPrompt,
         config: {
+            systemInstruction,
             responseMimeType: 'application/json',
             responseSchema: recipeSchema,
         }
@@ -151,7 +233,6 @@ export const generateRecipe = async (
     throw new Error("API_ERROR: Failed to communicate with the AI service. It might be down, or there could be a network issue.");
   }
 
-  // FIX: More robust handling of the API response.
   const jsonText = response.text.trim();
   if (!jsonText) {
       console.error("Gemini response was empty.");
@@ -210,7 +291,6 @@ export const generateShoppingList = async (
             }
         });
         
-        // FIX: More robust handling of the API response.
         const jsonText = response.text.trim();
         if (!jsonText) {
             console.error("Gemini response for shopping list was empty.");
