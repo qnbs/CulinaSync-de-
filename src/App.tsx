@@ -224,7 +224,7 @@ const App: React.FC = () => {
           hasRecognitionSupport={hasRecognitionSupport}
           onCommandPaletteToggle={() => setCommandPaletteOpen(true)}
         />
-        <main key={currentPage} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 page-fade-in pb-20">
+        <main key={currentPage} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 page-fade-in pb-20 md:pb-8">
           <Suspense fallback={<LoadingSpinner />}>
               {renderPage()}
           </Suspense>
