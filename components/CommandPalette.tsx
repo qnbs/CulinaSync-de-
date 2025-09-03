@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, LucideProps, Milk, BookOpen } from 'lucide-react';
 
@@ -14,7 +15,6 @@ interface CommandPaletteProps {
     onClose: () => void;
     commands: Command[];
     onGlobalSearch: (type: 'pantry' | 'recipes', term: string) => void;
-    // FIX: Add missing props to align with usage in App.tsx.
     addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
     navigateToItem: (page: 'recipes' | 'pantry', id: number) => void;
 }
@@ -87,6 +87,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
                 const command = flatCommandList[activeIndex];
                 if (command) {
                     (command as any).action();
+                    onClose();
                 }
             }
         };
@@ -115,7 +116,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
 
             <div 
-                className="relative bg-zinc-900 border border-zinc-700 rounded-lg shadow-2xl w-full max-w-2xl mx-4 transform transition-all"
+                className="relative bg-zinc-900 border border-zinc-700 rounded-lg shadow-2xl w-full max-w-2xl mx-4 transform transition-all modal-fade-in"
                 onClick={e => e.stopPropagation()}
             >
                 <div className="flex items-center border-b border-zinc-700 p-3">

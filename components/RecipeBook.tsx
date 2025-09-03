@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/services/db';
@@ -171,34 +172,45 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelec
     setPantryFilter(false);
   };
 
-  const filteredRecipes = useMemo(() => {
-    if (!savedRecipes || !pantryItems) return [];
+  const filteredRecipes = useLiveQuery(async () => {
+    if (!pantryItems) return []; 
     
-    let recipes = [...savedRecipes];
+    let collection = db.recipes.toCollection();
 
+    if (showFavoritesOnly) {
+        collection = collection.filter(r => !!r.isFavorite);
+    }
+    if (courseFilter) {
+        collection = collection.and(r => r.tags.course.includes(courseFilter));
+    }
+    if (cuisineFilter) {
+        collection = collection.and(r => r.tags.cuisine.includes(cuisineFilter));
+    }
+    if (mainIngredientFilter) {
+        collection = collection.and(r => r.tags.mainIngredient.includes(mainIngredientFilter));
+    }
+    if (difficultyFilter) {
+        collection = collection.filter(r => r.difficulty === difficultyFilter);
+    }
+    if (dietFilter) {
+        collection = collection.and(r => r.tags.diet.includes(dietFilter));
+    }
+    
+    let recipes = await collection.toArray();
+    
     if(pantryFilter) {
         recipes = recipes.filter(recipe => {
             const match = checkRecipePantryMatch(recipe, pantryItems);
             return match.have === match.total;
         });
     }
-    if (showFavoritesOnly) {
-        recipes = recipes.filter(recipe => recipe.isFavorite);
-    }
+
     if (debouncedSearchTerm) {
       const lowerCaseSearch = debouncedSearchTerm.toLowerCase();
       recipes = recipes.filter(recipe => 
         recipe.recipeTitle.toLowerCase().includes(lowerCaseSearch)
       );
     }
-    recipes = recipes.filter(recipe => {
-      const courseMatch = courseFilter ? recipe.tags.course?.includes(courseFilter) : true;
-      const cuisineMatch = cuisineFilter ? recipe.tags.cuisine?.includes(cuisineFilter) : true;
-      const mainIngredientMatch = mainIngredientFilter ? recipe.tags.mainIngredient?.includes(mainIngredientFilter) : true;
-      const difficultyMatch = difficultyFilter ? recipe.difficulty === difficultyFilter : true;
-      const dietMatch = dietFilter ? recipe.tags.diet?.includes(dietFilter) : true;
-      return courseMatch && cuisineMatch && mainIngredientMatch && difficultyMatch && dietMatch;
-    });
 
     switch (sortBy) {
         case 'a-z':
@@ -217,7 +229,8 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelec
     }
 
     return recipes;
-  }, [savedRecipes, pantryItems, debouncedSearchTerm, sortBy, courseFilter, cuisineFilter, mainIngredientFilter, difficultyFilter, dietFilter, showFavoritesOnly, pantryFilter]);
+  }, [pantryItems, debouncedSearchTerm, sortBy, courseFilter, cuisineFilter, mainIngredientFilter, difficultyFilter, dietFilter, showFavoritesOnly, pantryFilter], []);
+
 
   if (selectedRecipe) {
     return (
@@ -293,7 +306,7 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelec
               {filterOptions.diets.map(d => <option key={d} value={d}>{d}</option>)}
             </select>
           </div>
-          <div className="pt-3 border-t border-zinc-800 flex flex-wrap justify-between items-center gap-4">
+          <div className="pt-3 border-t border-zinc-800 flex flex-col sm:flex-row justify-between items-center gap-4">
                 <button onClick={clearFilters} disabled={!hasActiveFilters} className="flex items-center gap-2 text-sm text-amber-400 hover:text-amber-300 font-semibold disabled:text-zinc-600 disabled:cursor-not-allowed">
                     <X size={16} /> Alle Filter zurücksetzen
                 </button>

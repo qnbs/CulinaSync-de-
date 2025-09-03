@@ -80,8 +80,6 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast })
   const [currentStep, setCurrentStep] = useState(0);
 
   const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
-  // FIX: Explicitly type the lambda parameter `p` to ensure correct type inference for `pantryMap`.
-  // FIX: Explicitly type Map to ensure correct type inference for `pantryQty`.
   const pantryMap: Map<string, number> = useMemo(() => new Map(pantryItems?.map((p: PantryItem) => [p.name.toLowerCase(), p.quantity]) || []), [pantryItems]);
   
   const originalServings = useMemo(() => parseInt(recipe.servings.match(/\d+/)?.[0] || '1', 10), [recipe.servings]);
@@ -206,7 +204,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast })
         
         <div className="flex flex-wrap gap-x-6 gap-y-4 text-zinc-300 mb-6 pb-6 border-b border-zinc-700">
             <span className="flex items-center" title="Gesamtzeit"><Clock size={18} className="mr-2 text-zinc-500" /> {currentRecipe.totalTime}</span>
-            <span className="flex items-center" title="Portionen"><Users size={18} className="mr-2 text-zinc-500" /> {currentRecipe.servings}</span>
+            <span className="flex items-center" title="Portionen"><Users size={18} className="mr-2 text-zinc-500" /> {currentServings} Person{currentServings > 1 ? 'en' : ''}</span>
             <span className="flex items-center" title="Schwierigkeit"><BarChart size={18} className="mr-2 text-zinc-500" /> {currentRecipe.difficulty}</span>
         </div>
         
@@ -250,7 +248,10 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast })
                            {status === 'have' && <span title="Im Vorrat" className="flex-shrink-0"><CheckCircle size={16} className="text-green-500 mr-2 mt-1"/></span>}
                            {status === 'low' && <span title={`Wird knapp! Du hast ${pantryQty}${item.unit}`} className="flex-shrink-0"><AlertCircle size={16} className="text-yellow-500 mr-2 mt-1"/></span>}
                            {status === 'missing' && <div className="w-4 h-4 rounded-full border-2 border-zinc-600 mr-2 mt-1 flex-shrink-0"/>}
-                           <span>{`${scaledQuantityStr || ''} ${item.unit || ''} ${item.name}`.trim()}</span>
+                           <div>
+                            <span>{`${scaledQuantityStr || ''} ${item.unit || ''} ${item.name}`.trim()}</span>
+                            {scaleFactor !== 1 && <span className="text-xs text-zinc-500 ml-2">(Original: {item.quantity} {item.unit})</span>}
+                           </div>
                         </div>
                         {status !== 'have' && <button onClick={() => handleAddSingleToShoppingList(item)} className="opacity-0 group-hover:opacity-100 transition-opacity ml-2 p-1 text-zinc-400 hover:text-amber-400" title="Zur Einkaufsliste hinzufügen"><ShoppingCartIcon size={16}/></button>}
                       </li>
