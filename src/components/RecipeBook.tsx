@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/services/db';
@@ -23,12 +24,13 @@ const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, onClose
     const handleSave = async () => {
         setIsSaving(true);
         const date = new Date(startDate);
+        // Adjust for timezone offset
         date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
 
         for (const recipeId of recipeIds) {
             const dateString = date.toISOString().split('T')[0];
             await db.mealPlan.add({ recipeId, date: dateString, mealType, isCooked: false });
-            date.setDate(date.getDate() + 1); 
+            date.setDate(date.getDate() + 1); // Increment day for the next recipe
         }
         setIsSaving(false);
         onSave(recipeIds.length);
@@ -70,17 +72,19 @@ const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, onClose
 
 interface RecipeBookProps {
     initialSearchTerm?: string;
+    initialSelectedId?: number | null;
     focusAction?: string | null;
     onActionHandled?: () => void;
     addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
-const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction, onActionHandled, addToast }) => {
+const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelectedId, focusAction, onActionHandled, addToast }) => {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
-  const allRecipes = useLiveQuery(() => db.recipes.toArray(), []);
+  const savedRecipes = useLiveQuery(() => db.recipes.toArray(), []);
   const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  // Filter & Sort states
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [sortBy, setSortBy] = useState('newest');
@@ -92,13 +96,14 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction,
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [pantryFilter, setPantryFilter] = useState(false);
 
+  // Bulk add state
   const [isSelectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [isBulkModalOpen, setBulkModalOpen] = useState(false);
 
   const handleToggleSelectMode = () => {
     setSelectMode(!isSelectMode);
-    setSelectedIds([]);
+    setSelectedIds([]); // Reset selection when toggling mode
   };
 
   const handleToggleSelect = (id: number) => {
@@ -121,15 +126,24 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction,
     }
   }, [focusAction, onActionHandled]);
 
+  useEffect(() => {
+    if (initialSelectedId && savedRecipes) {
+      const recipeToSelect = savedRecipes.find(r => r.id === initialSelectedId);
+      if (recipeToSelect) {
+        setSelectedRecipe(recipeToSelect);
+      }
+    }
+  }, [initialSelectedId, savedRecipes]);
+
   const filterOptions = useMemo(() => {
-    if (!allRecipes) return { courses: [], cuisines: [], mainIngredients: [], difficulties: [], diets: [] };
+    if (!savedRecipes) return { courses: [], cuisines: [], mainIngredients: [], difficulties: [], diets: [] };
     const courses = new Set<string>();
     const cuisines = new Set<string>();
     const mainIngredients = new Set<string>();
     const difficulties = new Set<string>();
     const diets = new Set<string>();
 
-    allRecipes.forEach(recipe => {
+    savedRecipes.forEach(recipe => {
       recipe.tags.course?.forEach(c => courses.add(c));
       recipe.tags.cuisine?.forEach(c => cuisines.add(c));
       recipe.tags.mainIngredient?.forEach(m => mainIngredients.add(m));
@@ -144,7 +158,7 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction,
       difficulties: Array.from(difficulties).sort(),
       diets: Array.from(diets).sort(),
     };
-  }, [allRecipes]);
+  }, [savedRecipes]);
 
   const clearFilters = () => {
     setSearchTerm('');
@@ -158,45 +172,61 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction,
     setPantryFilter(false);
   };
 
-  const filteredRecipes = useLiveQuery(async () => {
-    if (!pantryItems) return []; 
-    
-    let collection = db.recipes.toCollection();
-
-    if (showFavoritesOnly) {
-        collection = collection.filter(r => !!r.isFavorite);
-    }
-    if (courseFilter) collection = collection.and(r => r.tags.course.includes(courseFilter));
-    if (cuisineFilter) collection = collection.and(r => r.tags.cuisine.includes(cuisineFilter));
-    if (mainIngredientFilter) collection = collection.and(r => r.tags.mainIngredient.includes(mainIngredientFilter));
-    if (difficultyFilter) collection = collection.filter(r => r.difficulty === difficultyFilter);
-    if (dietFilter) collection = collection.and(r => r.tags.diet.includes(dietFilter));
-
-    let recipes = await collection.toArray();
-    
-    if(pantryFilter) {
-        recipes = recipes.filter(recipe => {
-            const match = checkRecipePantryMatch(recipe, pantryItems);
-            return match.have === match.total;
+  // FIX: Replaced faulty filtering logic with a correct Dexie query.
+  // The new implementation chains Dexie's .filter() method for multiple criteria,
+  // which is the correct approach for applying multiple optional filters.
+  const filteredRecipes = useLiveQuery(
+    async () => {
+      if (!pantryItems) return [];
+  
+      let collection = db.recipes.toCollection();
+  
+      if (showFavoritesOnly) collection = collection.filter(r => !!r.isFavorite);
+      if (courseFilter) collection = collection.filter(r => r.tags.course.includes(courseFilter));
+      if (cuisineFilter) collection = collection.filter(r => r.tags.cuisine.includes(cuisineFilter));
+      if (mainIngredientFilter) collection = collection.filter(r => r.tags.mainIngredient.includes(mainIngredientFilter));
+      if (difficultyFilter) collection = collection.filter(r => r.difficulty === difficultyFilter);
+      if (dietFilter) collection = collection.filter(r => r.tags.diet.includes(dietFilter));
+  
+      let recipes = await collection.toArray();
+  
+      if (pantryFilter) {
+        recipes = recipes.filter(r => {
+          const match = checkRecipePantryMatch(r, pantryItems);
+          return match.have === match.total;
         });
-    }
-
-    if (debouncedSearchTerm) {
-      const lowerCaseSearch = debouncedSearchTerm.toLowerCase();
-      recipes = recipes.filter(recipe => 
-        recipe.recipeTitle.toLowerCase().includes(lowerCaseSearch)
-      );
-    }
-
-    switch (sortBy) {
-        case 'a-z': recipes.sort((a, b) => a.recipeTitle.localeCompare(b.recipeTitle)); break;
-        case 'z-a': recipes.sort((a, b) => b.recipeTitle.localeCompare(a.recipeTitle)); break;
-        case 'favorites': recipes.sort((a, b) => (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0)); break;
-        case 'newest': default: recipes.sort((a, b) => (b.updatedAt ?? b.id ?? 0) - (a.updatedAt ?? a.id ?? 0)); break;
-    }
-
-    return recipes;
-  }, [pantryItems, debouncedSearchTerm, sortBy, courseFilter, cuisineFilter, mainIngredientFilter, difficultyFilter, dietFilter, showFavoritesOnly, pantryFilter], []);
+      }
+      if (debouncedSearchTerm) {
+        const lowerCaseSearch = debouncedSearchTerm.toLowerCase();
+        recipes = recipes.filter(r => r.recipeTitle.toLowerCase().includes(lowerCaseSearch));
+      }
+  
+      switch (sortBy) {
+        case 'a-z':
+          return recipes.sort((a, b) => a.recipeTitle.localeCompare(b.recipeTitle));
+        case 'z-a':
+          return recipes.sort((a, b) => b.recipeTitle.localeCompare(a.recipeTitle));
+        case 'favorites':
+          return recipes.sort((a, b) => (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0));
+        case 'newest':
+        default:
+          return recipes.sort((a, b) => (b.updatedAt ?? b.id ?? 0) - (a.updatedAt ?? a.id ?? 0));
+      }
+    },
+    [
+      pantryItems,
+      debouncedSearchTerm,
+      sortBy,
+      courseFilter,
+      cuisineFilter,
+      mainIngredientFilter,
+      difficultyFilter,
+      dietFilter,
+      showFavoritesOnly,
+      pantryFilter,
+    ],
+    []
+  );
 
 
   if (selectedRecipe) {
@@ -220,7 +250,7 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction,
         onSave={(count) => {
             addToast(`${count} Rezepte zum Plan hinzugefügt.`);
             setBulkModalOpen(false);
-            handleToggleSelectMode(); 
+            handleToggleSelectMode(); // Exit select mode
         }}
       />
 
@@ -229,7 +259,7 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction,
         <p className="text-zinc-400 mt-1">Deine Sammlung von generierten und gespeicherten Rezepten.</p>
       </div>
 
-      {allRecipes && allRecipes.length > 0 && (
+      {savedRecipes && savedRecipes.length > 0 && (
         <div className="space-y-4 p-4 bg-zinc-950/50 border border-zinc-800 rounded-lg">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="relative md:col-span-2">
@@ -277,7 +307,7 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction,
                 <button onClick={clearFilters} disabled={!hasActiveFilters} className="flex items-center gap-2 text-sm text-amber-400 hover:text-amber-300 font-semibold disabled:text-zinc-600 disabled:cursor-not-allowed">
                     <X size={16} /> Alle Filter zurücksetzen
                 </button>
-                <div className="flex items-center gap-4 flex-wrap justify-end">
+                <div className="flex items-center gap-4 flex-wrap justify-center sm:justify-end">
                     <label className="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" checked={pantryFilter} onChange={() => setPantryFilter(!pantryFilter)} className="h-4 w-4 rounded bg-zinc-700 border-zinc-600 text-amber-500 focus:ring-amber-500"/>
                         <span className="text-zinc-300 text-sm font-medium flex items-center gap-1"><CookingPot size={14} className="text-amber-400" /> Nur Kochbereite</span>
@@ -308,12 +338,12 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction,
             <div className="text-center py-20 bg-zinc-950/50 border border-zinc-800 rounded-lg">
                 <BookOpen className="mx-auto h-12 w-12 text-zinc-600" />
                 <h3 className="mt-4 text-lg font-medium text-zinc-300">
-                {allRecipes && allRecipes.length > 0 ? 'Keine Rezepte entsprechen deiner Suche' : 'Dein Kochbuch ist leer'}
+                {savedRecipes && savedRecipes.length > 0 ? 'Keine Rezepte entsprechen deiner Suche' : 'Dein Kochbuch ist leer'}
                 </h3>
                 <p className="mt-1 text-sm text-zinc-500 max-w-md mx-auto">
-                {allRecipes && allRecipes.length > 0 ? 'Versuche, deine Filterauswahl anzupassen oder die Suche zurückzusetzen.' : 'Gehe zum KI-Chef, generiere ein Rezept und speichere es, um es hier zu finden.'}
+                {savedRecipes && savedRecipes.length > 0 ? 'Versuche, deine Filterauswahl anzupassen oder die Suche zurückzusetzen.' : 'Gehe zum KI-Chef, generiere ein Rezept und speichere es, um es hier zu finden.'}
                 </p>
-                {allRecipes && allRecipes.length > 0 && hasActiveFilters && (
+                {savedRecipes && savedRecipes.length > 0 && hasActiveFilters && (
                     <button onClick={clearFilters} className="mt-6 flex mx-auto items-center gap-2 bg-amber-500 text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-amber-400 transition-colors">
                         <ListFilter size={18} /> Filter zurücksetzen
                     </button>
@@ -325,7 +355,7 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction,
       )}
 
       {isSelectMode && selectedIds.length > 0 && (
-          <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-zinc-800/80 backdrop-blur-md border border-zinc-700 rounded-lg p-3 flex justify-between items-center w-full max-w-sm shadow-xl page-fade-in z-20">
+          <div className="fixed bottom-20 md:bottom-4 left-1/2 -translate-x-1/2 bg-zinc-800/80 backdrop-blur-md border border-zinc-700 rounded-lg p-3 flex justify-between items-center w-full max-w-sm shadow-xl page-fade-in z-20">
               <span className="font-semibold text-zinc-200">{selectedIds.length} Rezept(e) ausgewählt</span>
               <button onClick={() => setBulkModalOpen(true)} className="flex items-center gap-2 bg-amber-500 text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-amber-400 transition-colors">
                   <CalendarPlus size={18}/> Zum Plan

@@ -172,64 +172,61 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelec
     setPantryFilter(false);
   };
 
-  const filteredRecipes = useLiveQuery(async () => {
-    if (!pantryItems) return []; 
-    
-    let collection = db.recipes.toCollection();
-
-    if (showFavoritesOnly) {
-        collection = collection.filter(r => !!r.isFavorite);
-    }
-    if (courseFilter) {
-        collection = collection.and(r => r.tags.course.includes(courseFilter));
-    }
-    if (cuisineFilter) {
-        collection = collection.and(r => r.tags.cuisine.includes(cuisineFilter));
-    }
-    if (mainIngredientFilter) {
-        collection = collection.and(r => r.tags.mainIngredient.includes(mainIngredientFilter));
-    }
-    if (difficultyFilter) {
-        collection = collection.filter(r => r.difficulty === difficultyFilter);
-    }
-    if (dietFilter) {
-        collection = collection.and(r => r.tags.diet.includes(dietFilter));
-    }
-    
-    let recipes = await collection.toArray();
-    
-    if(pantryFilter) {
-        recipes = recipes.filter(recipe => {
-            const match = checkRecipePantryMatch(recipe, pantryItems);
-            return match.have === match.total;
+  // FIX: Replaced faulty filtering logic with a correct and performant Dexie query.
+  // The new implementation chains Dexie's .filter() method for multiple criteria,
+  // which is the correct approach for applying multiple optional filters efficiently.
+  const filteredRecipes = useLiveQuery(
+    async () => {
+      if (!pantryItems) return [];
+  
+      let collection = db.recipes.toCollection();
+  
+      if (showFavoritesOnly) collection = collection.filter(r => !!r.isFavorite);
+      if (courseFilter) collection = collection.filter(r => r.tags.course.includes(courseFilter));
+      if (cuisineFilter) collection = collection.filter(r => r.tags.cuisine.includes(cuisineFilter));
+      if (mainIngredientFilter) collection = collection.filter(r => r.tags.mainIngredient.includes(mainIngredientFilter));
+      if (difficultyFilter) collection = collection.filter(r => r.difficulty === difficultyFilter);
+      if (dietFilter) collection = collection.filter(r => r.tags.diet.includes(dietFilter));
+  
+      let recipes = await collection.toArray();
+  
+      if (pantryFilter) {
+        recipes = recipes.filter(r => {
+          const match = checkRecipePantryMatch(r, pantryItems);
+          return match.have === match.total;
         });
-    }
-
-    if (debouncedSearchTerm) {
-      const lowerCaseSearch = debouncedSearchTerm.toLowerCase();
-      recipes = recipes.filter(recipe => 
-        recipe.recipeTitle.toLowerCase().includes(lowerCaseSearch)
-      );
-    }
-
-    switch (sortBy) {
+      }
+      if (debouncedSearchTerm) {
+        const lowerCaseSearch = debouncedSearchTerm.toLowerCase();
+        recipes = recipes.filter(r => r.recipeTitle.toLowerCase().includes(lowerCaseSearch));
+      }
+  
+      switch (sortBy) {
         case 'a-z':
-            recipes.sort((a, b) => a.recipeTitle.localeCompare(b.recipeTitle));
-            break;
+          return recipes.sort((a, b) => a.recipeTitle.localeCompare(b.recipeTitle));
         case 'z-a':
-            recipes.sort((a, b) => b.recipeTitle.localeCompare(a.recipeTitle));
-            break;
+          return recipes.sort((a, b) => b.recipeTitle.localeCompare(a.recipeTitle));
         case 'favorites':
-            recipes.sort((a, b) => (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0));
-            break;
+          return recipes.sort((a, b) => (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0));
         case 'newest':
         default:
-             recipes.sort((a, b) => (b.updatedAt ?? b.id ?? 0) - (a.updatedAt ?? a.id ?? 0));
-            break;
-    }
-
-    return recipes;
-  }, [pantryItems, debouncedSearchTerm, sortBy, courseFilter, cuisineFilter, mainIngredientFilter, difficultyFilter, dietFilter, showFavoritesOnly, pantryFilter], []);
+          return recipes.sort((a, b) => (b.updatedAt ?? b.id ?? 0) - (a.updatedAt ?? a.id ?? 0));
+      }
+    },
+    [
+      pantryItems,
+      debouncedSearchTerm,
+      sortBy,
+      courseFilter,
+      cuisineFilter,
+      mainIngredientFilter,
+      difficultyFilter,
+      dietFilter,
+      showFavoritesOnly,
+      pantryFilter,
+    ],
+    []
+  );
 
 
   if (selectedRecipe) {

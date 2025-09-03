@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Recipe, PantryItem, IngredientItem } from '@/types';
 import { db, addRecipe, deleteRecipe, addRecipeToMealPlan, addMissingIngredientsToShoppingList, addShoppingListItem } from '@/services/db';
@@ -203,7 +204,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast })
         
         <div className="flex flex-wrap gap-x-6 gap-y-4 text-zinc-300 mb-6 pb-6 border-b border-zinc-700">
             <span className="flex items-center" title="Gesamtzeit"><Clock size={18} className="mr-2 text-zinc-500" /> {currentRecipe.totalTime}</span>
-            <span className="flex items-center" title="Portionen"><Users size={18} className="mr-2 text-zinc-500" /> {recipe.servings}</span>
+            <span className="flex items-center" title="Portionen"><Users size={18} className="mr-2 text-zinc-500" /> {currentServings} Person{currentServings > 1 ? 'en' : ''}</span>
             <span className="flex items-center" title="Schwierigkeit"><BarChart size={18} className="mr-2 text-zinc-500" /> {currentRecipe.difficulty}</span>
         </div>
         

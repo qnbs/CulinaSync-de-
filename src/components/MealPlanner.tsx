@@ -1,13 +1,34 @@
+
 import React, { useState, useMemo, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, markMealAsCooked, removeRecipeFromMealPlan, addRecipeToMealPlan } from '@/services/db';
 import { Recipe, MealPlanItem, PantryItem } from '@/types';
-import { ChevronLeft, ChevronRight, Search, PlusCircle, ChevronsRight, FileText, Save } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, PlusCircle, FileText, Save, ChevronsRight, X as XIcon } from 'lucide-react';
 import RecipeCard from '@/components/RecipeCard';
 import RecipeDetail from '@/components/RecipeDetail';
 import { useSettings } from '@/contexts/SettingsContext';
 import PlannedMealCard from '@/components/PlannedMealCard';
 import { checkRecipePantryMatch } from '@/services/utils';
+
+const CookModeView: React.FC<{ recipe: Recipe, currentStep: number, setCurrentStep: (updater: (s: number) => number) => void, onExit: () => void }> = ({ recipe, currentStep, setCurrentStep, onExit }) => (
+    <div className="fixed inset-0 bg-zinc-950 z-[100] flex flex-col p-4 sm:p-8 text-zinc-100 font-sans">
+        <header className="flex justify-between items-center mb-4 flex-shrink-0">
+            <h3 className="text-xl font-bold text-amber-400 truncate pr-4">{recipe.recipeTitle}</h3>
+            <button onClick={onExit} className="flex items-center gap-2 py-2 px-4 rounded-md bg-zinc-800 hover:bg-zinc-700 transition-colors">
+                <XIcon size={18} /> <span className="hidden sm:inline">Kochmodus beenden</span>
+            </button>
+        </header>
+        <div className="flex-grow flex flex-col justify-center items-center text-center overflow-y-auto">
+            <p className="text-zinc-400 mb-4 font-semibold">Schritt {currentStep + 1} von {recipe.instructions.length}</p>
+            <p className="text-2xl md:text-4xl leading-relaxed max-w-4xl page-fade-in">{recipe.instructions[currentStep]}</p>
+        </div>
+        <footer className="flex justify-center items-center gap-4 pt-4 flex-shrink-0">
+            <button onClick={() => setCurrentStep(s => s - 1)} disabled={currentStep === 0} className="py-3 px-6 rounded-md bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 transition-colors">Zurück</button>
+            <span className="font-bold text-lg tabular-nums">{currentStep + 1} / {recipe.instructions.length}</span>
+            <button onClick={() => setCurrentStep(s => s + 1)} disabled={currentStep >= recipe.instructions.length - 1} className="py-3 px-6 rounded-md bg-amber-500 text-zinc-900 font-bold hover:bg-amber-400 disabled:opacity-50 transition-colors">Weiter</button>
+        </footer>
+    </div>
+);
 
 const AddMealNoteModal: React.FC<{
     date: string;
@@ -49,7 +70,6 @@ const AddMealNoteModal: React.FC<{
     );
 };
 
-// Helper to calculate pantry status for a recipe
 const getPantryStatus = (recipe: Recipe | undefined, pantryMap: Map<string, number>): { status: 'ok' | 'partial' | 'missing' | 'unknown', missing: string[], missingCount: number, totalCount: number } => {
   if (!recipe || !recipe.ingredients) return { status: 'unknown', missing: [], missingCount: 0, totalCount: 0 };
   
@@ -83,7 +103,7 @@ const RecipeSidebar = ({ recipes, pantryItems, onDragStart, isCollapsed, onToggl
     
     if (isCollapsed) {
         return (
-            <div className="bg-zinc-950/50 border-l border-zinc-800 flex flex-col items-center p-2">
+            <div className="bg-zinc-950/50 border-l border-zinc-800 flex-col items-center p-2 hidden lg:flex">
                 <button onClick={onToggle} title="Rezepte anzeigen" className="p-2 rounded-md hover:bg-zinc-700 text-zinc-400">
                     <ChevronLeft size={20} />
                 </button>
@@ -92,7 +112,7 @@ const RecipeSidebar = ({ recipes, pantryItems, onDragStart, isCollapsed, onToggl
     }
 
     return (
-        <div className="w-full md:w-1/3 lg:w-1/4 bg-zinc-950/50 border-l border-zinc-800 p-4 flex flex-col">
+        <div className="hidden lg:flex w-full lg:w-1/3 xl:w-1/4 bg-zinc-950/50 border-l border-zinc-800 p-4 flex-col flex-shrink-0">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold">Rezepte ziehen</h3>
               <button onClick={onToggle} title="Seitenleiste einklappen" className="p-2 rounded-md hover:bg-zinc-700 text-zinc-400">
@@ -104,15 +124,16 @@ const RecipeSidebar = ({ recipes, pantryItems, onDragStart, isCollapsed, onToggl
                 <input type="text" placeholder="Suchen..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full bg-zinc-800 border-zinc-700 rounded-md py-2 pl-10 pr-3 text-sm focus:ring-2 focus:ring-amber-500" />
             </div>
             <div className="overflow-y-auto flex-grow pr-2 -mr-2 space-y-3">
-                {filteredRecipes.map(recipe => (
+                {(filteredRecipes && filteredRecipes.length > 0 && pantryItems) ? filteredRecipes.map(recipe => (
                     <div key={recipe.id} draggable onDragStart={(e) => onDragStart(e, recipe)} className="cursor-grab">
                         <RecipeCard recipe={recipe} size="small" pantryMatch={checkRecipePantryMatch(recipe, pantryItems)} />
                     </div>
-                ))}
+                )) : <p className="text-sm text-zinc-500 text-center py-4">Keine Rezepte gefunden.</p>}
             </div>
         </div>
     );
 };
+
 
 interface MealPlannerProps {
     addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
@@ -122,7 +143,6 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ addToast }) => {
   const { settings } = useSettings();
   const weekStartsOnMonday = settings.weekStart === 'Monday';
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const recipes = useLiveQuery(() => db.recipes.toArray(), []);
   const mealPlanItems = useLiveQuery(() => db.mealPlan.toArray(), []);
@@ -131,7 +151,11 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ addToast }) => {
   const [selectedRecipeForDetail, setSelectedRecipeForDetail] = useState<Recipe | null>(null);
   const [dropTarget, setDropTarget] = useState<{ date: string; mealType: string } | null>(null);
   const [noteModalState, setNoteModalState] = useState<{isOpen: boolean; date: string; mealType: string} | null>(null);
-  
+  const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isCookMode, setIsCookMode] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [recipeForCookMode, setRecipeForCookMode] = useState<Recipe | null>(null);
+
   const pantryMap: Map<string, number> = useMemo(() => new Map(pantryItems?.map((p: PantryItem) => [p.name.toLowerCase(), p.quantity]) || []), [pantryItems]);
   const recipesById = useMemo(() => new Map<number, Recipe>(recipes?.map(r => [r.id!, r]) || []), [recipes]);
   
@@ -158,7 +182,7 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ addToast }) => {
       return acc;
     }, {} as Record<string, MealPlanItem>);
   }, [mealPlanItems]);
-
+  
   const handleDragStart = (e: React.DragEvent, recipe: Recipe) => {
     e.dataTransfer.setData('recipeId', recipe.id!.toString());
   };
@@ -175,6 +199,11 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ addToast }) => {
   const handleMealAction = useCallback(async (action: string, payload: any) => {
     switch (action) {
         case 'view': setSelectedRecipeForDetail(payload); break;
+        case 'cook':
+            setRecipeForCookMode(payload);
+            setCurrentStep(0);
+            setIsCookMode(true);
+            break;
         case 'cooked': {
             const { success, changes } = await markMealAsCooked(payload.id!);
             if (success) {
@@ -216,7 +245,8 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ addToast }) => {
   }
 
   return (
-    <div className="flex h-[calc(100vh-10rem)]">
+    <div className="flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-8rem-2rem)] pb-16 lg:pb-0">
+         {isCookMode && recipeForCookMode && <CookModeView recipe={recipeForCookMode} currentStep={currentStep} setCurrentStep={setCurrentStep} onExit={() => setIsCookMode(false)} />}
          {noteModalState?.isOpen && (
             <AddMealNoteModal
                 date={noteModalState.date}
@@ -225,68 +255,72 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ addToast }) => {
                 onSave={(note) => handleSaveNote(note, noteModalState.date, noteModalState.mealType)}
             />
         )}
-        <div className="flex-grow flex flex-col space-y-4 overflow-y-auto pr-4">
-            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+
+        <div className="flex-grow flex flex-col space-y-4 overflow-hidden">
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 flex-shrink-0">
                 <div>
-                <h2 className="text-3xl font-bold tracking-tight text-zinc-100">Essensplaner</h2>
-                <p className="text-zinc-400 mt-1">Plane Mahlzeiten per Drag & Drop oder füge Notizen hinzu.</p>
+                    <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">Essensplaner</h2>
+                    <p className="text-zinc-400 mt-1">Plane Mahlzeiten per Drag & Drop oder füge Notizen hinzu.</p>
                 </div>
             </div>
 
-            <div className="flex items-center justify-between p-2 bg-zinc-950/50 border border-zinc-800 rounded-lg">
+            <div className="flex items-center justify-between p-2 bg-zinc-950/50 border border-zinc-800 rounded-lg flex-shrink-0">
                 <button onClick={() => setCurrentDate(d => new Date(d.setDate(d.getDate() - 7)))} className="p-2 rounded-md hover:bg-zinc-700"><ChevronLeft/></button>
-                <div className="flex items-center gap-4">
-                  <h3 className="font-semibold text-lg text-zinc-100 tabular-nums">{weekString}</h3>
+                <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-4 text-center">
+                  <h3 className="font-semibold text-base sm:text-lg text-zinc-100 tabular-nums">{weekString}</h3>
                   <button onClick={() => setCurrentDate(new Date())} className="text-sm font-semibold py-1 px-3 rounded-md bg-zinc-700 hover:bg-zinc-600 text-amber-300">Heute</button>
                 </div>
                 <button onClick={() => setCurrentDate(d => new Date(d.setDate(d.getDate() + 7)))} className="p-2 rounded-md hover:bg-zinc-700"><ChevronRight/></button>
             </div>
        
-            <div className="grid grid-cols-1 md:grid-cols-7 gap-px bg-zinc-800 border border-zinc-800 rounded-lg overflow-hidden">
-                {week.map(date => {
-                    const dateString = date.toISOString().split('T')[0];
-                    const today = isToday(date);
-                    return (
-                        <div key={dateString} className={`flex flex-col ${today ? 'bg-zinc-800/50' : 'bg-zinc-900'}`}>
-                            <div className={`text-center py-2 font-semibold text-sm border-b border-zinc-800 ${today ? 'text-amber-400' : 'text-zinc-300'}`}>
-                                <div>{date.toLocaleDateString('de-DE', { weekday: 'short' })}</div>
-                                <div className="text-xs text-zinc-400">{date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}</div>
-                            </div>
-                            <div className="flex flex-col gap-px">
-                                {(['Frühstück', 'Mittagessen', 'Abendessen'] as const).map(mealType => {
-                                    const meal = mealsByDate[`${dateString}-${mealType}`];
-                                    const recipe = meal?.recipeId ? recipesById.get(meal.recipeId) : undefined;
-                                    const isDropTarget = dropTarget?.date === dateString && dropTarget.mealType === mealType;
-                                    return (
-                                        <div 
-                                            key={mealType} 
-                                            className={`p-2 min-h-[120px] flex flex-col justify-start transition-colors group ${isDropTarget ? 'bg-amber-500/20' : ''}`}
-                                            onDragOver={e => { e.preventDefault(); setDropTarget({ date: dateString, mealType }); }}
-                                            onDragLeave={() => setDropTarget(null)}
-                                            onDrop={handleDrop}
-                                        >
-                                            <span className="text-xs text-zinc-500">{mealType}</span>
-                                            {meal ? <PlannedMealCard meal={meal} recipe={recipe} pantryStatus={getPantryStatus(recipe, pantryMap)} onAction={handleMealAction} />
-                                            : <div className="w-full h-full flex items-center justify-center text-zinc-600 rounded-md ">
-                                                <button onClick={() => setNoteModalState({ isOpen: true, date: dateString, mealType })} title="Notiz hinzufügen" className="opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-full hover:bg-zinc-700/50 hover:text-amber-400">
-                                                    <PlusCircle size={20}/>
-                                                </button>
-                                              </div>}
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        </div>
-                    )
-                })}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden flex-grow flex flex-col">
+                <div className="flex overflow-x-auto lg:grid lg:grid-cols-7 gap-px flex-grow">
+                  {week.map(date => {
+                      const dateString = date.toISOString().split('T')[0];
+                      const today = isToday(date);
+                      return (
+                          <div key={dateString} className={`flex flex-col w-4/5 min-w-[280px] sm:min-w-[320px] lg:w-auto lg:min-w-0 flex-shrink-0 ${today ? 'bg-zinc-800/50' : 'bg-zinc-900'}`}>
+                              <div className={`text-center py-2 font-semibold text-sm border-b border-zinc-800 ${today ? 'text-amber-400' : 'text-zinc-300'}`}>
+                                  <div>{date.toLocaleDateString('de-DE', { weekday: 'short' })}</div>
+                                  <div className="text-xs text-zinc-400">{date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}</div>
+                              </div>
+                              <div className="flex flex-col gap-px flex-grow">
+                                  {(['Frühstück', 'Mittagessen', 'Abendessen'] as const).map(mealType => {
+                                      const meal = mealsByDate[`${dateString}-${mealType}`];
+                                      const recipe = meal?.recipeId ? recipesById.get(meal.recipeId) : undefined;
+                                      const isDropTarget = dropTarget?.date === dateString && dropTarget.mealType === mealType;
+                                      return (
+                                          <div 
+                                              key={mealType} 
+                                              className={`p-2 min-h-[120px] flex flex-col justify-start transition-colors group flex-grow ${isDropTarget ? 'bg-amber-500/20' : ''}`}
+                                              onDragOver={e => { e.preventDefault(); setDropTarget({ date: dateString, mealType }); }}
+                                              onDragLeave={() => setDropTarget(null)}
+                                              onDrop={handleDrop}
+                                          >
+                                              <span className="text-xs text-zinc-500">{mealType}</span>
+                                              {meal ? <PlannedMealCard meal={meal} recipe={recipe} pantryStatus={getPantryStatus(recipe, pantryMap)} onAction={handleMealAction} />
+                                              : <div className="w-full h-full flex items-center justify-center text-zinc-600 rounded-md ">
+                                                  <button onClick={() => setNoteModalState({ isOpen: true, date: dateString, mealType })} title="Notiz hinzufügen" className="opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-full hover:bg-zinc-700/50 hover:text-amber-400">
+                                                      <PlusCircle size={20}/>
+                                                  </button>
+                                                </div>}
+                                          </div>
+                                      )
+                                  })}
+                              </div>
+                          </div>
+                      )
+                  })}
+                </div>
             </div>
         </div>
-        <RecipeSidebar 
-            recipes={recipes || []} 
-            pantryItems={pantryItems || []} 
-            onDragStart={handleDragStart} 
-            isCollapsed={isSidebarCollapsed}
-            onToggle={() => setSidebarCollapsed(prev => !prev)}
+        
+        <RecipeSidebar
+          recipes={recipes || []}
+          pantryItems={pantryItems || []}
+          onDragStart={handleDragStart}
+          isCollapsed={isSidebarCollapsed}
+          onToggle={() => setSidebarCollapsed(prev => !prev)}
         />
     </div>
   );
