@@ -10,6 +10,7 @@ import { addShoppingListItem, addOrUpdatePantryItem, removeItemFromPantry } from
 import VoiceControlUI from '@/components/VoiceControlUI';
 import { CheckCircle, Bot, Milk, BookOpen, CalendarDays, ShoppingCart, Settings as SettingsIcon, HelpCircle, PlusCircle, Search, RefreshCw, Trash2, Download, Upload, TerminalSquare, Mic, AlertTriangle, Info, X } from 'lucide-react';
 import { SettingsProvider } from '@/contexts/SettingsContext';
+import BottomNav from '@/components/BottomNav';
 
 // Lazy load page components for code splitting and faster initial load
 const AiChef = lazy(() => import('@/components/AiChef'));
@@ -224,11 +225,13 @@ const App: React.FC = () => {
           hasRecognitionSupport={hasRecognitionSupport}
           onCommandPaletteToggle={() => setCommandPaletteOpen(true)}
         />
-        <main key={currentPage} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 page-fade-in">
+        <main key={currentPage} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 page-fade-in pb-24">
           <Suspense fallback={<LoadingSpinner />}>
               {renderPage()}
           </Suspense>
         </main>
+        
+        <BottomNav currentPage={currentPage} setCurrentPage={navigate} />
 
         <CommandPalette 
           isOpen={isCommandPaletteOpen}

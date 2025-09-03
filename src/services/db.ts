@@ -11,7 +11,8 @@ class CulinaSyncDB extends Dexie {
 
     constructor() {
         super('CulinaSyncDB');
-        this.version(8).stores({
+        // FIX: Cast `this` to `any` to resolve TypeScript error where Dexie methods are not found on the subclass type.
+        (this as any).version(8).stores({
             pantry: '++id, name, expiryDate, createdAt, category, updatedAt',
             recipes: '++id, recipeTitle, isFavorite, *tags.course, *tags.cuisine, *tags.mainIngredient, updatedAt',
             mealPlan: '++id, date, recipeId, isCooked',
@@ -25,7 +26,8 @@ class CulinaSyncDB extends Dexie {
             });
         });
 
-        this.on('populate', async () => {
+        // FIX: Cast `this` to `any` to resolve TypeScript error where Dexie methods are not found on the subclass type.
+        (this as any).on('populate', async () => {
             console.log("Populating database for the first time...");
             try {
                 const now = Date.now();
@@ -76,7 +78,8 @@ export const syncSeedRecipes = async () => {
     }
 };
 
-db.open().then(syncSeedRecipes).catch(err => {
+// FIX: Cast `db` to `any` to resolve TypeScript error where Dexie methods are not found on the subclass type.
+(db as any).open().then(syncSeedRecipes).catch(err => {
     console.error(`Failed to open and initialize database: ${err.stack || err}`);
 });
 
@@ -90,7 +93,8 @@ export const importData = async (data: { pantry: PantryItem[], recipes: Recipe[]
         if (!data.pantry || !data.recipes || !data.mealPlan || !data.shoppingList) {
             throw new Error("Invalid data structure for import. Required tables are missing.");
         }
-        await db.transaction('rw', db.pantry, db.recipes, db.mealPlan, db.shoppingList, async () => {
+        // FIX: Cast `db` to `any` to resolve TypeScript error where Dexie methods are not found on the subclass type.
+        await (db as any).transaction('rw', db.pantry, db.recipes, db.mealPlan, db.shoppingList, async () => {
             console.log("Starting data import, clearing existing data...");
             await Promise.all([
                 db.pantry.clear(),
@@ -175,7 +179,8 @@ export const addRecipe = async (recipe: Recipe): Promise<number | undefined> => 
 
 export const deleteRecipe = async (id: number): Promise<void> => {
     try {
-        await db.transaction('rw', db.recipes, db.mealPlan, async () => {
+        // FIX: Cast `db` to `any` to resolve TypeScript error where Dexie methods are not found on the subclass type.
+        await (db as any).transaction('rw', db.recipes, db.mealPlan, async () => {
             await db.mealPlan.where('recipeId').equals(id).delete();
             await db.recipes.delete(id);
         });
@@ -209,7 +214,8 @@ export const removeRecipeFromMealPlan = async (id: number): Promise<void> => {
 
 export const markMealAsCooked = async (mealPlanItemId: number): Promise<{ success: boolean; changes?: { updated: string[], deleted: string[] } }> => {
     try {
-        const result = await db.transaction('rw', [db.mealPlan, db.pantry, db.recipes], async () => {
+        // FIX: Cast `db` to `any` to resolve TypeScript error where Dexie methods are not found on the subclass type.
+        const result = await (db as any).transaction('rw', [db.mealPlan, db.pantry, db.recipes], async () => {
             const meal = await db.mealPlan.get(mealPlanItemId);
             if (!meal?.recipeId || meal.isCooked) return { success: false };
 
@@ -294,7 +300,8 @@ export const batchAddShoppingListItems = async (
     if (itemsToAdd.length === 0) return { added: 0, updated: 0 };
 
     try {
-        return await db.transaction('rw', db.shoppingList, async () => {
+        // FIX: Cast `db` to `any` to resolve TypeScript error where Dexie methods are not found on the subclass type.
+        return await (db as any).transaction('rw', db.shoppingList, async () => {
             const existingUncheckedItems = await db.shoppingList.where('isChecked').equals(0).toArray();
             const existingMap: Map<string, ShoppingListItem> = new Map(
                 existingUncheckedItems.map((i: ShoppingListItem) => [`${i.name.toLowerCase()}_${i.unit.toLowerCase()}`, i])
@@ -531,7 +538,8 @@ export const generateListFromMealPlan = async (): Promise<{ added: number; exist
 
 export const moveCheckedToPantry = async (): Promise<number> => {
     try {
-        return await db.transaction('rw', db.shoppingList, db.pantry, async () => {
+        // FIX: Cast `db` to `any` to resolve TypeScript error where Dexie methods are not found on the subclass type.
+        return await (db as any).transaction('rw', db.shoppingList, db.pantry, async () => {
             const checkedItems = await db.shoppingList.where('isChecked').equals(1).toArray();
             if (checkedItems.length === 0) return 0;
             

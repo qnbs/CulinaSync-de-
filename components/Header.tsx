@@ -18,8 +18,6 @@ const navItems = [
   { id: 'recipes', label: 'Rezepte', icon: BookOpen },
   { id: 'meal-planner', label: 'Essensplaner', icon: CalendarDays },
   { id: 'shopping-list', label: 'Einkaufsliste', icon: ShoppingCart },
-  { id: 'settings', label: 'Einstellungen', icon: Settings },
-  { id: 'help', label: 'Hilfe', icon: HelpCircle },
 ];
 
 const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, isListening, startListening, stopListening, hasRecognitionSupport, onCommandPaletteToggle }) => {
@@ -60,27 +58,52 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, isListenin
                 <Mic className="h-5 w-5" />
               </button>
             )}
-            {navItems.map((item) => {
-              const isIconOnly = item.id === 'settings' || item.id === 'help';
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setCurrentPage(item.id as Page)}
-                  title={item.label}
-                  className={`flex items-center py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                    isIconOnly ? 'px-2' : 'space-x-2 px-2 sm:px-3'
-                  } ${
-                    currentPage === item.id
-                      ? 'bg-amber-500 text-zinc-900'
-                      : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100'
-                  }`}
-                  aria-current={currentPage === item.id ? 'page' : undefined}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {!isIconOnly && <span className="hidden md:inline">{item.label}</span>}
-                </button>
-              );
-            })}
+             {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-1 sm:space-x-2">
+              {navItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setCurrentPage(item.id as Page)}
+                    title={item.label}
+                    className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                      currentPage === item.id
+                        ? 'bg-amber-500 text-zinc-900'
+                        : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100'
+                    }`}
+                    aria-current={currentPage === item.id ? 'page' : undefined}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    <span className="hidden lg:inline">{item.label}</span>
+                  </button>
+              ))}
+            </div>
+            {/* Mobile Settings/Help */}
+             <button
+                key="settings"
+                onClick={() => setCurrentPage('settings')}
+                title="Einstellungen"
+                className={`flex items-center p-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                  currentPage === 'settings'
+                    ? 'bg-amber-500 text-zinc-900'
+                    : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100'
+                }`}
+                aria-current={currentPage === 'settings' ? 'page' : undefined}
+              >
+                <Settings className="h-5 w-5" />
+              </button>
+               <button
+                key="help"
+                onClick={() => setCurrentPage('help')}
+                title="Hilfe"
+                className={`flex items-center p-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                  currentPage === 'help'
+                    ? 'bg-amber-500 text-zinc-900'
+                    : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100'
+                }`}
+                aria-current={currentPage === 'help' ? 'page' : undefined}
+              >
+                <HelpCircle className="h-5 w-5" />
+              </button>
           </div>
         </div>
       </nav>
