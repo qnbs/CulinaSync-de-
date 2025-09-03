@@ -6,7 +6,7 @@ import RecipeDetail from '@/components/RecipeDetail';
 import { Sparkles, LoaderCircle, AlertTriangle, Sandwich, BrainCircuit, HeartPulse, Zap, Users, RotateCcw, Wand2, ChefHat, Megaphone, Leaf, PlusCircle, MinusCircle, Redo, ChevronDown, List } from 'lucide-react';
 import { loadSettings } from '@/services/settingsService';
 import { useLiveQuery } from 'dexie-react-hooks';
-import TagInput from '@/components/TagInput';
+import TagInput from './TagInput';
 
 const MODIFIER_OPTIONS = [
     { label: 'Schnell (< 30 Min)', icon: Zap },

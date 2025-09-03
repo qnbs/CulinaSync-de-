@@ -14,6 +14,9 @@ interface CommandPaletteProps {
     onClose: () => void;
     commands: Command[];
     onGlobalSearch: (type: 'pantry' | 'recipes', term: string) => void;
+    // FIX: Add missing props to align with usage in App.tsx.
+    addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
+    navigateToItem: (page: 'recipes' | 'pantry', id: number) => void;
 }
 
 const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, commands, onGlobalSearch }) => {

@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import Header from '@/components/Header';
 import CommandPalette, { Command } from '@/components/CommandPalette';
@@ -38,6 +39,7 @@ const App: React.FC = () => {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [isCommandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [focusAction, setFocusAction] = useState<string | null>(null);
+  const [initialSelectedId, setInitialSelectedId] = useState<number | null>(null);
   const [appVersion, setAppVersion] = useState<string>('');
 
   useEffect(() => {
@@ -72,9 +74,16 @@ const App: React.FC = () => {
   
   const navigate = useCallback((page: Page, focusTarget?: string) => {
     setCurrentPage(page);
+    setInitialSelectedId(null);
     if (focusTarget) {
       setFocusAction(focusTarget);
     }
+  }, []);
+
+  const navigateToItem = useCallback((page: 'recipes' | 'pantry', id: number) => {
+    setInitialSelectedId(id);
+    setCurrentPage(page);
+    setCommandPaletteOpen(false);
   }, []);
 
   useEffect(() => {
@@ -83,13 +92,13 @@ const App: React.FC = () => {
         const action = processCommand(finalTranscript, currentPage);
         
         if (action.type === 'NAVIGATE') {
-            setCurrentPage(action.payload);
+            navigate(action.payload);
             addToast(`Navigiere zu: ${action.payload.charAt(0).toUpperCase() + action.payload.slice(1)}`);
         } else if (action.type === 'ADD_SHOPPING_ITEM') {
             addShoppingListItem(action.payload).then(() => {
                 addToast(`"${action.payload.name}" zur Einkaufsliste hinzugefügt.`);
                 if (currentPage !== 'shopping-list') {
-                  setCurrentPage('shopping-list');
+                  navigate('shopping-list');
                 }
             });
         } else if (action.type === 'ADD_PANTRY_ITEM') {
@@ -99,7 +108,7 @@ const App: React.FC = () => {
                     : `Vorrat für "${item.name}" aktualisiert.`;
                  addToast(message);
                  if (currentPage !== 'pantry') {
-                    setCurrentPage('pantry');
+                    navigate('pantry');
                  }
             });
         } else if (action.type === 'REMOVE_PANTRY_ITEM') {
@@ -110,7 +119,7 @@ const App: React.FC = () => {
                     addToast(`"${action.payload}" nicht im Vorrat gefunden.`, "error");
                 }
                 if (currentPage !== 'pantry') {
-                    setCurrentPage('pantry');
+                    navigate('pantry');
                 }
             });
         }
@@ -120,7 +129,7 @@ const App: React.FC = () => {
             addToast("Befehl nicht erkannt.", "error");
         }
     }
-  }, [finalTranscript, currentPage, addToast]);
+  }, [finalTranscript, currentPage, addToast, navigate]);
   
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -143,11 +152,8 @@ const App: React.FC = () => {
     { id: 'nav-help', title: 'Gehe zur Hilfe', section: 'Navigation', icon: HelpCircle, action: () => navigate('help') },
     
     { id: 'pantry-add', title: 'Neuen Artikel zum Vorrat hinzufügen', section: 'Vorratskammer', icon: PlusCircle, action: () => navigate('pantry', 'addItem') },
-    { id: 'pantry-search', title: 'Vorrat durchsuchen', section: 'Vorratskammer', icon: Search, action: () => navigate('pantry', 'search') },
     
     { id: 'chef-generate', title: 'Neues Rezept generieren', section: 'KI-Chef', icon: Bot, action: () => navigate('chef', 'prompt') },
-
-    { id: 'recipe-search', title: 'Rezepte durchsuchen', section: 'Kochbuch', icon: Search, action: () => navigate('recipes', 'search') },
 
     { id: 'shopping-add', title: 'Artikel zur Einkaufsliste hinzufügen', section: 'Einkaufsliste', icon: PlusCircle, action: () => navigate('shopping-list', 'addItem') },
     { id: 'shopping-generate', title: 'Einkaufsliste aus Plan generieren', section: 'Einkaufsliste', icon: RefreshCw, action: () => navigate('shopping-list', 'generate') },
@@ -157,7 +163,6 @@ const App: React.FC = () => {
     { id: 'data-import', title: 'Daten importieren', section: 'Daten', icon: Upload, action: () => navigate('settings', 'import') },
     
     { id: 'voice-toggle', title: 'Sprachsteuerung umschalten', section: 'Global', icon: Mic, action: () => isListening ? stopListening() : startListening() },
-    { id: 'cmd-palette', title: 'Befehlspalette öffnen', section: 'Global', icon: TerminalSquare, action: () => setCommandPaletteOpen(true) },
   ];
 
   const onCommandPaletteClose = useCallback(() => {
@@ -165,8 +170,9 @@ const App: React.FC = () => {
   }, []);
 
   const handleGlobalSearch = useCallback((type: 'pantry' | 'recipes', term: string) => {
+    setInitialSelectedId(null);
     setCurrentPage(type);
-    setVoiceAction({ type: 'SEARCH', payload: term });
+    setVoiceAction({ type: 'SEARCH', payload: `${term}#${Date.now()}` });
     onCommandPaletteClose();
   }, [onCommandPaletteClose]);
 
@@ -181,6 +187,7 @@ const App: React.FC = () => {
         case 'pantry':
             return <PantryManager 
                         initialSearchTerm={voiceAction?.type === 'SEARCH' ? voiceAction.payload : undefined}
+                        initialSelectedId={initialSelectedId}
                         {...pageProps}
                     />;
         case 'chef':
@@ -190,6 +197,7 @@ const App: React.FC = () => {
                     />;
         case 'recipes': return <RecipeBook 
                                     initialSearchTerm={voiceAction?.type === 'SEARCH' ? voiceAction.payload : undefined} 
+                                    initialSelectedId={initialSelectedId}
                                     {...pageProps} 
                                 />;
         case 'meal-planner': return <MealPlanner {...pageProps} />;
@@ -206,10 +214,10 @@ const App: React.FC = () => {
 
   return (
     <SettingsProvider>
-      <div className="min-h-screen bg-zinc-900 text-zinc-100">
+      <div className="min-h-screen text-zinc-200">
         <Header 
           currentPage={currentPage} 
-          setCurrentPage={setCurrentPage}
+          setCurrentPage={navigate}
           isListening={isListening}
           startListening={startListening}
           stopListening={stopListening}
@@ -226,16 +234,18 @@ const App: React.FC = () => {
           isOpen={isCommandPaletteOpen}
           onClose={onCommandPaletteClose}
           commands={commands}
+          addToast={addToast}
+          navigateToItem={navigateToItem}
           onGlobalSearch={handleGlobalSearch}
         />
 
         <VoiceControlUI isListening={isListening} transcript={interimTranscript} />
-        {speechError && <div className="fixed bottom-16 sm:bottom-4 right-4 bg-red-800 text-white p-3 rounded-lg shadow-lg z-50 max-w-sm">{speechError}</div>}
+        {speechError && <div className="fixed bottom-16 sm:bottom-4 right-4 bg-red-800/80 backdrop-blur-md text-white p-3 rounded-lg shadow-lg z-50 max-w-sm">{speechError}</div>}
         
         <div aria-live="assertive" className="fixed inset-0 flex items-end px-4 py-6 pointer-events-none sm:p-6 sm:items-start z-50">
             <div className="w-full flex flex-col items-center space-y-4 sm:items-end">
                 {toasts.map((toast) => (
-                    <div key={toast.id} className="max-w-sm w-full bg-zinc-800 shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden page-fade-in">
+                    <div key={toast.id} className="max-w-sm w-full bg-zinc-800/80 backdrop-blur-md shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden page-fade-in">
                         <div className="p-4">
                             <div className="flex items-start">
                                 <div className="flex-shrink-0">
@@ -247,7 +257,7 @@ const App: React.FC = () => {
                                     <p className="text-sm font-medium text-zinc-100">{toast.message}</p>
                                 </div>
                                 <div className="ml-4 flex-shrink-0 flex">
-                                    <button onClick={() => removeToast(toast.id)} className="bg-zinc-800 rounded-md inline-flex text-zinc-400 hover:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
+                                    <button onClick={() => removeToast(toast.id)} className="bg-transparent rounded-md inline-flex text-zinc-400 hover:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 focus:ring-offset-zinc-800">
                                         <span className="sr-only">Schließen</span>
                                         <X className="h-5 w-5" />
                                     </button>

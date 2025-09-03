@@ -166,11 +166,11 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction,
     if (showFavoritesOnly) {
         collection = collection.filter(r => !!r.isFavorite);
     }
-    if (courseFilter) collection = collection.filter(r => r.tags.course.includes(courseFilter));
-    if (cuisineFilter) collection = collection.filter(r => r.tags.cuisine.includes(cuisineFilter));
-    if (mainIngredientFilter) collection = collection.filter(r => r.tags.mainIngredient.includes(mainIngredientFilter));
+    if (courseFilter) collection = collection.and(r => r.tags.course.includes(courseFilter));
+    if (cuisineFilter) collection = collection.and(r => r.tags.cuisine.includes(cuisineFilter));
+    if (mainIngredientFilter) collection = collection.and(r => r.tags.mainIngredient.includes(mainIngredientFilter));
     if (difficultyFilter) collection = collection.filter(r => r.difficulty === difficultyFilter);
-    if (dietFilter) collection = collection.filter(r => r.tags.diet.includes(dietFilter));
+    if (dietFilter) collection = collection.and(r => r.tags.diet.includes(dietFilter));
 
     let recipes = await collection.toArray();
     

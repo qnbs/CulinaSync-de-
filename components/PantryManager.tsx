@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { db, addOrUpdatePantryItem, addPantryItemsToShoppingList } from '@/services/db';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -101,12 +102,14 @@ const PantryItemModal: React.FC<{
 
 interface PantryManagerProps {
     initialSearchTerm?: string;
+    // FIX: Add initialSelectedId to props to allow navigation to a specific item.
+    initialSelectedId?: number | null;
     focusAction?: string | null;
     onActionHandled?: () => void;
     addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
-const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, focusAction, onActionHandled, addToast }) => {
+const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, initialSelectedId, focusAction, onActionHandled, addToast }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [sortOrder, setSortOrder] = useState('name');
@@ -117,6 +120,8 @@ const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, focusA
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const pantryItems: PantryItem[] | undefined = useLiveQuery(() => db.pantry.orderBy('name').toArray(), []);
 
   useEffect(() => {
     if (initialSearchTerm) {
@@ -132,7 +137,16 @@ const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, focusA
     }
   }, [focusAction, onActionHandled]);
 
-  const pantryItems: PantryItem[] | undefined = useLiveQuery(() => db.pantry.orderBy('name').toArray(), []);
+  // FIX: Add useEffect to handle opening the edit modal when an initialSelectedId is provided.
+  useEffect(() => {
+    if (initialSelectedId && pantryItems) {
+        const itemToEdit = pantryItems.find(item => item.id === initialSelectedId);
+        if (itemToEdit) {
+            setModalState({ isOpen: true, item: itemToEdit });
+        }
+    }
+  }, [initialSelectedId, pantryItems]);
+
 
   const filteredItems = useMemo(() => {
     if (!pantryItems) return [];

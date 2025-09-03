@@ -34,7 +34,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, isListenin
 
 
   return (
-    <header className="bg-zinc-950/50 backdrop-blur-sm sticky top-0 z-10 border-b border-zinc-800">
+    <header className="bg-zinc-950/70 backdrop-blur-lg sticky top-0 z-40 border-b border-white/10">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-4">
@@ -45,7 +45,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, isListenin
              <button
                 onClick={onCommandPaletteToggle}
                 title="Befehlspalette öffnen (⌘K)"
-                className="flex items-center justify-center p-2 rounded-md text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors duration-200"
+                className="flex items-center justify-center p-2 rounded-md text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100 transition-colors duration-200"
               >
                 <TerminalSquare className="h-5 w-5" />
               </button>
@@ -54,7 +54,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, isListenin
                 onClick={handleMicClick}
                 title={isListening ? "Sprachsteuerung stoppen" : "Sprachsteuerung aktivieren"}
                 className={`flex items-center justify-center p-2 rounded-md transition-colors duration-200 ${
-                    isListening ? 'bg-red-600 text-white animate-pulse' : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
+                    isListening ? 'bg-red-600 text-white animate-pulse' : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100'
                 }`}
               >
                 <Mic className="h-5 w-5" />
@@ -72,7 +72,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, isListenin
                   } ${
                     currentPage === item.id
                       ? 'bg-amber-500 text-zinc-900'
-                      : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
+                      : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100'
                   }`}
                   aria-current={currentPage === item.id ? 'page' : undefined}
                 >

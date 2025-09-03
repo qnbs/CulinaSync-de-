@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, updateShoppingListItem, clearShoppingList, addShoppingListItem, moveCheckedToPantry, renameShoppingListCategory, batchAddShoppingListItems, generateListFromMealPlan } from '@/services/db';
@@ -7,7 +5,7 @@ import { ShoppingListItem, Recipe, PantryItem } from '@/types';
 import { Trash2, FileDown, Plus, CheckCircle, Edit3, X, Save, ChevronDown, Bot, LoaderCircle, Archive, Send, GripVertical, TextQuote, ListCollapse, ListTree, RefreshCw, ArrowLeft, CheckSquare, Square } from 'lucide-react';
 import { exportShoppingListToCsv, exportShoppingListToPdf, exportShoppingListToMarkdown, exportShoppingListToTxt, exportShoppingListToJson } from '@/services/exportService';
 import { generateShoppingList } from '@/services/geminiService';
-import { getCategoryForItem, parseShoppingItemString } from '@/services/utils';
+import { parseShoppingItemString } from '@/services/utils';
 
 // #region Modals
 const AiModal = ({ isOpen, onClose, onAdd, pantryItems, currentListItems }: { isOpen: boolean, onClose: () => void, onAdd: (items: Omit<ShoppingListItem, 'id' | 'isChecked' | 'category' | 'sortOrder'>[]) => void, pantryItems: PantryItem[], currentListItems: ShoppingListItem[] }) => {
@@ -21,7 +19,6 @@ const AiModal = ({ isOpen, onClose, onAdd, pantryItems, currentListItems }: { is
         setIsLoading(true);
         setError('');
         try {
-            // FIX: Pass the currentListItems to the AI service to avoid duplicate suggestions.
             const items = await generateShoppingList(prompt, pantryItems, currentListItems);
             setReviewItems(items);
             setSelectedItems(new Map(items.map(item => [item.name, true])));
@@ -42,7 +39,6 @@ const AiModal = ({ isOpen, onClose, onAdd, pantryItems, currentListItems }: { is
     const handleAddSelected = () => {
         if (!reviewItems) return;
         const itemsToAdd = reviewItems.filter(item => selectedItems.get(item.name));
-        // FIX: The `onAdd` function expects items without a `category` property, so we strip it before passing.
         onAdd(itemsToAdd.map(({ category, ...rest }) => rest));
         handleClose();
     };
@@ -380,15 +376,24 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
   }, []);
   // #endregion
 
+  const handleClearList = async () => {
+    if (window.confirm('Möchtest du die Einkaufsliste wirklich komplett leeren?')) {
+        const count = await clearShoppingList();
+        if (count > 0) addToast('Liste geleert.');
+    }
+  };
+
   const handleExport = (format: 'pdf' | 'csv' | 'json' | 'md' | 'txt') => {
     setExportOpen(false);
     if (!shoppingList?.length) return;
-    switch(format) {
-        case 'pdf': exportShoppingListToPdf(shoppingList); break;
-        case 'csv': exportShoppingListToCsv(shoppingList); break;
-        case 'json': exportShoppingListToJson(shoppingList); break;
-        case 'md': exportShoppingListToMarkdown(shoppingList); break;
-        case 'txt': exportShoppingListToTxt(shoppingList); break;
+    if (window.confirm(`Möchtest du die Einkaufsliste wirklich als ${format.toUpperCase()}-Datei exportieren?`)) {
+      switch(format) {
+          case 'pdf': exportShoppingListToPdf(shoppingList); break;
+          case 'csv': exportShoppingListToCsv(shoppingList); break;
+          case 'json': exportShoppingListToJson(shoppingList); break;
+          case 'md': exportShoppingListToMarkdown(shoppingList); break;
+          case 'txt': exportShoppingListToTxt(shoppingList); break;
+      }
     }
   };
 
@@ -403,8 +408,10 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
   }, {} as Record<string, ShoppingListItem[]>), [activeItems]);
 
   const handleMoveToPantry = async () => {
-    const movedCount = await moveCheckedToPantry();
-    if(movedCount > 0) addToast(`${movedCount} Artikel in den Vorrat verschoben.`, 'success');
+      if (completedItems.length > 0 && window.confirm(`${completedItems.length} gekaufte(r) Artikel in den Vorrat verschieben?`)) {
+        const movedCount = await moveCheckedToPantry();
+        if (movedCount > 0) addToast(`${movedCount} Artikel in den Vorrat verschoben.`, 'success');
+      }
   };
 
   if (shoppingList === undefined) {
@@ -437,14 +444,16 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
                         <FileDown size={16} /> Exportieren <ChevronDown size={16} className={`transition-transform ${isExportOpen ? 'rotate-180' : ''}`} />
                     </button>
                     {isExportOpen && (
-                        <div className="absolute top-full right-0 mt-2 w-40 bg-zinc-800 border border-zinc-700 rounded-md shadow-lg z-10">
-                            <a onClick={() => handleExport('pdf')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">PDF</a>
-                            <a onClick={() => handleExport('json')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">JSON</a>
-                            <a onClick={() => handleExport('md')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">Markdown</a>
+                        <div className="absolute top-full right-0 mt-2 w-48 bg-zinc-800 border border-zinc-700 rounded-md shadow-lg z-10">
+                            <a onClick={() => handleExport('pdf')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">PDF (.pdf)</a>
+                            <a onClick={() => handleExport('csv')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">CSV (.csv)</a>
+                            <a onClick={() => handleExport('json')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">JSON (.json)</a>
+                            <a onClick={() => handleExport('md')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">Markdown (.md)</a>
+                            <a onClick={() => handleExport('txt')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">Text (.txt)</a>
                         </div>
                     )}
                 </div>
-                <button onClick={() => clearShoppingList().then(c => c > 0 && addToast('Liste geleert.'))} disabled={!shoppingList?.length} className="flex items-center gap-2 bg-red-900/80 font-semibold py-2 px-3 rounded-md hover:bg-red-800 disabled:bg-zinc-800 disabled:text-zinc-500 text-sm"><Trash2 size={16}/> Leeren</button>
+                <button onClick={handleClearList} disabled={!shoppingList?.length} className="flex items-center gap-2 bg-red-900/80 font-semibold py-2 px-3 rounded-md hover:bg-red-800 disabled:bg-zinc-800 disabled:text-zinc-500 text-sm"><Trash2 size={16}/> Leeren</button>
             </div>
           </div>
       </div>

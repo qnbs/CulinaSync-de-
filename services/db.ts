@@ -1,4 +1,4 @@
-import Dexie, { type Table } from 'dexie';
+import Dexie, { type Table, Transaction } from 'dexie';
 import { PantryItem, Recipe, MealPlanItem, ShoppingListItem } from '../types';
 import { seedRecipes } from '../data/seedData';
 import { scaleIngredientQuantity, getCategoryForItem } from './utils';
@@ -22,7 +22,7 @@ class CulinaSyncDB extends Dexie {
             recipes: '++id, recipeTitle, isFavorite, *tags.course, *tags.cuisine, *tags.mainIngredient, updatedAt',
             mealPlan: '++id, date, recipeId, isCooked',
             shoppingList: '++id, name, isChecked, category, sortOrder, [category+sortOrder]',
-        }).upgrade(tx => {
+        }).upgrade((tx: Transaction) => {
              // Upgrade logic for adding updatedAt field to pantry and recipes
             tx.table('pantry').toCollection().modify(item => {
                 if (item.updatedAt === undefined) item.updatedAt = item.createdAt;
@@ -393,12 +393,9 @@ export const renameShoppingListCategory = async (oldName: string, newName: strin
 
 export const clearShoppingList = async (): Promise<number> => {
     try {
-        if (window.confirm('Möchtest du die Einkaufsliste wirklich komplett leeren?')) {
-            const count = await db.shoppingList.count();
-            await db.shoppingList.clear();
-            return count;
-        }
-        return 0;
+        const count = await db.shoppingList.count();
+        await db.shoppingList.clear();
+        return count;
     } catch (error) {
         console.error("Failed to clear shopping list:", error);
         throw new Error(`Fehler beim Leeren der Einkaufsliste: ${error instanceof Error ? error.message : String(error)}`);
@@ -559,20 +556,17 @@ export const moveCheckedToPantry = async (): Promise<number> => {
             const checkedItems = await db.shoppingList.where('isChecked').equals(1).toArray();
             if (checkedItems.length === 0) return 0;
             
-            if (window.confirm(`${checkedItems.length} gekaufte(r) Artikel in den Vorrat verschieben?`)) {
-                for (const item of checkedItems) {
-                    await addOrUpdatePantryItem({
-                        name: item.name,
-                        quantity: item.quantity,
-                        unit: item.unit,
-                        category: getCategoryForItem(item.name)
-                    });
-                }
-                
-                await db.shoppingList.bulkDelete(checkedItems.map(item => item.id!));
-                return checkedItems.length;
+            for (const item of checkedItems) {
+                await addOrUpdatePantryItem({
+                    name: item.name,
+                    quantity: item.quantity,
+                    unit: item.unit,
+                    category: getCategoryForItem(item.name)
+                });
             }
-            return 0;
+            
+            await db.shoppingList.bulkDelete(checkedItems.map(item => item.id!));
+            return checkedItems.length;
         });
     } catch (error) {
         console.error("Failed to move checked items to pantry:", error);

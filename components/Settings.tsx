@@ -5,7 +5,7 @@ import { Save, Trash2, Download, Upload, AlertTriangle, User, Settings as Settin
 import { useSettings } from '@/contexts/SettingsContext';
 import TagInput from '@/components/TagInput';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { exportFullDataAsJson, exportFullDataAsTxt } from '@/services/exportService';
+import { exportFullDataAsJson, exportFullDataAsTxt, exportFullDataAsCsv, exportFullDataAsMarkdown, exportFullDataAsPdf } from '@/services/exportService';
 
 
 const ResetConfirmationModal: React.FC<{
@@ -131,11 +131,25 @@ const Settings: React.FC<SettingsProps> = ({ focusAction, onActionHandled, addTo
         });
     };
     
-    const handleExport = async (format: 'json' | 'txt') => {
+    const handleExport = async (format: 'json' | 'txt' | 'csv' | 'md' | 'pdf') => {
         setExportMenuOpen(false);
-        const formatName = format === 'json' ? 'JSON-Backup' : 'Text-Backup';
-        if (window.confirm(`Möchtest du wirklich ein vollständiges ${formatName} deiner Daten erstellen?`)) {
-            const success = format === 'json' ? await exportFullDataAsJson() : await exportFullDataAsTxt();
+        const formatNameMap = {
+            json: 'JSON-Backup',
+            txt: 'Text-Backup',
+            csv: 'CSV-Backup',
+            md: 'Markdown-Backup',
+            pdf: 'PDF-Backup'
+        };
+
+        if (window.confirm(`Möchtest du wirklich ein vollständiges ${formatNameMap[format]} deiner Daten erstellen?`)) {
+            let success = false;
+            switch (format) {
+                case 'json': success = await exportFullDataAsJson(); break;
+                case 'txt': success = await exportFullDataAsTxt(); break;
+                case 'csv': success = await exportFullDataAsCsv(); break;
+                case 'md': success = await exportFullDataAsMarkdown(); break;
+                case 'pdf': success = await exportFullDataAsPdf(); break;
+            }
             if (success) {
                 addToast('Daten erfolgreich exportiert.', 'success');
             } else {
@@ -283,8 +297,11 @@ const Settings: React.FC<SettingsProps> = ({ focusAction, onActionHandled, addTo
                                             </button>
                                             {isExportMenuOpen && (
                                                 <div className="absolute bottom-full right-0 mb-2 w-56 bg-zinc-800 border border-zinc-700 rounded-md shadow-lg z-10">
-                                                    <a onClick={() => handleExport('json')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">JSON Backup (Maschinenlesbar)</a>
-                                                    <a onClick={() => handleExport('txt')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">Text Backup (Lesbar)</a>
+                                                    <a onClick={() => handleExport('json')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">JSON-Backup (.json)</a>
+                                                    <a onClick={() => handleExport('txt')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">Text-Backup (.txt)</a>
+                                                    <a onClick={() => handleExport('csv')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">CSV-Backup (.csv)</a>
+                                                    <a onClick={() => handleExport('md')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">Markdown-Backup (.md)</a>
+                                                    <a onClick={() => handleExport('pdf')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">PDF-Backup (.pdf)</a>
                                                 </div>
                                             )}
                                          </div>

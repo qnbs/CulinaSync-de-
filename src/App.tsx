@@ -37,6 +37,8 @@ const App: React.FC = () => {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [isCommandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [focusAction, setFocusAction] = useState<string | null>(null);
+  // FIX: Add state to handle navigation to a specific item ID from command palette.
+  const [initialSelectedId, setInitialSelectedId] = useState<number | null>(null);
   const [appVersion, setAppVersion] = useState<string>('');
 
   useEffect(() => {
@@ -71,9 +73,18 @@ const App: React.FC = () => {
   
   const navigate = useCallback((page: Page, focusTarget?: string) => {
     setCurrentPage(page);
+    // FIX: Reset selected ID on general navigation.
+    setInitialSelectedId(null);
     if (focusTarget) {
       setFocusAction(focusTarget);
     }
+  }, []);
+
+  // FIX: Add function to navigate directly to an item.
+  const navigateToItem = useCallback((page: 'recipes' | 'pantry', id: number) => {
+    setInitialSelectedId(id);
+    setCurrentPage(page);
+    setCommandPaletteOpen(false);
   }, []);
 
   useEffect(() => {
@@ -82,13 +93,13 @@ const App: React.FC = () => {
         const action = processCommand(finalTranscript, currentPage);
         
         if (action.type === 'NAVIGATE') {
-            setCurrentPage(action.payload);
+            navigate(action.payload);
             addToast(`Navigiere zu: ${action.payload.charAt(0).toUpperCase() + action.payload.slice(1)}`);
         } else if (action.type === 'ADD_SHOPPING_ITEM') {
             addShoppingListItem(action.payload).then(() => {
                 addToast(`"${action.payload.name}" zur Einkaufsliste hinzugefügt.`);
                 if (currentPage !== 'shopping-list') {
-                  setCurrentPage('shopping-list');
+                  navigate('shopping-list');
                 }
             });
         } else if (action.type === 'ADD_PANTRY_ITEM') {
@@ -98,7 +109,7 @@ const App: React.FC = () => {
                     : `Vorrat für "${item.name}" aktualisiert.`;
                  addToast(message);
                  if (currentPage !== 'pantry') {
-                    setCurrentPage('pantry');
+                    navigate('pantry');
                  }
             });
         } else if (action.type === 'REMOVE_PANTRY_ITEM') {
@@ -109,7 +120,7 @@ const App: React.FC = () => {
                     addToast(`"${action.payload}" nicht im Vorrat gefunden.`, "error");
                 }
                 if (currentPage !== 'pantry') {
-                    setCurrentPage('pantry');
+                    navigate('pantry');
                 }
             });
         }
@@ -119,7 +130,7 @@ const App: React.FC = () => {
             addToast("Befehl nicht erkannt.", "error");
         }
     }
-  }, [finalTranscript, currentPage, addToast]);
+  }, [finalTranscript, currentPage, addToast, navigate]);
   
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -164,8 +175,9 @@ const App: React.FC = () => {
   }, []);
 
   const handleGlobalSearch = useCallback((type: 'pantry' | 'recipes', term: string) => {
+    setInitialSelectedId(null);
     setCurrentPage(type);
-    setVoiceAction({ type: 'SEARCH', payload: term });
+    setVoiceAction({ type: 'SEARCH', payload: `${term}#${Date.now()}` });
     onCommandPaletteClose();
   }, [onCommandPaletteClose]);
 
@@ -180,6 +192,7 @@ const App: React.FC = () => {
         case 'pantry':
             return <PantryManager 
                         initialSearchTerm={voiceAction?.type === 'SEARCH' ? voiceAction.payload : undefined}
+                        initialSelectedId={initialSelectedId}
                         {...pageProps}
                     />;
         case 'chef':
@@ -189,6 +202,7 @@ const App: React.FC = () => {
                     />;
         case 'recipes': return <RecipeBook 
                                     initialSearchTerm={voiceAction?.type === 'SEARCH' ? voiceAction.payload : undefined} 
+                                    initialSelectedId={initialSelectedId}
                                     {...pageProps} 
                                 />;
         case 'meal-planner': return <MealPlanner {...pageProps} />;
@@ -199,7 +213,7 @@ const App: React.FC = () => {
                     />;
         case 'settings': return <Settings {...pageProps} />;
         case 'help': return <Help appVersion={appVersion} />;
-        default: return <PantryManager {...pageProps} />;
+        default: return <PantryManager {...pageProps} initialSelectedId={initialSelectedId} />;
     }
   }
 
@@ -208,7 +222,7 @@ const App: React.FC = () => {
       <div className="min-h-screen bg-zinc-900 text-zinc-100">
         <Header 
           currentPage={currentPage} 
-          setCurrentPage={setCurrentPage}
+          setCurrentPage={navigate}
           isListening={isListening}
           startListening={startListening}
           stopListening={stopListening}
@@ -225,6 +239,8 @@ const App: React.FC = () => {
           isOpen={isCommandPaletteOpen}
           onClose={onCommandPaletteClose}
           commands={commands}
+          addToast={addToast}
+          navigateToItem={navigateToItem}
           onGlobalSearch={handleGlobalSearch}
         />
 

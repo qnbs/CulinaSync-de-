@@ -17,6 +17,13 @@
         .page-fade-in {
           animation: fadeIn 0.4s ease-out forwards;
         }
+        @keyframes modal-fade-in {
+          from { opacity: 0; transform: translateY(10px) scale(0.98); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .modal-fade-in {
+            animation: modal-fade-in 0.3s ease-out forwards;
+        }
         @keyframes pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.6; }
@@ -56,6 +63,30 @@
         .prose-styles tr:last-child td { border-bottom: none; }
         .prose-styles hr { border-top: 1px solid #3f3f46; margin: 2rem 0; }
       }
+      .glass-card {
+        @apply bg-zinc-900/50 backdrop-blur-lg border border-zinc-700/50 rounded-lg;
+      }
+      .glass-interactive {
+         @apply hover:bg-zinc-800/70 hover:border-zinc-600/60;
+      }
+       /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #4f4f5a;
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #fbbf24;
+      }
+      body {
+        overscroll-behavior-y: contain;
+      }
     </style>
   <script type="importmap">
 {
@@ -81,7 +112,11 @@
 }
 </script>
 </head>
-  <body class="bg-zinc-900 text-zinc-100 font-sans">
+  <body class="bg-zinc-950 text-zinc-200 font-sans">
+    <div class="fixed top-0 left-0 -z-10 h-full w-full bg-zinc-950">
+        <div class="absolute bottom-0 left-[-20%] right-0 top-[-10%] h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle_farthest-side,rgba(251,191,36,0.3),rgba(255,255,255,0))]"></div>
+        <div class="absolute bottom-0 right-[-20%] top-[-10%] h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle_farthest-side,rgba(251,191,36,0.2),rgba(255,255,255,0))]"></div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

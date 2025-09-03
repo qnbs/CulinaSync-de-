@@ -71,12 +71,13 @@ const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, onClose
 
 interface RecipeBookProps {
     initialSearchTerm?: string;
+    initialSelectedId?: number | null;
     focusAction?: string | null;
     onActionHandled?: () => void;
     addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
-const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction, onActionHandled, addToast }) => {
+const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelectedId, focusAction, onActionHandled, addToast }) => {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const savedRecipes = useLiveQuery(() => db.recipes.toArray(), []);
   const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
@@ -123,6 +124,15 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction,
         onActionHandled?.();
     }
   }, [focusAction, onActionHandled]);
+
+  useEffect(() => {
+    if (initialSelectedId && savedRecipes) {
+      const recipeToSelect = savedRecipes.find(r => r.id === initialSelectedId);
+      if (recipeToSelect) {
+        setSelectedRecipe(recipeToSelect);
+      }
+    }
+  }, [initialSelectedId, savedRecipes]);
 
   const filterOptions = useMemo(() => {
     if (!savedRecipes) return { courses: [], cuisines: [], mainIngredients: [], difficulties: [], diets: [] };
@@ -283,11 +293,11 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, focusAction,
               {filterOptions.diets.map(d => <option key={d} value={d}>{d}</option>)}
             </select>
           </div>
-          <div className="pt-3 border-t border-zinc-800 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="pt-3 border-t border-zinc-800 flex flex-wrap justify-between items-center gap-4">
                 <button onClick={clearFilters} disabled={!hasActiveFilters} className="flex items-center gap-2 text-sm text-amber-400 hover:text-amber-300 font-semibold disabled:text-zinc-600 disabled:cursor-not-allowed">
                     <X size={16} /> Alle Filter zurücksetzen
                 </button>
-                <div className="flex items-center gap-4 flex-wrap justify-end">
+                <div className="flex items-center gap-4 flex-wrap justify-center sm:justify-end">
                     <label className="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" checked={pantryFilter} onChange={() => setPantryFilter(!pantryFilter)} className="h-4 w-4 rounded bg-zinc-700 border-zinc-600 text-amber-500 focus:ring-amber-500"/>
                         <span className="text-zinc-300 text-sm font-medium flex items-center gap-1"><CookingPot size={14} className="text-amber-400" /> Nur Kochbereite</span>

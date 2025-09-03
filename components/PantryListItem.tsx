@@ -41,32 +41,36 @@ const PantryListItem = React.memo<PantryListItemProps>(({
     else indicatorClasses += 'border-zinc-800';
 
     return (
-        <li className={`p-3 flex items-center gap-3 group ${indicatorClasses}`}>
-          {isSelectMode && (
-            <button onClick={() => onToggleSelect(item.id!)} className="p-1 text-zinc-400" aria-label={`Select ${item.name}`}>
-              {isSelected ? <CheckSquare className="text-amber-400"/> : <Square/>}
-            </button>
-          )}
-          <div className="flex-grow cursor-pointer" onClick={() => onStartEdit(item)}>
-            <div className="flex items-center gap-2">
-                <p className="font-medium text-zinc-100">{item.name}</p>
-                {(isRunningLow || status !== 'ok') && <span title={status === 'expired' ? 'Abgelaufen!' : (status === 'nearing' ? 'Läuft bald ab!' : `Wird knapp! Mindestmenge: ${item.minQuantity} ${item.unit}`)}><AlertTriangle size={14} className={status === 'expired' ? 'text-red-400' : 'text-yellow-400'}/></span>}
+        <li className={`p-3 flex flex-wrap justify-between items-center gap-x-3 gap-y-2 group ${indicatorClasses}`}>
+          <div className="flex items-center gap-3 flex-grow min-w-[150px]">
+            {isSelectMode && (
+              <button onClick={() => onToggleSelect(item.id!)} className="p-1 text-zinc-400" aria-label={`Select ${item.name}`}>
+                {isSelected ? <CheckSquare className="text-amber-400"/> : <Square/>}
+              </button>
+            )}
+            <div className="flex-grow cursor-pointer" onClick={() => onStartEdit(item)}>
+              <div className="flex items-center gap-2">
+                  <p className="font-medium text-zinc-100">{item.name}</p>
+                  {(isRunningLow || status !== 'ok') && <span title={status === 'expired' ? 'Abgelaufen!' : (status === 'nearing' ? 'Läuft bald ab!' : `Wird knapp! Mindestmenge: ${item.minQuantity} ${item.unit}`)}><AlertTriangle size={14} className={status === 'expired' ? 'text-red-400' : 'text-yellow-400'}/></span>}
+              </div>
+              <p className="text-zinc-400 text-sm">
+                {item.category && <span className="mr-3">{item.category}</span>}
+                {item.expiryDate && <span title="Ablaufdatum">Ablauf: {new Date(item.expiryDate).toLocaleDateString('de-DE')}</span>}
+              </p>
             </div>
-            <p className="text-zinc-400 text-sm">
-              {item.category && <span className="mr-3">{item.category}</span>}
-              {item.expiryDate && <span title="Ablaufdatum">Ablauf: {new Date(item.expiryDate).toLocaleDateString('de-DE')}</span>}
-            </p>
           </div>
-          <div className="flex items-center gap-2 text-zinc-300">
-            <button onClick={() => onAdjustQuantity(item, -1)} aria-label={`Reduce quantity of ${item.name}`} className="p-1.5 rounded-full bg-zinc-700/50 hover:bg-zinc-700 transition-colors"><Minus size={14}/></button>
-            <span className="font-mono w-20 text-center text-lg tabular-nums">{item.quantity} <span className="text-base text-zinc-400">{item.unit}</span></span>
-            <button onClick={() => onAdjustQuantity(item, 1)} aria-label={`Increase quantity of ${item.name}`} className="p-1.5 rounded-full bg-zinc-700/50 hover:bg-zinc-700 transition-colors"><Plus size={14}/></button>
-          </div>
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
-            {isRunningLow && <button onClick={() => onAddToShoppingList(item)} aria-label={`Add ${item.name} to shopping list`} className="p-2 rounded-full text-zinc-400 hover:bg-zinc-700 hover:text-amber-400"><ShoppingCart size={16} /></button>}
-            <button onClick={() => onStartEdit(item)} aria-label={`Edit ${item.name}`} className="p-2 rounded-full text-zinc-400 hover:bg-zinc-700 hover:text-zinc-100">
-              <Edit3 size={16} />
-            </button>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <div className="flex items-center gap-2 text-zinc-300">
+              <button onClick={() => onAdjustQuantity(item, -1)} aria-label={`Reduce quantity of ${item.name}`} className="p-1.5 rounded-full bg-zinc-700/50 hover:bg-zinc-700 transition-colors"><Minus size={14}/></button>
+              <span className="font-mono w-20 text-center text-lg tabular-nums">{item.quantity} <span className="text-base text-zinc-400">{item.unit}</span></span>
+              <button onClick={() => onAdjustQuantity(item, 1)} aria-label={`Increase quantity of ${item.name}`} className="p-1.5 rounded-full bg-zinc-700/50 hover:bg-zinc-700 transition-colors"><Plus size={14}/></button>
+            </div>
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+              {isRunningLow && <button onClick={() => onAddToShoppingList(item)} aria-label={`Add ${item.name} to shopping list`} className="p-2 rounded-full text-zinc-400 hover:bg-zinc-700 hover:text-amber-400"><ShoppingCart size={16} /></button>}
+              <button onClick={() => onStartEdit(item)} aria-label={`Edit ${item.name}`} className="p-2 rounded-full text-zinc-400 hover:bg-zinc-700 hover:text-zinc-100">
+                <Edit3 size={16} />
+              </button>
+            </div>
           </div>
         </li>
     );
