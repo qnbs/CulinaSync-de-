@@ -1,10 +1,10 @@
 <div align="center">
   <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmYmJmMjQiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTEuNSA5LjVMOSAxMkwxMSA1bDIgN1oiLz48cGF0aCBkPSJNMTggMTBsLTIuNS0yLjVMMTggNWwyIDcgWiIvPjxwYXRoIGQ9Ik0yIDhsMTItMTIgMTIgMTIiLz48cGF0aCBkPSJNNCAxNGguMyIvPjxwYXRoIGQ9Ik0yMCAxNGgtLjMiLz48cGF0aCBkPSJNNi4zIDE4LjRIMTcuNyIvPjxwYXRoIGQ9Ik02IDVIMyIvPjxwYXRoIGQ9Ik0yMSA1di0zIi8+PC9zdmc+" alt="CulinaSync Logo" width="150">
-  <h1>CulinaSync (de): Dein intelligenter Küchenassistent</h1>
+  <h1>CulinaSync: Dein intelligenter Küchenassistent</h1>
   <p>
     <strong>Offline. Privat. Nahtlos.</strong>
     <br />
-    Eine Local-First Progressive Web App (PWA), die den gesamten kulinarischen Alltag in Ihrem Haushalt revolutioniert.
+    Eine Local-First Progressive Web App (PWA), die den gesamten kulinarischen Alltag im Haushalt revolutioniert.
   </p>
   <p>
     <em>Dieses Projekt wurde im Dialog mit <a href="https://ai.studio/apps/drive/1bQgaay6IODal47GVGZcn-65xgfu_PIDC">Google's AI Studio</a> entwickelt und verfeinert.</em>
@@ -21,7 +21,7 @@ Im Gegensatz zu traditionellen, Cloud-abhängigen Anwendungen basiert CulinaSync
 
 ## ✨ Kernfunktionen
 
-Die Anwendung deckt den gesamten kulinarischen Workflow ab, intelligent und nahtlos.
+Die Anwendung deckt den gesamten kulinarischen Workflow intelligent und nahtlos ab.
 
 | Feature                | Beschreibung                                                                                                                                                            | Status      |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
@@ -33,6 +33,14 @@ Die Anwendung deckt den gesamten kulinarischen Workflow ab, intelligent und naht
 | 🗣️ **Sprachsteuerung**         | Steuern Sie die App freihändig – fügen Sie Artikel hinzu, navigieren Sie oder haken Sie Zutaten von der Einkaufsliste ab.                                         | ✅ Verfügbar |
 | ⚙️ **Daten-Management**          | Exportieren und importieren Sie all Ihre Daten als JSON-Backup. Sie behalten die volle Kontrolle.                                                               | ✅ Verfügbar |
 
+
+## 🏛️ Die Local-First-Philosophie
+
+Die Entscheidung für eine Local-First-Architektur ist das technische und ideologische Fundament von CulinaSync. Sie bietet transformative Vorteile gegenüber Cloud-zentrierten Modellen:
+
+1.  **🚀 Performance & Latenzfreiheit:** Aktionen werden sofort gegen die lokale IndexedDB ausgeführt. Es gibt keine Lade-Spinner, die auf eine Netzwerkantwort warten.
+2.  **🌐 Echte Offline-Funktionalität:** Ob im Supermarkt im Keller ohne Empfang oder im Flugzeug – CulinaSync ist immer voll funktionsfähig. Eine Internetverbindung wird nur für KI-Funktionen benötigt.
+3.  **🔐 Datenschutz & Datenhoheit:** Ihre kulinarischen Daten sind privat. Da die "Source of Truth" auf Ihrem Gerät liegt, werden sensible Informationen nicht unnötig an Server von Drittanbietern gesendet. Sie besitzen Ihre Daten.
 
 ## 🛠️ Technologischer Stack & Architektur
 
@@ -46,14 +54,6 @@ CulinaSync nutzt einen modernen, performanten und robusten Tech-Stack, der für 
 -   **PWA-Funktionalität:** [VitePWA](https://vite-pwa-org.netlify.app/) zur Umwandlung der Web-App in eine installierbare, offline-fähige Anwendung.
 -   **Build-Tool:** [Vite](https://vitejs.dev/) für eine blitzschnelle Entwicklungsumgebung und optimierte Produktions-Builds.
 -   **Icons:** [Lucide React](https://lucide.dev/) für ein schönes und konsistentes Icon-Set.
-
-## 🏛️ Die Local-First-Philosophie
-
-Die Entscheidung für eine Local-First-Architektur ist das technische und ideologische Fundament von CulinaSync. Sie bietet transformative Vorteile gegenüber Cloud-zentrierten Modellen:
-
-1.  **🚀 Performance & Latenzfreiheit:** Aktionen werden sofort gegen die lokale IndexedDB ausgeführt. Es gibt keine Lade-Spinner, die auf eine Netzwerkantwort warten.
-2.  **🌐 Echte Offline-Funktionalität:** Ob im Supermarkt im Keller ohne Empfang oder im Flugzeug – CulinaSync ist immer voll funktionsfähig. Eine Internetverbindung wird nur für KI-Funktionen benötigt.
-3.  **🔐 Datenschutz & Datenhoheit:** Ihre kulinarischen Daten sind privat. Da die "Source of Truth" auf Ihrem Gerät liegt, werden sensible Informationen nicht unnötig an Server von Drittanbietern gesendet. Sie besitzen Ihre Daten.
 
 ## 🏁 Erste Schritte
 
@@ -71,7 +71,7 @@ Folgen Sie diesen Schritten, um das Projekt lokal auszuführen:
     ```
 
 3.  **Umgebungsvariablen konfigurieren**
-    Für die KI-Funktionen wird ein Google Gemini API-Schlüssel benötigt. Erstellen Sie eine `.env.local`-Datei im Projektstammverzeichnis und fügen Sie Ihren API-Schlüssel hinzu:
+    Für die KI-Funktionen wird ein Google Gemini API-Schlüssel benötigt. Erstellen Sie eine `.env`-Datei im Projektstammverzeichnis und fügen Sie Ihren API-Schlüssel hinzu:
     ```env
     # Ersetzen Sie YOUR_API_KEY durch Ihren tatsächlichen Google Gemini API-Schlüssel
     API_KEY=YOUR_API_KEY

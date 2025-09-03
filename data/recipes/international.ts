@@ -375,8 +375,9 @@ export const internationalRecipes: Recipe[] = [
         "Mit so viel Wasser oder Brühe auffüllen, dass das Fleisch knapp bedeckt ist. Aufkochen und zugedeckt bei niedrigster Hitze 2,5 Stunden schmoren.",
         "Nach der Schmorzeit sollte das Fleisch zart sein und die Sauce sämig. Mit Salz und Pfeffer abschmecken. Dazu passen Nockerl (Spätzle) oder Salzkartoffeln."
     ],
-// FIX: Added missing properties to conform to the Recipe type.
+    // FIX: Moved missing properties inside the recipe object to conform to the Recipe type.
     nutritionPerServing: { calories: "600 kcal", protein: "50 g", fat: "40 g", carbs: "10 g" },
+// FIX: Removed duplicate properties from the tags object.
     tags: {
       course: ["Hauptgericht"],
       cuisine: ["Ungarisch"],

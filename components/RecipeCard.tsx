@@ -10,9 +10,10 @@ interface RecipeCardProps {
   isSelectMode?: boolean;
   isSelected?: boolean;
   onToggleSelect?: (id: number) => void;
+  isDraggable?: boolean;
 }
 
-const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onSelectRecipe, matchInfo, size = 'normal', isSelectMode, isSelected, onToggleSelect }) => {
+const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onSelectRecipe, matchInfo, size = 'normal', isSelectMode, isSelected, onToggleSelect, isDraggable }) => {
   const isSmall = size === 'small';
   const isVeg = recipe.tags.diet.includes('Vegetarisch') || recipe.tags.diet.includes('Vegan');
 
@@ -22,10 +23,18 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onSelectRecipe, matchIn
   } else if (recipe.isFavorite) {
     cardClasses = 'border-amber-400 favorite-glow';
   }
+  
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    if (isDraggable && recipe.id) {
+        e.dataTransfer.setData('application/json', JSON.stringify({ type: 'recipe', id: recipe.id }));
+    } else {
+        e.preventDefault();
+    }
+  };
 
   return (
     <div 
-      className={`bg-zinc-800/50 border rounded-lg shadow-lg overflow-hidden transform hover:scale-[1.02] transition-all duration-300 group flex flex-col relative ${onSelectRecipe || onToggleSelect ? 'cursor-pointer' : ''} ${cardClasses}`}
+      className={`bg-zinc-800/50 border rounded-lg shadow-lg overflow-hidden transform hover:scale-[1.02] transition-all duration-300 group flex flex-col relative ${onSelectRecipe || onToggleSelect ? 'cursor-pointer' : ''} ${isDraggable ? 'cursor-grab' : ''} ${cardClasses}`}
       onClick={() => isSelectMode ? onToggleSelect?.(recipe.id!) : onSelectRecipe?.(recipe)}
       role={onSelectRecipe || onToggleSelect ? "button" : undefined}
       tabIndex={onSelectRecipe || onToggleSelect ? 0 : -1}
@@ -34,6 +43,8 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onSelectRecipe, matchIn
             isSelectMode ? onToggleSelect?.(recipe.id!) : onSelectRecipe?.(recipe)
         }
       }}
+      draggable={isDraggable}
+      onDragStart={handleDragStart}
     >
       {recipe.isFavorite && !isSelectMode && (
         <div className="absolute top-2 right-2 text-amber-400 z-10" title="Favorit">

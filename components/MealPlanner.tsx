@@ -2,10 +2,11 @@ import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, markMealAsCooked, removeRecipeFromMealPlan, addRecipeToMealPlan, addMissingIngredientsForMeals, addMissingIngredientsToShoppingList } from '@/services/db';
 import { Recipe, MealPlanItem, PantryItem } from '@/types';
-import { ChevronLeft, ChevronRight, Search, CheckCircle, Trash2, ShoppingCart, Info, X, Star, BookOpen, MoreVertical, PlusCircle, Square, CheckSquare, FileText, CookingPot, LoaderCircle, GripVertical } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, CheckCircle, Trash2, ShoppingCart, Info, X, Star, BookOpen, MoreVertical, PlusCircle, Square, CheckSquare, FileText, CookingPot, LoaderCircle, GripVertical, Minus, Plus, X as XIcon, Filter } from 'lucide-react';
 import RecipeCard from '@/components/RecipeCard';
 import RecipeDetail from '@/components/RecipeDetail';
 import { useSettings } from '@/contexts/SettingsContext';
+import { useDebounce } from '@/hooks/useDebounce';
 
 // Helper to calculate pantry status for a recipe
 const getPantryStatus = (recipe: Recipe, pantryMap: Map<string, number>): { status: 'ok' | 'partial' | 'missing' | 'unknown', missing: string[], missingCount: number, totalCount: number } => {
@@ -14,7 +15,6 @@ const getPantryStatus = (recipe: Recipe, pantryMap: Map<string, number>): { stat
 
   const missingIngredients: string[] = [];
   allIngredients.forEach(ing => {
-    // A simple heuristic: ignore optional or "to taste" ingredients
     if (ing.name.toLowerCase().includes('optional') || ing.name.toLowerCase().includes('nach geschmack')) return;
     const pantryQty = pantryMap.get(ing.name.toLowerCase()) || 0;
     if (pantryQty <= 0) {
@@ -126,30 +126,24 @@ const GenerateShoppingListModal: React.FC<{isOpen: boolean, onClose: () => void,
     );
 };
 
-const PlannedMealCard = React.memo<{ meal: MealPlanItem; recipe: Recipe | undefined; pantryMap: Map<string, number>; onAction: (action: string, payload: any) => void; onDragStart: (e: React.DragEvent, meal: MealPlanItem) => void; }>(({ meal, recipe, pantryMap, onAction, onDragStart }) => {
+const PlannedMealCard = React.memo<{ meal: MealPlanItem; recipe: Recipe | undefined; pantryMap: Map<string, number>; isToday: boolean; onAction: (action: string, payload: any) => void; onDragStart: (e: React.DragEvent, meal: MealPlanItem) => void; onCook: (recipe: Recipe) => void;}>(({ meal, recipe, pantryMap, isToday, onAction, onDragStart, onCook }) => {
     const [isMenuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
-    // Close menu on click outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-                setMenuOpen(false);
-            }
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) setMenuOpen(false);
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
-
 
     if (meal.note) {
         return (
              <div className="p-3 rounded-lg bg-zinc-700/50 border border-dashed border-zinc-600 flex items-start gap-3 relative group">
                 <FileText size={18} className="text-zinc-400 mt-0.5 flex-shrink-0"/>
                 <p className="text-sm text-zinc-300 flex-grow italic">{meal.note}</p>
-                 <button onClick={() => onAction('remove', meal)} className="absolute top-1 right-1 p-1 text-zinc-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Trash2 size={14}/>
-                </button>
+                 <button onClick={() => onAction('remove', meal)} className="absolute top-1 right-1 p-1 text-zinc-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={14}/></button>
             </div>
         )
     }
@@ -159,22 +153,21 @@ const PlannedMealCard = React.memo<{ meal: MealPlanItem; recipe: Recipe | undefi
     const pantryStatus = getPantryStatus(recipe, pantryMap);
     const statusConfig = {
         ok: { color: 'bg-green-500', title: 'Alle Zutaten im Vorrat' },
-        partial: { color: 'bg-yellow-500', title: `${pantryStatus.missingCount} von ${pantryStatus.totalCount} Zutat(en) fehlen: ${pantryStatus.missing.slice(0, 2).join(', ')}...` },
-        missing: { color: 'bg-red-500', title: `${pantryStatus.missingCount} von ${pantryStatus.totalCount} Zutat(en) fehlen: ${pantryStatus.missing.slice(0, 2).join(', ')}...` },
+        partial: { color: 'bg-yellow-500', title: `Fehlt: ${pantryStatus.missing.slice(0, 3).join(', ')}...` },
+        missing: { color: 'bg-red-500', title: `Fehlt: ${pantryStatus.missing.slice(0, 3).join(', ')}...` },
         unknown: { color: 'bg-zinc-600', title: 'Status unbekannt' },
     };
 
     return (
         <div draggable={!meal.isCooked} onDragStart={(e) => onDragStart(e, meal)}
-             className={`p-3 rounded-lg group relative transition-all duration-300 flex flex-col gap-2 ${meal.isCooked ? 'bg-zinc-800/80 opacity-70' : 'bg-zinc-800/80 border border-zinc-700 cursor-grab active:cursor-grabbing'}`}>
+             className={`p-3 rounded-lg group relative transition-all duration-300 flex flex-col gap-2 ${meal.isCooked ? 'bg-zinc-800/80 opacity-60' : 'bg-zinc-800/80 border border-zinc-700 cursor-grab active:cursor-grabbing'}`}>
             <div className="flex items-start gap-2">
                 <GripVertical size={18} className="text-zinc-600 flex-shrink-0 cursor-grab group-hover:opacity-100 opacity-0 transition-opacity mt-0.5" />
                 <div className="flex-grow">
                     <p className={`font-semibold text-zinc-100 text-sm leading-tight ${meal.isCooked ? 'line-through' : ''}`}>{recipe.recipeTitle}</p>
+                     {meal.servings && meal.servings !== parseInt(recipe.servings) && <p className="text-xs text-zinc-400">{meal.servings} Portionen</p>}
                     <div className="flex items-center gap-2 mt-2" title={statusConfig[pantryStatus.status].title}>
-                        <div className="w-full bg-zinc-700 rounded-full h-1.5">
-                            <div className={`h-1.5 rounded-full ${statusConfig[pantryStatus.status].color}`} style={{width: `${(pantryStatus.totalCount - pantryStatus.missingCount) / pantryStatus.totalCount * 100}%`}}></div>
-                        </div>
+                        <div className="w-full bg-zinc-700 rounded-full h-1.5"><div className={`h-1.5 rounded-full ${statusConfig[pantryStatus.status].color}`} style={{width: `${(pantryStatus.totalCount - pantryStatus.missingCount) / pantryStatus.totalCount * 100}%`}}></div></div>
                         <span className="text-xs text-zinc-400">{pantryStatus.totalCount > 0 ? `${pantryStatus.totalCount - pantryStatus.missingCount}/${pantryStatus.totalCount}`: ''}</span>
                     </div>
                 </div>
@@ -190,10 +183,77 @@ const PlannedMealCard = React.memo<{ meal: MealPlanItem; recipe: Recipe | undefi
                     )}
                 </div>
             </div>
+            {isToday && !meal.isCooked && <button onClick={() => onCook(recipe)} className="mt-2 w-full flex items-center justify-center gap-2 text-sm bg-amber-600/80 text-white font-semibold py-1 px-2 rounded-md hover:bg-amber-600 transition-colors"><CookingPot size={14}/> Kochen</button>}
             {meal.isCooked && <div className="absolute inset-0 bg-black/40 rounded-lg flex items-center justify-center"><CheckCircle className="text-green-400" size={24}/></div>}
         </div>
     );
 });
+
+const CookModeView: React.FC<{ recipe: Recipe, currentStep: number, setCurrentStep: (updater: (s: number) => number) => void, onExit: () => void }> = ({ recipe, currentStep, setCurrentStep, onExit }) => (
+    <div className="fixed inset-0 bg-zinc-950 z-[100] flex flex-col p-4 sm:p-8 text-zinc-100 font-sans">
+        <header className="flex justify-between items-center mb-4 flex-shrink-0">
+            <h3 className="text-xl font-bold text-amber-400 truncate pr-4">{recipe.recipeTitle}</h3>
+            <button onClick={onExit} className="flex items-center gap-2 py-2 px-4 rounded-md bg-zinc-800 hover:bg-zinc-700 transition-colors">
+                <XIcon size={18} /> <span className="hidden sm:inline">Kochmodus beenden</span>
+            </button>
+        </header>
+        <div className="flex-grow flex flex-col justify-center items-center text-center overflow-y-auto">
+            <p className="text-zinc-400 mb-4 font-semibold">Schritt {currentStep + 1} von {recipe.instructions.length}</p>
+            <p className="text-2xl md:text-4xl leading-relaxed max-w-4xl animate-fade-in">{recipe.instructions[currentStep]}</p>
+        </div>
+        <footer className="flex justify-center items-center gap-4 pt-4 flex-shrink-0">
+            <button onClick={() => setCurrentStep(s => s - 1)} disabled={currentStep === 0} className="py-3 px-6 rounded-md bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 transition-colors">Zurück</button>
+            <span className="font-bold text-lg tabular-nums">{currentStep + 1} / {recipe.instructions.length}</span>
+            <button onClick={() => setCurrentStep(s => s + 1)} disabled={currentStep >= recipe.instructions.length - 1} className="py-3 px-6 rounded-md bg-amber-500 text-zinc-900 font-bold hover:bg-amber-400 disabled:opacity-50 transition-colors">Weiter</button>
+        </footer>
+    </div>
+);
+
+const AddMealModal: React.FC<{ state: { recipe?: Recipe; date: string; mealType: string }; onClose: () => void; onSave: (item: Omit<MealPlanItem, 'id'>) => void; }> = ({ state, onClose, onSave }) => {
+    const defaultServings = parseInt(state.recipe?.servings || '2');
+    const [servings, setServings] = useState(defaultServings);
+
+    useEffect(() => {
+        setServings(parseInt(state.recipe?.servings || '2'))
+    }, [state.recipe]);
+
+    const handleSave = () => {
+        if (!state.recipe) return;
+        onSave({
+            recipeId: state.recipe.id!,
+            date: state.date,
+            mealType: state.mealType as any,
+            servings: servings,
+            isCooked: false
+        });
+    };
+
+    if (!state.recipe) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={onClose}>
+            <div className="bg-zinc-800 rounded-lg p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+                <h3 className="text-lg font-bold mb-1">Zum Plan hinzufügen</h3>
+                <p className="text-amber-400 font-semibold mb-4">{state.recipe.recipeTitle}</p>
+                <div className="space-y-4">
+                     <p className="text-sm text-zinc-300">Am {new Date(state.date).toLocaleDateString('de-DE', {weekday: 'long', day: 'numeric', month: 'long'})} als {state.mealType}.</p>
+                    <div className="flex items-center justify-center gap-4">
+                         <label htmlFor="servings-input" className="font-semibold text-zinc-200">Portionen:</label>
+                         <div className="flex items-center gap-2">
+                             <button onClick={() => setServings(s => Math.max(1, s - 1))} className="p-2 rounded-full bg-zinc-700 hover:bg-zinc-600"><Minus size={18} /></button>
+                             <input id="servings-input" type="number" value={servings} onChange={(e) => setServings(parseInt(e.target.value, 10) || 1)} className="w-16 text-center bg-zinc-900 border border-zinc-700 rounded-md p-2 font-bold text-lg text-amber-400"/>
+                             <button onClick={() => setServings(s => s + 1)} className="p-2 rounded-full bg-zinc-700 hover:bg-zinc-600"><Plus size={18} /></button>
+                         </div>
+                    </div>
+                    <div className="flex justify-end gap-3 pt-4">
+                        <button onClick={onClose} className="py-2 px-4 rounded-md text-zinc-300 hover:bg-zinc-700">Abbrechen</button>
+                        <button onClick={handleSave} className="py-2 px-4 rounded-md bg-amber-500 text-zinc-900 font-bold hover:bg-amber-400">Hinzufügen</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+};
 
 
 // MAIN COMPONENT
@@ -203,8 +263,14 @@ const MealPlanner: React.FC<{ addToast: (message: string, type?: 'success' | 'er
     const [draggedMeal, setDraggedMeal] = useState<MealPlanItem | null>(null);
     const [dropTarget, setDropTarget] = useState<{ date: string; mealType: string } | null>(null);
     const [pickerState, setPickerState] = useState<{isOpen: boolean, date: string, mealType: string} | null>(null);
+    const [addMealState, setAddMealState] = useState<{isOpen: boolean, recipeId?: number, date?: string, mealType?: string}>({isOpen: false});
     const [genListModalOpen, setGenListModalOpen] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [cookingRecipe, setCookingRecipe] = useState<Recipe | null>(null);
+    const [cookingStep, setCookingStep] = useState(0);
+    const [sidebarSearchTerm, setSidebarSearchTerm] = useState('');
+    const debouncedSidebarSearch = useDebounce(sidebarSearchTerm, 300);
+    const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
     const { settings } = useSettings();
     const allRecipes = useLiveQuery(() => db.recipes.toArray(), []);
@@ -226,6 +292,13 @@ const MealPlanner: React.FC<{ addToast: (message: string, type?: 'success' | 'er
 
     const recipesById = useMemo(() => new Map<number, Recipe>((allRecipes || []).map(r => [r.id!, r])), [allRecipes]);
     const pantryMap = useMemo(() => new Map<string, number>((pantryItems || []).map(p => [p.name.toLowerCase(), p.quantity])), [pantryItems]);
+    
+    const sidebarRecipes = useMemo(() => {
+        if (!allRecipes) return [];
+        return allRecipes
+            .filter(r => showFavoritesOnly ? r.isFavorite : true)
+            .filter(r => r.recipeTitle.toLowerCase().includes(debouncedSidebarSearch.toLowerCase()));
+    }, [allRecipes, debouncedSidebarSearch, showFavoritesOnly]);
     
     const handleAction = useCallback(async (action: string, payload: any) => {
         if (action === 'view') setShowRecipeDetail(payload);
@@ -262,20 +335,21 @@ const MealPlanner: React.FC<{ addToast: (message: string, type?: 'success' | 'er
     const handleDrop = async (e: React.DragEvent, date: string, mealType: 'Frühstück' | 'Mittagessen' | 'Abendessen') => {
         e.preventDefault();
         setDropTarget(null);
-        if (draggedMeal) {
-            await db.mealPlan.update(draggedMeal.id!, { date, mealType });
-        }
+        try {
+            const data = JSON.parse(e.dataTransfer.getData('application/json'));
+            if (data.type === 'mealPlanItem') {
+                await db.mealPlan.update(data.id, { date, mealType });
+            } else if (data.type === 'recipe') {
+                setAddMealState({ isOpen: true, recipeId: data.id, date, mealType });
+            }
+        } catch (error) { console.error("Drop failed:", error) }
         setDraggedMeal(null);
     };
-    
-    const handleDragStart = (e: React.DragEvent, meal: MealPlanItem) => {
-        setDraggedMeal(meal);
-    };
-    
-    const handleSelectRecipeForSlot = async (recipeId: number) => {
+
+    const handleSelectRecipeForSlot = (recipeId: number) => {
         if (!pickerState) return;
-        await addRecipeToMealPlan({ recipeId, date: pickerState.date, mealType: pickerState.mealType as any, isCooked: false });
         setPickerState(null);
+        setAddMealState({isOpen: true, recipeId, date: pickerState.date, mealType: pickerState.mealType });
     };
 
     const handleAddNoteForSlot = async (note: string) => {
@@ -283,18 +357,39 @@ const MealPlanner: React.FC<{ addToast: (message: string, type?: 'success' | 'er
         await addRecipeToMealPlan({ note, date: pickerState.date, mealType: pickerState.mealType as any, isCooked: false });
         setPickerState(null);
     };
+    
+    const handleSaveNewMeal = async (item: Omit<MealPlanItem, 'id'>) => {
+        await addRecipeToMealPlan(item as MealPlanItem);
+        setAddMealState({isOpen: false});
+    };
+
+    const handleStartCookMode = (recipe: Recipe) => {
+        setCookingRecipe(recipe);
+        setCookingStep(0);
+    };
 
     if (showRecipeDetail) return <RecipeDetail recipe={showRecipeDetail} onBack={() => setShowRecipeDetail(null)} />;
+    if (cookingRecipe) return <CookModeView recipe={cookingRecipe} currentStep={cookingStep} setCurrentStep={setCookingStep} onExit={() => setCookingRecipe(null)} />;
 
     return (
       <div className="space-y-8">
         <RecipePickerModal isOpen={!!pickerState} onClose={() => setPickerState(null)} onSelectRecipe={handleSelectRecipeForSlot} onAddNote={handleAddNoteForSlot} recipes={allRecipes || []} />
         <GenerateShoppingListModal isOpen={genListModalOpen} onClose={() => setGenListModalOpen(false)} meals={mealPlan?.filter(m => m.recipeId && !m.isCooked) || []} recipes={recipesById} onGenerate={handleGenerateList} />
+        {/* FIX: Correctly construct the `state` prop for AddMealModal to satisfy type requirements. */}
+        {(() => {
+            if (addMealState.isOpen && addMealState.recipeId && addMealState.date && addMealState.mealType) {
+                const recipe = recipesById.get(addMealState.recipeId);
+                if (recipe) {
+                    return <AddMealModal state={{ recipe, date: addMealState.date, mealType: addMealState.mealType }} onClose={() => setAddMealState({ isOpen: false })} onSave={handleSaveNewMeal} />;
+                }
+            }
+            return null;
+        })()}
         
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
             <div>
                 <h2 className="text-3xl font-bold tracking-tight text-zinc-100">Essensplaner</h2>
-                <p className="text-zinc-400 mt-1">Plane deine Mahlzeiten. Die Anzeige unter jedem Rezept zeigt, wie viele Zutaten du im Vorrat hast.</p>
+                <p className="text-zinc-400 mt-1">Plane Mahlzeiten per Drag & Drop aus deiner Rezeptsammlung.</p>
             </div>
             <button onClick={() => setGenListModalOpen(true)} disabled={isGenerating} className="flex items-center justify-center gap-2 bg-amber-500 text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-amber-400 transition-colors disabled:bg-zinc-600">
                 {isGenerating ? <LoaderCircle size={18} className="animate-spin" /> : <ShoppingCart size={18} />}
@@ -302,41 +397,57 @@ const MealPlanner: React.FC<{ addToast: (message: string, type?: 'success' | 'er
             </button>
         </div>
         
-        <div className="bg-zinc-950/50 border border-zinc-800 rounded-lg p-4">
-             <div className="flex justify-between items-center mb-4">
-                <button onClick={() => setWeekOffset(weekOffset - 1)} className="p-2 rounded-md hover:bg-zinc-700"><ChevronLeft/></button>
-                <h3 className="text-lg font-semibold text-zinc-100 text-center">{week[0].toLocaleDateString('de-DE', {day: '2-digit', month: 'short'})} - {week[6].toLocaleDateString('de-DE', {day: '2-digit', month: 'short', year: 'numeric'})}</h3>
-                <button onClick={() => setWeekOffset(weekOffset + 1)} className="p-2 rounded-md hover:bg-zinc-700"><ChevronRight/></button>
-            </div>
+        <div className="flex flex-col lg:flex-row gap-8">
+            <main className="flex-grow">
+                <div className="bg-zinc-950/50 border border-zinc-800 rounded-lg p-4">
+                     <div className="flex justify-between items-center mb-4">
+                        <button onClick={() => setWeekOffset(weekOffset - 1)} className="p-2 rounded-md hover:bg-zinc-700"><ChevronLeft/></button>
+                        <h3 className="text-lg font-semibold text-zinc-100 text-center">{week[0].toLocaleDateString('de-DE', {day: '2-digit', month: 'short'})} - {week[6].toLocaleDateString('de-DE', {day: '2-digit', month: 'short', year: 'numeric'})}</h3>
+                        <button onClick={() => setWeekOffset(weekOffset + 1)} className="p-2 rounded-md hover:bg-zinc-700"><ChevronRight/></button>
+                    </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
-                {week.map(day => {
-                    const dateString = day.toISOString().split('T')[0];
-                    const dayMeals = mealPlan?.filter(item => item.date === dateString) || [];
-                    const isToday = new Date().toISOString().split('T')[0] === dateString;
-                    return (
-                        <div key={dateString} className={`rounded-lg p-3 flex flex-col gap-4 ${isToday ? 'bg-zinc-800/50' : 'bg-zinc-900'}`}>
-                            <h4 className={`font-bold text-center ${isToday ? 'text-amber-400' : 'text-zinc-300'}`}>{day.toLocaleDateString('de-DE', { weekday: 'short' })} <span className="text-zinc-400 font-normal">{day.getDate()}.</span></h4>
-                             {(['Frühstück', 'Mittagessen', 'Abendessen'] as const).map(mealType => {
-                                const mealsInSlot = dayMeals.filter(m => m.mealType === mealType);
-                                const isTarget = dropTarget?.date === dateString && dropTarget?.mealType === mealType;
-                                return (
-                                    <div key={mealType} onDragOver={(e) => { e.preventDefault(); setDropTarget({ date: dateString, mealType }); }} onDragLeave={() => setDropTarget(null)} onDrop={(e) => handleDrop(e, dateString, mealType)} 
-                                        className={`rounded-lg min-h-[100px] flex flex-col gap-2 p-2 transition-colors ${isTarget ? 'bg-amber-900/50 ring-2 ring-amber-500' : ''}`}>
-                                        <p className="text-xs font-semibold text-zinc-500">{mealType}</p>
-                                        <div className="space-y-2 flex-grow">
-                                            {mealsInSlot.map(meal => <PlannedMealCard key={meal.id} meal={meal} recipe={meal.recipeId ? recipesById.get(meal.recipeId) : undefined} pantryMap={pantryMap} onAction={handleAction} onDragStart={handleDragStart} /> )}
-                                            <button onClick={() => setPickerState({isOpen: true, date: dateString, mealType})} className="w-full text-zinc-500 border-2 border-dashed border-zinc-700 rounded-lg py-2 flex items-center justify-center gap-2 hover:bg-zinc-800 hover:text-amber-400 hover:border-amber-500 transition-colors">
-                                                <PlusCircle size={16}/> Mahlzeit
-                                            </button>
-                                        </div>
-                                    </div>
-                                );
-                             })}
-                        </div>
-                    );
-                })}
-            </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-7 gap-4">
+                        {week.map(day => {
+                            const dateString = day.toISOString().split('T')[0];
+                            const dayMeals = mealPlan?.filter(item => item.date === dateString) || [];
+                            const isToday = new Date().toISOString().split('T')[0] === dateString;
+                            return (
+                                <div key={dateString} className={`rounded-lg p-3 flex flex-col gap-4 ${isToday ? 'bg-zinc-800/50' : 'bg-zinc-900'}`}>
+                                    <h4 className={`font-bold text-center ${isToday ? 'text-amber-400' : 'text-zinc-300'}`}>{day.toLocaleDateString('de-DE', { weekday: 'short' })} <span className="text-zinc-400 font-normal">{day.getDate()}.</span></h4>
+                                     {(['Frühstück', 'Mittagessen', 'Abendessen'] as const).map(mealType => {
+                                        const mealsInSlot = dayMeals.filter(m => m.mealType === mealType);
+                                        const isTarget = dropTarget?.date === dateString && dropTarget?.mealType === mealType;
+                                        return (
+                                            <div key={mealType} onDragOver={(e) => { e.preventDefault(); setDropTarget({ date: dateString, mealType }); }} onDragLeave={() => setDropTarget(null)} onDrop={(e) => handleDrop(e, dateString, mealType)} 
+                                                className={`rounded-lg min-h-[100px] flex flex-col gap-2 p-2 transition-colors ${isTarget ? 'bg-amber-900/50 ring-2 ring-amber-500' : ''}`}>
+                                                <p className="text-xs font-semibold text-zinc-500">{mealType}</p>
+                                                <div className="space-y-2 flex-grow">
+                                                    {mealsInSlot.map(meal => <PlannedMealCard key={meal.id} meal={meal} recipe={meal.recipeId ? recipesById.get(meal.recipeId) : undefined} pantryMap={pantryMap} isToday={isToday} onAction={handleAction} onDragStart={(e, m) => { e.dataTransfer.setData('application/json', JSON.stringify({type: 'mealPlanItem', id: m.id})); setDraggedMeal(m);}} onCook={handleStartCookMode} /> )}
+                                                    <button onClick={() => setPickerState({isOpen: true, date: dateString, mealType})} className="w-full text-zinc-500 border-2 border-dashed border-zinc-700 rounded-lg py-2 flex items-center justify-center gap-2 hover:bg-zinc-800 hover:text-amber-400 hover:border-amber-500 transition-colors">
+                                                        <PlusCircle size={16}/> Mahlzeit
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                     })}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </main>
+            <aside className="w-full lg:w-1/3 xl:w-1/4 flex-shrink-0">
+                 <div className="bg-zinc-950/50 border border-zinc-800 rounded-lg p-4 sticky top-20">
+                     <h3 className="text-xl font-bold text-amber-400 mb-4 flex items-center gap-2"><BookOpen />Rezeptbuch</h3>
+                     <div className="flex gap-2 mb-4">
+                        <div className="relative flex-grow"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} /><input type="text" placeholder="Suchen..." value={sidebarSearchTerm} onChange={e => setSidebarSearchTerm(e.target.value)} className="w-full bg-zinc-800 border-zinc-700 rounded-md py-2 pl-9 pr-3 text-sm focus:ring-2 focus:ring-amber-500" /></div>
+                        <button onClick={() => setShowFavoritesOnly(p => !p)} className={`p-2 rounded-md ${showFavoritesOnly ? 'bg-amber-500 text-zinc-900' : 'bg-zinc-800 text-zinc-300'}`} title="Nur Favoriten"><Star size={18}/></button>
+                     </div>
+                     <div className="h-[60vh] overflow-y-auto space-y-4 pr-2 -mr-2">
+                        {sidebarRecipes?.map(recipe => <RecipeCard key={recipe.id} recipe={recipe} size="small" isDraggable={true} onSelectRecipe={setShowRecipeDetail}/>)}
+                     </div>
+                 </div>
+            </aside>
         </div>
       </div>
     );

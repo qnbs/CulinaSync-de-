@@ -123,6 +123,8 @@ const Settings: React.FC<SettingsProps> = ({ focusAction, onActionHandled }) => 
 
     const handleResetData = () => {
         setResetModalOpen(false);
+        // FIX: Corrected db.delete() which was not found on the previous incorrect db type.
+        // The fix in services/db.ts ensures `db` is a proper Dexie instance with a `delete()` method.
         db.delete().then(() => {
             localStorage.clear();
             showFeedback('Alle Daten zurückgesetzt. App wird neu geladen...', 'info');

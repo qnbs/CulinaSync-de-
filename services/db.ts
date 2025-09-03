@@ -8,57 +8,60 @@ import { scaleIngredientQuantity, getCategoryForItem } from '@/services/utils';
  * @description Each property represents a table (object store) in the IndexedDB.
  * The schema defines table names, primary keys, and indexed properties for efficient querying.
  */
-// FIX: Replaced Dexie subclass with a typed instance to resolve issues where Dexie methods (like .version, .on, .transaction, .open) were not found on the class type.
-// This alternative pattern for typing the database is more robust and solves the cascading type errors throughout the file.
-interface ICulinaSyncDB extends Dexie {
-  pantry: Table<PantryItem, number>;
-  recipes: Table<Recipe, number>;
-  mealPlan: Table<MealPlanItem, number>;
-  shoppingList: Table<ShoppingListItem, number>;
-}
-export const db = new Dexie('CulinaSyncDB') as ICulinaSyncDB;
+// FIX: Switched to the standard Dexie subclassing pattern for robust typing.
+// This resolves issues where Dexie methods (like .version, .on, .transaction) were not found on the db instance type.
+class CulinaSyncDB extends Dexie {
+    pantry!: Table<PantryItem, number>;
+    recipes!: Table<Recipe, number>;
+    mealPlan!: Table<MealPlanItem, number>;
+    shoppingList!: Table<ShoppingListItem, number>;
 
-db.version(5).stores({
-  pantry: '++id, name, expiryDate, createdAt, category',
-  recipes: '++id, recipeTitle, isFavorite, *tags.course, *tags.cuisine, *tags.mainIngredient',
-  mealPlan: '++id, date, recipeId, isCooked',
-  shoppingList: '++id, name, isChecked',
-});
+    constructor() {
+        super('CulinaSyncDB');
+        this.version(5).stores({
+            pantry: '++id, name, expiryDate, createdAt, category',
+            recipes: '++id, recipeTitle, isFavorite, *tags.course, *tags.cuisine, *tags.mainIngredient',
+            mealPlan: '++id, date, recipeId, isCooked',
+            shoppingList: '++id, name, isChecked',
+        });
 
+        /**
+         * @summary Handles the initial population of the database with default data.
+         * @description This event fires only once when the database is first created with this version schema.
+         * It pre-fills the pantry with some example items and adds all recipes from the seed data.
+         */
+        this.on('populate', async () => {
+            console.log("Populating database for the first time...");
+            try {
+                const today = new Date();
+                const expiringSoon = new Date();
+                expiringSoon.setDate(today.getDate() + 2);
+                const expired = new Date();
+                expired.setDate(today.getDate() - 2);
 
-/**
- * @summary Handles the initial population of the database with default data.
- * @description This event fires only once when the database is first created with this version schema.
- * It pre-fills the pantry with some example items and adds all recipes from the seed data.
- */
-db.on('populate', async () => {
-    console.log("Populating database for the first time...");
-    try {
-        const today = new Date();
-        const expiringSoon = new Date();
-        expiringSoon.setDate(today.getDate() + 2);
-        const expired = new Date();
-        expired.setDate(today.getDate() - 2);
+                await this.pantry.bulkAdd([
+                    { name: 'Tomatenmark', quantity: 1, unit: 'Dose', category: 'Konserven', createdAt: Date.now() - 200000, expiryDate: new Date(2025, 1, 1).toISOString().split('T')[0] },
+                    { name: 'Knoblauch', quantity: 3, unit: 'Zehen', category: 'Frischeprodukte', createdAt: Date.now() - 100000 },
+                    { name: 'Zwiebel', quantity: 1, unit: 'Stück', category: 'Frischeprodukte', createdAt: Date.now(), minQuantity: 2 },
+                    { name: 'Spaghetti', quantity: 500, unit: 'g', category: 'Trockenwaren', createdAt: Date.now() - 300000 },
+                    { name: 'Olivenöl', quantity: 250, unit: 'ml', category: 'Öle & Essige', createdAt: Date.now() - 400000, minQuantity: 100 },
+                    { name: 'Milch', quantity: 1, unit: 'l', category: 'Milchprodukte', createdAt: Date.now() - 50000, expiryDate: expiringSoon.toISOString().split('T')[0] },
+                    { name: 'Joghurt', quantity: 500, unit: 'g', category: 'Milchprodukte', createdAt: Date.now() - 60000, expiryDate: expired.toISOString().split('T')[0] },
+                ]);
+                console.log("Default pantry items added.");
 
-        await db.pantry.bulkAdd([
-            { name: 'Tomatenmark', quantity: 1, unit: 'Dose', category: 'Konserven', createdAt: Date.now() - 200000, expiryDate: new Date(2025, 1, 1).toISOString().split('T')[0] },
-            { name: 'Knoblauch', quantity: 3, unit: 'Zehen', category: 'Frischeprodukte', createdAt: Date.now() - 100000 },
-            { name: 'Zwiebel', quantity: 1, unit: 'Stück', category: 'Frischeprodukte', createdAt: Date.now(), minQuantity: 2 },
-            { name: 'Spaghetti', quantity: 500, unit: 'g', category: 'Trockenwaren', createdAt: Date.now() - 300000 },
-            { name: 'Olivenöl', quantity: 250, unit: 'ml', category: 'Öle & Essige', createdAt: Date.now() - 400000, minQuantity: 100 },
-            { name: 'Milch', quantity: 1, unit: 'l', category: 'Milchprodukte', createdAt: Date.now() - 50000, expiryDate: expiringSoon.toISOString().split('T')[0] },
-            { name: 'Joghurt', quantity: 500, unit: 'g', category: 'Milchprodukte', createdAt: Date.now() - 60000, expiryDate: expired.toISOString().split('T')[0] },
-        ]);
-        console.log("Default pantry items added.");
-
-        if (seedRecipes.length > 0) {
-            await db.recipes.bulkAdd(seedRecipes.map(r => ({ ...r, isFavorite: false })));
-            console.log(`${seedRecipes.length} seed recipes added during initial population.`);
-        }
-    } catch (error) {
-        console.error("Failed during initial database population:", error);
+                if (seedRecipes.length > 0) {
+                    await this.recipes.bulkAdd(seedRecipes.map(r => ({ ...r, isFavorite: false })));
+                    console.log(`${seedRecipes.length} seed recipes added during initial population.`);
+                }
+            } catch (error) {
+                console.error("Failed during initial database population:", error);
+            }
+        });
     }
-});
+}
+
+export const db = new CulinaSyncDB();
 
 
 /**
