@@ -35,6 +35,7 @@ export const loadSettings = (): AppSettings => {
       // Merge with defaults to handle new settings being added in updates
       const parsed = JSON.parse(storedSettings);
       const defaults = getDefaultSettings();
+      // Deep merge nested objects
       return { 
           ...defaults, 
           ...parsed, 

@@ -3,8 +3,8 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/services/db';
 import { Recipe, PantryItem } from '@/types';
-import RecipeList from '@/components/RecipeList';
-import RecipeDetail from '@/components/RecipeDetail';
+import RecipeList from './RecipeList';
+import RecipeDetail from './RecipeDetail';
 import { BookOpen, Search, X, ListFilter, Star, CheckSquare, CalendarPlus, LoaderCircle, CookingPot } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { checkRecipePantryMatch } from '@/services/utils';
@@ -95,7 +95,6 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelec
   const [dietFilter, setDietFilter] = useState('');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [pantryFilter, setPantryFilter] = useState(false);
-  const [isFilterModalOpen, setFilterModalOpen] = useState(false);
 
   // Bulk add state
   const [isSelectMode, setSelectMode] = useState(false);
@@ -162,6 +161,7 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelec
   }, [savedRecipes]);
 
   const clearFilters = () => {
+    setSearchTerm('');
     setSortBy('newest');
     setCourseFilter('');
     setCuisineFilter('');
@@ -172,6 +172,9 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelec
     setPantryFilter(false);
   };
 
+  // FIX: Replaced faulty filtering logic with a correct and performant Dexie query.
+  // The new implementation chains Dexie's .filter() method for multiple criteria,
+  // which is the correct approach for applying multiple optional filters efficiently.
   const filteredRecipes = useLiveQuery(
     async () => {
       if (!pantryItems) return [];
@@ -236,12 +239,10 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelec
     );
   }
   
-  const hasActiveFilters = sortBy !== 'newest' || courseFilter || cuisineFilter || mainIngredientFilter || difficultyFilter || dietFilter || showFavoritesOnly || pantryFilter;
-  const activeFilterCount = [courseFilter, cuisineFilter, mainIngredientFilter, difficultyFilter, dietFilter, showFavoritesOnly, pantryFilter].filter(Boolean).length;
-
+  const hasActiveFilters = searchTerm || sortBy !== 'newest' || courseFilter || cuisineFilter || mainIngredientFilter || difficultyFilter || dietFilter || showFavoritesOnly || pantryFilter;
 
   return (
-    <div className="space-y-8 pb-20 md:pb-8">
+    <div className="space-y-8 pb-24">
       <BulkAddToPlanModal 
         isOpen={isBulkModalOpen}
         onClose={() => setBulkModalOpen(false)}
@@ -252,29 +253,7 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelec
             handleToggleSelectMode(); // Exit select mode
         }}
       />
-      {isFilterModalOpen && (
-         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 page-fade-in" onClick={() => setFilterModalOpen(false)}>
-            <div className="bg-zinc-800 rounded-lg p-6 w-full max-w-lg shadow-xl" onClick={e => e.stopPropagation()}>
-                <h3 className="text-xl font-bold mb-6">Rezepte filtern & sortieren</h3>
-                <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
-                    <select onChange={e => setSortBy(e.target.value)} value={sortBy} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" aria-label="Sortieren nach"><option value="newest">Sortieren: Neueste zuerst</option><option value="favorites">Sortieren: Favoriten zuerst</option><option value="a-z">Sortieren: Name (A-Z)</option><option value="z-a">Sortieren: Name (Z-A)</option></select>
-                    <select onChange={e => setCourseFilter(e.target.value)} value={courseFilter} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" aria-label="Nach Gang filtern"><option value="">Alle Gänge</option>{filterOptions.courses.map(c => <option key={c} value={c}>{c}</option>)}</select>
-                    <select onChange={e => setCuisineFilter(e.target.value)} value={cuisineFilter} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" aria-label="Nach Küche filtern"><option value="">Alle Küchen</option>{filterOptions.cuisines.map(c => <option key={c} value={c}>{c}</option>)}</select>
-                    <select onChange={e => setMainIngredientFilter(e.target.value)} value={mainIngredientFilter} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" aria-label="Nach Hauptzutat filtern"><option value="">Alle Hauptzutaten</option>{filterOptions.mainIngredients.map(i => <option key={i} value={i}>{i}</option>)}</select>
-                    <select onChange={e => setDifficultyFilter(e.target.value)} value={difficultyFilter} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" aria-label="Nach Schwierigkeit filtern"><option value="">Alle Schwierigkeiten</option>{filterOptions.difficulties.map(d => <option key={d} value={d}>{d}</option>)}</select>
-                    <select onChange={e => setDietFilter(e.target.value)} value={dietFilter} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" aria-label="Nach Ernährungsweise filtern"><option value="">Alle Ernährungsweisen</option>{filterOptions.diets.map(d => <option key={d} value={d}>{d}</option>)}</select>
-                    <div className="pt-3 border-t border-zinc-700 flex flex-col gap-3">
-                        <label className="flex items-center gap-3 cursor-pointer p-2 rounded-md hover:bg-zinc-700"><input type="checkbox" checked={pantryFilter} onChange={() => setPantryFilter(!pantryFilter)} className="h-4 w-4 rounded bg-zinc-600 border-zinc-500 text-amber-500 focus:ring-amber-500"/><span className="text-zinc-300 font-medium flex items-center gap-1.5"><CookingPot size={16} className="text-amber-400" /> Nur Kochbereite</span></label>
-                        <label className="flex items-center gap-3 cursor-pointer p-2 rounded-md hover:bg-zinc-700"><input type="checkbox" checked={showFavoritesOnly} onChange={() => setShowFavoritesOnly(!showFavoritesOnly)} className="h-4 w-4 rounded bg-zinc-600 border-zinc-500 text-amber-500 focus:ring-amber-500"/><span className="text-zinc-300 font-medium flex items-center gap-1.5"><Star size={16} className="text-amber-400" /> Nur Favoriten</span></label>
-                    </div>
-                </div>
-                 <div className="flex justify-between items-center gap-3 pt-4 mt-4 border-t border-zinc-700">
-                    <button onClick={clearFilters} disabled={!hasActiveFilters} className="flex items-center gap-2 text-sm text-amber-400 hover:text-amber-300 font-semibold disabled:text-zinc-600 disabled:cursor-not-allowed"><X size={16} /> Zurücksetzen</button>
-                    <button onClick={() => setFilterModalOpen(false)} className="py-2 px-4 rounded-md bg-amber-500 text-zinc-900 font-bold hover:bg-amber-400">Anwenden</button>
-                </div>
-            </div>
-         </div>
-      )}
+
       <div>
         <h2 className="text-3xl font-bold tracking-tight text-zinc-100">Mein Kochbuch</h2>
         <p className="text-zinc-400 mt-1">Deine Sammlung von generierten und gespeicherten Rezepten.</p>
@@ -282,28 +261,66 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelec
 
       {savedRecipes && savedRecipes.length > 0 && (
         <div className="space-y-4 p-4 bg-zinc-950/50 border border-zinc-800 rounded-lg">
-          <div className="flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-grow">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="relative md:col-span-2">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={20} />
                   <input 
                       ref={searchInputRef}
                       type="text" 
-                      placeholder="Rezepte durchsuchen..." 
+                      placeholder="Rezepte nach Titel durchsuchen..." 
                       value={searchTerm} 
                       onChange={e => setSearchTerm(e.target.value)} 
                       className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 pl-10 focus:ring-2 focus:ring-amber-500" 
                       aria-label="Rezepte durchsuchen"
                   />
               </div>
-              <div className='flex gap-2'>
-                <button onClick={() => setFilterModalOpen(true)} className="flex-grow flex items-center justify-center gap-2 p-2 rounded-md bg-zinc-800 text-zinc-300 hover:bg-zinc-700 relative">
-                    <ListFilter size={20} /> 
-                    <span className="hidden sm:inline">Filter</span>
-                    {activeFilterCount > 0 && <span className="absolute -top-1 -right-1 bg-amber-500 text-zinc-900 text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">{activeFilterCount}</span>}
-                </button>
-                <button onClick={handleToggleSelectMode} className={`p-2 rounded-md transition-colors ${isSelectMode ? 'bg-amber-500 text-zinc-900' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`} title="Auswählen"><CheckSquare size={20} /></button>
-              </div>
           </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <select onChange={e => setSortBy(e.target.value)} value={sortBy} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" aria-label="Sortieren nach">
+                <option value="newest">Sortieren: Neueste zuerst</option>
+                <option value="favorites">Sortieren: Favoriten zuerst</option>
+                <option value="a-z">Sortieren: Name (A-Z)</option>
+                <option value="z-a">Sortieren: Name (Z-A)</option>
+            </select>
+            <select onChange={e => setCourseFilter(e.target.value)} value={courseFilter} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" aria-label="Nach Gang filtern">
+              <option value="">Alle Gänge</option>
+              {filterOptions.courses.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <select onChange={e => setCuisineFilter(e.target.value)} value={cuisineFilter} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" aria-label="Nach Küche filtern">
+              <option value="">Alle Küchen</option>
+              {filterOptions.cuisines.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <select onChange={e => setMainIngredientFilter(e.target.value)} value={mainIngredientFilter} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" aria-label="Nach Hauptzutat filtern">
+              <option value="">Alle Hauptzutaten</option>
+              {filterOptions.mainIngredients.map(i => <option key={i} value={i}>{i}</option>)}
+            </select>
+            <select onChange={e => setDifficultyFilter(e.target.value)} value={difficultyFilter} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" aria-label="Nach Schwierigkeit filtern">
+              <option value="">Alle Schwierigkeiten</option>
+              {filterOptions.difficulties.map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
+             <select onChange={e => setDietFilter(e.target.value)} value={dietFilter} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" aria-label="Nach Ernährungsweise filtern">
+              <option value="">Alle Ernährungsweisen</option>
+              {filterOptions.diets.map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
+          </div>
+          <div className="pt-3 border-t border-zinc-800 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <button onClick={clearFilters} disabled={!hasActiveFilters} className="flex items-center gap-2 text-sm text-amber-400 hover:text-amber-300 font-semibold disabled:text-zinc-600 disabled:cursor-not-allowed">
+                    <X size={16} /> Alle Filter zurücksetzen
+                </button>
+                <div className="flex items-center gap-4 flex-wrap justify-center sm:justify-end">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked={pantryFilter} onChange={() => setPantryFilter(!pantryFilter)} className="h-4 w-4 rounded bg-zinc-700 border-zinc-600 text-amber-500 focus:ring-amber-500"/>
+                        <span className="text-zinc-300 text-sm font-medium flex items-center gap-1"><CookingPot size={14} className="text-amber-400" /> Nur Kochbereite</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked={showFavoritesOnly} onChange={() => setShowFavoritesOnly(!showFavoritesOnly)} className="h-4 w-4 rounded bg-zinc-700 border-zinc-600 text-amber-500 focus:ring-amber-500"/>
+                        <span className="text-zinc-300 text-sm font-medium flex items-center gap-1"><Star size={14} className="text-amber-400" /> Nur Favoriten</span>
+                    </label>
+                     <button onClick={handleToggleSelectMode} className={`flex items-center gap-2 text-sm font-semibold py-1 px-3 rounded-md transition-colors ${isSelectMode ? 'bg-amber-500 text-zinc-900' : 'text-amber-400 hover:text-amber-300'}`}>
+                        <CheckSquare size={16} /> {isSelectMode ? 'Abbrechen' : 'Auswählen'}
+                    </button>
+                </div>
+            </div>
         </div>
       )}
 
@@ -328,7 +345,7 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelec
                 </p>
                 {savedRecipes && savedRecipes.length > 0 && hasActiveFilters && (
                     <button onClick={clearFilters} className="mt-6 flex mx-auto items-center gap-2 bg-amber-500 text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-amber-400 transition-colors">
-                        <X size={18} /> Filter zurücksetzen
+                        <ListFilter size={18} /> Filter zurücksetzen
                     </button>
                 )}
             </div>
@@ -338,7 +355,7 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelec
       )}
 
       {isSelectMode && selectedIds.length > 0 && (
-          <div className="fixed bottom-20 md:bottom-4 left-1/2 -translate-x-1/2 bg-zinc-800/80 backdrop-blur-md border border-zinc-700 rounded-lg p-3 flex justify-between items-center w-full max-w-sm shadow-xl page-fade-in z-20">
+          <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-zinc-800/80 backdrop-blur-md border border-zinc-700 rounded-lg p-3 flex justify-between items-center w-full max-w-sm shadow-xl page-fade-in z-20">
               <span className="font-semibold text-zinc-200">{selectedIds.length} Rezept(e) ausgewählt</span>
               <button onClick={() => setBulkModalOpen(true)} className="flex items-center gap-2 bg-amber-500 text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-amber-400 transition-colors">
                   <CalendarPlus size={18}/> Zum Plan

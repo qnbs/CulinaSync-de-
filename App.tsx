@@ -1,8 +1,6 @@
-
-
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import Header from '@/components/Header';
-import CommandPalette, { Command } from '@/components/CommandPalette';
+import CommandPalette, { type Command } from '@/components/CommandPalette';
 import { Page } from '@/types';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import { processCommand } from '@/services/voiceCommands';
@@ -50,16 +48,6 @@ const App: React.FC = () => {
       .catch(() => setAppVersion('N/A'));
   }, []);
 
-  const {
-    finalTranscript,
-    interimTranscript,
-    startListening,
-    stopListening,
-    isListening,
-    hasRecognitionSupport,
-    error: speechError,
-  } = useSpeechRecognition();
-
   const removeToast = useCallback((id: number) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   }, []);
@@ -71,6 +59,22 @@ const App: React.FC = () => {
         removeToast(id);
     }, 4000);
   }, [removeToast]);
+
+  const {
+    finalTranscript,
+    interimTranscript,
+    startListening,
+    stopListening,
+    isListening,
+    hasRecognitionSupport,
+    error: speechError,
+  } = useSpeechRecognition();
+  
+  useEffect(() => {
+    if (speechError) {
+        addToast(speechError, 'error');
+    }
+  }, [speechError, addToast]);
   
   
   const navigate = useCallback((page: Page, focusTarget?: string) => {
@@ -225,7 +229,7 @@ const App: React.FC = () => {
           hasRecognitionSupport={hasRecognitionSupport}
           onCommandPaletteToggle={() => setCommandPaletteOpen(true)}
         />
-        <main key={currentPage} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 page-fade-in pb-24">
+        <main key={currentPage} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 page-fade-in pb-20 md:pb-8">
           <Suspense fallback={<LoadingSpinner />}>
               {renderPage()}
           </Suspense>
@@ -243,7 +247,6 @@ const App: React.FC = () => {
         />
 
         <VoiceControlUI isListening={isListening} transcript={interimTranscript} />
-        {speechError && <div className="fixed bottom-16 sm:bottom-4 right-4 bg-red-800/80 backdrop-blur-md text-white p-3 rounded-lg shadow-lg z-50 max-w-sm">{speechError}</div>}
         
         <div aria-live="assertive" className="fixed inset-0 flex items-end px-4 py-6 pointer-events-none sm:p-6 sm:items-start z-50">
             <div className="w-full flex flex-col items-center space-y-4 sm:items-end">

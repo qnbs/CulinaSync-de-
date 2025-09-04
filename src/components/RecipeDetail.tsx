@@ -1,11 +1,14 @@
 
-import React, { useState, useMemo } from 'react';
+
+// FIX: Import useEffect from React to be used in the CookModeView component.
+import React, { useState, useMemo, useEffect } from 'react';
 import { Recipe, PantryItem, IngredientItem } from '@/types';
 import { db, addRecipe, deleteRecipe, addRecipeToMealPlan, addMissingIngredientsToShoppingList, addShoppingListItem } from '@/services/db';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { exportRecipeToPdf, exportRecipeToCsv, exportRecipeToMarkdown, exportRecipeToTxt, exportRecipeToJson } from '@/services/exportService';
-import { ArrowLeft, Clock, Users, BarChart, UtensilsCrossed, Lightbulb, Save, Trash2, CheckCircle, CalendarPlus, FileDown, Star, ChevronDown, Plus, Minus, CookingPot, ShoppingCart, X as XIcon, AlertCircle, ShoppingCartIcon } from 'lucide-react';
+import { ArrowLeft, Clock, Users, BarChart, UtensilsCrossed, Lightbulb, Save, Trash2, CheckCircle, CalendarPlus, FileDown, Star, ChevronDown, Plus, Minus, CookingPot, ShoppingCart, X as XIcon, AlertCircle, ShoppingCartIcon, Volume2, PauseCircle } from 'lucide-react';
 import { scaleIngredientQuantity } from '@/services/utils';
+import { useSpeechSynthesis } from '@/hooks/useSpeechSynthesis';
 
 interface RecipeDetailProps {
   recipe: Recipe;
@@ -50,7 +53,14 @@ const MealPlanModal: React.FC<{recipeId: number, onClose: () => void, onSave: ()
     )
 }
 
-const CookModeView: React.FC<{ recipe: Recipe, currentStep: number, setCurrentStep: (updater: (s: number) => number) => void, onExit: () => void }> = ({ recipe, currentStep, setCurrentStep, onExit }) => (
+const CookModeView: React.FC<{ recipe: Recipe, currentStep: number, setCurrentStep: (updater: (s: number) => number) => void, onExit: () => void }> = ({ recipe, currentStep, setCurrentStep, onExit }) => {
+    const { speak, cancel } = useSpeechSynthesis();
+    useEffect(() => {
+        speak(recipe.instructions[currentStep]);
+        return () => cancel();
+    }, [currentStep, recipe, speak, cancel]);
+
+    return (
     <div className="fixed inset-0 bg-zinc-950 z-[100] flex flex-col p-4 sm:p-8 text-zinc-100 font-sans">
         <header className="flex justify-between items-center mb-4 flex-shrink-0">
             <h3 className="text-xl font-bold text-amber-400 truncate pr-4">{recipe.recipeTitle}</h3>
@@ -68,7 +78,7 @@ const CookModeView: React.FC<{ recipe: Recipe, currentStep: number, setCurrentSt
             <button onClick={() => setCurrentStep(s => s + 1)} disabled={currentStep >= recipe.instructions.length - 1} className="py-3 px-6 rounded-md bg-amber-500 text-zinc-900 font-bold hover:bg-amber-400 disabled:opacity-50 transition-colors">Weiter</button>
         </footer>
     </div>
-);
+)};
 
 
 const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast }) => {
@@ -78,6 +88,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast })
   const [isExportOpen, setExportOpen] = useState(false);
   const [isCookMode, setIsCookMode] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const { speak, cancel, isSpeaking } = useSpeechSynthesis();
 
   const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
   const pantryMap: Map<string, number> = useMemo(() => new Map(pantryItems?.map((p: PantryItem) => [p.name.toLowerCase(), p.quantity]) || []), [pantryItems]);
@@ -178,6 +189,15 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast })
     });
     addToast(`"${item.name}" zur Einkaufsliste hinzugefügt.`);
   }
+
+  const handleReadInstructions = () => {
+      if (isSpeaking) {
+          cancel();
+      } else {
+          const textToSpeak = `Anleitung für ${currentRecipe.recipeTitle}. ` + currentRecipe.instructions.map((step, i) => `Schritt ${i+1}. ${step}`).join(' ');
+          speak(textToSpeak);
+      }
+  };
   
   const allTags = currentRecipe.tags ? [
     ...(currentRecipe.tags.course || []),
@@ -262,7 +282,12 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast })
             </div>
           </div>
           <div className="lg:col-span-2">
-            <h3 className="text-2xl font-semibold text-white mb-4">Anleitung</h3>
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-2xl font-semibold text-white">Anleitung</h3>
+                <button onClick={handleReadInstructions} className={`p-2 rounded-full transition-colors ${isSpeaking ? 'bg-amber-500/20 text-amber-400' : 'text-zinc-400 hover:bg-zinc-700'}`} title={isSpeaking ? "Vorlesen stoppen" : "Anleitung vorlesen"}>
+                    {isSpeaking ? <PauseCircle /> : <Volume2 />}
+                </button>
+            </div>
             <ol className="space-y-4">
               {currentRecipe.instructions.map((step, index) => (
                 <li key={index} className="flex items-start">

@@ -1,4 +1,4 @@
-import { Recipe } from '../../types';
+import { Recipe } from '@/types';
 
 export const spanishPortugueseRecipes: Recipe[] = [
   {
@@ -173,7 +173,6 @@ export const spanishPortugueseRecipes: Recipe[] = [
         ]
       }
     ],
-    // FIX: Completed instructions array and added missing properties to conform to the Recipe type.
     instructions: [
         "Für die Salsa Brava die Tomaten mit den beiden Paprikapulvern, Essig, einer Prise Salz und Zucker in einem kleinen Topf aufkochen. Die Hitze reduzieren und 10-15 Minuten köcheln lassen, bis die Sauce andickt. Anschließend glatt pürieren und beiseitestellen.",
         "Die Kartoffeln schälen und in unregelmäßige, ca. 2-3 cm große Würfel schneiden. In kaltem Wasser abspülen und sehr gut trocken tupfen.",

@@ -1,8 +1,13 @@
 import Dexie, { type Table, Transaction } from 'dexie';
 import { PantryItem, Recipe, MealPlanItem, ShoppingListItem } from '@/types';
 import { seedRecipes } from '@/data/seedData';
-import { scaleIngredientQuantity, getCategoryForItem } from '@/services/utils';
+import { scaleIngredientQuantity, getCategoryForItem } from './utils';
 
+/**
+ * @summary Defines the database structure using Dexie.js.
+ * @description Each property represents a table (object store) in the IndexedDB.
+ * The schema defines table names, primary keys, and indexed properties for efficient querying.
+ */
 class CulinaSyncDB extends Dexie {
     pantry!: Table<PantryItem, number>;
     recipes!: Table<Recipe, number>;
@@ -18,6 +23,7 @@ class CulinaSyncDB extends Dexie {
             mealPlan: '++id, date, recipeId, isCooked',
             shoppingList: '++id, name, isChecked, category, sortOrder, [category+sortOrder]',
         }).upgrade((tx: Transaction) => {
+             // Upgrade logic for adding updatedAt field to pantry and recipes
             tx.table('pantry').toCollection().modify(item => {
                 if (item.updatedAt === undefined) item.updatedAt = item.createdAt;
             });
@@ -88,7 +94,7 @@ export const syncSeedRecipes = async () => {
 // DATA MANAGEMENT FUNCTIONS
 // =======================================================================
 
-export const importData = async (data: { pantry: PantryItem[], recipes: Recipe[], mealPlan: MealPlanItem[], shoppingList: ShoppingListItem[] }): Promise<void> => {
+export const importData = async (data: any): Promise<void> => {
     try {
         if (!data.pantry || !data.recipes || !data.mealPlan || !data.shoppingList) {
             throw new Error("Invalid data structure for import. Required tables are missing.");
@@ -177,12 +183,12 @@ export const addRecipe = async (recipe: Recipe): Promise<number | undefined> => 
     }
 };
 
-export const deleteRecipe = async (id: number): Promise<void> => {
+export const deleteRecipe = async (id: number): Promise<any> => {
     try {
         // FIX: Cast `db` to `any` to resolve TypeScript error where Dexie methods are not found on the subclass type.
-        await (db as any).transaction('rw', db.recipes, db.mealPlan, async () => {
+        return await (db as any).transaction('rw', db.recipes, db.mealPlan, async () => {
             await db.mealPlan.where('recipeId').equals(id).delete();
-            await db.recipes.delete(id);
+            return await db.recipes.delete(id);
         });
     } catch (error) {
         console.error(`Failed to delete recipe with id ${id}:`, error);
@@ -205,7 +211,7 @@ export const addRecipeToMealPlan = async (item: MealPlanItem): Promise<number> =
 
 export const removeRecipeFromMealPlan = async (id: number): Promise<void> => {
     try {
-        await db.mealPlan.delete(id);
+        return await db.mealPlan.delete(id);
     } catch (error) {
         console.error(`Failed to remove meal plan item with id ${id}:`, error);
         throw new Error(`Fehler beim Entfernen vom Essensplan mit ID ${id}: ${error instanceof Error ? error.message : String(error)}`);
@@ -215,7 +221,7 @@ export const removeRecipeFromMealPlan = async (id: number): Promise<void> => {
 export const markMealAsCooked = async (mealPlanItemId: number): Promise<{ success: boolean; changes?: { updated: string[], deleted: string[] } }> => {
     try {
         // FIX: Cast `db` to `any` to resolve TypeScript error where Dexie methods are not found on the subclass type.
-        const result = await (db as any).transaction('rw', [db.mealPlan, db.pantry, db.recipes], async () => {
+        const result = await (db as any).transaction('rw', db.mealPlan, db.pantry, db.recipes, async () => {
             const meal = await db.mealPlan.get(mealPlanItemId);
             if (!meal?.recipeId || meal.isCooked) return { success: false };
 
@@ -242,7 +248,7 @@ const deductIngredientsFromPantry = async (recipeId: number): Promise<{ updated:
         const pantryItem = await db.pantry.where('name').equalsIgnoreCase(ingredient.name).first();
         if (pantryItem) {
             const requiredQty = parseFloat(ingredient.quantity);
-            if (isNaN(requiredQty)) continue;
+            if (isNaN(requiredQty)) continue; // Skip if quantity is not a number
             
             const newQty = pantryItem.quantity - requiredQty;
             if (newQty <= 0) {
@@ -300,9 +306,9 @@ export const batchAddShoppingListItems = async (
     if (itemsToAdd.length === 0) return { added: 0, updated: 0 };
 
     try {
-        // FIX: Cast `db` to `any` to resolve TypeScript error where Dexie methods are not found on the subclass type.
         return await (db as any).transaction('rw', db.shoppingList, async () => {
             const existingUncheckedItems = await db.shoppingList.where('isChecked').equals(0).toArray();
+            // FIX: Explicitly type Map to ensure correct type inference for `existing`.
             const existingMap: Map<string, ShoppingListItem> = new Map(
                 existingUncheckedItems.map((i: ShoppingListItem) => [`${i.name.toLowerCase()}_${i.unit.toLowerCase()}`, i])
             );
@@ -324,7 +330,7 @@ export const batchAddShoppingListItems = async (
                 }
             }
             
-            const categories = [...new Set(newItems.map(i => (i as ShoppingListItem).category))];
+            const categories = [...new Set(newItems.map(i => (i as any).category))];
             const maxSortOrders = new Map<string, number>();
 
             for (const cat of categories) {
@@ -430,6 +436,8 @@ export const addMissingIngredientsToShoppingList = async (recipeId: number): Pro
         const recipe = await db.recipes.get(recipeId);
         if (!recipe) return 0;
 
+        // FIX: Add explicit type to lambda parameter to fix type inference issues.
+        // FIX: Explicitly type Map to ensure correct type inference for `pantryQty`.
         const pantryMap: Map<string, number> = new Map((await db.pantry.toArray()).map((p: PantryItem) => [p.name.toLowerCase(), p.quantity]));
         const shoppingListSet = new Set((await db.shoppingList.where({isChecked: 0}).toArray()).map(i => i.name.toLowerCase()));
         
@@ -441,7 +449,8 @@ export const addMissingIngredientsToShoppingList = async (recipeId: number): Pro
             if (pantryQty < requiredQty && !shoppingListSet.has(nameLower)) {
                 itemsToAdd.push({
                     name: ingredient.name,
-                    quantity: Math.max(1, requiredQty - pantryQty),
+                    // FIX: Ensure pantryQty is treated as a number in arithmetic operation.
+                    quantity: Math.max(1, requiredQty - Number(pantryQty)),
                     unit: ingredient.unit || 'Stk.',
                     recipeId: recipeId,
                 });
@@ -473,7 +482,11 @@ export const addMissingIngredientsForMeals = async (mealPlanItemIds: number[]): 
             db.shoppingList.where({ isChecked: 0 }).toArray()
         ]);
 
+        // FIX: Add explicit types to lambda parameters to fix type inference issues.
+        // FIX: Explicitly type Map to ensure correct type inference.
         const pantryMap: Map<string, number> = new Map(pantryItems.map((p: PantryItem) => [p.name.toLowerCase(), p.quantity]));
+        // FIX: Add explicit types to lambda parameters to fix type inference issues.
+        // FIX: Explicitly type Map to ensure correct type inference.
         const shoppingListMap: Map<string, ShoppingListItem> = new Map(shoppingListItems.map((i: ShoppingListItem) => [i.name.toLowerCase(), i]));
         const requiredItems = new Map<string, { name: string; quantity: number; unit: string; recipeId: number; }>();
 

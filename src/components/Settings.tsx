@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { db, importData } from '@/services/db';
 import { AppSettings } from '@/types';
-import { Save, Trash2, Download, Upload, AlertTriangle, User, Settings as SettingsIcon, Bot, Info, CheckCircle, RotateCcw, Database, BookOpen, Milk, CalendarDays, ShoppingCart, ChevronDown, LucideProps } from 'lucide-react';
+import { Save, Trash2, Download, Upload, AlertTriangle, Settings as SettingsIcon, Bot, Database, BookOpen, Milk, CalendarDays, ShoppingCart, ChevronDown, LucideProps } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import TagInput from '@/components/TagInput';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -125,7 +124,7 @@ const Settings: React.FC<SettingsProps> = ({ focusAction, onActionHandled, addTo
             localStorage.clear();
             addToast('Alle Daten zurückgesetzt. App wird neu geladen...', 'info');
             setTimeout(() => window.location.reload(), 2000);
-        }).catch(err => {
+        }).catch((err: any) => {
             addToast('Fehler beim Zurücksetzen der Daten.', 'error');
             console.error(err);
         });
@@ -212,12 +211,12 @@ const Settings: React.FC<SettingsProps> = ({ focusAction, onActionHandled, addTo
                 <p className="text-zinc-400 mt-1">Passe CulinaSync an deine Bedürfnisse an.</p>
             </div>
             
-             <nav className="border-b border-zinc-700 flex">
+            <nav className="border-b border-zinc-700 flex">
                 {SETTINGS_SECTIONS.map(section => (
                     <button 
                         key={section.id} 
                         onClick={() => setActiveSection(section.id)} 
-                        className={`py-2 px-4 text-sm font-semibold flex items-center gap-2 transition-colors ${activeSection === section.id ? 'text-amber-400 border-b-2 border-amber-400' : 'text-zinc-400 hover:text-white'}`}
+                        className={`py-3 px-4 text-sm font-semibold flex items-center gap-2 transition-colors ${activeSection === section.id ? 'text-amber-400 border-b-2 border-amber-400' : 'text-zinc-400 hover:text-white'}`}
                     >
                         <section.icon size={16} />
                         <span className='hidden sm:inline'>{section.label}</span>
@@ -322,12 +321,12 @@ const Settings: React.FC<SettingsProps> = ({ focusAction, onActionHandled, addTo
             </div>
 
             {isDirty && (
-                <div className="fixed bottom-16 md:bottom-0 left-0 right-0 bg-zinc-950/80 backdrop-blur-sm border-t border-zinc-700 p-4 z-20 page-fade-in">
-                    <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-                        <p className="font-semibold text-amber-300">Du hast ungespeicherte Änderungen.</p>
-                        <div className="flex gap-4">
-                            <button onClick={handleDiscard} className="flex items-center gap-2 text-zinc-300 font-bold py-2 px-4 rounded-md hover:bg-zinc-700 transition-colors"><RotateCcw size={18}/> Verwerfen</button>
-                            <button onClick={handleSave} className="flex items-center gap-2 bg-amber-500 text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-amber-400 transition-colors"><Save size={18}/> Änderungen speichern</button>
+                <div className="fixed bottom-20 md:bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-4xl z-20">
+                    <div className="bg-zinc-800/80 backdrop-blur-md border border-zinc-700 rounded-lg p-3 flex flex-col sm:flex-row justify-between items-center gap-3 shadow-xl page-fade-in">
+                        <p className="font-semibold text-amber-300 text-sm">Du hast ungespeicherte Änderungen.</p>
+                        <div className="flex gap-3">
+                            <button onClick={handleDiscard} className="flex items-center gap-2 text-zinc-300 font-bold py-2 px-4 rounded-md hover:bg-zinc-700 transition-colors text-sm">Abbrechen</button>
+                            <button onClick={handleSave} className="flex items-center gap-2 bg-amber-500 text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-amber-400 transition-colors text-sm"><Save size={16}/> Speichern</button>
                         </div>
                     </div>
                 </div>

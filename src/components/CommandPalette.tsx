@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, LucideProps, Milk, BookOpen } from 'lucide-react';
 import { db } from '@/services/db';
@@ -154,68 +153,91 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
                 </div>
 
                 <div className="max-h-[60vh] overflow-y-auto p-2">
-                    {flatCommandList.length === 0 ? (
-                         <p className="text-center text-zinc-500 p-8">Keine Ergebnisse gefunden.</p>
-                    ): null}
-
-                    {(dbSearchResults.recipes.length > 0 || dbSearchResults.pantry.length > 0) && (
+                    { (dbSearchResults.recipes.length > 0 || dbSearchResults.pantry.length > 0) && (
                         <div className="mb-2">
                             <h3 className="text-xs font-semibold text-zinc-500 px-2 my-1">Schnellzugriff</h3>
                             <ul>
-                                {dbSearchResults.recipes.map(item => {
-                                    const idx = currentIndex++;
-                                    return <li key={`recipe-${item.id}`} id={`command-item-${idx}`} onClick={() => { navigateToItem('recipes', item.id); onClose(); }} className={`flex items-center p-2 rounded-md cursor-pointer ${ activeIndex === idx ? 'bg-amber-500/20 text-amber-300' : 'text-zinc-300 hover:bg-zinc-800'}`}> <BookOpen className="h-5 w-5 mr-3" /> <span>{item.recipeTitle}</span> </li>
-                                })}
-                                 {dbSearchResults.pantry.map(item => {
-                                     const idx = currentIndex++;
-                                    return <li key={`pantry-${item.id}`} id={`command-item-${idx}`} onClick={() => { navigateToItem('pantry', item.id); onClose(); }} className={`flex items-center p-2 rounded-md cursor-pointer ${ activeIndex === idx ? 'bg-amber-500/20 text-amber-300' : 'text-zinc-300 hover:bg-zinc-800'}`}> <Milk className="h-5 w-5 mr-3" /> <span>{item.name}</span> </li>
-                                })}
-                            </ul>
-                        </div>
-                    )}
-                    
-                    {Object.entries(groupedCommands).map(([section, cmds]) => (
-                        <div key={section} className="mb-2">
-                            <h3 className="text-xs font-semibold text-zinc-500 px-2 my-1">{section}</h3>
-                            <ul>
-                                {cmds.map(command => {
-                                    const idx = currentIndex++;
-                                    const Icon = command.icon;
+                                {dbSearchResults.recipes.map(recipe => {
+                                    const itemIndex = currentIndex++;
                                     return (
                                         <li
-                                            key={command.id}
-                                            id={`command-item-${idx}`}
-                                            onClick={() => { command.action(); onClose(); }}
-                                            className={`flex items-center p-2 rounded-md cursor-pointer ${
-                                                activeIndex === idx ? 'bg-amber-500/20 text-amber-300' : 'text-zinc-300 hover:bg-zinc-800'
-                                            }`}
+                                            key={`db-recipe-${recipe.id}`}
+                                            id={`command-item-${itemIndex}`}
+                                            onClick={() => { navigateToItem('recipes', recipe.id); onClose(); }}
+                                            className={`flex items-center p-2 rounded-md cursor-pointer ${activeIndex === itemIndex ? 'bg-amber-500/20 text-amber-300' : 'text-zinc-300 hover:bg-zinc-800'}`}
                                         >
-                                            <Icon className="h-5 w-5 mr-3" />
-                                            <span>{command.title}</span>
+                                            <BookOpen className="h-5 w-5 mr-3 text-zinc-500" />
+                                            <span>{recipe.recipeTitle}</span>
+                                        </li>
+                                    );
+                                })}
+                                {dbSearchResults.pantry.map(pantryItem => {
+                                    const itemIndex = currentIndex++;
+                                    return (
+                                        <li
+                                            key={`db-pantry-${pantryItem.id}`}
+                                            id={`command-item-${itemIndex}`}
+                                            onClick={() => { navigateToItem('pantry', pantryItem.id); onClose(); }}
+                                            className={`flex items-center p-2 rounded-md cursor-pointer ${activeIndex === itemIndex ? 'bg-amber-500/20 text-amber-300' : 'text-zinc-300 hover:bg-zinc-800'}`}
+                                        >
+                                            <Milk className="h-5 w-5 mr-3 text-zinc-500" />
+                                            <span>{pantryItem.name}</span>
                                         </li>
                                     );
                                 })}
                             </ul>
                         </div>
-                    ))}
-                     {showGlobalSearch && (
+                    )}
+
+                    {Object.keys(groupedCommands).length > 0 ? (
+                        Object.entries(groupedCommands).map(([section, cmds]) => (
+                            <div key={section} className="mb-2">
+                                <h3 className="text-xs font-semibold text-zinc-500 px-2 my-1">{section}</h3>
+                                <ul>
+                                    {cmds.map(command => {
+                                        const itemIndex = currentIndex++;
+                                        const Icon = command.icon;
+                                        return (
+                                            <li
+                                                key={command.id}
+                                                id={`command-item-${itemIndex}`}
+                                                onClick={() => { command.action(); onClose(); }}
+                                                className={`flex items-center justify-between p-2 rounded-md cursor-pointer ${
+                                                    activeIndex === itemIndex ? 'bg-amber-500/20 text-amber-300' : 'text-zinc-300 hover:bg-zinc-800'
+                                                }`}
+                                            >
+                                                <div className="flex items-center">
+                                                    <Icon className="h-5 w-5 mr-3" />
+                                                    <span>{command.title}</span>
+                                                </div>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </div>
+                        ))
+                    ) : showGlobalSearch ? (
                          <div className="mb-2">
                             <h3 className="text-xs font-semibold text-zinc-500 px-2 my-1">Globale Suche</h3>
                             <ul>
-                                {(() => { const idx = currentIndex++; return (
-                                <li id={`command-item-${idx}`} onClick={() => onGlobalSearch('recipes', searchTerm)} className={`flex items-center p-2 rounded-md cursor-pointer ${ activeIndex === idx ? 'bg-amber-500/20 text-amber-300' : 'text-zinc-300 hover:bg-zinc-800' }`} >
+                                <li id={`command-item-${currentIndex}`} onClick={() => { onGlobalSearch('recipes', searchTerm); onClose(); }} className={`flex items-center p-2 rounded-md cursor-pointer ${ activeIndex === currentIndex ? 'bg-amber-500/20 text-amber-300' : 'text-zinc-300 hover:bg-zinc-800' }`} >
                                     <BookOpen className="h-5 w-5 mr-3" />
                                     <span>Suche in Rezepten nach: "{searchTerm}"</span>
                                 </li>
-                                )})()}
-                                {(() => { const idx = currentIndex++; return (
-                                <li id={`command-item-${idx}`} onClick={() => onGlobalSearch('pantry', searchTerm)} className={`flex items-center p-2 rounded-md cursor-pointer ${ activeIndex === idx ? 'bg-amber-500/20 text-amber-300' : 'text-zinc-300 hover:bg-zinc-800' }`} >
+                                <li id={`command-item-${currentIndex + 1}`} onClick={() => { onGlobalSearch('pantry', searchTerm); onClose(); }} className={`flex items-center p-2 rounded-md cursor-pointer ${ activeIndex === currentIndex + 1 ? 'bg-amber-500/20 text-amber-300' : 'text-zinc-300 hover:bg-zinc-800' }`} >
                                     <Milk className="h-5 w-5 mr-3" />
                                     <span>Suche im Vorrat nach: "{searchTerm}"</span>
                                 </li>
-                                )})()}
                             </ul>
                         </div>
+                    ) : (
+                        searchTerm.length === 0 && dbSearchResults.recipes.length === 0 && dbSearchResults.pantry.length === 0 && (
+                            <p className="text-center text-zinc-500 p-8">Beginne zu tippen, um Befehle zu sehen...</p>
+                        )
+                    )}
+
+                    {searchTerm.length > 0 && flatCommandList.length === 0 && !showGlobalSearch && (
+                        <p className="text-center text-zinc-500 p-8">Keine Ergebnisse gefunden.</p>
                     )}
                 </div>
             </div>

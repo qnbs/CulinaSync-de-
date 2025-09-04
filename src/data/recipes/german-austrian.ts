@@ -1,4 +1,4 @@
-import { Recipe } from '@/types';
+import { Recipe } from '../../types';
 
 export const germanAustrianRecipes: Recipe[] = [
   {
@@ -754,9 +754,9 @@ export const germanAustrianRecipes: Recipe[] = [
     tags: {
       course: ["Hauptgericht"],
       cuisine: ["Deutsch"],
+      occasion: ["Alltagsküche"],
       mainIngredient: ["Rind", "Kartoffel"],
       prepMethod: ["Pfannengericht"],
-      occasion: ["Alltagsküche"],
       diet: []
     },
     expertTips: [
