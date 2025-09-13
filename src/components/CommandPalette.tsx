@@ -50,8 +50,6 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
         );
     }, [searchTerm, commands]);
     
-    const showGlobalSearch = useMemo(() => filteredCommands.length === 0 && searchTerm.trim().length > 1 && dbSearchResults.recipes.length === 0 && dbSearchResults.pantry.length === 0, [filteredCommands, searchTerm, dbSearchResults]);
-
     const groupedCommands = useMemo(() => {
         return filteredCommands.reduce((acc, cmd) => {
             if (!acc[cmd.section]) {
@@ -68,12 +66,14 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
         list = list.concat(dbSearchResults.pantry.map(p => ({ ...p, type: 'pantry' })));
         list = list.concat(Object.values(groupedCommands).flat().map(c => ({...c, type: 'command'})));
         
+        const showGlobalSearch = list.length === 0 && searchTerm.trim().length > 1;
+
         if (showGlobalSearch) {
              list.push({ id: 'search-recipes-dynamic', title: `Suche in Rezepten nach: "${searchTerm}"`, action: () => onGlobalSearch('recipes', searchTerm), type: 'global' });
              list.push({ id: 'search-pantry-dynamic', title: `Suche im Vorrat nach: "${searchTerm}"`, action: () => onGlobalSearch('pantry', searchTerm), type: 'global' });
         }
         return list;
-    }, [groupedCommands, showGlobalSearch, searchTerm, onGlobalSearch, dbSearchResults]);
+    }, [groupedCommands, searchTerm, onGlobalSearch, dbSearchResults]);
 
 
     useEffect(() => {
@@ -125,6 +125,46 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
     
     let currentIndex = 0;
 
+    const renderItem = (item: any, index: number) => {
+        const isSelected = activeIndex === index;
+        let content;
+        let action;
+
+        switch (item.type) {
+            case 'recipe':
+                content = <><BookOpen className="h-5 w-5 mr-3 text-zinc-500" /><span>{item.recipeTitle}</span></>;
+                action = () => { navigateToItem('recipes', item.id); onClose(); };
+                break;
+            case 'pantry':
+                content = <><Milk className="h-5 w-5 mr-3 text-zinc-500" /><span>{item.name}</span></>;
+                action = () => { navigateToItem('pantry', item.id); onClose(); };
+                break;
+            case 'command':
+                const Icon = item.icon;
+                content = <><Icon className="h-5 w-5 mr-3" /><span>{item.title}</span></>;
+                action = () => { item.action(); onClose(); };
+                break;
+            case 'global':
+                const GlobalIcon = item.id.includes('recipes') ? BookOpen : Milk;
+                content = <><GlobalIcon className="h-5 w-5 mr-3" /><span>{item.title}</span></>;
+                action = () => { item.action(); onClose(); };
+                break;
+            default:
+                return null;
+        }
+
+        return (
+             <li
+                key={item.id}
+                id={`command-item-${index}`}
+                onClick={action}
+                className={`flex items-center p-2 rounded-md cursor-pointer ${isSelected ? 'bg-amber-500/20 text-amber-300' : 'text-zinc-300 hover:bg-zinc-800'}`}
+             >
+                {content}
+            </li>
+        );
+    };
+
     return (
         <div 
           className="fixed inset-0 z-50 flex items-start justify-center pt-24" 
@@ -153,91 +193,14 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
                 </div>
 
                 <div className="max-h-[60vh] overflow-y-auto p-2">
-                    { (dbSearchResults.recipes.length > 0 || dbSearchResults.pantry.length > 0) && (
-                        <div className="mb-2">
-                            <h3 className="text-xs font-semibold text-zinc-500 px-2 my-1">Schnellzugriff</h3>
-                            <ul>
-                                {dbSearchResults.recipes.map(recipe => {
-                                    const itemIndex = currentIndex++;
-                                    return (
-                                        <li
-                                            key={`db-recipe-${recipe.id}`}
-                                            id={`command-item-${itemIndex}`}
-                                            onClick={() => { navigateToItem('recipes', recipe.id); onClose(); }}
-                                            className={`flex items-center p-2 rounded-md cursor-pointer ${activeIndex === itemIndex ? 'bg-amber-500/20 text-amber-300' : 'text-zinc-300 hover:bg-zinc-800'}`}
-                                        >
-                                            <BookOpen className="h-5 w-5 mr-3 text-zinc-500" />
-                                            <span>{recipe.recipeTitle}</span>
-                                        </li>
-                                    );
-                                })}
-                                {dbSearchResults.pantry.map(pantryItem => {
-                                    const itemIndex = currentIndex++;
-                                    return (
-                                        <li
-                                            key={`db-pantry-${pantryItem.id}`}
-                                            id={`command-item-${itemIndex}`}
-                                            onClick={() => { navigateToItem('pantry', pantryItem.id); onClose(); }}
-                                            className={`flex items-center p-2 rounded-md cursor-pointer ${activeIndex === itemIndex ? 'bg-amber-500/20 text-amber-300' : 'text-zinc-300 hover:bg-zinc-800'}`}
-                                        >
-                                            <Milk className="h-5 w-5 mr-3 text-zinc-500" />
-                                            <span>{pantryItem.name}</span>
-                                        </li>
-                                    );
-                                })}
-                            </ul>
-                        </div>
-                    )}
-
-                    {Object.keys(groupedCommands).length > 0 ? (
-                        Object.entries(groupedCommands).map(([section, cmds]) => (
-                            <div key={section} className="mb-2">
-                                <h3 className="text-xs font-semibold text-zinc-500 px-2 my-1">{section}</h3>
-                                <ul>
-                                    {cmds.map(command => {
-                                        const itemIndex = currentIndex++;
-                                        const Icon = command.icon;
-                                        return (
-                                            <li
-                                                key={command.id}
-                                                id={`command-item-${itemIndex}`}
-                                                onClick={() => { command.action(); onClose(); }}
-                                                className={`flex items-center justify-between p-2 rounded-md cursor-pointer ${
-                                                    activeIndex === itemIndex ? 'bg-amber-500/20 text-amber-300' : 'text-zinc-300 hover:bg-zinc-800'
-                                                }`}
-                                            >
-                                                <div className="flex items-center">
-                                                    <Icon className="h-5 w-5 mr-3" />
-                                                    <span>{command.title}</span>
-                                                </div>
-                                            </li>
-                                        );
-                                    })}
-                                </ul>
-                            </div>
-                        ))
-                    ) : showGlobalSearch ? (
-                         <div className="mb-2">
-                            <h3 className="text-xs font-semibold text-zinc-500 px-2 my-1">Globale Suche</h3>
-                            <ul>
-                                <li id={`command-item-${currentIndex}`} onClick={() => { onGlobalSearch('recipes', searchTerm); onClose(); }} className={`flex items-center p-2 rounded-md cursor-pointer ${ activeIndex === currentIndex ? 'bg-amber-500/20 text-amber-300' : 'text-zinc-300 hover:bg-zinc-800' }`} >
-                                    <BookOpen className="h-5 w-5 mr-3" />
-                                    <span>Suche in Rezepten nach: "{searchTerm}"</span>
-                                </li>
-                                <li id={`command-item-${currentIndex + 1}`} onClick={() => { onGlobalSearch('pantry', searchTerm); onClose(); }} className={`flex items-center p-2 rounded-md cursor-pointer ${ activeIndex === currentIndex + 1 ? 'bg-amber-500/20 text-amber-300' : 'text-zinc-300 hover:bg-zinc-800' }`} >
-                                    <Milk className="h-5 w-5 mr-3" />
-                                    <span>Suche im Vorrat nach: "{searchTerm}"</span>
-                                </li>
-                            </ul>
-                        </div>
+                    {flatCommandList.length > 0 ? (
+                        <ul>
+                            {flatCommandList.map((item, index) => renderItem(item, index))}
+                        </ul>
                     ) : (
-                        searchTerm.length === 0 && dbSearchResults.recipes.length === 0 && dbSearchResults.pantry.length === 0 && (
-                            <p className="text-center text-zinc-500 p-8">Beginne zu tippen, um Befehle zu sehen...</p>
-                        )
-                    )}
-
-                    {searchTerm.length > 0 && flatCommandList.length === 0 && !showGlobalSearch && (
-                        <p className="text-center text-zinc-500 p-8">Keine Ergebnisse gefunden.</p>
+                        <p className="text-center text-zinc-500 p-8">
+                            {searchTerm ? 'Keine Ergebnisse gefunden.' : 'Beginne zu tippen...'}
+                        </p>
                     )}
                 </div>
             </div>

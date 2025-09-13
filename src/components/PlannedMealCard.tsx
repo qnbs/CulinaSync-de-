@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MealPlanItem, Recipe } from '@/types';
+import { MealPlanItem, Recipe } from '../types';
 import { CheckCircle, Trash2, BookOpen, MoreVertical, FileText, CookingPot, AlertTriangle } from 'lucide-react';
 
 const PlannedMealCard = React.memo<{
@@ -73,7 +73,7 @@ const PlannedMealCard = React.memo<{
                     {isMenuOpen && (
                         <div className="absolute top-full right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg w-48 z-20 page-fade-in">
                             <button onClick={() => { onAction('view', recipe); setMenuOpen(false); }} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2 hover:bg-zinc-700"><BookOpen size={14}/> Ansehen</button>
-                            <button onClick={() => onAction('cook', recipe)} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2 hover:bg-zinc-700"><CookingPot size={14}/> Kochmodus starten</button>
+                            <button onClick={() => { onAction('cook', recipe); setMenuOpen(false); }} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2 hover:bg-zinc-700"><CookingPot size={14}/> Kochmodus starten</button>
                             {!meal.isCooked && <button onClick={() => { onAction('cooked', meal); setMenuOpen(false); }} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2 hover:bg-zinc-700 text-green-400"><CheckCircle size={14}/> Als gekocht markieren</button>}
                             <div className="border-t border-zinc-700 my-1"></div>
                             <button onClick={() => { onAction('remove', meal); setMenuOpen(false); }} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2 hover:bg-zinc-700 text-red-400"><Trash2 size={14}/> Entfernen</button>
