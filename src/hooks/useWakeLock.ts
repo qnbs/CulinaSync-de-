@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
+// FIX: A custom hook to manage the Screen Wake Lock API for an improved user experience during cook mode.
 export const useWakeLock = (): [boolean, () => Promise<void>, () => Promise<void>] => {
   const [isLocked, setIsLocked] = useState(false);
   const [wakeLock, setWakeLock] = useState<WakeLockSentinel | null>(null);

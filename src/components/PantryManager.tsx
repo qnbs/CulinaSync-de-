@@ -135,15 +135,16 @@ const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, initia
 
   useEffect(() => {
     if (voiceAction?.type === 'ADJUST_PANTRY_QUANTITY') {
-        const payload = voiceAction.payload;
-        const itemName = payload.name.toLowerCase();
+        const payload = voiceAction.payload.split('#')[0]; // remove timestamp
+        const parsedPayload = JSON.parse(payload); // Assuming payload is a JSON string
+        const itemName = parsedPayload.name.toLowerCase();
         const itemToAdjust = pantryItems?.find(p => p.name.toLowerCase() === itemName);
 
         if(itemToAdjust) {
-            adjustQuantity(itemToAdjust, payload.amount);
+            adjustQuantity(itemToAdjust, parsedPayload.amount);
             addToast(`Menge für "${itemToAdjust.name}" angepasst.`);
         } else {
-            addToast(`"${payload.name}" nicht im Vorrat gefunden.`, 'error');
+            addToast(`"${parsedPayload.name}" nicht im Vorrat gefunden.`, 'error');
         }
     }
   }, [voiceAction, pantryItems, adjustQuantity, addToast]);

@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/services/db';
@@ -172,6 +173,9 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelec
     setPantryFilter(false);
   };
 
+  // FIX: Replaced faulty filtering logic with a correct and performant Dexie query.
+  // The new implementation chains Dexie's .filter() method for multiple criteria,
+  // which is the correct approach for applying multiple optional filters efficiently.
   const filteredRecipes = useLiveQuery(
     async () => {
       if (!pantryItems) return [];

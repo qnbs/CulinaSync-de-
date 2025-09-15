@@ -22,8 +22,8 @@ const AiModal = ({ isOpen, onClose, onAdd, pantryItems, currentListItems }: { is
             const items = await generateShoppingList(prompt, pantryItems, currentListItems);
             setReviewItems(items);
             setSelectedItems(new Map(items.map(item => [item.name, true])));
-        } catch (err) {
-            setError('Liste konnte nicht generiert werden. Bitte versuche es erneut.');
+        } catch (err: any) {
+             setError(err.message || 'Liste konnte nicht generiert werden. Bitte versuche es erneut.');
             console.error(err);
         } finally {
             setIsLoading(false);
@@ -255,6 +255,13 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem,
     await updateShoppingListItem({...item, isChecked: !item.isChecked });
   }, []);
 
+  const handleClearList = async () => {
+    if (window.confirm('Möchtest du die Einkaufsliste wirklich komplett leeren?')) {
+        const count = await clearShoppingList();
+        if (count > 0) addToast('Liste geleert.');
+    }
+  };
+
   useEffect(() => {
     if (focusAction) {
         if(focusAction === 'addItem' && addItemInputRef.current) addItemInputRef.current.focus();
@@ -386,13 +393,6 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem,
     setDropTargetInfo(null);
   }, []);
   // #endregion
-
-  const handleClearList = async () => {
-    if (window.confirm('Möchtest du die Einkaufsliste wirklich komplett leeren?')) {
-        const count = await clearShoppingList();
-        if (count > 0) addToast('Liste geleert.');
-    }
-  };
 
   const handleExport = (format: 'pdf' | 'csv' | 'json' | 'md' | 'txt') => {
     setExportOpen(false);

@@ -102,11 +102,16 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, v
   const originalServings = useMemo(() => parseInt(recipe.servings.match(/\d+/)?.[0] || '1', 10), [recipe.servings]);
   const [currentServings, setCurrentServings] = useState(originalServings);
   
+  const handleStartCookMode = useCallback(() => {
+    setCurrentStep(0);
+    setIsCookMode(true);
+  }, []);
+  
   useEffect(() => {
     if (voiceAction && voiceAction.type.startsWith('START_COOK_MODE')) {
         handleStartCookMode();
     }
-  }, [voiceAction]);
+  }, [voiceAction, handleStartCookMode]);
 
   const handleServingsChange = (newServings: number) => {
       if (!isNaN(newServings) && newServings > 0 && newServings <= 100) {
@@ -177,11 +182,6 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, v
             addToast('Aktion fehlgeschlagen.', 'error');
         }
     }
-  };
-
-  const handleStartCookMode = () => {
-    setCurrentStep(0);
-    setIsCookMode(true);
   };
   
   const handleAddMissingToShoppingList = async () => {
