@@ -1,7 +1,8 @@
+
 import { Page, ShoppingListItem } from '../types';
 
 export interface CommandAction {
-  type: 'NAVIGATE' | 'SEARCH' | 'ADD_PANTRY_ITEM' | 'REMOVE_PANTRY_ITEM' | 'ADJUST_PANTRY_QUANTITY' | 'ADD_SHOPPING_ITEM' | 'CHECK_SHOPPING_ITEM' | 'GENERATE_RECIPE' | 'READ_LIST' | 'START_COOK_MODE' | 'UNKNOWN';
+  type: 'NAVIGATE' | 'SEARCH' | 'ADD_PANTRY_ITEM' | 'REMOVE_PANTRY_ITEM' | 'ADJUST_PANTRY_QUANTITY' | 'ADD_SHOPPING_ITEM' | 'CHECK_SHOPPING_ITEM' | 'GENERATE_RECIPE' | 'READ_LIST' | 'START_COOK_MODE' | 'NEXT_STEP' | 'PREVIOUS_STEP' | 'EXIT_COOK_MODE' | 'UNKNOWN';
   payload?: any;
 }
 
@@ -29,6 +30,13 @@ const parseItemString = (itemString: string): { quantity: number; unit: string; 
 export const processCommand = (transcript: string, currentPage: Page): CommandAction => {
     const command = transcript.toLowerCase().trim();
 
+    // Cook Mode Commands (Highest Priority)
+    if (command.includes('nächster schritt')) return { type: 'NEXT_STEP' };
+    if (command.includes('vorheriger schritt') || command.includes('schritt zurück')) return { type: 'PREVIOUS_STEP' };
+    if (command.includes('beende kochmodus') || command.includes('kochmodus beenden')) return { type: 'EXIT_COOK_MODE' };
+    if (command.includes('starte kochmodus') && currentPage === 'recipes') return { type: 'START_COOK_MODE' };
+
+
     // Navigation Commands
     if (command.includes('gehe zu') || command.includes('öffne')) {
         if (command.includes('vorrat') || command.includes('vorratskammer')) return { type: 'NAVIGATE', payload: 'pantry' };
@@ -51,24 +59,18 @@ export const processCommand = (transcript: string, currentPage: Page): CommandAc
     }
 
     // Adjust Pantry Quantity
-    const adjustPantryMatch = command.match(/^(erhöhe|reduziere)\s(.+?)\s(um|um)\s(\d+)/);
+    const adjustPantryMatch = command.match(/^(erhöhe|reduziere|erhöhe|verringere)\s(.+?)\s(um|um)\s(\d+)/);
     if (currentPage === 'pantry' && adjustPantryMatch) {
         const [, action, itemName, , amountStr] = adjustPantryMatch;
         const amount = parseInt(amountStr, 10);
+        const isIncreasing = action === 'erhöhe' || action === 'erhöhe';
         return {
             type: 'ADJUST_PANTRY_QUANTITY',
             payload: {
                 name: itemName.trim(),
-                amount: action === 'erhöhe' ? amount : -amount,
+                amount: isIncreasing ? amount : -amount,
             }
         };
-    }
-    
-    // Start Cook Mode
-    if (command.includes('starte kochmodus') || command.includes('kochmodus starten')) {
-        if (currentPage === 'recipes') { // Assuming from recipe detail view
-            return { type: 'START_COOK_MODE' };
-        }
     }
 
     // Search Command (context-sensitive)

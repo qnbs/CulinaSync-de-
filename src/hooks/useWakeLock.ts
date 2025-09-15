@@ -1,47 +1,62 @@
-import { useState, useEffect, useCallback } from 'react';
 
-// FIX: A custom hook to manage the Screen Wake Lock API for an improved user experience during cook mode.
+import { useState, useEffect, useCallback, useRef } from 'react';
+
+type WakeLockSentinel = EventTarget & {
+  released: boolean;
+  type: 'screen';
+  release: () => Promise<void>;
+};
+
 export const useWakeLock = (): [boolean, () => Promise<void>, () => Promise<void>] => {
   const [isLocked, setIsLocked] = useState(false);
-  const [wakeLock, setWakeLock] = useState<WakeLockSentinel | null>(null);
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
 
   const requestWakeLock = useCallback(async () => {
-    if ('wakeLock' in navigator && !wakeLock) {
+    if ('wakeLock' in navigator && !wakeLockRef.current) {
       try {
-        const lock = await navigator.wakeLock.request('screen');
-        setWakeLock(lock);
+        const lock = await (navigator as any).wakeLock.request('screen');
+        wakeLockRef.current = lock;
         setIsLocked(true);
+        console.log('Wake Lock is active.');
         lock.addEventListener('release', () => {
+          console.log('Wake Lock was released.');
           setIsLocked(false);
-          setWakeLock(null);
+          wakeLockRef.current = null;
         });
       } catch (err: any) {
-        console.error(`${err.name}, ${err.message}`);
+        console.error(`Wake Lock Error: ${err.name}, ${err.message}`);
         setIsLocked(false);
       }
     }
-  }, [wakeLock]);
+  }, []);
 
   const releaseWakeLock = useCallback(async () => {
-    if (wakeLock) {
-      await wakeLock.release();
-      setWakeLock(null);
+    if (wakeLockRef.current) {
+      await wakeLockRef.current.release();
+      wakeLockRef.current = null;
       setIsLocked(false);
     }
-  }, [wakeLock]);
+  }, []);
 
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (wakeLock && document.visibilityState === 'visible') {
+      if (wakeLockRef.current && document.visibilityState === 'visible') {
         requestWakeLock();
       }
     };
+    
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      releaseWakeLock();
+      if (wakeLockRef.current) {
+        // Use a variable to avoid race conditions with the ref
+        const lock = wakeLockRef.current;
+        wakeLockRef.current = null;
+        lock.release();
+      }
     };
-  }, [wakeLock, requestWakeLock, releaseWakeLock]);
+  }, [requestWakeLock]);
 
   return [isLocked, requestWakeLock, releaseWakeLock];
 };

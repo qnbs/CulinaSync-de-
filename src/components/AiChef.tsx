@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { db } from '@/services/db';
 import { generateRecipeIdeas, generateRecipe } from '@/services/geminiService';
@@ -53,7 +54,7 @@ interface AiChefProps {
     voiceAction?: {type: string, payload: any} | null;
 }
 
-const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHandled, addToast }) => {
+const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHandled, addToast, voiceAction }) => {
   const [craving, setCraving] = useState('');
   const [includeIngredients, setIncludeIngredients] = useState<string[]>([]);
   const [excludeIngredients, setExcludeIngredients] = useState<string[]>([]);
@@ -191,7 +192,7 @@ const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHan
   };
   
   if (finalRecipe) {
-      return <RecipeDetail recipe={finalRecipe} onBack={() => { setFinalRecipe(null); setChefState('ideasReady'); }} addToast={addToast} />
+      return <RecipeDetail recipe={finalRecipe} onBack={() => { setFinalRecipe(null); setChefState('ideasReady'); }} addToast={addToast} voiceAction={voiceAction} />
   }
 
   const isLoading = chefState === 'loadingIdeas' || chefState === 'loadingRecipe';

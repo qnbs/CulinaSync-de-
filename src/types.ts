@@ -1,3 +1,5 @@
+import { Type } from '@google/genai';
+
 export interface PantryItem {
   id?: number;
   name: string;
@@ -120,3 +122,77 @@ export interface RecipeIdea {
   recipeTitle: string;
   shortDescription: string;
 }
+
+export const recipeSchema = {
+    type: Type.OBJECT,
+    properties: {
+        recipeTitle: { type: Type.STRING, description: "Ein kreativer und ansprechender Titel für das Rezept auf Deutsch." },
+        shortDescription: { type: Type.STRING, description: "Eine kurze, verlockende Beschreibung des Gerichts auf Deutsch." },
+        prepTime: { type: Type.STRING, description: "Vorbereitungszeit als Text, z.B. '15 Min.'" },
+        cookTime: { type: Type.STRING, description: "Kochzeit als Text, z.B. '30 Min.'" },
+        totalTime: { type: Type.STRING, description: "Gesamtzeit als Text, z.B. '45 Min.'" },
+        servings: { type: Type.STRING, description: "Anzahl der Portionen, z.B. '4 Personen'" },
+        difficulty: { type: Type.STRING, description: "Schwierigkeitsgrad, z.B. 'Einfach', 'Mittel', 'Schwer'" },
+        ingredients: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    sectionTitle: { type: Type.STRING, description: "Titel für eine Zutatengruppe, z.B. 'Für den Teig'." },
+                    items: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                quantity: { type: Type.STRING },
+                                unit: { type: Type.STRING },
+                                name: { type: Type.STRING }
+                            },
+                        }
+                    }
+                }
+            }
+        },
+        instructions: {
+            type: Type.ARRAY,
+            items: { type: Type.STRING },
+            description: "Schritt-für-Schritt-Anleitung zur Zubereitung des Gerichts."
+        },
+        nutritionPerServing: {
+            type: Type.OBJECT,
+            properties: {
+                calories: { type: Type.STRING },
+                protein: { type: Type.STRING },
+                fat: { type: Type.STRING },
+                carbs: { type: Type.STRING }
+            }
+        },
+        tags: {
+            type: Type.OBJECT,
+            properties: {
+                course: { type: Type.ARRAY, items: { type: Type.STRING } },
+                cuisine: { type: Type.ARRAY, items: { type: Type.STRING } },
+                occasion: { type: Type.ARRAY, items: { type: Type.STRING } },
+                mainIngredient: { type: Type.ARRAY, items: { type: Type.STRING } },
+                prepMethod: { type: Type.ARRAY, items: { type: Type.STRING } },
+                diet: { type: Type.ARRAY, items: { type: Type.STRING } },
+            }
+        },
+        expertTips: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    title: { type: Type.STRING },
+                    content: { type: Type.STRING }
+                }
+            }
+        }
+    },
+    propertyOrdering: [
+        "recipeTitle", "shortDescription", "prepTime", "cookTime", "totalTime",
+        "servings", "difficulty", "ingredients", "instructions",
+        "nutritionPerServing", "tags", "expertTips"
+    ],
+    required: ["recipeTitle", "shortDescription", "totalTime", "servings", "difficulty", "ingredients", "instructions"]
+};

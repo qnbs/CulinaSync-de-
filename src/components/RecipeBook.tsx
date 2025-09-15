@@ -173,9 +173,6 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelec
     setPantryFilter(false);
   };
 
-  // FIX: Replaced faulty filtering logic with a correct and performant Dexie query.
-  // The new implementation chains Dexie's .filter() method for multiple criteria,
-  // which is the correct approach for applying multiple optional filters efficiently.
   const filteredRecipes = useLiveQuery(
     async () => {
       if (!pantryItems) return [];

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import Header from '@/components/Header';
 import CommandPalette, { type Command } from '@/components/CommandPalette';
@@ -149,7 +150,7 @@ const App: React.FC = () => {
                 }
             });
         } else if (action.type !== 'UNKNOWN') {
-             setVoiceAction({ type: action.type, payload: `${action.payload}#${Date.now()}` });
+             setVoiceAction({ type: action.type, payload: JSON.stringify(action.payload) + `#${Date.now()}` });
         } else {
             addToast("Befehl nicht erkannt.", "error");
         }
@@ -251,7 +252,7 @@ const App: React.FC = () => {
           hasRecognitionSupport={hasRecognitionSupport}
           onCommandPaletteToggle={() => setCommandPaletteOpen(true)}
         />
-        <main key={currentPage} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 page-fade-in pb-20 md:pb-8">
+        <main key={currentPage} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 page-fade-in pb-24 md:pb-8">
            {isApiKeyMissing && (
                 <div className="bg-amber-600/20 border border-amber-500 text-amber-300 px-4 py-3 rounded-lg relative mb-6" role="alert">
                     <strong className="font-bold">Achtung: </strong>
