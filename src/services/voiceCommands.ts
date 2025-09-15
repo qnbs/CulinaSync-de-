@@ -1,7 +1,7 @@
-import { Page, ShoppingListItem } from '@/types';
+import { Page, ShoppingListItem } from '../types';
 
 export interface CommandAction {
-  type: 'NAVIGATE' | 'SEARCH' | 'ADD_PANTRY_ITEM' | 'REMOVE_PANTRY_ITEM' | 'ADD_SHOPPING_ITEM' | 'CHECK_SHOPPING_ITEM' | 'GENERATE_RECIPE' | 'UNKNOWN';
+  type: 'NAVIGATE' | 'SEARCH' | 'ADD_PANTRY_ITEM' | 'REMOVE_PANTRY_ITEM' | 'ADJUST_PANTRY_QUANTITY' | 'ADD_SHOPPING_ITEM' | 'CHECK_SHOPPING_ITEM' | 'GENERATE_RECIPE' | 'READ_LIST' | 'START_COOK_MODE' | 'UNKNOWN';
   payload?: any;
 }
 
@@ -38,6 +38,37 @@ export const processCommand = (transcript: string, currentPage: Page): CommandAc
         if (command.includes('einkaufsliste') || command.includes('liste')) return { type: 'NAVIGATE', payload: 'shopping-list' };
         if (command.includes('einstellungen')) return { type: 'NAVIGATE', payload: 'settings' };
         if (command.includes('hilfe')) return { type: 'NAVIGATE', payload: 'help' };
+    }
+
+    // Read list command
+    if(command.startsWith('lies') || command.startsWith('lese') || command.startsWith('was habe ich')) {
+        if(command.includes('einkaufsliste') || (command.includes('liste') && currentPage === 'shopping-list')) {
+            return { type: 'READ_LIST', payload: 'shopping-list'};
+        }
+        if(command.includes('vorrat') || command.includes('vorratskammer')) {
+            return { type: 'READ_LIST', payload: 'pantry'};
+        }
+    }
+
+    // Adjust Pantry Quantity
+    const adjustPantryMatch = command.match(/^(erhöhe|reduziere)\s(.+?)\s(um|um)\s(\d+)/);
+    if (currentPage === 'pantry' && adjustPantryMatch) {
+        const [, action, itemName, , amountStr] = adjustPantryMatch;
+        const amount = parseInt(amountStr, 10);
+        return {
+            type: 'ADJUST_PANTRY_QUANTITY',
+            payload: {
+                name: itemName.trim(),
+                amount: action === 'erhöhe' ? amount : -amount,
+            }
+        };
+    }
+    
+    // Start Cook Mode
+    if (command.includes('starte kochmodus') || command.includes('kochmodus starten')) {
+        if (currentPage === 'recipes') { // Assuming from recipe detail view
+            return { type: 'START_COOK_MODE' };
+        }
     }
 
     // Search Command (context-sensitive)

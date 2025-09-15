@@ -9,6 +9,7 @@ import VoiceControlUI from '@/components/VoiceControlUI';
 import { CheckCircle, Bot, Milk, BookOpen, CalendarDays, ShoppingCart, Settings as SettingsIcon, HelpCircle, PlusCircle, Search, RefreshCw, Trash2, Download, Upload, TerminalSquare, Mic, AlertTriangle, Info, X } from 'lucide-react';
 import { SettingsProvider } from '@/contexts/SettingsContext';
 import BottomNav from '@/components/BottomNav';
+import Onboarding from '@/components/Onboarding';
 
 // Lazy load page components for code splitting and faster initial load
 const AiChef = lazy(() => import('@/components/AiChef'));
@@ -40,12 +41,26 @@ const App: React.FC = () => {
   const [focusAction, setFocusAction] = useState<string | null>(null);
   const [initialSelectedId, setInitialSelectedId] = useState<number | null>(null);
   const [appVersion, setAppVersion] = useState<string>('');
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [isApiKeyMissing, setIsApiKeyMissing] = useState(false);
 
   useEffect(() => {
     fetch('./package.json')
       .then(res => res.json())
       .then(data => setAppVersion(data.version || 'N/A'))
       .catch(() => setAppVersion('N/A'));
+
+    const onboardingComplete = localStorage.getItem('culinaSyncOnboardingComplete');
+    if (onboardingComplete !== 'true') {
+        setShowOnboarding(true);
+    }
+    
+    if (!process.env.API_KEY) {
+        setIsApiKeyMissing(true);
+    }
+
+    setIsInitialized(true);
   }, []);
 
   const removeToast = useCallback((id: number) => {
@@ -84,6 +99,12 @@ const App: React.FC = () => {
       setFocusAction(focusTarget);
     }
   }, []);
+
+  const handleOnboardingComplete = useCallback(() => {
+    localStorage.setItem('culinaSyncOnboardingComplete', 'true');
+    setShowOnboarding(false);
+    navigate('pantry');
+  }, [navigate]);
 
   const navigateToItem = useCallback((page: 'recipes' | 'pantry', id: number) => {
     setInitialSelectedId(id);
@@ -127,9 +148,8 @@ const App: React.FC = () => {
                     navigate('pantry');
                 }
             });
-        }
-        else if (action.type !== 'UNKNOWN') {
-            setVoiceAction({ type: action.type, payload: `${action.payload}#${Date.now()}` });
+        } else if (action.type !== 'UNKNOWN') {
+             setVoiceAction({ type: action.type, payload: `${action.payload}#${Date.now()}` });
         } else {
             addToast("Befehl nicht erkannt.", "error");
         }
@@ -186,6 +206,7 @@ const App: React.FC = () => {
         focusAction,
         onActionHandled: () => setFocusAction(null),
         addToast,
+        voiceAction,
     };
     
     switch (currentPage) {
@@ -220,6 +241,7 @@ const App: React.FC = () => {
   return (
     <SettingsProvider>
       <div className="min-h-screen text-zinc-200">
+        {isInitialized && showOnboarding && <Onboarding onComplete={handleOnboardingComplete} />}
         <Header 
           currentPage={currentPage} 
           setCurrentPage={navigate}
@@ -230,6 +252,12 @@ const App: React.FC = () => {
           onCommandPaletteToggle={() => setCommandPaletteOpen(true)}
         />
         <main key={currentPage} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 page-fade-in pb-20 md:pb-8">
+           {isApiKeyMissing && (
+                <div className="bg-amber-600/20 border border-amber-500 text-amber-300 px-4 py-3 rounded-lg relative mb-6" role="alert">
+                    <strong className="font-bold">Achtung: </strong>
+                    <span className="block sm:inline">Kein API-Schlüssel gefunden. Die KI-Funktionen sind deaktiviert.</span>
+                </div>
+            )}
           <Suspense fallback={<LoadingSpinner />}>
               {renderPage()}
           </Suspense>

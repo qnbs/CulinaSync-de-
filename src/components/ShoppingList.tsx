@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, updateShoppingListItem, clearShoppingList, addShoppingListItem, moveCheckedToPantry, renameShoppingListCategory, batchAddShoppingListItems, generateListFromMealPlan } from '@/services/db';
 import { ShoppingListItem, Recipe, PantryItem } from '@/types';
-import { Trash2, FileDown, Plus, CheckCircle, Edit3, X, Save, ChevronDown, Bot, LoaderCircle, Archive, Send, GripVertical, TextQuote, ListCollapse, ListTree, RefreshCw, ArrowLeft, CheckSquare, Square, MoreVertical } from 'lucide-react';
+import { Trash2, FileDown, Plus, CheckCircle, Edit3, X, Save, ChevronDown, Bot, LoaderCircle, Archive, Send, GripVertical, TextQuote, ListCollapse, ListTree, RefreshCw, ArrowLeft, CheckSquare, Square, ShoppingCart } from 'lucide-react';
 import { exportShoppingListToCsv, exportShoppingListToPdf, exportShoppingListToMarkdown, exportShoppingListToTxt, exportShoppingListToJson } from '@/services/exportService';
 import { generateShoppingList } from '@/services/geminiService';
 import { parseShoppingItemString } from '@/services/utils';
@@ -225,9 +225,11 @@ const ShoppingListItemComponent = React.memo<{
 interface ShoppingListProps {
     addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
     triggerCheckItem?: string;
+    focusAction?: string | null;
+    onActionHandled?: () => void;
 }
 
-const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem }) => {
+const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem, focusAction, onActionHandled }) => {
   const shoppingList: ShoppingListItem[] | undefined = useLiveQuery(() => db.shoppingList.orderBy(['category', 'sortOrder']).toArray(), []);
   const pantryItems: PantryItem[] = useLiveQuery(() => db.pantry.toArray(), []) ?? [];
   const recipes: Recipe[] | undefined = useLiveQuery(() => db.recipes.toArray(), []);
@@ -238,7 +240,7 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
   const [editingItem, setEditingItem] = useState<ShoppingListItem | null>(null);
   const [editingCategory, setEditingCategory] = useState<{ oldName: string; newName: string } | null>(null);
   const [isCompletedVisible, setIsCompletedVisible] = useState(true);
-  const [isActionsMenuOpen, setActionsMenuOpen] = useState(false);
+  const [isExportOpen, setExportOpen] = useState(false);
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -248,23 +250,19 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
 
   const addItemInputRef = useRef<HTMLInputElement>(null);
   const recipesById = useMemo(() => new Map<number, Recipe>((recipes || []).map(r => [r.id!, r])), [recipes]);
-  const actionsMenuRef = useRef<HTMLDivElement>(null);
-
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-        if (actionsMenuRef.current && !actionsMenuRef.current.contains(event.target as Node)) {
-            setActionsMenuOpen(false);
-        }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
 
   const handleToggle = useCallback(async (item: ShoppingListItem) => {
     await updateShoppingListItem({...item, isChecked: !item.isChecked });
   }, []);
+
+  useEffect(() => {
+    if (focusAction) {
+        if(focusAction === 'addItem' && addItemInputRef.current) addItemInputRef.current.focus();
+        if(focusAction === 'generate') handleGenerateFromPlan();
+        if(focusAction === 'clear') handleClearList();
+        onActionHandled?.();
+    }
+  }, [focusAction, onActionHandled]);
 
   useEffect(() => {
     if (triggerCheckItem && shoppingList) {
@@ -303,7 +301,6 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
   }, [addToast]);
   
   const handleGenerateFromPlan = useCallback(async () => {
-    setActionsMenuOpen(false);
     setIsGenerating(true);
     try {
         const { added, existing } = await generateListFromMealPlan();
@@ -391,7 +388,6 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
   // #endregion
 
   const handleClearList = async () => {
-    setActionsMenuOpen(false);
     if (window.confirm('Möchtest du die Einkaufsliste wirklich komplett leeren?')) {
         const count = await clearShoppingList();
         if (count > 0) addToast('Liste geleert.');
@@ -399,7 +395,7 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
   };
 
   const handleExport = (format: 'pdf' | 'csv' | 'json' | 'md' | 'txt') => {
-    setActionsMenuOpen(false);
+    setExportOpen(false);
     if (!shoppingList?.length) return;
     if (window.confirm(`Möchtest du die Einkaufsliste wirklich als ${format.toUpperCase()}-Datei exportieren?`)) {
       switch(format) {
@@ -415,7 +411,7 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
   const activeItems = useMemo(() => shoppingList?.filter(item => !item.isChecked) || [], [shoppingList]);
   const completedItems = useMemo(() => shoppingList?.filter(item => item.isChecked) || [], [shoppingList]);
 
-  const groupedList = useMemo(() => activeItems.reduce((acc: Record<string, ShoppingListItem[]>, item) => {
+  const groupedList = useMemo(() => activeItems.reduce((acc, item) => {
     const category = item.category || 'Sonstiges';
     if (!acc[category]) acc[category] = [];
     acc[category].push(item);
@@ -442,93 +438,108 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
         <p className="text-zinc-400 mt-1">Verwalte, organisiere und übertrage deine Einkäufe.</p>
       </div>
 
-      <div className="bg-zinc-950/50 border border-zinc-800 rounded-lg p-4">
+      <div className="bg-zinc-950/50 border border-zinc-800 rounded-lg p-4 space-y-4">
           <div className="flex flex-wrap gap-2 justify-between items-center">
              <div className="flex items-center gap-2">
                 <button onClick={expandAll} className="flex items-center gap-2 p-2 rounded-md bg-zinc-700 text-sm hover:bg-zinc-600" title="Alle ausklappen"><ListTree size={16}/></button>
                 <button onClick={collapseAll} className="flex items-center gap-2 p-2 rounded-md bg-zinc-700 text-sm hover:bg-zinc-600" title="Alle einklappen"><ListCollapse size={16}/></button>
              </div>
              <div className="flex flex-wrap gap-2 justify-end">
+                <button onClick={handleGenerateFromPlan} disabled={isGenerating} className="flex items-center gap-2 bg-zinc-700 font-semibold py-2 px-3 rounded-md hover:bg-zinc-600 text-sm disabled:bg-zinc-800 disabled:text-zinc-500">
+                    {isGenerating ? <LoaderCircle size={16} className="animate-spin"/> : <RefreshCw size={16}/>} Aus Plan generieren
+                </button>
+                <button onClick={() => setBulkAddModalOpen(true)} className="flex items-center gap-2 bg-zinc-700 font-semibold py-2 px-3 rounded-md hover:bg-zinc-600 text-sm"><TextQuote size={16}/> Liste einfügen</button>
                 <button onClick={() => setAiModalOpen(true)} className="flex items-center gap-2 bg-zinc-700 font-semibold py-2 px-3 rounded-md hover:bg-zinc-600 text-sm"><Bot size={16} /> KI-Liste</button>
-                <div className="relative inline-block" ref={actionsMenuRef}>
-                    <button onClick={() => setActionsMenuOpen(!isActionsMenuOpen)} className="w-full flex items-center gap-2 bg-zinc-700 font-semibold py-2 px-3 rounded-md hover:bg-zinc-600 text-sm">
-                        <MoreVertical size={16} /> Aktionen
+                <div className="relative inline-block">
+                    <button onClick={() => setExportOpen(!isExportOpen)} className="w-full flex items-center gap-2 bg-zinc-700 font-semibold py-2 px-3 rounded-md hover:bg-zinc-600 text-sm">
+                        <FileDown size={16} /> Exportieren <ChevronDown size={16} className={`transition-transform ${isExportOpen ? 'rotate-180' : ''}`} />
                     </button>
-                    {isActionsMenuOpen && (
-                        <div className="absolute top-full right-0 mt-2 w-56 bg-zinc-800 border border-zinc-700 rounded-md shadow-lg z-10 page-fade-in">
-                            <button onClick={handleGenerateFromPlan} disabled={isGenerating} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2 hover:bg-zinc-700 disabled:text-zinc-500">
-                                {isGenerating ? <LoaderCircle size={16} className="animate-spin"/> : <RefreshCw size={16}/>} Aus Plan generieren
-                            </button>
-                            <button onClick={() => { setBulkAddModalOpen(true); setActionsMenuOpen(false); }} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2 hover:bg-zinc-700"><TextQuote size={16}/> Liste einfügen</button>
-                            <div className="border-t border-zinc-700 my-1"></div>
-                            <button onClick={() => handleExport('pdf')} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2 hover:bg-zinc-700"><FileDown size={14}/> Als PDF exportieren</button>
-                            <button onClick={() => handleExport('txt')} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2 hover:bg-zinc-700"><FileDown size={14}/> Als Text exportieren</button>
-                             <div className="border-t border-zinc-700 my-1"></div>
-                            <button onClick={handleClearList} disabled={!shoppingList?.length} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2 hover:bg-zinc-700 text-red-400 disabled:text-zinc-500"><Trash2 size={16}/> Liste leeren</button>
+                    {isExportOpen && (
+                        <div className="absolute top-full right-0 mt-2 w-48 bg-zinc-800 border border-zinc-700 rounded-md shadow-lg z-10">
+                            <a onClick={() => handleExport('pdf')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">PDF (.pdf)</a>
+                            <a onClick={() => handleExport('csv')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">CSV (.csv)</a>
+                            <a onClick={() => handleExport('json')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">JSON (.json)</a>
+                            <a onClick={() => handleExport('md')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">Markdown (.md)</a>
+                            <a onClick={() => handleExport('txt')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">Text (.txt)</a>
                         </div>
                     )}
                 </div>
+                <button onClick={handleClearList} disabled={!shoppingList?.length} className="flex items-center gap-2 bg-red-900/80 font-semibold py-2 px-3 rounded-md hover:bg-red-800 disabled:bg-zinc-800 disabled:text-zinc-500 text-sm"><Trash2 size={16}/> Leeren</button>
             </div>
           </div>
       </div>
 
       <div className="space-y-4">
-          {activeItems.length > 0 ? (
-              Object.entries(groupedList).sort(([catA], [catB]) => catA.localeCompare(catB)).map(([category, items]) => {
-                  const isCollapsed = collapsedCategories.has(category);
-                  const isDropTargetCategory = dropTargetInfo?.category === category && !dropTargetInfo.itemId;
-                  return (
-                  <div key={category} onDragOver={e => { e.preventDefault(); setDropTargetInfo({category}) }} onDragLeave={() => setDropTargetInfo(null)} onDrop={() => onCategoryDrop(category)} onDragEnd={onDragEnd}>
-                        {editingCategory?.oldName === category ? (
-                            <form onSubmit={e => { e.preventDefault(); handleRenameCategory(); }} className="mb-2">
-                                <input type="text" value={editingCategory.newName} onChange={e => setEditingCategory({ ...editingCategory, newName: e.target.value })} onBlur={handleRenameCategory} autoFocus className="font-bold text-amber-400 bg-zinc-800 border-amber-500 border-2 rounded-md w-full p-2 text-lg" />
-                            </form>
-                        ) : (
-                            <h3 onDoubleClick={() => setEditingCategory({ oldName: category, newName: category })} onClick={() => handleToggleCategoryCollapse(category)} title="Klicken zum Ein-/Ausklappen, Doppelklick zum Umbenennen" className="font-bold text-amber-400 text-lg mb-2 p-2 rounded-md bg-zinc-900/50 flex justify-between items-center cursor-pointer hover:bg-zinc-800/50" aria-expanded={!isCollapsed}>
-                                <span>{category} ({items.length})</span>
-                                <ChevronDown className={`transition-transform ${isCollapsed ? '' : 'rotate-180'}`} />
-                            </h3>
-                        )}
-                      {!isCollapsed && <ul className={`space-y-1 p-2 rounded-lg transition-colors ${isDropTargetCategory ? 'bg-amber-900/20' : ''}`}>
-                        {items.map(item => (
-                            <ShoppingListItemComponent
-                                key={item.id} item={item} isEditing={editingItem?.id === item.id}
-                                editingItem={editingItem} recipeName={item.recipeId ? recipesById.get(item.recipeId)?.recipeTitle ?? null : null}
-                                onToggle={handleToggle} 
-                                onStartEdit={(itemToEdit) => setEditingItem({ ...itemToEdit })} 
-                                onCancelEdit={() => setEditingItem(null)}
-                                onSaveEdit={async () => { if (editingItem) { await db.shoppingList.update(editingItem.id!, editingItem); setEditingItem(null); } }}
-                                setEditingItem={setEditingItem} 
-                                onDeleteItem={async (id) => { if (window.confirm("Artikel löschen?")) await db.shoppingList.delete(id); }}
-                                onDragStart={handleDragStart}
-                                onDragEnd={onDragEnd}
-                                onDragOver={e => handleDragOver(e, item)}
-                                onDragLeave={() => setDropTargetInfo(null)}
-                                onDrop={e => handleDrop(e, item)}
-                                isDragged={draggedItem?.id === item.id}
-                                dropTargetId={dropTargetInfo?.itemId ?? null}
-                            />))}
-                        </ul>}
+          {shoppingList && shoppingList.length > 0 ? (
+            <>
+              {activeItems.length > 0 && (
+                  Object.entries(groupedList).sort(([catA], [catB]) => catA.localeCompare(catB)).map(([category, items]) => {
+                      const isCollapsed = collapsedCategories.has(category);
+                      const isDropTargetCategory = dropTargetInfo?.category === category && !dropTargetInfo.itemId;
+                      return (
+                      <div key={category} onDragOver={e => { e.preventDefault(); setDropTargetInfo({category}) }} onDragLeave={() => setDropTargetInfo(null)} onDrop={() => onCategoryDrop(category)} onDragEnd={onDragEnd}>
+                            {editingCategory?.oldName === category ? (
+                                <form onSubmit={e => { e.preventDefault(); handleRenameCategory(); }} className="mb-2">
+                                    <input type="text" value={editingCategory.newName} onChange={e => setEditingCategory({ ...editingCategory, newName: e.target.value })} onBlur={handleRenameCategory} autoFocus className="font-bold text-amber-400 bg-zinc-800 border-amber-500 border-2 rounded-md w-full p-2 text-lg" />
+                                </form>
+                            ) : (
+                                <h3 onDoubleClick={() => setEditingCategory({ oldName: category, newName: category })} onClick={() => handleToggleCategoryCollapse(category)} title="Klicken zum Ein-/Ausklappen, Doppelklick zum Umbenennen" className="font-bold text-amber-400 text-lg mb-2 p-2 rounded-md bg-zinc-900/50 flex justify-between items-center cursor-pointer hover:bg-zinc-800/50" aria-expanded={!isCollapsed}>
+                                    <span>{category} ({items.length})</span>
+                                    <ChevronDown className={`transition-transform ${isCollapsed ? '' : 'rotate-180'}`} />
+                                </h3>
+                            )}
+                          {!isCollapsed && <ul className={`space-y-1 p-2 rounded-lg transition-colors ${isDropTargetCategory ? 'bg-amber-900/20' : ''}`}>
+                            {items.map(item => (
+                                <ShoppingListItemComponent
+                                    key={item.id} item={item} isEditing={editingItem?.id === item.id}
+                                    editingItem={editingItem} recipeName={item.recipeId ? recipesById.get(item.recipeId)?.recipeTitle ?? null : null}
+                                    onToggle={handleToggle} 
+                                    onStartEdit={(itemToEdit) => setEditingItem({ ...itemToEdit })} 
+                                    onCancelEdit={() => setEditingItem(null)}
+                                    onSaveEdit={async () => { if (editingItem) { await db.shoppingList.update(editingItem.id!, editingItem); setEditingItem(null); } }}
+                                    setEditingItem={setEditingItem} 
+                                    onDeleteItem={async (id) => { if (window.confirm("Artikel löschen?")) await db.shoppingList.delete(id); }}
+                                    onDragStart={handleDragStart}
+                                    onDragEnd={onDragEnd}
+                                    onDragOver={e => handleDragOver(e, item)}
+                                    onDragLeave={() => setDropTargetInfo(null)}
+                                    onDrop={e => handleDrop(e, item)}
+                                    isDragged={draggedItem?.id === item.id}
+                                    dropTargetId={dropTargetInfo?.itemId ?? null}
+                                />))}
+                            </ul>}
+                      </div>
+                  )})
+              )}
+              {completedItems.length > 0 && (
+                  <div className="pt-4 border-t border-zinc-700/50">
+                      <button onClick={() => setIsCompletedVisible(!isCompletedVisible)} className="w-full flex justify-between items-center text-lg font-semibold text-zinc-400 hover:text-white p-2">
+                          <span>Erledigt ({completedItems.length})</span>
+                          <ChevronDown className={`transition-transform ${!isCompletedVisible ? '' : 'rotate-180'}`} />
+                      </button>
+                      {isCompletedVisible && <ul className="mt-2 space-y-1 page-fade-in">{completedItems.map(item => ( <ShoppingListItemComponent key={item.id} item={item} isEditing={false} editingItem={null} recipeName={item.recipeId ? recipesById.get(item.recipeId)?.recipeTitle ?? null : null} onToggle={handleToggle} onStartEdit={() => {}} onCancelEdit={() => {}} onSaveEdit={() => {}} setEditingItem={() => {}} onDeleteItem={() => {}} onDragStart={() => {}} onDragEnd={onDragEnd} onDragOver={() => {}} onDragLeave={() => {}} onDrop={() => {}} isDragged={false} dropTargetId={null} /> ))}</ul>}
                   </div>
-              )})
+              )}
+              {activeItems.length === 0 && completedItems.length > 0 && (
+                <div className="text-center py-20 bg-zinc-950/50 border border-dashed border-zinc-700 rounded-lg">
+                    <CheckCircle className="mx-auto h-12 w-12 text-zinc-600" />
+                    <h3 className="mt-4 text-lg font-medium text-zinc-300">Alle Artikel erledigt!</h3>
+                    <p className="mt-1 text-sm text-zinc-500">Du kannst die gekauften Artikel nun in den Vorrat verschieben.</p>
+                </div>
+              )}
+            </>
           ) : (
-             <div className="text-center py-20 bg-zinc-950/50 border border-dashed border-zinc-700 rounded-lg">
-                <h3 className="mt-4 text-lg font-medium text-zinc-300">Alle Artikel erledigt!</h3>
-                <p className="mt-1 text-sm text-zinc-500">Du kannst die gekauften Artikel nun in den Vorrat verschieben.</p>
-             </div>
-          )}
-          {completedItems.length > 0 && (
-              <div className="pt-4 border-t border-zinc-700/50">
-                  <button onClick={() => setIsCompletedVisible(!isCompletedVisible)} className="w-full flex justify-between items-center text-lg font-semibold text-zinc-400 hover:text-white p-2">
-                      <span>Erledigt ({completedItems.length})</span>
-                      <ChevronDown className={`transition-transform ${!isCompletedVisible ? '' : 'rotate-180'}`} />
-                  </button>
-                  {isCompletedVisible && <ul className="mt-2 space-y-1 page-fade-in">{completedItems.map(item => ( <ShoppingListItemComponent key={item.id} item={item} isEditing={false} editingItem={null} recipeName={item.recipeId ? recipesById.get(item.recipeId)?.recipeTitle ?? null : null} onToggle={handleToggle} onStartEdit={() => {}} onCancelEdit={() => {}} onSaveEdit={() => {}} setEditingItem={() => {}} onDeleteItem={() => {}} onDragStart={() => {}} onDragEnd={onDragEnd} onDragOver={() => {}} onDragLeave={() => {}} onDrop={() => {}} isDragged={false} dropTargetId={null} /> ))}</ul>}
-              </div>
+            <div className="text-center py-20 bg-zinc-950/50 border border-dashed border-zinc-700 rounded-lg">
+                <ShoppingCart className="mx-auto h-12 w-12 text-zinc-600" />
+                <h3 className="mt-4 text-lg font-medium text-zinc-300">Deine Einkaufsliste ist leer</h3>
+                <p className="mt-1 text-sm text-zinc-500 max-w-md mx-auto">
+                    Füge Artikel manuell hinzu, erstelle eine KI-Liste oder generiere sie aus deinem Essensplan.
+                </p>
+            </div>
           )}
       </div>
 
-       <div className="fixed bottom-20 md:bottom-0 left-0 right-0 bg-zinc-950/80 backdrop-blur-sm border-t border-zinc-800 p-3 z-30">
+       <div className="fixed bottom-16 md:bottom-0 left-0 right-0 bg-zinc-950/80 backdrop-blur-sm border-t border-zinc-800 p-3 z-30">
             <div className="max-w-4xl mx-auto px-4">
                 {completedItems.length > 0 ? (
                     <button onClick={handleMoveToPantry} className="w-full flex items-center justify-center gap-3 bg-amber-500 text-zinc-900 font-bold py-3 px-4 rounded-md hover:bg-amber-400 transition-colors shadow-lg">

@@ -162,12 +162,27 @@ const constructBasePrompt = (
   return userPromptParts.join('\n');
 }
 
+const handleGeminiError = (error: any, context: string): Error => {
+    console.error(`Error calling Gemini for ${context}:`, error);
+    if (String(error).includes('API key not valid')) {
+         return new Error("API_KEY_INVALID: Der KI-Dienst ist nicht korrekt eingerichtet (ungültiger API-Schlüssel).");
+    }
+    if (error.message && error.message.includes('FETCH_ERROR')) {
+        return new Error("NETWORK_ERROR: Der KI-Dienst konnte nicht erreicht werden. Bitte prüfe deine Netzwerkverbindung.");
+    }
+     if (error.message && error.message.includes('429')) {
+        return new Error("RATE_LIMIT: Zu viele Anfragen an den KI-Dienst. Bitte warte einen Moment.");
+    }
+    return new Error("AI_ERROR: Ein unerwarteter Fehler beim KI-Dienst ist aufgetreten. Bitte versuche es später erneut.");
+};
+
+
 export const generateRecipeIdeas = async (
   prompt: StructuredPrompt,
   pantryItems: PantryItem[],
   aiPreferences: AppSettings['aiPreferences']
 ): Promise<RecipeIdea[]> => {
-    if (!API_KEY) throw new Error("API_KEY_MISSING");
+    if (!API_KEY) throw new Error("API_KEY_MISSING: Der KI-Dienst ist nicht konfiguriert.");
     
     const model = "gemini-2.5-flash";
     const systemInstruction = `Du bist Culina, ein Weltklasse-Koch und kulinarischer Assistent. Deine Aufgabe ist es, 3 köstliche, unterschiedliche und plausible Rezeptideen auf Deutsch zu entwickeln, die genau auf die Wünsche des Nutzers zugeschnitten sind. Antworte IMMER NUR mit einem einzigen, gültigen JSON-Objekt, das dem Schema entspricht.`;
@@ -180,18 +195,16 @@ export const generateRecipeIdeas = async (
             config: { systemInstruction, responseMimeType: 'application/json', responseSchema: recipeIdeasSchema }
         });
         const jsonText = response.text.trim();
-        if (!jsonText) throw new Error("INVALID_RESPONSE: Empty");
+        if (!jsonText) throw new Error("INVALID_RESPONSE: Die KI hat eine leere Antwort zurückgegeben.");
         
         const parsedData = JSON.parse(jsonText);
         if (parsedData.ideas && Array.isArray(parsedData.ideas) && parsedData.ideas.length > 0) {
             return parsedData.ideas;
         } else {
-            throw new Error("INVALID_STRUCTURE: Missing 'ideas' array.");
+            throw new Error("INVALID_STRUCTURE: Die KI hat eine Antwort mit falscher Struktur gesendet.");
         }
     } catch (e: any) {
-        console.error("Error calling Gemini for ideas:", e);
-        if (e.message.startsWith("API_KEY")) throw e;
-        throw new Error("API_ERROR");
+        throw handleGeminiError(e, 'ideas');
     }
 };
 
@@ -201,9 +214,7 @@ export const generateRecipe = async (
   aiPreferences: AppSettings['aiPreferences'],
   chosenIdea: RecipeIdea
 ): Promise<Recipe> => {
-  if (!API_KEY) {
-    throw new Error("API_KEY_MISSING: Gemini API key is not configured. Please set the API_KEY environment variable.");
-  }
+  if (!API_KEY) throw new Error("API_KEY_MISSING: Der KI-Dienst ist nicht konfiguriert.");
 
   const model = "gemini-2.5-flash";
   let fullPrompt = constructBasePrompt(prompt, pantryItems, aiPreferences);
@@ -213,8 +224,6 @@ export const generateRecipe = async (
   fullPrompt += `\n- Beschreibung: "${chosenIdea.shortDescription}"`;
   
   const systemInstruction = `Du bist Culina, ein Weltklasse-Koch und kulinarischer Assistent für die App CulinaSync. Deine Aufgabe ist es, ein köstliches, stimmiges und plausibles Rezept auf Deutsch zu erstellen, das genau auf die Wünsche des Nutzers zugeschnitten ist. Antworte IMMER NUR mit einem einzigen, gültigen JSON-Objekt, das dem bereitgestellten Schema entspricht. Füge keinen anderen Text, keine Markdown-Formatierung oder Erklärungen vor oder nach dem JSON-Objekt hinzu.`;
-  
-  console.log("Sending prompt to Gemini for full recipe:", fullPrompt);
   
   let response: GenerateContentResponse;
   try {
@@ -228,30 +237,24 @@ export const generateRecipe = async (
         }
     });
   } catch (error: any) {
-    console.error("Error calling Gemini API:", error);
-    throw new Error("API_ERROR: Failed to communicate with the AI service. It might be down, or there could be a network issue.");
+     throw handleGeminiError(error, 'full recipe');
   }
 
   const jsonText = response.text.trim();
   if (!jsonText) {
-      console.error("Gemini response was empty.");
-      throw new Error("INVALID_RESPONSE: The AI returned an empty or invalid response.");
+      throw new Error("INVALID_RESPONSE: Die KI hat eine leere Antwort zurückgegeben.");
   }
 
-  let recipeData;
   try {
-    recipeData = JSON.parse(jsonText);
+    const recipeData = JSON.parse(jsonText);
+    if (recipeData.recipeTitle && Array.isArray(recipeData.ingredients) && Array.isArray(recipeData.instructions)) {
+        return recipeData as Recipe;
+    } else {
+      throw new Error("INVALID_STRUCTURE: Die KI hat eine Antwort mit falscher Struktur gesendet.");
+    }
   } catch (error) {
     console.error("Failed to parse JSON from Gemini response:", jsonText);
-    throw new Error("INVALID_JSON: The AI returned a response that was not valid JSON.");
-  }
-  
-  // Basic validation to ensure the parsed data looks like a recipe
-  if (recipeData.recipeTitle && Array.isArray(recipeData.ingredients) && Array.isArray(recipeData.instructions)) {
-      return recipeData as Recipe;
-  } else {
-    console.error("Parsed JSON does not match Recipe structure:", recipeData);
-    throw new Error("INVALID_STRUCTURE: The AI returned a JSON object with a missing or incorrect structure.");
+    throw new Error("INVALID_JSON: Die KI hat eine Antwort gesendet, die kein gültiges JSON ist.");
   }
 };
 
@@ -261,9 +264,7 @@ export const generateShoppingList = async (
     pantryItems: PantryItem[],
     currentListItems: ShoppingListItem[]
 ): Promise<Omit<ShoppingListItem, 'id' | 'isChecked'>[]> => {
-    if (!API_KEY) {
-        throw new Error("API_KEY_MISSING: Gemini API key is not configured.");
-    }
+    if (!API_KEY) throw new Error("API_KEY_MISSING: Der KI-Dienst ist nicht konfiguriert.");
 
     const model = "gemini-2.5-flash";
     const pantryList = pantryItems.map(item => item.name).join(', ') || 'keine';
@@ -296,8 +297,7 @@ export const generateShoppingList = async (
         
         const jsonText = response.text.trim();
         if (!jsonText) {
-            console.error("Gemini response for shopping list was empty.");
-            throw new Error("INVALID_RESPONSE: The AI returned an empty response.");
+            throw new Error("INVALID_RESPONSE: Die KI hat eine leere Antwort zurückgegeben.");
         }
 
         const parsedData = JSON.parse(jsonText);
@@ -305,11 +305,10 @@ export const generateShoppingList = async (
         if (parsedData.items && Array.isArray(parsedData.items)) {
             return parsedData.items;
         } else {
-            throw new Error("INVALID_STRUCTURE: The AI returned a JSON object with a missing or incorrect structure.");
+            throw new Error("INVALID_STRUCTURE: Die KI hat eine Antwort mit falscher Struktur gesendet.");
         }
 
     } catch (error) {
-        console.error("Error generating shopping list with Gemini:", error);
-        throw new Error("API_ERROR: Failed to generate shopping list.");
+        throw handleGeminiError(error, 'shopping list');
     }
 };

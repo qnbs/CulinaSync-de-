@@ -1,10 +1,9 @@
-
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/services/db';
 import { Recipe, PantryItem } from '@/types';
-import RecipeList from './RecipeList';
-import RecipeDetail from './RecipeDetail';
+import RecipeList from '@/components/RecipeList';
+import RecipeDetail from '@/components/RecipeDetail';
 import { BookOpen, Search, X, ListFilter, Star, CheckSquare, CalendarPlus, LoaderCircle, CookingPot } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { checkRecipePantryMatch } from '@/services/utils';
@@ -76,9 +75,10 @@ interface RecipeBookProps {
     focusAction?: string | null;
     onActionHandled?: () => void;
     addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
+    voiceAction?: {type: string, payload: any} | null;
 }
 
-const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelectedId, focusAction, onActionHandled, addToast }) => {
+const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelectedId, focusAction, onActionHandled, addToast, voiceAction }) => {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const savedRecipes = useLiveQuery(() => db.recipes.toArray(), []);
   const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
@@ -172,9 +172,6 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelec
     setPantryFilter(false);
   };
 
-  // FIX: Replaced faulty filtering logic with a correct and performant Dexie query.
-  // The new implementation chains Dexie's .filter() method for multiple criteria,
-  // which is the correct approach for applying multiple optional filters efficiently.
   const filteredRecipes = useLiveQuery(
     async () => {
       if (!pantryItems) return [];
@@ -235,6 +232,7 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelec
         recipe={selectedRecipe}
         onBack={() => setSelectedRecipe(null)}
         addToast={addToast}
+        voiceAction={voiceAction}
       />
     );
   }
@@ -341,7 +339,10 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelec
                 {savedRecipes && savedRecipes.length > 0 ? 'Keine Rezepte entsprechen deiner Suche' : 'Dein Kochbuch ist leer'}
                 </h3>
                 <p className="mt-1 text-sm text-zinc-500 max-w-md mx-auto">
-                {savedRecipes && savedRecipes.length > 0 ? 'Versuche, deine Filterauswahl anzupassen oder die Suche zurückzusetzen.' : 'Gehe zum KI-Chef, generiere ein Rezept und speichere es, um es hier zu finden.'}
+                {savedRecipes && savedRecipes.length > 0
+                  ? 'Versuche, deine Filterauswahl anzupassen oder die Suche zurückzusetzen.'
+                  : 'Gehe zum KI-Chef, um dein erstes Rezept zu generieren. Gespeicherte Rezepte erscheinen hier.'
+                }
                 </p>
                 {savedRecipes && savedRecipes.length > 0 && hasActiveFilters && (
                     <button onClick={clearFilters} className="mt-6 flex mx-auto items-center gap-2 bg-amber-500 text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-amber-400 transition-colors">
@@ -355,7 +356,7 @@ const RecipeBook: React.FC<RecipeBookProps> = ({ initialSearchTerm, initialSelec
       )}
 
       {isSelectMode && selectedIds.length > 0 && (
-          <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-zinc-800/80 backdrop-blur-md border border-zinc-700 rounded-lg p-3 flex justify-between items-center w-full max-w-sm shadow-xl page-fade-in z-20">
+          <div className="fixed bottom-20 md:bottom-4 left-1/2 -translate-x-1/2 bg-zinc-800/80 backdrop-blur-md border border-zinc-700 rounded-lg p-3 flex justify-between items-center w-full max-w-sm shadow-xl page-fade-in z-20">
               <span className="font-semibold text-zinc-200">{selectedIds.length} Rezept(e) ausgewählt</span>
               <button onClick={() => setBulkModalOpen(true)} className="flex items-center gap-2 bg-amber-500 text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-amber-400 transition-colors">
                   <CalendarPlus size={18}/> Zum Plan

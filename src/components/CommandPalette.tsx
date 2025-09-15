@@ -25,7 +25,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
     const [dbSearchResults, setDbSearchResults] = useState<{recipes: any[], pantry: any[]}>({recipes: [], pantry: []});
 
     useEffect(() => {
-        if (searchTerm.length > 1) {
+        if (isOpen && searchTerm.length > 1) {
             const search = async () => {
                 const [recipes, pantry] = await Promise.all([
                     db.recipes.where('recipeTitle').startsWithIgnoreCase(searchTerm).limit(3).toArray(),
@@ -33,11 +33,12 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
                 ]);
                 setDbSearchResults({recipes, pantry});
             };
-            search();
+            const debounce = setTimeout(search, 150);
+            return () => clearTimeout(debounce);
         } else {
             setDbSearchResults({recipes: [], pantry: []});
         }
-    }, [searchTerm]);
+    }, [searchTerm, isOpen]);
 
     const filteredCommands = useMemo(() => {
         if (!searchTerm) {
@@ -85,7 +86,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
 
     useEffect(() => {
         setActiveIndex(0);
-    }, [searchTerm]);
+    }, [searchTerm, flatCommandList.length]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -123,13 +124,18 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
         return null;
     }
     
-    let currentIndex = 0;
-
-    const renderItem = (item: any, index: number) => {
+    const renderItem = (item: any, index: number): React.ReactNode => {
         const isSelected = activeIndex === index;
         let content;
         let action;
-
+    
+        const getSectionTitle = (currentItem: any, previousItem: any) => {
+            const currentSection = currentItem.type === 'recipe' ? 'Rezepte' : currentItem.type === 'pantry' ? 'Vorratskammer' : currentItem.type === 'global' ? 'Globale Suche' : currentItem.section;
+            if (!previousItem) return currentSection;
+            const previousSection = previousItem.type === 'recipe' ? 'Rezepte' : previousItem.type === 'pantry' ? 'Vorratskammer' : previousItem.type === 'global' ? 'Globale Suche' : previousItem.section;
+            return currentSection !== previousSection ? currentSection : null;
+        };
+    
         switch (item.type) {
             case 'recipe':
                 content = <><BookOpen className="h-5 w-5 mr-3 text-zinc-500" /><span>{item.recipeTitle}</span></>;
@@ -152,16 +158,20 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
             default:
                 return null;
         }
-
+    
+        const sectionTitle = getSectionTitle(item, index > 0 ? flatCommandList[index - 1] : null);
+    
         return (
-             <li
-                key={item.id}
-                id={`command-item-${index}`}
-                onClick={action}
-                className={`flex items-center p-2 rounded-md cursor-pointer ${isSelected ? 'bg-amber-500/20 text-amber-300' : 'text-zinc-300 hover:bg-zinc-800'}`}
-             >
-                {content}
-            </li>
+            <React.Fragment key={item.id}>
+                {sectionTitle && <h3 className="text-xs font-semibold text-zinc-500 px-2 my-1">{sectionTitle}</h3>}
+                <li
+                    id={`command-item-${index}`}
+                    onClick={action}
+                    className={`flex items-center p-2 rounded-md cursor-pointer ${isSelected ? 'bg-amber-500/20 text-amber-300' : 'text-zinc-300 hover:bg-zinc-800'}`}
+                >
+                    {content}
+                </li>
+            </React.Fragment>
         );
     };
 
@@ -183,7 +193,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
                     <Search className="h-5 w-5 text-zinc-500 mr-3" />
                     <input
                         type="text"
-                        placeholder="Befehl suchen oder Aktion ausführen..."
+                        placeholder="Suchen oder Befehl ausführen..."
                         className="w-full bg-transparent text-zinc-100 placeholder-zinc-500 focus:outline-none"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}

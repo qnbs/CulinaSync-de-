@@ -1,6 +1,4 @@
 
-
-// FIX: Import useEffect from React to be used in the CookModeView component.
 import React, { useState, useMemo, useEffect } from 'react';
 import { Recipe, PantryItem, IngredientItem } from '@/types';
 import { db, addRecipe, deleteRecipe, addRecipeToMealPlan, addMissingIngredientsToShoppingList, addShoppingListItem } from '@/services/db';
@@ -14,6 +12,8 @@ interface RecipeDetailProps {
   recipe: Recipe;
   onBack: () => void;
   addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
+  // FIX: Add voiceAction prop to handle voice commands on this page.
+  voiceAction?: {type: string, payload: any} | null;
 }
 
 const MealPlanModal: React.FC<{recipeId: number, onClose: () => void, onSave: () => void}> = ({recipeId, onClose, onSave}) => {
@@ -55,9 +55,15 @@ const MealPlanModal: React.FC<{recipeId: number, onClose: () => void, onSave: ()
 
 const CookModeView: React.FC<{ recipe: Recipe, currentStep: number, setCurrentStep: (updater: (s: number) => number) => void, onExit: () => void }> = ({ recipe, currentStep, setCurrentStep, onExit }) => {
     const { speak, cancel } = useSpeechSynthesis();
+    
     useEffect(() => {
-        speak(recipe.instructions[currentStep]);
-        return () => cancel();
+        // Speak the current step when it changes
+        speak(`Schritt ${currentStep + 1}. ${recipe.instructions[currentStep]}`);
+        
+        // Cleanup function to stop speaking if component unmounts or step changes
+        return () => {
+            cancel();
+        };
     }, [currentStep, recipe, speak, cancel]);
 
     return (
@@ -81,7 +87,7 @@ const CookModeView: React.FC<{ recipe: Recipe, currentStep: number, setCurrentSt
 )};
 
 
-const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast }) => {
+const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, voiceAction }) => {
   const [currentRecipe, setCurrentRecipe] = useState(recipe);
   const [isSaved, setIsSaved] = useState(!!currentRecipe.id);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -96,6 +102,12 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast })
   const originalServings = useMemo(() => parseInt(recipe.servings.match(/\d+/)?.[0] || '1', 10), [recipe.servings]);
   const [currentServings, setCurrentServings] = useState(originalServings);
   
+  useEffect(() => {
+    if (voiceAction && voiceAction.type.startsWith('START_COOK_MODE')) {
+        handleStartCookMode();
+    }
+  }, [voiceAction]);
+
   const handleServingsChange = (newServings: number) => {
       if (!isNaN(newServings) && newServings > 0 && newServings <= 100) {
           setCurrentServings(newServings);
@@ -125,6 +137,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast })
     if (currentRecipe.id && window.confirm(`Möchtest du das Rezept "${currentRecipe.recipeTitle}" wirklich endgültig löschen?`)) {
       try {
         await deleteRecipe(currentRecipe.id);
+        addToast('Rezept gelöscht.');
         onBack();
       } catch (error) {
         console.error("Failed to delete recipe:", error);
@@ -136,12 +149,18 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast })
   const handleExport = (format: 'pdf' | 'csv' | 'json' | 'md' | 'txt') => {
     setExportOpen(false);
     if (window.confirm(`Möchtest du das Rezept wirklich als ${format.toUpperCase()}-Datei exportieren?`)) {
-      switch (format) {
-        case 'pdf': exportRecipeToPdf(currentRecipe); break;
-        case 'csv': exportRecipeToCsv(currentRecipe); break;
-        case 'json': exportRecipeToJson(currentRecipe); break;
-        case 'md': exportRecipeToMarkdown(currentRecipe); break;
-        case 'txt': exportRecipeToTxt(currentRecipe); break;
+      try {
+        switch (format) {
+            case 'pdf': exportRecipeToPdf(currentRecipe); break;
+            case 'csv': exportRecipeToCsv(currentRecipe); break;
+            case 'json': exportRecipeToJson(currentRecipe); break;
+            case 'md': exportRecipeToMarkdown(currentRecipe); break;
+            case 'txt': exportRecipeToTxt(currentRecipe); break;
+        }
+        addToast(`Rezept als ${format.toUpperCase()} exportiert.`, 'success');
+      } catch (error) {
+          addToast("Export fehlgeschlagen.", "error");
+          console.error(error);
       }
     }
   };
@@ -167,11 +186,15 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast })
   
   const handleAddMissingToShoppingList = async () => {
       if(!recipe.id) return;
-      const count = await addMissingIngredientsToShoppingList(recipe.id);
-      if (count > 0) {
-        addToast(`${count} fehlende(r) Artikel zur Einkaufsliste hinzugefügt.`);
-      } else {
-        addToast('Alle Zutaten sind bereits im Vorrat oder auf der Liste!', 'info');
+      try {
+        const count = await addMissingIngredientsToShoppingList(recipe.id);
+        if (count > 0) {
+            addToast(`${count} fehlende(r) Artikel zur Einkaufsliste hinzugefügt.`);
+        } else {
+            addToast('Alle Zutaten sind bereits im Vorrat oder auf der Liste!', 'info');
+        }
+      } catch (e) {
+        addToast("Fehler beim Hinzufügen zur Einkaufsliste.", "error");
       }
   };
 
@@ -180,14 +203,18 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast })
     const requiredQty = parseFloat(scaledQuantityStr.replace(',', '.')) || 0;
     const pantryQty = pantryMap.get(item.name.toLowerCase()) || 0;
 
-    await addShoppingListItem({ 
-        name: item.name, 
-        quantity: Math.max(1, requiredQty - pantryQty), 
-        unit: item.unit,
-        recipeId: currentRecipe.id, 
-        isChecked: false 
-    });
-    addToast(`"${item.name}" zur Einkaufsliste hinzugefügt.`);
+    try {
+        await addShoppingListItem({ 
+            name: item.name, 
+            quantity: Math.max(1, requiredQty - pantryQty), 
+            unit: item.unit,
+            recipeId: currentRecipe.id, 
+            isChecked: false 
+        });
+        addToast(`"${item.name}" zur Einkaufsliste hinzugefügt.`);
+    } catch (e) {
+        addToast(`Fehler beim Hinzufügen von "${item.name}".`, 'error');
+    }
   }
 
   const handleReadInstructions = () => {

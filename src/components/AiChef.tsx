@@ -7,6 +7,7 @@ import { Sparkles, LoaderCircle, AlertTriangle, Sandwich, BrainCircuit, HeartPul
 import { loadSettings } from '@/services/settingsService';
 import { useLiveQuery } from 'dexie-react-hooks';
 import TagInput from './TagInput';
+import { useSpeechSynthesis } from '@/hooks/useSpeechSynthesis';
 
 const MODIFIER_OPTIONS = [
     { label: 'Schnell (< 30 Min)', icon: Zap },
@@ -49,6 +50,7 @@ interface AiChefProps {
     focusAction?: string | null;
     onActionHandled?: () => void;
     addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
+    voiceAction?: {type: string, payload: any} | null;
 }
 
 const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHandled, addToast }) => {
@@ -68,6 +70,8 @@ const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHan
 
   const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
   const pantrySuggestions = useMemo(() => pantryItems?.map(item => item.name) || [], [pantryItems]);
+
+  const { speak } = useSpeechSynthesis();
 
   const [history, setHistory] = useState<StructuredPrompt[]>(() => {
     try { const saved = localStorage.getItem(HISTORY_KEY); return saved ? JSON.parse(saved) : []; } catch { return []; }
@@ -119,6 +123,7 @@ const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHan
 
     const structuredPrompt: StructuredPrompt = { craving, includeIngredients, excludeIngredients, modifiers };
     setLastPrompt(structuredPrompt);
+    speak("Ich suche nach ein paar Ideen für dich.");
 
     try {
       const pantry = await db.pantry.toArray();
@@ -126,6 +131,8 @@ const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHan
       const ideas = await generateRecipeIdeas(structuredPrompt, pantry, settings.aiPreferences);
       setRecipeIdeas(ideas);
       setChefState('ideasReady');
+      addToast('Hier sind ein paar Vorschläge!', 'info');
+      speak("Hier sind ein paar Vorschläge für dich!");
       updateHistory(structuredPrompt);
     } catch (e: any) {
       handleError(e, 'idle');
@@ -139,12 +146,15 @@ const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHan
     }
     setChefState('loadingRecipe');
     setError(null);
+    speak(`Ich erstelle das Rezept für ${chosenIdea.recipeTitle}.`);
 
     try {
         const pantry = await db.pantry.toArray();
         const settings = loadSettings();
         const recipe = await generateRecipe(lastPrompt, pantry, settings.aiPreferences, chosenIdea);
         setFinalRecipe(recipe);
+        addToast('Dein Rezept wurde erstellt!', 'success');
+        speak("Dein Rezept ist fertig!");
     } catch (e: any) {
         handleError(e, 'ideasReady');
     }
@@ -152,16 +162,11 @@ const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHan
   
   const handleError = (e: any, fallbackState: AiChefState) => {
     console.error(e);
-      if (e.message.startsWith('API_KEY_MISSING')) {
-        setError('Konfigurationsfehler: Der KI-Dienst ist nicht korrekt eingerichtet.');
-      } else if (e.message.startsWith('API_ERROR')) {
-        setError('Verbindungsfehler: Der KI-Dienst konnte nicht erreicht werden. Bitte überprüfe dein Netzwerk und versuche es erneut.');
-      } else if (e.message.startsWith('INVALID_')) {
-        setError('Die KI hat eine ungewöhnliche Antwort gegeben. Möglicherweise ist sie überlastet. Bitte formuliere deine Anfrage um oder versuche es später erneut.');
-      } else {
-        setError('Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.');
-      }
-      setChefState(fallbackState);
+    const errorMessage = e.message || 'Ein unerwarteter Fehler ist aufgetreten.';
+    const userFriendlyMessage = errorMessage.substring(errorMessage.indexOf(':') + 1).trim();
+    setError(userFriendlyMessage);
+    speak(`Es ist ein Fehler aufgetreten: ${userFriendlyMessage}`);
+    setChefState(fallbackState);
   }
 
   const toggleModifier = (modifier: string) => { setModifiers(prev => prev.includes(modifier) ? prev.filter(m => m !== modifier) : [...prev, modifier]); };

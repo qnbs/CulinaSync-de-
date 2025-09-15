@@ -104,9 +104,10 @@ interface PantryManagerProps {
     focusAction?: string | null;
     onActionHandled?: () => void;
     addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
+    voiceAction?: { type: string, payload: any } | null;
 }
 
-const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, initialSelectedId, focusAction, onActionHandled, addToast }) => {
+const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, initialSelectedId, focusAction, onActionHandled, addToast, voiceAction }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [sortOrder, setSortOrder] = useState('name');
@@ -119,6 +120,33 @@ const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, initia
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const pantryItems: PantryItem[] | undefined = useLiveQuery(() => db.pantry.orderBy('name').toArray(), []);
+
+  const adjustQuantity = useCallback(async (item: PantryItem, amount: number) => {
+    const newQuantity = item.quantity + amount;
+    if (newQuantity < 0) return;
+    if (newQuantity === 0) {
+        if (window.confirm(`Soll "${item.name}" wirklich aus dem Vorrat entfernt werden?`)) {
+            await db.pantry.delete(item.id!);
+            addToast(`"${item.name}" entfernt.`);
+        }
+    }
+    else await db.pantry.update(item.id!, { quantity: newQuantity, updatedAt: Date.now() });
+  }, [addToast]);
+
+  useEffect(() => {
+    if (voiceAction?.type === 'ADJUST_PANTRY_QUANTITY') {
+        const payload = voiceAction.payload;
+        const itemName = payload.name.toLowerCase();
+        const itemToAdjust = pantryItems?.find(p => p.name.toLowerCase() === itemName);
+
+        if(itemToAdjust) {
+            adjustQuantity(itemToAdjust, payload.amount);
+            addToast(`Menge für "${itemToAdjust.name}" angepasst.`);
+        } else {
+            addToast(`"${payload.name}" nicht im Vorrat gefunden.`, 'error');
+        }
+    }
+  }, [voiceAction, pantryItems, adjustQuantity, addToast]);
 
   useEffect(() => {
     if (initialSearchTerm) {
@@ -172,7 +200,7 @@ const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, initia
 
   const groupedItems = useMemo(() => {
     if (!isGrouped || !filteredItems) return null;
-    return filteredItems.reduce((acc: Record<string, PantryItem[]>, item) => {
+    return filteredItems.reduce((acc, item) => {
         const category = item.category?.trim() || 'Unkategorisiert';
         if (!acc[category]) acc[category] = [];
         acc[category].push(item);
@@ -193,18 +221,6 @@ const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, initia
         console.error(error);
     }
   };
-  
-  const adjustQuantity = useCallback(async (item: PantryItem, amount: number) => {
-    const newQuantity = item.quantity + amount;
-    if (newQuantity < 0) return;
-    if (newQuantity === 0) {
-        if (window.confirm(`Soll "${item.name}" wirklich aus dem Vorrat entfernt werden?`)) {
-            await db.pantry.delete(item.id!);
-            addToast(`"${item.name}" entfernt.`);
-        }
-    }
-    else await db.pantry.update(item.id!, { quantity: newQuantity, updatedAt: Date.now() });
-  }, [addToast]);
 
   const toggleSelectItem = useCallback((id: number) => setSelectedItems(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]), []);
   
@@ -279,19 +295,30 @@ const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, initia
              {isGrouped && groupedItems ? (
                 Object.entries(groupedItems).sort(([catA], [catB]) => catA.localeCompare(catB)).map(([category, items]) => (
                     <div key={category}>
-                        <h4 className="font-bold text-amber-400 bg-zinc-900 px-4 py-2 border-b border-t border-zinc-800 sticky top-0 z-10">{category}</h4>
+                        <h4 className="font-bold text-amber-400 bg-zinc-900 px-4 py-2 border-b border-t border-zinc-800 sticky top-16 z-10">{category}</h4>
                         <ul className="divide-y divide-zinc-800">{renderItems(items)}</ul>
                     </div>
                 ))
              ) : (
                 <ul className="divide-y divide-zinc-800">
                 {filteredItems && filteredItems.length > 0 ? renderItems(filteredItems)
-                  : (<li className="p-12 text-center text-zinc-500 space-y-2"><Info size={32} className="mx-auto text-zinc-600"/><h4 className="font-semibold text-zinc-400">{pantryItems?.length ? "Keine Artikel entsprechen deinen Filtern." : "Deine Vorratskammer ist leer."}</h4><p className="text-sm">{pantryItems?.length ? "Versuche, die Filter zu ändern." : "Füge oben deinen ersten Artikel hinzu!"}</p></li>)}
+                  : (<li className="p-12 text-center text-zinc-500 space-y-2">
+                      <Info size={32} className="mx-auto text-zinc-600"/>
+                      <h4 className="font-semibold text-zinc-400">
+                        {pantryItems?.length ? "Keine Artikel entsprechen deinen Filtern." : "Deine Vorratskammer ist leer."}
+                      </h4>
+                      <p className="text-sm max-w-sm mx-auto">
+                        {pantryItems?.length 
+                            ? "Versuche, die Filter zu ändern oder zurückzusetzen." 
+                            : "Füge deine ersten Artikel hinzu, damit der KI-Chef weiß, womit er arbeiten kann!"
+                        }
+                      </p>
+                    </li>)}
                </ul>
              )}
          </div>
          {isSelectMode && (
-          <div className="sticky bottom-4 z-20 bg-zinc-800/80 backdrop-blur-md border border-zinc-700 rounded-lg p-3 flex justify-between items-center w-full max-w-lg mx-auto shadow-xl page-fade-in">
+          <div className="sticky bottom-20 md:bottom-4 z-20 bg-zinc-800/80 backdrop-blur-md border border-zinc-700 rounded-lg p-3 flex justify-between items-center w-full max-w-lg mx-auto shadow-xl page-fade-in">
               <span className="font-medium text-zinc-200">{selectedItems.length} Artikel ausgewählt</span>
               <div className="flex gap-2">
                 <button onClick={handleAddSelectedToShoppingList} disabled={selectedItems.length === 0} className="flex items-center gap-2 bg-amber-500 text-zinc-900 font-bold py-2 px-3 rounded-md hover:bg-amber-400 transition-colors disabled:bg-zinc-600 disabled:cursor-not-allowed text-sm">

@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { db, importData } from '@/services/db';
 import { AppSettings } from '@/types';
-import { Save, Trash2, Download, Upload, AlertTriangle, Settings as SettingsIcon, Bot, Database, BookOpen, Milk, CalendarDays, ShoppingCart, ChevronDown, LucideProps } from 'lucide-react';
+import { Save, Trash2, Download, Upload, AlertTriangle, Settings as SettingsIcon, Bot, Database, BookOpen, Milk, CalendarDays, ShoppingCart, ChevronDown, LucideProps, Speaker } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import TagInput from '@/components/TagInput';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { exportFullDataAsJson, exportFullDataAsTxt, exportFullDataAsCsv, exportFullDataAsMarkdown, exportFullDataAsPdf } from '@/services/exportService';
+import { useSpeechSynthesis } from '@/hooks/useSpeechSynthesis';
 
 
 const ResetConfirmationModal: React.FC<{
@@ -67,6 +68,7 @@ const StatCard: React.FC<{ label: string; value: number | undefined; icon: React
 const SETTINGS_SECTIONS = [
     { id: 'preferences', label: 'Allgemein', icon: SettingsIcon },
     { id: 'ai', label: 'KI-Chef', icon: Bot },
+    { id: 'speech', label: 'Sprachausgabe', icon: Speaker },
     { id: 'data', label: 'Daten', icon: Database },
 ];
 
@@ -84,6 +86,7 @@ const Settings: React.FC<SettingsProps> = ({ focusAction, onActionHandled, addTo
     const [isResetModalOpen, setResetModalOpen] = useState(false);
     const [activeSection, setActiveSection] = useState('preferences');
     const [isExportMenuOpen, setExportMenuOpen] = useState(false);
+    const { voices, speak } = useSpeechSynthesis();
     
     const fileInputRef = useRef<HTMLInputElement>(null);
     
@@ -117,41 +120,46 @@ const Settings: React.FC<SettingsProps> = ({ focusAction, onActionHandled, addTo
             aiPreferences: { ...prev.aiPreferences, [field]: value }
         }));
     };
+    
+    const handleSpeechPrefChange = (field: keyof AppSettings['speechSynthesis'], value: any) => {
+        setSettings(prev => ({
+            ...prev,
+            speechSynthesis: { ...prev.speechSynthesis, [field]: value }
+        }));
+    };
 
-    const handleResetData = () => {
+    const handleResetData = async () => {
         setResetModalOpen(false);
-        (db as any).delete().then(() => {
+        try {
+            await (db as any).delete();
             localStorage.clear();
             addToast('Alle Daten zurückgesetzt. App wird neu geladen...', 'info');
             setTimeout(() => window.location.reload(), 2000);
-        }).catch((err: any) => {
+        } catch (err: any) {
             addToast('Fehler beim Zurücksetzen der Daten.', 'error');
             console.error(err);
-        });
+        }
     };
     
     const handleExport = async (format: 'json' | 'txt' | 'csv' | 'md' | 'pdf') => {
         setExportMenuOpen(false);
-        const formatNameMap = {
-            json: 'JSON-Backup',
-            txt: 'Text-Backup',
-            csv: 'CSV-Backup',
-            md: 'Markdown-Backup',
-            pdf: 'PDF-Backup'
-        };
-
-        if (window.confirm(`Möchtest du wirklich ein vollständiges ${formatNameMap[format]} deiner Daten erstellen?`)) {
-            let success = false;
-            switch (format) {
-                case 'json': success = await exportFullDataAsJson(); break;
-                case 'txt': success = await exportFullDataAsTxt(); break;
-                case 'csv': success = await exportFullDataAsCsv(); break;
-                case 'md': success = await exportFullDataAsMarkdown(); break;
-                case 'pdf': success = await exportFullDataAsPdf(); break;
-            }
-            if (success) {
-                addToast('Daten erfolgreich exportiert.', 'success');
-            } else {
+        if (window.confirm(`Möchtest du wirklich ein vollständiges Backup deiner Daten als ${format.toUpperCase()}-Datei erstellen?`)) {
+            try {
+                let success = false;
+                switch (format) {
+                    case 'json': success = await exportFullDataAsJson(); break;
+                    case 'txt': success = await exportFullDataAsTxt(); break;
+                    case 'csv': success = await exportFullDataAsCsv(); break;
+                    case 'md': success = await exportFullDataAsMarkdown(); break;
+                    case 'pdf': success = await exportFullDataAsPdf(); break;
+                }
+                if (success) {
+                    addToast('Daten erfolgreich exportiert.', 'success');
+                } else {
+                    throw new Error("Export function returned false.");
+                }
+            } catch (error) {
+                console.error("Data export failed:", error);
                 addToast('Daten-Export fehlgeschlagen.', 'error');
             }
         }
@@ -269,6 +277,30 @@ const Settings: React.FC<SettingsProps> = ({ focusAction, onActionHandled, addTo
                         </div>
                     </section>
                     )}
+                     {activeSection === 'speech' && (
+                        <section className="bg-zinc-950/50 border border-zinc-800 rounded-lg p-6 page-fade-in">
+                            <h3 className="text-xl font-semibold text-amber-400 mb-6">Sprachausgabe</h3>
+                            <div className="max-w-md space-y-6">
+                                <div>
+                                    <label htmlFor="tts-voice" className="block text-sm font-medium text-zinc-400 mb-1">Stimme</label>
+                                    <select id="tts-voice" value={settings.speechSynthesis.voice || ''} onChange={e => handleSpeechPrefChange('voice', e.target.value)} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" disabled={voices.length === 0}>
+                                        <option value="">Automatisch / Standard</option>
+                                        {voices.map(voice => <option key={voice.voiceURI} value={voice.voiceURI}>{voice.name} ({voice.lang})</option>)}
+                                    </select>
+                                    {voices.length === 0 && <p className="text-xs text-zinc-500 mt-1">Keine deutschen Stimmen vom Browser gefunden.</p>}
+                                </div>
+                                 <div>
+                                    <label htmlFor="tts-rate" className="block text-sm font-medium text-zinc-400 mb-1">Geschwindigkeit: {settings.speechSynthesis.rate.toFixed(1)}</label>
+                                    <input id="tts-rate" type="range" min="0.5" max="2" step="0.1" value={settings.speechSynthesis.rate} onChange={e => handleSpeechPrefChange('rate', parseFloat(e.target.value))} className="w-full" />
+                                </div>
+                                <div>
+                                    <label htmlFor="tts-pitch" className="block text-sm font-medium text-zinc-400 mb-1">Tonhöhe: {settings.speechSynthesis.pitch.toFixed(1)}</label>
+                                    <input id="tts-pitch" type="range" min="0" max="2" step="0.1" value={settings.speechSynthesis.pitch} onChange={e => handleSpeechPrefChange('pitch', parseFloat(e.target.value))} className="w-full" />
+                                </div>
+                                <button onClick={() => speak('Hallo! So klinge ich mit den aktuellen Einstellungen.')} className="text-sm text-amber-400 font-semibold hover:text-amber-300">Test-Satz vorlesen</button>
+                            </div>
+                        </section>
+                     )}
                     {activeSection === 'data' && (
                     <div className="space-y-8 page-fade-in">
                         <section className="bg-zinc-950/50 border border-zinc-800 rounded-lg p-6">
