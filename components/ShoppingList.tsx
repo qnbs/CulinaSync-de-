@@ -228,9 +228,10 @@ interface ShoppingListProps {
 }
 
 const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem }) => {
-  const shoppingList: ShoppingListItem[] | undefined = useLiveQuery(() => db.shoppingList.orderBy(['category', 'sortOrder']).toArray(), []);
-  const pantryItems: PantryItem[] = useLiveQuery(() => db.pantry.toArray(), []) ?? [];
-  const recipes: Recipe[] | undefined = useLiveQuery(() => db.recipes.toArray(), []);
+  // FIX: Added generics to useLiveQuery and used ?? [] to ensure variables are always arrays.
+  const shoppingList: ShoppingListItem[] = useLiveQuery<ShoppingListItem[]>(() => db.shoppingList.orderBy(['category', 'sortOrder']).toArray()) ?? [];
+  const pantryItems: PantryItem[] = useLiveQuery<PantryItem[]>(() => db.pantry.toArray()) ?? [];
+  const recipes: Recipe[] = useLiveQuery<Recipe[]>(() => db.recipes.toArray()) ?? [];
 
   const [quickAddItem, setQuickAddItem] = useState('');
   const [isAiModalOpen, setAiModalOpen] = useState(false);
@@ -385,7 +386,7 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
 
   const handleExport = (format: 'pdf' | 'csv' | 'json' | 'md' | 'txt') => {
     setExportOpen(false);
-    if (!shoppingList?.length) return;
+    if (!shoppingList.length) return;
     if (window.confirm(`Möchtest du die Einkaufsliste wirklich als ${format.toUpperCase()}-Datei exportieren?`)) {
       switch(format) {
           case 'pdf': exportShoppingListToPdf(shoppingList); break;
@@ -453,7 +454,7 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
                         </div>
                     )}
                 </div>
-                <button onClick={handleClearList} disabled={!shoppingList?.length} className="flex items-center gap-2 bg-red-900/80 font-semibold py-2 px-3 rounded-md hover:bg-red-800 disabled:bg-zinc-800 disabled:text-zinc-500 text-sm"><Trash2 size={16}/> Leeren</button>
+                <button onClick={handleClearList} disabled={!shoppingList.length} className="flex items-center gap-2 bg-red-900/80 font-semibold py-2 px-3 rounded-md hover:bg-red-800 disabled:bg-zinc-800 disabled:text-zinc-500 text-sm"><Trash2 size={16}/> Leeren</button>
             </div>
           </div>
       </div>

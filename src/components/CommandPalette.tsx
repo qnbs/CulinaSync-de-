@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, LucideProps, Milk, BookOpen } from 'lucide-react';
 import { db } from '@/services/db';
@@ -65,7 +66,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
         let list: any[] = [];
         list = list.concat(dbSearchResults.recipes.map(r => ({ ...r, type: 'recipe' })));
         list = list.concat(dbSearchResults.pantry.map(p => ({ ...p, type: 'pantry' })));
-        list = list.concat(Object.values(groupedCommands).flat().map(c => ({...c, type: 'command'})));
+        list = list.concat(Object.values(groupedCommands).flat().map((c: Command) => ({...c, type: 'command'})));
         
         const showGlobalSearch = list.length === 0 && searchTerm.trim().length > 1;
 
@@ -189,7 +190,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
                 className="relative bg-zinc-900 border border-zinc-700 rounded-lg shadow-2xl w-full max-w-2xl mx-4 transform transition-all modal-fade-in"
                 onClick={e => e.stopPropagation()}
             >
-                <div className="flex items-center border-b border-zinc-700 p-3">
+                <div className="hidden md:flex items-center border-b border-zinc-700 p-3">
                     <Search className="h-5 w-5 text-zinc-500 mr-3" />
                     <input
                         type="text"
@@ -199,17 +200,17 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
                         onChange={e => setSearchTerm(e.target.value)}
                         autoFocus
                     />
-                     <div className="ml-3 text-xs text-zinc-500 border border-zinc-600 rounded px-1.5 py-0.5">ESC</div>
+                     <div className="ml-3 text-xs text-zinc-500 border border-zinc-600 rounded px-1.5 py-0.5 hidden lg:block">ESC</div>
                 </div>
 
-                <div className="max-h-[60vh] overflow-y-auto p-2">
+                <div className="max-h-[70vh] md:max-h-[60vh] overflow-y-auto p-2">
                     {flatCommandList.length > 0 ? (
                         <ul>
                             {flatCommandList.map((item, index) => renderItem(item, index))}
                         </ul>
                     ) : (
                         <p className="text-center text-zinc-500 p-8">
-                            {searchTerm ? 'Keine Ergebnisse gefunden.' : 'Beginne zu tippen...'}
+                            {searchTerm ? 'Keine Ergebnisse gefunden.' : 'Befehl auswählen...'}
                         </p>
                     )}
                 </div>

@@ -1,5 +1,3 @@
-
-
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -19,6 +17,10 @@ export default defineConfig({
         short_name: 'CulinaSync',
         description: 'Dein kollaborativer kulinarischer Hub für den Haushalt. Offline. Privat. Nahtlos.',
         theme_color: '#18181b',
+        background_color: '#18181b',
+        start_url: '/',
+        display: 'standalone',
+        scope: '/',
         icons: [
           {
             src: 'pwa-192x192.png',
@@ -37,6 +39,29 @@ export default defineConfig({
             purpose: 'any maskable',
           },
         ],
+        shortcuts: [
+          {
+            name: 'Vorratskammer',
+            short_name: 'Vorrrat',
+            description: 'Öffnet die Vorratskammer',
+            url: '/?page=pantry',
+            icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
+          },
+          {
+            name: 'Einkaufsliste',
+            short_name: 'Liste',
+            description: 'Öffnet die Einkaufsliste',
+            url: '/?page=shopping-list',
+            icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
+          },
+          {
+            name: 'KI-Chef',
+            short_name: 'KI-Chef',
+            description: 'Generiert ein neues Rezept',
+            url: '/?page=chef',
+            icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
+          }
+        ]
       },
     }),
   ],

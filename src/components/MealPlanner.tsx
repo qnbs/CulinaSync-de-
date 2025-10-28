@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, markMealAsCooked, removeRecipeFromMealPlan, addRecipeToMealPlan } from '@/services/db';
@@ -137,6 +138,7 @@ const RecipeSidebar = ({ recipes, pantryItems, onDragStart, isCollapsed, onToggl
 
 interface MealPlannerProps {
     addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
+    voiceAction?: { type: string, payload: any } | null;
 }
 
 const MealPlanner: React.FC<MealPlannerProps> = ({ addToast }) => {

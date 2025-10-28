@@ -233,9 +233,10 @@ interface ShoppingListProps {
 }
 
 const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem }) => {
-  const shoppingList: ShoppingListItem[] | undefined = useLiveQuery(() => db.shoppingList.orderBy(['category', 'sortOrder']).toArray(), []);
-  const pantryItems: PantryItem[] = useLiveQuery(() => db.pantry.toArray(), []) ?? [];
-  const recipes: Recipe[] | undefined = useLiveQuery(() => db.recipes.toArray(), []);
+  // FIX: Ensure live query results are always arrays to prevent type errors.
+  const shoppingList = useLiveQuery<ShoppingListItem[]>(() => db.shoppingList.orderBy(['category', 'sortOrder']).toArray()) ?? [];
+  const pantryItems = useLiveQuery<PantryItem[]>(() => db.pantry.toArray()) ?? [];
+  const recipes = useLiveQuery<Recipe[]>(() => db.recipes.toArray()) ?? [];
 
   const [quickAddItem, setQuickAddItem] = useState('');
   const [isAiModalOpen, setAiModalOpen] = useState(false);
@@ -332,7 +333,7 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
   }, []);
   
   const collapseAll = useCallback(() => {
-    if(!shoppingList) return;
+    // FIX: Accessing .map on a potentially unknown type. Corrected by ensuring shoppingList is always an array.
     const allCategories = new Set(shoppingList.map(i => i.category));
     setCollapsedCategories(allCategories);
   }, [shoppingList]);
@@ -381,15 +382,25 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
   }, []);
   // #endregion
 
+  const handleClearList = async () => {
+    if (window.confirm('Möchtest du die Einkaufsliste wirklich komplett leeren?')) {
+        const count = await clearShoppingList();
+        if (count > 0) addToast('Liste geleert.');
+    }
+  };
+
   const handleExport = (format: 'pdf' | 'csv' | 'json' | 'md' | 'txt') => {
     setExportOpen(false);
-    if (!shoppingList?.length) return;
-    switch(format) {
-        case 'pdf': exportShoppingListToPdf(shoppingList); break;
-        case 'csv': exportShoppingListToCsv(shoppingList); break;
-        case 'json': exportShoppingListToJson(shoppingList); break;
-        case 'md': exportShoppingListToMarkdown(shoppingList); break;
-        case 'txt': exportShoppingListToTxt(shoppingList); break;
+    // FIX: Accessing .length on a potentially unknown type. Corrected by ensuring shoppingList is always an array.
+    if (!shoppingList.length) return;
+    if (window.confirm(`Möchtest du die Einkaufsliste wirklich als ${format.toUpperCase()}-Datei exportieren?`)) {
+      switch(format) {
+          case 'pdf': exportShoppingListToPdf(shoppingList); break;
+          case 'csv': exportShoppingListToCsv(shoppingList); break;
+          case 'json': exportShoppingListToJson(shoppingList); break;
+          case 'md': exportShoppingListToMarkdown(shoppingList); break;
+          case 'txt': exportShoppingListToTxt(shoppingList); break;
+      }
     }
   };
 
@@ -404,8 +415,10 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
   }, {} as Record<string, ShoppingListItem[]>), [activeItems]);
 
   const handleMoveToPantry = async () => {
-    const movedCount = await moveCheckedToPantry();
-    if(movedCount > 0) addToast(`${movedCount} Artikel in den Vorrat verschoben.`, 'success');
+      if (completedItems.length > 0 && window.confirm(`${completedItems.length} gekaufte(r) Artikel in den Vorrat verschieben?`)) {
+        const movedCount = await moveCheckedToPantry();
+        if (movedCount > 0) addToast(`${movedCount} Artikel in den Vorrat verschoben.`, 'success');
+      }
   };
 
   if (shoppingList === undefined) {
@@ -438,14 +451,16 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem 
                         <FileDown size={16} /> Exportieren <ChevronDown size={16} className={`transition-transform ${isExportOpen ? 'rotate-180' : ''}`} />
                     </button>
                     {isExportOpen && (
-                        <div className="absolute top-full right-0 mt-2 w-40 bg-zinc-800 border border-zinc-700 rounded-md shadow-lg z-10">
-                            <a onClick={() => handleExport('pdf')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">PDF</a>
-                            <a onClick={() => handleExport('json')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">JSON</a>
-                            <a onClick={() => handleExport('md')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">Markdown</a>
+                        <div className="absolute top-full right-0 mt-2 w-48 bg-zinc-800 border border-zinc-700 rounded-md shadow-lg z-10">
+                            <a onClick={() => handleExport('pdf')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">PDF (.pdf)</a>
+                            <a onClick={() => handleExport('csv')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">CSV (.csv)</a>
+                            <a onClick={() => handleExport('json')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">JSON (.json)</a>
+                            <a onClick={() => handleExport('md')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">Markdown (.md)</a>
+                            <a onClick={() => handleExport('txt')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">Text (.txt)</a>
                         </div>
                     )}
                 </div>
-                <button onClick={() => clearShoppingList().then(c => c > 0 && addToast('Liste geleert.'))} disabled={!shoppingList?.length} className="flex items-center gap-2 bg-red-900/80 font-semibold py-2 px-3 rounded-md hover:bg-red-800 disabled:bg-zinc-800 disabled:text-zinc-500 text-sm"><Trash2 size={16}/> Leeren</button>
+                <button onClick={handleClearList} disabled={!shoppingList.length} className="flex items-center gap-2 bg-red-900/80 font-semibold py-2 px-3 rounded-md hover:bg-red-800 disabled:bg-zinc-800 disabled:text-zinc-500 text-sm"><Trash2 size={16}/> Leeren</button>
             </div>
           </div>
       </div>

@@ -1,4 +1,6 @@
 
+
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, LucideProps, Milk, BookOpen } from 'lucide-react';
 
@@ -18,6 +20,9 @@ interface CommandPaletteProps {
     addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
     navigateToItem: (page: 'recipes' | 'pantry', id: number) => void;
 }
+
+// FIX: Define a union type for all possible items in the command list for type safety.
+type PaletteCommand = Command | { id: string; action: () => void; };
 
 const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, commands, onGlobalSearch }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -46,7 +51,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
         }, {} as Record<string, Command[]>);
     }, [filteredCommands]);
 
-    const flatCommandList = useMemo(() => {
+    const flatCommandList: PaletteCommand[] = useMemo(() => {
         const commandItems = Object.values(groupedCommands).flat();
         if (showGlobalSearch) {
             // Add dummy items for keyboard navigation
@@ -86,7 +91,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
                 e.preventDefault();
                 const command = flatCommandList[activeIndex];
                 if (command) {
-                    (command as any).action();
+                    command.action();
                     onClose();
                 }
             }
@@ -133,13 +138,17 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
                 </div>
 
                 <div className="max-h-[60vh] overflow-y-auto p-2">
-                    {Object.keys(groupedCommands).length > 0 ? (
+                    {Object.keys(groupedCommands || {}).length > 0 ? (
+                        // FIX: Add guard for groupedCommands being unknown.
                         Object.entries(groupedCommands).map(([section, cmds]) => (
                             <div key={section} className="mb-2">
                                 <h3 className="text-xs font-semibold text-zinc-500 px-2 my-1">{section}</h3>
                                 <ul>
-                                    {cmds.map(command => {
-                                        const currentIndex = Object.values(groupedCommands).flat().findIndex(c => c.id === command.id);
+                                    {/* FIX: Cast cmds to Command[] to ensure type safety. */}
+                                    {cmds.map((command: Command) => {
+                                        // FIX: Use a typed array to prevent type inference issues with findIndex.
+                                        const flatCommands = Object.values(groupedCommands).flat();
+                                        const currentIndex = flatCommands.findIndex(c => c.id === command.id);
                                         const Icon = command.icon;
                                         return (
                                             <li

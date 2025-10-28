@@ -72,7 +72,7 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
                     className="w-full flex items-center justify-center gap-2 bg-amber-500 text-zinc-900 font-bold py-3 px-4 rounded-md hover:bg-amber-400 transition-colors"
                 >
                     {cta}
-                    {currentStep < steps.length - 1 ? <ArrowRight size={18}/> : <Check size={18}/>}
+                    {currentStep < steps.length - 1 ? <ArrowRight size={20} /> : <Check size={20} />}
                 </button>
             </div>
         </div>

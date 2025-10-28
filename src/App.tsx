@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import Header from '@/components/Header';
 import CommandPalette, { type Command } from '@/components/CommandPalette';
@@ -10,7 +9,7 @@ import VoiceControlUI from '@/components/VoiceControlUI';
 import { CheckCircle, Bot, Milk, BookOpen, CalendarDays, ShoppingCart, Settings as SettingsIcon, HelpCircle, PlusCircle, Search, RefreshCw, Trash2, Download, Upload, TerminalSquare, Mic, AlertTriangle, Info, X } from 'lucide-react';
 import { SettingsProvider } from '@/contexts/SettingsContext';
 import BottomNav from '@/components/BottomNav';
-import Onboarding from '@/components/Onboarding';
+import Onboarding from './components/Onboarding';
 
 // Lazy load page components for code splitting and faster initial load
 const AiChef = lazy(() => import('@/components/AiChef'));
@@ -42,9 +41,9 @@ const App: React.FC = () => {
   const [focusAction, setFocusAction] = useState<string | null>(null);
   const [initialSelectedId, setInitialSelectedId] = useState<number | null>(null);
   const [appVersion, setAppVersion] = useState<string>('');
+  const [installPromptEvent, setInstallPromptEvent] = useState<any>(null);
+  const [isStandalone, setIsStandalone] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [isApiKeyMissing, setIsApiKeyMissing] = useState(false);
 
   useEffect(() => {
     fetch('./package.json')
@@ -52,17 +51,31 @@ const App: React.FC = () => {
       .then(data => setAppVersion(data.version || 'N/A'))
       .catch(() => setAppVersion('N/A'));
 
-    const onboardingComplete = localStorage.getItem('culinaSyncOnboardingComplete');
-    if (onboardingComplete !== 'true') {
-        setShowOnboarding(true);
-    }
-    
-    if (!process.env.API_KEY) {
-        setIsApiKeyMissing(true);
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setInstallPromptEvent(e);
+    };
+
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setIsStandalone(true);
     }
 
-    setIsInitialized(true);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    const hasOnboarded = localStorage.getItem('culinaSyncOnboarded');
+    if (!hasOnboarded) {
+      setShowOnboarding(true);
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
   }, []);
+
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('culinaSyncOnboarded', 'true');
+    setShowOnboarding(false);
+  };
 
   const removeToast = useCallback((id: number) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
@@ -75,6 +88,19 @@ const App: React.FC = () => {
         removeToast(id);
     }, 4000);
   }, [removeToast]);
+
+  const handleInstallPWA = async () => {
+    if (!installPromptEvent) {
+        addToast('App kann derzeit nicht installiert werden.', 'info');
+        return;
+    }
+    installPromptEvent.prompt();
+    const { outcome } = await installPromptEvent.userChoice;
+    if (outcome === 'accepted') {
+        addToast('App erfolgreich installiert!', 'success');
+    }
+    setInstallPromptEvent(null);
+  };
 
   const {
     finalTranscript,
@@ -100,12 +126,6 @@ const App: React.FC = () => {
       setFocusAction(focusTarget);
     }
   }, []);
-
-  const handleOnboardingComplete = useCallback(() => {
-    localStorage.setItem('culinaSyncOnboardingComplete', 'true');
-    setShowOnboarding(false);
-    navigate('pantry');
-  }, [navigate]);
 
   const navigateToItem = useCallback((page: 'recipes' | 'pantry', id: number) => {
     setInitialSelectedId(id);
@@ -149,8 +169,9 @@ const App: React.FC = () => {
                     navigate('pantry');
                 }
             });
-        } else if (action.type !== 'UNKNOWN') {
-             setVoiceAction({ type: action.type, payload: JSON.stringify(action.payload) + `#${Date.now()}` });
+        }
+        else if (action.type !== 'UNKNOWN') {
+            setVoiceAction({ type: action.type, payload: `${action.payload}#${Date.now()}` });
         } else {
             addToast("Befehl nicht erkannt.", "error");
         }
@@ -167,6 +188,8 @@ const App: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  const canInstall = installPromptEvent && !isStandalone;
 
   const commands: Command[] = [
     { id: 'nav-pantry', title: 'Gehe zur Vorratskammer', section: 'Navigation', icon: Milk, action: () => navigate('pantry') },
@@ -191,6 +214,10 @@ const App: React.FC = () => {
     { id: 'voice-toggle', title: 'Sprachsteuerung umschalten', section: 'Global', icon: Mic, action: () => isListening ? stopListening() : startListening() },
   ];
 
+  if (canInstall) {
+    commands.push({ id: 'app-install', title: 'App installieren', section: 'Global', icon: Download, action: handleInstallPWA });
+  }
+
   const onCommandPaletteClose = useCallback(() => {
     setCommandPaletteOpen(false);
   }, []);
@@ -207,7 +234,6 @@ const App: React.FC = () => {
         focusAction,
         onActionHandled: () => setFocusAction(null),
         addToast,
-        voiceAction,
     };
     
     switch (currentPage) {
@@ -233,7 +259,11 @@ const App: React.FC = () => {
                         triggerCheckItem={voiceAction?.type === 'CHECK_SHOPPING_ITEM' ? voiceAction.payload : undefined}
                         {...pageProps}
                     />;
-        case 'settings': return <Settings {...pageProps} />;
+        // FIX: Destructure voiceAction from pageProps and pass the rest to Settings to avoid prop type errors.
+        case 'settings': {
+          const { voiceAction, ...rest } = { ...pageProps, voiceAction: voiceAction };
+          return <Settings {...rest} installPromptEvent={installPromptEvent} onInstallPWA={handleInstallPWA} isStandalone={isStandalone} />;
+        }
         case 'help': return <Help appVersion={appVersion} />;
         default: return <PantryManager {...pageProps} />;
     }
@@ -242,7 +272,7 @@ const App: React.FC = () => {
   return (
     <SettingsProvider>
       <div className="min-h-screen text-zinc-200">
-        {isInitialized && showOnboarding && <Onboarding onComplete={handleOnboardingComplete} />}
+        {showOnboarding && <Onboarding onComplete={handleOnboardingComplete} />}
         <Header 
           currentPage={currentPage} 
           setCurrentPage={navigate}
@@ -252,13 +282,7 @@ const App: React.FC = () => {
           hasRecognitionSupport={hasRecognitionSupport}
           onCommandPaletteToggle={() => setCommandPaletteOpen(true)}
         />
-        <main key={currentPage} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 page-fade-in pb-24 md:pb-8">
-           {isApiKeyMissing && (
-                <div className="bg-amber-600/20 border border-amber-500 text-amber-300 px-4 py-3 rounded-lg relative mb-6" role="alert">
-                    <strong className="font-bold">Achtung: </strong>
-                    <span className="block sm:inline">Kein API-Schlüssel gefunden. Die KI-Funktionen sind deaktiviert.</span>
-                </div>
-            )}
+        <main key={currentPage} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 page-fade-in pb-20 md:pb-8">
           <Suspense fallback={<LoadingSpinner />}>
               {renderPage()}
           </Suspense>

@@ -1,14 +1,12 @@
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { db } from '@/services/db';
 import { generateRecipeIdeas, generateRecipe } from '@/services/geminiService';
 import { Recipe, RecipeIdea, StructuredPrompt } from '@/types';
 import RecipeDetail from '@/components/RecipeDetail';
-import { Sparkles, LoaderCircle, AlertTriangle, Sandwich, BrainCircuit, HeartPulse, Zap, Users, RotateCcw, Wand2, ChefHat, Megaphone, Leaf, PlusCircle, MinusCircle, Redo, ChevronDown, List } from 'lucide-react';
+import { Sparkles, LoaderCircle, AlertTriangle, Sandwich, BrainCircuit, HeartPulse, Zap, Users, RotateCcw, Wand2, ChefHat, Megaphone, Leaf, PlusCircle, MinusCircle, Redo } from 'lucide-react';
 import { loadSettings } from '@/services/settingsService';
 import { useLiveQuery } from 'dexie-react-hooks';
 import TagInput from './TagInput';
-import { useSpeechSynthesis } from '@/hooks/useSpeechSynthesis';
 
 const MODIFIER_OPTIONS = [
     { label: 'Schnell (< 30 Min)', icon: Zap },
@@ -26,41 +24,19 @@ const MAX_HISTORY = 5;
 
 type AiChefState = 'idle' | 'loadingIdeas' | 'ideasReady' | 'loadingRecipe';
 
-const PromptSummary: React.FC<{prompt: StructuredPrompt}> = ({prompt}) => {
-    const [isExpanded, setIsExpanded] = useState(false);
-    return (
-        <div className="bg-zinc-800/50 border border-zinc-700 rounded-lg">
-            <button onClick={() => setIsExpanded(!isExpanded)} className="w-full flex justify-between items-center p-3 text-left">
-                <span className="font-semibold text-zinc-300 flex items-center gap-2"><List size={16}/> Deine Anfrage</span>
-                <ChevronDown size={20} className={`text-zinc-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-            </button>
-            {isExpanded && (
-                <div className="px-3 pb-3 border-t border-zinc-700 text-sm text-zinc-400 space-y-1 pt-3">
-                    <p><strong>Wunsch:</strong> {prompt.craving}</p>
-                    {prompt.includeIngredients.length > 0 && <p><strong>Muss enthalten:</strong> {prompt.includeIngredients.join(', ')}</p>}
-                    {prompt.excludeIngredients.length > 0 && <p><strong>Darf nicht enthalten:</strong> {prompt.excludeIngredients.join(', ')}</p>}
-                    {prompt.modifiers.length > 0 && <p><strong>Eigenschaften:</strong> {prompt.modifiers.join(', ')}</p>}
-                </div>
-            )}
-        </div>
-    )
-}
-
 interface AiChefProps {
     initialPrompt?: string;
     focusAction?: string | null;
     onActionHandled?: () => void;
     addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
-    voiceAction?: {type: string, payload: any} | null;
 }
 
-const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHandled, addToast, voiceAction }) => {
+const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHandled, addToast }) => {
   const [craving, setCraving] = useState('');
   const [includeIngredients, setIncludeIngredients] = useState<string[]>([]);
   const [excludeIngredients, setExcludeIngredients] = useState<string[]>([]);
   const [modifiers, setModifiers] = useState<string[]>([]);
-  
-  const [lastPrompt, setLastPrompt] = useState<StructuredPrompt | null>(null);
+
   const [chefState, setChefState] =useState<AiChefState>('idle');
   const [recipeIdeas, setRecipeIdeas] = useState<RecipeIdea[]>([]);
   const [finalRecipe, setFinalRecipe] = useState<Recipe | null>(null);
@@ -71,8 +47,6 @@ const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHan
 
   const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
   const pantrySuggestions = useMemo(() => pantryItems?.map(item => item.name) || [], [pantryItems]);
-
-  const { speak } = useSpeechSynthesis();
 
   const [history, setHistory] = useState<StructuredPrompt[]>(() => {
     try { const saved = localStorage.getItem(HISTORY_KEY); return saved ? JSON.parse(saved) : []; } catch { return []; }
@@ -123,8 +97,6 @@ const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHan
     setFinalRecipe(null);
 
     const structuredPrompt: StructuredPrompt = { craving, includeIngredients, excludeIngredients, modifiers };
-    setLastPrompt(structuredPrompt);
-    speak("Ich suche nach ein paar Ideen für dich.");
 
     try {
       const pantry = await db.pantry.toArray();
@@ -132,43 +104,28 @@ const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHan
       const ideas = await generateRecipeIdeas(structuredPrompt, pantry, settings.aiPreferences);
       setRecipeIdeas(ideas);
       setChefState('ideasReady');
-      addToast('Hier sind ein paar Vorschläge!', 'info');
-      speak("Hier sind ein paar Vorschläge für dich!");
       updateHistory(structuredPrompt);
     } catch (e: any) {
-      handleError(e, 'idle');
+      setError(e.message);
+      setChefState('idle');
     }
   };
 
   const handleGenerateFullRecipe = async (chosenIdea: RecipeIdea) => {
-    if (!lastPrompt) {
-        handleError(new Error("Missing prompt context"), 'idle');
-        return;
-    }
     setChefState('loadingRecipe');
     setError(null);
-    speak(`Ich erstelle das Rezept für ${chosenIdea.recipeTitle}.`);
+    const structuredPrompt: StructuredPrompt = { craving, includeIngredients, excludeIngredients, modifiers };
 
     try {
         const pantry = await db.pantry.toArray();
         const settings = loadSettings();
-        const recipe = await generateRecipe(lastPrompt, pantry, settings.aiPreferences, chosenIdea);
+        const recipe = await generateRecipe(structuredPrompt, pantry, settings.aiPreferences, chosenIdea);
         setFinalRecipe(recipe);
-        addToast('Dein Rezept wurde erstellt!', 'success');
-        speak("Dein Rezept ist fertig!");
     } catch (e: any) {
-        handleError(e, 'ideasReady');
+        setError(e.message);
+        setChefState('ideasReady');
     }
   };
-  
-  const handleError = (e: any, fallbackState: AiChefState) => {
-    console.error(e);
-    const errorMessage = e.message || 'Ein unerwarteter Fehler ist aufgetreten.';
-    const userFriendlyMessage = errorMessage.substring(errorMessage.indexOf(':') + 1).trim();
-    setError(userFriendlyMessage);
-    speak(`Es ist ein Fehler aufgetreten: ${userFriendlyMessage}`);
-    setChefState(fallbackState);
-  }
 
   const toggleModifier = (modifier: string) => { setModifiers(prev => prev.includes(modifier) ? prev.filter(m => m !== modifier) : [...prev, modifier]); };
 
@@ -188,11 +145,10 @@ const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHan
     setFinalRecipe(null);
     setRecipeIdeas([]);
     setError(null);
-    setLastPrompt(null);
   };
   
   if (finalRecipe) {
-      return <RecipeDetail recipe={finalRecipe} onBack={() => { setFinalRecipe(null); setChefState('ideasReady'); }} addToast={addToast} voiceAction={voiceAction} />
+      return <RecipeDetail recipe={finalRecipe} onBack={() => { setFinalRecipe(null); setChefState('ideasReady'); }} addToast={addToast} />
   }
 
   const isLoading = chefState === 'loadingIdeas' || chefState === 'loadingRecipe';
@@ -266,7 +222,6 @@ const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHan
                     <Redo size={16}/> Neu anfangen
                 </button>
              </div>
-             {lastPrompt && <PromptSummary prompt={lastPrompt} />}
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {recipeIdeas.map((idea, index) => (
                     <div key={index} className="bg-zinc-800/50 border border-zinc-700 rounded-lg p-5 flex flex-col text-center items-center justify-between gap-4">
@@ -284,12 +239,9 @@ const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHan
       )}
 
       {chefState === 'loadingRecipe' && (
-           <div className="space-y-4">
-               {lastPrompt && <PromptSummary prompt={lastPrompt} />}
-               <div className="text-center p-12 bg-zinc-800/50 border border-zinc-700 rounded-lg">
-                   <LoaderCircle size={32} className="animate-spin mx-auto text-amber-400" />
-                   <h3 className="text-xl font-bold tracking-tight text-zinc-100 mt-4">{loadingMessage}</h3>
-               </div>
+           <div className="text-center p-12 bg-zinc-800/50 border border-zinc-700 rounded-lg">
+               <LoaderCircle size={32} className="animate-spin mx-auto text-amber-400" />
+               <h3 className="text-xl font-bold tracking-tight text-zinc-100 mt-4">{loadingMessage}</h3>
            </div>
       )}
       

@@ -1,4 +1,3 @@
-
 import { Page, ShoppingListItem } from '../types';
 
 export interface CommandAction {

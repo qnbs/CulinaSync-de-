@@ -14,6 +14,7 @@ import {
   Mic,
   Lightbulb,
   LucideProps,
+  Download,
 } from 'lucide-react';
 
 // FIX: Made children optional to avoid type errors when component is used without children.
@@ -59,9 +60,10 @@ const FaqView: React.FC<{appVersion: string, onShowAbout: () => void}> = ({ appV
     </section>
     <section>
       <h3 className="text-xl font-semibold text-amber-400 border-b border-zinc-700 pb-2 mb-6 flex items-center gap-3"><Lightbulb /> Pro-Tipps & Kurzbefehle</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <HelpCard icon={TerminalSquare} title="Befehlspalette"><p>Drücke <kbd className="bg-zinc-700 text-zinc-200 font-sans rounded-md px-2 py-1 text-xs">⌘K</kbd> (Mac) oder <kbd className="bg-zinc-700 text-zinc-200 font-sans rounded-md px-2 py-1 text-xs">Strg+K</kbd> (Windows), um die Befehlspalette zu öffnen. Von hier aus kannst du blitzschnell zu jeder Seite navigieren oder Aktionen ausführen.</p></HelpCard>
         <HelpCard icon={Mic} title="Sprachsteuerung"><p>Aktiviere das Mikrofon in der Kopfzeile und steuere die App mit deiner Stimme. Probier mal:</p><ul className="list-disc list-outside pl-5 space-y-1 mt-2"><li>"Gehe zur Einkaufsliste"</li><li>"Füge 2 Liter Milch auf die Liste"</li><li>"Suche nach Hähnchen" (in der Vorratskammer)</li></ul></HelpCard>
+        <HelpCard icon={Download} title="App-Installation (PWA)"><p>Du kannst CulinaSync wie eine native App auf deinem Smartphone, Tablet oder Computer installieren. Suche dafür einfach in den <strong>Einstellungen</strong> unter <strong>Datenverwaltung</strong> nach dem "Installieren"-Button.</p></HelpCard>
       </div>
     </section>
     <section>
@@ -136,18 +138,3 @@ const Help: React.FC<HelpProps> = ({ appVersion }) => {
       <div className="border-b border-zinc-700 flex">
         <button onClick={() => setActiveTab('faq')} className={`py-2 px-4 text-sm font-semibold ${activeTab === 'faq' ? 'text-amber-400 border-b-2 border-amber-400' : 'text-zinc-400 hover:text-white'}`}>FAQ & Funktionen</button>
         <button onClick={() => setActiveTab('about')} className={`py-2 px-4 text-sm font-semibold ${activeTab === 'about' ? 'text-amber-400 border-b-2 border-amber-400' : 'text-zinc-400 hover:text-white'}`}>Über die App</button>
-      </div>
-      
-      <div className="space-y-12">
-        {activeTab === 'faq' ? (
-          <FaqView appVersion={appVersion} onShowAbout={() => setActiveTab('about')} />
-        ) : (
-          <AboutView />
-        )}
-      </div>
-
-    </div>
-  );
-};
-
-export default Help;

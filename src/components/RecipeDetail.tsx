@@ -1,13 +1,12 @@
 
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+
+import React, { useState, useMemo } from 'react';
 import { Recipe, PantryItem, IngredientItem } from '@/types';
 import { db, addRecipe, deleteRecipe, addRecipeToMealPlan, addMissingIngredientsToShoppingList, addShoppingListItem } from '@/services/db';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { exportRecipeToPdf, exportRecipeToCsv, exportRecipeToMarkdown, exportRecipeToTxt, exportRecipeToJson } from '@/services/exportService';
-import { ArrowLeft, Clock, Users, BarChart, UtensilsCrossed, Lightbulb, Save, Trash2, CheckCircle, CalendarPlus, FileDown, Star, ChevronDown, Plus, Minus, CookingPot, ShoppingCart, X as XIcon, AlertCircle, ShoppingCartIcon, Volume2, PauseCircle } from 'lucide-react';
+import { ArrowLeft, Clock, Users, BarChart, UtensilsCrossed, Lightbulb, Save, Trash2, CheckCircle, CalendarPlus, FileDown, Star, ChevronDown, Plus, Minus, CookingPot, ShoppingCart, X as XIcon, AlertCircle, ShoppingCartIcon } from 'lucide-react';
 import { scaleIngredientQuantity } from '@/services/utils';
-import { useSpeechSynthesis } from '@/hooks/useSpeechSynthesis';
-import { useWakeLock } from '@/hooks/useWakeLock';
 
 // FIX: Add optional `voiceAction` prop to handle voice commands.
 interface RecipeDetailProps {
@@ -54,15 +53,7 @@ const MealPlanModal: React.FC<{recipeId: number, onClose: () => void, onSave: ()
     )
 }
 
-const CookModeView: React.FC<{ recipe: Recipe, currentStep: number, setCurrentStep: (updater: (s: number) => number) => void, onExit: () => void }> = ({ recipe, currentStep, setCurrentStep, onExit }) => {
-    const { speak, cancel } = useSpeechSynthesis();
-    
-    useEffect(() => {
-        speak(`Schritt ${currentStep + 1}. ${recipe.instructions[currentStep]}`);
-        return () => cancel();
-    }, [currentStep, recipe, speak, cancel]);
-
-    return (
+const CookModeView: React.FC<{ recipe: Recipe, currentStep: number, setCurrentStep: (updater: (s: number) => number) => void, onExit: () => void }> = ({ recipe, currentStep, setCurrentStep, onExit }) => (
     <div className="fixed inset-0 bg-zinc-950 z-[100] flex flex-col p-4 sm:p-8 text-zinc-100 font-sans">
         <header className="flex justify-between items-center mb-4 flex-shrink-0">
             <h3 className="text-xl font-bold text-amber-400 truncate pr-4">{recipe.recipeTitle}</h3>
@@ -75,12 +66,12 @@ const CookModeView: React.FC<{ recipe: Recipe, currentStep: number, setCurrentSt
             <p className="text-2xl md:text-4xl leading-relaxed max-w-4xl page-fade-in">{recipe.instructions[currentStep]}</p>
         </div>
         <footer className="flex justify-center items-center gap-4 pt-4 flex-shrink-0">
-            <button onClick={() => setCurrentStep(s => Math.max(0, s - 1))} disabled={currentStep === 0} className="py-3 px-6 rounded-md bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 transition-colors">Zurück</button>
+            <button onClick={() => setCurrentStep(s => s - 1)} disabled={currentStep === 0} className="py-3 px-6 rounded-md bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 transition-colors">Zurück</button>
             <span className="font-bold text-lg tabular-nums">{currentStep + 1} / {recipe.instructions.length}</span>
-            <button onClick={() => setCurrentStep(s => Math.min(recipe.instructions.length - 1, s + 1))} disabled={currentStep >= recipe.instructions.length - 1} className="py-3 px-6 rounded-md bg-amber-500 text-zinc-900 font-bold hover:bg-amber-400 disabled:opacity-50 transition-colors">Weiter</button>
+            <button onClick={() => setCurrentStep(s => s + 1)} disabled={currentStep >= recipe.instructions.length - 1} className="py-3 px-6 rounded-md bg-amber-500 text-zinc-900 font-bold hover:bg-amber-400 disabled:opacity-50 transition-colors">Weiter</button>
         </footer>
     </div>
-)};
+);
 
 
 const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, voiceAction }) => {
@@ -90,9 +81,6 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, v
   const [isExportOpen, setExportOpen] = useState(false);
   const [isCookMode, setIsCookMode] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const { speak, cancel, isSpeaking } = useSpeechSynthesis();
-  const [, requestWakeLock, releaseWakeLock] = useWakeLock();
-
 
   const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
   const pantryMap: Map<string, number> = useMemo(() => new Map(pantryItems?.map((p: PantryItem) => [p.name.toLowerCase(), p.quantity]) || []), [pantryItems]);
@@ -100,30 +88,6 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, v
   const originalServings = useMemo(() => parseInt(recipe.servings.match(/\d+/)?.[0] || '1', 10), [recipe.servings]);
   const [currentServings, setCurrentServings] = useState(originalServings);
   
-  const handleStartCookMode = useCallback(() => {
-    setCurrentStep(0);
-    setIsCookMode(true);
-    requestWakeLock();
-    addToast('Kochmodus gestartet. Sag "Nächster Schritt" um fortzufahren.', 'info');
-  }, [addToast, requestWakeLock]);
-
-  const handleExitCookMode = useCallback(() => {
-      setIsCookMode(false);
-      releaseWakeLock();
-  }, [releaseWakeLock]);
-  
-  useEffect(() => {
-    if (voiceAction) {
-        const actionType = voiceAction.type;
-        if (actionType.startsWith('START_COOK_MODE')) handleStartCookMode();
-        if (isCookMode) {
-            if (actionType.startsWith('NEXT_STEP')) setCurrentStep(s => Math.min(currentRecipe.instructions.length - 1, s + 1));
-            if (actionType.startsWith('PREVIOUS_STEP')) setCurrentStep(s => Math.max(0, s - 1));
-            if (actionType.startsWith('EXIT_COOK_MODE')) handleExitCookMode();
-        }
-    }
-  }, [voiceAction, isCookMode, currentRecipe.instructions.length, handleStartCookMode, handleExitCookMode]);
-
   const handleServingsChange = (newServings: number) => {
       if (!isNaN(newServings) && newServings > 0 && newServings <= 100) {
           setCurrentServings(newServings);
@@ -135,112 +99,88 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, v
       return currentServings / originalServings;
   }, [currentServings, originalServings]);
 
-  const handleSave = useCallback(async () => {
+  const handleSave = async () => {
     try {
       const newId = await addRecipe(currentRecipe);
       if(newId) {
         setCurrentRecipe(prev => ({ ...prev, id: newId }));
         setIsSaved(true);
         addToast('Rezept erfolgreich gespeichert!');
-        speak('Rezept gespeichert.');
       }
     } catch (error) {
       console.error("Failed to save recipe:", error);
       addToast('Speichern fehlgeschlagen.', 'error');
     }
-  }, [addToast, currentRecipe, speak]);
+  };
 
-  const handleDelete = useCallback(async () => {
+  const handleDelete = async () => {
     if (currentRecipe.id && window.confirm(`Möchtest du das Rezept "${currentRecipe.recipeTitle}" wirklich endgültig löschen?`)) {
       try {
         await deleteRecipe(currentRecipe.id);
-        addToast('Rezept gelöscht.');
-        speak('Rezept gelöscht.');
         onBack();
       } catch (error) {
         console.error("Failed to delete recipe:", error);
         addToast('Löschen fehlgeschlagen.', 'error');
       }
     }
-  }, [currentRecipe, addToast, speak, onBack]);
+  };
   
-  const handleExport = useCallback((format: 'pdf' | 'csv' | 'json' | 'md' | 'txt') => {
+  const handleExport = (format: 'pdf' | 'csv' | 'json' | 'md' | 'txt') => {
     setExportOpen(false);
     if (window.confirm(`Möchtest du das Rezept wirklich als ${format.toUpperCase()}-Datei exportieren?`)) {
-      try {
-        switch (format) {
-            case 'pdf': exportRecipeToPdf(currentRecipe); break;
-            case 'csv': exportRecipeToCsv(currentRecipe); break;
-            case 'json': exportRecipeToJson(currentRecipe); break;
-            case 'md': exportRecipeToMarkdown(currentRecipe); break;
-            case 'txt': exportRecipeToTxt(currentRecipe); break;
-        }
-        addToast(`Rezept als ${format.toUpperCase()} exportiert.`, 'success');
-      } catch (error) {
-          addToast("Export fehlgeschlagen.", "error");
-          console.error(error);
+      switch (format) {
+        case 'pdf': exportRecipeToPdf(currentRecipe); break;
+        case 'csv': exportRecipeToCsv(currentRecipe); break;
+        case 'json': exportRecipeToJson(currentRecipe); break;
+        case 'md': exportRecipeToMarkdown(currentRecipe); break;
+        case 'txt': exportRecipeToTxt(currentRecipe); break;
       }
     }
-  }, [addToast, currentRecipe]);
+  };
 
-  const handleToggleFavorite = useCallback(async () => {
+  const handleToggleFavorite = async () => {
     if (currentRecipe.id) {
         try {
             const newIsFavorite = !currentRecipe.isFavorite;
             await db.recipes.update(currentRecipe.id, { isFavorite: newIsFavorite, updatedAt: Date.now() });
             setCurrentRecipe(prev => ({...prev, isFavorite: newIsFavorite}));
             addToast(newIsFavorite ? 'Als Favorit markiert!' : 'Favorit entfernt.');
-            speak(newIsFavorite ? 'Als Favorit markiert' : 'Favorit entfernt');
         } catch (error) {
             console.error("Failed to update favorite status:", error);
             addToast('Aktion fehlgeschlagen.', 'error');
         }
     }
-  }, [addToast, currentRecipe, speak]);
-  
-  const handleAddMissingToShoppingList = useCallback(async () => {
-      if(!recipe.id) return;
-      try {
-        const count = await addMissingIngredientsToShoppingList(recipe.id);
-        if (count > 0) {
-            addToast(`${count} fehlende(r) Artikel zur Einkaufsliste hinzugefügt.`);
-            speak(`${count} Artikel zur Liste hinzugefügt.`);
-        } else {
-            addToast('Alle Zutaten sind bereits im Vorrat oder auf der Liste!', 'info');
-            speak('Es ist bereits alles vorhanden.');
-        }
-      } catch (e) {
-        addToast("Fehler beim Hinzufügen zur Einkaufsliste.", "error");
-      }
-  }, [addToast, recipe.id, speak]);
+  };
 
-  const handleAddSingleToShoppingList = useCallback(async (item: IngredientItem) => {
+  const handleStartCookMode = () => {
+    setCurrentStep(0);
+    setIsCookMode(true);
+  };
+  
+  const handleAddMissingToShoppingList = async () => {
+      if(!recipe.id) return;
+      const count = await addMissingIngredientsToShoppingList(recipe.id);
+      if (count > 0) {
+        addToast(`${count} fehlende(r) Artikel zur Einkaufsliste hinzugefügt.`);
+      } else {
+        addToast('Alle Zutaten sind bereits im Vorrat oder auf der Liste!', 'info');
+      }
+  };
+
+  const handleAddSingleToShoppingList = async (item: IngredientItem) => {
     const scaledQuantityStr = scaleIngredientQuantity(item.quantity, scaleFactor);
     const requiredQty = parseFloat(scaledQuantityStr.replace(',', '.')) || 0;
     const pantryQty = pantryMap.get(item.name.toLowerCase()) || 0;
 
-    try {
-        await addShoppingListItem({ 
-            name: item.name, 
-            quantity: Math.max(1, requiredQty - pantryQty), 
-            unit: item.unit,
-            recipeId: currentRecipe.id, 
-            isChecked: false 
-        });
-        addToast(`"${item.name}" zur Einkaufsliste hinzugefügt.`);
-    } catch (e) {
-        addToast(`Fehler beim Hinzufügen von "${item.name}".`, 'error');
-    }
-  }, [addToast, scaleFactor, pantryMap, currentRecipe.id]);
-
-  const handleReadInstructions = useCallback(() => {
-      if (isSpeaking) {
-          cancel();
-      } else {
-          const textToSpeak = `Anleitung für ${currentRecipe.recipeTitle}. ` + currentRecipe.instructions.map((step, i) => `Schritt ${i+1}. ${step}`).join(' ');
-          speak(textToSpeak);
-      }
-  }, [isSpeaking, cancel, currentRecipe, speak]);
+    await addShoppingListItem({ 
+        name: item.name, 
+        quantity: Math.max(1, requiredQty - pantryQty), 
+        unit: item.unit,
+        recipeId: currentRecipe.id, 
+        isChecked: false 
+    });
+    addToast(`"${item.name}" zur Einkaufsliste hinzugefügt.`);
+  }
   
   const allTags = currentRecipe.tags ? [
     ...(currentRecipe.tags.course || []),
@@ -252,9 +192,9 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, v
   ].flat().filter(Boolean) : [];
 
   return (
-    <div className="page-fade-in pb-28">
+    <div className="page-fade-in">
       {isModalOpen && currentRecipe.id && <MealPlanModal recipeId={currentRecipe.id} onClose={() => setIsModalOpen(false)} onSave={() => addToast('Zum Essensplan hinzugefügt!')} />}
-      {isCookMode && <CookModeView recipe={currentRecipe} currentStep={currentStep} setCurrentStep={setCurrentStep} onExit={handleExitCookMode} />}
+      {isCookMode && <CookModeView recipe={currentRecipe} currentStep={currentStep} setCurrentStep={setCurrentStep} onExit={() => setIsCookMode(false)} />}
 
       <button onClick={onBack} className="flex items-center text-amber-400 hover:text-amber-300 mb-6 font-semibold">
         <ArrowLeft size={20} className="mr-2" />
@@ -325,12 +265,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, v
             </div>
           </div>
           <div className="lg:col-span-2">
-            <div className="flex justify-between items-center mb-4">
-                <h3 className="text-2xl font-semibold text-white">Anleitung</h3>
-                <button onClick={handleReadInstructions} className={`p-2 rounded-full transition-colors ${isSpeaking ? 'bg-amber-500/20 text-amber-400' : 'text-zinc-400 hover:bg-zinc-700'}`} title={isSpeaking ? "Vorlesen stoppen" : "Anleitung vorlesen"}>
-                    {isSpeaking ? <PauseCircle /> : <Volume2 />}
-                </button>
-            </div>
+            <h3 className="text-2xl font-semibold text-white mb-4">Anleitung</h3>
             <ol className="space-y-4">
               {currentRecipe.instructions.map((step, index) => (
                 <li key={index} className="flex items-start">
@@ -356,44 +291,55 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, v
           </div>
         )}
 
-      </div>
-       <div className="fixed bottom-0 left-0 right-0 bg-zinc-950/80 backdrop-blur-sm border-t border-zinc-800 p-3 z-30">
-          <div className="max-w-7xl mx-auto px-4 flex flex-wrap gap-2 justify-between items-center">
-              <div className="flex flex-wrap gap-2">
-                {isSaved && (
-                    <>
-                        <button onClick={handleStartCookMode} className="flex items-center gap-2 bg-amber-500 text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-amber-400 transition-colors">
-                            <CookingPot size={18} /> Kochmodus
-                        </button>
-                        <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-zinc-700 text-white font-semibold py-2 px-3 rounded-md hover:bg-zinc-600 transition-colors text-sm">
-                            <CalendarPlus size={16} /> Zum Plan
-                        </button>
-                        <button onClick={handleAddMissingToShoppingList} className="flex items-center gap-2 bg-zinc-700 text-white font-semibold py-2 px-3 rounded-md hover:bg-zinc-600 transition-colors text-sm">
-                            <ShoppingCart size={16} /> Fehlendes kaufen
-                        </button>
-                    </>
+        <div className="mt-10 pt-6 border-t border-zinc-700 flex flex-col sm:flex-row justify-between items-center gap-4">
+           <div className="flex flex-wrap gap-2">
+             {isSaved && (
+                <>
+                    <button onClick={handleStartCookMode} className="flex items-center gap-2 bg-zinc-700 text-white font-bold py-2 px-4 rounded-md hover:bg-zinc-600 transition-colors">
+                        <CookingPot size={18} /> Kochmodus
+                    </button>
+                    <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-zinc-700 text-white font-bold py-2 px-4 rounded-md hover:bg-zinc-600 transition-colors">
+                        <CalendarPlus size={18} /> Zum Essensplan
+                    </button>
+                     <button onClick={handleAddMissingToShoppingList} className="flex items-center gap-2 bg-zinc-700 text-white font-bold py-2 px-4 rounded-md hover:bg-zinc-600 transition-colors">
+                        <ShoppingCart size={18} /> Fehlendes kaufen
+                    </button>
+                </>
+             )}
+             <div className="relative inline-block">
+                <button onClick={() => setExportOpen(!isExportOpen)} className="flex items-center gap-2 bg-zinc-700 text-white font-bold py-2 px-4 rounded-md hover:bg-zinc-600 transition-colors">
+                    <FileDown size={18} /> Exportieren <ChevronDown size={16} className={`transition-transform ${isExportOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {isExportOpen && (
+                    <div className="absolute bottom-full mb-2 w-full bg-zinc-800 border border-zinc-700 rounded-md shadow-lg z-10">
+                        <a onClick={() => handleExport('pdf')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">PDF</a>
+                        <a onClick={() => handleExport('csv')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">CSV</a>
+                        <a onClick={() => handleExport('json')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">JSON</a>
+                        <a onClick={() => handleExport('md')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">Markdown (.md)</a>
+                        <a onClick={() => handleExport('txt')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">Text (.txt)</a>
+                    </div>
                 )}
-              </div>
+             </div>
+           </div>
 
-            <div className="flex items-center gap-2">
+           <div className="flex items-center gap-4">
+                 {isSaved && (
+                    <button onClick={handleToggleFavorite} title={currentRecipe.isFavorite ? "Favorit entfernen" : "Als Favorit markieren"} className="p-2 rounded-full text-zinc-400 hover:text-amber-400 hover:bg-zinc-700 transition-colors">
+                        <Star size={22} className={`transition-colors ${currentRecipe.isFavorite ? 'fill-current text-amber-400' : ''}`} />
+                    </button>
+                )}
                 {isSaved ? (
-                    <button onClick={handleDelete} className="p-2 rounded-full text-zinc-400 hover:bg-red-900/50 hover:text-red-400 transition-colors" title="Rezept löschen">
-                        <Trash2 size={20} />
+                    <button onClick={handleDelete} className="flex items-center gap-2 bg-red-600/80 text-white font-bold py-2 px-4 rounded-md hover:bg-red-600 transition-colors">
+                        <Trash2 size={18} /> Rezept löschen
                     </button>
                 ) : (
                     <button onClick={handleSave} className="flex items-center gap-2 bg-amber-500 text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-amber-400 transition-colors">
                         <Save size={18} /> Rezept speichern
                     </button>
                 )}
-                 {isSaved && (
-                    <button onClick={handleToggleFavorite} title={currentRecipe.isFavorite ? "Favorit entfernen" : "Als Favorit markieren"} className="p-2 rounded-full text-zinc-400 hover:text-amber-400 hover:bg-zinc-700 transition-colors">
-                        <Star size={22} className={`transition-colors ${currentRecipe.isFavorite ? 'fill-current text-amber-400' : ''}`} />
-                    </button>
-                )}
-            </div>
-          </div>
-       </div>
-
+           </div>
+        </div>
+      </div>
     </div>
   );
 };

@@ -230,9 +230,10 @@ interface ShoppingListProps {
 }
 
 const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem, focusAction, onActionHandled }) => {
-  const shoppingList: ShoppingListItem[] | undefined = useLiveQuery(() => db.shoppingList.orderBy(['category', 'sortOrder']).toArray(), []);
-  const pantryItems: PantryItem[] = useLiveQuery(() => db.pantry.toArray(), []) ?? [];
-  const recipes: Recipe[] | undefined = useLiveQuery(() => db.recipes.toArray(), []);
+  // FIX: Added generics to useLiveQuery and used ?? [] to ensure variables are always arrays.
+  const shoppingList: ShoppingListItem[] = useLiveQuery<ShoppingListItem[]>(() => db.shoppingList.orderBy(['category', 'sortOrder']).toArray()) ?? [];
+  const pantryItems: PantryItem[] = useLiveQuery<PantryItem[]>(() => db.pantry.toArray()) ?? [];
+  const recipes: Recipe[] = useLiveQuery<Recipe[]>(() => db.recipes.toArray()) ?? [];
 
   const [quickAddItem, setQuickAddItem] = useState('');
   const [isAiModalOpen, setAiModalOpen] = useState(false);
@@ -346,7 +347,8 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem,
   
   const collapseAll = useCallback(() => {
     if(!shoppingList) return;
-    const allCategories = new Set(shoppingList.map(i => i.category));
+    // FIX: Add explicit type to map parameter to fix type inference issue.
+    const allCategories = new Set(shoppingList.map((i: ShoppingListItem) => i.category));
     setCollapsedCategories(allCategories);
   }, [shoppingList]);
   
@@ -396,7 +398,7 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem,
 
   const handleExport = (format: 'pdf' | 'csv' | 'json' | 'md' | 'txt') => {
     setExportOpen(false);
-    if (!shoppingList?.length) return;
+    if (!shoppingList.length) return;
     if (window.confirm(`Möchtest du die Einkaufsliste wirklich als ${format.toUpperCase()}-Datei exportieren?`)) {
       switch(format) {
           case 'pdf': exportShoppingListToPdf(shoppingList); break;
@@ -464,7 +466,8 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem,
                         </div>
                     )}
                 </div>
-                <button onClick={handleClearList} disabled={!shoppingList?.length} className="flex items-center gap-2 bg-red-900/80 font-semibold py-2 px-3 rounded-md hover:bg-red-800 disabled:bg-zinc-800 disabled:text-zinc-500 text-sm"><Trash2 size={16}/> Leeren</button>
+                {/* FIX: Add guard to disabled prop to prevent accessing length on a potentially undefined value. */}
+                <button onClick={handleClearList} disabled={!shoppingList || shoppingList.length === 0} className="flex items-center gap-2 bg-red-900/80 font-semibold py-2 px-3 rounded-md hover:bg-red-800 disabled:bg-zinc-800 disabled:text-zinc-500 text-sm"><Trash2 size={16}/> Leeren</button>
             </div>
           </div>
       </div>
@@ -517,7 +520,10 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ addToast, triggerCheckItem,
                           <span>Erledigt ({completedItems.length})</span>
                           <ChevronDown className={`transition-transform ${!isCompletedVisible ? '' : 'rotate-180'}`} />
                       </button>
-                      {isCompletedVisible && <ul className="mt-2 space-y-1 page-fade-in">{completedItems.map(item => ( <ShoppingListItemComponent key={item.id} item={item} isEditing={false} editingItem={null} recipeName={item.recipeId ? recipesById.get(item.recipeId)?.recipeTitle ?? null : null} onToggle={handleToggle} onStartEdit={() => {}} onCancelEdit={() => {}} onSaveEdit={() => {}} setEditingItem={() => {}} onDeleteItem={() => {}} onDragStart={() => {}} onDragEnd={onDragEnd} onDragOver={() => {}} onDragLeave={() => {}} onDrop={() => {}} isDragged={false} dropTargetId={null} /> ))}</ul>}
+                      {isCompletedVisible && <ul className="mt-2 space-y-1 page-fade-in">{
+                        // FIX: Add a guard to ensure completedItems is an array before mapping.
+                        Array.isArray(completedItems) && completedItems.map(item => ( <ShoppingListItemComponent key={item.id} item={item} isEditing={false} editingItem={null} recipeName={item.recipeId ? recipesById.get(item.recipeId)?.recipeTitle ?? null : null} onToggle={handleToggle} onStartEdit={() => {}} onCancelEdit={() => {}} onSaveEdit={() => {}} setEditingItem={() => {}} onDeleteItem={() => {}} onDragStart={() => {}} onDragEnd={onDragEnd} onDragOver={() => {}} onDragLeave={() => {}} onDrop={() => {}} isDragged={false} dropTargetId={null} /> ))
+                      }</ul>}
                   </div>
               )}
               {activeItems.length === 0 && completedItems.length > 0 && (

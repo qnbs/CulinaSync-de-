@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { db, addOrUpdatePantryItem, addPantryItemsToShoppingList } from '@/services/db';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -121,7 +122,8 @@ const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, initia
   
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const pantryItems: PantryItem[] | undefined = useLiveQuery(() => db.pantry.orderBy('name').toArray(), []);
+  // FIX: Added generic to useLiveQuery and used ?? [] to ensure pantryItems is always an array.
+  const pantryItems: PantryItem[] = useLiveQuery<PantryItem[]>(() => db.pantry.orderBy('name').toArray()) ?? [];
 
   useEffect(() => {
     if (initialSearchTerm) {
@@ -256,7 +258,7 @@ const PantryManager: React.FC<PantryManagerProps> = ({ initialSearchTerm, initia
 
   return (
     <div className="space-y-8">
-      <PantryItemModal isOpen={modalState.isOpen} item={modalState.item} onClose={() => setModalState({ isOpen: false, item: null })} onSave={handleSaveItem} pantryItems={pantryItems || []} />
+      <PantryItemModal isOpen={modalState.isOpen} item={modalState.item} onClose={() => setModalState({ isOpen: false, item: null })} onSave={handleSaveItem} pantryItems={pantryItems} />
 
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div>
