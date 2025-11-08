@@ -14,17 +14,23 @@ export const getDefaultSettings = (): AppSettings => ({
   pantry: {
     defaultSort: 'name',
     isGrouped: true,
+    expiryWarningDays: 3,
   },
   recipeBook: {
     defaultSort: 'newest',
   },
   shoppingList: {
     groupCheckedAtBottom: true,
+    defaultSort: 'category',
+    autoCategorize: true,
   },
   speechSynthesis: {
     voice: null,
     rate: 1,
     pitch: 1,
+  },
+  appearance: {
+    accentColor: 'amber',
   },
 });
 
@@ -38,14 +44,12 @@ export const loadSettings = (): AppSettings => {
       return { 
           ...defaults, 
           ...parsed, 
-          aiPreferences: {
-              ...defaults.aiPreferences, 
-              ...(parsed.aiPreferences || {})
-          },
+          aiPreferences: { ...defaults.aiPreferences, ...(parsed.aiPreferences || {}) },
           pantry: { ...defaults.pantry, ...(parsed.pantry || {}) },
           recipeBook: { ...defaults.recipeBook, ...(parsed.recipeBook || {}) },
           shoppingList: { ...defaults.shoppingList, ...(parsed.shoppingList || {}) },
           speechSynthesis: { ...defaults.speechSynthesis, ...(parsed.speechSynthesis || {}) },
+          appearance: { ...defaults.appearance, ...(parsed.appearance || {}) },
         };
     }
   } catch (error) {

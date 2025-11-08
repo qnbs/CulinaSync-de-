@@ -59,6 +59,8 @@ export interface Recipe {
   expertTips: ExpertTip[];
   isFavorite?: boolean;
   updatedAt?: number;
+  pantryMatchPercentage?: number;
+  ingredientCount?: number;
 }
 
 export interface MealPlanItem {
@@ -95,17 +97,23 @@ export interface AppSettings {
   pantry: {
     defaultSort: 'name' | 'expiryDate' | 'updatedAt' | 'createdAt';
     isGrouped: boolean;
+    expiryWarningDays: number;
   };
   recipeBook: {
     defaultSort: 'newest' | 'favorites' | 'a-z' | 'z-a';
   };
   shoppingList: {
     groupCheckedAtBottom: boolean;
+    defaultSort: 'category' | 'alpha';
+    autoCategorize: boolean;
   };
   speechSynthesis: {
     voice: string | null; // Stores voiceURI
     rate: number;
     pitch: number;
+  };
+  appearance: {
+    accentColor: 'amber' | 'rose' | 'sky' | 'emerald';
   };
 }
 

@@ -17,12 +17,11 @@ import {
   Download,
 } from 'lucide-react';
 
-// FIX: Made children optional to avoid type errors when component is used without children.
 const FaqItem = ({ question, children }: { question: string, children?: React.ReactNode }) => (
   <details className="bg-zinc-800/50 p-4 rounded-lg cursor-pointer group transition-all duration-300 hover:bg-zinc-800">
     <summary className="font-semibold text-zinc-200 flex justify-between items-center list-none">
       <span>{question}</span>
-      <ChevronsRight className="group-open:rotate-90 transition-transform text-amber-400" size={20} />
+      <ChevronsRight className="group-open:rotate-90 transition-transform text-[var(--color-accent-400)]" size={20} />
     </summary>
     <div className="mt-4 pt-3 border-t border-zinc-700 text-zinc-400 text-sm space-y-3">
       {children}
@@ -30,12 +29,11 @@ const FaqItem = ({ question, children }: { question: string, children?: React.Re
   </details>
 );
 
-// FIX: Made children optional to avoid type errors when component is used without children.
 const HelpCard = ({ icon: Icon, title, children }: { icon: React.FC<LucideProps>, title: string, children?: React.ReactNode }) => (
     <div className="bg-zinc-950/50 border border-zinc-800 rounded-lg p-6">
         <div className="flex items-center gap-4 mb-4">
-            <div className="bg-amber-500/10 p-2 rounded-full">
-                <Icon className="h-6 w-6 text-amber-400" />
+            <div className="bg-[var(--color-accent-500)]/10 p-2 rounded-full">
+                <Icon className="h-6 w-6 text-[var(--color-accent-400)]" />
             </div>
             <h4 className="text-lg font-bold text-zinc-100">{title}</h4>
         </div>
@@ -48,7 +46,7 @@ const HelpCard = ({ icon: Icon, title, children }: { icon: React.FC<LucideProps>
 const FaqView: React.FC<{appVersion: string, onShowAbout: () => void}> = ({ appVersion, onShowAbout }) => (
   <>
     <section>
-      <h3 className="text-xl font-semibold text-amber-400 border-b border-zinc-700 pb-2 mb-6 flex items-center gap-3"><BookOpen /> Die Kernfunktionen im Detail</h3>
+      <h3 className="text-xl font-semibold text-[var(--color-accent-400)] border-b border-zinc-700 pb-2 mb-6 flex items-center gap-3"><BookOpen /> Die Kernfunktionen im Detail</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <HelpCard icon={Milk} title="Die Vorratskammer"><p>Das Herzstück deiner Küche. Hier verwaltest du, was du hast. Die Einträge beeinflussen direkt die Rezeptvorschläge des KI-Chefs und deine Einkaufsliste.</p><ul className="list-disc list-outside pl-5 space-y-1 mt-2"><li><b>Artikel hinzufügen:</b> Über den großen Button oben rechts.</li><li><b>Menge anpassen:</b> Mit den +/- Knöpfen direkt in der Liste für schnelle Korrekturen.</li><li><b>Mehrere Artikel auswählen:</b> Nutze den "Auswählen"-Modus, um mehrere Artikel gleichzeitig zur Einkaufsliste hinzuzufügen oder zu löschen.</li></ul></HelpCard>
         <HelpCard icon={Bot} title="Der KI-Chef"><p>Dein kreativer Partner. Sag ihm, worauf du Lust hast, und er erstellt ein passendes Rezept. Er berücksichtigt dabei automatisch, was du im Vorrat hast und welche Vorlieben du in den Einstellungen hinterlegt hast.</p><ul className="list-disc list-outside pl-5 space-y-1 mt-2"><li><b>Gute Anfragen:</b> Sei spezifisch! "Ein schnelles vegetarisches Pastagericht mit Tomaten" liefert bessere Ergebnisse als nur "Pasta".</li><li><b>Überrasch mich!:</b> Nutze diesen Button, um kreative Vorschläge basierend auf deinem aktuellen Vorrat zu erhalten.</li></ul></HelpCard>
@@ -59,7 +57,7 @@ const FaqView: React.FC<{appVersion: string, onShowAbout: () => void}> = ({ appV
       </div>
     </section>
     <section>
-      <h3 className="text-xl font-semibold text-amber-400 border-b border-zinc-700 pb-2 mb-6 flex items-center gap-3"><Lightbulb /> Pro-Tipps & Kurzbefehle</h3>
+      <h3 className="text-xl font-semibold text-[var(--color-accent-400)] border-b border-zinc-700 pb-2 mb-6 flex items-center gap-3"><Lightbulb /> Pro-Tipps & Kurzbefehle</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <HelpCard icon={TerminalSquare} title="Befehlspalette"><p>Drücke <kbd className="bg-zinc-700 text-zinc-200 font-sans rounded-md px-2 py-1 text-xs">⌘K</kbd> (Mac) oder <kbd className="bg-zinc-700 text-zinc-200 font-sans rounded-md px-2 py-1 text-xs">Strg+K</kbd> (Windows), um die Befehlspalette zu öffnen. Von hier aus kannst du blitzschnell zu jeder Seite navigieren oder Aktionen ausführen.</p></HelpCard>
         <HelpCard icon={Mic} title="Sprachsteuerung"><p>Aktiviere das Mikrofon in der Kopfzeile und steuere die App mit deiner Stimme. Probier mal:</p><ul className="list-disc list-outside pl-5 space-y-1 mt-2"><li>"Gehe zur Einkaufsliste"</li><li>"Füge 2 Liter Milch auf die Liste"</li><li>"Suche nach Hähnchen" (in der Vorratskammer)</li></ul></HelpCard>
@@ -67,7 +65,7 @@ const FaqView: React.FC<{appVersion: string, onShowAbout: () => void}> = ({ appV
       </div>
     </section>
     <section>
-      <h3 className="text-xl font-semibold text-amber-400 border-b border-zinc-700 pb-2 mb-6 flex items-center gap-3"><HelpCircle /> Häufig gestellte Fragen (FAQ)</h3>
+      <h3 className="text-xl font-semibold text-[var(--color-accent-400)] border-b border-zinc-700 pb-2 mb-6 flex items-center gap-3"><HelpCircle /> Häufig gestellte Fragen (FAQ)</h3>
       <div className="space-y-4">
         <FaqItem question="Was bedeutet 'Local-First' und was sind meine Vorteile?"><p>'Local-First' bedeutet, dass alle deine Daten (Rezepte, Vorräte etc.) primär auf deinem eigenen Gerät gespeichert werden, nicht in der Cloud eines Anbieters. Das hat drei große Vorteile:</p><ul className="mt-2 list-disc list-inside space-y-1"><li><b>Extrem Schnell:</b> Die App fühlt sich an wie eine native Anwendung, da sie nicht auf eine Internetverbindung warten muss.</li><li><b>100% Offline-Fähig:</b> Du kannst die App überall nutzen, auch im Supermarkt im Keller ohne Empfang.</li><li><b>Maximaler Datenschutz:</b> Deine persönlichen Daten verlassen dein Gerät nicht. Du hast die volle Kontrolle.</li></ul></FaqItem>
         <FaqItem question="Wie mache ich die Rezepte vom KI-Chef noch besser?"><p>Gehe zu <b>Einstellungen → KI-Chef Präferenzen</b>. Dort kannst du Ernährungsweisen (z.B. vegetarisch), bevorzugte Küchen (z.B. Italienisch, Asiatisch) und eine generelle Anweisung (z.B. "alle Gerichte sollen scharf sein") hinterlegen. Diese Vorgaben werden bei jeder Anfrage berücksichtigt.</p></FaqItem>
@@ -79,7 +77,7 @@ const FaqView: React.FC<{appVersion: string, onShowAbout: () => void}> = ({ appV
         <div className="bg-zinc-800/50 p-6 rounded-lg text-zinc-400 text-sm">
             <div className="space-y-3">
                 <p className="font-semibold text-zinc-200">Version: {appVersion}</p>
-                <button onClick={onShowAbout} className="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 font-semibold">
+                <button onClick={onShowAbout} className="inline-flex items-center gap-2 text-[var(--color-accent-400)] hover:text-[var(--color-accent-300)] font-semibold">
                     <Info size={16} /> Über die App & Technische Details
                 </button>
             </div>
@@ -108,7 +106,7 @@ const AboutView: React.FC = () => (
           <h2>💡 Entwicklung & Technologie</h2>
           <p>CulinaSync ist eine moderne Progressive Web App (PWA), die mit React und TypeScript entwickelt wurde. Die KI-gestützten Funktionen, wie der Rezept-Chef, werden von der <a href="https://ai.google.dev/" target="_blank" rel="noopener noreferrer">Google Gemini API</a> angetrieben.</p>
           <p>Der gesamte Entwicklungsprozess wurde interaktiv mit <a href="https://ai.studio/" target="_blank" rel="noopener noreferrer">Google's AI Studio</a> gestaltet. Sie können die Entstehung der App hier nachverfolgen:</p>
-          <p style={{ textAlign: 'center', margin: '1.5rem 0' }}><a href="https://ai.studio/apps/drive/1bQgaay6IODal47GVGZcn-65xgfu_PIDC" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#f59e0b', color: '#18181b', padding: '0.75rem 1.5rem', borderRadius: '0.5rem', textDecoration: 'none', fontWeight: 'bold', display: 'inline-block' }}>Projekt im AI Studio ansehen</a></p>
+          <p style={{ textAlign: 'center', margin: '1.5rem 0' }}><a href="https://ai.studio/apps/drive/1bQgaay6IODal47GVGZcn-65xgfu_PIDC" target="_blank" rel="noopener noreferrer" className="bg-[var(--color-accent-500)] text-zinc-900" style={{ padding: '0.75rem 1.5rem', borderRadius: '0.5rem', textDecoration: 'none', fontWeight: 'bold', display: 'inline-block' }}>Projekt im AI Studio ansehen</a></p>
 
           <h2>🌐 Quelloffen & Community</h2>
           <p>CulinaSync ist ein Open-Source-Projekt. Wir glauben an Transparenz und die Kraft der Community. Der gesamte Quellcode ist öffentlich zugänglich und wir freuen uns über Beiträge, Feedback und Verbesserungsvorschläge. Besuchen Sie uns auf GitHub:</p>
@@ -136,5 +134,20 @@ const Help: React.FC<HelpProps> = ({ appVersion }) => {
       </div>
 
       <div className="border-b border-zinc-700 flex">
-        <button onClick={() => setActiveTab('faq')} className={`py-2 px-4 text-sm font-semibold ${activeTab === 'faq' ? 'text-amber-400 border-b-2 border-amber-400' : 'text-zinc-400 hover:text-white'}`}>FAQ & Funktionen</button>
-        <button onClick={() => setActiveTab('about')} className={`py-2 px-4 text-sm font-semibold ${activeTab === 'about' ? 'text-amber-400 border-b-2 border-amber-400' : 'text-zinc-400 hover:text-white'}`}>Über die App</button>
+        <button onClick={() => setActiveTab('faq')} className={`py-2 px-4 text-sm font-semibold ${activeTab === 'faq' ? 'text-[var(--color-accent-400)] border-b-2 border-[var(--color-accent-400)]' : 'text-zinc-400 hover:text-white'}`}>FAQ & Funktionen</button>
+        <button onClick={() => setActiveTab('about')} className={`py-2 px-4 text-sm font-semibold ${activeTab === 'about' ? 'text-[var(--color-accent-400)] border-b-2 border-[var(--color-accent-400)]' : 'text-zinc-400 hover:text-white'}`}>Über die App</button>
+      </div>
+      
+      <div className="space-y-12">
+        {activeTab === 'faq' ? (
+          <FaqView appVersion={appVersion} onShowAbout={() => setActiveTab('about')} />
+        ) : (
+          <AboutView />
+        )}
+      </div>
+
+    </div>
+  );
+};
+
+export default Help;

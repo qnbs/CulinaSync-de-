@@ -1,7 +1,12 @@
-import { Recipe, PantryItem } from '@/types';
+import { loadSettings } from './settingsService';
 
 // Improved heuristic for category mapping
 export const getCategoryForItem = (itemName: string): string => {
+    const settings = loadSettings();
+    if (!settings.shoppingList.autoCategorize) {
+      return 'Sonstiges';
+    }
+
     const name = itemName.toLowerCase();
     if (['milch', 'joghurt', 'käse', 'butter', 'sahne', 'quark', 'feta', 'ei', 'eier'].some(s => name.includes(s))) return 'Milchprodukte & Eier';
     if (['apfel', 'banane', 'tomate', 'zwiebel', 'knoblauch', 'karotte', 'salat', 'paprika', 'spinat', 'gemüse', 'kartoffel', 'gurke', 'zucchini', 'lauch', 'petersilie', 'basilikum', 'schnittlauch'].some(s => name.includes(s))) return 'Obst & Gemüse';
@@ -112,22 +117,4 @@ export const parseShoppingItemString = (input: string): { name: string; quantity
         quantity: 1,
         unit: 'Stk.'
     };
-};
-
-export const checkRecipePantryMatch = (recipe: Recipe, pantryItems: PantryItem[]): { have: number, total: number } => {
-    const allIngredients = recipe.ingredients.flatMap(g => g.items);
-    if (!pantryItems || pantryItems.length === 0) {
-        return { have: 0, total: allIngredients.length };
-    }
-    const pantryMap = new Map(pantryItems.map(item => [item.name.toLowerCase(), item.quantity]));
-    let haveCount = 0;
-
-    for (const ingredient of allIngredients) {
-        const requiredQty = parseFloat(ingredient.quantity.replace(',', '.')) || 0;
-        const pantryQty = pantryMap.get(ingredient.name.toLowerCase()) || 0;
-        if (pantryQty >= requiredQty) {
-            haveCount++;
-        }
-    }
-    return { have: haveCount, total: allIngredients.length };
 };

@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { db } from '@/services/db';
-import { generateRecipeIdeas, generateRecipe } from '@/services/geminiService';
-import { Recipe, RecipeIdea, StructuredPrompt } from '@/types';
-import RecipeDetail from '@/components/RecipeDetail';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { generateRecipeIdeasAsync, generateFullRecipeAsync, resetAiChef, backToIdeas } from '../store/slices/aiChefSlice';
+import { RecipeIdea, StructuredPrompt } from '../types';
+import RecipeDetail from './RecipeDetail';
 import { Sparkles, LoaderCircle, AlertTriangle, Sandwich, BrainCircuit, HeartPulse, Zap, Users, RotateCcw, Wand2, ChefHat, Megaphone, Leaf, PlusCircle, MinusCircle, Redo } from 'lucide-react';
-import { loadSettings } from '@/services/settingsService';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../services/db';
 import TagInput from './TagInput';
+import { addToast, setFocusAction, setVoiceAction } from '../store/slices/uiSlice';
 
 const MODIFIER_OPTIONS = [
     { label: 'Schnell (< 30 Min)', icon: Zap },
@@ -22,27 +23,17 @@ const recipeLoadingMessages = ['Füge eine kreative Wendung hinzu...', 'Schreibe
 const HISTORY_KEY = 'culinaSyncAiChefHistory';
 const MAX_HISTORY = 5;
 
-type AiChefState = 'idle' | 'loadingIdeas' | 'ideasReady' | 'loadingRecipe';
+const AiChef: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const { status, ideas: recipeIdeas, recipe: finalRecipe, error } = useAppSelector((state) => state.aiChef);
+  const { voiceAction, focusAction } = useAppSelector(state => state.ui);
 
-interface AiChefProps {
-    initialPrompt?: string;
-    focusAction?: string | null;
-    onActionHandled?: () => void;
-    addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
-}
-
-const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHandled, addToast }) => {
   const [craving, setCraving] = useState('');
   const [includeIngredients, setIncludeIngredients] = useState<string[]>([]);
   const [excludeIngredients, setExcludeIngredients] = useState<string[]>([]);
   const [modifiers, setModifiers] = useState<string[]>([]);
-
-  const [chefState, setChefState] =useState<AiChefState>('idle');
-  const [recipeIdeas, setRecipeIdeas] = useState<RecipeIdea[]>([]);
-  const [finalRecipe, setFinalRecipe] = useState<Recipe | null>(null);
-
+  
   const [loadingMessage, setLoadingMessage] = useState('');
-  const [error, setError] = useState<string | null>(null);
   const promptRef = useRef<HTMLTextAreaElement>(null);
 
   const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
@@ -52,27 +43,33 @@ const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHan
     try { const saved = localStorage.getItem(HISTORY_KEY); return saved ? JSON.parse(saved) : []; } catch { return []; }
   });
 
+  const initialPrompt = voiceAction?.type === 'GENERATE_RECIPE' ? voiceAction.payload : undefined;
+
   useEffect(() => {
     if (initialPrompt) {
         setCraving(initialPrompt.split('#')[0]);
+        dispatch(setVoiceAction(null));
     }
-  }, [initialPrompt]);
+  }, [initialPrompt, dispatch]);
 
   useEffect(() => {
-    if (focusAction === 'prompt' && promptRef.current) { promptRef.current.focus(); onActionHandled?.(); }
-  }, [focusAction, onActionHandled]);
+    if (focusAction === 'prompt' && promptRef.current) {
+      promptRef.current.focus();
+      dispatch(setFocusAction(null));
+    }
+  }, [focusAction, dispatch]);
   
   useEffect(() => {
       let interval: ReturnType<typeof setInterval>;
-      if (chefState === 'loadingIdeas' || chefState === 'loadingRecipe') {
-          const messages = chefState === 'loadingIdeas' ? ideaLoadingMessages : recipeLoadingMessages;
+      if (status === 'loadingIdeas' || status === 'loadingRecipe') {
+          const messages = status === 'loadingIdeas' ? ideaLoadingMessages : recipeLoadingMessages;
           setLoadingMessage(messages[0]);
           interval = setInterval(() => {
               setLoadingMessage(prev => messages[(messages.indexOf(prev) + 1) % messages.length]);
           }, 2500);
       }
       return () => clearInterval(interval);
-  }, [chefState]);
+  }, [status]);
   
   const updateHistory = (prompt: StructuredPrompt) => {
     const newHistory = [prompt, ...history.filter(h => JSON.stringify(h) !== JSON.stringify(prompt))].slice(0, MAX_HISTORY);
@@ -85,46 +82,22 @@ const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHan
     setIncludeIngredients(prompt.includeIngredients);
     setExcludeIngredients(prompt.excludeIngredients);
     setModifiers(prompt.modifiers);
-    setChefState('idle');
-    setFinalRecipe(null);
-    setRecipeIdeas([]);
+    dispatch(resetAiChef());
   }
 
   const handleGenerateIdeas = async () => {
-    if (!craving.trim()) { setError('Bitte gib ein, worauf du Appetit hast.'); return; }
-    setChefState('loadingIdeas');
-    setError(null);
-    setFinalRecipe(null);
-
-    const structuredPrompt: StructuredPrompt = { craving, includeIngredients, excludeIngredients, modifiers };
-
-    try {
-      const pantry = await db.pantry.toArray();
-      const settings = loadSettings();
-      const ideas = await generateRecipeIdeas(structuredPrompt, pantry, settings.aiPreferences);
-      setRecipeIdeas(ideas);
-      setChefState('ideasReady');
-      updateHistory(structuredPrompt);
-    } catch (e: any) {
-      setError(e.message);
-      setChefState('idle');
+    if (!craving.trim()) { 
+        dispatch(addToast({ message: 'Bitte gib ein, worauf du Appetit hast.', type: 'error' }));
+        return; 
     }
+    const structuredPrompt: StructuredPrompt = { craving, includeIngredients, excludeIngredients, modifiers };
+    dispatch(generateRecipeIdeasAsync(structuredPrompt));
+    updateHistory(structuredPrompt);
   };
 
   const handleGenerateFullRecipe = async (chosenIdea: RecipeIdea) => {
-    setChefState('loadingRecipe');
-    setError(null);
     const structuredPrompt: StructuredPrompt = { craving, includeIngredients, excludeIngredients, modifiers };
-
-    try {
-        const pantry = await db.pantry.toArray();
-        const settings = loadSettings();
-        const recipe = await generateRecipe(structuredPrompt, pantry, settings.aiPreferences, chosenIdea);
-        setFinalRecipe(recipe);
-    } catch (e: any) {
-        setError(e.message);
-        setChefState('ideasReady');
-    }
+    dispatch(generateFullRecipeAsync({ prompt: structuredPrompt, chosenIdea }));
   };
 
   const toggleModifier = (modifier: string) => { setModifiers(prev => prev.includes(modifier) ? prev.filter(m => m !== modifier) : [...prev, modifier]); };
@@ -139,19 +112,12 @@ const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHan
     setExcludeIngredients([]);
     setModifiers([]);
   };
-
-  const resetAll = () => {
-    setChefState('idle');
-    setFinalRecipe(null);
-    setRecipeIdeas([]);
-    setError(null);
-  };
   
   if (finalRecipe) {
-      return <RecipeDetail recipe={finalRecipe} onBack={() => { setFinalRecipe(null); setChefState('ideasReady'); }} addToast={addToast} />
+      return <RecipeDetail recipe={finalRecipe} onBack={() => dispatch(backToIdeas())} />
   }
 
-  const isLoading = chefState === 'loadingIdeas' || chefState === 'loadingRecipe';
+  const isLoading = status === 'loadingIdeas' || status === 'loadingRecipe';
 
   return (
     <div className="space-y-8">
@@ -160,19 +126,19 @@ const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHan
         <p className="text-zinc-400 mt-1">Beschreibe dein Verlangen und ich erstelle ein einzigartiges Rezept für dich.</p>
       </div>
 
-    {chefState === 'idle' || chefState === 'loadingIdeas' ? (
+    {status === 'idle' || status === 'loadingIdeas' ? (
       <div className="bg-zinc-950/50 border border-zinc-800 rounded-lg p-4 sm:p-6 space-y-6">
         <section className="space-y-4">
-            <h3 className="font-semibold text-amber-400 flex items-center gap-2"><Megaphone size={18}/>Was schwebt dir vor?</h3>
+            <h3 className="font-semibold text-[var(--color-accent-400)] flex items-center gap-2"><Megaphone size={18}/>Was schwebt dir vor?</h3>
             <textarea
               ref={promptRef} value={craving} onChange={(e) => setCraving(e.target.value)}
               placeholder="z.B. ein schnelles, gesundes Mittagessen mit Tomaten und Knoblauch..."
-              className="w-full bg-zinc-800 border-zinc-700 rounded-md p-3 h-20 focus:ring-2 focus:ring-amber-500 focus:outline-none resize-none"
+              className="w-full bg-zinc-800 border-zinc-700 rounded-md p-3 h-20 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:outline-none resize-none"
               disabled={isLoading} />
         </section>
 
         <section className="space-y-4">
-            <h3 className="font-semibold text-amber-400 flex items-center gap-2"><Leaf size={18}/>Was ist im Vorrat?</h3>
+            <h3 className="font-semibold text-[var(--color-accent-400)] flex items-center gap-2"><Leaf size={18}/>Was ist im Vorrat?</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                    <label className="flex items-center gap-2 text-sm font-medium text-zinc-300 mb-1.5"><PlusCircle size={14}/>Muss enthalten</label>
@@ -186,10 +152,10 @@ const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHan
         </section>
 
         <section className="space-y-4">
-             <h3 className="font-semibold text-amber-400 flex items-center gap-2"><ChefHat size={18}/>Gib den Ton an</h3>
+             <h3 className="font-semibold text-[var(--color-accent-400)] flex items-center gap-2"><ChefHat size={18}/>Gib den Ton an</h3>
              <div className="flex flex-wrap gap-2">
                 {MODIFIER_OPTIONS.map(({label, icon: Icon}) => (
-                    <button key={label} onClick={() => toggleModifier(label)} disabled={isLoading} className={`flex items-center gap-2 text-sm border rounded-full px-3 py-1.5 transition-colors ${modifiers.includes(label) ? 'bg-amber-500 text-zinc-900 border-amber-500' : 'bg-zinc-800 border-zinc-700 hover:border-zinc-600'}`}>
+                    <button key={label} onClick={() => toggleModifier(label)} disabled={isLoading} className={`flex items-center gap-2 text-sm border rounded-full px-3 py-1.5 transition-colors ${modifiers.includes(label) ? 'bg-[var(--color-accent-500)] text-zinc-900 border-[var(--color-accent-500)]' : 'bg-zinc-800 border-zinc-700 hover:border-zinc-600'}`}>
                         <Icon size={16}/> {label}
                     </button>
                 ))}
@@ -197,10 +163,10 @@ const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHan
         </section>
 
         <div className="pt-4 border-t border-zinc-700/50 flex flex-col-reverse sm:flex-row items-center gap-4">
-            <button onClick={handleSurpriseMe} disabled={isLoading} className="w-full sm:w-auto flex items-center justify-center gap-2 text-amber-400 font-semibold text-sm py-3 px-4 rounded-md hover:bg-amber-500/10 transition-colors disabled:text-zinc-600 disabled:cursor-not-allowed">
+            <button onClick={handleSurpriseMe} disabled={isLoading} className="w-full sm:w-auto flex items-center justify-center gap-2 text-[var(--color-accent-400)] font-semibold text-sm py-3 px-4 rounded-md hover:bg-[var(--color-accent-500)]/10 transition-colors disabled:text-zinc-600 disabled:cursor-not-allowed">
                 <Sparkles size={16}/> Überrasch mich!
             </button>
-            <button onClick={handleGenerateIdeas} disabled={isLoading || !craving.trim()} className="w-full sm:flex-1 flex items-center justify-center gap-2 bg-amber-500 text-zinc-900 font-bold py-3 px-4 rounded-md hover:bg-amber-400 transition-colors disabled:bg-zinc-600 disabled:cursor-not-allowed">
+            <button onClick={handleGenerateIdeas} disabled={isLoading || !craving.trim()} className="w-full sm:flex-1 flex items-center justify-center gap-2 bg-[var(--color-accent-500)] text-zinc-900 font-bold py-3 px-4 rounded-md hover:bg-[var(--color-accent-400)] transition-colors disabled:bg-zinc-600 disabled:cursor-not-allowed">
               {isLoading ? ( <><LoaderCircle size={20} className="animate-spin" /> {loadingMessage}</> ) : 'Ideen finden'}
             </button>
         </div>
@@ -214,11 +180,11 @@ const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHan
         </div>
       )}
 
-      {chefState === 'ideasReady' && (
+      {status === 'ideasReady' && (
          <div className="space-y-6 page-fade-in">
              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                 <h3 className="text-2xl font-bold tracking-tight text-zinc-100">Hier sind ein paar Ideen...</h3>
-                <button onClick={resetAll} className="flex items-center gap-2 text-sm text-amber-400 font-semibold py-2 px-4 rounded-md hover:bg-amber-500/10">
+                <button onClick={() => dispatch(resetAiChef())} className="flex items-center gap-2 text-sm text-[var(--color-accent-400)] font-semibold py-2 px-4 rounded-md hover:bg-[var(--color-accent-500)]/10">
                     <Redo size={16}/> Neu anfangen
                 </button>
              </div>
@@ -226,7 +192,7 @@ const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHan
                 {recipeIdeas.map((idea, index) => (
                     <div key={index} className="bg-zinc-800/50 border border-zinc-700 rounded-lg p-5 flex flex-col text-center items-center justify-between gap-4">
                         <div className="space-y-2">
-                           <h4 className="font-bold text-amber-400 text-lg">{idea.recipeTitle}</h4>
+                           <h4 className="font-bold text-[var(--color-accent-400)] text-lg">{idea.recipeTitle}</h4>
                            <p className="text-zinc-400 text-sm">{idea.shortDescription}</p>
                         </div>
                         <button onClick={() => handleGenerateFullRecipe(idea)} disabled={isLoading} className="w-full mt-2 flex items-center justify-center gap-2 bg-zinc-700 text-white font-bold py-2 px-4 rounded-md hover:bg-zinc-600 transition-colors">
@@ -238,9 +204,9 @@ const AiChef: React.FC<AiChefProps> = ({ initialPrompt, focusAction, onActionHan
          </div>
       )}
 
-      {chefState === 'loadingRecipe' && (
+      {status === 'loadingRecipe' && (
            <div className="text-center p-12 bg-zinc-800/50 border border-zinc-700 rounded-lg">
-               <LoaderCircle size={32} className="animate-spin mx-auto text-amber-400" />
+               <LoaderCircle size={32} className="mx-auto text-[var(--color-accent-400)]" />
                <h3 className="text-xl font-bold tracking-tight text-zinc-100 mt-4">{loadingMessage}</h3>
            </div>
       )}

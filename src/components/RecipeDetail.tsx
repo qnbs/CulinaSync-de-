@@ -1,19 +1,18 @@
-
-
-import React, { useState, useMemo } from 'react';
-import { Recipe, PantryItem, IngredientItem } from '@/types';
-import { db, addRecipe, deleteRecipe, addRecipeToMealPlan, addMissingIngredientsToShoppingList, addShoppingListItem } from '@/services/db';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { Recipe, PantryItem, IngredientItem } from '../types';
+import { db, addRecipe, deleteRecipe, addRecipeToMealPlan, addMissingIngredientsToShoppingList, addShoppingListItem } from '../services/db';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { exportRecipeToPdf, exportRecipeToCsv, exportRecipeToMarkdown, exportRecipeToTxt, exportRecipeToJson } from '@/services/exportService';
-import { ArrowLeft, Clock, Users, BarChart, UtensilsCrossed, Lightbulb, Save, Trash2, CheckCircle, CalendarPlus, FileDown, Star, ChevronDown, Plus, Minus, CookingPot, ShoppingCart, X as XIcon, AlertCircle, ShoppingCartIcon } from 'lucide-react';
-import { scaleIngredientQuantity } from '@/services/utils';
+import { exportRecipeToPdf, exportRecipeToCsv, exportRecipeToMarkdown, exportRecipeToTxt, exportRecipeToJson } from '../services/exportService';
+import { ArrowLeft, Clock, Users, BarChart, UtensilsCrossed, Lightbulb, Save, Trash2, CheckCircle, CalendarPlus, FileDown, Star, ChevronDown, Plus, Minus, CookingPot, ShoppingCart, AlertCircle, ShoppingCartIcon } from 'lucide-react';
+import { scaleIngredientQuantity } from '../services/utils';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { addToast, setVoiceAction } from '../store/slices/uiSlice';
+import CookModeView from './CookModeView';
 
-// FIX: Add optional `voiceAction` prop to handle voice commands.
+
 interface RecipeDetailProps {
   recipe: Recipe;
   onBack: () => void;
-  addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
-  voiceAction?: {type: string, payload: any} | null;
 }
 
 const MealPlanModal: React.FC<{recipeId: number, onClose: () => void, onSave: () => void}> = ({recipeId, onClose, onSave}) => {
@@ -33,11 +32,11 @@ const MealPlanModal: React.FC<{recipeId: number, onClose: () => void, onSave: ()
                 <div className="space-y-4">
                     <div>
                         <label htmlFor="date" className="block text-sm font-medium text-zinc-400 mb-1">Datum</label>
-                        <input type="date" id="date" value={date} onChange={e => setDate(e.target.value)} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none"/>
+                        <input type="date" id="date" value={date} onChange={e => setDate(e.target.value)} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:outline-none"/>
                     </div>
                     <div>
                         <label htmlFor="mealType" className="block text-sm font-medium text-zinc-400 mb-1">Mahlzeit</label>
-                        <select id="mealType" value={mealType} onChange={e => setMealType(e.target.value as any)} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        <select id="mealType" value={mealType} onChange={e => setMealType(e.target.value as any)} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:outline-none">
                             <option>Frühstück</option>
                             <option>Mittagessen</option>
                             <option>Abendessen</option>
@@ -45,7 +44,7 @@ const MealPlanModal: React.FC<{recipeId: number, onClose: () => void, onSave: ()
                     </div>
                     <div className="flex justify-end gap-3 pt-4">
                         <button onClick={onClose} className="py-2 px-4 rounded-md text-zinc-300 hover:bg-zinc-700">Abbrechen</button>
-                        <button onClick={handleSave} className="py-2 px-4 rounded-md bg-amber-500 text-zinc-900 font-bold hover:bg-amber-400">Speichern</button>
+                        <button onClick={handleSave} className="py-2 px-4 rounded-md bg-[var(--color-accent-500)] text-zinc-900 font-bold hover:bg-[var(--color-accent-400)]">Speichern</button>
                     </div>
                 </div>
             </div>
@@ -53,34 +52,14 @@ const MealPlanModal: React.FC<{recipeId: number, onClose: () => void, onSave: ()
     )
 }
 
-const CookModeView: React.FC<{ recipe: Recipe, currentStep: number, setCurrentStep: (updater: (s: number) => number) => void, onExit: () => void }> = ({ recipe, currentStep, setCurrentStep, onExit }) => (
-    <div className="fixed inset-0 bg-zinc-950 z-[100] flex flex-col p-4 sm:p-8 text-zinc-100 font-sans">
-        <header className="flex justify-between items-center mb-4 flex-shrink-0">
-            <h3 className="text-xl font-bold text-amber-400 truncate pr-4">{recipe.recipeTitle}</h3>
-            <button onClick={onExit} className="flex items-center gap-2 py-2 px-4 rounded-md bg-zinc-800 hover:bg-zinc-700 transition-colors">
-                <XIcon size={18} /> <span className="hidden sm:inline">Kochmodus beenden</span>
-            </button>
-        </header>
-        <div className="flex-grow flex flex-col justify-center items-center text-center overflow-y-auto">
-            <p className="text-zinc-400 mb-4 font-semibold">Schritt {currentStep + 1} von {recipe.instructions.length}</p>
-            <p className="text-2xl md:text-4xl leading-relaxed max-w-4xl page-fade-in">{recipe.instructions[currentStep]}</p>
-        </div>
-        <footer className="flex justify-center items-center gap-4 pt-4 flex-shrink-0">
-            <button onClick={() => setCurrentStep(s => s - 1)} disabled={currentStep === 0} className="py-3 px-6 rounded-md bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 transition-colors">Zurück</button>
-            <span className="font-bold text-lg tabular-nums">{currentStep + 1} / {recipe.instructions.length}</span>
-            <button onClick={() => setCurrentStep(s => s + 1)} disabled={currentStep >= recipe.instructions.length - 1} className="py-3 px-6 rounded-md bg-amber-500 text-zinc-900 font-bold hover:bg-amber-400 disabled:opacity-50 transition-colors">Weiter</button>
-        </footer>
-    </div>
-);
-
-
-const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, voiceAction }) => {
+const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
+  const dispatch = useAppDispatch();
+  const { voiceAction } = useAppSelector(state => state.ui);
   const [currentRecipe, setCurrentRecipe] = useState(recipe);
   const [isSaved, setIsSaved] = useState(!!currentRecipe.id);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isExportOpen, setExportOpen] = useState(false);
   const [isCookMode, setIsCookMode] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
 
   const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
   const pantryMap: Map<string, number> = useMemo(() => new Map(pantryItems?.map((p: PantryItem) => [p.name.toLowerCase(), p.quantity]) || []), [pantryItems]);
@@ -105,11 +84,11 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, v
       if(newId) {
         setCurrentRecipe(prev => ({ ...prev, id: newId }));
         setIsSaved(true);
-        addToast('Rezept erfolgreich gespeichert!');
+        dispatch(addToast({message: 'Rezept erfolgreich gespeichert!'}));
       }
     } catch (error) {
       console.error("Failed to save recipe:", error);
-      addToast('Speichern fehlgeschlagen.', 'error');
+      dispatch(addToast({message: 'Speichern fehlgeschlagen.', type: 'error'}));
     }
   };
 
@@ -120,7 +99,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, v
         onBack();
       } catch (error) {
         console.error("Failed to delete recipe:", error);
-        addToast('Löschen fehlgeschlagen.', 'error');
+        dispatch(addToast({message: 'Löschen fehlgeschlagen.', type: 'error'}));
       }
     }
   };
@@ -144,26 +123,32 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, v
             const newIsFavorite = !currentRecipe.isFavorite;
             await db.recipes.update(currentRecipe.id, { isFavorite: newIsFavorite, updatedAt: Date.now() });
             setCurrentRecipe(prev => ({...prev, isFavorite: newIsFavorite}));
-            addToast(newIsFavorite ? 'Als Favorit markiert!' : 'Favorit entfernt.');
+            dispatch(addToast({message: newIsFavorite ? 'Als Favorit markiert!' : 'Favorit entfernt.'}));
         } catch (error) {
             console.error("Failed to update favorite status:", error);
-            addToast('Aktion fehlgeschlagen.', 'error');
+            dispatch(addToast({message: 'Aktion fehlgeschlagen.', type: 'error'}));
         }
     }
   };
 
-  const handleStartCookMode = () => {
-    setCurrentStep(0);
+  const handleStartCookMode = useCallback(() => {
     setIsCookMode(true);
-  };
+  }, []);
+
+  useEffect(() => {
+    if (voiceAction?.type === 'START_COOK_MODE') {
+        handleStartCookMode();
+        dispatch(setVoiceAction(null));
+    }
+  }, [voiceAction, dispatch, handleStartCookMode]);
   
   const handleAddMissingToShoppingList = async () => {
       if(!recipe.id) return;
       const count = await addMissingIngredientsToShoppingList(recipe.id);
       if (count > 0) {
-        addToast(`${count} fehlende(r) Artikel zur Einkaufsliste hinzugefügt.`);
+        dispatch(addToast({message: `${count} fehlende(r) Artikel zur Einkaufsliste hinzugefügt.`}));
       } else {
-        addToast('Alle Zutaten sind bereits im Vorrat oder auf der Liste!', 'info');
+        dispatch(addToast({message: 'Alle Zutaten sind bereits im Vorrat oder auf der Liste!', type: 'info'}));
       }
   };
 
@@ -179,7 +164,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, v
         recipeId: currentRecipe.id, 
         isChecked: false 
     });
-    addToast(`"${item.name}" zur Einkaufsliste hinzugefügt.`);
+    dispatch(addToast({message: `"${item.name}" zur Einkaufsliste hinzugefügt.`}));
   }
   
   const allTags = currentRecipe.tags ? [
@@ -193,16 +178,16 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, v
 
   return (
     <div className="page-fade-in">
-      {isModalOpen && currentRecipe.id && <MealPlanModal recipeId={currentRecipe.id} onClose={() => setIsModalOpen(false)} onSave={() => addToast('Zum Essensplan hinzugefügt!')} />}
-      {isCookMode && <CookModeView recipe={currentRecipe} currentStep={currentStep} setCurrentStep={setCurrentStep} onExit={() => setIsCookMode(false)} />}
+      {isModalOpen && currentRecipe.id && <MealPlanModal recipeId={currentRecipe.id} onClose={() => setIsModalOpen(false)} onSave={() => dispatch(addToast({message: 'Zum Essensplan hinzugefügt!'}))} />}
+      {isCookMode && <CookModeView recipe={currentRecipe} onExit={() => setIsCookMode(false)} />}
 
-      <button onClick={onBack} className="flex items-center text-amber-400 hover:text-amber-300 mb-6 font-semibold">
+      <button onClick={onBack} className="flex items-center text-[var(--color-accent-400)] hover:text-[var(--color-accent-300)] mb-6 font-semibold">
         <ArrowLeft size={20} className="mr-2" />
         Zurück zur Übersicht
       </button>
 
       <div className="bg-zinc-950/50 border border-zinc-800 rounded-lg shadow-xl p-6 md:p-8">
-        <h2 className="text-3xl md:text-4xl font-bold text-amber-400 mb-4">{currentRecipe.recipeTitle}</h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-[var(--color-accent-400)] mb-4">{currentRecipe.recipeTitle}</h2>
         <p className="text-zinc-300 mb-6">{currentRecipe.shortDescription}</p>
         
         <div className="flex flex-wrap gap-x-6 gap-y-4 text-zinc-300 mb-6 pb-6 border-b border-zinc-700">
@@ -215,7 +200,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, v
             <label htmlFor="servings-input" className="font-semibold text-zinc-200">Portionen anpassen:</label>
             <div className="flex items-center gap-2">
                 <button onClick={() => handleServingsChange(currentServings - 1)} className="p-2 rounded-full bg-zinc-700 hover:bg-zinc-600 transition-colors disabled:opacity-50" disabled={currentServings <= 1} aria-label="Portionen verringern"><Minus size={18} /></button>
-                <input id="servings-input" type="number" value={currentServings} onChange={(e) => handleServingsChange(parseInt(e.target.value, 10))} className="w-16 text-center bg-zinc-900 border border-zinc-700 rounded-md p-2 font-bold text-lg text-amber-400 focus:ring-2 focus:ring-amber-500 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" min="1" max="100"/>
+                <input id="servings-input" type="number" value={currentServings} onChange={(e) => handleServingsChange(parseInt(e.target.value, 10))} className="w-16 text-center bg-zinc-900 border border-zinc-700 rounded-md p-2 font-bold text-lg text-[var(--color-accent-400)] focus:ring-2 focus:ring-[var(--color-accent-500)] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" min="1" max="100"/>
                 <button onClick={() => handleServingsChange(currentServings + 1)} className="p-2 rounded-full bg-zinc-700 hover:bg-zinc-600 transition-colors disabled:opacity-50" disabled={currentServings >= 100} aria-label="Portionen erhöhen"><Plus size={18} /></button>
             </div>
         </div>
@@ -230,7 +215,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, v
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1">
-            <h3 className="text-2xl font-semibold text-white mb-4 flex items-center"><UtensilsCrossed className="mr-3 text-amber-400"/>Zutaten</h3>
+            <h3 className="text-2xl font-semibold text-white mb-4 flex items-center"><UtensilsCrossed className="mr-3 text-[var(--color-accent-400)]"/>Zutaten</h3>
             <div className="space-y-4">
               {currentRecipe.ingredients.map((group, idx) => (
                 <div key={group.sectionTitle || idx}>
@@ -256,7 +241,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, v
                             {scaleFactor !== 1 && <span className="text-xs text-zinc-500 ml-2">(Original: {item.quantity} {item.unit})</span>}
                            </div>
                         </div>
-                        {status !== 'have' && <button onClick={() => handleAddSingleToShoppingList(item)} className="opacity-0 group-hover:opacity-100 transition-opacity ml-2 p-1 text-zinc-400 hover:text-amber-400" title="Zur Einkaufsliste hinzufügen"><ShoppingCartIcon size={16}/></button>}
+                        {status !== 'have' && <button onClick={() => handleAddSingleToShoppingList(item)} className="opacity-0 group-hover:opacity-100 transition-opacity ml-2 p-1 text-zinc-400 hover:text-[var(--color-accent-400)]" title="Zur Einkaufsliste hinzufügen"><ShoppingCartIcon size={16}/></button>}
                       </li>
                     )})}
                   </ul>
@@ -269,7 +254,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, v
             <ol className="space-y-4">
               {currentRecipe.instructions.map((step, index) => (
                 <li key={index} className="flex items-start">
-                  <span className="bg-amber-500 text-zinc-900 font-bold rounded-full h-8 w-8 flex-shrink-0 flex items-center justify-center text-md mr-4">{index + 1}</span>
+                  <span className="bg-[var(--color-accent-500)] text-zinc-900 font-bold rounded-full h-8 w-8 flex-shrink-0 flex items-center justify-center text-md mr-4">{index + 1}</span>
                   <p className="text-zinc-300 pt-1">{step}</p>
                 </li>
               ))}
@@ -279,7 +264,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, v
 
         {currentRecipe.expertTips && currentRecipe.expertTips.length > 0 && (
           <div className="mt-10 pt-6 border-t border-zinc-700">
-             <h3 className="text-2xl font-semibold text-white mb-4 flex items-center"><Lightbulb className="mr-3 text-amber-400"/>Expertentipps</h3>
+             <h3 className="text-2xl font-semibold text-white mb-4 flex items-center"><Lightbulb className="mr-3 text-[var(--color-accent-400)]"/>Expertentipps</h3>
              <div className="space-y-4">
               {currentRecipe.expertTips.map((tip, i) => (
                   <div key={tip.title + i} className="bg-zinc-900/50 p-4 rounded-md">
@@ -324,8 +309,8 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, v
 
            <div className="flex items-center gap-4">
                  {isSaved && (
-                    <button onClick={handleToggleFavorite} title={currentRecipe.isFavorite ? "Favorit entfernen" : "Als Favorit markieren"} className="p-2 rounded-full text-zinc-400 hover:text-amber-400 hover:bg-zinc-700 transition-colors">
-                        <Star size={22} className={`transition-colors ${currentRecipe.isFavorite ? 'fill-current text-amber-400' : ''}`} />
+                    <button onClick={handleToggleFavorite} title={currentRecipe.isFavorite ? "Favorit entfernen" : "Als Favorit markieren"} className="p-2 rounded-full text-zinc-400 hover:text-[var(--color-accent-400)] hover:bg-zinc-700 transition-colors">
+                        <Star size={22} className={`transition-colors ${currentRecipe.isFavorite ? 'fill-current text-[var(--color-accent-400)]' : ''}`} />
                     </button>
                 )}
                 {isSaved ? (
@@ -333,7 +318,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, addToast, v
                         <Trash2 size={18} /> Rezept löschen
                     </button>
                 ) : (
-                    <button onClick={handleSave} className="flex items-center gap-2 bg-amber-500 text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-amber-400 transition-colors">
+                    <button onClick={handleSave} className="flex items-center gap-2 bg-[var(--color-accent-500)] text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-[var(--color-accent-400)] transition-colors">
                         <Save size={18} /> Rezept speichern
                     </button>
                 )}

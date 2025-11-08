@@ -1,7 +1,9 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, LucideProps, Milk, BookOpen } from 'lucide-react';
-import { db } from '@/services/db';
+import { db } from '../services/db';
+import { Recipe, PantryItem } from '../types';
+import { useAppDispatch } from '../store/hooks';
+import { navigateToItem as navigateToItemAction, setCurrentPage, setVoiceAction } from '../store/slices/uiSlice';
 
 export interface Command {
     id: string;
@@ -15,15 +17,24 @@ interface CommandPaletteProps {
     isOpen: boolean;
     onClose: () => void;
     commands: Command[];
-    onGlobalSearch: (type: 'pantry' | 'recipes', term: string) => void;
-    addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
-    navigateToItem: (page: 'recipes' | 'pantry', id: number) => void;
 }
 
-const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, commands, onGlobalSearch, navigateToItem }) => {
+const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, commands }) => {
+    const dispatch = useAppDispatch();
     const [searchTerm, setSearchTerm] = useState('');
     const [activeIndex, setActiveIndex] = useState(0);
-    const [dbSearchResults, setDbSearchResults] = useState<{recipes: any[], pantry: any[]}>({recipes: [], pantry: []});
+    const [dbSearchResults, setDbSearchResults] = useState<{recipes: Recipe[], pantry: PantryItem[]}>({recipes: [], pantry: []});
+
+    const navigateToItem = (page: 'recipes' | 'pantry', id: number) => {
+        dispatch(navigateToItemAction({ page, id }));
+    };
+
+    const handleGlobalSearch = (type: 'pantry' | 'recipes', term: string) => {
+        dispatch(setCurrentPage({ page: type }));
+        dispatch(setVoiceAction({ type: 'SEARCH', payload: `${term}#${Date.now()}` }));
+        onClose();
+    };
+
 
     useEffect(() => {
         if (isOpen && searchTerm.length > 1) {
@@ -52,7 +63,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
         );
     }, [searchTerm, commands]);
     
-    const groupedCommands = useMemo(() => {
+    const groupedCommands: Record<string, Command[]> = useMemo(() => {
         return filteredCommands.reduce((acc, cmd) => {
             if (!acc[cmd.section]) {
                 acc[cmd.section] = [];
@@ -66,16 +77,16 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
         let list: any[] = [];
         list = list.concat(dbSearchResults.recipes.map(r => ({ ...r, type: 'recipe' })));
         list = list.concat(dbSearchResults.pantry.map(p => ({ ...p, type: 'pantry' })));
-        list = list.concat(Object.values(groupedCommands).flat().map((c: Command) => ({...c, type: 'command'})));
+        list = list.concat(Object.values(groupedCommands).flat().map(c => ({...c, type: 'command'})));
         
         const showGlobalSearch = list.length === 0 && searchTerm.trim().length > 1;
 
         if (showGlobalSearch) {
-             list.push({ id: 'search-recipes-dynamic', title: `Suche in Rezepten nach: "${searchTerm}"`, action: () => onGlobalSearch('recipes', searchTerm), type: 'global' });
-             list.push({ id: 'search-pantry-dynamic', title: `Suche im Vorrat nach: "${searchTerm}"`, action: () => onGlobalSearch('pantry', searchTerm), type: 'global' });
+             list.push({ id: 'search-recipes-dynamic', title: `Suche in Rezepten nach: "${searchTerm}"`, action: () => handleGlobalSearch('recipes', searchTerm), type: 'global' });
+             list.push({ id: 'search-pantry-dynamic', title: `Suche im Vorrat nach: "${searchTerm}"`, action: () => handleGlobalSearch('pantry', searchTerm), type: 'global' });
         }
         return list;
-    }, [groupedCommands, searchTerm, onGlobalSearch, dbSearchResults]);
+    }, [groupedCommands, searchTerm, dbSearchResults, handleGlobalSearch]);
 
 
     useEffect(() => {
@@ -168,7 +179,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
                 <li
                     id={`command-item-${index}`}
                     onClick={action}
-                    className={`flex items-center p-2 rounded-md cursor-pointer ${isSelected ? 'bg-amber-500/20 text-amber-300' : 'text-zinc-300 hover:bg-zinc-800'}`}
+                    className={`flex items-center p-2 rounded-md cursor-pointer ${isSelected ? 'bg-[var(--color-accent-500)]/20 text-[var(--color-accent-300)]' : 'text-zinc-300 hover:bg-zinc-800'}`}
                 >
                     {content}
                 </li>
@@ -190,17 +201,17 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
                 className="relative bg-zinc-900 border border-zinc-700 rounded-lg shadow-2xl w-full max-w-2xl mx-4 transform transition-all modal-fade-in"
                 onClick={e => e.stopPropagation()}
             >
-                <div className="hidden md:flex items-center border-b border-zinc-700 p-3">
+                <div className="flex items-center border-b border-zinc-700 p-3">
                     <Search className="h-5 w-5 text-zinc-500 mr-3" />
                     <input
                         type="text"
                         placeholder="Suchen oder Befehl ausführen..."
-                        className="w-full bg-transparent text-zinc-100 placeholder-zinc-500 focus:outline-none"
+                        className="w-full bg-transparent text-zinc-100 placeholder-zinc-500 focus:outline-none hidden sm:block"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                         autoFocus
                     />
-                     <div className="ml-3 text-xs text-zinc-500 border border-zinc-600 rounded px-1.5 py-0.5 hidden lg:block">ESC</div>
+                     <div className="ml-3 text-xs text-zinc-500 border border-zinc-600 rounded px-1.5 py-0.5 hidden sm:block">ESC</div>
                 </div>
 
                 <div className="max-h-[70vh] md:max-h-[60vh] overflow-y-auto p-2">

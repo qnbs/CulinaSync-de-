@@ -44,7 +44,7 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
     return (
         <div className="fixed inset-0 bg-zinc-950/90 backdrop-blur-md z-[100] flex items-center justify-center p-4 page-fade-in">
             <div className="w-full max-w-md text-center bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl space-y-6 modal-fade-in">
-                <div className="flex justify-center items-center gap-4 text-amber-400">
+                <div className="flex justify-center items-center gap-4 text-[var(--color-accent-400)]">
                    <ChefHat size={32} />
                    <h2 className="text-2xl font-bold text-zinc-100">Willkommen bei CulinaSync!</h2>
                 </div>
@@ -53,8 +53,8 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
                 
                 <div className="bg-zinc-800/50 p-6 rounded-lg text-left space-y-4">
                     <div className="flex items-center gap-4">
-                        <div className="bg-amber-500/10 p-3 rounded-full">
-                           <Icon className="h-6 w-6 text-amber-400" />
+                        <div className="bg-[var(--color-accent-500)]/10 p-3 rounded-full">
+                           <Icon className="h-6 w-6 text-[var(--color-accent-400)]" />
                         </div>
                         <h3 className="text-lg font-semibold text-zinc-100">{title}</h3>
                     </div>
@@ -63,13 +63,13 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
                 
                 <div className="flex justify-center items-center gap-4">
                     {steps.map((_, index) => (
-                        <div key={index} className={`h-2 rounded-full transition-all duration-300 ${index === currentStep ? 'w-8 bg-amber-500' : 'w-2 bg-zinc-600'}`}></div>
+                        <div key={index} className={`h-2 rounded-full transition-all duration-300 ${index === currentStep ? 'w-8 bg-[var(--color-accent-500)]' : 'w-2 bg-zinc-600'}`}></div>
                     ))}
                 </div>
 
                 <button 
                     onClick={handleNext} 
-                    className="w-full flex items-center justify-center gap-2 bg-amber-500 text-zinc-900 font-bold py-3 px-4 rounded-md hover:bg-amber-400 transition-colors"
+                    className="w-full flex items-center justify-center gap-2 bg-[var(--color-accent-500)] text-zinc-900 font-bold py-3 px-4 rounded-md hover:bg-[var(--color-accent-400)] transition-colors"
                 >
                     {cta}
                     {currentStep < steps.length - 1 ? <ArrowRight size={20} /> : <Check size={20} />}

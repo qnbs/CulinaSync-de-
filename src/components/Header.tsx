@@ -1,6 +1,6 @@
 import React from 'react';
 import { Bot, ChefHat, Milk, BookOpen, CalendarDays, ShoppingCart, Settings, HelpCircle, Mic, TerminalSquare } from 'lucide-react';
-import { Page } from '@/types';
+import { Page } from '../types';
 
 interface HeaderProps {
   currentPage: Page;
@@ -36,7 +36,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, isListenin
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-4">
-            <ChefHat className="h-8 w-8 text-amber-400" />
+            <ChefHat className="h-8 w-8 text-[var(--color-accent-400)]" />
             <h1 className="text-xl font-bold text-zinc-100">CulinaSync</h1>
           </div>
           <div className="flex items-center space-x-1 sm:space-x-2">
@@ -67,7 +67,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, isListenin
                     title={item.label}
                     className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                       currentPage === item.id
-                        ? 'bg-amber-500 text-zinc-900'
+                        ? 'bg-[var(--color-accent-500)] text-zinc-900'
                         : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100'
                     }`}
                     aria-current={currentPage === item.id ? 'page' : undefined}
@@ -84,7 +84,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, isListenin
                 title="Einstellungen"
                 className={`flex items-center p-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                   currentPage === 'settings'
-                    ? 'bg-amber-500 text-zinc-900'
+                    ? 'bg-[var(--color-accent-500)] text-zinc-900'
                     : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100'
                 }`}
                 aria-current={currentPage === 'settings' ? 'page' : undefined}
@@ -97,7 +97,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, isListenin
                 title="Hilfe"
                 className={`flex items-center p-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                   currentPage === 'help'
-                    ? 'bg-amber-500 text-zinc-900'
+                    ? 'bg-[var(--color-accent-500)] text-zinc-900'
                     : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100'
                 }`}
                 aria-current={currentPage === 'help' ? 'page' : undefined}

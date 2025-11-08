@@ -1,7 +1,8 @@
 
+
 import React from 'react';
 import { Bot, Milk, BookOpen, CalendarDays, ShoppingCart } from 'lucide-react';
-import { Page } from '@/types';
+import { Page } from '../types';
 
 interface BottomNavProps {
   currentPage: Page;
@@ -25,7 +26,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentPage, setCurrentPage }) =>
             key={item.id}
             onClick={() => setCurrentPage(item.id as Page)}
             className={`flex flex-col items-center justify-center space-y-1 w-full h-full transition-colors duration-200 ${
-              currentPage === item.id ? 'text-amber-400' : 'text-zinc-400 hover:text-zinc-100'
+              currentPage === item.id ? 'text-[var(--color-accent-400)]' : 'text-zinc-400 hover:text-zinc-100'
             }`}
             aria-current={currentPage === item.id ? 'page' : undefined}
           >

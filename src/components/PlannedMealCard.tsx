@@ -5,7 +5,7 @@ import { CheckCircle, Trash2, BookOpen, MoreVertical, FileText, CookingPot, Aler
 const PlannedMealCard = React.memo<{
     meal: MealPlanItem;
     recipe: Recipe | undefined;
-    pantryStatus: { status: 'ok' | 'partial' | 'missing' | 'unknown'; missing: string[]; missingCount: number, totalCount: number };
+    pantryStatus: { status: 'ok' | 'partial' | 'missing' | 'unknown'; have: number; total: number };
     onAction: (action: string, payload: any) => void;
 }>(({ meal, recipe, pantryStatus, onAction }) => {
     const [isMenuOpen, setMenuOpen] = useState(false);
@@ -52,8 +52,8 @@ const PlannedMealCard = React.memo<{
 
     const statusConfig = {
         ok: { color: 'bg-green-500', title: 'Alle Zutaten im Vorrat' },
-        partial: { color: 'bg-yellow-500', title: `Fehlt u.a.: ${pantryStatus.missing.slice(0, 3).join(', ')}` },
-        missing: { color: 'bg-red-500', title: `Fehlt u.a.: ${pantryStatus.missing.slice(0, 3).join(', ')}` },
+        partial: { color: 'bg-yellow-500', title: `${pantryStatus.have} von ${pantryStatus.total} Zutaten im Vorrat` },
+        missing: { color: 'bg-red-500', title: `${pantryStatus.have} von ${pantryStatus.total} Zutaten im Vorrat` },
         unknown: { color: 'bg-zinc-600', title: 'Status unbekannt' },
     };
 
@@ -64,8 +64,8 @@ const PlannedMealCard = React.memo<{
                     <p className={`font-semibold text-zinc-100 text-sm leading-tight ${meal.isCooked ? 'line-through' : ''}`}>{recipe.recipeTitle}</p>
                      {meal.servings && meal.servings !== parseInt(recipe.servings) && <p className="text-xs text-zinc-400">{meal.servings} Portionen</p>}
                     <div className="flex items-center gap-2 mt-2" title={statusConfig[pantryStatus.status].title}>
-                        <div className="w-full bg-zinc-700 rounded-full h-1.5"><div className={`h-1.5 rounded-full ${statusConfig[pantryStatus.status].color}`} style={{width: `${pantryStatus.totalCount > 0 ? (pantryStatus.totalCount - pantryStatus.missingCount) / pantryStatus.totalCount * 100 : 0}%`}}></div></div>
-                        <span className="text-xs text-zinc-400">{pantryStatus.totalCount > 0 ? `${pantryStatus.totalCount - pantryStatus.missingCount}/${pantryStatus.totalCount}`: ''}</span>
+                        <div className="w-full bg-zinc-700 rounded-full h-1.5"><div className={`h-1.5 rounded-full ${statusConfig[pantryStatus.status].color}`} style={{width: `${pantryStatus.total > 0 ? (pantryStatus.have / pantryStatus.total) * 100 : 0}%`}}></div></div>
+                        <span className="text-xs text-zinc-400">{pantryStatus.total > 0 ? `${pantryStatus.have}/${pantryStatus.total}`: ''}</span>
                     </div>
                 </div>
                  <div className="relative" ref={menuRef}>

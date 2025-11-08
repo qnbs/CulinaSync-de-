@@ -95,8 +95,7 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
       if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
         setError('Mikrofonzugriff wurde verweigert. Bitte erlaube den Zugriff in den Browsereinstellungen.');
       } else if (event.error === 'no-speech') {
-        // This error is common, so we don't show a toast for it.
-        // The UI already indicates that listening has stopped.
+        // This is a common occurrence, do nothing. The listening state will turn off.
       } else if (event.error === 'audio-capture') {
         setError('Problem mit dem Mikrofon. Bitte überprüfe deine Hardware.');
       }

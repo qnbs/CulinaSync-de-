@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="apple-touch-icon" href="/logo-192x192.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CulinaSync</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -34,35 +34,34 @@
         }
         @keyframes favorite-glow {
           0%, 100% {
-            box-shadow: 0 0 5px rgba(251, 191, 36, 0.3), 0 0 10px rgba(251, 191, 36, 0.2);
-            border-color: rgba(251, 191, 36, 0.8);
+            box-shadow: 0 0 5px var(--color-accent-glow), 0 0 10px var(--color-accent-glow-soft);
+            border-color: var(--color-accent-400-semi);
           }
           50% {
-            box-shadow: 0 0 15px rgba(251, 191, 36, 0.5), 0 0 25px rgba(251, 191, 36, 0.3);
-            border-color: rgba(251, 191, 36, 1);
+            box-shadow: 0 0 15px var(--color-accent-glow), 0 0 25px var(--color-accent-glow-soft);
+            border-color: var(--color-accent-400);
           }
         }
         .favorite-glow {
           animation: favorite-glow 3s ease-in-out infinite;
         }
-        .prose-styles h1, .prose-styles h2, .prose-styles h3 { color: #f59e0b; }
+        .prose-styles h1, .prose-styles h2, .prose-styles h3 { color: var(--color-accent-500); }
         .prose-styles h1 { font-size: 2.25rem; font-weight: bold; margin-bottom: 1.5rem; margin-top: 0.5rem; }
         .prose-styles h2 { font-size: 1.5rem; font-weight: bold; margin-top: 2.5rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #3f3f46; }
         .prose-styles h3 { font-size: 1.25rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.75rem; }
         .prose-styles p { color: #d4d4d8; line-height: 1.6; margin-bottom: 1rem; }
-        .prose-styles a { color: #fbbf24; text-decoration: underline; }
-        .prose-styles a:hover { color: #f59e0b; }
+        .prose-styles a { color: var(--color-accent-400); text-decoration: underline; }
+        .prose-styles a:hover { color: var(--color-accent-500); }
         .prose-styles ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; color: #d4d4d8; }
         .prose-styles li { margin-bottom: 0.5rem; }
-        .prose-styles code { background-color: #3f3f46; color: #fbbf24; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.9em; }
+        .prose-styles code { background-color: #3f3f46; color: var(--color-accent-400); padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.9em; }
         .prose-styles pre { background-color: #18181b; border: 1px solid #3f3f46; border-radius: 0.5rem; padding: 1rem; overflow-x: auto; }
         .prose-styles pre code { background-color: transparent; padding: 0; }
         .prose-styles strong { color: #fafafa; font-weight: 600; }
         .prose-styles table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
-        .prose-styles th { color: #fbbf24; border-bottom: 2px solid #52525b; padding: 0.75rem; text-align: left; }
+        .prose-styles th { color: var(--color-accent-400); border-bottom: 2px solid #52525b; padding: 0.75rem; text-align: left; }
         .prose-styles td { border-bottom: 1px solid #3f3f46; padding: 0.75rem; }
         .prose-styles tr:last-child td { border-bottom: none; }
-        .prose-styles hr { border-top: 1px solid #3f3f46; margin: 2rem 0; }
       }
       .glass-card {
         @apply bg-zinc-900/50 backdrop-blur-lg border border-zinc-700/50 rounded-lg;
@@ -83,7 +82,17 @@
         border-radius: 10px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #fbbf24;
+        background: var(--color-accent-400);
+      }
+    </style>
+     <style>
+      :root {
+        --color-accent-300: #fcd34d;
+        --color-accent-400: #fbbf24;
+        --color-accent-500: #f59e0b;
+        --color-accent-glow: rgba(251, 191, 36, 0.3);
+        --color-accent-glow-soft: rgba(251, 191, 36, 0.2);
+        --color-accent-400-semi: rgba(251, 191, 36, 0.8);
       }
     </style>
   <script type="importmap">
@@ -105,17 +114,23 @@
     "url": "https://aistudiocdn.com/url@^0.11.4",
     "vite-plugin-pwa": "https://aistudiocdn.com/vite-plugin-pwa@^1.0.3",
     "path": "https://aistudiocdn.com/path@^0.12.7",
-    "fs": "https://aistudiocdn.com/fs@^0.0.1-security"
+    "fs": "https://aistudiocdn.com/fs@^0.0.1-security",
+    "@reduxjs/toolkit": "https://aistudiocdn.com/@reduxjs/toolkit@^2.2.6",
+    "react-redux": "https://aistudiocdn.com/react-redux@^9.1.2",
+    "redux-persist": "https://aistudiocdn.com/redux-persist@^6.0.0",
+    "redux-persist/integration/react": "https://aistudiocdn.com/redux-persist@^6.0.0/es/integration/react.js",
+    "redux-persist/lib/storage": "https://aistudiocdn.com/redux-persist@^6.0.0/es/storage.js",
+    "redux-persist/": "https://aistudiocdn.com/redux-persist@^6.0.0/"
   }
 }
 </script>
 </head>
   <body class="bg-zinc-950 text-zinc-200 font-sans">
     <div class="fixed top-0 left-0 -z-10 h-full w-full bg-zinc-950">
-        <div class="absolute bottom-0 left-[-20%] right-0 top-[-10%] h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle_farthest-side,rgba(251,191,36,0.3),rgba(255,255,255,0))]"></div>
-        <div class="absolute bottom-0 right-[-20%] top-[-10%] h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle_farthest-side,rgba(251,191,36,0.2),rgba(255,255,255,0))]"></div>
+        <div class="absolute bottom-0 left-[-20%] right-0 top-[-10%] h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle_farthest-side,var(--color-accent-glow),rgba(255,255,255,0))]"></div>
+        <div class="absolute bottom-0 right-[-20%] top-[-10%] h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle_farthest-side,var(--color-accent-glow-soft),rgba(255,255,255,0))]"></div>
     </div>
     <div id="root"></div>
-    <script type="module" src="/src/index.tsx"></script>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>

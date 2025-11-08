@@ -1,5 +1,5 @@
 import React from 'react';
-import { Recipe } from '@/types';
+import { Recipe } from '../types';
 import { Clock, Users, BarChart, Star, Leaf, CheckCircle } from 'lucide-react';
 
 interface RecipeCardProps {
@@ -9,21 +9,22 @@ interface RecipeCardProps {
   isSelectMode?: boolean;
   isSelected?: boolean;
   onToggleSelect?: (id: number) => void;
-  pantryMatch?: { have: number, total: number };
 }
 
-const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onSelectRecipe, size = 'normal', isSelectMode, isSelected, onToggleSelect, pantryMatch }) => {
+const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onSelectRecipe, size = 'normal', isSelectMode, isSelected, onToggleSelect }) => {
   const isSmall = size === 'small';
   const isVeg = recipe.tags.diet.includes('Vegetarisch') || recipe.tags.diet.includes('Vegan');
 
   let cardClasses = 'border-zinc-700 hover:border-zinc-600';
   if (isSelectMode) {
-    cardClasses = isSelected ? 'border-amber-400 ring-2 ring-amber-400' : 'border-zinc-600 hover:border-amber-400';
+    cardClasses = isSelected ? 'border-[var(--color-accent-400)] ring-2 ring-[var(--color-accent-400)]' : 'border-zinc-600 hover:border-[var(--color-accent-400)]';
   } else if (recipe.isFavorite) {
-    cardClasses = 'border-amber-400 favorite-glow';
+    cardClasses = 'border-[var(--color-accent-400)] favorite-glow';
   }
 
-  const matchPercentage = pantryMatch && pantryMatch.total > 0 ? (pantryMatch.have / pantryMatch.total) * 100 : 0;
+  const matchPercentage = recipe.pantryMatchPercentage ?? 0;
+  const totalCount = recipe.ingredientCount ?? 0;
+  const haveCount = Math.round(totalCount * (matchPercentage / 100));
 
   return (
     <div 
@@ -38,7 +39,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onSelectRecipe, size = 
       }}
     >
       {recipe.isFavorite && !isSelectMode && (
-        <div className="absolute top-2 right-2 text-amber-400 z-10" title="Favorit">
+        <div className="absolute top-2 right-2 text-[var(--color-accent-400)] z-10" title="Favorit">
             <Star size={isSmall ? 14 : 18} className="fill-current" />
         </div>
       )}
@@ -48,19 +49,19 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onSelectRecipe, size = 
         </div>
       )}
       <div className={`flex-grow ${isSmall ? 'p-3' : 'p-6'}`}>
-        {pantryMatch && pantryMatch.total > 0 && matchPercentage === 100 && (
+        {totalCount > 0 && matchPercentage === 100 && (
              <span className="text-xs font-bold bg-green-500 text-zinc-900 px-2 py-1 rounded-full mb-2 inline-flex items-center gap-1.5"><CheckCircle size={14}/> Kochbereit</span>
         )}
-        <h3 className={`font-bold text-amber-400 group-hover:text-amber-300 transition-colors ${isSmall ? 'text-base leading-tight' : 'text-xl'}`}>{recipe.recipeTitle}</h3>
+        <h3 className={`font-bold text-[var(--color-accent-400)] group-hover:text-[var(--color-accent-300)] transition-colors ${isSmall ? 'text-base leading-tight' : 'text-xl'}`}>{recipe.recipeTitle}</h3>
         {!isSmall && <p className="text-zinc-400 mt-2 text-sm h-20 overflow-hidden">{recipe.shortDescription}</p>}
       </div>
       
-       {pantryMatch && pantryMatch.total > 0 && (
+       {totalCount > 0 && (
           <div className={`${isSmall ? 'px-3 pb-2 -mt-2' : 'px-6 pb-2 -mt-2'}`}>
             <div className="w-full bg-zinc-700 rounded-full h-1.5">
-                <div className="bg-amber-500 h-1.5 rounded-full" style={{ width: `${matchPercentage}%` }}></div>
+                <div className="bg-[var(--color-accent-500)] h-1.5 rounded-full" style={{ width: `${matchPercentage}%` }}></div>
             </div>
-             <p className="text-xs text-zinc-400 text-right mt-1">Du hast {pantryMatch.have} von {pantryMatch.total} Zutaten</p>
+             <p className="text-xs text-zinc-400 text-right mt-1">Du hast {haveCount} von {totalCount} Zutaten</p>
           </div>
        )}
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useSettings } from '@/contexts/SettingsContext';
+import { useAppSelector } from '../store/hooks';
 
 interface SpeechSynthesisHook {
   isSpeaking: boolean;
@@ -13,7 +13,7 @@ export const useSpeechSynthesis = (): SpeechSynthesisHook => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [supported, setSupported] = useState(false);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-  const { settings } = useSettings();
+  const settings = useAppSelector(state => state.settings);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {

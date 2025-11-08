@@ -1,4 +1,4 @@
-import { Recipe } from '@/types';
+import { Recipe } from '../../types';
 
 export const asianRecipes: Recipe[] = [
   {
@@ -115,4 +115,5 @@ export const asianRecipes: Recipe[] = [
             content: "Ersetzen Sie das Hähnchen durch festen Tofu oder eine Mischung aus Gemüse wie Brokkoli, Bambussprossen und Babymais. Verwenden Sie anstelle von Fischsauce helle Sojasauce."
         }
     ]
-  
+  }
+];

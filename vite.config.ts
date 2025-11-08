@@ -11,7 +11,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'logo-192x192.png', 'logo-512x512.png'],
       manifest: {
         name: 'CulinaSync',
         short_name: 'CulinaSync',
@@ -23,17 +23,12 @@ export default defineConfig({
         scope: '/',
         icons: [
           {
-            src: 'pwa-192x192.png',
+            src: 'logo-192x192.png',
             sizes: '192x192',
             type: 'image/png',
           },
           {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          },
-          {
-            src: 'pwa-512x512.png',
+            src: 'logo-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable',
@@ -45,21 +40,21 @@ export default defineConfig({
             short_name: 'Vorrrat',
             description: 'Öffnet die Vorratskammer',
             url: '/?page=pantry',
-            icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
+            icons: [{ src: 'logo-192x192.png', sizes: '192x192' }]
           },
           {
             name: 'Einkaufsliste',
             short_name: 'Liste',
             description: 'Öffnet die Einkaufsliste',
             url: '/?page=shopping-list',
-            icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
+            icons: [{ src: 'logo-192x192.png', sizes: '192x192' }]
           },
           {
             name: 'KI-Chef',
             short_name: 'KI-Chef',
             description: 'Generiert ein neues Rezept',
             url: '/?page=chef',
-            icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
+            icons: [{ src: 'logo-192x192.png', sizes: '192x192' }]
           }
         ]
       },
@@ -67,7 +62,6 @@ export default defineConfig({
   ],
   resolve: {
     alias: [
-      // FIX: `__dirname` is not available in ES modules. This replaces it with the modern equivalent using `import.meta.url`.
       { find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
     ],
   },

@@ -1,34 +1,15 @@
-
 import React, { useState, useMemo, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, markMealAsCooked, removeRecipeFromMealPlan, addRecipeToMealPlan } from '@/services/db';
-import { Recipe, MealPlanItem, PantryItem } from '@/types';
+import { db, markMealAsCooked, removeRecipeFromMealPlan, addRecipeToMealPlan } from '../services/db';
+import { Recipe, MealPlanItem } from '../types';
 import { ChevronLeft, ChevronRight, Search, PlusCircle, FileText, Save, ChevronsRight, X as XIcon, CookingPot } from 'lucide-react';
-import RecipeCard from '@/components/RecipeCard';
-import RecipeDetail from '@/components/RecipeDetail';
-import { useSettings } from '@/contexts/SettingsContext';
-import PlannedMealCard from '@/components/PlannedMealCard';
-import { checkRecipePantryMatch } from '@/services/utils';
-
-const CookModeView: React.FC<{ recipe: Recipe, currentStep: number, setCurrentStep: (updater: (s: number) => number) => void, onExit: () => void }> = ({ recipe, currentStep, setCurrentStep, onExit }) => (
-    <div className="fixed inset-0 bg-zinc-950 z-[100] flex flex-col p-4 sm:p-8 text-zinc-100 font-sans">
-        <header className="flex justify-between items-center mb-4 flex-shrink-0">
-            <h3 className="text-xl font-bold text-amber-400 truncate pr-4">{recipe.recipeTitle}</h3>
-            <button onClick={onExit} className="flex items-center gap-2 py-2 px-4 rounded-md bg-zinc-800 hover:bg-zinc-700 transition-colors">
-                <XIcon size={18} /> <span className="hidden sm:inline">Kochmodus beenden</span>
-            </button>
-        </header>
-        <div className="flex-grow flex flex-col justify-center items-center text-center overflow-y-auto">
-            <p className="text-zinc-400 mb-4 font-semibold">Schritt {currentStep + 1} von {recipe.instructions.length}</p>
-            <p className="text-2xl md:text-4xl leading-relaxed max-w-4xl page-fade-in">{recipe.instructions[currentStep]}</p>
-        </div>
-        <footer className="flex justify-center items-center gap-4 pt-4 flex-shrink-0">
-            <button onClick={() => setCurrentStep(s => s - 1)} disabled={currentStep === 0} className="py-3 px-6 rounded-md bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 transition-colors">Zurück</button>
-            <span className="font-bold text-lg tabular-nums">{currentStep + 1} / {recipe.instructions.length}</span>
-            <button onClick={() => setCurrentStep(s => s + 1)} disabled={currentStep >= recipe.instructions.length - 1} className="py-3 px-6 rounded-md bg-amber-500 text-zinc-900 font-bold hover:bg-amber-400 disabled:opacity-50 transition-colors">Weiter</button>
-        </footer>
-    </div>
-);
+import RecipeCard from './RecipeCard';
+import RecipeDetail from './RecipeDetail';
+import { useAppSelector, useAppDispatch } from '../store/hooks';
+import { addToast as addToastAction } from '../store/slices/uiSlice';
+import PlannedMealCard from './PlannedMealCard';
+import { useMealPlan } from '../hooks/useMealPlan';
+import CookModeView from './CookModeView';
 
 const AddMealNoteModal: React.FC<{
     date: string;
@@ -55,13 +36,13 @@ const AddMealNoteModal: React.FC<{
                     value={note}
                     onChange={e => setNote(e.target.value)}
                     placeholder="Deine Notiz..."
-                    className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-amber-500"
+                    className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-[var(--color-accent-500)]"
                     rows={3}
                     autoFocus
                 />
                 <div className="flex justify-end gap-3 pt-4 mt-2 border-t border-zinc-700">
                     <button onClick={onClose} className="py-2 px-4 rounded-md text-zinc-300 hover:bg-zinc-700">Abbrechen</button>
-                    <button onClick={handleSave} disabled={!note.trim()} className="py-2 px-4 rounded-md bg-amber-500 text-zinc-900 font-bold hover:bg-amber-400 flex items-center gap-2 disabled:bg-zinc-600">
+                    <button onClick={handleSave} disabled={!note.trim()} className="py-2 px-4 rounded-md bg-[var(--color-accent-500)] text-zinc-900 font-bold hover:bg-[var(--color-accent-400)] flex items-center gap-2 disabled:bg-zinc-600">
                         <Save size={16}/> Speichern
                     </button>
                 </div>
@@ -70,32 +51,25 @@ const AddMealNoteModal: React.FC<{
     );
 };
 
-// Helper to calculate pantry status for a recipe
-const getPantryStatus = (recipe: Recipe | undefined, pantryMap: Map<string, number>): { status: 'ok' | 'partial' | 'missing' | 'unknown', missing: string[], missingCount: number, totalCount: number } => {
-  if (!recipe || !recipe.ingredients) return { status: 'unknown', missing: [], missingCount: 0, totalCount: 0 };
-  
-  const allIngredients = recipe.ingredients.flatMap(g => g.items);
-  if (allIngredients.length === 0) return { status: 'ok', missing: [], missingCount: 0, totalCount: 0 };
-
-  const missingIngredients: string[] = [];
-  allIngredients.forEach(ing => {
-    if (ing.name.toLowerCase().includes('optional') || ing.name.toLowerCase().includes('nach geschmack')) return;
-    const pantryQty = pantryMap.get(ing.name.toLowerCase()) || 0;
-    const requiredQty = parseFloat(ing.quantity) || 0;
-    if (pantryQty < requiredQty) {
-      missingIngredients.push(ing.name);
+// Helper to calculate pantry status for a planned meal using pre-computed data
+const getPantryStatusForPlannedMeal = (recipe: Recipe | undefined): { status: 'ok' | 'partial' | 'missing' | 'unknown'; have: number; total: number } => {
+    if (!recipe || typeof recipe.pantryMatchPercentage === 'undefined' || typeof recipe.ingredientCount === 'undefined') {
+        return { status: 'unknown', have: 0, total: 0 };
     }
-  });
-  
-  const missingCount = missingIngredients.length;
-  const totalCount = allIngredients.length;
-
-  if (missingCount === 0) return { status: 'ok', missing: [], missingCount, totalCount };
-  if (missingCount / totalCount <= 0.3) return { status: 'partial', missing: missingIngredients, missingCount, totalCount };
-  return { status: 'missing', missing: missingIngredients, missingCount, totalCount };
+    
+    const { pantryMatchPercentage, ingredientCount } = recipe;
+    
+    const have = Math.round(ingredientCount * (pantryMatchPercentage / 100));
+    
+    let status: 'ok' | 'partial' | 'missing' = 'missing';
+    if (pantryMatchPercentage === 100) status = 'ok';
+    else if (pantryMatchPercentage >= 70) status = 'partial';
+    
+    return { status, have, total: ingredientCount };
 };
 
-const RecipeSidebar = ({ recipes, pantryItems, onDragStart, isCollapsed, onToggle }: { recipes: Recipe[], pantryItems: PantryItem[], onDragStart: (e: React.DragEvent, recipe: Recipe) => void, isCollapsed: boolean, onToggle: () => void }) => {
+
+const RecipeSidebar = ({ recipes, onDragStart, isCollapsed, onToggle }: { recipes: Recipe[], onDragStart: (e: React.DragEvent, recipe: Recipe) => void, isCollapsed: boolean, onToggle: () => void }) => {
     const [searchTerm, setSearchTerm] = useState('');
     
     const filteredRecipes = useMemo(() => {
@@ -122,12 +96,12 @@ const RecipeSidebar = ({ recipes, pantryItems, onDragStart, isCollapsed, onToggl
             </div>
             <div className="relative mb-4">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
-                <input type="text" placeholder="Suchen..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full bg-zinc-800 border-zinc-700 rounded-md py-2 pl-10 pr-3 text-sm focus:ring-2 focus:ring-amber-500" />
+                <input type="text" placeholder="Suchen..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full bg-zinc-800 border-zinc-700 rounded-md py-2 pl-10 pr-3 text-sm focus:ring-2 focus:ring-[var(--color-accent-500)]" />
             </div>
             <div className="overflow-y-auto flex-grow pr-2 -mr-2 space-y-3">
-                {(filteredRecipes && filteredRecipes.length > 0 && pantryItems) ? filteredRecipes.map(recipe => (
+                {(filteredRecipes && filteredRecipes.length > 0) ? filteredRecipes.map(recipe => (
                     <div key={recipe.id} draggable onDragStart={(e) => onDragStart(e, recipe)} className="cursor-grab">
-                        <RecipeCard recipe={recipe} size="small" pantryMatch={checkRecipePantryMatch(recipe, pantryItems)} />
+                        <RecipeCard recipe={recipe} size="small" />
                     </div>
                 )) : <p className="text-sm text-zinc-500 text-center py-4">Keine Rezepte gefunden.</p>}
             </div>
@@ -135,55 +109,30 @@ const RecipeSidebar = ({ recipes, pantryItems, onDragStart, isCollapsed, onToggl
     );
 };
 
-
-interface MealPlannerProps {
-    addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
-    voiceAction?: { type: string, payload: any } | null;
-}
-
-const MealPlanner: React.FC<MealPlannerProps> = ({ addToast }) => {
-  const { settings } = useSettings();
-  const weekStartsOnMonday = settings.weekStart === 'Monday';
+const MealPlanner: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const settings = useAppSelector((state) => state.settings);
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  const recipes = useLiveQuery(() => db.recipes.toArray(), []);
-  const mealPlanItems = useLiveQuery(() => db.mealPlan.toArray(), []);
-  const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
+  const {
+      recipes,
+      recipesById,
+      week,
+      mealsByDate
+  } = useMealPlan(currentDate, settings.weekStart === 'Monday');
   
   const [selectedRecipeForDetail, setSelectedRecipeForDetail] = useState<Recipe | null>(null);
   const [dropTarget, setDropTarget] = useState<{ date: string; mealType: string } | null>(null);
   const [noteModalState, setNoteModalState] = useState<{isOpen: boolean; date: string; mealType: string} | null>(null);
   const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isCookMode, setIsCookMode] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
   const [recipeForCookMode, setRecipeForCookMode] = useState<Recipe | null>(null);
 
-  const pantryMap: Map<string, number> = useMemo(() => new Map(pantryItems?.map((p: PantryItem) => [p.name.toLowerCase(), p.quantity]) || []), [pantryItems]);
-  const recipesById = useMemo(() => new Map<number, Recipe>(recipes?.map(r => [r.id!, r]) || []), [recipes]);
-  
-  const week = useMemo(() => {
-    const startOfWeek = new Date(currentDate);
-    const dayOfWeek = startOfWeek.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
-    const diff = startOfWeek.getDate() - dayOfWeek + (weekStartsOnMonday ? (dayOfWeek === 0 ? -6 : 1) : 0);
-    startOfWeek.setDate(diff);
-    startOfWeek.setHours(0, 0, 0, 0);
-
-    return Array.from({ length: 7 }).map((_, i) => {
-        const date = new Date(startOfWeek);
-        date.setDate(date.getDate() + i);
-        return date;
-    });
-  }, [currentDate, weekStartsOnMonday]);
+  const addToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    dispatch(addToastAction({ message, type }));
+  };
   
   const weekString = `Woche vom ${week[0].toLocaleDateString('de-DE')} - ${week[6].toLocaleDateString('de-DE')}`;
-  
-  const mealsByDate = useMemo(() => {
-    return (mealPlanItems || []).reduce((acc, meal) => {
-      const key = `${meal.date}-${meal.mealType}`;
-      acc[key] = meal;
-      return acc;
-    }, {} as Record<string, MealPlanItem>);
-  }, [mealPlanItems]);
   
   const handleDragStart = (e: React.DragEvent, recipe: Recipe) => {
     e.dataTransfer.setData('recipeId', recipe.id!.toString());
@@ -203,7 +152,6 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ addToast }) => {
         case 'view': setSelectedRecipeForDetail(payload); break;
         case 'cook':
             setRecipeForCookMode(payload);
-            setCurrentStep(0);
             setIsCookMode(true);
             break;
         case 'cooked': {
@@ -243,12 +191,12 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ addToast }) => {
   };
 
   if (selectedRecipeForDetail) {
-    return <RecipeDetail recipe={selectedRecipeForDetail} onBack={() => setSelectedRecipeForDetail(null)} addToast={addToast} />;
+    return <RecipeDetail recipe={selectedRecipeForDetail} onBack={() => setSelectedRecipeForDetail(null)} />;
   }
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-8rem)]">
-         {isCookMode && recipeForCookMode && <CookModeView recipe={recipeForCookMode} currentStep={currentStep} setCurrentStep={setCurrentStep} onExit={() => setIsCookMode(false)} />}
+         {isCookMode && recipeForCookMode && <CookModeView recipe={recipeForCookMode} onExit={() => setIsCookMode(false)} />}
          {noteModalState?.isOpen && (
             <AddMealNoteModal
                 date={noteModalState.date}
@@ -270,7 +218,7 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ addToast }) => {
                 <button onClick={() => setCurrentDate(d => new Date(d.setDate(d.getDate() - 7)))} className="p-2 rounded-md hover:bg-zinc-700"><ChevronLeft/></button>
                 <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-4 text-center">
                   <h3 className="font-semibold text-base sm:text-lg text-zinc-100 tabular-nums">{weekString}</h3>
-                  <button onClick={() => setCurrentDate(new Date())} className="text-sm font-semibold py-1 px-3 rounded-md bg-zinc-700 hover:bg-zinc-600 text-amber-300">Heute</button>
+                  <button onClick={() => setCurrentDate(new Date())} className="text-sm font-semibold py-1 px-3 rounded-md bg-zinc-700 hover:bg-zinc-600 text-[var(--color-accent-300)]">Heute</button>
                 </div>
                 <button onClick={() => setCurrentDate(d => new Date(d.setDate(d.getDate() + 7)))} className="p-2 rounded-md hover:bg-zinc-700"><ChevronRight/></button>
             </div>
@@ -282,7 +230,7 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ addToast }) => {
                       const today = isToday(date);
                       return (
                           <div key={dateString} className={`flex flex-col w-4/5 min-w-[280px] sm:min-w-[320px] lg:w-auto lg:min-w-0 flex-shrink-0 ${today ? 'bg-zinc-800/50' : 'bg-zinc-900'}`}>
-                              <div className={`text-center py-2 font-semibold text-sm border-b border-zinc-800 ${today ? 'text-amber-400' : 'text-zinc-300'}`}>
+                              <div className={`text-center py-2 font-semibold text-sm border-b border-zinc-800 ${today ? 'text-[var(--color-accent-400)]' : 'text-zinc-300'}`}>
                                   <div>{date.toLocaleDateString('de-DE', { weekday: 'short' })}</div>
                                   <div className="text-xs text-zinc-400">{date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}</div>
                               </div>
@@ -294,15 +242,15 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ addToast }) => {
                                       return (
                                           <div 
                                               key={mealType} 
-                                              className={`p-2 min-h-[120px] flex flex-col justify-start transition-colors group flex-grow ${isDropTarget ? 'bg-amber-500/20' : ''}`}
+                                              className={`p-2 min-h-[120px] flex flex-col justify-start transition-colors group flex-grow ${isDropTarget ? 'bg-[var(--color-accent-500)]/20' : ''}`}
                                               onDragOver={e => { e.preventDefault(); setDropTarget({ date: dateString, mealType }); }}
                                               onDragLeave={() => setDropTarget(null)}
                                               onDrop={handleDrop}
                                           >
                                               <span className="text-xs text-zinc-500">{mealType}</span>
-                                              {meal ? <PlannedMealCard meal={meal} recipe={recipe} pantryStatus={getPantryStatus(recipe, pantryMap)} onAction={handleMealAction} />
+                                              {meal ? <PlannedMealCard meal={meal} recipe={recipe} pantryStatus={getPantryStatusForPlannedMeal(recipe)} onAction={handleMealAction} />
                                               : <div className="w-full h-full flex items-center justify-center text-zinc-600 rounded-md ">
-                                                  <button onClick={() => setNoteModalState({ isOpen: true, date: dateString, mealType })} title="Notiz hinzufügen" className="opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-full hover:bg-zinc-700/50 hover:text-amber-400">
+                                                  <button onClick={() => setNoteModalState({ isOpen: true, date: dateString, mealType })} title="Notiz hinzufügen" className="opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-full hover:bg-zinc-700/50 hover:text-[var(--color-accent-400)]">
                                                       <PlusCircle size={20}/>
                                                   </button>
                                                 </div>}
@@ -319,7 +267,6 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ addToast }) => {
         
         <RecipeSidebar
           recipes={recipes || []}
-          pantryItems={pantryItems || []}
           onDragStart={handleDragStart}
           isCollapsed={isSidebarCollapsed}
           onToggle={() => setSidebarCollapsed(prev => !prev)}

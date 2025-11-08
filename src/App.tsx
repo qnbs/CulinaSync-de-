@@ -1,31 +1,27 @@
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import Header from '@/components/Header';
-import CommandPalette, { type Command } from '@/components/CommandPalette';
-import { Page } from '@/types';
-import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
-import { processCommand } from '@/services/voiceCommands';
-import { addShoppingListItem, addOrUpdatePantryItem, removeItemFromPantry } from '@/services/db';
-import VoiceControlUI from '@/components/VoiceControlUI';
+import Header from './components/Header';
+import CommandPalette, { type Command } from './components/CommandPalette';
+import { Page } from './types';
+import { useSpeechRecognition } from './hooks/useSpeechRecognition';
+import { processCommand } from './services/voiceCommands';
+import { addShoppingListItem, addOrUpdatePantryItem, removeItemFromPantry } from './services/db';
+import VoiceControlUI from './components/VoiceControlUI';
 import { CheckCircle, Bot, Milk, BookOpen, CalendarDays, ShoppingCart, Settings as SettingsIcon, HelpCircle, PlusCircle, Search, RefreshCw, Trash2, Download, Upload, TerminalSquare, Mic, AlertTriangle, Info, X } from 'lucide-react';
-import { SettingsProvider } from '@/contexts/SettingsContext';
-import BottomNav from '@/components/BottomNav';
+import BottomNav from './components/BottomNav';
 import Onboarding from './components/Onboarding';
+import { useAppDispatch, useAppSelector } from './store/hooks';
+import { setCurrentPage, navigateToItem as navigateToItemAction, setCommandPaletteOpen, addToast as addToastAction, removeToast as removeToastAction, setFocusAction, setVoiceAction } from './store/slices/uiSlice';
+
 
 // Lazy load page components for code splitting and faster initial load
-const AiChef = lazy(() => import('@/components/AiChef'));
-const PantryManager = lazy(() => import('@/components/PantryManager'));
-const RecipeBook = lazy(() => import('@/components/RecipeBook'));
-const MealPlanner = lazy(() => import('@/components/MealPlanner'));
-const ShoppingList = lazy(() => import('@/components/ShoppingList'));
-const Settings = lazy(() => import('@/components/Settings'));
-const Help = lazy(() => import('@/components/Help'));
+const AiChef = lazy(() => import('./components/AiChef'));
+const PantryManager = lazy(() => import('./components/PantryManager'));
+const RecipeBook = lazy(() => import('./components/RecipeBook'));
+const MealPlanner = lazy(() => import('./components/MealPlanner'));
+const ShoppingList = lazy(() => import('./components/ShoppingList'));
+const Settings = lazy(() => import('./components/Settings'));
+const Help = lazy(() => import('./components/Help'));
 
-
-interface Toast {
-  id: number;
-  message: string;
-  type: 'success' | 'error' | 'info';
-}
 
 const LoadingSpinner = () => (
     <div className="flex justify-center items-center h-64" aria-label="Loading content">
@@ -34,12 +30,9 @@ const LoadingSpinner = () => (
 );
 
 const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<Page>('pantry');
-  const [voiceAction, setVoiceAction] = useState<{type: string, payload: any} | null>(null);
-  const [toasts, setToasts] = useState<Toast[]>([]);
-  const [isCommandPaletteOpen, setCommandPaletteOpen] = useState(false);
-  const [focusAction, setFocusAction] = useState<string | null>(null);
-  const [initialSelectedId, setInitialSelectedId] = useState<number | null>(null);
+  const dispatch = useAppDispatch();
+  const { currentPage, toasts, isCommandPaletteOpen } = useAppSelector((state) => state.ui);
+
   const [appVersion, setAppVersion] = useState<string>('');
   const [installPromptEvent, setInstallPromptEvent] = useState<any>(null);
   const [isStandalone, setIsStandalone] = useState(false);
@@ -77,17 +70,23 @@ const App: React.FC = () => {
     setShowOnboarding(false);
   };
 
-  const removeToast = useCallback((id: number) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  }, []);
+  const removeToast = useCallback((id: string) => {
+    dispatch(removeToastAction(id));
+  }, [dispatch]);
   
   const addToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success') => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => {
-        removeToast(id);
-    }, 4000);
-  }, [removeToast]);
+    dispatch(addToastAction({ message, type }));
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (toasts.length > 0) {
+      const latestToast = toasts[toasts.length - 1];
+      const timer = setTimeout(() => {
+        removeToast(latestToast.id);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toasts, removeToast]);
 
   const handleInstallPWA = async () => {
     if (!installPromptEvent) {
@@ -120,18 +119,8 @@ const App: React.FC = () => {
   
   
   const navigate = useCallback((page: Page, focusTarget?: string) => {
-    setCurrentPage(page);
-    setInitialSelectedId(null);
-    if (focusTarget) {
-      setFocusAction(focusTarget);
-    }
-  }, []);
-
-  const navigateToItem = useCallback((page: 'recipes' | 'pantry', id: number) => {
-    setInitialSelectedId(id);
-    setCurrentPage(page);
-    setCommandPaletteOpen(false);
-  }, []);
+    dispatch(setCurrentPage({ page, focusTarget }));
+  }, [dispatch]);
 
   useEffect(() => {
     if (finalTranscript) {
@@ -171,23 +160,24 @@ const App: React.FC = () => {
             });
         }
         else if (action.type !== 'UNKNOWN') {
-            setVoiceAction({ type: action.type, payload: `${action.payload}#${Date.now()}` });
+            const payloadContent = action.payload ?? '';
+            dispatch(setVoiceAction({ type: action.type, payload: `${payloadContent}#${Date.now()}` }));
         } else {
             addToast("Befehl nicht erkannt.", "error");
         }
     }
-  }, [finalTranscript, currentPage, addToast, navigate]);
+  }, [finalTranscript, currentPage, addToast, navigate, dispatch]);
   
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
         event.preventDefault();
-        setCommandPaletteOpen(prev => !prev);
+        dispatch(setCommandPaletteOpen(!isCommandPaletteOpen));
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [isCommandPaletteOpen, dispatch]);
 
   const canInstall = installPromptEvent && !isStandalone;
 
@@ -219,58 +209,23 @@ const App: React.FC = () => {
   }
 
   const onCommandPaletteClose = useCallback(() => {
-    setCommandPaletteOpen(false);
-  }, []);
-
-  const handleGlobalSearch = useCallback((type: 'pantry' | 'recipes', term: string) => {
-    setInitialSelectedId(null);
-    setCurrentPage(type);
-    setVoiceAction({ type: 'SEARCH', payload: `${term}#${Date.now()}` });
-    onCommandPaletteClose();
-  }, [onCommandPaletteClose]);
+    dispatch(setCommandPaletteOpen(false));
+  }, [dispatch]);
 
   const renderPage = () => {
-    const pageProps = {
-        focusAction,
-        onActionHandled: () => setFocusAction(null),
-        addToast,
-    };
-    
     switch (currentPage) {
-        case 'pantry':
-            return <PantryManager 
-                        initialSearchTerm={voiceAction?.type === 'SEARCH' ? voiceAction.payload : undefined}
-                        initialSelectedId={initialSelectedId}
-                        {...pageProps}
-                    />;
-        case 'chef':
-            return <AiChef 
-                        initialPrompt={voiceAction?.type === 'GENERATE_RECIPE' ? voiceAction.payload : undefined}
-                        {...pageProps}
-                    />;
-        case 'recipes': return <RecipeBook 
-                                    initialSearchTerm={voiceAction?.type === 'SEARCH' ? voiceAction.payload : undefined} 
-                                    initialSelectedId={initialSelectedId}
-                                    {...pageProps} 
-                                />;
-        case 'meal-planner': return <MealPlanner {...pageProps} />;
-        case 'shopping-list': 
-            return <ShoppingList
-                        triggerCheckItem={voiceAction?.type === 'CHECK_SHOPPING_ITEM' ? voiceAction.payload : undefined}
-                        {...pageProps}
-                    />;
-        // FIX: Destructure voiceAction from pageProps and pass the rest to Settings to avoid prop type errors.
-        case 'settings': {
-          const { voiceAction, ...rest } = { ...pageProps, voiceAction: voiceAction };
-          return <Settings {...rest} installPromptEvent={installPromptEvent} onInstallPWA={handleInstallPWA} isStandalone={isStandalone} />;
-        }
+        case 'pantry': return <PantryManager />;
+        case 'chef': return <AiChef />;
+        case 'recipes': return <RecipeBook />;
+        case 'meal-planner': return <MealPlanner />;
+        case 'shopping-list': return <ShoppingList />;
+        case 'settings': return <Settings installPromptEvent={installPromptEvent} onInstallPWA={handleInstallPWA} isStandalone={isStandalone} />;
         case 'help': return <Help appVersion={appVersion} />;
-        default: return <PantryManager {...pageProps} />;
+        default: return <PantryManager />;
     }
   }
 
   return (
-    <SettingsProvider>
       <div className="min-h-screen text-zinc-200">
         {showOnboarding && <Onboarding onComplete={handleOnboardingComplete} />}
         <Header 
@@ -280,7 +235,7 @@ const App: React.FC = () => {
           startListening={startListening}
           stopListening={stopListening}
           hasRecognitionSupport={hasRecognitionSupport}
-          onCommandPaletteToggle={() => setCommandPaletteOpen(true)}
+          onCommandPaletteToggle={() => dispatch(setCommandPaletteOpen(true))}
         />
         <main key={currentPage} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 page-fade-in pb-20 md:pb-8">
           <Suspense fallback={<LoadingSpinner />}>
@@ -294,9 +249,6 @@ const App: React.FC = () => {
           isOpen={isCommandPaletteOpen}
           onClose={onCommandPaletteClose}
           commands={commands}
-          addToast={addToast}
-          navigateToItem={navigateToItem}
-          onGlobalSearch={handleGlobalSearch}
         />
 
         <VoiceControlUI isListening={isListening} transcript={interimTranscript} />
@@ -328,7 +280,6 @@ const App: React.FC = () => {
             </div>
         </div>
       </div>
-    </SettingsProvider>
   );
 };
 
