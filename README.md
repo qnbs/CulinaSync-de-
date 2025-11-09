@@ -1,5 +1,5 @@
-<div align="center">
-  <img src="https://storage.googleapis.com/aai-cdn-files/icons/culina-sync-logo.png" alt="CulinaSync Logo" width="150">
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/qnbs/CulinaSync-de-)
+<div align="left">
   <h1 style="border-bottom: none;">CulinaSync: Das intelligente Küchen-Betriebssystem</h1>
   <p>
     <strong>Eine Local-First, KI-gestützte Progressive Web App für den modernen Haushalt</strong>
