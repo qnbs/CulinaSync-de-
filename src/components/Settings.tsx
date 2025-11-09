@@ -9,7 +9,6 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { exportFullDataAsJson } from '../services/exportService';
 import { addToast as addToastAction, setFocusAction } from '../store/slices/uiSlice';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
-// FIX: Import Dexie to resolve 'Cannot find name 'Dexie'' error.
 import Dexie from 'dexie';
 
 const ACCENT_COLORS: Record<AppSettings['appearance']['accentColor'], Record<string, string>> = {
@@ -188,7 +187,6 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
             const reader = new FileReader();
             reader.onload = async () => {
                 try {
-                    // FIX: Use reader.result and perform a type check to ensure it's a string before parsing.
                     const text = reader.result;
                     if (typeof text !== 'string') {
                         throw new Error("File could not be read as text.");

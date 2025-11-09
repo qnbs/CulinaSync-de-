@@ -50,7 +50,6 @@ export const PantryList = () => {
     return (
         <div className="bg-zinc-950/50 border border-zinc-800 rounded-lg overflow-hidden" aria-label="Vorratsliste">
             {!hasFilteredContent ? (
-                // FIX: pantryItems can be undefined. Use optional chaining and nullish coalescing operator.
                 <EmptyState totalItemCount={pantryItems?.length ?? 0} />
             ) : isGrouped && groupedItems ? (
                 Object.entries(groupedItems).sort(([catA], [catB]) => catA.localeCompare(catB)).map(([category, items]: [string, PantryItem[]]) => (

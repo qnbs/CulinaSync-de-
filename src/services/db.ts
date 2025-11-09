@@ -43,7 +43,6 @@ class CulinaSyncDB extends Dexie {
             }).then(() => {
                 // Trigger a full recalculation after the schema upgrade completes
                 // This is deferred because the transaction needs to finish first
-                // FIX: Wrap updatePantryMatches in an arrow function to avoid passing `undefined` from `then` as an argument.
                 Promise.resolve().then(() => updatePantryMatches());
             });
         });

@@ -24,8 +24,6 @@ export const usePantryManager = () => {
   
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // FIX: The version of useLiveQuery seems to expect only 2 arguments. Removed the third 'defaultValue' argument.
-  // This means `pantryItems` can be `undefined`.
   const pantryItems = useLiveQuery<PantryItem[]>(() => db.pantry.orderBy('name').toArray(), []);
 
   const initialSearchTerm = voiceAction?.type === 'SEARCH' ? voiceAction.payload : undefined;
@@ -59,9 +57,7 @@ export const usePantryManager = () => {
   }, [focusAction, dispatch]);
 
   useEffect(() => {
-    // FIX: Add check for pantryItems being defined before using it.
     if (initialSelectedId && pantryItems && pantryItems.length > 0) {
-        // FIX: pantryItems is now correctly typed, so .find can be used.
         const itemToEdit = pantryItems.find(item => item.id === initialSelectedId);
         if (itemToEdit) {
             setModalState({ isOpen: true, item: itemToEdit });
@@ -71,7 +67,6 @@ export const usePantryManager = () => {
   }, [initialSelectedId, pantryItems, dispatch]);
 
   const filteredItems = useMemo(() => {
-    // FIX: Handle potentially undefined `pantryItems` by providing a fallback empty array.
     let items = pantryItems || [];
     if (expiryFilter !== 'all') {
       items = items.filter(item => getExpiryStatus(item.expiryDate) === expiryFilter);

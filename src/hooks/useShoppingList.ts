@@ -43,9 +43,8 @@ export const useShoppingList = () => {
   const addItemInputRef = useRef<HTMLInputElement>(null);
   const recipesById = useMemo(() => new Map<number, Recipe>((recipes || []).map(r => [r.id!, r])), [recipes]);
   
-  const triggerCheckItem = voiceAction?.type === 'CHECK_SHOPG_ITEM' ? voiceAction.payload : undefined;
+  const triggerCheckItem = voiceAction?.type === 'CHECK_SHOPPING_ITEM' ? voiceAction.payload : undefined;
 
-  // FIX: Wrap addToast in useCallback to make it a stable dependency for other hooks.
   const addToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success') => {
     dispatch(addToastAction({ message, type }));
   }, [dispatch]);
@@ -140,7 +139,6 @@ export const useShoppingList = () => {
     dispatch(toggleCategoryCollapse(category));
   }, [dispatch]);
   
-  // FIX: Renamed callbacks to avoid shadowing the imported action creators, which caused infinite recursion.
   const handleCollapseAll = useCallback(() => {
     if(!shoppingList) return;
     const allCategories = Array.from(new Set(shoppingList.map(i => i.category)));
@@ -238,7 +236,6 @@ export const useShoppingList = () => {
 
     handleToggle, handleQuickAdd, handleAiAdd, handleBulkAdd, handleGenerateFromPlan,
     handleRenameCategory, handleToggleCategoryCollapse, 
-    // FIX: Pass renamed handlers to avoid recursive calls.
     collapseAll: handleCollapseAll, 
     expandAll: handleExpandAll,
     handleDragStart, handleDragOver, handleDrop, onCategoryDrop, onDragEnd,

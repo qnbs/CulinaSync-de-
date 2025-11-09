@@ -1,7 +1,5 @@
 import { db } from './db';
 import { Recipe, PantryItem } from '../types';
-// FIX: The `BulkUpdateChange` type is not exported from Dexie.
-// Using an inline type definition that matches the expected structure for `bulkUpdate`.
 
 // Debounce mechanism to prevent flooding updates on rapid pantry changes
 let debounceTimeout: number | undefined;

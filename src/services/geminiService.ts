@@ -1,8 +1,6 @@
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import { AppSettings, PantryItem, Recipe, StructuredPrompt, ShoppingListItem, RecipeIdea } from "../types";
 
-// FIX: Per @google/genai guidelines, the API key must be obtained from process.env.API_KEY.
-// This also resolves the TypeScript error "Property 'env' does not exist on type 'ImportMeta'".
 const API_KEY = process.env.API_KEY;
 
 if (!API_KEY) {

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import Header from './components/Header';
-// FIX: CommandPalette is a named export, not a default export.
 import { CommandPalette, type Command } from './components/CommandPalette';
 import { Page, BeforeInstallPromptEvent, ShoppingListItem, PantryItem } from './types';
 import { useSpeechRecognition } from './hooks/useSpeechRecognition';

@@ -29,7 +29,6 @@ export const getDefaultSettings = (): AppSettings => ({
     rate: 1,
     pitch: 1,
   },
-  // FIX: Add missing 'appearance' property to default settings to match AppSettings type.
   appearance: {
     accentColor: 'amber',
   },
