@@ -1,6 +1,7 @@
 import { db } from './db';
 import { Recipe, PantryItem } from '../types';
-import { BulkUpdateChange } from 'dexie';
+// FIX: The `BulkUpdateChange` type is not exported from Dexie.
+// Using an inline type definition that matches the expected structure for `bulkUpdate`.
 
 // Debounce mechanism to prevent flooding updates on rapid pantry changes
 let debounceTimeout: number | undefined;
@@ -39,7 +40,7 @@ export const updatePantryMatches = async (recipeIds?: number[]): Promise<void> =
 
         if (recipesToUpdate.length === 0) return;
 
-        const updates: BulkUpdateChange<Recipe, number>[] = [];
+        const updates: { key: number; changes: Partial<Recipe> }[] = [];
         
         for (const recipe of recipesToUpdate) {
             const { percentage, count } = calculateMatch(recipe, pantryMap);

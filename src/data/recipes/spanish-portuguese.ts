@@ -2,6 +2,7 @@ import { Recipe } from '../../types';
 
 export const spanishPortugueseRecipes: Recipe[] = [
   {
+    seedId: "es-01",
     recipeTitle: "Paella Valenciana (Originalrezept)",
     shortDescription: "Das authentische Nationalgericht aus Valencia. Safran-Reis, gekocht mit Huhn, Kaninchen und grünen Bohnen in einer großen, flachen Pfanne. Das Highlight ist der 'Socarrat' - eine köstliche, leicht angebratene Reiskruste am Boden der Pfanne.",
     prepTime: "30 Min.",
@@ -53,6 +54,7 @@ export const spanishPortugueseRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "es-02",
     recipeTitle: "Tortilla Española (Spanisches Kartoffelomelett)",
     shortDescription: "Ein spanischer Nationalstolz und ein Klassiker jeder Tapas-Bar. Ein dickes, saftiges Omelett aus langsam in Olivenöl gegarten Kartoffeln und Zwiebeln, gebunden mit Eiern. Schmeckt warm als Hauptgericht oder kalt in Würfel geschnitten.",
     prepTime: "15 Min.",
@@ -100,6 +102,7 @@ export const spanishPortugueseRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "es-03",
     recipeTitle: "Gazpacho Andaluz (Kalte Tomatensuppe)",
     shortDescription: "Eine erfrischende, ungekochte Gemüsesuppe aus Andalusien, perfekt für heiße Sommertage. Reife Tomaten, Gurke, Paprika und Knoblauch werden zu einer samtigen, kühlen Suppe püriert, die als Vorspeise oder leichtes Hauptgericht serviert wird.",
     prepTime: "15 Min.",
@@ -147,6 +150,7 @@ export const spanishPortugueseRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "es-04",
     recipeTitle: "Patatas Bravas (mit authentischer Salsa Brava)",
     shortDescription: "Der unangefochtene König der spanischen Tapas-Bars. Knusprig frittierte Kartoffelwürfel, serviert mit einer pikanten, rauchigen Tomatensauce (Salsa Brava). Oft wird dazu eine cremige Knoblauch-Aioli gereicht.",
     prepTime: "15 Min.",

@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useCallback, FormEvent, DragEvent } from 'react';
+import { useState, useMemo, useRef, useCallback, FormEvent, DragEvent, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../services/db';
 import { ShoppingListItem, Recipe, PantryItem } from '../types';
@@ -26,7 +26,6 @@ import {
     moveToPantryAsync,
     toggleCompletedVisible,
 } from '../store/slices/shoppingListSlice';
-import { useEffect } from 'react';
 
 export const useShoppingList = () => {
   const dispatch = useAppDispatch();
@@ -44,7 +43,7 @@ export const useShoppingList = () => {
   const addItemInputRef = useRef<HTMLInputElement>(null);
   const recipesById = useMemo(() => new Map<number, Recipe>((recipes || []).map(r => [r.id!, r])), [recipes]);
   
-  const triggerCheckItem = voiceAction?.type === 'CHECK_SHOPPING_ITEM' ? voiceAction.payload : undefined;
+  const triggerCheckItem = voiceAction?.type === 'CHECK_SHOPING_ITEM' ? voiceAction.payload : undefined;
 
   const addToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     dispatch(addToastAction({ message, type }));
@@ -180,7 +179,7 @@ export const useShoppingList = () => {
     const lastItem = itemsInCategory[itemsInCategory.length - 1];
     const newSortOrder = (lastItem ? lastItem.sortOrder : 0) + 1000;
     
-    dispatch(updateItemOrderAsync({ ...draggedItem, category, sortOrder: newSortOrder }));
+    dispatch(updateItemOrderAsync({ ...draggedItem, category, newSortOrder }));
   }, [draggedItem, shoppingList, dispatch]);
 
   const onDragEnd = useCallback(() => {
@@ -212,14 +211,15 @@ export const useShoppingList = () => {
     return acc;
   }, {} as Record<string, ShoppingListItem[]>), [activeItems]);
 
-  const handleMoveToPantry = async () => {
+  // FIX: Wrap event handler in useCallback to ensure stable function reference and fix potential type inference issues.
+  const handleMoveToPantry = useCallback(async () => {
       if (completedItems.length > 0 && window.confirm(`${completedItems.length} gekaufte(r) Artikel in den Vorrat verschieben?`)) {
         const resultAction = await dispatch(moveToPantryAsync());
         if(moveToPantryAsync.fulfilled.match(resultAction) && resultAction.payload > 0) {
             addToast(`${resultAction.payload} Artikel in den Vorrat verschoben.`, 'success');
         }
       }
-  };
+  }, [completedItems, dispatch, addToast]);
 
   return {
     shoppingList, pantryItems, recipes, quickAddItem, ...shoppingListState,

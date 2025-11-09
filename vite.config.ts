@@ -4,9 +4,6 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { fileURLToPath, URL } from 'url';
 
 export default defineConfig({
-  define: {
-    'process.env.API_KEY': JSON.stringify(process.env.API_KEY),
-  },
   plugins: [
     react(),
     VitePWA({

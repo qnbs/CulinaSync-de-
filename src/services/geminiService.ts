@@ -1,6 +1,8 @@
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import { AppSettings, PantryItem, Recipe, StructuredPrompt, ShoppingListItem, RecipeIdea } from "../types";
 
+// FIX: Per @google/genai guidelines, the API key must be obtained from process.env.API_KEY.
+// This also resolves the TypeScript error "Property 'env' does not exist on type 'ImportMeta'".
 const API_KEY = process.env.API_KEY;
 
 if (!API_KEY) {
@@ -123,15 +125,17 @@ const shoppingListSchema = {
     required: ["items"]
 };
 
-const handleGeminiError = (error: any, context: string): Error => {
+const handleGeminiError = (error: unknown, context: string): Error => {
     console.error(`Error calling Gemini for ${context}:`, error);
-    if (String(error).includes('API key not valid')) {
+    const errorMessage = (error as Error)?.message || String(error);
+
+    if (errorMessage.includes('API key not valid')) {
          return new Error("Der KI-Dienst ist nicht korrekt eingerichtet (ungültiger API-Schlüssel).");
     }
-    if (error.message && (error.message.includes('FETCH_ERROR') || error.message.includes('NetworkError'))) {
+    if (errorMessage.includes('FETCH_ERROR') || errorMessage.includes('NetworkError')) {
         return new Error("Der KI-Dienst konnte nicht erreicht werden. Bitte prüfe deine Netzwerkverbindung.");
     }
-     if (error.message && error.message.includes('429')) {
+     if (errorMessage.includes('429')) {
         return new Error("Zu viele Anfragen an den KI-Dienst. Bitte warte einen Moment.");
     }
     return new Error("Ein unerwarteter Fehler beim KI-Dienst ist aufgetreten.");
@@ -181,8 +185,6 @@ export const generateRecipeIdeas = async (
   pantryItems: PantryItem[],
   aiPreferences: AppSettings['aiPreferences']
 ): Promise<RecipeIdea[]> => {
-    if (!API_KEY) throw new Error("Der KI-Dienst ist nicht konfiguriert (API-Schlüssel fehlt).");
-    
     const model = "gemini-2.5-flash";
     const systemInstruction = `Du bist Culina, ein Weltklasse-Koch und kulinarischer Assistent. Deine Aufgabe ist es, 3 köstliche, unterschiedliche und plausible Rezeptideen auf Deutsch zu entwickeln, die genau auf die Wünsche des Nutzers zugeschnitten sind. Antworte IMMER NUR mit einem einzigen, gültigen JSON-Objekt, das dem Schema entspricht.`;
     const fullPrompt = constructBasePrompt(prompt, pantryItems, aiPreferences);
@@ -202,7 +204,7 @@ export const generateRecipeIdeas = async (
         } else {
             throw new Error("Die KI hat eine Antwort mit falscher Struktur gesendet.");
         }
-    } catch (e: any) {
+    } catch (e: unknown) {
         throw handleGeminiError(e, 'ideas');
     }
 };
@@ -213,8 +215,6 @@ export const generateRecipe = async (
   aiPreferences: AppSettings['aiPreferences'],
   chosenIdea: RecipeIdea
 ): Promise<Recipe> => {
-  if (!API_KEY) throw new Error("Der KI-Dienst ist nicht konfiguriert (API-Schlüssel fehlt).");
-
   const model = "gemini-2.5-flash";
   let fullPrompt = constructBasePrompt(prompt, pantryItems, aiPreferences);
 
@@ -235,7 +235,7 @@ export const generateRecipe = async (
             responseSchema: recipeSchema,
         }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
      throw handleGeminiError(error, 'full recipe');
   }
 
@@ -263,8 +263,6 @@ export const generateShoppingList = async (
     pantryItems: PantryItem[],
     currentListItems: ShoppingListItem[]
 ): Promise<Omit<ShoppingListItem, 'id' | 'isChecked'>[]> => {
-    if (!API_KEY) throw new Error("Der KI-Dienst ist nicht konfiguriert (API-Schlüssel fehlt).");
-
     const model = "gemini-2.5-flash";
     const pantryList = pantryItems.map(item => item.name).join(', ') || 'keine';
     const currentShoppingList = currentListItems.map(item => item.name).join(', ') || 'keine';

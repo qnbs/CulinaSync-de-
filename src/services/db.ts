@@ -1,5 +1,5 @@
 import Dexie, { type Table, Transaction } from 'dexie';
-import { PantryItem, Recipe, MealPlanItem, ShoppingListItem } from '../types';
+import { PantryItem, Recipe, MealPlanItem, ShoppingListItem, FullBackupData, IngredientGroup } from '../types';
 import { seedRecipes } from '../data/seedData';
 import { scaleIngredientQuantity, getCategoryForItem } from './utils';
 import { updatePantryMatches, debouncedUpdateAllPantryMatches } from './pantryMatcherService';
@@ -39,7 +39,7 @@ class CulinaSyncDB extends Dexie {
         }).upgrade(tx => {
             return tx.table('recipes').toCollection().modify(item => {
                 item.pantryMatchPercentage = 0;
-                item.ingredientCount = item.ingredients.flatMap((g: any) => g.items).length;
+                item.ingredientCount = item.ingredients.flatMap((g: IngredientGroup) => g.items).length;
             }).then(() => {
                 // Trigger a full recalculation after the schema upgrade completes
                 // This is deferred because the transaction needs to finish first
@@ -100,17 +100,19 @@ export const db = new CulinaSyncDB() as CulinaSyncDB & Dexie;
 
 export const syncSeedRecipes = async () => {
     try {
-        const existingTitles = new Set((await db.recipes.toArray()).map(r => r.recipeTitle));
-        const newRecipes = seedRecipes.filter(seedRecipe => !existingTitles.has(seedRecipe.recipeTitle));
+        const existingRecipes = await db.recipes.toArray();
+        const existingSeedIds = new Set(existingRecipes.map(r => r.seedId).filter(Boolean));
+
+        const newRecipes = seedRecipes.filter(seedRecipe => seedRecipe.seedId && !existingSeedIds.has(seedRecipe.seedId));
 
         if (newRecipes.length > 0) {
-            console.log(`Syncing database: Found ${newRecipes.length} new recipes to add.`);
+            console.log(`Syncing database: Found ${newRecipes.length} new seed recipes to add.`);
             const newIds = await db.recipes.bulkAdd(newRecipes.map(r => ({ ...r, isFavorite: false, updatedAt: Date.now() })), { allKeys: true });
             console.log("Database sync complete.");
             // Update matches for the newly added recipes
             await updatePantryMatches(newIds as number[]);
         } else {
-            console.log("Database sync: No new recipes to add.");
+            console.log("Database sync: No new seed recipes to add.");
         }
     } catch (error) {
         console.error("Failed to sync seed recipes:", error);
@@ -118,7 +120,7 @@ export const syncSeedRecipes = async () => {
 };
 
 db.open().then(syncSeedRecipes).catch(err => {
-    console.error(`Failed to open and initialize database: ${err.stack || err}`);
+    console.error(`Failed to open and initialize database: ${(err as Error).stack || err}`);
 });
 
 
@@ -442,7 +444,7 @@ export const addMissingIngredientsToShoppingList = async (recipeId: number): Pro
 };
 
 // Data Import/Export
-export const importData = async (data: any): Promise<void> => {
+export const importData = async (data: FullBackupData): Promise<void> => {
     await db.transaction('rw', db.pantry, db.recipes, db.mealPlan, db.shoppingList, async () => {
         await db.pantry.clear();
         if (data.pantry) await db.pantry.bulkAdd(data.pantry);

@@ -147,15 +147,15 @@ const MealPlanner: React.FC = () => {
     setDropTarget(null);
   };
   
-  const handleMealAction = useCallback(async (action: string, payload: any) => {
+  const handleMealAction = useCallback(async (action: string, payload: Recipe | MealPlanItem) => {
     switch (action) {
-        case 'view': setSelectedRecipeForDetail(payload); break;
+        case 'view': setSelectedRecipeForDetail(payload as Recipe); break;
         case 'cook':
-            setRecipeForCookMode(payload);
+            setRecipeForCookMode(payload as Recipe);
             setIsCookMode(true);
             break;
         case 'cooked': {
-            const { success, changes } = await markMealAsCooked(payload.id!);
+            const { success, changes } = await markMealAsCooked((payload as MealPlanItem).id!);
             if (success) {
                 let message = "Mahlzeit als gekocht markiert.";
                 if(changes?.updated.length || changes.deleted.length) {
@@ -167,7 +167,7 @@ const MealPlanner: React.FC = () => {
         }
         case 'remove': {
             if(window.confirm("Mahlzeit wirklich aus dem Plan entfernen?")) {
-                await removeRecipeFromMealPlan(payload.id!);
+                await removeRecipeFromMealPlan((payload as MealPlanItem).id!);
                 addToast("Mahlzeit entfernt.");
             }
             break;

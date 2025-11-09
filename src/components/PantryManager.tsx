@@ -16,7 +16,8 @@ const PantryManagerView: React.FC = () => {
                 item={modalState.item}
                 onClose={() => setModalState({ isOpen: false, item: null })}
                 onSave={handleSaveItem}
-                pantryItems={pantryItems}
+                // FIX: `pantryItems` can be undefined initially. Provide an empty array as a fallback.
+                pantryItems={pantryItems || []}
             />
             <PantryHeader />
             <PantryToolbar />

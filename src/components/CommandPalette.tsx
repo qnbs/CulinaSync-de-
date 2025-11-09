@@ -19,6 +19,12 @@ interface CommandPaletteProps {
     commands: Command[];
 }
 
+type PaletteItem = (Recipe & { type: 'recipe' }) 
+    | (PantryItem & { type: 'pantry' }) 
+    | (Command & { type: 'command' }) 
+    | { id: string, title: string, action: () => void, type: 'global' };
+
+
 const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, commands }) => {
     const dispatch = useAppDispatch();
     const [searchTerm, setSearchTerm] = useState('');
@@ -74,9 +80,9 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
     }, [filteredCommands]);
 
     const flatCommandList = useMemo(() => {
-        let list: any[] = [];
+        let list: PaletteItem[] = [];
         list = list.concat(dbSearchResults.recipes.map(r => ({ ...r, type: 'recipe' })));
-        list = list.concat(dbSearchResults.pantry.map(p => ({ ...p, type: 'pantry' })));
+        list = list.concat(dbSearchResults.pantry.map(p => ({...p, type: 'pantry' })));
         list = list.concat(Object.values(groupedCommands).flat().map(c => ({...c, type: 'command'})));
         
         const showGlobalSearch = list.length === 0 && searchTerm.trim().length > 1;
@@ -116,8 +122,8 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
                 e.preventDefault();
                 const item = flatCommandList[activeIndex];
                 if (item) {
-                    if (item.type === 'recipe') navigateToItem('recipes', item.id);
-                    else if (item.type === 'pantry') navigateToItem('pantry', item.id);
+                    if (item.type === 'recipe') navigateToItem('recipes', item.id!);
+                    else if (item.type === 'pantry') navigateToItem('pantry', item.id!);
                     else if (item.action) item.action();
                     onClose();
                 }
@@ -136,12 +142,12 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
         return null;
     }
     
-    const renderItem = (item: any, index: number): React.ReactNode => {
+    const renderItem = (item: PaletteItem, index: number): React.ReactNode => {
         const isSelected = activeIndex === index;
         let content;
         let action;
     
-        const getSectionTitle = (currentItem: any, previousItem: any) => {
+        const getSectionTitle = (currentItem: PaletteItem, previousItem: PaletteItem | null) => {
             const currentSection = currentItem.type === 'recipe' ? 'Rezepte' : currentItem.type === 'pantry' ? 'Vorratskammer' : currentItem.type === 'global' ? 'Globale Suche' : currentItem.section;
             if (!previousItem) return currentSection;
             const previousSection = previousItem.type === 'recipe' ? 'Rezepte' : previousItem.type === 'pantry' ? 'Vorratskammer' : previousItem.type === 'global' ? 'Globale Suche' : previousItem.section;
@@ -151,11 +157,11 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
         switch (item.type) {
             case 'recipe':
                 content = <><BookOpen className="h-5 w-5 mr-3 text-zinc-500" /><span>{item.recipeTitle}</span></>;
-                action = () => { navigateToItem('recipes', item.id); onClose(); };
+                action = () => { navigateToItem('recipes', item.id!); onClose(); };
                 break;
             case 'pantry':
                 content = <><Milk className="h-5 w-5 mr-3 text-zinc-500" /><span>{item.name}</span></>;
-                action = () => { navigateToItem('pantry', item.id); onClose(); };
+                action = () => { navigateToItem('pantry', item.id!); onClose(); };
                 break;
             case 'command':
                 const Icon = item.icon;
@@ -189,45 +195,36 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
 
     return (
         <div 
-          className="fixed inset-0 z-50 flex items-start justify-center pt-24" 
-          aria-labelledby="command-palette-title" 
-          role="dialog" 
-          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24"
           onClick={onClose}
+          role="dialog"
+          aria-modal="true"
         >
-            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
-
-            <div 
-                className="relative bg-zinc-900 border border-zinc-700 rounded-lg shadow-2xl w-full max-w-2xl mx-4 transform transition-all modal-fade-in"
-                onClick={e => e.stopPropagation()}
-            >
-                <div className="flex items-center border-b border-zinc-700 p-3">
-                    <Search className="h-5 w-5 text-zinc-500 mr-3" />
-                    <input
-                        type="text"
-                        placeholder="Suchen oder Befehl ausführen..."
-                        className="w-full bg-transparent text-zinc-100 placeholder-zinc-500 focus:outline-none hidden sm:block"
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                        autoFocus
-                    />
-                     <div className="ml-3 text-xs text-zinc-500 border border-zinc-600 rounded px-1.5 py-0.5 hidden sm:block">ESC</div>
-                </div>
-
-                <div className="max-h-[70vh] md:max-h-[60vh] overflow-y-auto p-2">
-                    {flatCommandList.length > 0 ? (
-                        <ul>
-                            {flatCommandList.map((item, index) => renderItem(item, index))}
-                        </ul>
-                    ) : (
-                        <p className="text-center text-zinc-500 p-8">
-                            {searchTerm ? 'Keine Ergebnisse gefunden.' : 'Befehl auswählen...'}
-                        </p>
-                    )}
-                </div>
+          <div 
+            className="relative w-full max-w-xl bg-zinc-900 border border-zinc-700/50 rounded-lg shadow-2xl modal-fade-in"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center border-b border-zinc-700/50 p-1">
+              <Search className="h-5 w-5 text-zinc-500 mx-3" />
+              <input
+                type="text"
+                autoFocus
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                placeholder="Befehl ausführen oder suchen..."
+                className="w-full bg-transparent p-2 text-lg text-zinc-100 focus:outline-none placeholder-zinc-500"
+              />
             </div>
+            {flatCommandList.length > 0 ? (
+                <ul className="max-h-[60vh] overflow-y-auto p-2">
+                    {flatCommandList.map((item, index) => renderItem(item, index))}
+                </ul>
+            ) : (
+                <p className="p-4 text-center text-zinc-500">Keine Ergebnisse gefunden.</p>
+            )}
+          </div>
         </div>
     );
 };
 
-export default CommandPalette;
+export { CommandPalette };

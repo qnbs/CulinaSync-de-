@@ -47,7 +47,7 @@ interface SpeechRecognitionHook {
   error: string | null;
 }
 
-const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+const SpeechRecognition: { new (): ISpeechRecognition } = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
 export const useSpeechRecognition = (): SpeechRecognitionHook => {
   const [isListening, setIsListening] = useState(false);

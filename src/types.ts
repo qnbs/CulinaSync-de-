@@ -38,6 +38,7 @@ export interface ExpertTip {
 
 export interface Recipe {
   id?: number;
+  seedId?: string;
   recipeTitle: string;
   shortDescription: string;
   prepTime: string;
@@ -127,4 +128,24 @@ export interface StructuredPrompt {
 export interface RecipeIdea {
   recipeTitle: string;
   shortDescription: string;
+}
+
+// For PWA installation prompt event
+export interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: string[];
+  readonly userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed';
+    platform: string;
+  }>;
+  prompt(): Promise<void>;
+}
+
+// For data import/export
+export interface FullBackupData {
+    pantry?: PantryItem[];
+    recipes?: Recipe[];
+    mealPlan?: MealPlanItem[];
+    shoppingList?: ShoppingListItem[];
+    settings?: AppSettings;
+    exportedAt?: string;
 }

@@ -2,6 +2,7 @@ import { Recipe } from '../../types';
 
 export const italianRecipes: Recipe[] = [
   {
+    seedId: "it-01",
     recipeTitle: "Lasagne al Forno (Klassisch)",
     shortDescription: "Der Inbegriff italienischer Hausmannskost. Schichten aus frischem Eiernudelteig, einem reichhaltigen Ragù alla Bolognese, cremiger Béchamelsauce und reichlich Parmesan, im Ofen goldbraun überbacken.",
     prepTime: "50 Min.",
@@ -66,6 +67,7 @@ export const italianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "it-02",
     recipeTitle: "Spaghetti Carbonara (Originalrezept)",
     shortDescription: "Ein ikonisches Pastagericht aus Rom. Das Originalrezept besticht durch seine cremige Sauce aus Eigelb, Pecorino Romano und dem ausgelassenen Fett von Guanciale (luftgetrockneter Schweinebacke).",
     prepTime: "10 Min.",
@@ -112,6 +114,7 @@ export const italianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "it-03",
     recipeTitle: "Risotto alla Milanese",
     shortDescription: "Ein cremiger und leuchtend gelber Risotto-Klassiker aus Mailand. Der unverwechselbare Geschmack und die Farbe stammen von Safranfäden. Oft als Beilage zu Osso Buco serviert.",
     prepTime: "10 Min.",
@@ -161,6 +164,7 @@ export const italianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "it-04",
     recipeTitle: "Osso Buco alla Milanese",
     shortDescription: "Ein Schmorgericht-Klassiker aus der Lombardei. Dicke Kalbsbeinscheiben werden langsam in einer aromatischen Soße aus Weißwein, Tomaten und Gemüse gegart, bis das Fleisch butterzart ist.",
     prepTime: "20 Min.",
@@ -219,6 +223,7 @@ export const italianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "it-05",
     recipeTitle: "Saltimbocca alla Romana",
     shortDescription: "Ein blitzschneller Klassiker aus Rom, dessen Name wörtlich 'springt in den Mund' bedeutet. Dünne Kalbsschnitzel werden mit Prosciutto und Salbei belegt und in Butter und Weißwein kurz gebraten.",
     prepTime: "15 Min.",
@@ -268,6 +273,7 @@ export const italianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "it-06",
     recipeTitle: "Vitello Tonnato",
     shortDescription: "Eine klassische italienische Vorspeise aus dem Piemont. Dünn aufgeschnittenes, zart gekochtes Kalbfleisch wird mit einer cremigen Thunfisch-Kapern-Sauce serviert. Ein perfektes Gericht für Buffets oder als elegante Vorspeise an warmen Tagen.",
     prepTime: "35 Min. (+ Kühlzeit)",
@@ -331,6 +337,7 @@ export const italianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "it-07",
     recipeTitle: "Pollo alla Cacciatora (Huhn nach Jägerart)",
     shortDescription: "Ein rustikales und aromatisches Schmorgericht aus Italien. Hähnchenteile werden knusprig angebraten und dann langsam in einer würzigen Tomatensoße mit Kräutern, Oliven und Kapern gegart. Ein einfaches Gericht, das voller Geschmack steckt.",
     prepTime: "20 Min.",
@@ -381,6 +388,7 @@ export const italianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "it-08",
     recipeTitle: "Melanzane alla Parmigiana (Auberginenauflauf)",
     shortDescription: "Ein vegetarischer Klassiker aus Süditalien. Gebratene Auberginenscheiben werden mit einer fruchtigen Tomatensoße, Basilikum, Mozzarella und reichlich Parmesan geschichtet und im Ofen goldbraun überbacken. Ein sättigendes und unglaublich geschmackvolles Hauptgericht.",
     prepTime: "30 Min.",

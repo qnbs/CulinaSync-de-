@@ -2,6 +2,7 @@ import { Recipe } from '../../types';
 
 export const frenchRecipes: Recipe[] = [
   {
+    seedId: "fr-01",
     recipeTitle: "Coq au Vin (Klassisch mit Rotwein)",
     shortDescription: "Ein rustikaler französischer Schmor-Klassiker. Zarte Hähnchenteile, langsam in einem kräftigen Rotwein-Sud mit Speck, Champignons und Zwiebeln gegart, bis das Fleisch vom Knochen fällt.",
     prepTime: "30 Min.",
@@ -54,6 +55,7 @@ export const frenchRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "fr-02",
     recipeTitle: "Klassisches Ratatouille",
     shortDescription: "Ein rustikaler Gemüseeintopf aus der Provence, der den Sommer auf den Teller bringt. Auberginen, Zucchini, Paprika und Tomaten werden langsam in Olivenöl mit Kräutern geschmort. Perfekt als Beilage oder vegetarisches Hauptgericht.",
     prepTime: "20 Min.",
@@ -103,6 +105,7 @@ export const frenchRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "fr-03",
     recipeTitle: "Soupe à l'Oignon (Französische Zwiebelsuppe)",
     shortDescription: "Der Inbegriff französischer Bistro-Küche. Eine tiefbraune, süßlich-herzhafte Suppe aus langsam karamellisierten Zwiebeln, klassisch serviert mit einer Käsekruste aus Gruyère und Baguette.",
     prepTime: "15 Min.",
@@ -151,6 +154,7 @@ export const frenchRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "fr-04",
     recipeTitle: "Crème Brûlée (Klassisch)",
     shortDescription: "Das ikonische französische Dessert. Eine zarte, cremige Vanille-Eier-Creme unter einer knackigen, goldbraunen Karamellkruste. Ein eleganter Klassiker, der einfacher zuzubereiten ist, als man denkt.",
     prepTime: "20 Min.",
@@ -200,6 +204,7 @@ export const frenchRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "fr-05",
     recipeTitle: "Boeuf Bourguignon (Klassisch nach Julia Child)",
     shortDescription: "Der Inbegriff des französischen Schmorgerichts. Zarte Rindfleischwürfel, langsam in einem vollmundigen Burgunder-Rotwein mit Speck, Perlzwiebeln und Champignons geschmort, bis sie auf der Zunge zergehen. Ein zeitloser Klassiker, perfekt für ein festliches Essen.",
     prepTime: "45 Min.",
@@ -252,6 +257,7 @@ export const frenchRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "fr-06",
     recipeTitle: "Quiche Lorraine (Originalrezept)",
     shortDescription: "Der weltberühmte herzhafte Kuchen aus der französischen Region Lothringen. Ein knuspriger Mürbeteigboden, gefüllt mit einer cremigen Masse aus Eiern, Sahne und geräuchertem Speck. Die klassische Variante wird oft mit Käse verfeinert.",
     prepTime: "25 Min. (+ 1 Std. Kühlzeit)",

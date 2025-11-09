@@ -2,6 +2,7 @@ import { Recipe } from '../../types';
 
 export const asianRecipes: Recipe[] = [
   {
+    seedId: "th-01",
     recipeTitle: "Pad Thai (mit Garnelen)",
     shortDescription: "Das Nationalgericht Thailands. Gebratene Reisnudeln in einer süß-sauren Tamarindensoße, serviert mit Garnelen, Tofu, frischen Sojasprossen, Erdnüssen und einem Spritzer Limette.",
     prepTime: "20 Min.",
@@ -67,6 +68,7 @@ export const asianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "th-02",
     recipeTitle: "Grünes Thai Curry (mit Huhn)",
     shortDescription: "Ein aromatisches und scharfes Curry aus Thailand. Zarte Hähnchenbruststreifen und knackiges Gemüse in einer cremigen Soße aus grüner Currypaste und Kokosmilch, verfeinert mit Kaffir-Limettenblättern und Thai-Basilikum.",
     prepTime: "15 Min.",

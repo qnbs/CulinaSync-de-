@@ -2,6 +2,7 @@ import { Recipe } from '../../types';
 
 export const breakfastBrunchRecipes: Recipe[] = [
   {
+    seedId: "br-01",
     recipeTitle: "Perfektes cremiges Rührei",
     shortDescription: "Das Geheimnis für Rührei, das nicht trocken und bröselig, sondern unglaublich cremig und saftig ist. Mit der richtigen Technik und niedriger Hitze gelingt ein Frühstücksklassiker in Restaurantqualität.",
     prepTime: "5 Min.",
@@ -46,6 +47,7 @@ export const breakfastBrunchRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "br-02",
     recipeTitle: "Original Shakshuka",
     shortDescription: "Ein aromatisches Pfannengericht aus Nordafrika und dem Nahen Osten. Eier werden in einer würzigen Sauce aus Tomaten, Paprika und Zwiebeln pochiert. Ein perfektes, wärmendes Gericht für Brunch oder ein schnelles Abendessen.",
     prepTime: "10 Min.",
@@ -90,6 +92,7 @@ export const breakfastBrunchRecipes: Recipe[] = [
     expertTips: []
   },
   {
+    seedId: "br-03",
     recipeTitle: "Avocado Toast mit pochiertem Ei",
     shortDescription: "Ein moderner Frühstücksklassiker, der gesund, sättigend und schnell zubereitet ist. Cremig zerdrückte Avocado auf knusprigem Vollkorntoast, gekrönt von einem perfekt pochierten Ei mit flüssigem Kern.",
     prepTime: "10 Min.",
@@ -135,6 +138,7 @@ export const breakfastBrunchRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "br-04",
     recipeTitle: "Original Schweizer Bircher Müsli",
     shortDescription: "Der gesunde Frühstücksklassiker, erfunden vom Schweizer Arzt Dr. Bircher-Benner. Zarte Haferflocken werden über Nacht eingeweicht und mit frisch geriebenem Apfel, Nüssen und Zitrone zu einem nahrhaften und bekömmlichen Müsli kombiniert.",
     prepTime: "10 Min.",
@@ -175,6 +179,7 @@ export const breakfastBrunchRecipes: Recipe[] = [
     expertTips: []
   },
   {
+    seedId: "br-05",
     recipeTitle: "Dickflüssige Beeren-Smoothie-Bowl",
     shortDescription: "Ein gesundes, farbenfrohes und sättigendes Frühstück zum Löffeln. Gefrorene Beeren und Banane werden zu einer dicken, eiscreme-ähnlichen Masse püriert und mit frischen Früchten, Nüssen und Samen kreativ garniert.",
     prepTime: "10 Min.",

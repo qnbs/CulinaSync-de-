@@ -6,7 +6,7 @@ const PlannedMealCard = React.memo<{
     meal: MealPlanItem;
     recipe: Recipe | undefined;
     pantryStatus: { status: 'ok' | 'partial' | 'missing' | 'unknown'; have: number; total: number };
-    onAction: (action: string, payload: any) => void;
+    onAction: (action: string, payload: Recipe | MealPlanItem) => void;
 }>(({ meal, recipe, pantryStatus, onAction }) => {
     const [isMenuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);

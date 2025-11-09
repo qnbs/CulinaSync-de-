@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { db, importData } from '../services/db';
-import { AppSettings } from '../types';
+import { AppSettings, BeforeInstallPromptEvent, FullBackupData } from '../types';
 import { Save, Trash2, Download, Upload, AlertTriangle, User, Settings as SettingsIcon, Bot, Info, CheckCircle, RotateCcw, Database, BookOpen, Milk, CalendarDays, ShoppingCart, LucideProps, Palette, Mic, TestTube2 } from 'lucide-react';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { updateSettings } from '../store/slices/settingsSlice';
@@ -9,6 +9,8 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { exportFullDataAsJson } from '../services/exportService';
 import { addToast as addToastAction, setFocusAction } from '../store/slices/uiSlice';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
+// FIX: Import Dexie to resolve 'Cannot find name 'Dexie'' error.
+import Dexie from 'dexie';
 
 const ACCENT_COLORS: Record<AppSettings['appearance']['accentColor'], Record<string, string>> = {
   amber: { '300': '#fcd34d', '400': '#fbbf24', '500': '#f59e0b', glow: 'rgba(251, 191, 36, 0.3)', 'glow-soft': 'rgba(251, 191, 36, 0.2)', '400-semi': 'rgba(251, 191, 36, 0.8)' },
@@ -68,7 +70,7 @@ const StatCard: React.FC<{ label: string; value: number | undefined; icon: React
     <div className="bg-zinc-800/50 p-4 rounded-lg flex items-center gap-4">
         <Icon className="text-[var(--color-accent-400)]" size={24} />
         <div>
-            <div className="text-2xl font-bold text-zinc-100">{value ?? '...'}</div>
+            <div className="text-2xl font-bold text-zinc-100 min-w-[3ch]">{value ?? '...'}</div>
             <div className="text-sm text-zinc-400">{label}</div>
         </div>
     </div>
@@ -92,7 +94,7 @@ const SETTINGS_SECTIONS = [
 const DIETARY_SUGGESTIONS = ['Vegetarisch', 'Vegan', 'Glutenfrei', 'Laktosefrei', 'Nussfrei', 'Wenig Kohlenhydrate'];
 
 interface SettingsProps {
-    installPromptEvent: any;
+    installPromptEvent: BeforeInstallPromptEvent | null;
     onInstallPWA: () => void;
     isStandalone: boolean;
 }
@@ -144,7 +146,7 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
         setSettings(globalSettings);
     };
 
-    const handleSettingsChange = (path: string, value: any) => {
+    const handleSettingsChange = (path: string, value: string | number | boolean | string[] | null) => {
         const keys = path.split('.');
         setSettings(prev => {
             const newState = JSON.parse(JSON.stringify(prev)); // Deep copy
@@ -159,11 +161,11 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
 
     const handleResetData = () => {
         setResetModalOpen(false);
-        (db as any).delete().then(() => {
+        (db as Dexie).delete().then(() => {
             localStorage.clear();
             addToast('Alle Daten zurückgesetzt. App wird neu geladen...', 'info');
             setTimeout(() => window.location.reload(), 2000);
-        }).catch((err: any) => {
+        }).catch((err: unknown) => {
             addToast('Fehler beim Zurücksetzen der Daten.', 'error');
             console.error(err);
         });
@@ -184,11 +186,14 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
 
         if (window.confirm('Möchtest du wirklich die Daten importieren? Alle aktuellen Daten werden überschrieben.')) {
             const reader = new FileReader();
-            reader.onload = async (e) => {
+            reader.onload = async () => {
                 try {
-                    const text = e.target?.result;
-                    if (typeof text !== 'string') throw new Error("File could not be read");
-                    const data = JSON.parse(text);
+                    // FIX: Use reader.result and perform a type check to ensure it's a string before parsing.
+                    const text = reader.result;
+                    if (typeof text !== 'string') {
+                        throw new Error("File could not be read as text.");
+                    }
+                    const data = JSON.parse(text) as FullBackupData;
 
                     await importData(data);
                     if (data.settings) {
@@ -196,10 +201,7 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
                     }
                     addToast('Daten erfolgreich importiert. App wird neu geladen.', 'info');
                     setTimeout(() => window.location.reload(), 2000);
-                    // FIX: Explicitly type the caught error as `any` to avoid a TypeScript error
-                    // when `useUnknownInCatchVariables` is enabled, making it consistent
-                    // with other error handlers in the file.
-                } catch (error: any) {
+                } catch (error: unknown) {
                     addToast('Import fehlgeschlagen. Bitte stelle sicher, dass es eine gültige CulinaSync-Backup-Datei ist.', 'error');
                     console.error(error);
                 } finally {
@@ -222,7 +224,7 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
             else if (focusAction === 'export') { setActiveSection('data'); handleExport(); }
             dispatch(setFocusAction(null));
         }
-    }, [focusAction, dispatch]);
+    }, [focusAction, dispatch, handleExport]);
 
 
     return (

@@ -2,6 +2,7 @@ import { Recipe } from '../../types';
 
 export const germanAustrianRecipes: Recipe[] = [
   {
+    seedId: "de-01",
     recipeTitle: "Bayerischer Schweinebraten mit Kruste und Knödeln",
     shortDescription: "Ein bayerischer Wirtshausklassiker, der zu Hause gelingt. Saftiges Fleisch, eine unwiderstehlich knusprige Kruste und eine kräftige Biersoße machen diesen Braten zum perfekten Sonntagsessen.",
     prepTime: "30 Min.",
@@ -60,6 +61,7 @@ export const germanAustrianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "de-02",
     recipeTitle: "Klassische Rinderrouladen",
     shortDescription: "Ein deutsches Traditionsgericht wie von Oma. Zarte Rouladen aus der Rinderoberschale, gefüllt mit Speck, Zwiebeln und Gewürzgurken, langsam in einer kräftigen Rotweinsoße geschmort.",
     prepTime: "30 Min.",
@@ -116,6 +118,7 @@ export const germanAustrianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "de-03",
     recipeTitle: "Wiener Schnitzel (Original vom Kalb)",
     shortDescription: "Der unangefochtene Klassiker der österreichischen und deutschen Küche. Hauchdünn geklopftes Kalbfleisch, umhüllt von einer luftigen, goldbraunen Panade, die beim Braten Wellen wirft ('souffliert').",
     prepTime: "20 Min.",
@@ -165,6 +168,7 @@ export const germanAustrianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "de-04",
     recipeTitle: "Allgäuer Käsespätzle (Originalrezept)",
     shortDescription: "Das ultimative süddeutsche Wohlfühlessen. Frisch geschabte Eiernudeln (Spätzle) werden abwechselnd mit kräftigem Bergkäse geschichtet und mit knusprigen Röstzwiebeln gekrönt.",
     prepTime: "20 Min.",
@@ -220,6 +224,7 @@ export const germanAustrianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "de-05",
     recipeTitle: "Königsberger Klopse",
     shortDescription: "Ein Klassiker der ostpreußischen Küche. Zarte Kochklopse aus gemischtem Hackfleisch, verfeinert mit Sardellen, in einer cremigen, weißen Kapernsoße. Ein einfaches, aber raffiniertes Gericht, das traditionell mit Salzkartoffeln serviert wird.",
     prepTime: "20 Min.",
@@ -286,6 +291,7 @@ export const germanAustrianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "de-06",
     recipeTitle: "Schwäbische Maultaschen (in der Brühe)",
     shortDescription: "Das kulinarische Aushängeschild Schwabens, auch 'Herrgottsbscheißerle' genannt. Hausgemachte Nudelteigtaschen mit einer herzhaften Füllung aus Brät, Hackfleisch, geräuchertem Speck und Spinat. Klassisch werden sie in einer kräftigen Rinderbrühe serviert.",
     prepTime: "45 Min.",
@@ -349,6 +355,7 @@ export const germanAustrianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "de-07",
     recipeTitle: "Schwarzwälder Kirschtorte",
     shortDescription: "Der weltberühmte Tortenklassiker aus Deutschland. Saftige Schokoladen-Biskuitböden, getränkt mit Kirschwasser, gefüllt mit einer fruchtigen Kirschfüllung und luftiger Sahne, umhüllt von Schokoladenraspeln. Ein Meisterwerk für besondere Anlässe.",
     prepTime: "60 Min.",
@@ -415,6 +422,7 @@ export const germanAustrianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "de-08",
     recipeTitle: "Frankfurter Kranz",
     shortDescription: "Ein Klassiker der deutschen Konditorkunst. Ein lockerer Rührteig-Kranz, der zweimal durchgeschnitten und mit einer feinen deutschen Buttercreme und Konfitüre gefüllt wird. Ummantelt mit Krokant und verziert mit Belegkirschen ist er eine Zierde für jede Kaffeetafel.",
     prepTime: "45 Min.",
@@ -483,6 +491,7 @@ export const germanAustrianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "de-09",
     recipeTitle: "Donauwelle",
     shortDescription: "Ein beliebter Blechkuchen-Klassiker, auch als 'Schneewittchenkuchen' bekannt. Auf einem hellen und einem dunklen Rührteig versinken saftige Sauerkirschen, bedeckt von einer feinen Vanille-Buttercreme und einer knackigen Schokoladenglasur mit Wellenmuster.",
     prepTime: "40 Min.",
@@ -549,6 +558,7 @@ export const germanAustrianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "de-10",
     recipeTitle: "Klassischer Käsekuchen mit Quark",
     shortDescription: "Ein zeitloser deutscher Klassiker, der auf keiner Kaffeetafel fehlen darf. Cremige Quarkfüllung auf einem knusprigen Mürbeteigboden. Dieses Rezept gelingt garantiert und schmeckt wie von Oma.",
     prepTime: "25 Min.",
@@ -608,6 +618,7 @@ export const germanAustrianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "de-11",
     recipeTitle: "Saftiger Marmorkuchen",
     shortDescription: "Ein Rührkuchen-Klassiker aus der Gugelhupf-Form, der Kindheitserinnerungen weckt. Ein heller und ein dunkler Kakaoteig werden ineinander verschlungen und ergeben die typische Marmorierung. Dieses Rezept garantiert ein besonders saftiges Ergebnis.",
     prepTime: "20 Min.",
@@ -661,6 +672,7 @@ export const germanAustrianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "de-12",
     recipeTitle: "Wiener Apfelstrudel",
     shortDescription: "Der Klassiker der Wiener Kaffeehauskultur. Hauchdünner Strudelteig, gefüllt mit säuerlichen Äpfeln, Rosinen und in Butter gerösteten Semmelbröseln, mit Puderzucker bestäubt. Schmeckt am besten lauwarm mit Vanillesauce oder einer Kugel Vanilleeis.",
     prepTime: "20 Min.",
@@ -712,6 +724,7 @@ export const germanAustrianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "de-13",
     recipeTitle: "Hamburger Labskaus (Original)",
     shortDescription: "Ein traditionelles Seemannsgericht aus dem Norden Deutschlands. Herzhafter Brei aus Pökelfleisch, Kartoffeln und Roter Bete, klassisch serviert mit Spiegelei, Rollmops und Gewürzgurke. Ein deftiges und nahrhaftes Gericht mit langer Geschichte.",
     prepTime: "20 Min.",
@@ -767,6 +780,7 @@ export const germanAustrianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "de-14",
     recipeTitle: "Rheinischer Sauerbraten",
     shortDescription: "Ein traditioneller Schmorbraten aus dem Rheinland, der durch seine süß-saure Soße einzigartig wird. Das Rindfleisch wird über mehrere Tage in einer Essig-Rotwein-Beize mariniert, was es unglaublich zart macht. Die Soße wird klassisch mit Rosinen und Printen oder Lebkuchen gebunden.",
     prepTime: "30 Min. (+ 3-6 Tage Marinierzeit)",
@@ -825,6 +839,7 @@ export const germanAustrianRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "de-15",
     recipeTitle: "Grünkohl mit Pinkel (Norddeutscher Klassiker)",
     shortDescription: "Ein deftiges und traditionsreiches Wintergericht aus Norddeutschland. Frisch geernteter Grünkohl wird langsam mit Schmalz, Zwiebeln und Speck geschmort und mit Pinkel (einer geräucherten Grützwurst) sowie oft Kassler oder Kochwurst serviert. Ein wärmendes Gericht, das klassisch zu karamellisierten Kartoffeln gereicht wird.",
     prepTime: "20 Min.",

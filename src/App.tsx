@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import Header from './components/Header';
-import CommandPalette, { type Command } from './components/CommandPalette';
-import { Page } from './types';
+// FIX: CommandPalette is a named export, not a default export.
+import { CommandPalette, type Command } from './components/CommandPalette';
+import { Page, BeforeInstallPromptEvent, ShoppingListItem, PantryItem } from './types';
 import { useSpeechRecognition } from './hooks/useSpeechRecognition';
-import { processCommand } from './services/voiceCommands';
+import { processCommand, executeVoiceAction } from './services/voiceCommands';
 import { addShoppingListItem, addOrUpdatePantryItem, removeItemFromPantry } from './services/db';
 import VoiceControlUI from './components/VoiceControlUI';
 import { CheckCircle, Bot, Milk, BookOpen, CalendarDays, ShoppingCart, Settings as SettingsIcon, HelpCircle, PlusCircle, Search, RefreshCw, Trash2, Download, Upload, TerminalSquare, Mic, AlertTriangle, Info, X } from 'lucide-react';
@@ -25,7 +26,7 @@ const Help = lazy(() => import('./components/Help'));
 
 const LoadingSpinner = () => (
     <div className="flex justify-center items-center h-64" aria-label="Loading content">
-        <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-16 h-16 border-4 border-[var(--color-accent-500)] border-t-transparent rounded-full animate-spin"></div>
     </div>
 );
 
@@ -34,7 +35,7 @@ const App: React.FC = () => {
   const { currentPage, toasts, isCommandPaletteOpen } = useAppSelector((state) => state.ui);
 
   const [appVersion, setAppVersion] = useState<string>('');
-  const [installPromptEvent, setInstallPromptEvent] = useState<any>(null);
+  const [installPromptEvent, setInstallPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
@@ -46,7 +47,7 @@ const App: React.FC = () => {
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
-      setInstallPromptEvent(e);
+      setInstallPromptEvent(e as BeforeInstallPromptEvent);
     };
 
     if (window.matchMedia('(display-mode: standalone)').matches) {
@@ -127,44 +128,14 @@ const App: React.FC = () => {
         console.log("Processing final command:", finalTranscript);
         const action = processCommand(finalTranscript, currentPage);
         
-        if (action.type === 'NAVIGATE') {
-            navigate(action.payload);
-            addToast(`Navigiere zu: ${action.payload.charAt(0).toUpperCase() + action.payload.slice(1)}`);
-        } else if (action.type === 'ADD_SHOPPING_ITEM') {
-            addShoppingListItem(action.payload).then(() => {
-                addToast(`"${action.payload.name}" zur Einkaufsliste hinzugefügt.`);
-                if (currentPage !== 'shopping-list') {
-                  navigate('shopping-list');
-                }
-            });
-        } else if (action.type === 'ADD_PANTRY_ITEM') {
-            addOrUpdatePantryItem(action.payload).then(({ status, item }) => {
-                 const message = status === 'added' 
-                    ? `"${item.name}" zum Vorrat hinzugefügt.`
-                    : `Vorrat für "${item.name}" aktualisiert.`;
-                 addToast(message);
-                 if (currentPage !== 'pantry') {
-                    navigate('pantry');
-                 }
-            });
-        } else if (action.type === 'REMOVE_PANTRY_ITEM') {
-            removeItemFromPantry(action.payload).then((success) => {
-                if(success) {
-                    addToast(`"${action.payload}" aus dem Vorrat entfernt.`);
-                } else {
-                    addToast(`"${action.payload}" nicht im Vorrat gefunden.`, "error");
-                }
-                if (currentPage !== 'pantry') {
-                    navigate('pantry');
-                }
-            });
-        }
-        else if (action.type !== 'UNKNOWN') {
-            const payloadContent = action.payload ?? '';
-            dispatch(setVoiceAction({ type: action.type, payload: `${payloadContent}#${Date.now()}` }));
-        } else {
-            addToast("Befehl nicht erkannt.", "error");
-        }
+        executeVoiceAction(action, {
+            navigate,
+            addToast,
+            addShoppingListItem: (item) => addShoppingListItem(item as Omit<ShoppingListItem, 'id' | 'sortOrder' | 'category'>),
+            addOrUpdatePantryItem: (item) => addOrUpdatePantryItem(item as Omit<PantryItem, 'id' | 'createdAt' | 'updatedAt'>),
+            removeItemFromPantry,
+            dispatch,
+        }, currentPage);
     }
   }, [finalTranscript, currentPage, addToast, navigate, dispatch]);
   
@@ -268,7 +239,7 @@ const App: React.FC = () => {
                                     <p className="text-sm font-medium text-zinc-100">{toast.message}</p>
                                 </div>
                                 <div className="ml-4 flex-shrink-0 flex">
-                                    <button onClick={() => removeToast(toast.id)} className="bg-transparent rounded-md inline-flex text-zinc-400 hover:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 focus:ring-offset-zinc-800">
+                                    <button onClick={() => removeToast(toast.id)} className="bg-transparent rounded-md inline-flex text-zinc-400 hover:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-accent-500)] focus:ring-offset-zinc-800">
                                         <span className="sr-only">Schließen</span>
                                         <X className="h-5 w-5" />
                                     </button>

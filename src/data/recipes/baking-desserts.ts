@@ -2,6 +2,7 @@ import { Recipe } from '../../types';
 
 export const bakingDessertsRecipes: Recipe[] = [
   {
+    seedId: "bak-01",
     recipeTitle: "The Ultimate Fudgy Brownies",
     shortDescription: "Das definitive Rezept für unglaublich saftige, dichte und intensiv schokoladige Brownies mit einer glänzenden, hauchdünnen Knusperkruste. Dieses Rezept verzichtet auf übermäßiges Aufgehen und zielt auf die perfekte 'fudgy' Textur ab, die im Mund schmilzt.",
     prepTime: "15 Min.",
@@ -50,6 +51,7 @@ export const bakingDessertsRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "bak-02",
     recipeTitle: "Bienenstich (einfache Variante)",
     shortDescription: "Ein schneller und unkomplizierter Bienenstich, der ohne Hefeteig auskommt. Ein lockerer Rührteig wird mit einer knusprigen Mandel-Karamell-Schicht gebacken und mit einer leichten Vanille-Sahne-Creme gefüllt. Perfekt für spontane Kaffeerunden.",
     prepTime: "20 Min.",
@@ -106,6 +108,7 @@ export const bakingDessertsRecipes: Recipe[] = [
     expertTips: []
   },
   {
+    seedId: "bak-03",
     recipeTitle: "Chewy Chocolate Chip Cookies",
     shortDescription: "Amerikanische Cookies, wie sie sein sollen: Außen knusprig, innen weich und herrlich zäh ('chewy'). Das Geheimnis liegt im richtigen Verhältnis von braunem und weißem Zucker und der perfekten Backzeit.",
     prepTime: "15 Min.",
@@ -155,6 +158,7 @@ export const bakingDessertsRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "bak-04",
     recipeTitle: "Einfache Butterplätzchen zum Ausstechen",
     shortDescription: "Das Grundrezept für klassische Weihnachtsplätzchen oder Gebäck für das ganze Jahr. Ein einfacher Mürbeteig, der sich perfekt ausrollen und ausstechen lässt. Ideal zum gemeinsamen Backen mit Kindern und zum kreativen Verzieren.",
     prepTime: "20 Min.",
@@ -202,6 +206,7 @@ export const bakingDessertsRecipes: Recipe[] = [
     expertTips: []
   },
   {
+    seedId: "bak-05",
     recipeTitle: "Brüsseler Waffeln (knusprig & luftig)",
     shortDescription: "Die klassische belgische Waffel: Außen goldbraun und knusprig, innen federleicht und luftig. Aus einem einfachen Rührteig schnell zubereitet. Traditionell warm mit Puderzucker, frischen Früchten und Sahne serviert.",
     prepTime: "10 Min.",
@@ -249,6 +254,7 @@ export const bakingDessertsRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "bak-06",
     recipeTitle: "Lütticher Waffeln (mit Perlzucker)",
     shortDescription: "Die süße und reichhaltige Spezialität aus Lüttich. Ein fester Hefeteig, angereichert mit Butter und dem charakteristischen Perlzucker, der beim Backen karamellisiert und für eine unwiderstelich knusprige Außenseite und einen weichen Kern sorgt.",
     prepTime: "20 Min.",
@@ -295,6 +301,7 @@ export const bakingDessertsRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "bak-07",
     recipeTitle: "Klassische deutsche Pfannkuchen",
     shortDescription: "Dünne, eierbetonte Eierkuchen, wie man sie in Deutschland kennt. Ein einfaches Grundrezept, das sich sowohl für süße Füllungen wie Apfelmus oder Marmelade als auch für herzhafte Varianten eignet.",
     prepTime: "10 Min.",
@@ -335,6 +342,7 @@ export const bakingDessertsRecipes: Recipe[] = [
     expertTips: []
   },
   {
+    seedId: "bak-08",
     recipeTitle: "Fluffige American Pancakes",
     shortDescription: "Das klassische amerikanische Frühstück. Kleine, dicke und besonders fluffige Pfannkuchen, die durch Backpulver ihre Höhe bekommen. Traditionell werden sie gestapelt und mit einem Stück Butter und reichlich Ahornsirup serviert.",
     prepTime: "10 Min.",
@@ -381,6 +389,7 @@ export const bakingDessertsRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "bak-09",
     recipeTitle: "Hauchdünne französische Crêpes",
     shortDescription: "Der französische Klassiker, hauchdünn und zart. Dieses Grundrezept für Crêpes-Teig ist die perfekte Basis für süße Füllungen wie Zucker und Zimt oder Nutella, aber auch für herzhafte Varianten wie Schinken und Käse (Galettes).",
     prepTime: "10 Min.",

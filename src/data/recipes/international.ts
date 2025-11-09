@@ -2,6 +2,7 @@ import { Recipe } from '../../types';
 
 export const internationalRecipes: Recipe[] = [
   {
+    seedId: "int-01",
     recipeTitle: "Chili con Carne (Tex-Mex Original)",
     shortDescription: "Ein authentisches Tex-Mex-Chili, das seinen Namen verdient. Anstelle von Hackfleisch werden zarte Rindfleischwürfel langsam in einer tiefroten, rauchigen Sauce aus echten getrockneten Chilis geschmort. Ein intensives, komplexes und wärmendes Gericht, das weit über die bekannte Alltagsversion hinausgeht.",
     prepTime: "30 Min.",
@@ -55,6 +56,7 @@ export const internationalRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "int-02",
     recipeTitle: "Griechischer Moussaka",
     shortDescription: "Ein cremiger Auflauf aus geschichteten Auberginen, Kartoffeln und einer würzigen Lammhackfleisch-Sauce, gekrönt von einer reichhaltigen Béchamelsauce und im Ofen goldbraun gebacken. Das ultimative griechische Wohlfühlessen.",
     prepTime: "45 Min.",
@@ -112,6 +114,7 @@ export const internationalRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "int-03",
     recipeTitle: "Chicken Tikka Masala",
     shortDescription: "Zarte, in Joghurt marinierte Hähnchenstücke, gegrillt und serviert in einer cremig-würzigen Tomatensauce. Ein weltweiter Favorit der indischen Küche, der milder ist als viele andere Currys und dennoch voller Geschmack steckt.",
     prepTime: "20 Min. (+ 2 Std. Marinierzeit)",
@@ -167,6 +170,7 @@ export const internationalRecipes: Recipe[] = [
     ]
   },
   {
+    seedId: "int-04",
     recipeTitle: "Amerikanische BBQ Ribs (Fall-off-the-bone)",
     shortDescription: "Spareribs, die so zart sind, dass das Fleisch fast vom Knochen fällt. Das Geheimnis ist die 'low and slow' Garmethode im Ofen, kombiniert mit einem würzigen 'Dry Rub' und einer rauchig-süßen BBQ-Sauce zum Glasieren.",
     prepTime: "20 Min.",

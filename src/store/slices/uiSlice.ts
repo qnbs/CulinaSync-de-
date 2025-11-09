@@ -13,7 +13,7 @@ interface UiState {
   toasts: Toast[];
   focusAction: string | null;
   initialSelectedId: number | null;
-  voiceAction: { type: string; payload: any } | null;
+  voiceAction: { type: string; payload: string } | null;
 }
 
 const initialState: UiState = {
@@ -58,7 +58,7 @@ const uiSlice = createSlice({
     setFocusAction: (state, action: PayloadAction<string | null>) => {
         state.focusAction = action.payload;
     },
-    setVoiceAction: (state, action: PayloadAction<{type: string, payload: any} | null>) => {
+    setVoiceAction: (state, action: PayloadAction<{type: string, payload: string} | null>) => {
         state.voiceAction = action.payload;
     },
     clearInitialSelectedId: (state) => {
