@@ -110,7 +110,7 @@ const AboutView: React.FC = () => (
 
           <h2>🌐 Quelloffen & Community</h2>
           <p>CulinaSync ist ein Open-Source-Projekt. Wir glauben an Transparenz und die Kraft der Community. Der gesamte Quellcode ist öffentlich zugänglich und wir freuen uns über Beiträge, Feedback und Verbesserungsvorschläge. Besuchen Sie uns auf GitHub:</p>
-           <p style={{ textAlign: 'center', margin: '1.5rem 0' }}><a href="https://github.com/qnbs/CulinaSync-de-" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#4a4a52', color: '#fafafa', padding: '0.75rem 1.5rem', borderRadius: '0.5rem', textDecoration: 'none', fontWeight: 'bold', display: 'inline-block' }}>Zum GitHub-Repository</a></p>
+           <p style={{ textAlign: 'center', margin: '1.5rem 0' }}><a href="https://github.com/qnbs/CulinaSync-de" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#4a4a52', color: '#fafafa', padding: '0.75rem 1.5rem', borderRadius: '0.5rem', textDecoration: 'none', fontWeight: 'bold', display: 'inline-block' }}>Zum GitHub-Repository</a></p>
 
           <h2>🗺️ Die Zukunft von CulinaSync</h2>
           <p>Die App wird kontinuierlich weiterentwickelt. Geplante zukünftige Erweiterungen umfassen einen Barcode-Scanner für Vorräte, den Import von Rezepten von Webseiten und optionale Synchronisierungsfunktionen zwischen mehreren Geräten.</p>

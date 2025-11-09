@@ -1,4 +1,5 @@
-<div align="left">
+<div align="center">
+  <img src="https://storage.googleapis.com/aai-cdn-files/icons/culina-sync-logo.png" alt="CulinaSync Logo" width="150">
   <h1 style="border-bottom: none;">CulinaSync: Das intelligente Küchen-Betriebssystem</h1>
   <p>
     <strong>Eine Local-First, KI-gestützte Progressive Web App für den modernen Haushalt</strong>
@@ -101,8 +102,8 @@ Um CulinaSync lokal für die Entwicklung auszuführen, folgen Sie diesen Schritt
 
 1.  **Repository klonen**
     ```sh
-    git clone https://github.com/your-username/CulinaSync.git
-    cd CulinaSync
+    git clone https://github.com/qnbs/CulinaSync-de.git
+    cd CulinaSync-de
     ```
 
 2.  **Abhängigkeiten installieren**

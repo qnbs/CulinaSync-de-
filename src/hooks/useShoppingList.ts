@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useCallback, FormEvent, DragEvent, useEffect } from 'react';
+import { useState, useMemo, useRef, useCallback, useEffect, type FormEvent, type DragEvent } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../services/db';
 import { ShoppingListItem, Recipe, PantryItem } from '../types';
@@ -43,11 +43,12 @@ export const useShoppingList = () => {
   const addItemInputRef = useRef<HTMLInputElement>(null);
   const recipesById = useMemo(() => new Map<number, Recipe>((recipes || []).map(r => [r.id!, r])), [recipes]);
   
-  const triggerCheckItem = voiceAction?.type === 'CHECK_SHOPING_ITEM' ? voiceAction.payload : undefined;
+  const triggerCheckItem = voiceAction?.type === 'CHECK_SHOPG_ITEM' ? voiceAction.payload : undefined;
 
-  const addToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+  // FIX: Wrap addToast in useCallback to make it a stable dependency for other hooks.
+  const addToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success') => {
     dispatch(addToastAction({ message, type }));
-  };
+  }, [dispatch]);
 
   const handleToggle = useCallback((item: ShoppingListItem) => {
     dispatch(toggleItemCheckedAsync(item));
@@ -139,13 +140,14 @@ export const useShoppingList = () => {
     dispatch(toggleCategoryCollapse(category));
   }, [dispatch]);
   
-  const collapseAll = useCallback(() => {
+  // FIX: Renamed callbacks to avoid shadowing the imported action creators, which caused infinite recursion.
+  const handleCollapseAll = useCallback(() => {
     if(!shoppingList) return;
     const allCategories = Array.from(new Set(shoppingList.map(i => i.category)));
     dispatch(collapseAll(allCategories));
   }, [shoppingList, dispatch]);
   
-  const expandAll = useCallback(() => dispatch(expandAll()), [dispatch]);
+  const handleExpandAll = useCallback(() => dispatch(expandAll()), [dispatch]);
 
   const handleDragStart = useCallback((e: DragEvent, item: ShoppingListItem) => {
     setDraggedItem(item);
@@ -211,7 +213,6 @@ export const useShoppingList = () => {
     return acc;
   }, {} as Record<string, ShoppingListItem[]>), [activeItems]);
 
-  // FIX: Wrap event handler in useCallback to ensure stable function reference and fix potential type inference issues.
   const handleMoveToPantry = useCallback(async () => {
       if (completedItems.length > 0 && window.confirm(`${completedItems.length} gekaufte(r) Artikel in den Vorrat verschieben?`)) {
         const resultAction = await dispatch(moveToPantryAsync());
@@ -236,7 +237,10 @@ export const useShoppingList = () => {
     setDropTargetInfo,
 
     handleToggle, handleQuickAdd, handleAiAdd, handleBulkAdd, handleGenerateFromPlan,
-    handleRenameCategory, handleToggleCategoryCollapse, collapseAll, expandAll,
+    handleRenameCategory, handleToggleCategoryCollapse, 
+    // FIX: Pass renamed handlers to avoid recursive calls.
+    collapseAll: handleCollapseAll, 
+    expandAll: handleExpandAll,
     handleDragStart, handleDragOver, handleDrop, onCategoryDrop, onDragEnd,
     handleClearList, handleExport, handleMoveToPantry,
     updateItem: (item: ShoppingListItem) => dispatch(updateItemAsync(item)),
