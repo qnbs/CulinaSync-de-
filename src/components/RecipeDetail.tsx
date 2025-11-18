@@ -1,12 +1,13 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Recipe, PantryItem, IngredientItem } from '../types';
-import { db, addRecipe, deleteRecipe, addRecipeToMealPlan, addMissingIngredientsToShoppingList, addShoppingListItem } from '../services/db';
+import { db, addRecipe, deleteRecipe, addRecipeToMealPlan, addMissingIngredientsToShoppingList, addShoppingListItem, updateRecipeImage } from '../services/db';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { exportRecipeToPdf, exportRecipeToCsv, exportRecipeToMarkdown, exportRecipeToTxt, exportRecipeToJson } from '../services/exportService';
-import { ArrowLeft, Clock, Users, BarChart, UtensilsCrossed, Lightbulb, Save, Trash2, CheckCircle, CalendarPlus, FileDown, Star, ChevronDown, Plus, Minus, CookingPot, ShoppingCart, AlertCircle, ShoppingCartIcon } from 'lucide-react';
+import { ArrowLeft, Clock, Users, BarChart, UtensilsCrossed, Lightbulb, Save, Trash2, CheckCircle, CalendarPlus, FileDown, Star, ChevronDown, Plus, Minus, CookingPot, ShoppingCartIcon, AlertCircle, ImagePlus, LoaderCircle } from 'lucide-react';
 import { scaleIngredientQuantity } from '../services/utils';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { addToast, setVoiceAction } from '../store/slices/uiSlice';
+import { generateImageAsync } from '../store/slices/aiChefSlice';
 import CookModeView from './CookModeView';
 
 
@@ -55,11 +56,16 @@ const MealPlanModal: React.FC<{recipeId: number, onClose: () => void, onSave: ()
 const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
   const dispatch = useAppDispatch();
   const { voiceAction } = useAppSelector(state => state.ui);
+  const { imageStatus, generatedImageUrl } = useAppSelector(state => state.aiChef);
+
   const [currentRecipe, setCurrentRecipe] = useState(recipe);
   const [isSaved, setIsSaved] = useState(!!currentRecipe.id);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isExportOpen, setExportOpen] = useState(false);
   const [isCookMode, setIsCookMode] = useState(false);
+
+  // If the recipe has an image, use it. If not, and we just generated one, use that.
+  const displayImage = currentRecipe.imageUrl || (currentRecipe.recipeTitle === recipe.recipeTitle ? generatedImageUrl : null);
 
   const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
   const pantryMap: Map<string, number> = useMemo(() => new Map(pantryItems?.map((p: PantryItem) => [p.name.toLowerCase(), p.quantity]) || []), [pantryItems]);
@@ -80,9 +86,12 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
 
   const handleSave = async () => {
     try {
-      const newId = await addRecipe(currentRecipe);
+      // If we have a generated image but it's not in the recipe object yet, add it.
+      const recipeToSave = { ...currentRecipe, imageUrl: displayImage || undefined };
+      
+      const newId = await addRecipe(recipeToSave);
       if(newId) {
-        setCurrentRecipe(prev => ({ ...prev, id: newId }));
+        setCurrentRecipe(prev => ({ ...prev, id: newId, imageUrl: displayImage || undefined }));
         setIsSaved(true);
         dispatch(addToast({message: 'Rezept erfolgreich gespeichert!'}));
       }
@@ -102,6 +111,18 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
         dispatch(addToast({message: 'Löschen fehlgeschlagen.', type: 'error'}));
       }
     }
+  };
+
+  const handleGenerateImage = async () => {
+      const result = await dispatch(generateImageAsync(currentRecipe.recipeTitle));
+      if (generateImageAsync.fulfilled.match(result)) {
+          // If recipe is already saved, update it in DB
+          if (currentRecipe.id) {
+              await updateRecipeImage(currentRecipe.id, result.payload);
+              setCurrentRecipe(prev => ({ ...prev, imageUrl: result.payload }));
+              dispatch(addToast({ message: 'Bild gespeichert.' }));
+          }
+      }
   };
   
   const handleExport = (format: 'pdf' | 'csv' | 'json' | 'md' | 'txt') => {
@@ -177,7 +198,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
   ].flat().filter(Boolean) : [];
 
   return (
-    <div className="page-fade-in">
+    <div className="page-fade-in pb-20">
       {isModalOpen && currentRecipe.id && <MealPlanModal recipeId={currentRecipe.id} onClose={() => setIsModalOpen(false)} onSave={() => dispatch(addToast({message: 'Zum Essensplan hinzugefügt!'}))} />}
       {isCookMode && <CookModeView recipe={currentRecipe} onExit={() => setIsCookMode(false)} />}
 
@@ -185,42 +206,70 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
         <ArrowLeft size={20} className="mr-2" />
         Zurück zur Übersicht
       </button>
+      
+      {/* Hero Image Section */}
+      <div className="relative w-full h-64 md:h-80 rounded-xl overflow-hidden mb-8 bg-zinc-900 border border-zinc-800">
+          {displayImage ? (
+              <>
+                <img src={displayImage} alt={currentRecipe.recipeTitle} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent"></div>
+              </>
+          ) : (
+              <div className="flex flex-col items-center justify-center h-full text-zinc-500">
+                  {imageStatus === 'loading' ? (
+                       <div className="flex flex-col items-center gap-2 animate-pulse text-[var(--color-accent-400)]">
+                           <LoaderCircle size={40} className="animate-spin" />
+                           <span className="text-sm font-medium">Generiere Bild...</span>
+                       </div>
+                  ) : (
+                    <>
+                        <ImagePlus size={48} className="mb-2 opacity-50" />
+                        <button onClick={handleGenerateImage} className="text-sm font-medium text-[var(--color-accent-400)] hover:underline">
+                            Bild generieren
+                        </button>
+                    </>
+                  )}
+              </div>
+          )}
+          <div className="absolute bottom-0 left-0 p-6 md:p-8">
+            <h2 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg shadow-black">{currentRecipe.recipeTitle}</h2>
+          </div>
+      </div>
 
       <div className="bg-zinc-950/50 border border-zinc-800 rounded-lg shadow-xl p-6 md:p-8">
-        <h2 className="text-3xl md:text-4xl font-bold text-[var(--color-accent-400)] mb-4">{currentRecipe.recipeTitle}</h2>
-        <p className="text-zinc-300 mb-6">{currentRecipe.shortDescription}</p>
+        <p className="text-zinc-300 mb-6 text-lg leading-relaxed">{currentRecipe.shortDescription}</p>
         
         <div className="flex flex-wrap gap-x-6 gap-y-4 text-zinc-300 mb-6 pb-6 border-b border-zinc-700">
-            <span className="flex items-center" title="Gesamtzeit"><Clock size={18} className="mr-2 text-zinc-500" /> {currentRecipe.totalTime}</span>
-            <span className="flex items-center" title="Portionen"><Users size={18} className="mr-2 text-zinc-500" /> {currentServings} Person{currentServings > 1 ? 'en' : ''}</span>
-            <span className="flex items-center" title="Schwierigkeit"><BarChart size={18} className="mr-2 text-zinc-500" /> {currentRecipe.difficulty}</span>
+            <span className="flex items-center" title="Gesamtzeit"><Clock size={18} className="mr-2 text-[var(--color-accent-400)]" /> {currentRecipe.totalTime}</span>
+            <span className="flex items-center" title="Portionen"><Users size={18} className="mr-2 text-[var(--color-accent-400)]" /> {currentServings} Person{currentServings > 1 ? 'en' : ''}</span>
+            <span className="flex items-center" title="Schwierigkeit"><BarChart size={18} className="mr-2 text-[var(--color-accent-400)]" /> {currentRecipe.difficulty}</span>
         </div>
         
-        <div className="my-6 p-4 bg-zinc-800 rounded-lg flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="my-6 p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg flex flex-col sm:flex-row items-center justify-center gap-4">
             <label htmlFor="servings-input" className="font-semibold text-zinc-200">Portionen anpassen:</label>
             <div className="flex items-center gap-2">
-                <button onClick={() => handleServingsChange(currentServings - 1)} className="p-2 rounded-full bg-zinc-700 hover:bg-zinc-600 transition-colors disabled:opacity-50" disabled={currentServings <= 1} aria-label="Portionen verringern"><Minus size={18} /></button>
-                <input id="servings-input" type="number" value={currentServings} onChange={(e) => handleServingsChange(parseInt(e.target.value, 10))} className="w-16 text-center bg-zinc-900 border border-zinc-700 rounded-md p-2 font-bold text-lg text-[var(--color-accent-400)] focus:ring-2 focus:ring-[var(--color-accent-500)] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" min="1" max="100"/>
-                <button onClick={() => handleServingsChange(currentServings + 1)} className="p-2 rounded-full bg-zinc-700 hover:bg-zinc-600 transition-colors disabled:opacity-50" disabled={currentServings >= 100} aria-label="Portionen erhöhen"><Plus size={18} /></button>
+                <button onClick={() => handleServingsChange(currentServings - 1)} className="p-2 rounded-full bg-zinc-800 hover:bg-zinc-700 transition-colors disabled:opacity-50" disabled={currentServings <= 1} aria-label="Portionen verringern"><Minus size={18} /></button>
+                <input id="servings-input" type="number" value={currentServings} onChange={(e) => handleServingsChange(parseInt(e.target.value, 10))} className="w-16 text-center bg-transparent border-b-2 border-[var(--color-accent-500)] font-bold text-xl text-zinc-100 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" min="1" max="100"/>
+                <button onClick={() => handleServingsChange(currentServings + 1)} className="p-2 rounded-full bg-zinc-800 hover:bg-zinc-700 transition-colors disabled:opacity-50" disabled={currentServings >= 100} aria-label="Portionen erhöhen"><Plus size={18} /></button>
             </div>
         </div>
         
         {allTags.length > 0 && (
           <div className="flex flex-wrap gap-2 my-8">
               {allTags.map((tag, i) => (
-                  <span key={`${tag}-${i}`} className="bg-zinc-700 text-zinc-300 text-xs font-medium px-3 py-1 rounded-full">{tag}</span>
+                  <span key={`${tag}-${i}`} className="bg-zinc-800 border border-zinc-700 text-zinc-400 text-xs font-medium px-3 py-1 rounded-full">{tag}</span>
               ))}
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
           <div className="lg:col-span-1">
-            <h3 className="text-2xl font-semibold text-white mb-4 flex items-center"><UtensilsCrossed className="mr-3 text-[var(--color-accent-400)]"/>Zutaten</h3>
-            <div className="space-y-4">
+            <h3 className="text-2xl font-semibold text-white mb-6 flex items-center"><UtensilsCrossed className="mr-3 text-[var(--color-accent-400)]"/>Zutaten</h3>
+            <div className="space-y-6">
               {currentRecipe.ingredients.map((group, idx) => (
                 <div key={group.sectionTitle || idx}>
-                  {group.sectionTitle && <h4 className="font-bold text-zinc-300 mb-2">{group.sectionTitle}</h4>}
-                  <ul className="space-y-2">
+                  {group.sectionTitle && <h4 className="font-bold text-[var(--color-accent-400)] mb-3 uppercase text-sm tracking-wider">{group.sectionTitle}</h4>}
+                  <ul className="space-y-3">
                     {group.items.map(item => {
                       const scaledQuantityStr = scaleIngredientQuantity(item.quantity, scaleFactor);
                       const requiredQty = parseFloat(scaledQuantityStr.replace(',', '.')) || 0;
@@ -231,17 +280,16 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
                       else if (pantryQty > 0) status = 'low';
 
                       return (
-                      <li key={item.name} className="flex items-start text-zinc-300 group">
-                        <div className="flex-grow flex items-start">
-                           {status === 'have' && <span title="Im Vorrat" className="flex-shrink-0"><CheckCircle size={16} className="text-green-500 mr-2 mt-1"/></span>}
-                           {status === 'low' && <span title={`Wird knapp! Du hast ${pantryQty}${item.unit}`} className="flex-shrink-0"><AlertCircle size={16} className="text-yellow-500 mr-2 mt-1"/></span>}
-                           {status === 'missing' && <div className="w-4 h-4 rounded-full border-2 border-zinc-600 mr-2 mt-1 flex-shrink-0"/>}
-                           <div>
-                            <span>{`${scaledQuantityStr || ''} ${item.unit || ''} ${item.name}`.trim()}</span>
-                            {scaleFactor !== 1 && <span className="text-xs text-zinc-500 ml-2">(Original: {item.quantity} {item.unit})</span>}
+                      <li key={item.name} className="flex items-start text-zinc-300 group bg-zinc-900/30 p-2 rounded-lg hover:bg-zinc-900/80 transition-colors">
+                        <div className="flex-grow flex items-center">
+                           {status === 'have' && <span title="Im Vorrat" className="flex-shrink-0 mr-3"><CheckCircle size={16} className="text-emerald-500"/></span>}
+                           {status === 'low' && <span title={`Wird knapp! Du hast ${pantryQty}${item.unit}`} className="flex-shrink-0 mr-3"><AlertCircle size={16} className="text-amber-500"/></span>}
+                           {status === 'missing' && <div className="w-4 h-4 rounded-full border-2 border-zinc-700 mr-3 flex-shrink-0"/>}
+                           <div className="flex-grow">
+                            <span className="font-medium text-zinc-100">{scaledQuantityStr} {item.unit}</span> <span className="text-zinc-400">{item.name}</span>
                            </div>
                         </div>
-                        {status !== 'have' && <button onClick={() => handleAddSingleToShoppingList(item)} className="opacity-0 group-hover:opacity-100 transition-opacity ml-2 p-1 text-zinc-400 hover:text-[var(--color-accent-400)]" title="Zur Einkaufsliste hinzufügen"><ShoppingCartIcon size={16}/></button>}
+                        {status !== 'have' && <button onClick={() => handleAddSingleToShoppingList(item)} className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-zinc-800 rounded text-zinc-400 hover:text-[var(--color-accent-400)]" title="Zur Einkaufsliste hinzufügen"><ShoppingCartIcon size={16}/></button>}
                       </li>
                     )})}
                   </ul>
@@ -250,58 +298,60 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
             </div>
           </div>
           <div className="lg:col-span-2">
-            <h3 className="text-2xl font-semibold text-white mb-4">Anleitung</h3>
-            <ol className="space-y-4">
+            <h3 className="text-2xl font-semibold text-white mb-6">Anleitung</h3>
+            <div className="space-y-8">
               {currentRecipe.instructions.map((step, index) => (
-                <li key={index} className="flex items-start">
-                  <span className="bg-[var(--color-accent-500)] text-zinc-900 font-bold rounded-full h-8 w-8 flex-shrink-0 flex items-center justify-center text-md mr-4">{index + 1}</span>
-                  <p className="text-zinc-300 pt-1">{step}</p>
-                </li>
+                <div key={index} className="flex gap-4">
+                  <div className="flex-shrink-0 flex flex-col items-center">
+                      <span className="bg-zinc-800 text-[var(--color-accent-400)] font-bold rounded-full h-8 w-8 flex items-center justify-center border border-zinc-700 shadow-lg">{index + 1}</span>
+                      {index < currentRecipe.instructions.length - 1 && <div className="w-px h-full bg-zinc-800 my-2"></div>}
+                  </div>
+                  <p className="text-zinc-300 pt-1 text-lg leading-relaxed">{step}</p>
+                </div>
               ))}
-            </ol>
+            </div>
           </div>
         </div>
 
         {currentRecipe.expertTips && currentRecipe.expertTips.length > 0 && (
-          <div className="mt-10 pt-6 border-t border-zinc-700">
-             <h3 className="text-2xl font-semibold text-white mb-4 flex items-center"><Lightbulb className="mr-3 text-[var(--color-accent-400)]"/>Expertentipps</h3>
-             <div className="space-y-4">
+          <div className="mt-12 pt-8 border-t border-zinc-800">
+             <h3 className="text-2xl font-semibold text-white mb-6 flex items-center"><Lightbulb className="mr-3 text-[var(--color-accent-400)]"/>Expertentipps</h3>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {currentRecipe.expertTips.map((tip, i) => (
-                  <div key={tip.title + i} className="bg-zinc-900/50 p-4 rounded-md">
-                      <h4 className="font-bold text-zinc-200">{tip.title}</h4>
-                      <p className="text-zinc-400 mt-1">{tip.content}</p>
+                  <div key={tip.title + i} className="bg-zinc-900/50 border border-[var(--color-accent-500)]/20 p-5 rounded-xl">
+                      <h4 className="font-bold text-[var(--color-accent-400)] mb-2">{tip.title}</h4>
+                      <p className="text-zinc-400 text-sm">{tip.content}</p>
                   </div>
               ))}
              </div>
           </div>
         )}
 
-        <div className="mt-10 pt-6 border-t border-zinc-700 flex flex-col sm:flex-row justify-between items-center gap-4">
-           <div className="flex flex-wrap gap-2">
+        <div className="mt-12 pt-6 border-t border-zinc-700 flex flex-col sm:flex-row justify-between items-center gap-4">
+           <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
              {isSaved && (
                 <>
-                    <button onClick={handleStartCookMode} className="flex items-center gap-2 bg-zinc-700 text-white font-bold py-2 px-4 rounded-md hover:bg-zinc-600 transition-colors">
+                    <button onClick={handleStartCookMode} className="flex items-center gap-2 bg-[var(--color-accent-500)] text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-[var(--color-accent-400)] transition-colors shadow-lg shadow-[var(--color-accent-500)]/20">
                         <CookingPot size={18} /> Kochmodus
                     </button>
-                    <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-zinc-700 text-white font-bold py-2 px-4 rounded-md hover:bg-zinc-600 transition-colors">
-                        <CalendarPlus size={18} /> Zum Essensplan
+                    <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-zinc-800 text-zinc-200 font-bold py-2 px-4 rounded-md hover:bg-zinc-700 transition-colors border border-zinc-700">
+                        <CalendarPlus size={18} /> Planen
                     </button>
-                     <button onClick={handleAddMissingToShoppingList} className="flex items-center gap-2 bg-zinc-700 text-white font-bold py-2 px-4 rounded-md hover:bg-zinc-600 transition-colors">
-                        <ShoppingCart size={18} /> Fehlendes kaufen
+                     <button onClick={handleAddMissingToShoppingList} className="flex items-center gap-2 bg-zinc-800 text-zinc-200 font-bold py-2 px-4 rounded-md hover:bg-zinc-700 transition-colors border border-zinc-700">
+                        <ShoppingCartIcon size={18} /> Einkaufen
                     </button>
                 </>
              )}
              <div className="relative inline-block">
-                <button onClick={() => setExportOpen(!isExportOpen)} className="flex items-center gap-2 bg-zinc-700 text-white font-bold py-2 px-4 rounded-md hover:bg-zinc-600 transition-colors">
-                    <FileDown size={18} /> Exportieren <ChevronDown size={16} className={`transition-transform ${isExportOpen ? 'rotate-180' : ''}`} />
+                <button onClick={() => setExportOpen(!isExportOpen)} className="flex items-center gap-2 bg-zinc-800 text-zinc-200 font-bold py-2 px-4 rounded-md hover:bg-zinc-700 transition-colors border border-zinc-700">
+                    <FileDown size={18} /> Export <ChevronDown size={16} className={`transition-transform ${isExportOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {isExportOpen && (
-                    <div className="absolute bottom-full mb-2 w-full bg-zinc-800 border border-zinc-700 rounded-md shadow-lg z-10">
+                    <div className="absolute bottom-full mb-2 w-full bg-zinc-800 border border-zinc-700 rounded-md shadow-xl z-10 overflow-hidden">
                         <a onClick={() => handleExport('pdf')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">PDF</a>
                         <a onClick={() => handleExport('csv')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">CSV</a>
                         <a onClick={() => handleExport('json')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">JSON</a>
-                        <a onClick={() => handleExport('md')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">Markdown (.md)</a>
-                        <a onClick={() => handleExport('txt')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">Text (.txt)</a>
+                        <a onClick={() => handleExport('md')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">Markdown</a>
                     </div>
                 )}
              </div>
@@ -309,17 +359,17 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
 
            <div className="flex items-center gap-4">
                  {isSaved && (
-                    <button onClick={handleToggleFavorite} title={currentRecipe.isFavorite ? "Favorit entfernen" : "Als Favorit markieren"} className="p-2 rounded-full text-zinc-400 hover:text-[var(--color-accent-400)] hover:bg-zinc-700 transition-colors">
+                    <button onClick={handleToggleFavorite} title={currentRecipe.isFavorite ? "Favorit entfernen" : "Als Favorit markieren"} className="p-2 rounded-full text-zinc-400 hover:text-[var(--color-accent-400)] hover:bg-zinc-800 transition-colors">
                         <Star size={22} className={`transition-colors ${currentRecipe.isFavorite ? 'fill-current text-[var(--color-accent-400)]' : ''}`} />
                     </button>
                 )}
                 {isSaved ? (
-                    <button onClick={handleDelete} className="flex items-center gap-2 bg-red-600/80 text-white font-bold py-2 px-4 rounded-md hover:bg-red-600 transition-colors">
-                        <Trash2 size={18} /> Rezept löschen
+                    <button onClick={handleDelete} className="flex items-center gap-2 bg-red-900/20 text-red-400 font-bold py-2 px-4 rounded-md hover:bg-red-900/40 transition-colors border border-red-900/50">
+                        <Trash2 size={18} /> Löschen
                     </button>
                 ) : (
-                    <button onClick={handleSave} className="flex items-center gap-2 bg-[var(--color-accent-500)] text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-[var(--color-accent-400)] transition-colors">
-                        <Save size={18} /> Rezept speichern
+                    <button onClick={handleSave} className="flex items-center gap-2 bg-[var(--color-accent-500)] text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-[var(--color-accent-400)] transition-colors shadow-lg shadow-[var(--color-accent-500)]/20">
+                        <Save size={18} /> Speichern
                     </button>
                 )}
            </div>

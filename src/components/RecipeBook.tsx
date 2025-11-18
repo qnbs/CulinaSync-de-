@@ -4,70 +4,13 @@ import { db } from '../services/db';
 import { Recipe } from '../types';
 import RecipeList from './RecipeList';
 import RecipeDetail from './RecipeDetail';
-import { BookOpen, Search, X, ListFilter, Star, CheckSquare, CalendarPlus, LoaderCircle, CookingPot } from 'lucide-react';
+import { BookOpen, ListFilter, CheckSquare, CalendarPlus, LoaderCircle, X } from 'lucide-react';
 import { useDebounce } from '../hooks/useDebounce';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setVoiceAction, setFocusAction, addToast as addToastAction, clearInitialSelectedId } from '../store/slices/uiSlice';
-
-interface BulkAddToPlanModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    recipeIds: number[];
-    onSave: (count: number) => void;
-}
-
-const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, onClose, recipeIds, onSave }) => {
-    const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
-    const [mealType, setMealType] = useState<'Frühstück' | 'Mittagessen' | 'Abendessen'>('Abendessen');
-    const [isSaving, setIsSaving] = useState(false);
-
-    const handleSave = async () => {
-        setIsSaving(true);
-        const date = new Date(startDate);
-        // Adjust for timezone offset
-        date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
-
-        for (const recipeId of recipeIds) {
-            const dateString = date.toISOString().split('T')[0];
-            await db.mealPlan.add({ recipeId, date: dateString, mealType, isCooked: false });
-            date.setDate(date.getDate() + 1); // Increment day for the next recipe
-        }
-        setIsSaving(false);
-        onSave(recipeIds.length);
-    };
-
-    if (!isOpen) return null;
-
-    return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 page-fade-in" onClick={onClose}>
-            <div className="bg-zinc-800 rounded-lg p-6 w-full max-w-sm shadow-xl" onClick={e => e.stopPropagation()}>
-                <h3 className="text-lg font-bold mb-4">Rezepte zum Plan hinzufügen</h3>
-                <div className="space-y-4">
-                    <div>
-                        <label htmlFor="startDate" className="block text-sm font-medium text-zinc-400 mb-1">Startdatum</label>
-                        <input type="date" id="startDate" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-[var(--color-accent-500)]"/>
-                    </div>
-                    <div>
-                        <label htmlFor="mealType" className="block text-sm font-medium text-zinc-400 mb-1">Mahlzeit</label>
-                        <select id="mealType" value={mealType} onChange={e => setMealType(e.target.value as any)} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-[var(--color-accent-500)]">
-                            <option>Abendessen</option>
-                            <option>Mittagessen</option>
-                            <option>Frühstück</option>
-                        </select>
-                    </div>
-                    <p className="text-xs text-zinc-500">Die {recipeIds.length} Rezepte werden ab dem {new Date(startDate).toLocaleDateString('de-DE')} als aufeinanderfolgende '{mealType}' geplant.</p>
-                </div>
-                <div className="flex justify-end gap-3 pt-4 mt-4 border-t border-zinc-700">
-                    <button onClick={onClose} className="py-2 px-4 rounded-md text-zinc-300 hover:bg-zinc-700">Abbrechen</button>
-                    <button onClick={handleSave} disabled={isSaving} className="py-2 px-4 rounded-md bg-[var(--color-accent-500)] text-zinc-900 font-bold hover:bg-[var(--color-accent-400)] flex items-center gap-2 disabled:bg-zinc-600">
-                        {isSaving && <LoaderCircle size={18} className="animate-spin" />}
-                        Hinzufügen
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-};
+import { RecipeBookHeader } from './recipe-book/RecipeBookHeader';
+import { RecipeToolbar } from './recipe-book/RecipeToolbar';
+import { BulkAddToPlanModal } from './recipe-book/BulkAddToPlanModal';
 
 const RecipeBook: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -77,23 +20,28 @@ const RecipeBook: React.FC = () => {
   const savedRecipes = useLiveQuery(() => db.recipes.toArray(), []);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Filter & Sort states
+  // State for Search & Sort
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [sortBy, setSortBy] = useState('newest');
-  const [courseFilter, setCourseFilter] = useState('');
-  const [cuisineFilter, setCuisineFilter] = useState('');
-  const [mainIngredientFilter, setMainIngredientFilter] = useState('');
-  const [difficultyFilter, setDifficultyFilter] = useState('');
-  const [dietFilter, setDietFilter] = useState('');
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
-  const [pantryFilter, setPantryFilter] = useState(false);
+
+  // State for Filters
+  const [filters, setFilters] = useState({
+      course: '',
+      cuisine: '',
+      mainIngredient: '',
+      difficulty: '',
+      diet: '',
+      favoritesOnly: false,
+      pantryReady: false
+  });
 
   // Bulk add state
   const [isSelectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [isBulkModalOpen, setBulkModalOpen] = useState(false);
 
+  // Voice and external actions handling
   const initialSearchTerm = voiceAction?.type === 'SEARCH' ? voiceAction.payload : undefined;
 
   const addToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
@@ -102,7 +50,7 @@ const RecipeBook: React.FC = () => {
 
   const handleToggleSelectMode = () => {
     setSelectMode(!isSelectMode);
-    setSelectedIds([]); // Reset selection when toggling mode
+    setSelectedIds([]);
   };
 
   const handleToggleSelect = (id: number) => {
@@ -164,60 +112,52 @@ const RecipeBook: React.FC = () => {
   const clearFilters = () => {
     setSearchTerm('');
     setSortBy('newest');
-    setCourseFilter('');
-    setCuisineFilter('');
-    setMainIngredientFilter('');
-    setDifficultyFilter('');
-    setDietFilter('');
-    setShowFavoritesOnly(false);
-    setPantryFilter(false);
+    setFilters({
+        course: '',
+        cuisine: '',
+        mainIngredient: '',
+        difficulty: '',
+        diet: '',
+        favoritesOnly: false,
+        pantryReady: false
+    });
   };
 
-  const filteredRecipes = useLiveQuery(
-    async () => {
-      let collection = db.recipes.toCollection();
-  
-      if (showFavoritesOnly) collection = collection.filter(r => !!r.isFavorite);
-      if (pantryFilter) collection = collection.filter(r => r.pantryMatchPercentage === 100);
-      if (courseFilter) collection = collection.filter(r => r.tags.course.includes(courseFilter));
-      if (cuisineFilter) collection = collection.filter(r => r.tags.cuisine.includes(cuisineFilter));
-      if (mainIngredientFilter) collection = collection.filter(r => r.tags.mainIngredient.includes(mainIngredientFilter));
-      if (difficultyFilter) collection = collection.filter(r => r.difficulty === difficultyFilter);
-      if (dietFilter) collection = collection.filter(r => r.tags.diet.includes(dietFilter));
-  
-      let recipes = await collection.toArray();
-  
-      if (debouncedSearchTerm) {
-        const lowerCaseSearch = debouncedSearchTerm.toLowerCase();
-        recipes = recipes.filter(r => r.recipeTitle.toLowerCase().includes(lowerCaseSearch));
-      }
-  
-      switch (sortBy) {
-        case 'a-z':
-          return recipes.sort((a, b) => a.recipeTitle.localeCompare(b.recipeTitle));
-        case 'z-a':
-          return recipes.sort((a, b) => b.recipeTitle.localeCompare(a.recipeTitle));
-        case 'favorites':
-          return recipes.sort((a, b) => (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0));
-        case 'newest':
-        default:
-          return recipes.sort((a, b) => (b.updatedAt ?? b.id ?? 0) - (a.updatedAt ?? a.id ?? 0));
-      }
-    },
-    [
-      debouncedSearchTerm,
-      sortBy,
-      courseFilter,
-      cuisineFilter,
-      mainIngredientFilter,
-      difficultyFilter,
-      dietFilter,
-      showFavoritesOnly,
-      pantryFilter,
-    ],
-    []
-  );
+  // Filter Logic (Client-side for simplicity with complex filters)
+  const filteredRecipes = useMemo(() => {
+      if (!savedRecipes) return [];
+      let result = [...savedRecipes];
 
+      // Search
+      if (debouncedSearchTerm) {
+          const lower = debouncedSearchTerm.toLowerCase();
+          result = result.filter(r => r.recipeTitle.toLowerCase().includes(lower));
+      }
+
+      // Filters
+      if (filters.favoritesOnly) result = result.filter(r => r.isFavorite);
+      if (filters.pantryReady) result = result.filter(r => (r.pantryMatchPercentage || 0) === 100);
+      if (filters.course) result = result.filter(r => r.tags.course?.includes(filters.course));
+      if (filters.cuisine) result = result.filter(r => r.tags.cuisine?.includes(filters.cuisine));
+      if (filters.mainIngredient) result = result.filter(r => r.tags.mainIngredient?.includes(filters.mainIngredient));
+      if (filters.difficulty) result = result.filter(r => r.difficulty === filters.difficulty);
+      if (filters.diet) result = result.filter(r => r.tags.diet?.includes(filters.diet));
+
+      // Sort
+      switch (sortBy) {
+          case 'a-z': result.sort((a, b) => a.recipeTitle.localeCompare(b.recipeTitle)); break;
+          case 'z-a': result.sort((a, b) => b.recipeTitle.localeCompare(a.recipeTitle)); break;
+          case 'favorites': result.sort((a, b) => (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0)); break;
+          case 'newest': 
+          default: result.sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0)); break;
+      }
+      
+      return result;
+  }, [savedRecipes, debouncedSearchTerm, filters, sortBy]);
+
+  const hasActiveFilters = useMemo(() => {
+      return !!(searchTerm || Object.values(filters).some(v => !!v));
+  }, [searchTerm, filters]);
 
   if (selectedRecipe) {
     return (
@@ -227,8 +167,10 @@ const RecipeBook: React.FC = () => {
       />
     );
   }
-  
-  const hasActiveFilters = searchTerm || sortBy !== 'newest' || courseFilter || cuisineFilter || mainIngredientFilter || difficultyFilter || dietFilter || showFavoritesOnly || pantryFilter;
+
+  if (!savedRecipes) {
+      return <div className="flex justify-center items-center h-64"><LoaderCircle className="animate-spin text-[var(--color-accent-500)]" size={48} /></div>;
+  }
 
   return (
     <div className="space-y-8 pb-24">
@@ -239,115 +181,75 @@ const RecipeBook: React.FC = () => {
         onSave={(count) => {
             addToast(`${count} Rezepte zum Plan hinzugefügt.`);
             setBulkModalOpen(false);
-            handleToggleSelectMode(); // Exit select mode
+            handleToggleSelectMode();
         }}
       />
 
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight text-zinc-100">Mein Kochbuch</h2>
-        <p className="text-zinc-400 mt-1">Deine Sammlung von generierten und gespeicherten Rezepten.</p>
-      </div>
+      <RecipeBookHeader recipes={savedRecipes} />
 
-      {savedRecipes && savedRecipes.length > 0 && (
-        <div className="space-y-4 p-4 bg-zinc-950/50 border border-zinc-800 rounded-lg">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="relative md:col-span-2">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={20} />
-                  <input 
-                      ref={searchInputRef}
-                      type="text" 
-                      placeholder="Rezepte nach Titel durchsuchen..." 
-                      value={searchTerm} 
-                      onChange={e => setSearchTerm(e.target.value)} 
-                      className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 pl-10 focus:ring-2 focus:ring-[var(--color-accent-500)]" 
-                      aria-label="Rezepte durchsuchen"
-                  />
-              </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <select onChange={e => setSortBy(e.target.value)} value={sortBy} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:outline-none" aria-label="Sortieren nach">
-                <option value="newest">Sortieren: Neueste zuerst</option>
-                <option value="favorites">Sortieren: Favoriten zuerst</option>
-                <option value="a-z">Sortieren: Name (A-Z)</option>
-                <option value="z-a">Sortieren: Name (Z-A)</option>
-            </select>
-            <select onChange={e => setCourseFilter(e.target.value)} value={courseFilter} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:outline-none" aria-label="Nach Gang filtern">
-              <option value="">Alle Gänge</option>
-              {filterOptions.courses.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <select onChange={e => setCuisineFilter(e.target.value)} value={cuisineFilter} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:outline-none" aria-label="Nach Küche filtern">
-              <option value="">Alle Küchen</option>
-              {filterOptions.cuisines.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <select onChange={e => setMainIngredientFilter(e.target.value)} value={mainIngredientFilter} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:outline-none" aria-label="Nach Hauptzutat filtern">
-              <option value="">Alle Hauptzutaten</option>
-              {filterOptions.mainIngredients.map(i => <option key={i} value={i}>{i}</option>)}
-            </select>
-            <select onChange={e => setDifficultyFilter(e.target.value)} value={difficultyFilter} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:outline-none" aria-label="Nach Schwierigkeit filtern">
-              <option value="">Alle Schwierigkeiten</option>
-              {filterOptions.difficulties.map(d => <option key={d} value={d}>{d}</option>)}
-            </select>
-             <select onChange={e => setDietFilter(e.target.value)} value={dietFilter} className="w-full bg-zinc-800 border-zinc-700 rounded-md p-2 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:outline-none" aria-label="Nach Ernährungsweise filtern">
-              <option value="">Alle Ernährungsweisen</option>
-              {filterOptions.diets.map(d => <option key={d} value={d}>{d}</option>)}
-            </select>
-          </div>
-          <div className="pt-3 border-t border-zinc-800 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <button onClick={clearFilters} disabled={!hasActiveFilters} className="flex items-center gap-2 text-sm text-[var(--color-accent-400)] hover:text-[var(--color-accent-300)] font-semibold disabled:text-zinc-600 disabled:cursor-not-allowed">
-                    <X size={16} /> Alle Filter zurücksetzen
-                </button>
-                <div className="flex items-center gap-4 flex-wrap justify-center sm:justify-end">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" checked={pantryFilter} onChange={() => setPantryFilter(!pantryFilter)} className="h-4 w-4 rounded bg-zinc-700 border-zinc-600 text-[var(--color-accent-500)] focus:ring-[var(--color-accent-500)]"/>
-                        <span className="text-zinc-300 text-sm font-medium flex items-center gap-1"><CookingPot size={14} className="text-[var(--color-accent-400)]" /> Nur Kochbereite</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" checked={showFavoritesOnly} onChange={() => setShowFavoritesOnly(!showFavoritesOnly)} className="h-4 w-4 rounded bg-zinc-700 border-zinc-600 text-[var(--color-accent-500)] focus:ring-[var(--color-accent-500)]"/>
-                        <span className="text-zinc-300 text-sm font-medium flex items-center gap-1"><Star size={14} className="text-[var(--color-accent-400)]" /> Nur Favoriten</span>
-                    </label>
-                     <button onClick={handleToggleSelectMode} className={`flex items-center gap-2 text-sm font-semibold py-1 px-3 rounded-md transition-colors ${isSelectMode ? 'bg-[var(--color-accent-500)] text-zinc-900' : 'text-[var(--color-accent-400)] hover:text-[var(--color-accent-300)]'}`}>
-                        <CheckSquare size={16} /> {isSelectMode ? 'Abbrechen' : 'Auswählen'}
-                    </button>
+      <RecipeToolbar 
+        searchTerm={searchTerm} setSearchTerm={setSearchTerm} searchInputRef={searchInputRef}
+        sortBy={sortBy} setSortBy={setSortBy}
+        filters={filters} setFilters={setFilters} clearFilters={clearFilters}
+        hasActiveFilters={hasActiveFilters} filterOptions={filterOptions}
+      />
+
+      {/* Results Area */}
+      <div className="relative min-h-[300px]">
+          {filteredRecipes.length > 0 ? (
+             <RecipeList 
+                recipes={filteredRecipes} 
+                onSelectRecipe={setSelectedRecipe} 
+                isSelectMode={isSelectMode}
+                selectedIds={selectedIds}
+                onToggleSelect={handleToggleSelect}
+            />
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-zinc-800 rounded-2xl bg-zinc-900/20">
+                <div className="bg-zinc-900 p-4 rounded-full mb-4">
+                    <BookOpen className="h-10 w-10 text-zinc-600" />
                 </div>
-            </div>
-        </div>
-      )}
-
-      {filteredRecipes ? (
-        filteredRecipes.length > 0 ? (
-        <RecipeList 
-            recipes={filteredRecipes} 
-            onSelectRecipe={setSelectedRecipe} 
-            isSelectMode={isSelectMode}
-            selectedIds={selectedIds}
-            onToggleSelect={handleToggleSelect}
-        />
-        ) : (
-            <div className="text-center py-20 bg-zinc-950/50 border border-dashed border-zinc-700 rounded-lg">
-                <BookOpen className="mx-auto h-12 w-12 text-zinc-600" />
-                <h3 className="mt-4 text-lg font-medium text-zinc-300">
-                {savedRecipes && savedRecipes.length > 0 ? 'Keine Rezepte entsprechen deiner Suche' : 'Dein Kochbuch ist leer'}
-                </h3>
-                <p className="mt-1 text-sm text-zinc-500 max-w-md mx-auto">
-                {savedRecipes && savedRecipes.length > 0 ? 'Versuche, deine Filterauswahl anzupassen oder die Suche zurückzusetzen.' : 'Gehe zum KI-Chef, generiere ein Rezept und speichere es, um es hier zu finden.'}
+                <h3 className="text-lg font-medium text-zinc-300">Keine Rezepte gefunden</h3>
+                <p className="mt-1 text-sm text-zinc-500 max-w-md">
+                    {savedRecipes.length > 0 ? 'Versuche es mit anderen Filtern oder Suchbegriffen.' : 'Dein Kochbuch ist noch leer. Besuche den KI-Chef, um Rezepte zu erstellen!'}
                 </p>
-                {savedRecipes && savedRecipes.length > 0 && hasActiveFilters && (
-                    <button onClick={clearFilters} className="mt-6 flex mx-auto items-center gap-2 bg-[var(--color-accent-500)] text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-[var(--color-accent-400)] transition-colors">
-                        <ListFilter size={18} /> Filter zurücksetzen
+                {hasActiveFilters && (
+                    <button onClick={clearFilters} className="mt-6 flex items-center gap-2 bg-zinc-800 text-zinc-200 font-medium py-2 px-4 rounded-lg hover:bg-zinc-700 transition-colors">
+                        <ListFilter size={16} /> Filter zurücksetzen
                     </button>
                 )}
             </div>
-        )
-      ) : (
-        <div className="text-center p-12"><LoaderCircle className="mx-auto animate-spin text-[var(--color-accent-500)]" size={32} /></div>
+          )}
+      </div>
+
+      {/* Selection Mode Toggle & Floating Bar */}
+      {!isSelectMode && filteredRecipes.length > 0 && (
+          <div className="fixed bottom-24 right-4 md:right-8 z-30">
+              <button 
+                onClick={handleToggleSelectMode}
+                className="flex items-center justify-center w-12 h-12 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-700 shadow-lg transition-all"
+                title="Auswahlmodus starten"
+              >
+                  <CheckSquare size={20}/>
+              </button>
+          </div>
       )}
 
-      {isSelectMode && selectedIds.length > 0 && (
-          <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-zinc-800/80 backdrop-blur-md border border-zinc-700 rounded-lg p-3 flex justify-between items-center w-full max-w-sm shadow-xl page-fade-in z-20">
-              <span className="font-semibold text-zinc-200">{selectedIds.length} Rezept(e) ausgewählt</span>
-              <button onClick={() => setBulkModalOpen(true)} className="flex items-center gap-2 bg-[var(--color-accent-500)] text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-[var(--color-accent-400)] transition-colors">
-                  <CalendarPlus size={18}/> Zum Plan
-              </button>
+      {isSelectMode && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-md px-4 z-40 page-fade-in">
+             <div className="bg-zinc-900/90 backdrop-blur-xl border border-zinc-700 rounded-2xl p-3 shadow-2xl flex items-center justify-between">
+                <div className="flex items-center gap-3 px-2">
+                    <button onClick={handleToggleSelectMode} className="p-1 text-zinc-400 hover:text-zinc-200"><X size={20}/></button>
+                    <span className="font-medium text-zinc-200 text-sm">{selectedIds.length} ausgewählt</span>
+                </div>
+                <button 
+                    onClick={() => setBulkModalOpen(true)} 
+                    disabled={selectedIds.length === 0}
+                    className="flex items-center gap-2 bg-[var(--color-accent-500)] text-zinc-900 font-bold py-2 px-4 rounded-xl hover:bg-[var(--color-accent-400)] transition-colors disabled:bg-zinc-800 disabled:text-zinc-600 text-sm"
+                >
+                    <CalendarPlus size={18}/> Zum Plan
+                </button>
+             </div>
           </div>
       )}
     </div>

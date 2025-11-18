@@ -1,6 +1,6 @@
 import Dexie, { type Table, Transaction } from 'dexie';
 import { PantryItem, Recipe, MealPlanItem, ShoppingListItem, FullBackupData, IngredientGroup } from '../types';
-import { seedRecipes } from '../data/seedData';
+import { allSeedRecipes as seedRecipes } from '../data/recipes/index';
 import { scaleIngredientQuantity, getCategoryForItem } from './utils';
 import { updatePantryMatches, debouncedUpdateAllPantryMatches } from './pantryMatcherService';
 
@@ -44,6 +44,14 @@ class CulinaSyncDB extends Dexie {
                 // Trigger a full recalculation after the schema upgrade completes
                 // This is deferred because the transaction needs to finish first
                 Promise.resolve().then(() => updatePantryMatches());
+            });
+        });
+        
+        (this as Dexie).version(10).stores({
+            recipes: '++id, recipeTitle, isFavorite, *tags.course, *tags.cuisine, *tags.mainIngredient, updatedAt, pantryMatchPercentage',
+        }).upgrade(tx => {
+            return tx.table('recipes').toCollection().modify(item => {
+                if (item.imageUrl === undefined) item.imageUrl = undefined;
             });
         });
 
@@ -395,6 +403,10 @@ export const markMealAsCooked = async (mealId: number): Promise<{ success: boole
 export const addRecipe = async (recipe: Omit<Recipe, 'id'>): Promise<number> => {
     const now = Date.now();
     return db.recipes.add({ ...recipe, isFavorite: recipe.isFavorite ?? false, updatedAt: now });
+};
+
+export const updateRecipeImage = async (recipeId: number, imageUrl: string): Promise<void> => {
+    await db.recipes.update(recipeId, { imageUrl, updatedAt: Date.now() });
 };
 
 export const deleteRecipe = async (recipeId: number): Promise<void> => {

@@ -21,6 +21,7 @@ interface ShoppingListState {
     editingCategory: { oldName: string; newName: string } | null;
     isCompletedVisible: boolean;
     isExportOpen: boolean;
+    isShoppingMode: boolean;
     collapsedCategories: string[]; // Storing as array for serializability
     isGenerating: boolean;
     error: string | null;
@@ -34,6 +35,7 @@ const initialState: ShoppingListState = {
     editingCategory: null,
     isCompletedVisible: true,
     isExportOpen: false,
+    isShoppingMode: false,
     collapsedCategories: [],
     isGenerating: false,
     error: null,
@@ -102,6 +104,7 @@ const shoppingListSlice = createSlice({
         setEditingCategory: (state, action: PayloadAction<{ oldName: string; newName: string } | null>) => { state.editingCategory = action.payload; },
         toggleCompletedVisible: (state) => { state.isCompletedVisible = !state.isCompletedVisible; },
         setExportOpen: (state, action: PayloadAction<boolean>) => { state.isExportOpen = action.payload; },
+        setShoppingMode: (state, action: PayloadAction<boolean>) => { state.isShoppingMode = action.payload; },
         toggleCategoryCollapse: (state, action: PayloadAction<string>) => {
             const category = action.payload;
             const index = state.collapsedCategories.indexOf(category);
@@ -140,6 +143,7 @@ export const {
     setEditingCategory,
     toggleCompletedVisible,
     setExportOpen,
+    setShoppingMode,
     toggleCategoryCollapse,
     collapseAll,
     expandAll

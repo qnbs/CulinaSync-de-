@@ -1,183 +1,156 @@
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/qnbs/CulinaSync-de-)
-<div align="left">
-  <h1 style="border-bottom: none;">CulinaSync: Das intelligente Küchen-Betriebssystem</h1>
+<div align="center">
+  <img src="https://storage.googleapis.com/aai-cdn-files/icons/culina-sync-logo.png" alt="CulinaSync Logo" width="180">
+  <h1>CulinaSync</h1>
+  <p><strong>Das Kognitive Küchen-Betriebssystem</strong></p>
   <p>
-    <strong>Eine Local-First, KI-gestützte Progressive Web App für den modernen Haushalt</strong>
+    <em>Next-Gen Progressive Web App (PWA) • Local-First Architecture • Multimodal AI Integration</em>
+  </p>
+
+  <p>
+    <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19"></a>
+    <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"></a>
+    <a href="https://vitejs.dev/"><img src="https://img.shields.io/badge/Vite-Lightning_Fast-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite"></a>
+    <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind_CSS-Utility_First-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS"></a>
     <br />
-    <em>Mobil-First. Offline-Fähig. Datenschutz-Zentriert. Nahtlos integriert.</em>
-  </p>
-  <p>
-    <img src="https://img.shields.io/badge/version-1.0.0-blue.svg" alt="Version">
-    <img src="https://img.shields.io/badge/lizenz-MIT-green.svg" alt="Lizenz">
-    <img src="https://img.shields.io/badge/React-19-blue?logo=react" alt="React">
-    <img src="https://img.shields.io/badge/Powered%20by-Gemini%20API-purple.svg" alt="Gemini API">
-  </p>
-  <p>
-    <em>Dieses Projekt wurde in einem iterativen Dialog mit <a href="https://ai.studio/apps/drive/1bQgaay6IODal47GVGZcn-65xgfu_PIDC">Google's AI Studio</a> entwickelt.</em>
+    <a href="https://ai.google.dev/"><img src="https://img.shields.io/badge/Gemini_2.5-Flash_%7C_Pro-8E75B2?style=for-the-badge&logo=google-gemini&logoColor=white" alt="Gemini AI"></a>
+    <a href="https://dexie.org/"><img src="https://img.shields.io/badge/IndexedDB-Dexie.js-323330?style=for-the-badge&logo=database&logoColor=white" alt="Dexie.js"></a>
+    <a href="https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps"><img src="https://img.shields.io/badge/PWA-Offline_Ready-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA"></a>
   </p>
 </div>
 
 ---
 
-## 🚀 Vision: Ihr proaktiver kulinarischer Partner
+## 🚀 Vision & Philosophie
 
-CulinaSync ist mehr als nur eine traditionelle Rezept-App. Es wurde als **proaktives, intelligentes Küchen-Betriebssystem** konzipiert – ein zentraler Hub, der den gesamten kulinarischen Lebenszyklus für Ihren Haushalt optimiert. Unsere Vision ist es, die tägliche Frage "Was soll ich kochen?" in ein selbstbewusstes "Das koche ich heute" zu verwandeln, gestützt durch intelligente, datenbasierte Assistenz.
+**CulinaSync** ist keine bloße Rezept-App. Es ist ein intelligenter Orchestrator für den kulinarischen Lebenszyklus eines modernen Haushalts. Entwickelt unter der Prämisse **"Privacy First, Latency Zero"**, verschiebt CulinaSync die Grenzen dessen, was im Browser möglich ist.
 
-Von der Inspiration und Essensplanung über den intelligenten Einkauf bis hin zum interaktiven Kochen ist CulinaSync als nahtloser, intuitiver Partner in Ihrer Küche konzipiert.
-
-## 🏛️ Architektonische Kernphilosophie
-
-Unsere Entwicklung orientiert sich an drei unumstößlichen Prinzipien, die das Nutzererlebnis definieren:
-
-1.  **🔒 Local-First & Datenschutz by Design:** Ihre Daten gehören Ihnen. Punkt. Alle Ihre Rezepte, Vorratsartikel und Essenspläne befinden sich ausschließlich auf Ihrem Gerät, unterstützt durch IndexedDB. Dies garantiert maximale Leistung, echte Offline-Funktionalität und kompromisslose Privatsphäre. Es gibt kein Cloud-Backend, kein User-Tracking und keine Datenmonetarisierung.
-
-2.  **📱 Mobil-First, universell zugänglich:** CulinaSync wurde für das Gerät entwickelt, das Sie immer bei sich haben – Ihr Smartphone. Jede Funktion ist für die Touch-basierte Interaktion unterwegs optimiert. Durch "Progressive Enhancement" skaliert die Benutzeroberfläche elegant und bietet ein ebenso leistungsstarkes Erlebnis auf Tablets und Desktops, sodass die Funktionalität niemals dem Formfaktor geopfert wird.
-
-3.  **🧠 Intelligente & kontextsensitive Assistenz:** Wir nutzen die Leistung der Google Gemini API nicht als Gimmick, sondern als integrierte Intelligenzschicht. Die KI ist kontextbewusst und berücksichtigt Ihren Vorratsbestand, Ihre Ernährungspräferenzen und Ihre expliziten Wünsche, um wirklich nützliche, personalisierte kulinarische Anleitungen zu liefern.
+Durch die Synergie von **On-Device-Datenhaltung** (IndexedDB) und **Cloud-basierter Intelligenz** (Google Gemini & Imagen) entsteht ein System, das sofort reagiert, offline funktioniert und dennoch über das Weltwissen eines Sternekochs verfügt.
 
 ---
 
-## ✨ Feature-Übersicht
+## ✨ High-Level Feature Matrix
 
-CulinaSync bietet eine integrierte Suite von Werkzeugen, die den gesamten kulinarischen Arbeitsablauf abdecken.
+### 🧠 1. Kognitiver KI-Chef (Powered by Gemini 2.5 & Imagen 3)
+Der KI-Chef ist das Herzstück der Anwendung. Er agiert nicht als simple Suchmaschine, sondern als kreativer Partner.
+*   **Kontext-Sensitivität:** Berücksichtigt Vorrat, Ernährungsweise (Vegan, Keto, etc.) und implizite Wünsche.
+*   **Visuelle Generierung:** Nutzt **Imagen 3 (`imagen-4.0-generate-001`)**, um fotorealistische, appetitanregende Rezeptbilder in Echtzeit zu rendern.
+*   **Thinking Process Visualization:** Die UI visualisiert die "Gedankenschritte" der KI (z.B. "Balanciere Säure...", "Prüfe Vorrat..."), um Vertrauen und Transparenz zu schaffen.
 
-### Kernmodule
-- 🥫 **Intelligente Vorratsverwaltung:** Ein Echtzeit-Inventar Ihrer Vorräte. Fügen Sie Artikel hinzu, verfolgen Sie Mengen und legen Sie Mindesthaltbarkeitsdaten fest. Die Vorratskammer ist die grundlegende Datenquelle für alle intelligenten Funktionen.
-- 📚 **Persönliches Kochbuch:** Ihre digitale kulinarische Bibliothek. Speichern Sie KI-generierte Rezepte, fügen Sie manuell Ihre eigenen hinzu und bauen Sie eine personalisierte, durchsuchbare Sammlung auf.
-- 📅 **Dynamischer Essensplaner:** Planen Sie Ihre Mahlzeiten mit einer flüssigen Drag-and-Drop-Oberfläche. Optimiert für die mobile Wochenansicht und die umfassende Planung am Desktop.
-- 🛒 **Automatisierte Einkaufsliste:** Die intelligenteste Einkaufsliste, die Sie je verwendet haben. Sie füllt sich automatisch basierend auf Ihrem Essensplan, gleicht sich mit Ihrer Vorratskammer ab und eliminiert überflüssige Einkäufe.
+### 🥫 2. Intelligentes Vorrats-Management
+*   **Natural Language Processing (NLP):** Die "Smart Input"-Funktion zerlegt Eingaben wie *"5 Liter laktosefreie Milch"* automatisch in strukturierte Daten (Menge: 5, Einheit: Liter, Attribut: laktosefrei, Kategorie: Milchprodukte).
+*   **Echtzeit-Abgleich:** Berechnet im Millisekunden-Takt, welche Rezepte mit dem aktuellen Bestand gekocht werden können ("Pantry Match Percentage").
+*   **Expiry Tracking:** Proaktive Warnungen bei ablaufenden Lebensmitteln.
 
-### KI & Intelligenz
-- 🤖 **KI-Chef (Gemini-betrieben):** Verwandeln Sie abstrakte Gelüste in konkrete, köstliche Rezepte. Der KI-Chef berücksichtigt Ihren Vorrat, Ihre Vorlieben und gewünschte Modifikatoren (z. B. "schnell", "gesund"), um einzigartige Rezeptideen und vollständige, detaillierte Kochanleitungen zu generieren.
-- 🔍 **Vorrats-Abgleich:** Jedes Rezept in Ihrem Kochbuch wird automatisch mit Ihrem aktuellen Vorratsbestand abgeglichen. So sehen Sie auf einen Blick, was Sie *jetzt sofort* kochen können. Dieser Abgleich wird effizient und mit Verzögerung (debounced) bei Datenänderungen berechnet.
-- 🗣️ **Fortschrittliche Sprachsteuerung:** Ein umfassendes Sprachbefehlssystem ermöglicht eine freihändige Bedienung. Navigieren Sie durch die App, fügen Sie Artikel zu Ihrer Vorratskammer oder Einkaufsliste hinzu und steuern Sie den Kochmodus, ohne den Bildschirm zu berühren.
+### 🍳 3. Immersiver Kochmodus
+Eine "Hands-Free"-Umgebung für die aktive Küche.
+*   **Wake Lock API:** Verhindert das Abdunkeln des Bildschirms während des Kochens.
+*   **Voice Control & TTS:** Vollständige Sprachsteuerung ("Nächster Schritt", "Zutat wiederholen") und hochwertige Text-to-Speech-Synthese.
+*   **Cinematic UI:** Nutzt KI-generierte Bilder als atmosphärischen, weichgezeichneten Hintergrund.
 
-### Nutzererlebnis & Arbeitsablauf
-- 🍳 **Interaktiver Kochmodus:** Eine ablenkungsfreie Vollbild-Kochoberfläche, die Sie Schritt für Schritt anleitet.
-    - **Bildschirm-Sperre (Wake Lock):** Ihr Bildschirm bleibt an, sodass Sie Ihr Gerät nicht mit schmutzigen Händen entsperren müssen.
-    - **Text-to-Speech:** Lassen Sie sich Anweisungen vorlesen, mit Steuerelementen zum Wiederholen oder Pausieren.
-    - **Vollständige Sprachnavigation:** Wechseln Sie zwischen den Schritten ("nächster Schritt", "vorheriger Schritt") oder beenden Sie den Modus ("Kochmodus beenden") komplett freihändig.
-- ⌨️ **Befehlspalette (`⌘K` / `Strg+K`):** Eine Power-User-Funktion für sofortige Navigation und Aktionsausführung. Suchen Sie von überall in der App nach Rezepten, Vorratsartikeln oder Befehlen.
-- 🔄 **Datenportabilität:** Vollständige Import-/Export-Funktionalität für all Ihre Daten im Standard-JSON-Format. Sie haben die vollständige Hoheit und Kontrolle.
-- 📱 **Volle PWA-Fähigkeiten:** Installierbar auf Ihrem Startbildschirm für ein natives App-Gefühl, mit vollständigem Offline-Zugriff auf alle Kernfunktionen.
-
----
-
-## 🛠️ Technische Details & Architektur
-
-CulinaSync basiert auf einem modernen, robusten und performanten Technologie-Stack, der unsere Kernphilosophie unterstützt.
-
--   **Framework & Sprache:** [**React 19**](https://react.dev/) mit [**TypeScript**](https://www.typescriptlang.org/). Wir nutzen funktionale Komponenten und eine umfangreiche Suite von benutzerdefinierten Hooks für eine deklarative, typsichere und hochgradig wartbare Codebasis.
-
--   **Styling:** [**Tailwind CSS**](https://tailwindcss.com/). Ein Utility-First-CSS-Framework ermöglicht eine schnelle, konsistente und responsive UI-Entwicklung direkt in unseren Komponenten und folgt unserem Mobile-First-Designprinzip.
-
--   **Zustandsverwaltung (State Management):**
-    -   **Globaler Zustand:** [**Redux Toolkit**](https://redux-toolkit.js.org/) bietet einen zentralen, vorhersagbaren Zustandscontainer für anwendungsweite Daten wie UI-Zustand und Einstellungen.
-    -   **Persistenz:** `redux-persist` wird verwendet, um nicht-sensiblen globalen Zustand (wie Benutzereinstellungen) im Local Storage zu speichern und so ein konsistentes Erlebnis über Sitzungen hinweg zu gewährleisten.
-    -   **Lokaler Zustand:** Reacts eingebaute `useState`- und `useReducer`-Hooks werden für komponenten-lokalen, ephemeren Zustand verwendet.
-    -   **Feature-Level-Zustand (Hybrid-Muster):** Für komplexe Bereiche wie die Vorratskammer und die Einkaufsliste verwenden wir ein "Context-as-DI"-Muster. Ein dedizierter benutzerdefinierter Hook (z. B. `usePantryManager`) kapselt die gesamte Feature-Logik und die Interaktion mit einem bestimmten Redux-Slice. Ein React Context Provider injiziert diesen Hook dann in den Komponentenbaum des Features. Dieser Ansatz bietet eine starke Kapselung und bündelt die gesamte zugehörige Logik, was die Wartbarkeit verbessert.
-
--   **Datenschicht (Local-First):**
-    -   **Datenbank:** Wir verwenden die browser-interne [**IndexedDB**](https://developer.mozilla.org/de/docs/Web/API/IndexedDB_API) als leistungsstarke, persistente On-Device-Datenbank.
-    -   **ORM/Wrapper:** [**Dexie.js**](https://dexie.org/) bietet eine elegante, Promise-basierte API über IndexedDB, die die Verwaltung des Datenbankschemas, Transaktionen und komplexe Abfragen vereinfacht.
-    -   **Reaktivität:** `dexie-react-hooks` (`useLiveQuery`) verbindet Dexie mit React und schafft eine reaktive Datenschicht, bei der UI-Komponenten automatisch neu gerendert werden, wenn sich die zugrunde liegenden Daten in der IndexedDB ändern.
-
--   **KI-Integration:**
-    -   **API:** Das offizielle [`@google/genai`](https://www.npmjs.com/package/@google/genai) SDK wird verwendet, um mit der **Google Gemini API** zu kommunizieren.
-    -   **Strukturierte Ausgabe:** Wir nutzen den JSON-Modus von Gemini und stellen ein detailliertes `responseSchema` für die Rezeptgenerierung bereit. Dies stellt sicher, dass die Ausgabe der KI zuverlässig, parsebar und direkt in den Datenstrukturen der Anwendung verwendbar ist, was Fehler und Nachbearbeitung minimiert.
-
--   **PWA & Offline-Funktionalität:**
-    -   **Service Worker:** [**VitePWA**](https://vite-pwa-org.netlify.app/) orchestriert die Erstellung und Verwaltung eines Service Workers.
-    -   **Strategie:** Wir verwenden eine `autoUpdate`-Registrierung und eine Cache-First-Strategie für Assets, um sicherzustellen, dass die App sofort lädt und offline nahtlos funktioniert.
-
--   **Build & Entwicklung:**
-    -   **Bundler:** [**Vite**](https://vitejs.dev/) bietet ein blitzschnelles Entwicklungserlebnis mit Hot Module Replacement (HMR) und einem optimierten Produktions-Build-Prozess.
-    -   **Icons:** [**Lucide React**](https://lucide.dev/) für ein sauberes, konsistentes und "tree-shakable" Icon-Set.
+### 🛒 4. Dynamische Einkaufslogik
+*   **Auto-Kategorisierung:** Sortiert Artikel intelligent nach Supermarkt-Layout.
+*   **Plan-to-List:** Generiert Einkaufslisten basierend auf dem Wochenplan abzüglich des vorhandenen Vorrats.
+*   **KI-Assistenz:** "Erstelle eine Liste für eine Grillparty mit 6 Veganern."
 
 ---
 
-## 🏁 Erste Schritte
+## 🏗️ Technische Architektur (Deep Dive)
 
-Um CulinaSync lokal für die Entwicklung auszuführen, folgen Sie diesen Schritten:
+CulinaSync setzt auf einen **hybriden Architektur-Stack**, der maximale Performance mit modernen Web-Capabilities verbindet.
 
-1.  **Repository klonen**
-    ```sh
-    git clone https://github.com/qnbs/CulinaSync-de.git
-    cd CulinaSync-de
-    ```
+### Frontend & Core
+*   **Framework:** [React 19](https://react.dev/) – Nutzung neuer Hooks (`use`, `useOptimistic`) für nahtlose UI-Updates.
+*   **Build Tool:** [Vite](https://vitejs.dev/) – Blitzschnelles HMR und optimierte Production-Builds.
+*   **Styling:** [Tailwind CSS](https://tailwindcss.com/) – Utility-First, mit dynamischem Theming und CSS-Variablen für Echtzeit-Farbwechsel.
 
-2.  **Abhängigkeiten installieren**
-    ```sh
-    npm install
-    ```
+### State Management & Datenpersistenz
+Die App verwendet eine **Dual-Layer-State-Strategie**:
+1.  **Ephemerer UI-State:** [Redux Toolkit](https://redux-toolkit.js.org/) verwaltet UI-Zustände (Modals, Toasts, Session-Settings).
+2.  **Persistenter Daten-State:** [Dexie.js](https://dexie.org/) (Wrapper um IndexedDB) dient als "Source of Truth".
+    *   **Reaktivität:** `useLiveQuery` Hooks sorgen dafür, dass jede Datenbankänderung sofort in der UI reflektiert wird, ohne manuelles Polling.
+    *   **Offline-First:** Alle Daten liegen lokal. Sync erfolgt (konzeptionell) opportunistisch.
 
-3.  **Umgebungsvariablen konfigurieren**
-    Die KI-Funktionen erfordern einen Google Gemini API-Schlüssel. Erstellen Sie eine `.env.local`-Datei im Projektstammverzeichnis:
-    ```env
-    # Erhalten Sie Ihren Schlüssel von Google AI Studio und ersetzen Sie YOUR_API_KEY
-    VITE_API_KEY=YOUR_API_KEY
-    ```
-    *Hinweis: Das `VITE_`-Präfix ist erforderlich, damit Vite die Variable dem clientseitigen Code zur Verfügung stellt.*
+### AI Integration Layer
+*   **SDK:** `@google/genai`
+*   **Modelle:**
+    *   `gemini-2.5-flash`: Für schnelle Textaufgaben (Listen-Parsing, Chat).
+    *   `gemini-2.5-pro`: Für komplexe Rezept-Logik und "Reasoning".
+    *   `imagen-4.0-generate-001`: Für High-Fidelity Food Photography.
+*   **Schema Enforcement:** Strikte JSON-Schemas garantieren, dass die KI-Antworten immer typensicher und direkt in der App verwendbar sind.
 
-4.  **Entwicklungsserver starten**
-    ```sh
-    npm run dev
-    ```
-    Die Anwendung ist unter `http://localhost:5173` (oder dem nächsten verfügbaren Port) erreichbar.
-
-### Verfügbare Skripte
-
--   `npm run dev`: Startet den Entwicklungsserver mit HMR.
--   `npm run build`: Kompiliert und bündelt die Anwendung für die Produktion.
--   `npm run lint`: Überprüft die Codebasis mit ESLint.
--   `npm run preview`: Stellt den Produktions-Build lokal zum Testen bereit.
-
----
-
-## 🚀 Deployment
-
-Das Repository enthält die Konfiguration für ein nahtloses Deployment auf **Google Cloud Run** über **Cloud Build**.
-
--   **`Dockerfile`:** Ein mehrstufiges Dockerfile, das zuerst die statischen React-Assets erstellt und sie dann mit einem schlanken Nginx-Container ausliefert.
--   **`cloudbuild.yaml`:** Eine CI/CD-Pipeline-Definition für Cloud Build. Sie automatisiert das Erstellen des Docker-Images, das Pushen in die Google Container Registry und das Deployment als neue Revision des Cloud Run-Dienstes.
-
-Um das Deployment durchzuführen, führen Sie den folgenden `gcloud`-Befehl aus dem Projektstammverzeichnis aus:
-```sh
-gcloud builds submit --config cloudbuild.yaml --substitutions=_VITE_API_KEY="YOUR_API_KEY"
-```
+### Progressive Web App (PWA)
+*   **Service Worker:** Caching-Strategien (Stale-While-Revalidate) für Instant-Loading.
+*   **Manifest:** Installierbarkeit auf iOS/Android/Desktop.
+*   **Capabilities:** Zugriff auf Mikrofon (Web Speech API), Lautsprecher (Synthesis API) und Wake Lock.
 
 ---
 
 ## 📂 Projektstruktur
 
-Das Projekt folgt einer feature-orientierten und modularen Struktur, um Skalierbarkeit und Wartbarkeit zu gewährleisten.
+Die Codebasis folgt einer modularen, feature-orientierten Struktur ("Screaming Architecture").
 
 ```
-/
-├── public/                # Statische Assets (Icons, manifest.json)
-├── src/
-│   ├── components/        # Wiederverwendbare React-Komponenten (UI-Elemente, Seiten)
-│   ├── contexts/          # React Context Provider für lokalen Zustand
-│   ├── data/              # Statische Daten, inkl. Seed-Rezepte
-│   ├── hooks/             # Eigene React Hooks für geteilte Logik (z.B. useDebounce)
-│   ├── services/          # Kern-Geschäftslogik, API-Clients (Gemini), DB-Interaktionen (Dexie)
-│   ├── store/             # Redux Toolkit Setup (Store, Slices, Middleware)
-│   ├── types.ts           # Globale TypeScript-Typdefinitionen
-│   ├── App.tsx            # Wurzel-Komponente, Routing und globales Layout
-│   └── index.tsx          # Einstiegspunkt der Anwendung
-├── .env.local             # Lokale Umgebungsvariablen (untracked)
-├── Dockerfile             # Container-Definition für das Deployment
-├── cloudbuild.yaml        # CI/CD-Konfiguration für Google Cloud Build
-└── vite.config.ts         # Vite Build- und PWA-Konfiguration
+src/
+├── components/          # UI-Bausteine
+│   ├── ai-chef/         # Spezifische Logik für den KI-Koch
+│   ├── pantry/          # Vorrats-Komponenten (Smart Input, Listen)
+│   ├── settings/        # Modulare Einstellungs-Panels
+│   ├── shopping-list/   # Einkaufslisten-Module
+│   └── ...
+├── contexts/            # Dependency Injection via React Context
+├── data/                # Statische Seed-Daten & Typ-Definitionen
+├── hooks/               # Custom Hooks (useSpeechRecognition, useWakeLock)
+├── services/            # Business Logic Layer
+│   ├── db.ts            # Datenbank-Schema & Transaktionen
+│   ├── geminiService.ts # KI-Schnittstelle & Prompt Engineering
+│   └── voiceCommands.ts # Sprachsteuerungs-Router
+├── store/               # Redux Slices & Middleware
+└── types.ts             # Globale TypeScript Interfaces
 ```
 
 ---
 
-## 🗺️ Zukünftige Roadmap
+## 🚦 Setup & Entwicklung
 
-CulinaSync ist ein sich aktiv entwickelndes Projekt. Kernbereiche für die zukünftige Entwicklung umfassen:
-- [ ] **Multi-Geräte-Synchronisation:** Optionale, Ende-zu-Ende-verschlüsselte Synchronisation von Daten über die Geräte der Nutzer hinweg.
-- [ ] **Barcode-Scanning:** Schnelles Hinzufügen von Vorratsartikeln durch Scannen ihrer Barcodes.
-- [ ] **Rezept-Import:** Importieren von Rezepten direkt von Ihren Lieblings-Kochwebseiten.
-- [ ] **Erweitertes Teilen:** Teilen von Essensplänen oder Einkaufslisten mit anderen Haushaltsmitgliedern.
-- [ ] **Nährwertanalyse:** Tiefere Integration von Nährwertdaten und -tracking.
+### Voraussetzungen
+*   Node.js (v18+)
+*   Google AI Studio API Key
+
+### Installation
+
+1.  **Repository klonen**
+    ```bash
+    git clone https://github.com/your-repo/culinasync.git
+    cd culinasync
+    ```
+
+2.  **Abhängigkeiten installieren**
+    ```bash
+    npm install
+    ```
+
+3.  **Environment konfigurieren**
+    Erstelle eine `.env` Datei im Root-Verzeichnis:
+    ```env
+    VITE_API_KEY=dein_google_gemini_api_key_hier
+    ```
+
+4.  **Starten**
+    ```bash
+    npm run dev
+    ```
+
+---
+
+## 🔮 Roadmap & Zukunft
+
+*   **Sync & Cloud:** Optionales E2E-verschlüsseltes Backup via WebRTC oder CRDTs (Yjs).
+*   **IoT Integration:** Anbindung an smarte Küchengeräte (Home Connect).
+*   **Health Connect:** Synchronisation von Nährwerten mit Apple Health / Google Fit.
+*   **Multi-Modal Input:** Foto vom Kühlschrankinhalt machen -> KI erkennt Zutaten automatisch.
+
+---
+
+<div align="center">
+  <small>Crafted with ❤️ and 🤖 using React 19 & Gemini API.</small>
+</div>

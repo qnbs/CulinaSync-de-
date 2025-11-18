@@ -62,6 +62,7 @@ export interface Recipe {
   updatedAt?: number;
   pantryMatchPercentage?: number;
   ingredientCount?: number;
+  imageUrl?: string; // Base64 encoded image or URL
 }
 
 export interface MealPlanItem {
@@ -94,6 +95,7 @@ export interface AppSettings {
     dietaryRestrictions: string[];
     preferredCuisines: string[];
     customInstruction: string;
+    creativityLevel: number; // 0.0 to 1.0 (Temperature)
   };
   pantry: {
     defaultSort: 'name' | 'expiryDate' | 'updatedAt' | 'createdAt';
@@ -115,6 +117,7 @@ export interface AppSettings {
   };
   appearance: {
     accentColor: 'amber' | 'rose' | 'sky' | 'emerald';
+    highContrast: boolean;
   };
 }
 

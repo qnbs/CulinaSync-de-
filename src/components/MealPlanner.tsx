@@ -1,15 +1,15 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db, markMealAsCooked, removeRecipeFromMealPlan, addRecipeToMealPlan } from '../services/db';
+import React, { useState, useCallback } from 'react';
+import { addRecipeToMealPlan, markMealAsCooked, removeRecipeFromMealPlan } from '../services/db';
 import { Recipe, MealPlanItem } from '../types';
-import { ChevronLeft, ChevronRight, Search, PlusCircle, FileText, Save, ChevronsRight, X as XIcon, CookingPot } from 'lucide-react';
-import RecipeCard from './RecipeCard';
-import RecipeDetail from './RecipeDetail';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { addToast as addToastAction } from '../store/slices/uiSlice';
-import PlannedMealCard from './PlannedMealCard';
 import { useMealPlan } from '../hooks/useMealPlan';
+import RecipeDetail from './RecipeDetail';
 import CookModeView from './CookModeView';
+import { MealPlannerHeader } from './meal-planner/MealPlannerHeader';
+import { DayColumn } from './meal-planner/DayColumn';
+import { PlannerSidebar } from './meal-planner/PlannerSidebar';
+import { Save, FileText } from 'lucide-react';
 
 const AddMealNoteModal: React.FC<{
     date: string;
@@ -20,90 +20,33 @@ const AddMealNoteModal: React.FC<{
     const [note, setNote] = useState('');
 
     const handleSave = () => {
-        if (note.trim()) {
-            onSave(note.trim());
-        }
+        if (note.trim()) onSave(note.trim());
     };
 
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 page-fade-in" onClick={onClose}>
-            <div className="bg-zinc-800 rounded-lg p-6 w-full max-w-sm shadow-xl" onClick={e => e.stopPropagation()}>
-                <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><FileText size={18}/> Notiz hinzufügen</h3>
+        <div className="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm flex items-center justify-center z-50 page-fade-in" onClick={onClose}>
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl scale-100" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center gap-3 mb-4 text-[var(--color-accent-400)]">
+                    <FileText size={24}/> 
+                    <h3 className="text-lg font-bold text-zinc-100">Notiz hinzufügen</h3>
+                </div>
                 <p className="text-xs text-zinc-400 mb-4">
-                    Füge eine kurze Notiz für "{mealType}" am {new Date(date).toLocaleDateString('de-DE')} hinzu (z.B. "Reste essen", "Essen gehen").
+                    Für {mealType} am {new Date(date).toLocaleDateString('de-DE')}.
                 </p>
                 <textarea
                     value={note}
                     onChange={e => setNote(e.target.value)}
-                    placeholder="Deine Notiz..."
-                    className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-[var(--color-accent-500)]"
+                    placeholder="z.B. 'Essen gehen' oder 'Reste vom Vortag'"
+                    className="w-full bg-zinc-950/50 border border-zinc-700 rounded-xl p-3 text-zinc-200 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none resize-none"
                     rows={3}
                     autoFocus
                 />
-                <div className="flex justify-end gap-3 pt-4 mt-2 border-t border-zinc-700">
-                    <button onClick={onClose} className="py-2 px-4 rounded-md text-zinc-300 hover:bg-zinc-700">Abbrechen</button>
-                    <button onClick={handleSave} disabled={!note.trim()} className="py-2 px-4 rounded-md bg-[var(--color-accent-500)] text-zinc-900 font-bold hover:bg-[var(--color-accent-400)] flex items-center gap-2 disabled:bg-zinc-600">
+                <div className="flex justify-end gap-3 pt-6">
+                    <button onClick={onClose} className="px-4 py-2 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition-colors text-sm font-medium">Abbrechen</button>
+                    <button onClick={handleSave} disabled={!note.trim()} className="px-4 py-2 rounded-lg bg-[var(--color-accent-500)] text-zinc-900 font-bold hover:bg-[var(--color-accent-400)] disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center gap-2 transition-all">
                         <Save size={16}/> Speichern
                     </button>
                 </div>
-            </div>
-        </div>
-    );
-};
-
-// Helper to calculate pantry status for a planned meal using pre-computed data
-const getPantryStatusForPlannedMeal = (recipe: Recipe | undefined): { status: 'ok' | 'partial' | 'missing' | 'unknown'; have: number; total: number } => {
-    if (!recipe || typeof recipe.pantryMatchPercentage === 'undefined' || typeof recipe.ingredientCount === 'undefined') {
-        return { status: 'unknown', have: 0, total: 0 };
-    }
-    
-    const { pantryMatchPercentage, ingredientCount } = recipe;
-    
-    const have = Math.round(ingredientCount * (pantryMatchPercentage / 100));
-    
-    let status: 'ok' | 'partial' | 'missing' = 'missing';
-    if (pantryMatchPercentage === 100) status = 'ok';
-    else if (pantryMatchPercentage >= 70) status = 'partial';
-    
-    return { status, have, total: ingredientCount };
-};
-
-
-const RecipeSidebar = ({ recipes, onDragStart, isCollapsed, onToggle }: { recipes: Recipe[], onDragStart: (e: React.DragEvent, recipe: Recipe) => void, isCollapsed: boolean, onToggle: () => void }) => {
-    const [searchTerm, setSearchTerm] = useState('');
-    
-    const filteredRecipes = useMemo(() => {
-        return recipes.filter(r => r.recipeTitle.toLowerCase().includes(searchTerm.toLowerCase()));
-    }, [recipes, searchTerm]);
-    
-    if (isCollapsed) {
-        return (
-            <div className="bg-zinc-950/50 border-l border-zinc-800 flex flex-col items-center p-2">
-                <button onClick={onToggle} title="Rezepte anzeigen" className="p-2 rounded-md hover:bg-zinc-700 text-zinc-400">
-                    <ChevronLeft size={20} />
-                </button>
-            </div>
-        )
-    }
-
-    return (
-        <div className="w-full lg:w-1/3 xl:w-1/4 bg-zinc-950/50 border-l border-zinc-800 p-4 flex flex-col flex-shrink-0">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold">Rezepte ziehen</h3>
-              <button onClick={onToggle} title="Seitenleiste einklappen" className="p-2 rounded-md hover:bg-zinc-700 text-zinc-400">
-                  <ChevronsRight size={20}/>
-              </button>
-            </div>
-            <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
-                <input type="text" placeholder="Suchen..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full bg-zinc-800 border-zinc-700 rounded-md py-2 pl-10 pr-3 text-sm focus:ring-2 focus:ring-[var(--color-accent-500)]" />
-            </div>
-            <div className="overflow-y-auto flex-grow pr-2 -mr-2 space-y-3">
-                {(filteredRecipes && filteredRecipes.length > 0) ? filteredRecipes.map(recipe => (
-                    <div key={recipe.id} draggable onDragStart={(e) => onDragStart(e, recipe)} className="cursor-grab">
-                        <RecipeCard recipe={recipe} size="small" />
-                    </div>
-                )) : <p className="text-sm text-zinc-500 text-center py-4">Keine Rezepte gefunden.</p>}
             </div>
         </div>
     );
@@ -114,15 +57,9 @@ const MealPlanner: React.FC = () => {
   const settings = useAppSelector((state) => state.settings);
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  const {
-      recipes,
-      recipesById,
-      week,
-      mealsByDate
-  } = useMealPlan(currentDate, settings.weekStart === 'Monday');
+  const { recipes, recipesById, week, mealsByDate } = useMealPlan(currentDate, settings.weekStart === 'Monday');
   
   const [selectedRecipeForDetail, setSelectedRecipeForDetail] = useState<Recipe | null>(null);
-  const [dropTarget, setDropTarget] = useState<{ date: string; mealType: string } | null>(null);
   const [noteModalState, setNoteModalState] = useState<{isOpen: boolean; date: string; mealType: string} | null>(null);
   const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isCookMode, setIsCookMode] = useState(false);
@@ -132,19 +69,20 @@ const MealPlanner: React.FC = () => {
     dispatch(addToastAction({ message, type }));
   };
   
-  const weekString = `Woche vom ${week[0].toLocaleDateString('de-DE')} - ${week[6].toLocaleDateString('de-DE')}`;
+  const weekString = `${week[0].toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })} - ${week[6].toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })}`;
   
   const handleDragStart = (e: React.DragEvent, recipe: Recipe) => {
     e.dataTransfer.setData('recipeId', recipe.id!.toString());
+    e.dataTransfer.effectAllowed = 'copy';
   };
 
-  const handleDrop = async (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent, date: string, mealType: string) => {
     e.preventDefault();
-    if (dropTarget) {
-        const recipeId = parseInt(e.dataTransfer.getData('recipeId'), 10);
-        await addRecipeToMealPlan({ date: dropTarget.date, mealType: dropTarget.mealType as any, recipeId });
+    const recipeIdStr = e.dataTransfer.getData('recipeId');
+    if (recipeIdStr) {
+        const recipeId = parseInt(recipeIdStr, 10);
+        await addRecipeToMealPlan({ date, mealType: mealType as any, recipeId });
     }
-    setDropTarget(null);
   };
   
   const handleMealAction = useCallback(async (action: string, payload: Recipe | MealPlanItem) => {
@@ -159,7 +97,7 @@ const MealPlanner: React.FC = () => {
             if (success) {
                 let message = "Mahlzeit als gekocht markiert.";
                 if(changes?.updated.length || changes.deleted.length) {
-                    message += ` ${[...changes.updated, ...changes.deleted].length} Artikel im Vorrat angepasst.`
+                    message += ` ${[...changes.updated, ...changes.deleted].length} Artikel im Vorrat aktualisiert.`
                 }
                 addToast(message);
             }
@@ -176,12 +114,8 @@ const MealPlanner: React.FC = () => {
   }, [addToast]);
   
   const handleSaveNote = useCallback(async (note: string, date: string, mealType: string) => {
-    await addRecipeToMealPlan({
-        date,
-        mealType: mealType as any,
-        note,
-    });
-    addToast('Notiz zum Plan hinzugefügt.');
+    await addRecipeToMealPlan({ date, mealType: mealType as any, note });
+    addToast('Notiz hinzugefügt.');
     setNoteModalState(null);
   }, [addToast]);
 
@@ -195,8 +129,9 @@ const MealPlanner: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-8rem)]">
+    <div className="flex flex-col lg:flex-row gap-8 h-full min-h-[calc(100vh-140px)] relative">
          {isCookMode && recipeForCookMode && <CookModeView recipe={recipeForCookMode} onExit={() => setIsCookMode(false)} />}
+         
          {noteModalState?.isOpen && (
             <AddMealNoteModal
                 date={noteModalState.date}
@@ -206,66 +141,45 @@ const MealPlanner: React.FC = () => {
             />
         )}
 
-        <div className="flex-grow flex flex-col space-y-4 overflow-y-auto">
-            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                <div>
-                    <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">Essensplaner</h2>
-                    <p className="text-zinc-400 mt-1">Plane Mahlzeiten per Drag & Drop oder füge Notizen hinzu.</p>
-                </div>
-            </div>
-
-            <div className="flex items-center justify-between p-2 bg-zinc-950/50 border border-zinc-800 rounded-lg flex-shrink-0">
-                <button onClick={() => setCurrentDate(d => new Date(d.setDate(d.getDate() - 7)))} className="p-2 rounded-md hover:bg-zinc-700"><ChevronLeft/></button>
-                <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-4 text-center">
-                  <h3 className="font-semibold text-base sm:text-lg text-zinc-100 tabular-nums">{weekString}</h3>
-                  <button onClick={() => setCurrentDate(new Date())} className="text-sm font-semibold py-1 px-3 rounded-md bg-zinc-700 hover:bg-zinc-600 text-[var(--color-accent-300)]">Heute</button>
-                </div>
-                <button onClick={() => setCurrentDate(d => new Date(d.setDate(d.getDate() + 7)))} className="p-2 rounded-md hover:bg-zinc-700"><ChevronRight/></button>
-            </div>
+        <div className="flex-grow flex flex-col min-w-0">
+            <MealPlannerHeader 
+                currentDate={currentDate} 
+                setCurrentDate={setCurrentDate} 
+                weekString={weekString} 
+                mealsByDate={mealsByDate}
+                recipesById={recipesById}
+                weekDates={week}
+            />
        
-            <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden flex-grow">
-                <div className="flex overflow-x-auto lg:grid lg:grid-cols-7 gap-px">
+            {/* Kanban Board Scroll Container */}
+            <div className="flex-grow overflow-x-auto pb-4 custom-scrollbar -mx-4 px-4 lg:mx-0 lg:px-0">
+                <div className="flex gap-4 min-w-max lg:min-w-0">
                   {week.map(date => {
                       const dateString = date.toISOString().split('T')[0];
-                      const today = isToday(date);
+                      const meals = {
+                          'Frühstück': mealsByDate[`${dateString}-Frühstück`],
+                          'Mittagessen': mealsByDate[`${dateString}-Mittagessen`],
+                          'Abendessen': mealsByDate[`${dateString}-Abendessen`]
+                      };
+
                       return (
-                          <div key={dateString} className={`flex flex-col w-4/5 min-w-[280px] sm:min-w-[320px] lg:w-auto lg:min-w-0 flex-shrink-0 ${today ? 'bg-zinc-800/50' : 'bg-zinc-900'}`}>
-                              <div className={`text-center py-2 font-semibold text-sm border-b border-zinc-800 ${today ? 'text-[var(--color-accent-400)]' : 'text-zinc-300'}`}>
-                                  <div>{date.toLocaleDateString('de-DE', { weekday: 'short' })}</div>
-                                  <div className="text-xs text-zinc-400">{date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}</div>
-                              </div>
-                              <div className="flex flex-col gap-px flex-grow">
-                                  {(['Frühstück', 'Mittagessen', 'Abendessen'] as const).map(mealType => {
-                                      const meal = mealsByDate[`${dateString}-${mealType}`];
-                                      const recipe = meal?.recipeId ? recipesById.get(meal.recipeId) : undefined;
-                                      const isDropTarget = dropTarget?.date === dateString && dropTarget.mealType === mealType;
-                                      return (
-                                          <div 
-                                              key={mealType} 
-                                              className={`p-2 min-h-[120px] flex flex-col justify-start transition-colors group flex-grow ${isDropTarget ? 'bg-[var(--color-accent-500)]/20' : ''}`}
-                                              onDragOver={e => { e.preventDefault(); setDropTarget({ date: dateString, mealType }); }}
-                                              onDragLeave={() => setDropTarget(null)}
-                                              onDrop={handleDrop}
-                                          >
-                                              <span className="text-xs text-zinc-500">{mealType}</span>
-                                              {meal ? <PlannedMealCard meal={meal} recipe={recipe} pantryStatus={getPantryStatusForPlannedMeal(recipe)} onAction={handleMealAction} />
-                                              : <div className="w-full h-full flex items-center justify-center text-zinc-600 rounded-md ">
-                                                  <button onClick={() => setNoteModalState({ isOpen: true, date: dateString, mealType })} title="Notiz hinzufügen" className="opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-full hover:bg-zinc-700/50 hover:text-[var(--color-accent-400)]">
-                                                      <PlusCircle size={20}/>
-                                                  </button>
-                                                </div>}
-                                          </div>
-                                      )
-                                  })}
-                              </div>
-                          </div>
-                      )
+                          <DayColumn 
+                            key={dateString}
+                            date={date}
+                            isToday={isToday(date)}
+                            meals={meals}
+                            recipesById={recipesById}
+                            onDrop={handleDrop}
+                            onAddNote={(d, t) => setNoteModalState({ isOpen: true, date: d, mealType: t })}
+                            onMealAction={handleMealAction}
+                          />
+                      );
                   })}
                 </div>
             </div>
         </div>
         
-        <RecipeSidebar
+        <PlannerSidebar
           recipes={recipes || []}
           onDragStart={handleDragStart}
           isCollapsed={isSidebarCollapsed}

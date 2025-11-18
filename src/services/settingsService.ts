@@ -10,6 +10,7 @@ export const getDefaultSettings = (): AppSettings => ({
     dietaryRestrictions: [],
     preferredCuisines: [],
     customInstruction: '',
+    creativityLevel: 0.7,
   },
   pantry: {
     defaultSort: 'name',
@@ -31,6 +32,7 @@ export const getDefaultSettings = (): AppSettings => ({
   },
   appearance: {
     accentColor: 'amber',
+    highContrast: false,
   },
 });
 
@@ -41,6 +43,8 @@ export const loadSettings = (): AppSettings => {
       // Merge with defaults to handle new settings being added in updates
       const parsed = JSON.parse(storedSettings);
       const defaults = getDefaultSettings();
+      
+      // Deep merge needed for nested objects to ensure new fields (like creativityLevel) are added
       return { 
           ...defaults, 
           ...parsed, 

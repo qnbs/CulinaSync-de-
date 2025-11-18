@@ -11,6 +11,7 @@ import {
     setEditingItem,
     setEditingCategory,
     setExportOpen,
+    setShoppingMode,
     toggleCategoryCollapse,
     collapseAll,
     expandAll,
@@ -232,6 +233,7 @@ export const useShoppingList = () => {
     setEditingCategory: (cat: { oldName: string, newName: string } | null) => dispatch(setEditingCategory(cat)),
     setIsCompletedVisible: () => dispatch(toggleCompletedVisible()),
     setExportOpen: (isOpen: boolean) => dispatch(setExportOpen(isOpen)),
+    setShoppingMode: (isMode: boolean) => dispatch(setShoppingMode(isMode)),
     setDropTargetInfo,
 
     handleToggle, handleQuickAdd, handleAiAdd, handleBulkAdd, handleGenerateFromPlan,

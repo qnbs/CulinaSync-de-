@@ -7,6 +7,7 @@ import { getExpiryStatus } from '../components/PantryListItem';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setVoiceAction, addToast as addToastAction, setFocusAction, clearInitialSelectedId } from '../store/slices/uiSlice';
 import { setPantryGrouping, setPantrySort } from '../store/slices/settingsSlice';
+import { parseShoppingItemString, getCategoryForItem } from '../services/utils';
 
 
 export const usePantryManager = () => {
@@ -114,6 +115,24 @@ export const usePantryManager = () => {
         console.error(error);
     }
   }, [addToast]);
+
+  // New Quick Add Function
+  const handleQuickAdd = useCallback(async (input: string) => {
+      const parsed = parseShoppingItemString(input);
+      const category = getCategoryForItem(parsed.name);
+      try {
+        const { status, item } = await addOrUpdatePantryItem({
+            ...parsed,
+            category,
+        });
+        const message = status === 'added'
+            ? `"${item.name}" hinzugefügt (${item.quantity} ${item.unit}).`
+            : `"${item.name}" aktualisiert.`;
+        addToast(message, 'success');
+      } catch(e) {
+          addToast('Fehler beim Hinzufügen.', 'error');
+      }
+  }, [addToast]);
   
   const adjustQuantity = useCallback(async (item: PantryItem, amount: number) => {
     const newQuantity = item.quantity + amount;
@@ -167,6 +186,6 @@ export const usePantryManager = () => {
     expiryFilter, setExpiryFilter, modalState, setModalState, isSelectMode,
     selectedItems, pantryItems, filteredItems, groupedItems, searchInputRef,
     adjustQuantity, toggleSelectItem, toggleSelectMode, handleDeleteSelected,
-    handleAddSelectedToShoppingList, handleSaveItem, handleAddToShoppingList
+    handleAddSelectedToShoppingList, handleSaveItem, handleAddToShoppingList, handleQuickAdd
   };
 };

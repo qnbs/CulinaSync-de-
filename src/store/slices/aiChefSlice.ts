@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { Recipe, RecipeIdea, StructuredPrompt } from '../../types';
-import { generateRecipeIdeas, generateRecipe } from '../../services/geminiService';
+import { generateRecipeIdeas, generateRecipe, generateRecipeImage } from '../../services/geminiService';
 import { RootState } from '..';
 import { db } from '../../services/db';
 
@@ -11,6 +11,8 @@ interface AiChefSliceState {
   ideas: RecipeIdea[];
   recipe: Recipe | null;
   error: string | null;
+  imageStatus: 'idle' | 'loading' | 'success' | 'error';
+  generatedImageUrl: string | null;
 }
 
 const initialState: AiChefSliceState = {
@@ -18,6 +20,8 @@ const initialState: AiChefSliceState = {
   ideas: [],
   recipe: null,
   error: null,
+  imageStatus: 'idle',
+  generatedImageUrl: null,
 };
 
 export const generateRecipeIdeasAsync = createAsyncThunk<
@@ -50,6 +54,19 @@ export const generateFullRecipeAsync = createAsyncThunk<
     }
 });
 
+export const generateImageAsync = createAsyncThunk<
+  string,
+  string,
+  { rejectValue: string }
+>('aiChef/generateImage', async (recipeTitle, { rejectWithValue }) => {
+    try {
+        const imageUrl = await generateRecipeImage(recipeTitle);
+        return imageUrl;
+    } catch (e: any) {
+        return rejectWithValue(e.message);
+    }
+});
+
 const aiChefSlice = createSlice({
   name: 'aiChef',
   initialState,
@@ -59,6 +76,8 @@ const aiChefSlice = createSlice({
         state.status = 'ideasReady';
         state.recipe = null;
         state.error = null;
+        state.imageStatus = 'idle';
+        state.generatedImageUrl = null;
     }
   },
   extraReducers: (builder) => {
@@ -67,6 +86,8 @@ const aiChefSlice = createSlice({
         state.status = 'loadingIdeas';
         state.error = null;
         state.recipe = null;
+        state.imageStatus = 'idle';
+        state.generatedImageUrl = null;
       })
       .addCase(generateRecipeIdeasAsync.fulfilled, (state, action) => {
         state.status = 'ideasReady';
@@ -87,6 +108,19 @@ const aiChefSlice = createSlice({
       .addCase(generateFullRecipeAsync.rejected, (state, action) => {
         state.status = 'ideasReady'; // Go back to ideas screen on error
         state.error = action.payload ?? 'Failed to generate recipe';
+      })
+      .addCase(generateImageAsync.pending, (state) => {
+          state.imageStatus = 'loading';
+      })
+      .addCase(generateImageAsync.fulfilled, (state, action) => {
+          state.imageStatus = 'success';
+          state.generatedImageUrl = action.payload;
+          if (state.recipe) {
+              state.recipe.imageUrl = action.payload;
+          }
+      })
+      .addCase(generateImageAsync.rejected, (state) => {
+          state.imageStatus = 'error';
       });
   },
 });

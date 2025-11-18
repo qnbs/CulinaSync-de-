@@ -5,12 +5,13 @@ import { PantryToolbar } from './pantry/PantryToolbar';
 import { PantryList } from './pantry/PantryList';
 import { PantryBulkActions } from './pantry/PantryBulkActions';
 import { PantryItemModal } from './pantry/PantryItemModal';
+import { PantryQuickAdd } from './pantry/PantryQuickAdd';
 
 const PantryManagerView: React.FC = () => {
     const { modalState, setModalState, handleSaveItem, pantryItems } = usePantryManagerContext();
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 pb-24">
             <PantryItemModal 
                 isOpen={modalState.isOpen}
                 item={modalState.item}
@@ -24,6 +25,7 @@ const PantryManagerView: React.FC = () => {
                 <PantryList />
                 <PantryBulkActions />
             </div>
+            <PantryQuickAdd />
         </div>
     );
 };

@@ -184,14 +184,20 @@ export const generateRecipeIdeas = async (
   aiPreferences: AppSettings['aiPreferences']
 ): Promise<RecipeIdea[]> => {
     const model = "gemini-2.5-flash";
-    const systemInstruction = `Du bist Culina, ein Weltklasse-Koch und kulinarischer Assistent. Deine Aufgabe ist es, 3 köstliche, unterschiedliche und plausible Rezeptideen auf Deutsch zu entwickeln, die genau auf die Wünsche des Nutzers zugeschnitten sind. Antworte IMMER NUR mit einem einzigen, gültigen JSON-Objekt, das dem Schema entspricht.`;
+    const systemInstruction = `Du bist Culina, ein Weltklasse-Koch. Entwickle 3 kreative, unterschiedliche Rezeptideen auf Deutsch. Nutze deinen "Thinking Process", um sicherzustellen, dass die Ideen exakt zu den Vorräten und Einschränkungen passen.`;
     const fullPrompt = constructBasePrompt(prompt, pantryItems, aiPreferences);
 
     try {
         const response = await ai.models.generateContent({
             model,
             contents: fullPrompt,
-            config: { systemInstruction, responseMimeType: 'application/json', responseSchema: recipeIdeasSchema }
+            config: { 
+                systemInstruction, 
+                responseMimeType: 'application/json', 
+                responseSchema: recipeIdeasSchema,
+                thinkingConfig: { thinkingBudget: 2048 },
+                temperature: aiPreferences.creativityLevel ?? 0.7,
+            }
         });
         const jsonText = response.text.trim();
         if (!jsonText) throw new Error("Die KI hat eine leere Antwort zurückgegeben.");
@@ -220,7 +226,7 @@ export const generateRecipe = async (
   fullPrompt += `\n- Titel: "${chosenIdea.recipeTitle}"`;
   fullPrompt += `\n- Beschreibung: "${chosenIdea.shortDescription}"`;
   
-  const systemInstruction = `Du bist Culina, ein Weltklasse-Koch und kulinarischer Assistent für die App CulinaSync. Deine Aufgabe ist es, ein köstliches, stimmiges und plausibles Rezept auf Deutsch zu erstellen, das genau auf die Wünsche des Nutzers zugeschnitten ist. Antworte IMMER NUR mit einem einzigen, gültigen JSON-Objekt, das dem bereitgestellten Schema entspricht. Füge keinen anderen Text, keine Markdown-Formatierung oder Erklärungen vor oder nach dem JSON-Objekt hinzu.`;
+  const systemInstruction = `Du bist Culina, ein Weltklasse-Koch. Erstelle ein präzises, deutsches Rezept. Nutze deinen "Thinking Process", um die Kochschritte logisch zu strukturieren und sicherzustellen, dass keine Zutat in der Anleitung vergessen wird.`;
   
   let response: GenerateContentResponse;
   try {
@@ -231,6 +237,8 @@ export const generateRecipe = async (
             systemInstruction,
             responseMimeType: 'application/json',
             responseSchema: recipeSchema,
+            thinkingConfig: { thinkingBudget: 4096 },
+            temperature: aiPreferences.creativityLevel ?? 0.7,
         }
     });
   } catch (error: unknown) {
@@ -305,5 +313,28 @@ export const generateShoppingList = async (
 
     } catch (error) {
         throw handleGeminiError(error, 'shopping list');
+    }
+};
+
+export const generateRecipeImage = async (recipeTitle: string): Promise<string> => {
+    const model = "imagen-4.0-generate-001";
+    const prompt = `High quality, professional food photography of ${recipeTitle}, studio lighting, delicious, appetizing, 4k resolution, photorealistic, overhead shot, plated elegantly`;
+    
+    try {
+        const response = await ai.models.generateImages({
+            model,
+            prompt,
+            config: {
+                numberOfImages: 1,
+                outputMimeType: 'image/jpeg',
+                aspectRatio: '16:9',
+            },
+        });
+        
+        const base64ImageBytes = response.generatedImages[0].image.imageBytes;
+        return `data:image/jpeg;base64,${base64ImageBytes}`;
+
+    } catch (e: unknown) {
+        throw handleGeminiError(e, 'image generation');
     }
 };
