@@ -1,5 +1,4 @@
 <div align="center">
-  <img src="https://storage.googleapis.com/aai-cdn-files/icons/culina-sync-logo.png" alt="CulinaSync Logo" width="180">
   <h1>CulinaSync</h1>
   <p><strong>Das Kognitive Küchen-Betriebssystem</strong></p>
   <p>
