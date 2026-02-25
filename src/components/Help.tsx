@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Search, Book, Info, X } from 'lucide-react';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { useAppDispatch } from '../store/hooks';
 import { setCommandPaletteOpen, setCurrentPage, setVoiceAction } from '../store/slices/uiSlice';
 import { FaqSection, TipsSection, AboutSection } from './help/HelpComponents';
 
@@ -11,7 +11,6 @@ interface HelpProps {
 
 const Help: React.FC<HelpProps> = ({ appVersion }) => {
   const dispatch = useAppDispatch();
-  const { isListening } = useAppSelector(state => state.ui); // Access global listening state just in case we need it
   
   const [activeTab, setActiveTab] = useState<'knowledge' | 'about'>('knowledge');
   const [searchTerm, setSearchTerm] = useState('');

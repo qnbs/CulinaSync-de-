@@ -21,7 +21,7 @@ const NutrientBadge = ({ label, value, unit, color }: { label: string, value: nu
     </div>
 );
 
-export const MealPlannerHeader: React.FC<MealPlannerHeaderProps> = ({ currentDate, setCurrentDate, weekString, mealsByDate, recipesById, weekDates }) => {
+export const MealPlannerHeader: React.FC<MealPlannerHeaderProps> = ({ setCurrentDate, weekString, mealsByDate, recipesById, weekDates }) => {
     const dispatch = useAppDispatch();
 
     const weekNutrition = useMemo(() => {
@@ -57,7 +57,7 @@ export const MealPlannerHeader: React.FC<MealPlannerHeaderProps> = ({ currentDat
     const handleGenerateShoppingList = async () => {
         const resultAction = await dispatch(generateFromPlanAsync());
         if (generateFromPlanAsync.fulfilled.match(resultAction)) {
-             const { added, existing } = resultAction.payload;
+             const { added } = resultAction.payload;
              dispatch(addToast({ message: `Einkaufsliste aktualisiert: +${added} Artikel.` }));
         }
     };

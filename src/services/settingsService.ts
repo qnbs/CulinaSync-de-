@@ -3,6 +3,7 @@ import { AppSettings } from '../types';
 export const SETTINGS_KEY = 'culinaSyncSettings';
 
 export const getDefaultSettings = (): AppSettings => ({
+  language: 'de',
   displayName: 'Mein Haushalt',
   defaultServings: 2,
   weekStart: 'Monday',

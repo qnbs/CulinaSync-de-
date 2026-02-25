@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { PlusCircle, Package, AlertTriangle, ShoppingCart } from 'lucide-react';
 import { usePantryManagerContext } from '../../contexts/PantryManagerContext';
 import { getExpiryStatus } from '../PantryListItem';

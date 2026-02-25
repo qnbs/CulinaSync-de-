@@ -13,7 +13,7 @@ export const ShoppingListItemComponent = React.memo<{
     onStartEdit: (item: ShoppingListItem) => void;
     onCancelEdit: () => void;
     onSaveEdit: () => void;
-    setEditingItem: React.Dispatch<React.SetStateAction<ShoppingListItem | null>>;
+    setEditingItem: (item: ShoppingListItem | null) => void;
     onDeleteItem: (id: number) => void;
     onDragStart: (e: React.DragEvent, item: ShoppingListItem) => void;
     onDragOver: (e: React.DragEvent, item: ShoppingListItem) => void;

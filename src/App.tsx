@@ -6,11 +6,11 @@ import { useSpeechRecognition } from './hooks/useSpeechRecognition';
 import { processCommand, executeVoiceAction } from './services/voiceCommands';
 import { addShoppingListItem, addOrUpdatePantryItem, removeItemFromPantry } from './services/db';
 import VoiceControlUI from './components/VoiceControlUI';
-import { CheckCircle, Bot, Milk, BookOpen, CalendarDays, ShoppingCart, Settings as SettingsIcon, HelpCircle, PlusCircle, Search, RefreshCw, Trash2, Download, Upload, TerminalSquare, Mic, AlertTriangle, Info, X } from 'lucide-react';
+import { CheckCircle, Bot, Milk, BookOpen, CalendarDays, ShoppingCart, Settings as SettingsIcon, HelpCircle, PlusCircle, RefreshCw, Trash2, Download, Upload, Mic, AlertTriangle, Info, X } from 'lucide-react';
 import BottomNav from './components/BottomNav';
 import Onboarding from './components/Onboarding';
 import { useAppDispatch, useAppSelector } from './store/hooks';
-import { setCurrentPage, navigateToItem as navigateToItemAction, setCommandPaletteOpen, addToast as addToastAction, removeToast as removeToastAction, setFocusAction, setVoiceAction } from './store/slices/uiSlice';
+import { setCurrentPage, setCommandPaletteOpen, addToast as addToastAction, removeToast as removeToastAction } from './store/slices/uiSlice';
 
 
 // Lazy load page components for code splitting and faster initial load

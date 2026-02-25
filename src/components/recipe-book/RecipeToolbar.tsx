@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, Filter, X, ArrowUpDown, Star, CheckCircle2, Leaf } from 'lucide-react';
+import { useState } from 'react';
+import { Search, Filter, X, ArrowUpDown, Star, CheckCircle2 } from 'lucide-react';
 
 interface FilterOptions {
     courses: string[];

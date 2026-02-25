@@ -1,4 +1,3 @@
-import React from 'react';
 import { useShoppingListContext } from '../../contexts/ShoppingListContext';
 import { FileDown, Bot, TextQuote, RefreshCw, Trash2, ListTree, ListCollapse, ChevronDown, LoaderCircle } from 'lucide-react';
 

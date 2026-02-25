@@ -9,7 +9,7 @@ import CookModeView from './CookModeView';
 import { MealPlannerHeader } from './meal-planner/MealPlannerHeader';
 import { DayColumn } from './meal-planner/DayColumn';
 import { PlannerSidebar } from './meal-planner/PlannerSidebar';
-import { Save, FileText } from 'lucide-react';
+import { Save, FileText, X } from 'lucide-react';
 
 const AddMealNoteModal: React.FC<{
     date: string;
@@ -65,6 +65,9 @@ const MealPlanner: React.FC = () => {
   const [isCookMode, setIsCookMode] = useState(false);
   const [recipeForCookMode, setRecipeForCookMode] = useState<Recipe | null>(null);
 
+  // New State for "Tap to Place" interaction (Mobile support)
+  const [pendingRecipeId, setPendingRecipeId] = useState<number | null>(null);
+
   const addToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     dispatch(addToastAction({ message, type }));
   };
@@ -76,13 +79,40 @@ const MealPlanner: React.FC = () => {
     e.dataTransfer.effectAllowed = 'copy';
   };
 
+  // Handles both Drag&Drop (desktop) and Tap-to-Place (mobile)
+  const handleAddRecipeToSlot = async (date: string, mealType: string, recipeId: number) => {
+      await addRecipeToMealPlan({ date, mealType: mealType as any, recipeId });
+      if (pendingRecipeId) {
+          setPendingRecipeId(null); // Clear pending state after placement
+          addToast('Rezept geplant.');
+      }
+  };
+
   const handleDrop = async (e: React.DragEvent, date: string, mealType: string) => {
     e.preventDefault();
     const recipeIdStr = e.dataTransfer.getData('recipeId');
     if (recipeIdStr) {
         const recipeId = parseInt(recipeIdStr, 10);
-        await addRecipeToMealPlan({ date, mealType: mealType as any, recipeId });
+        await handleAddRecipeToSlot(date, mealType, recipeId);
     }
+  };
+  
+  // Handler for tapping a recipe in the sidebar (starts selection mode)
+  const handleSelectRecipeForPlacement = (recipe: Recipe) => {
+      setPendingRecipeId(prev => prev === recipe.id ? null : recipe.id!);
+      if (pendingRecipeId !== recipe.id) {
+          addToast("Wähle nun einen Tag für das Rezept aus.", "info");
+      }
+  };
+
+  // Handler for tapping a slot when a recipe is selected
+  const handleSlotClick = (date: string, mealType: string) => {
+      if (pendingRecipeId) {
+          handleAddRecipeToSlot(date, mealType, pendingRecipeId);
+      } else {
+          // Normal behavior: Add Note
+           setNoteModalState({ isOpen: true, date: date, mealType: mealType });
+      }
   };
   
   const handleMealAction = useCallback(async (action: string, payload: Recipe | MealPlanItem) => {
@@ -127,9 +157,11 @@ const MealPlanner: React.FC = () => {
   if (selectedRecipeForDetail) {
     return <RecipeDetail recipe={selectedRecipeForDetail} onBack={() => setSelectedRecipeForDetail(null)} />;
   }
+  
+  const pendingRecipe = pendingRecipeId ? recipesById.get(pendingRecipeId) : null;
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 h-full min-h-[calc(100vh-140px)] relative">
+    <div className="flex flex-col lg:flex-row gap-6 h-full min-h-[calc(100vh-140px)] relative pb-24 md:pb-8">
          {isCookMode && recipeForCookMode && <CookModeView recipe={recipeForCookMode} onExit={() => setIsCookMode(false)} />}
          
          {noteModalState?.isOpen && (
@@ -139,6 +171,16 @@ const MealPlanner: React.FC = () => {
                 onClose={() => setNoteModalState(null)}
                 onSave={(note) => handleSaveNote(note, noteModalState.date, noteModalState.mealType)}
             />
+        )}
+        
+        {/* Placement Mode Indicator Overlay */}
+        {pendingRecipe && (
+            <div className="fixed top-20 left-1/2 -translate-x-1/2 z-40 bg-[var(--color-accent-500)] text-zinc-900 px-6 py-3 rounded-full shadow-xl font-bold flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
+                <span>Wähle einen Tag für "{pendingRecipe.recipeTitle}"</span>
+                <button onClick={() => setPendingRecipeId(null)} className="bg-black/20 p-1 rounded-full hover:bg-black/30">
+                    <X size={16}/>
+                </button>
+            </div>
         )}
 
         <div className="flex-grow flex flex-col min-w-0">
@@ -151,8 +193,8 @@ const MealPlanner: React.FC = () => {
                 weekDates={week}
             />
        
-            {/* Kanban Board Scroll Container */}
-            <div className="flex-grow overflow-x-auto pb-4 custom-scrollbar -mx-4 px-4 lg:mx-0 lg:px-0">
+            {/* Kanban Board Scroll Container with Snap */}
+            <div className="flex-grow overflow-x-auto pb-4 -mx-4 px-4 lg:mx-0 lg:px-0 snap-x-mandatory scroll-smooth no-scrollbar">
                 <div className="flex gap-4 min-w-max lg:min-w-0">
                   {week.map(date => {
                       const dateString = date.toISOString().split('T')[0];
@@ -163,16 +205,18 @@ const MealPlanner: React.FC = () => {
                       };
 
                       return (
-                          <DayColumn 
-                            key={dateString}
-                            date={date}
-                            isToday={isToday(date)}
-                            meals={meals}
-                            recipesById={recipesById}
-                            onDrop={handleDrop}
-                            onAddNote={(d, t) => setNoteModalState({ isOpen: true, date: d, mealType: t })}
-                            onMealAction={handleMealAction}
-                          />
+                          <div key={dateString} className="snap-center w-[85vw] sm:w-[300px] lg:w-auto lg:flex-1">
+                              <DayColumn 
+                                date={date}
+                                isToday={isToday(date)}
+                                meals={meals}
+                                recipesById={recipesById}
+                                onDrop={handleDrop}
+                                onSlotClick={handleSlotClick}
+                                onMealAction={handleMealAction}
+                                isPlacementMode={!!pendingRecipeId}
+                              />
+                          </div>
                       );
                   })}
                 </div>
@@ -182,6 +226,8 @@ const MealPlanner: React.FC = () => {
         <PlannerSidebar
           recipes={recipes || []}
           onDragStart={handleDragStart}
+          onSelectRecipe={handleSelectRecipeForPlacement}
+          selectedRecipeId={pendingRecipeId}
           isCollapsed={isSidebarCollapsed}
           onToggle={() => setSidebarCollapsed(prev => !prev)}
         />

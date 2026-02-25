@@ -30,20 +30,25 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, isListenin
     }
   };
 
-
   return (
-    <header className="bg-zinc-950/70 backdrop-blur-lg sticky top-0 z-40 border-b border-white/10">
+    <header className="glass-panel-strong sticky top-0 z-50 border-b-0 border-b-white/0 shadow-lg backdrop-blur-xl">
+      {/* Subtle Gradient Line at Bottom */}
+      <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+      
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-4">
-            <ChefHat className="h-8 w-8 text-[var(--color-accent-400)]" />
-            <h1 className="text-xl font-bold text-zinc-100">CulinaSync</h1>
+            <div className="relative">
+               <div className="absolute inset-0 bg-[var(--color-accent-500)]/20 blur-xl rounded-full"></div>
+               <ChefHat className="relative h-8 w-8 text-[var(--color-accent-400)] drop-shadow-md" />
+            </div>
+            <h1 className="text-xl font-bold text-zinc-100 tracking-tight">CulinaSync</h1>
           </div>
           <div className="flex items-center space-x-1 sm:space-x-2">
              <button
                 onClick={onCommandPaletteToggle}
                 title="Befehlspalette öffnen (⌘K)"
-                className="flex items-center justify-center p-2 rounded-md text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100 transition-colors duration-200"
+                className="glass-button flex items-center justify-center p-2 rounded-lg text-zinc-400 hover:text-zinc-100"
               >
                 <TerminalSquare className="h-5 w-5" />
               </button>
@@ -51,24 +56,24 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, isListenin
               <button
                 onClick={handleMicClick}
                 title={isListening ? "Sprachsteuerung stoppen" : "Sprachsteuerung aktivieren"}
-                className={`flex items-center justify-center p-2 rounded-md transition-colors duration-200 ${
-                    isListening ? 'bg-red-600 text-white animate-pulse' : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100'
+                className={`glass-button flex items-center justify-center p-2 rounded-lg transition-all duration-300 ${
+                    isListening ? 'bg-red-500/20 !border-red-500/50 text-red-400 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.3)]' : 'text-zinc-400 hover:text-zinc-100'
                 }`}
               >
                 <Mic className="h-5 w-5" />
               </button>
             )}
              {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-1 sm:space-x-2">
+            <div className="hidden md:flex items-center space-x-1 p-1 bg-white/5 rounded-lg border border-white/5">
               {navItems.map((item) => (
                   <button
                     key={item.id}
                     onClick={() => setCurrentPage(item.id as Page)}
                     title={item.label}
-                    className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                    className={`flex items-center space-x-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
                       currentPage === item.id
-                        ? 'bg-[var(--color-accent-500)] text-zinc-900'
-                        : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100'
+                        ? 'bg-[var(--color-accent-500)] text-zinc-900 shadow-[0_0_10px_rgba(var(--color-accent-glow),0.4)]'
+                        : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5'
                     }`}
                     aria-current={currentPage === item.id ? 'page' : undefined}
                   >
@@ -78,32 +83,32 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, isListenin
               ))}
             </div>
             {/* Mobile Settings/Help */}
-             <button
-                key="settings"
-                onClick={() => setCurrentPage('settings')}
-                title="Einstellungen"
-                className={`flex items-center p-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                  currentPage === 'settings'
-                    ? 'bg-[var(--color-accent-500)] text-zinc-900'
-                    : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100'
-                }`}
-                aria-current={currentPage === 'settings' ? 'page' : undefined}
-              >
-                <Settings className="h-5 w-5" />
-              </button>
-               <button
-                key="help"
-                onClick={() => setCurrentPage('help')}
-                title="Hilfe"
-                className={`flex items-center p-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                  currentPage === 'help'
-                    ? 'bg-[var(--color-accent-500)] text-zinc-900'
-                    : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100'
-                }`}
-                aria-current={currentPage === 'help' ? 'page' : undefined}
-              >
-                <HelpCircle className="h-5 w-5" />
-              </button>
+            <div className="flex items-center space-x-1 border-l border-white/10 pl-2 ml-1">
+                 <button
+                    key="settings"
+                    onClick={() => setCurrentPage('settings')}
+                    title="Einstellungen"
+                    className={`glass-button flex items-center p-2 rounded-lg text-sm font-medium ${
+                      currentPage === 'settings'
+                        ? 'text-[var(--color-accent-400)] border-[var(--color-accent-500)]/30'
+                        : 'text-zinc-400 hover:text-zinc-100'
+                    }`}
+                  >
+                    <Settings className="h-5 w-5" />
+                  </button>
+                   <button
+                    key="help"
+                    onClick={() => setCurrentPage('help')}
+                    title="Hilfe"
+                    className={`glass-button flex items-center p-2 rounded-lg text-sm font-medium ${
+                      currentPage === 'help'
+                        ? 'text-[var(--color-accent-400)] border-[var(--color-accent-500)]/30'
+                        : 'text-zinc-400 hover:text-zinc-100'
+                    }`}
+                  >
+                    <HelpCircle className="h-5 w-5" />
+                  </button>
+            </div>
           </div>
         </div>
       </nav>

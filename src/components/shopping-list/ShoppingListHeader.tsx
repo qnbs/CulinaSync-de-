@@ -1,4 +1,3 @@
-import React, { useMemo } from 'react';
 import { ShoppingCart, CheckCircle, ShoppingBag } from 'lucide-react';
 import { useShoppingListContext } from '../../contexts/ShoppingListContext';
 

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useShoppingListContext } from '../../contexts/ShoppingListContext';
 import { ShoppingListItemComponent } from './ShoppingListItemComponent';
 import { ChevronDown, GripVertical } from 'lucide-react';

@@ -57,7 +57,7 @@ export const useShoppingList = () => {
   const handleClearList = useCallback(async () => {
     if (window.confirm('Möchtest du die Einkaufsliste wirklich komplett leeren?')) {
         const result = await dispatch(clearListAsync());
-        if(result.payload > 0) addToast('Liste geleert.');
+        if(clearListAsync.fulfilled.match(result) && result.payload > 0) addToast('Liste geleert.');
     }
   }, [dispatch, addToast]);
 
@@ -180,7 +180,7 @@ export const useShoppingList = () => {
     const lastItem = itemsInCategory[itemsInCategory.length - 1];
     const newSortOrder = (lastItem ? lastItem.sortOrder : 0) + 1000;
     
-    dispatch(updateItemOrderAsync({ ...draggedItem, category, newSortOrder }));
+    dispatch(updateItemOrderAsync({ ...draggedItem, category, sortOrder: newSortOrder }));
   }, [draggedItem, shoppingList, dispatch]);
 
   const onDragEnd = useCallback(() => {

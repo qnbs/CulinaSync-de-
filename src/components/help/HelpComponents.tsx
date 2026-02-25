@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { ChevronDown, Search, ArrowRight, Activity, Smartphone, Globe, Database } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronDown, ArrowRight, Activity, Smartphone, Globe, Database } from 'lucide-react';
 import { FAQS, PRO_TIPS, TECH_STACK, PHILOSOPHY } from './helpData';
 
 // --- FAQ Accordion Component ---

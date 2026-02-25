@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ShoppingListItem } from '../../types';
 import { TextQuote } from 'lucide-react';
 import { parseShoppingItemString } from '../../services/utils';

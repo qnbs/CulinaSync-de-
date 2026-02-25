@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { AppSettings, BeforeInstallPromptEvent } from '../types';
-import { Save, RotateCcw, CheckCircle } from 'lucide-react';
+import { Save, RotateCcw } from 'lucide-react';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { updateSettings } from '../store/slices/settingsSlice';
 import { addToast as addToastAction } from '../store/slices/uiSlice';

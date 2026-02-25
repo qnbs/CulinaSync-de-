@@ -1,5 +1,5 @@
 
-import { Bot, Milk, BookOpen, CalendarDays, ShoppingCart, TerminalSquare, Mic, Database, ShieldCheck, WifiOff, Zap } from 'lucide-react';
+import { ShoppingCart, TerminalSquare, Mic, ShieldCheck, WifiOff, Zap } from 'lucide-react';
 
 export const FAQS = [
     {

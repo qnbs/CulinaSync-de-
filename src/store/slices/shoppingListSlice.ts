@@ -10,7 +10,6 @@ import {
     batchAddShoppingListItems, 
     generateListFromMealPlan 
 } from '../../services/db';
-import { RootState } from '..';
 import { parseShoppingItemString } from '../../services/utils';
 
 interface ShoppingListState {

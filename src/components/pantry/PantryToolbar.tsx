@@ -1,4 +1,3 @@
-import React from 'react';
 import { Search, ArrowUpDown, ListTree, Filter, CheckSquare, X } from 'lucide-react';
 import { usePantryManagerContext } from '../../contexts/PantryManagerContext';
 

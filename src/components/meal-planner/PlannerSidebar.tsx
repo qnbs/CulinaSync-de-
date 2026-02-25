@@ -6,11 +6,13 @@ import RecipeCard from '../RecipeCard';
 interface PlannerSidebarProps {
     recipes: Recipe[];
     onDragStart: (e: React.DragEvent, recipe: Recipe) => void;
+    onSelectRecipe: (recipe: Recipe) => void;
+    selectedRecipeId: number | null;
     isCollapsed: boolean;
     onToggle: () => void;
 }
 
-export const PlannerSidebar: React.FC<PlannerSidebarProps> = ({ recipes, onDragStart, isCollapsed, onToggle }) => {
+export const PlannerSidebar: React.FC<PlannerSidebarProps> = ({ recipes, onDragStart, onSelectRecipe, selectedRecipeId, isCollapsed, onToggle }) => {
     const [searchTerm, setSearchTerm] = useState('');
     
     const filteredRecipes = useMemo(() => {
@@ -41,7 +43,7 @@ export const PlannerSidebar: React.FC<PlannerSidebarProps> = ({ recipes, onDragS
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h3 className="text-lg font-bold text-zinc-100">Rezepte</h3>
-                    <p className="text-xs text-zinc-500">Drag & Drop in den Plan</p>
+                    <p className="text-xs text-zinc-500">Drag & Drop oder Antippen</p>
                 </div>
                 <button 
                     onClick={onToggle} 
@@ -70,9 +72,10 @@ export const PlannerSidebar: React.FC<PlannerSidebarProps> = ({ recipes, onDragS
                             key={recipe.id} 
                             draggable 
                             onDragStart={(e) => onDragStart(e, recipe)} 
-                            className="cursor-grab active:cursor-grabbing transform transition-transform hover:scale-[1.02]"
+                            onClick={() => onSelectRecipe(recipe)}
+                            className={`cursor-grab active:cursor-grabbing transform transition-all hover:scale-[1.02] ${selectedRecipeId === recipe.id ? 'ring-2 ring-[var(--color-accent-500)] rounded-2xl' : ''}`}
                         >
-                            <RecipeCard recipe={recipe} size="small" />
+                            <RecipeCard recipe={recipe} size="small" isSelected={selectedRecipeId === recipe.id} />
                         </div>
                     ))
                 ) : (

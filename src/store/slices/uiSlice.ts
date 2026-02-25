@@ -49,7 +49,7 @@ const uiSlice = createSlice({
             state.toasts.push(action.payload);
         },
         prepare: (payload: { message: string, type?: 'success' | 'error' | 'info'}) => {
-            return { payload: { id: nanoid(), type: 'success', ...payload } }
+            return { payload: { id: nanoid(), type: payload.type || 'success', message: payload.message } }
         }
     },
     removeToast: (state, action: PayloadAction<string>) => {

@@ -199,7 +199,7 @@ export const generateRecipeIdeas = async (
                 temperature: aiPreferences.creativityLevel ?? 0.7,
             }
         });
-        const jsonText = response.text.trim();
+        const jsonText = response.text?.trim();
         if (!jsonText) throw new Error("Die KI hat eine leere Antwort zurückgegeben.");
         
         const parsedData = JSON.parse(jsonText);
@@ -245,7 +245,7 @@ export const generateRecipe = async (
      throw handleGeminiError(error, 'full recipe');
   }
 
-  const jsonText = response.text.trim();
+  const jsonText = response.text?.trim();
   if (!jsonText) {
       throw new Error("Die KI hat eine leere Antwort zurückgegeben.");
   }
@@ -298,7 +298,7 @@ export const generateShoppingList = async (
             }
         });
         
-        const jsonText = response.text.trim();
+        const jsonText = response.text?.trim();
         if (!jsonText) {
             throw new Error("Die KI hat eine leere Antwort zurückgegeben.");
         }
@@ -331,7 +331,8 @@ export const generateRecipeImage = async (recipeTitle: string): Promise<string> 
             },
         });
         
-        const base64ImageBytes = response.generatedImages[0].image.imageBytes;
+        const base64ImageBytes = response.generatedImages?.[0]?.image?.imageBytes;
+        if (!base64ImageBytes) throw new Error("Kein Bild generiert.");
         return `data:image/jpeg;base64,${base64ImageBytes}`;
 
     } catch (e: unknown) {

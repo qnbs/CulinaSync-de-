@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { PlusCircle, MoreHorizontal, Trash2 } from 'lucide-react';
+import { PlusCircle, MoreHorizontal, Trash2, CheckCircle2 } from 'lucide-react';
 import { MealPlanItem, Recipe } from '../../types';
 import PlannedMealCard from '../PlannedMealCard';
-import { removeRecipeFromMealPlan } from '../../services/db'; // Direct import or prop drilling
 
 interface DayColumnProps {
     date: Date;
@@ -10,8 +9,9 @@ interface DayColumnProps {
     meals: Record<'Frühstück' | 'Mittagessen' | 'Abendessen', MealPlanItem | undefined>;
     recipesById: Map<number, Recipe>;
     onDrop: (e: React.DragEvent, date: string, mealType: string) => void;
-    onAddNote: (date: string, mealType: string) => void;
+    onSlotClick: (date: string, mealType: string) => void;
     onMealAction: (action: string, payload: Recipe | MealPlanItem) => void;
+    isPlacementMode?: boolean;
 }
 
 // Helper to calculate pantry status for a planned meal
@@ -27,7 +27,7 @@ const getPantryStatus = (recipe: Recipe | undefined) => {
     return { status, have, total: ingredientCount };
 };
 
-export const DayColumn: React.FC<DayColumnProps> = ({ date, isToday, meals, recipesById, onDrop, onAddNote, onMealAction }) => {
+export const DayColumn: React.FC<DayColumnProps> = ({ date, isToday, meals, recipesById, onDrop, onSlotClick, onMealAction, isPlacementMode }) => {
     const dateString = date.toISOString().split('T')[0];
     const [dragOverType, setDragOverType] = useState<string | null>(null);
 
@@ -54,7 +54,7 @@ export const DayColumn: React.FC<DayColumnProps> = ({ date, isToday, meals, reci
     };
 
     return (
-        <div className={`flex flex-col flex-shrink-0 w-full sm:w-[320px] lg:w-auto lg:flex-1 rounded-2xl border transition-all duration-300 ${isToday ? 'bg-zinc-900/60 border-[var(--color-accent-500)]/30 ring-1 ring-[var(--color-accent-500)]/20 shadow-[0_0_20px_rgba(0,0,0,0.3)]' : 'bg-zinc-900/30 border-zinc-800/50'}`}>
+        <div className={`flex flex-col h-full rounded-2xl border transition-all duration-300 ${isToday ? 'bg-zinc-900/60 border-[var(--color-accent-500)]/30 ring-1 ring-[var(--color-accent-500)]/20 shadow-[0_0_20px_rgba(0,0,0,0.3)]' : 'bg-zinc-900/30 border-zinc-800/50'}`}>
             {/* Header */}
             <div className={`flex items-center justify-between p-4 border-b ${isToday ? 'border-[var(--color-accent-500)]/20 bg-[var(--color-accent-500)]/5' : 'border-zinc-800/50'}`}>
                 <div>
@@ -83,30 +83,42 @@ export const DayColumn: React.FC<DayColumnProps> = ({ date, isToday, meals, reci
                     const meal = meals[mealType];
                     const recipe = meal?.recipeId ? recipesById.get(meal.recipeId) : undefined;
                     const isDragOver = dragOverType === mealType;
+                    
+                    // Visual cue for placement mode
+                    const placementHighlight = isPlacementMode && !meal ? "ring-2 ring-dashed ring-[var(--color-accent-500)] bg-[var(--color-accent-500)]/5 cursor-pointer hover:bg-[var(--color-accent-500)]/10" : "";
 
                     return (
                         <div 
                             key={mealType}
-                            className={`relative min-h-[100px] rounded-xl transition-all duration-200 flex flex-col ${isDragOver ? 'bg-[var(--color-accent-500)]/10 border-2 border-dashed border-[var(--color-accent-500)]' : 'border border-transparent'}`}
+                            className={`relative min-h-[100px] rounded-xl transition-all duration-200 flex flex-col ${isDragOver ? 'bg-[var(--color-accent-500)]/10 border-2 border-dashed border-[var(--color-accent-500)]' : 'border border-transparent'} ${placementHighlight}`}
                             onDragOver={(e) => handleDragOver(e, mealType)}
                             onDragLeave={handleDragLeave}
                             onDrop={(e) => handleDropInternal(e, mealType)}
+                            onClick={() => (!meal || isPlacementMode) && onSlotClick(dateString, mealType)}
                         >
                             {!meal && (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center text-zinc-700 opacity-0 hover:opacity-100 transition-opacity group">
-                                    <p className="text-[10px] uppercase tracking-widest font-bold mb-1">{mealType}</p>
-                                    <button 
-                                        onClick={() => onAddNote(dateString, mealType)}
-                                        className="p-2 rounded-full bg-zinc-800 text-zinc-400 hover:text-[var(--color-accent-400)] hover:bg-zinc-700 shadow-sm"
-                                        title="Notiz hinzufügen"
-                                    >
-                                        <PlusCircle size={20}/>
-                                    </button>
+                                <div className={`absolute inset-0 flex flex-col items-center justify-center text-zinc-700 transition-opacity group ${isPlacementMode ? 'opacity-100' : 'opacity-0 hover:opacity-100'}`}>
+                                    {isPlacementMode ? (
+                                        <div className="flex flex-col items-center gap-1 text-[var(--color-accent-400)] animate-pulse">
+                                            <CheckCircle2 size={24} />
+                                            <span className="text-[10px] font-bold uppercase">Hier einfügen</span>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <p className="text-[10px] uppercase tracking-widest font-bold mb-1">{mealType}</p>
+                                            <button 
+                                                className="p-2 rounded-full bg-zinc-800 text-zinc-400 hover:text-[var(--color-accent-400)] hover:bg-zinc-700 shadow-sm"
+                                                title="Notiz hinzufügen"
+                                            >
+                                                <PlusCircle size={20}/>
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             )}
                             
                             {/* Label for empty slots to guide user, visible when not hovering */}
-                            {!meal && !isDragOver && (
+                            {!meal && !isDragOver && !isPlacementMode && (
                                 <div className="absolute top-2 left-2 text-[10px] font-bold text-zinc-800 uppercase tracking-wider pointer-events-none">
                                     {mealType}
                                 </div>

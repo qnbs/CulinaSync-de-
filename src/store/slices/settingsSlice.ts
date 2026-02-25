@@ -8,7 +8,7 @@ const settingsSlice = createSlice({
   name: 'settings',
   initialState,
   reducers: {
-    updateSettings: (state, action: PayloadAction<AppSettings>) => {
+    updateSettings: (_state, action: PayloadAction<AppSettings>) => {
       saveSettings(action.payload);
       return action.payload;
     },

@@ -1,0 +1,36 @@
+{
+  "nav": {
+    "chef": "KI Koch",
+    "pantry": "Vorrat",
+    "recipes": "Rezepte",
+    "mealPlanner": "Planer",
+    "shoppingList": "Einkauf"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": "Sprache",
+    "english": "Englisch",
+    "german": "Deutsch",
+    "appearance": "Erscheinungsbild",
+    "accentColor": "Akzentfarbe",
+    "highContrast": "Hoher Kontrast",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "general": "Allgemein",
+    "displayName": "Anzeigename",
+    "defaultServings": "Standardportionen",
+    "weekStart": "Wochenstart",
+    "monday": "Montag",
+    "sunday": "Sonntag"
+  },
+  "common": {
+    "add": "Hinzufügen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "search": "Suchen...",
+    "loading": "Wird geladen...",
+    "error": "Ein Fehler ist aufgetreten"
+  }
+}

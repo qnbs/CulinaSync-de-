@@ -4,81 +4,104 @@
     <meta charset="UTF-8" />
     <link rel="icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" href="/logo-192x192.png">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>CulinaSync</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#18181b" />
+    <meta name="theme-color" content="#09090b" />
     <style type="text/tailwindcss">
       @layer utilities {
+        /* Animation Primitives */
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
+          from { opacity: 0; transform: translateY(8px); }
           to { opacity: 1; transform: translateY(0); }
         }
         .page-fade-in {
-          animation: fadeIn 0.4s ease-out forwards;
+          animation: fadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
-        @keyframes modal-fade-in {
-          from { opacity: 0; transform: translateY(10px) scale(0.98); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
+        
+        @keyframes scaleIn {
+          from { opacity: 0; transform: scale(0.96); }
+          to { opacity: 1; transform: scale(1); }
         }
         .modal-fade-in {
-            animation: modal-fade-in 0.3s ease-out forwards;
+            animation: scaleIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
-        @keyframes pulse {
+
+        @keyframes pulse-soft {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.6; }
         }
-        .animate-pulse {
-          animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        .animate-pulse-soft {
+          animation: pulse-soft 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
-        @keyframes favorite-glow {
-          0%, 100% {
-            box-shadow: 0 0 5px var(--color-accent-glow), 0 0 10px var(--color-accent-glow-soft);
-            border-color: var(--color-accent-400-semi);
-          }
-          50% {
-            box-shadow: 0 0 15px var(--color-accent-glow), 0 0 25px var(--color-accent-glow-soft);
-            border-color: var(--color-accent-400);
-          }
+
+        /* Advanced Glassmorphism System */
+        .glass-panel {
+          @apply bg-zinc-900/40 backdrop-blur-md border border-white/10 shadow-xl;
         }
-        .favorite-glow {
-          animation: favorite-glow 3s ease-in-out infinite;
+        .glass-panel-strong {
+          @apply bg-zinc-950/70 backdrop-blur-xl border-b border-white/5 shadow-2xl supports-[backdrop-filter]:bg-zinc-950/60;
         }
-        .prose-styles h1, .prose-styles h2, .prose-styles h3 { color: var(--color-accent-500); }
-        .prose-styles h1 { font-size: 2.25rem; font-weight: bold; margin-bottom: 1.5rem; margin-top: 0.5rem; }
-        .prose-styles h2 { font-size: 1.5rem; font-weight: bold; margin-top: 2.5rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #3f3f46; }
-        .prose-styles h3 { font-size: 1.25rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.75rem; }
-        .prose-styles p { color: #d4d4d8; line-height: 1.6; margin-bottom: 1rem; }
-        .prose-styles a { color: var(--color-accent-400); text-decoration: underline; }
-        .prose-styles a:hover { color: var(--color-accent-500); }
-        .prose-styles ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; color: #d4d4d8; }
-        .prose-styles li { margin-bottom: 0.5rem; }
-        .prose-styles code { background-color: #3f3f46; color: var(--color-accent-400); padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.9em; }
-        .prose-styles pre { background-color: #18181b; border: 1px solid #3f3f46; border-radius: 0.5rem; padding: 1rem; overflow-x: auto; }
-        .prose-styles pre code { background-color: transparent; padding: 0; }
-        .prose-styles strong { color: #fafafa; font-weight: 600; }
-        .prose-styles table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
-        .prose-styles th { color: var(--color-accent-400); border-bottom: 2px solid #52525b; padding: 0.75rem; text-align: left; }
-        .prose-styles td { border-bottom: 1px solid #3f3f46; padding: 0.75rem; }
-        .prose-styles tr:last-child td { border-bottom: none; }
+        .glass-button {
+           @apply bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/5 backdrop-blur-sm transition-all duration-200 active:scale-95;
+        }
+        
+        /* Typography & Effects */
+        .text-glow {
+          text-shadow: 0 0 20px rgba(var(--color-accent-glow), 0.4);
+        }
+        .text-shadow-sm {
+          text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+        .text-shadow-lg {
+          text-shadow: 0 4px 12px rgba(0,0,0,0.8);
+        }
+
+        /* Mobile Optimizations */
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        
+        .snap-x-mandatory {
+            scroll-snap-type: x mandatory;
+        }
+        .snap-center {
+            scroll-snap-align: center;
+        }
+
+        /* Safe Area Utilities */
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .mb-safe {
+            margin-bottom: env(safe-area-inset-bottom);
+        }
+        .bottom-safe {
+            bottom: env(safe-area-inset-bottom);
+        }
+        
+        /* High-performance transforms */
+        .gpu {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
       }
-      .glass-card {
-        @apply bg-zinc-900/50 backdrop-blur-lg border border-zinc-700/50 rounded-lg;
-      }
-      .glass-interactive {
-         @apply hover:bg-zinc-800/70 hover:border-zinc-600/60;
-      }
-       /* Custom Scrollbar */
+
+      /* Custom Scrollbar */
       ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+        width: 6px;
+        height: 6px;
       }
       ::-webkit-scrollbar-track {
         background: transparent;
       }
       ::-webkit-scrollbar-thumb {
-        background: #4f4f5a;
+        background: rgba(255,255,255,0.1);
         border-radius: 10px;
       }
       ::-webkit-scrollbar-thumb:hover {
@@ -90,7 +113,7 @@
         --color-accent-300: #fcd34d;
         --color-accent-400: #fbbf24;
         --color-accent-500: #f59e0b;
-        --color-accent-glow: rgba(251, 191, 36, 0.3);
+        --color-accent-glow: 251, 191, 36; /* RGB format for rgba usage */
         --color-accent-glow-soft: rgba(251, 191, 36, 0.2);
         --color-accent-400-semi: rgba(251, 191, 36, 0.8);
       }
@@ -125,10 +148,11 @@
 }
 </script>
 </head>
-  <body class="bg-zinc-950 text-zinc-200 font-sans">
-    <div class="fixed top-0 left-0 -z-10 h-full w-full bg-zinc-950">
-        <div class="absolute bottom-0 left-[-20%] right-0 top-[-10%] h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle_farthest-side,var(--color-accent-glow),rgba(255,255,255,0))]"></div>
-        <div class="absolute bottom-0 right-[-20%] top-[-10%] h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle_farthest-side,var(--color-accent-glow-soft),rgba(255,255,255,0))]"></div>
+  <body class="bg-zinc-950 text-zinc-200 font-sans antialiased selection:bg-[var(--color-accent-500)] selection:text-black overscroll-none">
+    <!-- Ambient Background Glow -->
+    <div class="fixed top-0 left-0 -z-10 h-full w-full bg-zinc-950 overflow-hidden pointer-events-none">
+        <div class="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full bg-[rgba(var(--color-accent-glow),0.08)] blur-[120px] animate-pulse-soft"></div>
+        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-purple-900/10 blur-[120px]"></div>
     </div>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>

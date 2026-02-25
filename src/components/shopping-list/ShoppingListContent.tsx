@@ -1,4 +1,3 @@
-import React from 'react';
 import { useShoppingListContext } from '../../contexts/ShoppingListContext';
 import { ShoppingCart, CheckCircle } from 'lucide-react';
 import { ShoppingListActive } from './ShoppingListActive';

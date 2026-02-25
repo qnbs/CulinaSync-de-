@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { db, importData } from '../../../services/db';
 import { exportFullDataAsJson } from '../../../services/exportService';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Download, Upload, Trash2, AlertTriangle, Database, PieChart, HardDrive } from 'lucide-react';
+import { Download, Upload, Trash2, AlertTriangle, HardDrive } from 'lucide-react';
 import Dexie from 'dexie';
-import { FullBackupData, AppSettings } from '../../../types';
+import { FullBackupData } from '../../../types';
 import { updateSettings } from '../../../store/slices/settingsSlice';
 import { useAppDispatch } from '../../../store/hooks';
 

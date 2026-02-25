@@ -1,4 +1,4 @@
-import { db } from './db';
+import { db } from './dbInstance';
 import { Recipe, PantryItem } from '../types';
 
 // Debounce mechanism to prevent flooding updates on rapid pantry changes

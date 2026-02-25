@@ -1,0 +1,36 @@
+{
+  "nav": {
+    "chef": "AI Chef",
+    "pantry": "Pantry",
+    "recipes": "Recipes",
+    "mealPlanner": "Plan",
+    "shoppingList": "Shopping"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "english": "English",
+    "german": "German",
+    "appearance": "Appearance",
+    "accentColor": "Accent Color",
+    "highContrast": "High Contrast",
+    "save": "Save",
+    "cancel": "Cancel",
+    "general": "General",
+    "displayName": "Display Name",
+    "defaultServings": "Default Servings",
+    "weekStart": "Week Starts On",
+    "monday": "Monday",
+    "sunday": "Sunday"
+  },
+  "common": {
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "search": "Search...",
+    "loading": "Loading...",
+    "error": "An error occurred"
+  }
+}

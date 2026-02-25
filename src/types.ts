@@ -88,6 +88,7 @@ export interface ShoppingListItem {
 }
 
 export interface AppSettings {
+  language: 'de' | 'en';
   displayName: string;
   defaultServings: number;
   weekStart: 'Monday' | 'Sunday';

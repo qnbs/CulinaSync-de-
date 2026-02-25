@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ShoppingListItem } from '../../types';
 import { generateShoppingList } from '../../services/geminiService';
 import { Bot, LoaderCircle, ArrowLeft, CheckSquare, Square } from 'lucide-react';

@@ -23,7 +23,7 @@ listenerMiddleware.startListening({
     renameCategoryAsync.rejected,
     moveToPantryAsync.rejected
     ),
-  effect: (action, listenerApi) => {
+  effect: (action: any, listenerApi) => {
     if (action.payload) {
       listenerApi.dispatch(addToast({ message: action.payload as string, type: 'error' }));
     } else if (action.error.message) {
