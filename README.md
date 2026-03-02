@@ -187,6 +187,20 @@ Das Deployment erfolgt automatisch bei jedem Push auf `main` via GitHub Actions.
 | **SPA-Routing 404** | `404.html` wird automatisch beim Build erstellt |
 | **PWA installiert nicht** | HTTPS erforderlich (GitHub Pages bietet HTTPS) |
 
+### Offline-QA (Export-Pfade)
+
+Nach den aktuellen Performance-Optimierungen werden große Export-Bibliotheken nicht mehr beim Installieren vorab gecacht, sondern bei Bedarf geladen und danach per Service Worker runtime-gecacht.
+
+Empfohlene manuelle Prüfung:
+
+1. App online öffnen und einmal je Exporttyp testen (mindestens CSV und PDF in Rezept oder Einkaufsliste).
+2. Browser DevTools öffnen → Application → Service Workers/Cache Storage prüfen (`export-libs-cache` sollte Einträge enthalten).
+3. Netzwerk auf **Offline** stellen.
+4. Dieselben Exporte erneut auslösen.
+5. Erwartung: Exporte funktionieren weiterhin offline, sofern der jeweilige Exportpfad zuvor einmal online geladen wurde.
+
+Hinweis: Beim ersten Offline-Start auf einem komplett neuen Gerät ohne vorherigen Online-Aufruf dieser Exportpfade sind PDF/CSV-Exporte erwartbar nicht verfügbar.
+
 ---
 
 ## 🛡️ Haftungsausschluss
