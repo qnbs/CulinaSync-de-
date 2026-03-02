@@ -138,11 +138,11 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
         exportRecipeToTxt,
       } = await import('../services/exportService');
       switch (format) {
-        case 'pdf': exportRecipeToPdf(currentRecipe); break;
-        case 'csv': exportRecipeToCsv(currentRecipe); break;
-        case 'json': exportRecipeToJson(currentRecipe); break;
-        case 'md': exportRecipeToMarkdown(currentRecipe); break;
-        case 'txt': exportRecipeToTxt(currentRecipe); break;
+        case 'pdf': await exportRecipeToPdf(currentRecipe); break;
+        case 'csv': await exportRecipeToCsv(currentRecipe); break;
+        case 'json': await exportRecipeToJson(currentRecipe); break;
+        case 'md': await exportRecipeToMarkdown(currentRecipe); break;
+        case 'txt': await exportRecipeToTxt(currentRecipe); break;
       }
     }
   };

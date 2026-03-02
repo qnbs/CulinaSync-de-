@@ -199,11 +199,11 @@ export const useShoppingList = () => {
         exportShoppingListToTxt,
       } = await import('../services/exportService');
       switch(format) {
-          case 'pdf': exportShoppingListToPdf(shoppingList); break;
-          case 'csv': exportShoppingListToCsv(shoppingList); break;
-          case 'json': exportShoppingListToJson(shoppingList); break;
-          case 'md': exportShoppingListToMarkdown(shoppingList); break;
-          case 'txt': exportShoppingListToTxt(shoppingList); break;
+          case 'pdf': await exportShoppingListToPdf(shoppingList); break;
+          case 'csv': await exportShoppingListToCsv(shoppingList); break;
+          case 'json': await exportShoppingListToJson(shoppingList); break;
+          case 'md': await exportShoppingListToMarkdown(shoppingList); break;
+          case 'txt': await exportShoppingListToTxt(shoppingList); break;
       }
     }
   };

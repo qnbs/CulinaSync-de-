@@ -1,8 +1,24 @@
 import { Recipe, ShoppingListItem } from '../types';
 import { db } from './db';
-import { jsPDF } from 'jspdf';
-import Papa from 'papaparse';
 import { loadSettings } from './settingsService';
+
+let papaModulePromise: Promise<typeof import('papaparse')> | null = null;
+let jsPdfModulePromise: Promise<typeof import('jspdf')> | null = null;
+
+const getPapaModule = async () => {
+    if (!papaModulePromise) {
+        papaModulePromise = import('papaparse');
+    }
+    return papaModulePromise;
+};
+
+const getJsPdfCtor = async () => {
+    if (!jsPdfModulePromise) {
+        jsPdfModulePromise = import('jspdf');
+    }
+    const { jsPDF } = await jsPdfModulePromise;
+    return jsPDF;
+};
 
 // Helper function to trigger download
 const downloadFile = (filename: string, content: string | Blob, mimeType: string) => {
@@ -96,7 +112,7 @@ export const exportRecipeToMarkdown = (recipe: Recipe) => {
     downloadFile(filename, recipeToMarkdown(recipe), 'text/markdown;charset=utf-8');
 };
 
-export const exportRecipeToCsv = (recipe: Recipe) => {
+export const exportRecipeToCsv = async (recipe: Recipe) => {
     const data = recipe.ingredients.flatMap(group => 
         group.items.map(item => ({
             'Rezept': recipe.recipeTitle,
@@ -106,13 +122,15 @@ export const exportRecipeToCsv = (recipe: Recipe) => {
             'Zutat': item.name,
         }))
     );
+    const Papa = await getPapaModule();
     const csv = Papa.unparse(data);
     const filename = `${recipe.recipeTitle.replace(/\s/g, '_')}_Zutaten.csv`;
     downloadFile(filename, csv, 'text/csv;charset=utf-8');
 };
 
-export const exportRecipeToPdf = (recipe: Recipe) => {
-    const doc = new jsPDF();
+export const exportRecipeToPdf = async (recipe: Recipe) => {
+    const JsPDF = await getJsPdfCtor();
+    const doc = new JsPDF();
     const margin = 15;
     const pageWidth = doc.internal.pageSize.getWidth();
     let y = 20;
@@ -203,7 +221,7 @@ export const exportShoppingListToMarkdown = (list: ShoppingListItem[]) => {
     downloadFile('einkaufsliste.md', md, 'text/markdown;charset=utf-8');
 };
 
-export const exportShoppingListToCsv = (list: ShoppingListItem[]) => {
+export const exportShoppingListToCsv = async (list: ShoppingListItem[]) => {
     const data = list.map(item => ({
         Kategorie: item.category,
         Menge: item.quantity,
@@ -211,12 +229,14 @@ export const exportShoppingListToCsv = (list: ShoppingListItem[]) => {
         Artikel: item.name,
         Erledigt: item.isChecked ? 'Ja' : 'Nein',
     }));
+    const Papa = await getPapaModule();
     const csv = Papa.unparse(data);
     downloadFile('einkaufsliste.csv', csv, 'text/csv;charset=utf-8');
 };
 
-export const exportShoppingListToPdf = (list: ShoppingListItem[]) => {
-    const doc = new jsPDF();
+export const exportShoppingListToPdf = async (list: ShoppingListItem[]) => {
+    const JsPDF = await getJsPdfCtor();
+    const doc = new JsPDF();
     let y = 20;
     doc.setFontSize(22);
     doc.text("Einkaufsliste", 15, y);
@@ -295,6 +315,7 @@ export const exportFullDataAsMarkdown = async (): Promise<boolean> => {
 export const exportFullDataAsCsv = async (): Promise<boolean> => {
     try {
         const data = await getFullData();
+        const Papa = await getPapaModule();
         const pantryCsv = Papa.unparse(data.pantry);
         const recipesCsv = Papa.unparse(data.recipes.map(r => ({title: r.recipeTitle, servings: r.servings, difficulty: r.difficulty})));
         const shoppingCsv = Papa.unparse(data.shoppingList);
@@ -307,7 +328,8 @@ export const exportFullDataAsCsv = async (): Promise<boolean> => {
 
 export const exportFullDataAsPdf = async (): Promise<boolean> => {
      try {
-        const doc = new jsPDF();
+    const JsPDF = await getJsPdfCtor();
+    const doc = new JsPDF();
         const data = await getFullData();
         let y = 20;
 
