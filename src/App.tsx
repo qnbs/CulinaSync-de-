@@ -1,15 +1,12 @@
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import Header from './components/Header';
-import { CommandPalette, type Command } from './components/CommandPalette';
+import { type Command } from './components/CommandPalette';
 import { Page, BeforeInstallPromptEvent, ShoppingListItem, PantryItem } from './types';
 import { useSpeechRecognition } from './hooks/useSpeechRecognition';
 import { processCommand, executeVoiceAction } from './services/voiceCommands';
 import { addShoppingListItem } from './services/repositories/shoppingListRepository';
 import { addOrUpdatePantryItem, removeItemFromPantry } from './services/repositories/pantryRepository';
-import VoiceControlUI from './components/VoiceControlUI';
 import { CheckCircle, Bot, Milk, BookOpen, CalendarDays, ShoppingCart, Settings as SettingsIcon, HelpCircle, PlusCircle, RefreshCw, Trash2, Download, Upload, Mic, AlertTriangle, Info, X } from 'lucide-react';
-import BottomNav from './components/BottomNav';
-import Onboarding from './components/Onboarding';
 import { useAppDispatch, useAppSelector } from './store/hooks';
 import { setCurrentPage, setCommandPaletteOpen, addToast as addToastAction, removeToast as removeToastAction } from './store/slices/uiSlice';
 
@@ -22,6 +19,10 @@ const MealPlanner = lazy(() => import('./components/MealPlanner'));
 const ShoppingList = lazy(() => import('./components/ShoppingList'));
 const Settings = lazy(() => import('./components/Settings'));
 const Help = lazy(() => import('./components/Help'));
+const BottomNav = lazy(() => import('./components/BottomNav'));
+const Onboarding = lazy(() => import('./components/Onboarding'));
+const VoiceControlUI = lazy(() => import('./components/VoiceControlUI'));
+const CommandPalette = lazy(() => import('./components/CommandPalette').then(m => ({ default: m.CommandPalette })));
 
 
 const LoadingSpinner = () => (
@@ -198,7 +199,9 @@ const App: React.FC = () => {
 
   return (
       <div className="min-h-screen text-zinc-200">
-        {showOnboarding && <Onboarding onComplete={handleOnboardingComplete} />}
+        <Suspense fallback={null}>
+          {showOnboarding && <Onboarding onComplete={handleOnboardingComplete} />}
+        </Suspense>
         <Header 
           currentPage={currentPage} 
           setCurrentPage={navigate}
@@ -213,16 +216,22 @@ const App: React.FC = () => {
               {renderPage()}
           </Suspense>
         </main>
-        
-        <BottomNav currentPage={currentPage} setCurrentPage={navigate} />
 
-        <CommandPalette 
-          isOpen={isCommandPaletteOpen}
-          onClose={onCommandPaletteClose}
-          commands={commands}
-        />
+        <Suspense fallback={null}>
+          <BottomNav currentPage={currentPage} setCurrentPage={navigate} />
+        </Suspense>
 
-        <VoiceControlUI isListening={isListening} transcript={interimTranscript} />
+        <Suspense fallback={null}>
+          <CommandPalette 
+            isOpen={isCommandPaletteOpen}
+            onClose={onCommandPaletteClose}
+            commands={commands}
+          />
+        </Suspense>
+
+        <Suspense fallback={null}>
+          <VoiceControlUI isListening={isListening} transcript={interimTranscript} />
+        </Suspense>
         
         <div aria-live="assertive" className="fixed inset-0 flex items-end px-4 py-6 pointer-events-none sm:p-6 sm:items-start z-50">
             <div className="w-full flex flex-col items-center space-y-4 sm:items-end">
