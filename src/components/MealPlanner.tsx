@@ -10,6 +10,7 @@ import { MealPlannerHeader } from './meal-planner/MealPlannerHeader';
 import { DayColumn } from './meal-planner/DayColumn';
 import { PlannerSidebar } from './meal-planner/PlannerSidebar';
 import { Save, FileText, X } from 'lucide-react';
+import { useModalA11y } from '../hooks/useModalA11y';
 
 const AddMealNoteModal: React.FC<{
     date: string;
@@ -18,6 +19,15 @@ const AddMealNoteModal: React.FC<{
     onSave: (note: string) => void;
 }> = ({ date, mealType, onClose, onSave }) => {
     const [note, setNote] = useState('');
+    const modalRef = React.useRef<HTMLDivElement>(null);
+    const textRef = React.useRef<HTMLTextAreaElement>(null);
+
+    useModalA11y({
+        isOpen: true,
+        onClose,
+        containerRef: modalRef,
+        initialFocusRef: textRef,
+    });
 
     const handleSave = () => {
         if (note.trim()) onSave(note.trim());
@@ -25,15 +35,16 @@ const AddMealNoteModal: React.FC<{
 
     return (
         <div className="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm flex items-center justify-center z-50 page-fade-in" onClick={onClose}>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl scale-100" onClick={e => e.stopPropagation()}>
+            <div ref={modalRef} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl scale-100" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="meal-note-title" tabIndex={-1}>
                 <div className="flex items-center gap-3 mb-4 text-[var(--color-accent-400)]">
                     <FileText size={24}/> 
-                    <h3 className="text-lg font-bold text-zinc-100">Notiz hinzufügen</h3>
+                    <h3 id="meal-note-title" className="text-lg font-bold text-zinc-100">Notiz hinzufügen</h3>
                 </div>
                 <p className="text-xs text-zinc-400 mb-4">
                     Für {mealType} am {new Date(date).toLocaleDateString('de-DE')}.
                 </p>
                 <textarea
+                    ref={textRef}
                     value={note}
                     onChange={e => setNote(e.target.value)}
                     placeholder="z.B. 'Essen gehen' oder 'Reste vom Vortag'"
@@ -42,8 +53,8 @@ const AddMealNoteModal: React.FC<{
                     autoFocus
                 />
                 <div className="flex justify-end gap-3 pt-6">
-                    <button onClick={onClose} className="px-4 py-2 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition-colors text-sm font-medium">Abbrechen</button>
-                    <button onClick={handleSave} disabled={!note.trim()} className="px-4 py-2 rounded-lg bg-[var(--color-accent-500)] text-zinc-900 font-bold hover:bg-[var(--color-accent-400)] disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center gap-2 transition-all">
+                    <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition-colors text-sm font-medium">Abbrechen</button>
+                    <button type="button" onClick={handleSave} disabled={!note.trim()} className="px-4 py-2 rounded-lg bg-[var(--color-accent-500)] text-zinc-900 font-bold hover:bg-[var(--color-accent-400)] disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center gap-2 transition-all">
                         <Save size={16}/> Speichern
                     </button>
                 </div>
@@ -81,7 +92,7 @@ const MealPlanner: React.FC = () => {
 
   // Handles both Drag&Drop (desktop) and Tap-to-Place (mobile)
   const handleAddRecipeToSlot = async (date: string, mealType: string, recipeId: number) => {
-      await addRecipeToMealPlan({ date, mealType: mealType as any, recipeId });
+      await addRecipeToMealPlan({ date, mealType: mealType as 'Frühstück' | 'Mittagessen' | 'Abendessen', recipeId });
       if (pendingRecipeId) {
           setPendingRecipeId(null); // Clear pending state after placement
           addToast('Rezept geplant.');
@@ -144,7 +155,7 @@ const MealPlanner: React.FC = () => {
   }, [addToast]);
   
   const handleSaveNote = useCallback(async (note: string, date: string, mealType: string) => {
-    await addRecipeToMealPlan({ date, mealType: mealType as any, note });
+    await addRecipeToMealPlan({ date, mealType: mealType as 'Frühstück' | 'Mittagessen' | 'Abendessen', note });
     addToast('Notiz hinzugefügt.');
     setNoteModalState(null);
   }, [addToast]);

@@ -52,7 +52,7 @@ export const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, 
                 aria-labelledby="bulk-plan-modal-title"
                 tabIndex={-1}
             >
-                <button onClick={onClose} className="absolute top-4 right-4 text-zinc-500 hover:text-zinc-300 transition-colors">
+                <button type="button" aria-label="Dialog schließen" onClick={onClose} className="absolute top-4 right-4 text-zinc-500 hover:text-zinc-300 transition-colors">
                     <X size={20} />
                 </button>
                 
@@ -84,7 +84,7 @@ export const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, 
                             <select 
                                 id="mealType" 
                                 value={mealType} 
-                                onChange={e => setMealType(e.target.value as any)} 
+                                onChange={e => setMealType(e.target.value as 'Frühstück' | 'Mittagessen' | 'Abendessen')} 
                                 className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl p-3 text-zinc-200 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none appearance-none transition-all"
                             >
                                 <option>Frühstück</option>
@@ -103,10 +103,11 @@ export const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, 
                 </div>
 
                 <div className="flex gap-3 mt-8">
-                    <button onClick={onClose} className="flex-1 py-2.5 px-4 rounded-xl text-zinc-400 font-medium hover:bg-zinc-800 hover:text-zinc-200 transition-colors">
+                    <button type="button" onClick={onClose} className="flex-1 py-2.5 px-4 rounded-xl text-zinc-400 font-medium hover:bg-zinc-800 hover:text-zinc-200 transition-colors">
                         Abbrechen
                     </button>
                     <button 
+                        type="button"
                         onClick={handleSave} 
                         disabled={isSaving} 
                         className="flex-1 py-2.5 px-4 rounded-xl bg-[var(--color-accent-500)] text-zinc-900 font-bold hover:bg-[var(--color-accent-400)] hover:shadow-[0_0_15px_var(--color-accent-glow)] transition-all disabled:bg-zinc-700 disabled:text-zinc-500 disabled:shadow-none flex items-center justify-center gap-2"

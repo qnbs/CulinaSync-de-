@@ -7,6 +7,7 @@ import Dexie from 'dexie';
 import { BeforeInstallPromptEvent, FullBackupData } from '../../../types';
 import { updateSettings } from '../../../store/slices/settingsSlice';
 import { useAppDispatch } from '../../../store/hooks';
+import { useModalA11y } from '../../../hooks/useModalA11y';
 
 const ResetConfirmationModal: React.FC<{
     isOpen: boolean;
@@ -15,21 +16,31 @@ const ResetConfirmationModal: React.FC<{
 }> = ({ isOpen, onClose, onConfirm }) => {
     const [confirmationText, setConfirmationText] = useState('');
     const CONFIRMATION_KEYWORD = 'LÖSCHEN';
+    const modalRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useModalA11y({
+        isOpen,
+        onClose,
+        containerRef: modalRef,
+        initialFocusRef: inputRef,
+    });
 
     useEffect(() => { if (isOpen) setConfirmationText(''); }, [isOpen]);
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 page-fade-in" onClick={onClose}>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div ref={modalRef} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="reset-confirmation-title" tabIndex={-1}>
                 <div className="flex items-center gap-3 text-red-500 mb-4">
                     <div className="p-2 bg-red-500/10 rounded-full"><AlertTriangle size={24} /></div>
-                    <h3 className="text-lg font-bold">Daten unwiderruflich löschen?</h3>
+                    <h3 id="reset-confirmation-title" className="text-lg font-bold">Daten unwiderruflich löschen?</h3>
                 </div>
                 <p className="text-zinc-400 text-sm mb-6">
                     Alle Rezepte, Vorräte und Einstellungen werden entfernt. Diese Aktion kann nicht rückgängig gemacht werden.
                 </p>
                 <input
+                    ref={inputRef}
                     type="text"
                     value={confirmationText}
                     onChange={(e) => setConfirmationText(e.target.value)}
@@ -37,8 +48,9 @@ const ResetConfirmationModal: React.FC<{
                     className="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:outline-none font-mono text-center uppercase"
                 />
                 <div className="flex justify-end gap-3 mt-6">
-                    <button onClick={onClose} className="py-2.5 px-4 rounded-xl text-zinc-400 hover:bg-zinc-800 font-medium">Abbrechen</button>
+                    <button type="button" onClick={onClose} className="py-2.5 px-4 rounded-xl text-zinc-400 hover:bg-zinc-800 font-medium">Abbrechen</button>
                     <button
+                        type="button"
                         onClick={onConfirm}
                         disabled={confirmationText !== CONFIRMATION_KEYWORD}
                         className="py-2.5 px-4 rounded-xl bg-red-600 text-white font-bold hover:bg-red-500 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed flex items-center gap-2 transition-all"

@@ -32,6 +32,8 @@ export const PantryToolbar = () => {
                     />
                     {searchTerm && (
                         <button 
+                            type="button"
+                            aria-label="Suche leeren"
                             onClick={() => setSearchTerm('')}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
                         >
@@ -49,7 +51,7 @@ export const PantryToolbar = () => {
                         </div>
                         <select 
                             value={expiryFilter} 
-                            onChange={e => setExpiryFilter(e.target.value as any)} 
+                            onChange={e => setExpiryFilter(e.target.value as 'all' | 'nearing' | 'expired')} 
                             aria-label="Ablaufstatus filtern"
                             className="appearance-none h-full bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-800 rounded-lg py-2.5 pl-9 pr-8 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none cursor-pointer transition-all"
                         >
@@ -81,6 +83,8 @@ export const PantryToolbar = () => {
 
                     {/* Toggles */}
                     <button 
+                        type="button"
+                        aria-label={isGrouped ? 'Gruppierung aufheben' : 'Nach Kategorie gruppieren'}
                         onClick={() => setIsGrouped(!isGrouped)} 
                         className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-all flex-shrink-0 ${isGrouped ? 'bg-[var(--color-accent-500)]/10 border-[var(--color-accent-500)] text-[var(--color-accent-400)]' : 'bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`} 
                         title={isGrouped ? "Gruppierung aufheben" : "Nach Kategorie gruppieren"}
@@ -89,6 +93,8 @@ export const PantryToolbar = () => {
                     </button>
                     
                     <button 
+                        type="button"
+                        aria-label="Auswahlmodus umschalten"
                         onClick={toggleSelectMode} 
                         className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-all flex-shrink-0 ${isSelectMode ? 'bg-[var(--color-accent-500)] text-zinc-900 border-[var(--color-accent-500)] shadow-[0_0_15px_var(--color-accent-glow)]' : 'bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`} 
                         title="Auswahlmodus"

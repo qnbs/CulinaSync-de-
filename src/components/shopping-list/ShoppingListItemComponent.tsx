@@ -33,8 +33,8 @@ export const ShoppingListItemComponent = React.memo<{
                       <input type="text" value={editingItem!.unit} onChange={e => setEditingItem({...editingItem!, unit: e.target.value})} className="w-24 bg-zinc-700 rounded-lg p-2 text-zinc-100" />
                   </div>
                   <div className="flex gap-1 ml-auto">
-                      <button type="submit" className="p-2 rounded-lg bg-[var(--color-accent-500)] hover:bg-[var(--color-accent-400)] text-zinc-900"><Save size={18}/></button>
-                      <button type="button" onClick={onCancelEdit} className="p-2 rounded-lg bg-zinc-600 hover:bg-zinc-500"><X size={18}/></button>
+                          <button type="submit" aria-label="Änderungen speichern" className="p-2 rounded-lg bg-[var(--color-accent-500)] hover:bg-[var(--color-accent-400)] text-zinc-900"><Save size={18}/></button>
+                          <button type="button" aria-label="Bearbeitung abbrechen" onClick={onCancelEdit} className="p-2 rounded-lg bg-zinc-600 hover:bg-zinc-500"><X size={18}/></button>
                   </div>
                 </form>
             </li>
@@ -60,6 +60,7 @@ export const ShoppingListItemComponent = React.memo<{
                 )}
                 
                 <button 
+                    type="button"
                     onClick={() => onToggle(item)} 
                     className={`flex-shrink-0 transition-all duration-200 ${isShoppingMode ? 'p-2' : 'mt-0.5'}`}
                     aria-label={`Mark ${item.name} as ${item.isChecked ? 'incomplete' : 'complete'}`}
@@ -91,8 +92,8 @@ export const ShoppingListItemComponent = React.memo<{
 
                 {!item.isChecked && !isShoppingMode && (
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                        <button onClick={(e) => { e.stopPropagation(); onStartEdit(item); }} className="p-2 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-700"><Edit3 size={16}/></button>
-                        <button onClick={(e) => { e.stopPropagation(); onDeleteItem(item.id!); }} className="p-2 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-900/20"><Trash2 size={16}/></button>
+                        <button type="button" aria-label={`${item.name} bearbeiten`} onClick={(e) => { e.stopPropagation(); onStartEdit(item); }} className="p-2 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-700"><Edit3 size={16}/></button>
+                        <button type="button" aria-label={`${item.name} löschen`} onClick={(e) => { e.stopPropagation(); onDeleteItem(item.id!); }} className="p-2 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-900/20"><Trash2 size={16}/></button>
                     </div>
                 )}
             </div>

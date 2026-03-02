@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChefHat, Milk, Wand2, CalendarDays, ShoppingCart, ArrowRight, Check } from 'lucide-react';
+import { useModalA11y } from '../hooks/useModalA11y';
 
 const steps = [
     {
@@ -30,6 +31,15 @@ const steps = [
 
 const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
     const [currentStep, setCurrentStep] = useState(0);
+    const modalRef = React.useRef<HTMLDivElement>(null);
+    const nextButtonRef = React.useRef<HTMLButtonElement>(null);
+
+    useModalA11y({
+        isOpen: true,
+        onClose: () => {},
+        containerRef: modalRef,
+        initialFocusRef: nextButtonRef,
+    });
 
     const handleNext = () => {
         if (currentStep < steps.length - 1) {
@@ -43,15 +53,15 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
 
     return (
         <div className="fixed inset-0 bg-zinc-950/90 backdrop-blur-md z-[100] flex items-center justify-center p-4 page-fade-in">
-            <div className="w-full max-w-md text-center bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl space-y-6 modal-fade-in">
+            <div ref={modalRef} className="w-full max-w-md text-center bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl space-y-6 modal-fade-in" role="dialog" aria-modal="true" aria-labelledby="onboarding-title" aria-describedby="onboarding-description" tabIndex={-1}>
                 <div className="flex justify-center items-center gap-4 text-[var(--color-accent-400)]">
                    <ChefHat size={32} />
-                   <h2 className="text-2xl font-bold text-zinc-100">Willkommen bei CulinaSync!</h2>
+                   <h2 id="onboarding-title" className="text-2xl font-bold text-zinc-100">Willkommen bei CulinaSync!</h2>
                 </div>
                 
-                <p className="text-zinc-400">Dein intelligenter Assistent für eine perfekt organisierte Küche.</p>
+                <p id="onboarding-description" className="text-zinc-400">Dein intelligenter Assistent für eine perfekt organisierte Küche.</p>
                 
-                <div className="bg-zinc-800/50 p-6 rounded-lg text-left space-y-4">
+                <div className="bg-zinc-800/50 p-6 rounded-lg text-left space-y-4" aria-live="polite">
                     <div className="flex items-center gap-4">
                         <div className="bg-[var(--color-accent-500)]/10 p-3 rounded-full">
                            <Icon className="h-6 w-6 text-[var(--color-accent-400)]" />
@@ -63,11 +73,13 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
                 
                 <div className="flex justify-center items-center gap-4">
                     {steps.map((_, index) => (
-                        <div key={index} className={`h-2 rounded-full transition-all duration-300 ${index === currentStep ? 'w-8 bg-[var(--color-accent-500)]' : 'w-2 bg-zinc-600'}`}></div>
+                        <div key={index} aria-hidden="true" className={`h-2 rounded-full transition-all duration-300 ${index === currentStep ? 'w-8 bg-[var(--color-accent-500)]' : 'w-2 bg-zinc-600'}`}></div>
                     ))}
                 </div>
 
                 <button 
+                    ref={nextButtonRef}
+                    type="button"
                     onClick={handleNext} 
                     className="w-full flex items-center justify-center gap-2 bg-[var(--color-accent-500)] text-zinc-900 font-bold py-3 px-4 rounded-md hover:bg-[var(--color-accent-400)] transition-colors"
                 >
