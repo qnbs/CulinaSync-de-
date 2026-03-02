@@ -12,6 +12,7 @@ import { AiChefPanel } from './settings/panels/AiChefPanel';
 import { DataPanel } from './settings/panels/DataPanel';
 import { VoicePanel } from './settings/panels/VoicePanel';
 import { ModulesPanel } from './settings/panels/ModulesPanel';
+import { ApiKeyPanel } from './settings/panels/ApiKeyPanel';
 
 const ACCENT_COLORS: Record<AppSettings['appearance']['accentColor'], Record<string, string>> = {
   amber: { '300': '#fcd34d', '400': '#fbbf24', '500': '#f59e0b', glow: 'rgba(251, 191, 36, 0.3)', 'glow-soft': 'rgba(251, 191, 36, 0.2)', '400-semi': 'rgba(251, 191, 36, 0.8)' },
@@ -44,6 +45,7 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
         if (focusAction) {
              if (['import', 'export'].includes(focusAction)) setActiveSection('data');
              else if (['speech', 'voice'].includes(focusAction)) setActiveSection('speech');
+             else if (['apikey', 'api-key', 'api'].includes(focusAction)) setActiveSection('apikey');
         }
     }, [focusAction]);
 
@@ -87,6 +89,7 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
         switch (activeSection) {
             case 'appearance': return <AppearancePanel settings={localSettings} onChange={handleChange} />;
             case 'ai': return <AiChefPanel settings={localSettings} onChange={handleChange} />;
+            case 'apikey': return <ApiKeyPanel addToast={addToastWrapper} />;
             case 'data': return <DataPanel addToast={addToastWrapper} installPromptEvent={installPromptEvent} onInstallPWA={onInstallPWA} isStandalone={isStandalone} />;
             case 'speech': return <VoicePanel settings={localSettings} onChange={handleChange} />;
             case 'modules': return <ModulesPanel settings={localSettings} onChange={handleChange} />;
@@ -104,6 +107,7 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
                          {activeSection === 'appearance' && 'Design & Farben'}
                          {activeSection === 'modules' && 'Modul Konfiguration'}
                          {activeSection === 'ai' && 'KI-Chef Präferenzen'}
+                         {activeSection === 'apikey' && 'API-Schlüssel'}
                          {activeSection === 'speech' && 'Sprachsteuerung & Audio'}
                          {activeSection === 'data' && 'Daten & Speicher'}
                      </h2>

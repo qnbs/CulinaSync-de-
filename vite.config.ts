@@ -3,7 +3,12 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { fileURLToPath, URL } from 'url';
 
+// GitHub Pages subpath: set automatically in CI via GITHUB_ACTIONS env
+const REPO_NAME = 'CulinaSync-de-';
+const base = process.env.GITHUB_ACTIONS ? `/${REPO_NAME}/` : '/';
+
 export default defineConfig({
+  base,
   plugins: [
     react(),
     VitePWA({
@@ -15,9 +20,9 @@ export default defineConfig({
         description: 'Dein kollaborativer kulinarischer Hub für den Haushalt. Offline. Privat. Nahtlos.',
         theme_color: '#18181b',
         background_color: '#18181b',
-        start_url: '/',
+        start_url: base,
         display: 'standalone',
-        scope: '/',
+        scope: base,
         icons: [
           {
             src: 'logo-192x192.png',
@@ -34,23 +39,23 @@ export default defineConfig({
         shortcuts: [
           {
             name: 'Vorratskammer',
-            short_name: 'Vorrrat',
+            short_name: 'Vorrat',
             description: 'Öffnet die Vorratskammer',
-            url: '/?page=pantry',
+            url: `${base}?page=pantry`,
             icons: [{ src: 'logo-192x192.png', sizes: '192x192' }]
           },
           {
             name: 'Einkaufsliste',
             short_name: 'Liste',
             description: 'Öffnet die Einkaufsliste',
-            url: '/?page=shopping-list',
+            url: `${base}?page=shopping-list`,
             icons: [{ src: 'logo-192x192.png', sizes: '192x192' }]
           },
           {
             name: 'KI-Chef',
             short_name: 'KI-Chef',
             description: 'Generiert ein neues Rezept',
-            url: '/?page=chef',
+            url: `${base}?page=chef`,
             icons: [{ src: 'logo-192x192.png', sizes: '192x192' }]
           }
         ]
@@ -61,5 +66,19 @@ export default defineConfig({
     alias: [
       { find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
     ],
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-redux': ['@reduxjs/toolkit', 'react-redux', 'redux-persist'],
+          'vendor-dexie': ['dexie', 'dexie-react-hooks'],
+          'vendor-pdf': ['jspdf'],
+        },
+      },
+    },
+    sourcemap: false,
+    target: 'es2020',
   },
 });

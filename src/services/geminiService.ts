@@ -1,13 +1,40 @@
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import { AppSettings, PantryItem, Recipe, StructuredPrompt, ShoppingListItem, RecipeIdea } from "../types";
+import { loadApiKey } from "./apiKeyService";
 
-const API_KEY = process.env.API_KEY;
+// --- Dynamic AI Client (loaded from secure IndexedDB, never from env/build) ---
+let _aiClient: GoogleGenAI | null = null;
+let _lastKeyHash: string | null = null;
 
-if (!API_KEY) {
-  console.warn("API_KEY environment variable not set. AI features will not work.");
-}
+const simpleHash = (str: string): string => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash |= 0;
+  }
+  return hash.toString(36);
+};
 
-const ai = new GoogleGenAI({ apiKey: API_KEY! });
+const getAIClient = async (): Promise<GoogleGenAI> => {
+  const key = await loadApiKey();
+  if (!key) {
+    throw new Error(
+      "Kein API-Schlüssel konfiguriert. Bitte hinterlege deinen Google Gemini API-Schlüssel unter Einstellungen → API-Schlüssel."
+    );
+  }
+  const keyHash = simpleHash(key);
+  if (!_aiClient || _lastKeyHash !== keyHash) {
+    _aiClient = new GoogleGenAI({ apiKey: key });
+    _lastKeyHash = keyHash;
+  }
+  return _aiClient;
+};
+
+export const invalidateAIClient = () => {
+  _aiClient = null;
+  _lastKeyHash = null;
+};
 
 const recipeSchema = {
     type: Type.OBJECT,
@@ -127,14 +154,17 @@ const handleGeminiError = (error: unknown, context: string): Error => {
     console.error(`Error calling Gemini for ${context}:`, error);
     const errorMessage = (error as Error)?.message || String(error);
 
-    if (errorMessage.includes('API key not valid')) {
-         return new Error("Der KI-Dienst ist nicht korrekt eingerichtet (ungültiger API-Schlüssel).");
+    if (errorMessage.includes('API key not valid') || errorMessage.includes('API_KEY_INVALID')) {
+         return new Error("Der API-Schlüssel ist ungültig. Bitte überprüfe ihn unter Einstellungen → API-Schlüssel.");
     }
     if (errorMessage.includes('FETCH_ERROR') || errorMessage.includes('NetworkError')) {
         return new Error("Der KI-Dienst konnte nicht erreicht werden. Bitte prüfe deine Netzwerkverbindung.");
     }
      if (errorMessage.includes('429')) {
         return new Error("Zu viele Anfragen an den KI-Dienst. Bitte warte einen Moment.");
+    }
+    if (errorMessage.includes('Kein API-Schlüssel konfiguriert')) {
+        return new Error(errorMessage);
     }
     return new Error("Ein unerwarteter Fehler beim KI-Dienst ist aufgetreten.");
 };
@@ -183,6 +213,7 @@ export const generateRecipeIdeas = async (
   pantryItems: PantryItem[],
   aiPreferences: AppSettings['aiPreferences']
 ): Promise<RecipeIdea[]> => {
+    const ai = await getAIClient();
     const model = "gemini-2.5-flash";
     const systemInstruction = `Du bist Culina, ein Weltklasse-Koch. Entwickle 3 kreative, unterschiedliche Rezeptideen auf Deutsch. Nutze deinen "Thinking Process", um sicherzustellen, dass die Ideen exakt zu den Vorräten und Einschränkungen passen.`;
     const fullPrompt = constructBasePrompt(prompt, pantryItems, aiPreferences);
@@ -219,6 +250,7 @@ export const generateRecipe = async (
   aiPreferences: AppSettings['aiPreferences'],
   chosenIdea: RecipeIdea
 ): Promise<Recipe> => {
+  const ai = await getAIClient();
   const model = "gemini-2.5-flash";
   let fullPrompt = constructBasePrompt(prompt, pantryItems, aiPreferences);
 
@@ -269,6 +301,7 @@ export const generateShoppingList = async (
     pantryItems: PantryItem[],
     currentListItems: ShoppingListItem[]
 ): Promise<Omit<ShoppingListItem, 'id' | 'isChecked'>[]> => {
+    const ai = await getAIClient();
     const model = "gemini-2.5-flash";
     const pantryList = pantryItems.map(item => item.name).join(', ') || 'keine';
     const currentShoppingList = currentListItems.map(item => item.name).join(', ') || 'keine';
@@ -317,6 +350,7 @@ export const generateShoppingList = async (
 };
 
 export const generateRecipeImage = async (recipeTitle: string): Promise<string> => {
+    const ai = await getAIClient();
     const model = "imagen-4.0-generate-001";
     const prompt = `High quality, professional food photography of ${recipeTitle}, studio lighting, delicious, appetizing, 4k resolution, photorealistic, overhead shot, plated elegantly`;
     

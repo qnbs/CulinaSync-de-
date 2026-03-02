@@ -19,6 +19,14 @@
 
 ---
 
+## 🌐 Live Demo
+
+> **[👉 https://qnbs.github.io/CulinaSync-de-/](https://qnbs.github.io/CulinaSync-de-/)**
+>
+> Die App läuft vollständig im Browser. Keine Registrierung erforderlich.
+
+---
+
 ## 🚀 Vision & Philosophie
 
 **CulinaSync** ist keine bloße Rezept-App. Es ist ein intelligenter Orchestrator für den kulinarischen Lebenszyklus eines modernen Haushalts. Entwickelt unter der Prämisse **"Privacy First, Latency Zero"**, verschiebt CulinaSync die Grenzen dessen, was im Browser möglich ist.
@@ -101,6 +109,7 @@ src/
 ├── hooks/               # Custom Hooks (useSpeechRecognition, useWakeLock)
 ├── services/            # Business Logic Layer
 │   ├── db.ts            # Datenbank-Schema & Transaktionen
+│   ├── apiKeyService.ts # Sichere API-Key Verwaltung (IndexedDB)
 │   ├── geminiService.ts # KI-Schnittstelle & Prompt Engineering
 │   └── voiceCommands.ts # Sprachsteuerungs-Router
 ├── store/               # Redux Slices & Middleware
@@ -113,14 +122,14 @@ src/
 
 ### Voraussetzungen
 *   Node.js (v18+)
-*   Google AI Studio API Key
+*   Google AI Studio API Key (optional – wird über die App-UI eingegeben)
 
 ### Installation
 
 1.  **Repository klonen**
     ```bash
-    git clone https://github.com/your-repo/culinasync.git
-    cd culinasync
+    git clone https://github.com/qnbs/CulinaSync-de-.git
+    cd CulinaSync-de-
     ```
 
 2.  **Abhängigkeiten installieren**
@@ -128,16 +137,61 @@ src/
     npm install
     ```
 
-3.  **Environment konfigurieren**
-    Erstelle eine `.env` Datei im Root-Verzeichnis:
-    ```env
-    VITE_API_KEY=dein_google_gemini_api_key_hier
-    ```
-
-4.  **Starten**
+3.  **Starten**
     ```bash
     npm run dev
     ```
+
+4.  **API-Schlüssel einrichten**
+    Öffne die App → **Einstellungen → API-Key** → Schlüssel einfügen.
+    Der Schlüssel wird sicher in IndexedDB gespeichert, nie im Build.
+
+### Workflows
+
+| Befehl | Beschreibung |
+|---|---|
+| `npm run dev` | Entwicklungsserver starten |
+| `npm run build` | Produktions-Build erstellen |
+| `npm run preview` | Produktions-Build lokal testen |
+| `npm run lint` | Code-Qualität prüfen |
+
+---
+
+## 🔑 Gemini API-Schlüssel
+
+CulinaSync nutzt die Google Gemini API für KI-Funktionen. Der API-Schlüssel wird **sicher auf deinem Gerät** gespeichert (verschlüsselt in IndexedDB), niemals im Code oder Build.
+
+1. Öffne [Google AI Studio](https://aistudio.google.com/apikey)
+2. Erstelle einen API-Key
+3. In CulinaSync: **Einstellungen → API-Key → einfügen → Speichern**
+4. Empfehlung: Beschränke den Key auf deine Domain in der [Google Console](https://console.cloud.google.com/apis/credentials)
+
+---
+
+## 🌐 Deployment (GitHub Pages)
+
+Das Deployment erfolgt automatisch bei jedem Push auf `main` via GitHub Actions.
+
+### Erstmalige Einrichtung:
+1. **Settings → Pages** im Repository öffnen
+2. Unter **Source** → **"GitHub Actions"** wählen
+3. Push auf `main` oder Workflow manuell triggern
+4. Live-URL: `https://qnbs.github.io/CulinaSync-de-/`
+
+### Fehlerbehebung
+
+| Problem | Lösung |
+|---|---|
+| **Leere Seite** | Prüfe `base` in `vite.config.ts` |
+| **Assets laden nicht** | Bild-URLs müssen relativ sein |
+| **SPA-Routing 404** | `404.html` wird automatisch beim Build erstellt |
+| **PWA installiert nicht** | HTTPS erforderlich (GitHub Pages bietet HTTPS) |
+
+---
+
+## 🛡️ Haftungsausschluss
+
+> **CulinaSync ist ein Open-Source-Projekt zu Bildungszwecken.** Rezeptvorschläge der KI sollten stets kritisch geprüft werden. Bei Allergien oder Unverträglichkeiten ist besondere Vorsicht geboten. Die Entwickler übernehmen keine Haftung für gesundheitliche Folgen.
 
 ---
 

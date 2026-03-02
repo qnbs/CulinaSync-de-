@@ -1,5 +1,5 @@
 import React from 'react';
-import { Palette, Settings as SettingsIcon, Bot, Mic, Database, LucideProps } from 'lucide-react';
+import { Palette, Settings as SettingsIcon, Bot, Mic, Database, Key, LucideProps } from 'lucide-react';
 
 export interface SectionDef {
     id: string;
@@ -12,6 +12,7 @@ export const SETTINGS_SECTIONS: SectionDef[] = [
     { id: 'appearance', label: 'Design', icon: Palette, description: 'Farben & Darstellung' },
     { id: 'modules', label: 'Module', icon: SettingsIcon, description: 'Feature-Konfiguration' },
     { id: 'ai', label: 'KI-Chef', icon: Bot, description: 'Personalisierung & Intelligenz' },
+    { id: 'apikey', label: 'API-Key', icon: Key, description: 'Gemini Schlüssel verwalten' },
     { id: 'speech', label: 'Audio', icon: Mic, description: 'Sprachausgabe & Steuerung' },
     { id: 'data', label: 'Daten', icon: Database, description: 'Backup & Speicher' },
 ];
