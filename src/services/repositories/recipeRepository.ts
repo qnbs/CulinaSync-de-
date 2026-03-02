@@ -1,11 +1,11 @@
 import { db } from '../dbInstance';
 import { Recipe } from '../../types';
-import { allSeedRecipes as seedRecipes } from '../../data/recipes/index';
 import { updatePantryMatches } from '../pantryMatcherService';
 import { addShoppingListItem } from './shoppingListRepository';
 
 export const syncSeedRecipes = async () => {
     try {
+        const { allSeedRecipes: seedRecipes } = await import('../../data/recipes/index');
         const existingRecipes = await db.recipes.toArray();
         const existingSeedIds = new Set(existingRecipes.map(r => r.seedId).filter(Boolean));
 

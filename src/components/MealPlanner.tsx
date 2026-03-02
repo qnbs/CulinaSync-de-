@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { addRecipeToMealPlan, markMealAsCooked, removeRecipeFromMealPlan } from '../services/db';
+import { addRecipeToMealPlan, markMealAsCooked, removeRecipeFromMealPlan } from '../services/repositories/mealPlanRepository';
 import { Recipe, MealPlanItem } from '../types';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { addToast as addToastAction } from '../store/slices/uiSlice';

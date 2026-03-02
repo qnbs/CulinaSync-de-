@@ -8,7 +8,7 @@ import { ChefLoading } from './ai-chef/ChefLoading';
 import { ChefResults } from './ai-chef/ChefResults';
 import { AlertTriangle } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../services/db';
+import { db } from '../services/dbInstance';
 import { addToast, setFocusAction, setVoiceAction } from '../store/slices/uiSlice';
 
 const HISTORY_KEY = 'culinaSyncAiChefHistory';

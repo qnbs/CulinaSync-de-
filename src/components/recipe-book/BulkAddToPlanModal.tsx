@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { db } from '../../services/db';
+import { db } from '../../services/dbInstance';
 import { LoaderCircle, CalendarPlus, X } from 'lucide-react';
 
 interface BulkAddToPlanModalProps {

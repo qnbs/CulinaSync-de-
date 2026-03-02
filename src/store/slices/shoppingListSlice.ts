@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { ShoppingListItem } from '../../types';
+import { db } from '../../services/dbInstance';
 import { 
-    db, 
     updateShoppingListItem, 
     clearShoppingList, 
     addShoppingListItem, 
@@ -9,7 +9,7 @@ import {
     renameShoppingListCategory, 
     batchAddShoppingListItems, 
     generateListFromMealPlan 
-} from '../../services/db';
+} from '../../services/repositories/shoppingListRepository';
 import { parseShoppingItemString } from '../../services/utils';
 
 interface ShoppingListState {

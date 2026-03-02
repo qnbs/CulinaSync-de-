@@ -1,12 +1,12 @@
 import { db } from './dbInstance';
 import { debouncedUpdateAllPantryMatches, updatePantryMatches } from './pantryMatcherService';
 import { syncSeedRecipes } from './repositories/recipeRepository';
-import { allSeedRecipes as seedRecipes } from '../data/recipes/index';
 
 // --- Initialization Logic ---
 const populateDB = async () => {
     console.log("Populating database for the first time...");
     try {
+        const { allSeedRecipes: seedRecipes } = await import('../data/recipes/index');
         const now = Date.now();
         await db.pantry.bulkAdd([
             { name: 'Tomatenmark', quantity: 1, unit: 'Dose', category: 'Konserven', createdAt: now - 200000, updatedAt: now - 200000, expiryDate: new Date(2025, 1, 1).toISOString().split('T')[0] },

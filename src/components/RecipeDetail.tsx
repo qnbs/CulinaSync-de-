@@ -1,6 +1,9 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Recipe, PantryItem, IngredientItem } from '../types';
-import { db, addRecipe, deleteRecipe, addRecipeToMealPlan, addMissingIngredientsToShoppingList, addShoppingListItem, updateRecipeImage } from '../services/db';
+import { db } from '../services/dbInstance';
+import { addRecipe, deleteRecipe, addMissingIngredientsToShoppingList, updateRecipeImage } from '../services/repositories/recipeRepository';
+import { addRecipeToMealPlan } from '../services/repositories/mealPlanRepository';
+import { addShoppingListItem } from '../services/repositories/shoppingListRepository';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { exportRecipeToPdf, exportRecipeToCsv, exportRecipeToMarkdown, exportRecipeToTxt, exportRecipeToJson } from '../services/exportService';
 import { ArrowLeft, Clock, Users, BarChart, UtensilsCrossed, Lightbulb, Save, Trash2, CheckCircle, CalendarPlus, FileDown, Star, ChevronDown, Plus, Minus, CookingPot, ShoppingCartIcon, AlertCircle, ImagePlus, LoaderCircle } from 'lucide-react';

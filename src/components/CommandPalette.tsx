@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, LucideProps, Milk, BookOpen } from 'lucide-react';
-import { db } from '../services/db';
+import { db } from '../services/dbInstance';
 import { Recipe, PantryItem } from '../types';
 import { useAppDispatch } from '../store/hooks';
 import { navigateToItem as navigateToItemAction, setCurrentPage, setVoiceAction } from '../store/slices/uiSlice';

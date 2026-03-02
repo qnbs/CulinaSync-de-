@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../services/db';
+import { db } from '../services/dbInstance';
 import { Recipe } from '../types';
 import RecipeList from './RecipeList';
 import RecipeDetail from './RecipeDetail';

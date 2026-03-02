@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { Recipe, RecipeIdea, StructuredPrompt } from '../../types';
 import { generateRecipeIdeas, generateRecipe, generateRecipeImage } from '../../services/geminiService';
 import { RootState } from '..';
-import { db } from '../../services/db';
+import { db } from '../../services/dbInstance';
 
 type AiChefState = 'idle' | 'loadingIdeas' | 'ideasReady' | 'loadingRecipe' | 'error';
 

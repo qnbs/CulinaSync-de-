@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { db, importData } from '../../../services/db';
+import { db } from '../../../services/dbInstance';
+import { importData } from '../../../services/repositories/dataRepository';
 import { exportFullDataAsJson } from '../../../services/exportService';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Download, Upload, Trash2, AlertTriangle, HardDrive } from 'lucide-react';

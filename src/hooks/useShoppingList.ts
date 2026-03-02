@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useCallback, useEffect, type FormEvent, type DragEvent } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../services/db';
+import { db } from '../services/dbInstance';
 import { ShoppingListItem, Recipe, PantryItem } from '../types';
 import { exportShoppingListToCsv, exportShoppingListToPdf, exportShoppingListToMarkdown, exportShoppingListToTxt, exportShoppingListToJson } from '../services/exportService';
 import { useAppDispatch, useAppSelector } from '../store/hooks';

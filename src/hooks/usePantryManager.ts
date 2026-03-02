@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { db, addOrUpdatePantryItem, addPantryItemsToShoppingList } from '../services/db';
+import { db } from '../services/dbInstance';
+import { addOrUpdatePantryItem, addPantryItemsToShoppingList } from '../services/repositories/pantryRepository';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { PantryItem, AppSettings } from '../types';
 import { useDebounce } from './useDebounce';

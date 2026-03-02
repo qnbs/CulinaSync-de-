@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../services/db';
+import { db } from '../services/dbInstance';
 import { Recipe, MealPlanItem } from '../types';
 
 export const useMealPlan = (currentDate: Date, weekStartsOnMonday: boolean) => {
