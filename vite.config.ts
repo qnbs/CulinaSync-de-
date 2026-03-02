@@ -14,6 +14,14 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'logo-192x192.png', 'logo-512x512.png'],
+      workbox: {
+        globIgnores: [
+          '**/jspdf.es.min-*.js',
+          '**/html2canvas.esm-*.js',
+          '**/papaparse.min-*.js',
+          '**/index.es-*.js',
+        ],
+      },
       manifest: {
         name: 'CulinaSync',
         short_name: 'CulinaSync',
