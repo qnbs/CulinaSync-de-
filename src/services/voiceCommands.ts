@@ -76,7 +76,7 @@ export const executeVoiceAction = (
 
 const parseItemString = (itemString: string): { quantity: number; unit: string; name: string } => {
     // Regex to capture quantity (number), unit (word), and name (rest)
-    const match = itemString.trim().match(/^(\d+[\.,]?\d*)\s*([a-zA-ZäöüÄÖÜß]+)?\s+(.+)$/);
+    const match = itemString.trim().match(/^(\d+[.,]?\d*)\s*([a-zA-ZäöüÄÖÜß]+)?\s+(.+)$/);
 
     if (match) {
         const [, quantityStr, unit, name] = match;

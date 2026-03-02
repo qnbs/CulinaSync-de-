@@ -37,7 +37,12 @@ export const AiModal = () => {
     const handleAddSelected = () => {
         if (!reviewItems) return;
         const itemsToAdd = reviewItems.filter(item => selectedItems.get(item.name));
-        handleAiAdd(itemsToAdd.map(({ category, ...rest }) => rest));
+        handleAiAdd(itemsToAdd.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            unit: item.unit,
+            recipeId: item.recipeId,
+        })));
         handleClose();
     };
     

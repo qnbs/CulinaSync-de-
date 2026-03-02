@@ -163,16 +163,18 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
                 content = <><Milk className="h-5 w-5 mr-3 text-zinc-500" /><span>{item.name}</span></>;
                 action = () => { navigateToItem('pantry', item.id!); onClose(); };
                 break;
-            case 'command':
+            case 'command': {
                 const Icon = item.icon;
                 content = <><Icon className="h-5 w-5 mr-3" /><span>{item.title}</span></>;
                 action = () => { item.action(); onClose(); };
                 break;
-            case 'global':
+            }
+            case 'global': {
                 const GlobalIcon = item.id.includes('recipes') ? BookOpen : Milk;
                 content = <><GlobalIcon className="h-5 w-5 mr-3" /><span>{item.title}</span></>;
                 action = () => { item.action(); onClose(); };
                 break;
+            }
             default:
                 return null;
         }

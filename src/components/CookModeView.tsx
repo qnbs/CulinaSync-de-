@@ -65,7 +65,6 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
         } else {
             cancel();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentStep, isSpeechEnabled, recipe.instructions]);
 
     // Handle voice commands from global state
