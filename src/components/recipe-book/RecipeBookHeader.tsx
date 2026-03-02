@@ -1,12 +1,13 @@
 import React from 'react';
 import { BookOpen, Star, CheckCircle2, ChefHat } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { Recipe } from '../../types';
 
 interface RecipeBookHeaderProps {
     recipes: Recipe[] | undefined;
 }
 
-const StatItem = ({ icon: Icon, label, value, subValue, colorClass }: { icon: any, label: string, value: number, subValue?: string, colorClass: string }) => (
+const StatItem = ({ icon: Icon, label, value, subValue, colorClass }: { icon: LucideIcon, label: string, value: number, subValue?: string, colorClass: string }) => (
     <div className="bg-zinc-900/40 border border-white/5 rounded-xl p-4 flex items-center gap-4 backdrop-blur-sm hover:bg-zinc-900/60 transition-colors">
         <div className={`p-3 rounded-full bg-black/20 ${colorClass}`}>
             <Icon size={24} />

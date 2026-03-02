@@ -4,7 +4,7 @@ import { importData } from '../../../services/repositories/dataRepository';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Download, Upload, Trash2, AlertTriangle, HardDrive } from 'lucide-react';
 import Dexie from 'dexie';
-import { FullBackupData } from '../../../types';
+import { BeforeInstallPromptEvent, FullBackupData } from '../../../types';
 import { updateSettings } from '../../../store/slices/settingsSlice';
 import { useAppDispatch } from '../../../store/hooks';
 
@@ -51,7 +51,14 @@ const ResetConfirmationModal: React.FC<{
     );
 };
 
-export const DataPanel = ({ addToast, installPromptEvent, onInstallPWA, isStandalone }: { addToast: any, installPromptEvent: any, onInstallPWA: any, isStandalone: boolean }) => {
+interface DataPanelProps {
+    addToast: (message: string, type: 'success' | 'error' | 'info') => unknown;
+    installPromptEvent: BeforeInstallPromptEvent | null;
+    onInstallPWA: () => void;
+    isStandalone: boolean;
+}
+
+export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEvent, onInstallPWA, isStandalone }) => {
     const dispatch = useAppDispatch();
     const [isResetModalOpen, setResetModalOpen] = useState(false);
     const [storageEstimate, setStorageEstimate] = useState<{ used: number; quota: number } | null>(null);
@@ -74,9 +81,11 @@ export const DataPanel = ({ addToast, installPromptEvent, onInstallPWA, isStanda
             localStorage.clear();
             addToast('App wird neu gestartet...', 'info');
             setTimeout(() => window.location.reload(), 1500);
-        }).catch((err: any) => {
+        }).catch((err: unknown) => {
             addToast('Fehler beim Zurücksetzen.', 'error');
-            console.error(err);
+            if (import.meta.env.DEV) {
+                console.error(err);
+            }
         });
     };
 

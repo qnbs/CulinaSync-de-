@@ -27,7 +27,9 @@ const calculateMatch = (recipe: Recipe, pantryMap: Map<string, number>): { perce
 };
 
 export const updatePantryMatches = async (recipeIds?: number[]): Promise<void> => {
-    console.log(`Updating pantry matches. Recipe IDs: ${recipeIds ? recipeIds.join(',') : 'All'}`);
+    if (import.meta.env.DEV) {
+        console.log(`Updating pantry matches. Recipe IDs: ${recipeIds ? recipeIds.join(',') : 'All'}`);
+    }
     try {
         const pantryItems: PantryItem[] = await db.pantry.toArray();
         const pantryMap = new Map(pantryItems.map(item => [item.name.toLowerCase(), item.quantity]));
@@ -56,7 +58,9 @@ export const updatePantryMatches = async (recipeIds?: number[]): Promise<void> =
         
         if (updates.length > 0) {
             await db.recipes.bulkUpdate(updates);
-            console.log(`Successfully updated pantry match for ${updates.length} recipes.`);
+            if (import.meta.env.DEV) {
+                console.log(`Successfully updated pantry match for ${updates.length} recipes.`);
+            }
         }
     } catch (error) {
         console.error("Failed to update pantry matches:", error);

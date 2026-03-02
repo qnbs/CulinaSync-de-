@@ -27,7 +27,7 @@ interface RecipeToolbarProps {
         pantryReady: boolean;
     };
     
-    setFilters: (filters: any) => void;
+    setFilters: (updater: (prev: RecipeToolbarProps['filters']) => RecipeToolbarProps['filters']) => void;
     clearFilters: () => void;
     hasActiveFilters: boolean;
     filterOptions: FilterOptions;
@@ -40,12 +40,12 @@ export const RecipeToolbar: React.FC<RecipeToolbarProps> = ({
 }) => {
     const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
-    const toggleFilter = (key: string) => {
-        setFilters((prev: any) => ({ ...prev, [key]: !prev[key] }));
+    const toggleFilter = (key: 'pantryReady' | 'favoritesOnly') => {
+        setFilters((prev) => ({ ...prev, [key]: !prev[key] }));
     };
 
-    const handleSelectChange = (key: string, value: string) => {
-        setFilters((prev: any) => ({ ...prev, [key]: value }));
+    const handleSelectChange = (key: 'course' | 'cuisine' | 'mainIngredient' | 'difficulty' | 'diet', value: string) => {
+        setFilters((prev) => ({ ...prev, [key]: value }));
     };
 
     return (
@@ -64,7 +64,7 @@ export const RecipeToolbar: React.FC<RecipeToolbarProps> = ({
                             className="w-full bg-zinc-900/50 border border-zinc-800 rounded-lg py-2.5 pl-10 pr-10 text-sm text-zinc-200 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none transition-all"
                         />
                         {searchTerm && (
-                            <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"><X size={16} /></button>
+                            <button type="button" aria-label="Suche zurücksetzen" onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"><X size={16} /></button>
                         )}
                     </div>
 
@@ -72,6 +72,7 @@ export const RecipeToolbar: React.FC<RecipeToolbarProps> = ({
                     <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 lg:pb-0">
                         {/* Quick Toggles */}
                         <button 
+                            type="button"
                             onClick={() => toggleFilter('pantryReady')}
                             className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition-all whitespace-nowrap ${filters.pantryReady ? 'bg-green-500/10 border-green-500/50 text-green-400' : 'bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:bg-zinc-900'}`}
                         >
@@ -79,6 +80,7 @@ export const RecipeToolbar: React.FC<RecipeToolbarProps> = ({
                         </button>
 
                         <button 
+                            type="button"
                             onClick={() => toggleFilter('favoritesOnly')}
                             className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition-all whitespace-nowrap ${filters.favoritesOnly ? 'bg-[var(--color-accent-500)]/10 border-[var(--color-accent-500)]/50 text-[var(--color-accent-400)]' : 'bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:bg-zinc-900'}`}
                         >
@@ -88,7 +90,8 @@ export const RecipeToolbar: React.FC<RecipeToolbarProps> = ({
                         <div className="w-px bg-zinc-800 mx-1 my-1"></div>
 
                          {/* Filter Toggle */}
-                         <button 
+                                 <button 
+                                     type="button"
                             onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
                             className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition-all whitespace-nowrap ${isFilterPanelOpen || (hasActiveFilters && !filters.pantryReady && !filters.favoritesOnly) ? 'bg-zinc-800 text-zinc-200 border-zinc-700' : 'bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:bg-zinc-900'}`}
                         >
@@ -103,6 +106,7 @@ export const RecipeToolbar: React.FC<RecipeToolbarProps> = ({
                             <select 
                                 value={sortBy} 
                                 onChange={e => setSortBy(e.target.value)} 
+                                aria-label="Sortierung wählen"
                                 className="appearance-none h-full bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-800 rounded-lg py-2 pl-9 pr-8 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none cursor-pointer transition-all"
                             >
                                 <option value="newest">Neueste</option>
@@ -120,42 +124,42 @@ export const RecipeToolbar: React.FC<RecipeToolbarProps> = ({
                 <div className="bg-zinc-900/95 backdrop-blur-md border border-zinc-800 rounded-xl p-4 shadow-xl grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 page-fade-in">
                      <div className="space-y-1.5">
                         <label className="text-xs font-bold text-zinc-500 uppercase">Gang</label>
-                        <select value={filters.course} onChange={e => handleSelectChange('course', e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] outline-none">
+                        <select aria-label="Nach Gang filtern" value={filters.course} onChange={e => handleSelectChange('course', e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] outline-none">
                             <option value="">Alle</option>
                             {filterOptions.courses.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                     </div>
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-zinc-500 uppercase">Küche</label>
-                        <select value={filters.cuisine} onChange={e => handleSelectChange('cuisine', e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] outline-none">
+                        <select aria-label="Nach Küche filtern" value={filters.cuisine} onChange={e => handleSelectChange('cuisine', e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] outline-none">
                             <option value="">Alle</option>
                             {filterOptions.cuisines.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                     </div>
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-zinc-500 uppercase">Hauptzutat</label>
-                        <select value={filters.mainIngredient} onChange={e => handleSelectChange('mainIngredient', e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] outline-none">
+                        <select aria-label="Nach Hauptzutat filtern" value={filters.mainIngredient} onChange={e => handleSelectChange('mainIngredient', e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] outline-none">
                             <option value="">Alle</option>
                             {filterOptions.mainIngredients.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                     </div>
                      <div className="space-y-1.5">
                         <label className="text-xs font-bold text-zinc-500 uppercase">Schwierigkeit</label>
-                        <select value={filters.difficulty} onChange={e => handleSelectChange('difficulty', e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] outline-none">
+                        <select aria-label="Nach Schwierigkeit filtern" value={filters.difficulty} onChange={e => handleSelectChange('difficulty', e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] outline-none">
                             <option value="">Alle</option>
                             {filterOptions.difficulties.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                     </div>
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-zinc-500 uppercase">Ernährung</label>
-                        <select value={filters.diet} onChange={e => handleSelectChange('diet', e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] outline-none">
+                        <select aria-label="Nach Ernährungsform filtern" value={filters.diet} onChange={e => handleSelectChange('diet', e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] outline-none">
                             <option value="">Alle</option>
                             {filterOptions.diets.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                     </div>
                     {hasActiveFilters && (
                         <div className="col-span-full flex justify-end pt-2 border-t border-zinc-800 mt-2">
-                             <button onClick={clearFilters} className="text-xs font-bold text-[var(--color-accent-400)] hover:text-[var(--color-accent-300)] flex items-center gap-1">
+                                      <button type="button" onClick={clearFilters} className="text-xs font-bold text-[var(--color-accent-400)] hover:text-[var(--color-accent-300)] flex items-center gap-1">
                                 <X size={12} /> ALLE FILTER ZURÜCKSETZEN
                              </button>
                         </div>

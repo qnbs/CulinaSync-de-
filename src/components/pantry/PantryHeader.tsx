@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
 import { PlusCircle, Package, AlertTriangle, ShoppingCart } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { usePantryManagerContext } from '../../contexts/PantryManagerContext';
 import { getExpiryStatus } from '../PantryListItem';
 import { useAppSelector } from '../../store/hooks';
 
-const StatCard = ({ icon: Icon, label, value, colorClass, bgClass }: { icon: any, label: string, value: number, colorClass: string, bgClass: string }) => (
+const StatCard = ({ icon: Icon, label, value, colorClass, bgClass }: { icon: LucideIcon, label: string, value: number, colorClass: string, bgClass: string }) => (
     <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border border-white/5 shadow-lg backdrop-blur-sm ${bgClass}`}>
         <div className={`p-2 rounded-full bg-black/20 ${colorClass}`}>
             <Icon size={20} />
@@ -49,6 +50,7 @@ export const PantryHeader = () => {
                     </p>
                 </div>
                 <button 
+                    type="button"
                     onClick={() => setModalState({ isOpen: true, item: null })} 
                     className="group flex items-center justify-center gap-2 bg-gradient-to-br from-[var(--color-accent-500)] to-[var(--color-accent-600)] text-zinc-100 font-bold py-2.5 px-5 rounded-xl hover:shadow-[0_0_20px_var(--color-accent-glow)] transition-all duration-300 active:scale-95"
                 >

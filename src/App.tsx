@@ -126,7 +126,9 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (finalTranscript) {
+      if (import.meta.env.DEV) {
         console.log("Processing final command:", finalTranscript);
+      }
         const action = processCommand(finalTranscript, currentPage);
         
         executeVoiceAction(action, {
@@ -208,6 +210,9 @@ const App: React.FC = () => {
 
   return (
       <div className="min-h-screen text-zinc-200">
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-[60] bg-zinc-900 border border-zinc-600 text-zinc-100 rounded px-3 py-2">
+          Zum Inhalt springen
+        </a>
         <Suspense fallback={null}>
           {showOnboarding && <Onboarding onComplete={handleOnboardingComplete} />}
         </Suspense>
@@ -220,7 +225,7 @@ const App: React.FC = () => {
           hasRecognitionSupport={hasRecognitionSupport}
           onCommandPaletteToggle={() => dispatch(setCommandPaletteOpen(true))}
         />
-        <main key={currentPage} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 page-fade-in pb-20 md:pb-8">
+        <main id="main-content" key={currentPage} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 page-fade-in pb-20 md:pb-8">
           <Suspense fallback={<LoadingSpinner />}>
               {renderPage()}
           </Suspense>

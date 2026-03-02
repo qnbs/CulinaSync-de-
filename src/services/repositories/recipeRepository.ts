@@ -12,13 +12,19 @@ export const syncSeedRecipes = async () => {
         const newRecipes = seedRecipes.filter(seedRecipe => seedRecipe.seedId && !existingSeedIds.has(seedRecipe.seedId));
 
         if (newRecipes.length > 0) {
-            console.log(`Syncing database: Found ${newRecipes.length} new seed recipes to add.`);
+            if (import.meta.env.DEV) {
+                console.log(`Syncing database: Found ${newRecipes.length} new seed recipes to add.`);
+            }
             const newIds = await db.recipes.bulkAdd(newRecipes.map(r => ({ ...r, isFavorite: false, updatedAt: Date.now() })), { allKeys: true });
-            console.log("Database sync complete.");
+            if (import.meta.env.DEV) {
+                console.log("Database sync complete.");
+            }
             // Update matches for the newly added recipes
             await updatePantryMatches(newIds as number[]);
         } else {
-            console.log("Database sync: No new seed recipes to add.");
+            if (import.meta.env.DEV) {
+                console.log("Database sync: No new seed recipes to add.");
+            }
         }
     } catch (error) {
         console.error("Failed to sync seed recipes:", error);

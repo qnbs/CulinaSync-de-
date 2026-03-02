@@ -226,6 +226,8 @@ const RecipeBook: React.FC = () => {
       {!isSelectMode && filteredRecipes.length > 0 && (
           <div className="fixed bottom-24 right-4 md:right-8 z-30">
               <button 
+                type="button"
+                aria-label="Auswahlmodus starten"
                 onClick={handleToggleSelectMode}
                 className="flex items-center justify-center w-12 h-12 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-700 shadow-lg transition-all"
                 title="Auswahlmodus starten"
@@ -239,10 +241,11 @@ const RecipeBook: React.FC = () => {
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-md px-4 z-40 page-fade-in">
              <div className="bg-zinc-900/90 backdrop-blur-xl border border-zinc-700 rounded-2xl p-3 shadow-2xl flex items-center justify-between">
                 <div className="flex items-center gap-3 px-2">
-                    <button onClick={handleToggleSelectMode} className="p-1 text-zinc-400 hover:text-zinc-200"><X size={20}/></button>
+                  <button type="button" aria-label="Auswahlmodus beenden" onClick={handleToggleSelectMode} className="p-1 text-zinc-400 hover:text-zinc-200"><X size={20}/></button>
                     <span className="font-medium text-zinc-200 text-sm">{selectedIds.length} ausgewählt</span>
                 </div>
                 <button 
+                  type="button"
                     onClick={() => setBulkModalOpen(true)} 
                     disabled={selectedIds.length === 0}
                     className="flex items-center gap-2 bg-[var(--color-accent-500)] text-zinc-900 font-bold py-2 px-4 rounded-xl hover:bg-[var(--color-accent-400)] transition-colors disabled:bg-zinc-800 disabled:text-zinc-600 text-sm"
