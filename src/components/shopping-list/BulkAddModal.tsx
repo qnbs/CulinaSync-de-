@@ -1,14 +1,17 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ShoppingListItem } from '../../types';
 import { TextQuote } from 'lucide-react';
 import { parseShoppingItemString } from '../../services/utils';
 import { useShoppingListContext } from '../../contexts/ShoppingListContext';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 export const BulkAddModal = () => {
     const { isBulkAddModalOpen, setBulkAddModalOpen, handleBulkAdd } = useShoppingListContext();
     const [text, setText] = useState('');
     const [parsedItems, setParsedItems] = useState<Omit<ShoppingListItem, 'id' | 'isChecked' | 'sortOrder' | 'category'>[]>([]);
     const [isParsed, setIsParsed] = useState(false);
+    const modalRef = useRef<HTMLDivElement>(null);
+    const textRef = useRef<HTMLTextAreaElement>(null);
 
     const handleParse = () => {
         const lines = text.split('\n').filter(line => line.trim() !== '');
@@ -25,17 +28,32 @@ export const BulkAddModal = () => {
     const handleClose = () => {
         setText(''); setParsedItems([]); setIsParsed(false); setBulkAddModalOpen(false);
     };
+
+    useModalA11y({
+        isOpen: isBulkAddModalOpen,
+        onClose: handleClose,
+        containerRef: modalRef,
+        initialFocusRef: textRef,
+    });
     
     if (!isBulkAddModalOpen) return null;
 
     return (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 page-fade-in" onClick={handleClose}>
-             <div className="bg-zinc-800 rounded-lg p-6 w-full max-w-lg shadow-xl" onClick={e => e.stopPropagation()}>
-                 <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><TextQuote /> Liste einfügen</h3>
+             <div
+                ref={modalRef}
+                className="bg-zinc-800 rounded-lg p-6 w-full max-w-lg shadow-xl"
+                onClick={e => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="bulk-add-title"
+                tabIndex={-1}
+             >
+                 <h3 id="bulk-add-title" className="text-xl font-bold mb-4 flex items-center gap-2"><TextQuote /> Liste einfügen</h3>
                  {!isParsed ? (
                      <>
                         <p className="text-zinc-400 text-sm mb-4">Füge eine Liste von Zutaten ein, einen Artikel pro Zeile. Mengen und Einheiten werden automatisch erkannt.</p>
-                        <textarea value={text} onChange={e => setText(e.target.value)} placeholder={"250g Mehl\n1 Prise Salz\nEier"} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 h-40 focus:ring-2 focus:ring-amber-500" />
+                        <textarea ref={textRef} value={text} onChange={e => setText(e.target.value)} placeholder={"250g Mehl\n1 Prise Salz\nEier"} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 h-40 focus:ring-2 focus:ring-amber-500" />
                         <div className="flex justify-end gap-3 pt-4">
                             <button type="button" onClick={handleClose} className="py-2 px-4 rounded-md text-zinc-300 hover:bg-zinc-700">Abbrechen</button>
                             <button onClick={handleParse} disabled={!text.trim()} className="py-2 px-4 rounded-md bg-amber-500 text-zinc-900 font-bold hover:bg-amber-400 disabled:bg-zinc-600">Analysieren</button>

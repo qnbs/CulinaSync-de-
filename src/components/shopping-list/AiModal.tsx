@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ShoppingListItem } from '../../types';
 import { generateShoppingList } from '../../services/geminiService';
 import { Bot, LoaderCircle, ArrowLeft, CheckSquare, Square } from 'lucide-react';
 import { useShoppingListContext } from '../../contexts/ShoppingListContext';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 export const AiModal = () => {
     const { isAiModalOpen, setAiModalOpen, handleAiAdd, pantryItems, activeItems } = useShoppingListContext();
@@ -12,6 +13,24 @@ export const AiModal = () => {
     const [error, setError] = useState('');
     const [reviewItems, setReviewItems] = useState<Omit<ShoppingListItem, 'id' | 'isChecked' | 'sortOrder'>[] | null>(null);
     const [selectedItems, setSelectedItems] = useState<Map<string, boolean>>(new Map());
+    const modalRef = useRef<HTMLDivElement>(null);
+    const promptRef = useRef<HTMLTextAreaElement>(null);
+
+    const handleClose = () => {
+        setPrompt('');
+        setIsLoading(false);
+        setError('');
+        setReviewItems(null);
+        setSelectedItems(new Map());
+        setAiModalOpen(false);
+    }
+
+    useModalA11y({
+        isOpen: isAiModalOpen,
+        onClose: handleClose,
+        containerRef: modalRef,
+        initialFocusRef: promptRef,
+    });
 
     const handleGenerate = async () => {
         setIsLoading(true);
@@ -46,27 +65,26 @@ export const AiModal = () => {
         handleClose();
     };
     
-    const handleClose = () => {
-        setPrompt('');
-        setIsLoading(false);
-        setError('');
-        setReviewItems(null);
-        setSelectedItems(new Map());
-        setAiModalOpen(false);
-    }
-
     if (!isAiModalOpen) return null;
 
     const selectedCount = Array.from(selectedItems.values()).filter(Boolean).length;
 
     return (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 page-fade-in" onClick={handleClose}>
-            <div className="bg-zinc-800 rounded-lg p-6 w-full max-w-lg shadow-xl" onClick={e => e.stopPropagation()}>
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><Bot /> KI-gestützte Einkaufsliste</h3>
+            <div
+                ref={modalRef}
+                className="bg-zinc-800 rounded-lg p-6 w-full max-w-lg shadow-xl"
+                onClick={e => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="ai-modal-title"
+                tabIndex={-1}
+            >
+                <h3 id="ai-modal-title" className="text-xl font-bold mb-4 flex items-center gap-2"><Bot /> KI-gestützte Einkaufsliste</h3>
                 {!reviewItems ? (
                     <>
                         <p className="text-zinc-400 text-sm mb-4">Beschreibe, was du vorhast (z.B. "Grillparty für 6 Personen" oder "Zutaten für Lasagne"), und die KI erstellt eine passende Einkaufsliste für dich. Dein aktueller Vorrat wird dabei berücksichtigt.</p>
-                        <textarea value={prompt} onChange={e => setPrompt(e.target.value)} placeholder="z.B. Zutaten für einen Schokoladenkuchen..." className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 h-24 focus:ring-2 focus:ring-[var(--color-accent-500)]" />
+                        <textarea ref={promptRef} value={prompt} onChange={e => setPrompt(e.target.value)} placeholder="z.B. Zutaten für einen Schokoladenkuchen..." className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 h-24 focus:ring-2 focus:ring-[var(--color-accent-500)]" />
                         {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
                         <div className="flex justify-end gap-3 pt-4">
                             <button type="button" onClick={handleClose} className="py-2 px-4 rounded-md text-zinc-300 hover:bg-zinc-700">Abbrechen</button>

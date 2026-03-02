@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { db } from '../../services/dbInstance';
 import { LoaderCircle, CalendarPlus, X } from 'lucide-react';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 interface BulkAddToPlanModalProps {
     isOpen: boolean;
@@ -13,6 +14,15 @@ export const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, 
     const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
     const [mealType, setMealType] = useState<'Frühstück' | 'Mittagessen' | 'Abendessen'>('Abendessen');
     const [isSaving, setIsSaving] = useState(false);
+    const modalRef = useRef<HTMLDivElement>(null);
+    const startDateRef = useRef<HTMLInputElement>(null);
+
+    useModalA11y({
+        isOpen,
+        onClose,
+        containerRef: modalRef,
+        initialFocusRef: startDateRef,
+    });
 
     const handleSave = async () => {
         setIsSaving(true);
@@ -33,7 +43,15 @@ export const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, 
 
     return (
         <div className="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm flex items-center justify-center z-50 page-fade-in" onClick={onClose}>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl relative" onClick={e => e.stopPropagation()}>
+            <div
+                ref={modalRef}
+                className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl relative"
+                onClick={e => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="bulk-plan-modal-title"
+                tabIndex={-1}
+            >
                 <button onClick={onClose} className="absolute top-4 right-4 text-zinc-500 hover:text-zinc-300 transition-colors">
                     <X size={20} />
                 </button>
@@ -43,7 +61,7 @@ export const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, 
                         <CalendarPlus size={24} />
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold text-zinc-100">Zum Plan hinzufügen</h3>
+                        <h3 id="bulk-plan-modal-title" className="text-lg font-bold text-zinc-100">Zum Plan hinzufügen</h3>
                         <p className="text-xs text-zinc-400">{recipeIds.length} Rezepte ausgewählt</p>
                     </div>
                 </div>
@@ -52,6 +70,7 @@ export const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, 
                     <div className="space-y-1.5">
                         <label htmlFor="startDate" className="block text-xs font-bold text-zinc-400 uppercase tracking-wider">Startdatum</label>
                         <input 
+                            ref={startDateRef}
                             type="date" 
                             id="startDate" 
                             value={startDate} 

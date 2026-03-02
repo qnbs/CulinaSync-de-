@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { PantryItem } from '../../types';
 import { Save } from 'lucide-react';
 import { getCategoryForItem } from '../../services/utils';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 const DEFAULT_UNITS = ["Stück", "g", "kg", "ml", "l", "TL", "EL", "Dose", "Bund", "Zehen", "Flasche", "Packung"];
 
@@ -14,13 +15,20 @@ export const PantryItemModal: React.FC<{
 }> = ({ isOpen, item, onClose, onSave, pantryItems }) => {
     const [formData, setFormData] = useState<Partial<PantryItem>>({});
     const nameInputRef = useRef<HTMLInputElement>(null);
+    const modalRef = useRef<HTMLDivElement>(null);
+
+    useModalA11y({
+        isOpen,
+        onClose,
+        containerRef: modalRef,
+        initialFocusRef: nameInputRef,
+    });
 
     const existingCategories = useMemo(() => Array.from(new Set(pantryItems.map(p => p.category).filter(Boolean))), [pantryItems]);
 
     useEffect(() => {
         if (isOpen) {
             setFormData(item ? { ...item } : { name: '', quantity: 1, unit: 'Stück', category: '', expiryDate: '', minQuantity: undefined, notes: '' });
-            setTimeout(() => nameInputRef.current?.focus(), 100);
         }
     }, [isOpen, item]);
     
@@ -43,9 +51,17 @@ export const PantryItemModal: React.FC<{
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 page-fade-in" onClick={onClose} role="dialog" aria-modal="true">
-            <div className="bg-zinc-800 rounded-lg p-6 w-full max-w-lg shadow-xl" onClick={e => e.stopPropagation()}>
-                <h3 className="text-xl font-bold mb-6">{item ? 'Artikel bearbeiten' : 'Neuer Artikel im Vorrat'}</h3>
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 page-fade-in" onClick={onClose}>
+            <div
+                ref={modalRef}
+                className="bg-zinc-800 rounded-lg p-6 w-full max-w-lg shadow-xl"
+                onClick={e => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="pantry-item-modal-title"
+                tabIndex={-1}
+            >
+                <h3 id="pantry-item-modal-title" className="text-xl font-bold mb-6">{item ? 'Artikel bearbeiten' : 'Neuer Artikel im Vorrat'}</h3>
                 <form onSubmit={handleSave} className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div className="sm:col-span-2">

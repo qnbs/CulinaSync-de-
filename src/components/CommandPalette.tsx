@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Search, LucideProps, Milk, BookOpen } from 'lucide-react';
 import { db } from '../services/dbInstance';
 import { Recipe, PantryItem } from '../types';
 import { useAppDispatch } from '../store/hooks';
 import { navigateToItem as navigateToItemAction, setCurrentPage, setVoiceAction } from '../store/slices/uiSlice';
+import { useModalA11y } from '../hooks/useModalA11y';
 
 export interface Command {
     id: string;
@@ -30,6 +31,16 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
     const [searchTerm, setSearchTerm] = useState('');
     const [activeIndex, setActiveIndex] = useState(0);
     const [dbSearchResults, setDbSearchResults] = useState<{recipes: Recipe[], pantry: PantryItem[]}>({recipes: [], pantry: []});
+    const modalRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useModalA11y({
+        isOpen,
+        onClose,
+        containerRef: modalRef,
+        initialFocusRef: inputRef,
+        closeOnEscape: false,
+    });
 
     const navigateToItem = (page: 'recipes' | 'pantry', id: number) => {
         dispatch(navigateToItemAction({ page, id }));
@@ -196,19 +207,23 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
     };
 
     return (
-        <div 
-          className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24"
-          onClick={onClose}
-          role="dialog"
-          aria-modal="true"
-        >
+                <div 
+                    className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24"
+                    onClick={onClose}
+                >
           <div 
+                        ref={modalRef}
             className="relative w-full max-w-xl bg-zinc-900 border border-zinc-700/50 rounded-lg shadow-2xl modal-fade-in"
             onClick={e => e.stopPropagation()}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Befehlspalette"
+                        tabIndex={-1}
           >
             <div className="flex items-center border-b border-zinc-700/50 p-1">
               <Search className="h-5 w-5 text-zinc-500 mx-3" />
               <input
+                                ref={inputRef}
                 type="text"
                 autoFocus
                 value={searchTerm}
