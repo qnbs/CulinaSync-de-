@@ -201,6 +201,28 @@ Empfohlene manuelle Prüfung:
 
 Hinweis: Beim ersten Offline-Start auf einem komplett neuen Gerät ohne vorherigen Online-Aufruf dieser Exportpfade sind PDF/CSV-Exporte erwartbar nicht verfügbar.
 
+### Lighthouse-Audit (lokale Produktionsvorschau)
+
+Die folgenden Werte wurden nach den letzten Optimierungen mit Lighthouse gegen die lokale Vite-Preview gemessen:
+
+| Kategorie | Vorher | Nachher |
+|---|---:|---:|
+| Performance | 0.70 | 0.64* |
+| Accessibility | 0.86 | 1.00 |
+| Best Practices | 0.96 | 1.00 |
+| SEO | 0.91 | 1.00 |
+
+\*Hinweis: Performance ist ein lab-basierter Messwert und schwankt je Lauf. Die übrigen Kategorien zeigen die gezielt behobenen Defizite stabil.
+
+Reproduzierbarer Audit-Flow:
+
+1. Build + Preview starten:
+  - `npm run build`
+  - `npm run preview -- --host 127.0.0.1 --port 4173`
+2. Lighthouse gegen die Preview laufen lassen (Headless Chrome erforderlich):
+  - `CHROME_PATH=/pfad/zu/chrome npx lighthouse http://127.0.0.1:4173 --chrome-flags='--headless=new --no-sandbox --disable-dev-shm-usage' --output=json --output-path=./lighthouse.json --quiet`
+3. Ergebnisdatei auswerten (Scores + gezielte Audits wie `errors-in-console`, `color-contrast`, `select-name`, `meta-description`).
+
 ---
 
 ## 🛡️ Haftungsausschluss

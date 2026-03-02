@@ -8,7 +8,7 @@ const populateDB = async () => {
     try {
         const { allSeedRecipes: seedRecipes } = await import('../data/recipes/index');
         const now = Date.now();
-        await db.pantry.bulkAdd([
+        await db.pantry.bulkPut([
             { name: 'Tomatenmark', quantity: 1, unit: 'Dose', category: 'Konserven', createdAt: now - 200000, updatedAt: now - 200000, expiryDate: new Date(2025, 1, 1).toISOString().split('T')[0] },
             { name: 'Knoblauch', quantity: 3, unit: 'Zehen', category: 'Frischeprodukte', createdAt: now - 100000, updatedAt: now - 100000 },
             { name: 'Zwiebel', quantity: 1, unit: 'Stück', category: 'Frischeprodukte', createdAt: now, updatedAt: now, minQuantity: 2 },
@@ -18,13 +18,15 @@ const populateDB = async () => {
         console.log("Default pantry items added.");
 
         if (seedRecipes.length > 0) {
-            await db.recipes.bulkAdd(seedRecipes.map(r => ({ ...r, isFavorite: false, updatedAt: now })));
+            await db.recipes.bulkPut(seedRecipes.map(r => ({ ...r, isFavorite: false, updatedAt: now })));
             console.log(`${seedRecipes.length} seed recipes added during initial population.`);
         }
         // After populating, calculate all matches
         await updatePantryMatches();
     } catch (error) {
-        console.error("Failed during initial database population:", error);
+        if (import.meta.env.DEV) {
+            console.error("Failed during initial database population:", error);
+        }
     }
 };
 

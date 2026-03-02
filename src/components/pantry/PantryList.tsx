@@ -9,9 +9,9 @@ const EmptyState: React.FC<{ totalItemCount: number }> = ({ totalItemCount }) =>
         <div className="bg-zinc-900 p-4 rounded-full mb-4 ring-1 ring-white/5">
             <PackageOpen size={40} className="text-zinc-600"/>
         </div>
-        <h4 className="text-xl font-bold text-zinc-300 mb-2">
+        <h3 className="text-xl font-bold text-zinc-300 mb-2">
             {totalItemCount > 0 ? "Keine Ergebnisse gefunden" : "Deine Vorratskammer ist leer"}
-        </h4>
+        </h3>
         <p className="text-zinc-500 max-w-sm mx-auto leading-relaxed">
             {totalItemCount > 0 
                 ? "Versuche, deine Suchbegriffe oder Filter anzupassen." 

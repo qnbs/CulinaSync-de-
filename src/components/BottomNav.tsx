@@ -40,7 +40,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentPage, setCurrentPage }) =>
                     <item.icon className={`h-6 w-6 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}`} />
                 </div>
                 <span className={`text-[10px] font-medium transition-colors duration-300 ${
-                  isActive ? 'text-[var(--color-accent-100)]' : 'text-zinc-500'
+                  isActive ? 'text-[var(--color-accent-100)]' : 'text-zinc-400'
                 }`}>
                     {item.label}
                 </span>

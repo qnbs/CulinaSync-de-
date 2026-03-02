@@ -50,6 +50,7 @@ export const PantryToolbar = () => {
                         <select 
                             value={expiryFilter} 
                             onChange={e => setExpiryFilter(e.target.value as any)} 
+                            aria-label="Ablaufstatus filtern"
                             className="appearance-none h-full bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-800 rounded-lg py-2.5 pl-9 pr-8 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none cursor-pointer transition-all"
                         >
                             <option value="all">Alle Status</option>
@@ -66,6 +67,7 @@ export const PantryToolbar = () => {
                         <select 
                             value={sortOrder} 
                             onChange={e => setSortOrder(e.target.value)} 
+                            aria-label="Sortierreihenfolge wählen"
                             className="appearance-none h-full bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-800 rounded-lg py-2.5 pl-9 pr-8 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none cursor-pointer transition-all"
                         >
                             <option value="name">Name (A-Z)</option>
