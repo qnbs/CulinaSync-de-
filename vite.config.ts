@@ -21,6 +21,22 @@ export default defineConfig({
           '**/papaparse.min-*.js',
           '**/index.es-*.js',
         ],
+        runtimeCaching: [
+          {
+            urlPattern: /\/assets\/(jspdf\.es\.min-|html2canvas\.esm-|papaparse\.min-|index\.es-).+\.js$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'export-libs-cache',
+              expiration: {
+                maxEntries: 12,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+        ],
       },
       manifest: {
         name: 'CulinaSync',
