@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { Recipe, RecipeIdea, StructuredPrompt } from '../../types';
 import { RootState } from '..';
-import { db } from '../../services/dbInstance';
 
 type AiChefState = 'idle' | 'loadingIdeas' | 'ideasReady' | 'loadingRecipe' | 'error';
 
@@ -30,6 +29,7 @@ export const generateRecipeIdeasAsync = createAsyncThunk<
 >('aiChef/generateIdeas', async (prompt, { getState, rejectWithValue }) => {
     try {
     const { generateRecipeIdeas } = await import('../../services/geminiService');
+    const { db } = await import('../../services/dbInstance');
         const state = getState();
         const pantryItems = await db.pantry.toArray();
         const ideas = await generateRecipeIdeas(prompt, pantryItems, state.settings.aiPreferences);
@@ -46,6 +46,7 @@ export const generateFullRecipeAsync = createAsyncThunk<
 >('aiChef/generateRecipe', async ({ prompt, chosenIdea }, { getState, rejectWithValue }) => {
     try {
     const { generateRecipe } = await import('../../services/geminiService');
+    const { db } = await import('../../services/dbInstance');
         const state = getState();
         const pantryItems = await db.pantry.toArray();
         const recipe = await generateRecipe(prompt, pantryItems, state.settings.aiPreferences, chosenIdea);

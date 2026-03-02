@@ -74,7 +74,6 @@ export default defineConfig({
           'vendor-react': ['react', 'react-dom'],
           'vendor-redux': ['@reduxjs/toolkit', 'react-redux', 'redux-persist'],
           'vendor-dexie': ['dexie', 'dexie-react-hooks'],
-          'vendor-pdf': ['jspdf'],
         },
       },
     },

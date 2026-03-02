@@ -4,8 +4,6 @@ import { type Command } from './components/CommandPalette';
 import { Page, BeforeInstallPromptEvent, ShoppingListItem, PantryItem } from './types';
 import { useSpeechRecognition } from './hooks/useSpeechRecognition';
 import { processCommand, executeVoiceAction } from './services/voiceCommands';
-import { addShoppingListItem } from './services/repositories/shoppingListRepository';
-import { addOrUpdatePantryItem, removeItemFromPantry } from './services/repositories/pantryRepository';
 import { CheckCircle, Bot, Milk, BookOpen, CalendarDays, ShoppingCart, Settings as SettingsIcon, HelpCircle, PlusCircle, RefreshCw, Trash2, Download, Upload, Mic, AlertTriangle, Info, X } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from './store/hooks';
 import { setCurrentPage, setCommandPaletteOpen, addToast as addToastAction, removeToast as removeToastAction } from './store/slices/uiSlice';
@@ -41,6 +39,8 @@ const App: React.FC = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
+    void import('./services/db');
+
     fetch('./package.json')
       .then(res => res.json())
       .then(data => setAppVersion(data.version || 'N/A'))
@@ -132,9 +132,18 @@ const App: React.FC = () => {
         executeVoiceAction(action, {
             navigate,
             addToast,
-            addShoppingListItem: (item) => addShoppingListItem(item as Omit<ShoppingListItem, 'id' | 'sortOrder' | 'category'>),
-            addOrUpdatePantryItem: (item) => addOrUpdatePantryItem(item as Omit<PantryItem, 'id' | 'createdAt' | 'updatedAt'>),
-            removeItemFromPantry,
+            addShoppingListItem: async (item) => {
+              const { addShoppingListItem } = await import('./services/repositories/shoppingListRepository');
+              return addShoppingListItem(item as Omit<ShoppingListItem, 'id' | 'sortOrder' | 'category'>);
+            },
+            addOrUpdatePantryItem: async (item) => {
+              const { addOrUpdatePantryItem } = await import('./services/repositories/pantryRepository');
+              return addOrUpdatePantryItem(item as Omit<PantryItem, 'id' | 'createdAt' | 'updatedAt'>);
+            },
+            removeItemFromPantry: async (name) => {
+              const { removeItemFromPantry } = await import('./services/repositories/pantryRepository');
+              return removeItemFromPantry(name);
+            },
             dispatch,
         }, currentPage);
     }

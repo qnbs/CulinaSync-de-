@@ -1,15 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { ShoppingListItem } from '../../types';
-import { db } from '../../services/dbInstance';
-import { 
-    updateShoppingListItem, 
-    clearShoppingList, 
-    addShoppingListItem, 
-    moveCheckedToPantry, 
-    renameShoppingListCategory, 
-    batchAddShoppingListItems, 
-    generateListFromMealPlan 
-} from '../../services/repositories/shoppingListRepository';
 import { parseShoppingItemString } from '../../services/utils';
 
 interface ShoppingListState {
@@ -42,52 +32,62 @@ const initialState: ShoppingListState = {
 
 // Async Thunks
 export const toggleItemCheckedAsync = createAsyncThunk('shoppingList/toggleItem', async (item: ShoppingListItem) => {
+    const { updateShoppingListItem } = await import('../../services/repositories/shoppingListRepository');
     await updateShoppingListItem({ ...item, isChecked: !item.isChecked });
     return item.id;
 });
 
 export const clearListAsync = createAsyncThunk('shoppingList/clearList', async () => {
+    const { clearShoppingList } = await import('../../services/repositories/shoppingListRepository');
     const count = await clearShoppingList();
     return count;
 });
 
 export const generateFromPlanAsync = createAsyncThunk('shoppingList/generateFromPlan', async () => {
+    const { generateListFromMealPlan } = await import('../../services/repositories/shoppingListRepository');
     const result = await generateListFromMealPlan();
     return result;
 });
 
 export const addItemAsync = createAsyncThunk('shoppingList/addItem', async (itemString: string) => {
+    const { addShoppingListItem } = await import('../../services/repositories/shoppingListRepository');
     const parsed = parseShoppingItemString(itemString);
     const result = await addShoppingListItem({ ...parsed, isChecked: false });
     return { status: result.status, name: parsed.name };
 });
 
 export const addItemsAsync = createAsyncThunk('shoppingList/addItems', async (items: Omit<ShoppingListItem, 'id' | 'isChecked' | 'sortOrder' | 'category'>[]) => {
+    const { batchAddShoppingListItems } = await import('../../services/repositories/shoppingListRepository');
     const result = await batchAddShoppingListItems(items);
     return result;
 });
 
 export const renameCategoryAsync = createAsyncThunk('shoppingList/renameCategory', async ({ oldName, newName }: { oldName: string, newName: string }) => {
+    const { renameShoppingListCategory } = await import('../../services/repositories/shoppingListRepository');
     await renameShoppingListCategory(oldName, newName);
     return { oldName, newName };
 });
 
 export const updateItemOrderAsync = createAsyncThunk('shoppingList/updateItemOrder', async (item: ShoppingListItem) => {
+    const { updateShoppingListItem } = await import('../../services/repositories/shoppingListRepository');
     await updateShoppingListItem(item);
     return item;
 });
 
 export const updateItemAsync = createAsyncThunk('shoppingList/updateItem', async (item: ShoppingListItem) => {
+    const { updateShoppingListItem } = await import('../../services/repositories/shoppingListRepository');
     await updateShoppingListItem(item);
     return item;
 });
 
 export const deleteItemAsync = createAsyncThunk('shoppingList/deleteItem', async (id: number) => {
+    const { db } = await import('../../services/dbInstance');
     await db.shoppingList.delete(id);
     return id;
 });
 
 export const moveToPantryAsync = createAsyncThunk('shoppingList/moveToPantry', async () => {
+    const { moveCheckedToPantry } = await import('../../services/repositories/shoppingListRepository');
     const count = await moveCheckedToPantry();
     return count;
 });
