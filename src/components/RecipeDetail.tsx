@@ -5,7 +5,6 @@ import { addRecipe, deleteRecipe, addMissingIngredientsToShoppingList, updateRec
 import { addRecipeToMealPlan } from '../services/repositories/mealPlanRepository';
 import { addShoppingListItem } from '../services/repositories/shoppingListRepository';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { exportRecipeToPdf, exportRecipeToCsv, exportRecipeToMarkdown, exportRecipeToTxt, exportRecipeToJson } from '../services/exportService';
 import { ArrowLeft, Clock, Users, BarChart, UtensilsCrossed, Lightbulb, Save, Trash2, CheckCircle, CalendarPlus, FileDown, Star, ChevronDown, Plus, Minus, CookingPot, ShoppingCartIcon, AlertCircle, ImagePlus, LoaderCircle } from 'lucide-react';
 import { scaleIngredientQuantity } from '../services/utils';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -128,9 +127,16 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
       }
   };
   
-  const handleExport = (format: 'pdf' | 'csv' | 'json' | 'md' | 'txt') => {
+  const handleExport = async (format: 'pdf' | 'csv' | 'json' | 'md' | 'txt') => {
     setExportOpen(false);
     if (window.confirm(`Möchtest du das Rezept wirklich als ${format.toUpperCase()}-Datei exportieren?`)) {
+      const {
+        exportRecipeToPdf,
+        exportRecipeToCsv,
+        exportRecipeToJson,
+        exportRecipeToMarkdown,
+        exportRecipeToTxt,
+      } = await import('../services/exportService');
       switch (format) {
         case 'pdf': exportRecipeToPdf(currentRecipe); break;
         case 'csv': exportRecipeToCsv(currentRecipe); break;

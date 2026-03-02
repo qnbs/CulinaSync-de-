@@ -2,7 +2,6 @@ import { useState, useMemo, useRef, useCallback, useEffect, type FormEvent, type
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../services/dbInstance';
 import { ShoppingListItem, Recipe, PantryItem } from '../types';
-import { exportShoppingListToCsv, exportShoppingListToPdf, exportShoppingListToMarkdown, exportShoppingListToTxt, exportShoppingListToJson } from '../services/exportService';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setVoiceAction, addToast as addToastAction, setFocusAction } from '../store/slices/uiSlice';
 import { 
@@ -188,10 +187,17 @@ export const useShoppingList = () => {
     setDropTargetInfo(null);
   }, []);
 
-  const handleExport = (format: 'pdf' | 'csv' | 'json' | 'md' | 'txt') => {
+  const handleExport = async (format: 'pdf' | 'csv' | 'json' | 'md' | 'txt') => {
     dispatch(setExportOpen(false));
     if (!shoppingList?.length) return;
     if (window.confirm(`Möchtest du die Einkaufsliste wirklich als ${format.toUpperCase()}-Datei exportieren?`)) {
+      const {
+        exportShoppingListToPdf,
+        exportShoppingListToCsv,
+        exportShoppingListToJson,
+        exportShoppingListToMarkdown,
+        exportShoppingListToTxt,
+      } = await import('../services/exportService');
       switch(format) {
           case 'pdf': exportShoppingListToPdf(shoppingList); break;
           case 'csv': exportShoppingListToCsv(shoppingList); break;
