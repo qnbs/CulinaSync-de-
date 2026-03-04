@@ -14,6 +14,8 @@ export const SETTINGS_SECTIONS: SectionDef[] = [
     { id: 'modules', label: 'Module', icon: SettingsIcon, description: 'Feature-Konfiguration' },
     { id: 'ai', label: 'KI-Chef', icon: Bot, description: 'Personalisierung & Intelligenz' },
     { id: 'policies', label: 'Policies', icon: Shield, description: 'Allergie- & Haushaltsregeln' },
+    { id: 'health', label: 'Health Connect', icon: Database, description: 'Nährwert-Export zu Health-Apps' },
+    { id: 'community', label: 'Community', icon: Database, description: 'Rezepte teilen (opt-in)' },
     { id: 'apikey', label: 'API-Key', icon: Key, description: 'Gemini Schlüssel verwalten' },
     { id: 'speech', label: 'Audio', icon: Mic, description: 'Sprachausgabe & Steuerung' },
     { id: 'data', label: 'Daten', icon: Database, description: 'Backup & Speicher' },

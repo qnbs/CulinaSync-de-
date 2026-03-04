@@ -1,3 +1,35 @@
+// --- Gemini Vision: Zutaten aus Bild extrahieren ---
+export const extractPantryItemsFromImage = async (imageFile: File): Promise<string> => {
+    const ai = await getAIClient();
+    const model = "gemini-pro-vision";
+    // Bild als base64 kodieren
+    const fileToBase64 = (file: File) => new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve((reader.result as string).split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+    const base64 = await fileToBase64(imageFile);
+    const prompt = `Analysiere das Foto und erkenne alle Lebensmittel/Zutaten. Gib eine möglichst natürliche, aber strukturierte Zusammenfassung wie: 'Das sind deine 8 Eier, 2 Zucchini, 1 Packung Butter, ...'. Antworte nur mit einem einzigen deutschen Satz.`;
+    try {
+        const response = await ai.models.generateContent({
+            model,
+            contents: [
+                { role: "user", parts: [
+                    { inlineData: { mimeType: imageFile.type, data: base64 } },
+                    { text: prompt }
+                ] }
+            ],
+            config: {
+                responseMimeType: "text/plain",
+                temperature: 0.2,
+            }
+        });
+        return response.text?.trim() || "";
+    } catch (e) {
+        throw handleGeminiError(e, 'vision');
+    }
+};
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import { fakerDE as faker } from '@faker-js/faker';
 import { AppSettings, PantryItem, Recipe, StructuredPrompt, ShoppingListItem, RecipeIdea } from "../types";

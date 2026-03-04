@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Plus, Wand2, Camera, Barcode } from 'lucide-react';
 import { usePantryManagerContext } from '../../contexts/PantryManagerContext';
 import Tesseract from 'tesseract.js';
+import { extractPantryItemsFromImage } from '../../services/geminiService';
 
 export const PantryQuickAdd = () => {
     const { handleQuickAdd } = usePantryManagerContext();
@@ -16,14 +17,21 @@ export const PantryQuickAdd = () => {
         setInput('');
     };
 
-    // --- OCR (Foto/Textbild) ---
+    // --- Multi-Modal: Gemini Vision (mit Fallback OCR) ---
     const handleImageInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
         setVisionLoading(true);
         try {
-            const { data } = await Tesseract.recognize(file, 'deu');
-            if (data.text) setInput(data.text.trim());
+            let visionText = '';
+            try {
+                visionText = await extractPantryItemsFromImage(file);
+            } catch (err) {
+                // Fallback: OCR lokal
+                const { data } = await Tesseract.recognize(file, 'deu');
+                visionText = data.text?.trim() || '';
+            }
+            if (visionText) setInput(visionText);
         } catch (err) {
             alert('Bild konnte nicht erkannt werden.');
         } finally {
@@ -60,10 +68,10 @@ export const PantryQuickAdd = () => {
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
                         className="flex-shrink-0 flex items-center justify-center bg-zinc-800 text-[var(--color-accent-400)] h-10 w-10 rounded-xl hover:bg-zinc-700 transition-colors shadow-lg active:scale-95 mr-1"
-                        aria-label="Foto/Textbild erkennen"
+                        aria-label="Foto/Textbild erkennen (Gemini Vision oder OCR)"
                         disabled={visionLoading}
                     >
-                        <Camera size={20}/>
+                        {visionLoading ? <span className="animate-spin">⏳</span> : <Camera size={20}/>} 
                     </button>
                     {/* Barcode-Scan-Button (Platzhalter, Implementierung folgt) */}
                     {/*

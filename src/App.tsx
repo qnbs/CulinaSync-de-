@@ -8,6 +8,7 @@ import { processCommand, executeVoiceAction } from './services/voiceCommands';
 import { CheckCircle, Bot, Milk, BookOpen, CalendarDays, ShoppingCart, Settings as SettingsIcon, HelpCircle, PlusCircle, RefreshCw, Trash2, Download, Upload, Mic, AlertTriangle, Info, X } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from './store/hooks';
 import { setCurrentPage, setCommandPaletteOpen, addToast as addToastAction, removeToast as removeToastAction } from './store/slices/uiSlice';
+import { handleDeepLink } from './deepLinking';
 
 
 // Lazy load page components for code splitting and faster initial load

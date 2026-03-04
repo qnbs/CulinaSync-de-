@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AppSettings } from '../../../types';
 import { useSpeechSynthesis } from '../../../hooks/useSpeechSynthesis';
+import { useWhisperRecognition } from '../../../hooks/useWhisperRecognition';
 import { Mic2, Play, Square, Volume2 } from 'lucide-react';
 
 interface VoicePanelProps {
@@ -10,6 +11,8 @@ interface VoicePanelProps {
 
 export const VoicePanel: React.FC<VoicePanelProps> = ({ settings, onChange }) => {
     const { voices, speak, isSpeaking, cancel } = useSpeechSynthesis();
+    const [mode, setMode] = useState<'browser' | 'whisper'>('browser');
+    const whisper = useWhisperRecognition();
     const [isPlayingTest, setIsPlayingTest] = useState(false);
 
     useEffect(() => {
@@ -91,6 +94,25 @@ export const VoicePanel: React.FC<VoicePanelProps> = ({ settings, onChange }) =>
                         {isPlayingTest ? <><Square size={16} className="fill-current"/> Stop</> : <><Play size={16} className="fill-current"/> Testen</>}
                     </button>
                 </div>
+
+                <div className="mt-6">
+                    <h4 className="text-lg font-bold text-zinc-100 mb-2">Sprachmodus</h4>
+                    <select value={mode} onChange={e => setMode(e.target.value as 'browser' | 'whisper')} className="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 appearance-none focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none">
+                        <option value="browser">Browser SpeechRecognition</option>
+                        <option value="whisper">Whisper.cpp (lokal, privacy-first)</option>
+                    </select>
+                </div>
+                {mode === 'whisper' && (
+                    <div className="space-y-2">
+                        <button onClick={whisper.isListening ? whisper.stopListening : whisper.startListening} className="bg-[var(--color-accent-500)] text-white px-4 py-2 rounded">
+                            {whisper.isListening ? 'Stop' : 'Start'} (Whisper)
+                        </button>
+                        <div className="mt-2">
+                            <span className="font-mono text-xs text-zinc-400">{whisper.transcript}</span>
+                            {whisper.error && <div className="text-red-500 text-xs">{whisper.error}</div>}
+                        </div>
+                    </div>
+                )}
             </section>
         </div>
     );
