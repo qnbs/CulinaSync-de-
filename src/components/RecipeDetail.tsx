@@ -1,11 +1,14 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Recipe, PantryItem, IngredientItem } from '../types';
 import { db } from '../services/dbInstance';
 import { addRecipe, deleteRecipe, addMissingIngredientsToShoppingList, updateRecipeImage } from '../services/repositories/recipeRepository';
 import { addRecipeToMealPlan } from '../services/repositories/mealPlanRepository';
 import { addShoppingListItem } from '../services/repositories/shoppingListRepository';
+import { analyzeRecipeNutritionAndAllergens } from '../services/nutritionAllergyService';
+import { verifyNutritionAndAllergensWithGemini } from '../services/geminiService';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { ArrowLeft, Clock, Users, BarChart, UtensilsCrossed, Lightbulb, Save, Trash2, CheckCircle, CalendarPlus, FileDown, Star, ChevronDown, Plus, Minus, CookingPot, ShoppingCartIcon, AlertCircle, ImagePlus, LoaderCircle } from 'lucide-react';
+import { ArrowLeft, Clock, Users, BarChart, UtensilsCrossed, Lightbulb, Save, Trash2, CheckCircle, CalendarPlus, FileDown, Star, ChevronDown, Plus, Minus, CookingPot, ShoppingCartIcon, AlertCircle, ImagePlus, LoaderCircle, ShieldAlert } from 'lucide-react';
 import { scaleIngredientQuantity } from '../services/utils';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { addToast, setVoiceAction } from '../store/slices/uiSlice';
@@ -20,6 +23,7 @@ interface RecipeDetailProps {
 }
 
 const MealPlanModal: React.FC<{recipeId: number, onClose: () => void, onSave: () => void}> = ({recipeId, onClose, onSave}) => {
+  const { t } = useTranslation();
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [mealType, setMealType] = useState<'Frühstück' | 'Mittagessen' | 'Abendessen'>('Abendessen');
   const modalRef = React.useRef<HTMLDivElement>(null);
@@ -39,25 +43,25 @@ const MealPlanModal: React.FC<{recipeId: number, onClose: () => void, onSave: ()
     }
 
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={onClose}>
-        <div ref={modalRef} className="bg-zinc-800 rounded-lg p-6 w-full max-w-sm" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="mealplan-modal-title" tabIndex={-1}>
-          <h3 id="mealplan-modal-title" className="text-lg font-bold mb-4">Zum Essensplan hinzufügen</h3>
+        <div className="fixed inset-0 flex items-center justify-center z-50 glass-overlay" onClick={onClose}>
+        <div ref={modalRef} className="rounded-lg p-6 w-full max-w-sm glass-modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="mealplan-modal-title" tabIndex={-1}>
+          <h3 id="mealplan-modal-title" className="text-lg font-bold mb-4">{t('recipeDetail.modal.addToMealPlanTitle')}</h3>
                 <div className="space-y-4">
                     <div>
-                        <label htmlFor="date" className="block text-sm font-medium text-zinc-400 mb-1">Datum</label>
+                <label htmlFor="date" className="block text-sm font-medium text-zinc-400 mb-1">{t('recipeDetail.modal.date')}</label>
               <input ref={dateInputRef} type="date" id="date" value={date} onChange={e => setDate(e.target.value)} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:outline-none"/>
                     </div>
                     <div>
-                        <label htmlFor="mealType" className="block text-sm font-medium text-zinc-400 mb-1">Mahlzeit</label>
+                <label htmlFor="mealType" className="block text-sm font-medium text-zinc-400 mb-1">{t('recipeDetail.modal.mealType')}</label>
               <select id="mealType" value={mealType} onChange={e => setMealType(e.target.value as 'Frühstück' | 'Mittagessen' | 'Abendessen')} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:outline-none">
-                            <option>Frühstück</option>
-                            <option>Mittagessen</option>
-                            <option>Abendessen</option>
+                  <option>{t('recipeDetail.mealType.breakfast')}</option>
+                  <option>{t('recipeDetail.mealType.lunch')}</option>
+                  <option>{t('recipeDetail.mealType.dinner')}</option>
                         </select>
                     </div>
                     <div className="flex justify-end gap-3 pt-4">
-              <button type="button" onClick={onClose} className="py-2 px-4 rounded-md text-zinc-300 hover:bg-zinc-700">Abbrechen</button>
-              <button type="button" onClick={handleSave} className="py-2 px-4 rounded-md bg-[var(--color-accent-500)] text-zinc-900 font-bold hover:bg-[var(--color-accent-400)]">Speichern</button>
+            <button type="button" onClick={onClose} className="py-2 px-4 rounded-md text-zinc-300 hover:bg-zinc-700">{t('common.cancel')}</button>
+            <button type="button" onClick={handleSave} className="py-2 px-4 rounded-md bg-[var(--color-accent-500)] text-zinc-900 font-bold hover:bg-[var(--color-accent-400)]">{t('common.save')}</button>
                     </div>
                 </div>
             </div>
@@ -66,6 +70,7 @@ const MealPlanModal: React.FC<{recipeId: number, onClose: () => void, onSave: ()
 }
 
 const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { voiceAction } = useAppSelector(state => state.ui);
   const { imageStatus, generatedImageUrl } = useAppSelector(state => state.aiChef);
@@ -75,6 +80,8 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isExportOpen, setExportOpen] = useState(false);
   const [isCookMode, setIsCookMode] = useState(false);
+  const [isGeminiCheckLoading, setGeminiCheckLoading] = useState(false);
+  const [geminiVerification, setGeminiVerification] = useState<{ summary: string; warnings: string[] } | null>(null);
 
   // If the recipe has an image, use it. If not, and we just generated one, use that.
   const displayImage = currentRecipe.imageUrl || (currentRecipe.recipeTitle === recipe.recipeTitle ? generatedImageUrl : null);
@@ -96,6 +103,27 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
       return currentServings / originalServings;
   }, [currentServings, originalServings]);
 
+  const nutritionReport = useMemo(() => analyzeRecipeNutritionAndAllergens(currentRecipe), [currentRecipe]);
+
+  const handleGeminiNutritionCheck = async () => {
+    setGeminiCheckLoading(true);
+    try {
+      const verification = await verifyNutritionAndAllergensWithGemini(currentRecipe, {
+        calories: nutritionReport.calories,
+        protein: nutritionReport.protein,
+        fat: nutritionReport.fat,
+        carbs: nutritionReport.carbs,
+        allergens: nutritionReport.allergens,
+      });
+      setGeminiVerification(verification);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t('common.error');
+      dispatch(addToast({ message, type: 'error' }));
+    } finally {
+      setGeminiCheckLoading(false);
+    }
+  };
+
   const handleSave = async () => {
     try {
       // If we have a generated image but it's not in the recipe object yet, add it.
@@ -105,22 +133,22 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
       if(newId) {
         setCurrentRecipe(prev => ({ ...prev, id: newId, imageUrl: displayImage || undefined }));
         setIsSaved(true);
-        dispatch(addToast({message: 'Rezept erfolgreich gespeichert!'}));
+        dispatch(addToast({message: t('recipeDetail.toast.saved')}));
       }
     } catch (error) {
       console.error("Failed to save recipe:", error);
-      dispatch(addToast({message: 'Speichern fehlgeschlagen.', type: 'error'}));
+      dispatch(addToast({message: t('recipeDetail.toast.saveFailed'), type: 'error'}));
     }
   };
 
   const handleDelete = async () => {
-    if (currentRecipe.id && window.confirm(`Möchtest du das Rezept "${currentRecipe.recipeTitle}" wirklich endgültig löschen?`)) {
+    if (currentRecipe.id && window.confirm(t('recipeDetail.confirm.deleteRecipe', { recipeTitle: currentRecipe.recipeTitle }))) {
       try {
         await deleteRecipe(currentRecipe.id);
         onBack();
       } catch (error) {
         console.error("Failed to delete recipe:", error);
-        dispatch(addToast({message: 'Löschen fehlgeschlagen.', type: 'error'}));
+        dispatch(addToast({message: t('recipeDetail.toast.deleteFailed'), type: 'error'}));
       }
     }
   };
@@ -132,14 +160,14 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
           if (currentRecipe.id) {
               await updateRecipeImage(currentRecipe.id, result.payload);
               setCurrentRecipe(prev => ({ ...prev, imageUrl: result.payload }));
-              dispatch(addToast({ message: 'Bild gespeichert.' }));
+                dispatch(addToast({ message: t('recipeDetail.toast.imageSaved') }));
           }
       }
   };
   
   const handleExport = async (format: 'pdf' | 'csv' | 'json' | 'md' | 'txt') => {
     setExportOpen(false);
-    if (window.confirm(`Möchtest du das Rezept wirklich als ${format.toUpperCase()}-Datei exportieren?`)) {
+    if (window.confirm(t('recipeDetail.confirm.exportRecipe', { format: format.toUpperCase() }))) {
       const {
         exportRecipeToPdf,
         exportRecipeToCsv,
@@ -163,10 +191,10 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
             const newIsFavorite = !currentRecipe.isFavorite;
             await db.recipes.update(currentRecipe.id, { isFavorite: newIsFavorite, updatedAt: Date.now() });
             setCurrentRecipe(prev => ({...prev, isFavorite: newIsFavorite}));
-            dispatch(addToast({message: newIsFavorite ? 'Als Favorit markiert!' : 'Favorit entfernt.'}));
+            dispatch(addToast({message: newIsFavorite ? t('recipeDetail.toast.favoriteAdded') : t('recipeDetail.toast.favoriteRemoved')}));
         } catch (error) {
             console.error("Failed to update favorite status:", error);
-            dispatch(addToast({message: 'Aktion fehlgeschlagen.', type: 'error'}));
+            dispatch(addToast({message: t('recipeDetail.toast.actionFailed'), type: 'error'}));
         }
     }
   };
@@ -186,9 +214,9 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
       if(!recipe.id) return;
       const count = await addMissingIngredientsToShoppingList(recipe.id);
       if (count > 0) {
-        dispatch(addToast({message: `${count} fehlende(r) Artikel zur Einkaufsliste hinzugefügt.`}));
+        dispatch(addToast({message: t('recipeDetail.toast.missingItemsAdded', { count })}));
       } else {
-        dispatch(addToast({message: 'Alle Zutaten sind bereits im Vorrat oder auf der Liste!', type: 'info'}));
+        dispatch(addToast({message: t('recipeDetail.toast.noMissingItems'), type: 'info'}));
       }
   };
 
@@ -204,7 +232,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
         recipeId: currentRecipe.id, 
         isChecked: false 
     });
-    dispatch(addToast({message: `"${item.name}" zur Einkaufsliste hinzugefügt.`}));
+    dispatch(addToast({message: t('recipeDetail.toast.singleItemAdded', { itemName: item.name })}));
   }
   
   const allTags = currentRecipe.tags ? [
@@ -218,12 +246,12 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
 
   return (
     <div className="page-fade-in pb-20">
-      {isModalOpen && currentRecipe.id && <MealPlanModal recipeId={currentRecipe.id} onClose={() => setIsModalOpen(false)} onSave={() => dispatch(addToast({message: 'Zum Essensplan hinzugefügt!'}))} />}
+      {isModalOpen && currentRecipe.id && <MealPlanModal recipeId={currentRecipe.id} onClose={() => setIsModalOpen(false)} onSave={() => dispatch(addToast({message: t('recipeDetail.toast.addedToMealPlan')}))} />}
       {isCookMode && <CookModeView recipe={currentRecipe} onExit={() => setIsCookMode(false)} />}
 
       <button onClick={onBack} className="flex items-center text-[var(--color-accent-400)] hover:text-[var(--color-accent-300)] mb-6 font-semibold">
         <ArrowLeft size={20} className="mr-2" />
-        Zurück zur Übersicht
+        {t('recipeDetail.back')}
       </button>
       
       {/* Hero Image Section */}
@@ -238,13 +266,13 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
                   {imageStatus === 'loading' ? (
                        <div className="flex flex-col items-center gap-2 animate-pulse text-[var(--color-accent-400)]">
                            <LoaderCircle size={40} className="animate-spin" />
-                           <span className="text-sm font-medium">Generiere Bild...</span>
+                             <span className="text-sm font-medium">{t('recipeDetail.generatingImage')}</span>
                        </div>
                   ) : (
                     <>
                         <ImagePlus size={48} className="mb-2 opacity-50" />
                         <button onClick={handleGenerateImage} className="text-sm font-medium text-[var(--color-accent-400)] hover:underline">
-                            Bild generieren
+                            {t('recipeDetail.generateImage')}
                         </button>
                     </>
                   )}
@@ -265,7 +293,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
         </div>
         
         <div className="my-6 p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg flex flex-col sm:flex-row items-center justify-center gap-4">
-            <label htmlFor="servings-input" className="font-semibold text-zinc-200">Portionen anpassen:</label>
+          <label htmlFor="servings-input" className="font-semibold text-zinc-200">{t('recipeDetail.adjustServings')}</label>
             <div className="flex items-center gap-2">
                 <button onClick={() => handleServingsChange(currentServings - 1)} className="p-2 rounded-full bg-zinc-800 hover:bg-zinc-700 transition-colors disabled:opacity-50" disabled={currentServings <= 1} aria-label="Portionen verringern"><Minus size={18} /></button>
                 <input id="servings-input" type="number" value={currentServings} onChange={(e) => handleServingsChange(parseInt(e.target.value, 10))} className="w-16 text-center bg-transparent border-b-2 border-[var(--color-accent-500)] font-bold text-xl text-zinc-100 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" min="1" max="100"/>
@@ -280,6 +308,48 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
               ))}
           </div>
         )}
+
+        <div className="mb-8 p-4 rounded-xl border border-zinc-800 bg-zinc-900/40">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+            <h3 className="text-lg font-semibold text-zinc-100 flex items-center gap-2">
+              <ShieldAlert size={18} className="text-[var(--color-accent-400)]" /> Naehrwert- & Allergie-Check
+            </h3>
+            <button
+              type="button"
+              onClick={handleGeminiNutritionCheck}
+              disabled={isGeminiCheckLoading}
+              className="py-1.5 px-3 rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors text-sm font-medium disabled:opacity-60"
+            >
+              {isGeminiCheckLoading ? 'Gemini prueft...' : 'Mit Gemini verifizieren'}
+            </button>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm mb-3">
+            <div className="bg-zinc-800/70 rounded-lg p-2">kcal: {Math.round(nutritionReport.calories)}</div>
+            <div className="bg-zinc-800/70 rounded-lg p-2">Protein: {Math.round(nutritionReport.protein)} g</div>
+            <div className="bg-zinc-800/70 rounded-lg p-2">Fett: {Math.round(nutritionReport.fat)} g</div>
+            <div className="bg-zinc-800/70 rounded-lg p-2">Kohlenhydrate: {Math.round(nutritionReport.carbs)} g</div>
+          </div>
+          <p className="text-xs text-zinc-400 mb-2">
+            Lokale USDA-Matches: {nutritionReport.matchedIngredients}/{nutritionReport.totalIngredients}
+          </p>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {nutritionReport.allergens.length > 0 ? nutritionReport.allergens.map((allergen) => (
+              <span key={allergen} className="text-xs px-2 py-1 rounded-full border border-amber-600/40 text-amber-300 bg-amber-900/20">
+                {allergen}
+              </span>
+            )) : <span className="text-xs text-zinc-400">Keine klaren Allergene erkannt.</span>}
+          </div>
+          {geminiVerification && (
+            <div className="mt-3 p-3 rounded-lg border border-zinc-700 bg-zinc-900/60 text-sm">
+              <p className="text-zinc-200 mb-2">{geminiVerification.summary}</p>
+              {geminiVerification.warnings.length > 0 && (
+                <ul className="list-disc pl-5 text-zinc-300 space-y-1">
+                  {geminiVerification.warnings.map((warning, idx) => <li key={`${warning}-${idx}`}>{warning}</li>)}
+                </ul>
+              )}
+            </div>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
           <div className="lg:col-span-1">
@@ -378,17 +448,17 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
 
            <div className="flex items-center gap-4">
                  {isSaved && (
-                    <button onClick={handleToggleFavorite} title={currentRecipe.isFavorite ? "Favorit entfernen" : "Als Favorit markieren"} className="p-2 rounded-full text-zinc-400 hover:text-[var(--color-accent-400)] hover:bg-zinc-800 transition-colors">
+                  <button onClick={handleToggleFavorite} title={currentRecipe.isFavorite ? t('recipeDetail.actions.removeFavorite') : t('recipeDetail.actions.markFavorite')} className="p-2 rounded-full text-zinc-400 hover:text-[var(--color-accent-400)] hover:bg-zinc-800 transition-colors">
                         <Star size={22} className={`transition-colors ${currentRecipe.isFavorite ? 'fill-current text-[var(--color-accent-400)]' : ''}`} />
                     </button>
                 )}
                 {isSaved ? (
                     <button onClick={handleDelete} className="flex items-center gap-2 bg-red-900/20 text-red-400 font-bold py-2 px-4 rounded-md hover:bg-red-900/40 transition-colors border border-red-900/50">
-                        <Trash2 size={18} /> Löschen
+                    <Trash2 size={18} /> {t('common.delete')}
                     </button>
                 ) : (
                     <button onClick={handleSave} className="flex items-center gap-2 bg-[var(--color-accent-500)] text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-[var(--color-accent-400)] transition-colors shadow-lg shadow-[var(--color-accent-500)]/20">
-                        <Save size={18} /> Speichern
+                    <Save size={18} /> {t('common.save')}
                     </button>
                 )}
            </div>

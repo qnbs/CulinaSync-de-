@@ -70,10 +70,10 @@ export const AiModal = () => {
     const selectedCount = Array.from(selectedItems.values()).filter(Boolean).length;
 
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 page-fade-in" onClick={handleClose}>
+        <div className="fixed inset-0 flex items-center justify-center z-50 page-fade-in glass-overlay" onClick={handleClose}>
             <div
                 ref={modalRef}
-                className="bg-zinc-800 rounded-lg p-6 w-full max-w-lg shadow-xl"
+            className="rounded-lg p-6 w-full max-w-lg glass-modal"
                 onClick={e => e.stopPropagation()}
                 role="dialog"
                 aria-modal="true"
@@ -96,7 +96,7 @@ export const AiModal = () => {
                 ) : (
                     <>
                         <p className="text-zinc-400 text-sm mb-4">Überprüfe die Vorschläge der KI. Entferne Artikel, die du nicht benötigst.</p>
-                        <div className="bg-zinc-900 rounded-md p-2 max-h-60 overflow-y-auto border border-zinc-700 space-y-1">
+                        <div className="glass-card rounded-md p-2 max-h-60 overflow-y-auto space-y-1">
                             {reviewItems.map(item => (
                                 <div key={item.name} onClick={() => handleToggleItem(item.name)} className="flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-zinc-800">
                                     {selectedItems.get(item.name) ? <CheckSquare className="text-[var(--color-accent-400)]"/> : <Square className="text-zinc-500"/>}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppSettings, BeforeInstallPromptEvent } from '../types';
 import { Save, RotateCcw } from 'lucide-react';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
@@ -28,6 +29,7 @@ interface SettingsProps {
 }
 
 const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, isStandalone }) => {
+    const { t } = useTranslation();
     const dispatch = useAppDispatch();
     const globalSettings = useAppSelector(state => state.settings);
     const { focusAction } = useAppSelector(state => state.ui);
@@ -62,12 +64,12 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
 
     const handleSave = () => {
         dispatch(updateSettings(localSettings));
-        dispatch(addToastAction({ message: 'Einstellungen gespeichert', type: 'success' }));
+        dispatch(addToastAction({ message: t('settings.toast.saved'), type: 'success' }));
     };
 
     const handleDiscard = () => {
         setLocalSettings(globalSettings);
-        dispatch(addToastAction({ message: 'Änderungen verworfen', type: 'info' }));
+        dispatch(addToastAction({ message: t('settings.toast.discarded'), type: 'info' }));
     };
 
     const handleChange = useCallback((path: string, value: any) => {
@@ -104,22 +106,22 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
              <div className="flex-grow min-w-0">
                  <div className="flex justify-between items-center mb-6">
                      <h2 className="text-2xl font-bold text-zinc-100">
-                         {activeSection === 'appearance' && 'Design & Farben'}
-                         {activeSection === 'modules' && 'Modul Konfiguration'}
-                         {activeSection === 'ai' && 'KI-Chef Präferenzen'}
-                         {activeSection === 'apikey' && 'API-Schlüssel'}
-                         {activeSection === 'speech' && 'Sprachsteuerung & Audio'}
-                         {activeSection === 'data' && 'Daten & Speicher'}
+                         {activeSection === 'appearance' && t('settings.sections.appearance')}
+                         {activeSection === 'modules' && t('settings.sections.modules')}
+                         {activeSection === 'ai' && t('settings.sections.ai')}
+                         {activeSection === 'apikey' && t('settings.sections.apiKey')}
+                         {activeSection === 'speech' && t('settings.sections.speech')}
+                         {activeSection === 'data' && t('settings.sections.data')}
                      </h2>
                      
                      {/* Floating Action Bar for Mobile/Desktop Consistency */}
                      {isDirty && (
                          <div className="flex gap-2 animate-fade-in">
-                             <button onClick={handleDiscard} className="p-2 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 transition-colors" title="Verwerfen">
+                            <button onClick={handleDiscard} className="p-2 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 transition-colors" title={t('settings.actions.discard')}>
                                  <RotateCcw size={20} />
                              </button>
                              <button onClick={handleSave} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-accent-500)] text-zinc-900 font-bold hover:bg-[var(--color-accent-400)] transition-all shadow-lg shadow-[var(--color-accent-glow)]">
-                                 <Save size={18} /> Speichern
+                                 <Save size={18} /> {t('common.save')}
                              </button>
                          </div>
                      )}

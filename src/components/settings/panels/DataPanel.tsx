@@ -30,8 +30,8 @@ const ResetConfirmationModal: React.FC<{
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 page-fade-in" onClick={onClose}>
-            <div ref={modalRef} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="reset-confirmation-title" tabIndex={-1}>
+        <div className="fixed inset-0 flex items-center justify-center z-50 page-fade-in glass-overlay" onClick={onClose}>
+            <div ref={modalRef} className="rounded-2xl p-6 w-full max-w-md glass-modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="reset-confirmation-title" tabIndex={-1}>
                 <div className="flex items-center gap-3 text-red-500 mb-4">
                     <div className="p-2 bg-red-500/10 rounded-full"><AlertTriangle size={24} /></div>
                     <h3 id="reset-confirmation-title" className="text-lg font-bold">Daten unwiderruflich löschen?</h3>

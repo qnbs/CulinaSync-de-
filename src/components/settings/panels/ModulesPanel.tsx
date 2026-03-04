@@ -8,7 +8,7 @@ interface ModulesPanelProps {
 }
 
 const Toggle = ({ label, desc, checked, onToggle }: { label: string, desc: string, checked: boolean, onToggle: () => void }) => (
-    <div className="flex items-center justify-between p-4 bg-zinc-900/30 border border-zinc-800 rounded-xl hover:bg-zinc-900/50 transition-colors cursor-pointer" onClick={onToggle}>
+    <div className="flex items-center justify-between p-4 glass-card rounded-xl hover:bg-zinc-900/50 transition-colors cursor-pointer" onClick={onToggle}>
         <div>
             <h4 className="font-bold text-zinc-200">{label}</h4>
             <p className="text-xs text-zinc-500 mt-1">{desc}</p>
@@ -89,7 +89,7 @@ export const ModulesPanel: React.FC<ModulesPanelProps> = ({ settings, onChange }
                     onToggle={() => onChange('shoppingList.autoCategorize', !settings.shoppingList.autoCategorize)} 
                  />
                  
-                 <div className="p-4 bg-zinc-900/30 border border-zinc-800 rounded-xl">
+                 <div className="p-4 glass-card rounded-xl">
                      <div className="flex justify-between items-center mb-2">
                         <span className="font-bold text-zinc-200">Ablaufwarnung</span>
                         <span className="font-mono text-[var(--color-accent-400)]">{settings.pantry.expiryWarningDays} Tage</span>

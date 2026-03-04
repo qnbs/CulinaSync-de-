@@ -11,8 +11,12 @@ import { setVoiceAction, setFocusAction, addToast as addToastAction, clearInitia
 import { RecipeBookHeader } from './recipe-book/RecipeBookHeader';
 import { RecipeToolbar } from './recipe-book/RecipeToolbar';
 import { BulkAddToPlanModal } from './recipe-book/BulkAddToPlanModal';
+import { RecipeImportModal } from './recipe-book/RecipeImportModal';
+import { addRecipe } from '../services/repositories/recipeRepository';
+import { useTranslation } from 'react-i18next';
 
 const RecipeBook: React.FC = () => {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { voiceAction, initialSelectedId, focusAction } = useAppSelector(state => state.ui);
 
@@ -40,12 +44,21 @@ const RecipeBook: React.FC = () => {
   const [isSelectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [isBulkModalOpen, setBulkModalOpen] = useState(false);
+  const [isImportModalOpen, setImportModalOpen] = useState(false);
 
   // Voice and external actions handling
   const initialSearchTerm = voiceAction?.type === 'SEARCH' ? voiceAction.payload : undefined;
 
   const addToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     dispatch(addToastAction({ message, type }));
+  };
+
+  const handleImportedRecipe = async (recipe: Recipe) => {
+    const { id, ...recipeWithoutId } = recipe;
+    void id;
+    const newId = await addRecipe(recipeWithoutId);
+    addToast(t('recipeImport.toast.importSuccess', { title: recipe.recipeTitle }), 'success');
+    setSelectedRecipe({ ...recipeWithoutId, id: newId });
   };
 
   const handleToggleSelectMode = () => {
@@ -185,6 +198,12 @@ const RecipeBook: React.FC = () => {
         }}
       />
 
+      <RecipeImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onImport={handleImportedRecipe}
+      />
+
       <RecipeBookHeader recipes={savedRecipes} />
 
       <RecipeToolbar 
@@ -192,6 +211,7 @@ const RecipeBook: React.FC = () => {
         sortBy={sortBy} setSortBy={setSortBy}
         filters={filters} setFilters={setFilters} clearFilters={clearFilters}
         hasActiveFilters={hasActiveFilters} filterOptions={filterOptions}
+        onOpenImportModal={() => setImportModalOpen(true)}
       />
 
       {/* Results Area */}

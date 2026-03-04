@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Search, Filter, X, ArrowUpDown, Star, CheckCircle2 } from 'lucide-react';
+import { Search, Filter, X, ArrowUpDown, Star, CheckCircle2, Upload } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface FilterOptions {
     courses: string[];
@@ -31,13 +32,15 @@ interface RecipeToolbarProps {
     clearFilters: () => void;
     hasActiveFilters: boolean;
     filterOptions: FilterOptions;
+    onOpenImportModal: () => void;
 }
 
 export const RecipeToolbar: React.FC<RecipeToolbarProps> = ({
     searchTerm, setSearchTerm, searchInputRef,
     sortBy, setSortBy,
-    filters, setFilters, clearFilters, hasActiveFilters, filterOptions
+    filters, setFilters, clearFilters, hasActiveFilters, filterOptions, onOpenImportModal
 }) => {
+    const { t } = useTranslation();
     const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
     const toggleFilter = (key: 'pantryReady' | 'favoritesOnly') => {
@@ -87,6 +90,16 @@ export const RecipeToolbar: React.FC<RecipeToolbarProps> = ({
                             <Star size={16} className={filters.favoritesOnly ? "fill-current" : ""} /> Favoriten
                         </button>
                         
+                        <div className="w-px bg-zinc-800 mx-1 my-1"></div>
+
+                        <button
+                            type="button"
+                            onClick={onOpenImportModal}
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition-all whitespace-nowrap bg-zinc-900/50 border-zinc-800 text-zinc-300 hover:bg-zinc-900"
+                        >
+                            <Upload size={16} /> {t('recipeImport.openButton')}
+                        </button>
+
                         <div className="w-px bg-zinc-800 mx-1 my-1"></div>
 
                          {/* Filter Toggle */}

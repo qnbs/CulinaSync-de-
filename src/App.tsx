@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import { useTranslation } from 'react-i18next';
 import Header from './components/Header';
 import { type Command } from './components/CommandPalette';
 import { Page, BeforeInstallPromptEvent, ShoppingListItem, PantryItem } from './types';
@@ -23,13 +24,19 @@ const VoiceControlUI = lazy(() => import('./components/VoiceControlUI'));
 const CommandPalette = lazy(() => import('./components/CommandPalette').then(m => ({ default: m.CommandPalette })));
 
 
-const LoadingSpinner = () => (
-    <div className="flex justify-center items-center h-64" aria-label="Loading content">
+const LoadingSpinner: React.FC = () => {
+  const { t } = useTranslation();
+
+  return (
+  <div className="flex justify-center items-center h-64" role="status" aria-live="polite" aria-label={t('app.loading')}>
         <div className="w-16 h-16 border-4 border-[var(--color-accent-500)] border-t-transparent rounded-full animate-spin"></div>
+    <span className="sr-only">{t('app.loading')}</span>
     </div>
-);
+  );
+};
 
 const App: React.FC = () => {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { currentPage, toasts, isCommandPaletteOpen } = useAppSelector((state) => state.ui);
 
@@ -92,13 +99,13 @@ const App: React.FC = () => {
 
   const handleInstallPWA = async () => {
     if (!installPromptEvent) {
-        addToast('App kann derzeit nicht installiert werden.', 'info');
+        addToast(t('app.install.unavailable'), 'info');
         return;
     }
     installPromptEvent.prompt();
     const { outcome } = await installPromptEvent.userChoice;
     if (outcome === 'accepted') {
-        addToast('App erfolgreich installiert!', 'success');
+      addToast(t('app.install.success'), 'success');
     }
     setInstallPromptEvent(null);
   };
@@ -165,30 +172,30 @@ const App: React.FC = () => {
   const canInstall = installPromptEvent && !isStandalone;
 
   const commands: Command[] = [
-    { id: 'nav-pantry', title: 'Gehe zur Vorratskammer', section: 'Navigation', icon: Milk, action: () => navigate('pantry') },
-    { id: 'nav-chef', title: 'Gehe zum KI-Chef', section: 'Navigation', icon: Bot, action: () => navigate('chef') },
-    { id: 'nav-recipes', title: 'Gehe zum Kochbuch', section: 'Navigation', icon: BookOpen, action: () => navigate('recipes') },
-    { id: 'nav-planner', title: 'Gehe zum Essensplaner', section: 'Navigation', icon: CalendarDays, action: () => navigate('meal-planner') },
-    { id: 'nav-shopping', title: 'Gehe zur Einkaufsliste', section: 'Navigation', icon: ShoppingCart, action: () => navigate('shopping-list') },
-    { id: 'nav-settings', title: 'Gehe zu den Einstellungen', section: 'Navigation', icon: SettingsIcon, action: () => navigate('settings') },
-    { id: 'nav-help', title: 'Gehe zur Hilfe', section: 'Navigation', icon: HelpCircle, action: () => navigate('help') },
+    { id: 'nav-pantry', title: t('app.commands.nav.pantry'), section: t('app.commandSections.navigation'), icon: Milk, action: () => navigate('pantry') },
+    { id: 'nav-chef', title: t('app.commands.nav.chef'), section: t('app.commandSections.navigation'), icon: Bot, action: () => navigate('chef') },
+    { id: 'nav-recipes', title: t('app.commands.nav.recipes'), section: t('app.commandSections.navigation'), icon: BookOpen, action: () => navigate('recipes') },
+    { id: 'nav-planner', title: t('app.commands.nav.mealPlanner'), section: t('app.commandSections.navigation'), icon: CalendarDays, action: () => navigate('meal-planner') },
+    { id: 'nav-shopping', title: t('app.commands.nav.shoppingList'), section: t('app.commandSections.navigation'), icon: ShoppingCart, action: () => navigate('shopping-list') },
+    { id: 'nav-settings', title: t('app.commands.nav.settings'), section: t('app.commandSections.navigation'), icon: SettingsIcon, action: () => navigate('settings') },
+    { id: 'nav-help', title: t('app.commands.nav.help'), section: t('app.commandSections.navigation'), icon: HelpCircle, action: () => navigate('help') },
     
-    { id: 'pantry-add', title: 'Neuen Artikel zum Vorrat hinzufügen', section: 'Vorratskammer', icon: PlusCircle, action: () => navigate('pantry', 'addItem') },
+    { id: 'pantry-add', title: t('app.commands.pantry.addItem'), section: t('app.commandSections.pantry'), icon: PlusCircle, action: () => navigate('pantry', 'addItem') },
     
-    { id: 'chef-generate', title: 'Neues Rezept generieren', section: 'KI-Chef', icon: Bot, action: () => navigate('chef', 'prompt') },
+    { id: 'chef-generate', title: t('app.commands.chef.generateRecipe'), section: t('app.commandSections.chef'), icon: Bot, action: () => navigate('chef', 'prompt') },
 
-    { id: 'shopping-add', title: 'Artikel zur Einkaufsliste hinzufügen', section: 'Einkaufsliste', icon: PlusCircle, action: () => navigate('shopping-list', 'addItem') },
-    { id: 'shopping-generate', title: 'Einkaufsliste aus Plan generieren', section: 'Einkaufsliste', icon: RefreshCw, action: () => navigate('shopping-list', 'generate') },
-    { id: 'shopping-clear', title: 'Einkaufsliste leeren', section: 'Einkaufsliste', icon: Trash2, action: () => navigate('shopping-list', 'clear') },
+    { id: 'shopping-add', title: t('app.commands.shoppingList.addItem'), section: t('app.commandSections.shoppingList'), icon: PlusCircle, action: () => navigate('shopping-list', 'addItem') },
+    { id: 'shopping-generate', title: t('app.commands.shoppingList.generateFromPlan'), section: t('app.commandSections.shoppingList'), icon: RefreshCw, action: () => navigate('shopping-list', 'generate') },
+    { id: 'shopping-clear', title: t('app.commands.shoppingList.clear'), section: t('app.commandSections.shoppingList'), icon: Trash2, action: () => navigate('shopping-list', 'clear') },
     
-    { id: 'data-export', title: 'Daten exportieren', section: 'Daten', icon: Download, action: () => navigate('settings', 'export') },
-    { id: 'data-import', title: 'Daten importieren', section: 'Daten', icon: Upload, action: () => navigate('settings', 'import') },
+    { id: 'data-export', title: t('app.commands.data.export'), section: t('app.commandSections.data'), icon: Download, action: () => navigate('settings', 'export') },
+    { id: 'data-import', title: t('app.commands.data.import'), section: t('app.commandSections.data'), icon: Upload, action: () => navigate('settings', 'import') },
     
-    { id: 'voice-toggle', title: 'Sprachsteuerung umschalten', section: 'Global', icon: Mic, action: () => isListening ? stopListening() : startListening() },
+    { id: 'voice-toggle', title: t('app.commands.global.toggleVoiceControl'), section: t('app.commandSections.global'), icon: Mic, action: () => isListening ? stopListening() : startListening() },
   ];
 
   if (canInstall) {
-    commands.push({ id: 'app-install', title: 'App installieren', section: 'Global', icon: Download, action: handleInstallPWA });
+    commands.push({ id: 'app-install', title: t('app.commands.global.installApp'), section: t('app.commandSections.global'), icon: Download, action: handleInstallPWA });
   }
 
   const onCommandPaletteClose = useCallback(() => {
@@ -211,7 +218,7 @@ const App: React.FC = () => {
   return (
       <div className="min-h-screen text-zinc-200">
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-[60] bg-zinc-900 border border-zinc-600 text-zinc-100 rounded px-3 py-2">
-          Zum Inhalt springen
+          {t('app.skipToContent')}
         </a>
         <Suspense fallback={null}>
           {showOnboarding && <Onboarding onComplete={handleOnboardingComplete} />}
@@ -250,7 +257,7 @@ const App: React.FC = () => {
         <div aria-live="assertive" className="fixed inset-0 flex items-end px-4 py-6 pointer-events-none sm:p-6 sm:items-start z-50">
             <div className="w-full flex flex-col items-center space-y-4 sm:items-end">
                 {toasts.map((toast) => (
-                    <div key={toast.id} className="max-w-sm w-full bg-zinc-800/80 backdrop-blur-md shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden page-fade-in">
+                    <div key={toast.id} className="max-w-sm w-full rounded-lg pointer-events-auto overflow-hidden page-fade-in glass-hud ring-1 ring-black/20">
                         <div className="p-4">
                             <div className="flex items-start">
                                 <div className="flex-shrink-0">
@@ -263,7 +270,7 @@ const App: React.FC = () => {
                                 </div>
                                 <div className="ml-4 flex-shrink-0 flex">
                                     <button onClick={() => removeToast(toast.id)} className="bg-transparent rounded-md inline-flex text-zinc-400 hover:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-accent-500)] focus:ring-offset-zinc-800">
-                                        <span className="sr-only">Schließen</span>
+                                      <span className="sr-only">{t('app.close')}</span>
                                         <X className="h-5 w-5" />
                                     </button>
                                 </div>

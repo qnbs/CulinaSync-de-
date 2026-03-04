@@ -21,7 +21,22 @@
     "defaultServings": "Default Servings",
     "weekStart": "Week Starts On",
     "monday": "Monday",
-    "sunday": "Sunday"
+    "sunday": "Sunday",
+    "toast": {
+      "saved": "Settings saved",
+      "discarded": "Changes discarded"
+    },
+    "sections": {
+      "appearance": "Design & Colors",
+      "modules": "Module Configuration",
+      "ai": "AI Chef Preferences",
+      "apiKey": "API Key",
+      "speech": "Voice Control & Audio",
+      "data": "Data & Storage"
+    },
+    "actions": {
+      "discard": "Discard"
+    }
   },
   "common": {
     "add": "Add",
@@ -32,5 +47,186 @@
     "search": "Search...",
     "loading": "Loading...",
     "error": "An error occurred"
+  },
+  "app": {
+    "loading": "Loading content",
+    "skipToContent": "Skip to content",
+    "close": "Close",
+    "install": {
+      "unavailable": "App cannot be installed right now.",
+      "success": "App installed successfully!"
+    },
+    "commandSections": {
+      "navigation": "Navigation",
+      "pantry": "Pantry",
+      "chef": "AI Chef",
+      "shoppingList": "Shopping List",
+      "data": "Data",
+      "global": "Global"
+    },
+    "commands": {
+      "nav": {
+        "pantry": "Go to pantry",
+        "chef": "Go to AI chef",
+        "recipes": "Go to recipe book",
+        "mealPlanner": "Go to meal planner",
+        "shoppingList": "Go to shopping list",
+        "settings": "Go to settings",
+        "help": "Go to help"
+      },
+      "pantry": {
+        "addItem": "Add a new pantry item"
+      },
+      "chef": {
+        "generateRecipe": "Generate a new recipe"
+      },
+      "shoppingList": {
+        "addItem": "Add item to shopping list",
+        "generateFromPlan": "Generate shopping list from plan",
+        "clear": "Clear shopping list"
+      },
+      "data": {
+        "export": "Export data",
+        "import": "Import data"
+      },
+      "global": {
+        "toggleVoiceControl": "Toggle voice control",
+        "installApp": "Install app"
+      }
+    }
+  },
+  "header": {
+    "nav": {
+      "pantry": "Pantry",
+      "chef": "AI Chef",
+      "recipes": "Recipes",
+      "mealPlanner": "Meal Planner",
+      "shoppingList": "Shopping List"
+    },
+    "actions": {
+      "openCommandPalette": "Open command palette (⌘K)",
+      "startVoiceControl": "Enable voice control",
+      "stopVoiceControl": "Disable voice control",
+      "settings": "Settings",
+      "help": "Help"
+    }
+  },
+  "commandPalette": {
+    "ariaLabel": "Command palette",
+    "placeholder": "Run command or search...",
+    "noResults": "No results found.",
+    "sections": {
+      "recipes": "Recipes",
+      "pantry": "Pantry",
+      "globalSearch": "Global search"
+    },
+    "dynamicSearch": {
+      "recipes": "Search recipes for: \"{{searchTerm}}\"",
+      "pantry": "Search pantry for: \"{{searchTerm}}\""
+    }
+  },
+  "mealPlanner": {
+    "addNote": {
+      "title": "Add note",
+      "subtitle": "For {{mealType}} on {{date}}.",
+      "placeholder": "e.g. 'Eat out' or 'Leftovers from yesterday'"
+    },
+    "toast": {
+      "recipePlanned": "Recipe planned.",
+      "selectDayForRecipe": "Now select a day for the recipe.",
+      "markedCooked": "Meal marked as cooked.",
+      "pantryUpdatedCount": "{{count}} pantry items updated.",
+      "mealRemoved": "Meal removed.",
+      "noteAdded": "Note added."
+    },
+    "confirm": {
+      "removeMeal": "Remove this meal from the plan?"
+    },
+    "overlay": {
+      "selectDayFor": "Select a day for \"{{recipeTitle}}\""
+    },
+    "actions": {
+      "exportIcs": "Export calendar (ICS)",
+      "autoPlan": "Auto-suggest (expiring)",
+      "autoPlanApplied": "Auto-suggestion applied: {{count}} meal(s).",
+      "autoPlanEmpty": "No matching suggestions from soon-expiring ingredients."
+    }
+  },
+  "shoppingList": {
+    "quickAdd": {
+      "placeholder": "Quick add (e.g. 500g flour)",
+      "voiceAria": "Start voice input",
+      "cameraAria": "Open camera scan",
+      "submitAria": "Add item",
+      "scanBarcode": "Scan barcode via camera/photo",
+      "scanReceipt": "Scan receipt with OCR"
+    }
+  },
+  "recipeDetail": {
+    "back": "Back to overview",
+    "generatingImage": "Generating image...",
+    "generateImage": "Generate image",
+    "adjustServings": "Adjust servings:",
+    "mealType": {
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner"
+    },
+    "modal": {
+      "addToMealPlanTitle": "Add to meal plan",
+      "date": "Date",
+      "mealType": "Meal"
+    },
+    "confirm": {
+      "deleteRecipe": "Do you really want to permanently delete the recipe \"{{recipeTitle}}\"?",
+      "exportRecipe": "Do you really want to export the recipe as a {{format}} file?"
+    },
+    "actions": {
+      "removeFavorite": "Remove favorite",
+      "markFavorite": "Mark as favorite"
+    },
+    "toast": {
+      "saved": "Recipe saved successfully!",
+      "saveFailed": "Saving failed.",
+      "deleteFailed": "Deleting failed.",
+      "imageSaved": "Image saved.",
+      "favoriteAdded": "Marked as favorite!",
+      "favoriteRemoved": "Favorite removed.",
+      "actionFailed": "Action failed.",
+      "missingItemsAdded": "Added {{count}} missing item(s) to shopping list.",
+      "noMissingItems": "All ingredients are already in pantry or shopping list!",
+      "singleItemAdded": "Added \"{{itemName}}\" to shopping list.",
+      "addedToMealPlan": "Added to meal plan!"
+    }
+  },
+  "recipeImport": {
+    "openButton": "Import recipe",
+    "title": "Import recipe",
+    "description": "Import a recipe from a URL or JSON format.",
+    "tabs": {
+      "url": "URL",
+      "json": "JSON"
+    },
+    "url": {
+      "label": "Recipe URL",
+      "placeholder": "https://example.com/recipe",
+      "helper": "The app first tries structured recipe data and then falls back to AI extraction."
+    },
+    "json": {
+      "label": "Recipe JSON",
+      "placeholder": "Paste recipe JSON here...",
+      "upload": "Choose JSON file"
+    },
+    "actions": {
+      "import": "Import",
+      "importing": "Importing..."
+    },
+    "toast": {
+      "importSuccess": "\"{{title}}\" was imported."
+    },
+    "error": {
+      "generic": "Import failed. Please try again.",
+      "fileRead": "Could not read file."
+    }
   }
 }

@@ -2,10 +2,21 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
+import { registerSW } from 'virtual:pwa-register';
 import { store, persistor } from './src/store';
 import './src/index.css';
 import './src/i18n';
 import App from './src/App';
+
+registerSW({
+  immediate: true,
+  onOfflineReady() {
+    console.info('CulinaSync ist offline bereit.');
+  },
+  onRegisterError(error) {
+    console.error('Service Worker Registrierung fehlgeschlagen:', error);
+  },
+});
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

@@ -1,4 +1,4 @@
-import { Recipe, ShoppingListItem } from '../types';
+import { Recipe, ShoppingListItem, MealPlanItem } from '../types';
 import { db } from './db';
 import { loadSettings } from './settingsService';
 
@@ -362,4 +362,73 @@ export const exportFullDataAsPdf = async (): Promise<boolean> => {
         console.error("PDF export failed", e);
         return false;
     }
+};
+
+const escapeIcsText = (value: string): string => {
+    return value
+        .replace(/\\/g, '\\\\')
+        .replace(/;/g, '\\;')
+        .replace(/,/g, '\\,')
+        .replace(/\n/g, '\\n');
+};
+
+const toIcsDate = (date: string): string => date.replace(/-/g, '');
+
+export const exportMealPlanWeekToIcs = (
+    weekDates: Date[],
+    mealsByDate: Record<string, MealPlanItem>,
+    recipesById: Map<number, Recipe>
+) => {
+    const now = new Date();
+    const nowUtc = now.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+
+    const lines: string[] = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//CulinaSync//Meal Planner//DE',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+    ];
+
+    for (const date of weekDates) {
+        const dateKey = date.toISOString().split('T')[0];
+        const mealTypes: Array<'Frühstück' | 'Mittagessen' | 'Abendessen'> = ['Frühstück', 'Mittagessen', 'Abendessen'];
+
+        for (const mealType of mealTypes) {
+            const meal = mealsByDate[`${dateKey}-${mealType}`];
+            if (!meal) continue;
+
+            const recipe = meal.recipeId ? recipesById.get(meal.recipeId) : undefined;
+            const summary = recipe
+                ? `${mealType}: ${recipe.recipeTitle}`
+                : `${mealType}: ${meal.note || 'Meal note'}`;
+
+            const description = recipe
+                ? `${recipe.shortDescription || ''}\\nPortionen: ${meal.servings || recipe.servings}`
+                : meal.note || '';
+
+            const startDate = toIcsDate(dateKey);
+            const endDateDate = new Date(date);
+            endDateDate.setDate(endDateDate.getDate() + 1);
+            const endDate = toIcsDate(endDateDate.toISOString().split('T')[0]);
+
+            const uidSeed = `${dateKey}-${mealType}-${meal.id || recipe?.id || 'note'}`;
+            const uid = `${uidSeed}@culinasync.local`;
+
+            lines.push('BEGIN:VEVENT');
+            lines.push(`UID:${uid}`);
+            lines.push(`DTSTAMP:${nowUtc}`);
+            lines.push(`DTSTART;VALUE=DATE:${startDate}`);
+            lines.push(`DTEND;VALUE=DATE:${endDate}`);
+            lines.push(`SUMMARY:${escapeIcsText(summary)}`);
+            lines.push(`DESCRIPTION:${escapeIcsText(description)}`);
+            lines.push('END:VEVENT');
+        }
+    }
+
+    lines.push('END:VCALENDAR');
+    const content = `${lines.join('\r\n')}\r\n`;
+    const from = weekDates[0]?.toISOString().split('T')[0] || 'week';
+    const to = weekDates[6]?.toISOString().split('T')[0] || 'week';
+    downloadFile(`mealplan_${from}_${to}.ics`, content, 'text/calendar;charset=utf-8');
 };

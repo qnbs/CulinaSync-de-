@@ -26,35 +26,40 @@ concurrency:
 
 jobs:
   build:
+    # Build once and upload static artifact for the deploy job.
     runs-on: ubuntu-latest
     steps:
+      # 1) Pull repository source code.
       - name: Checkout
         uses: actions/checkout@v5
 
+      # 2) Install LTS Node.js and enable npm dependency cache.
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 'lts/*'
           cache: 'npm'
 
+      # 3) Install exact lockfile dependencies.
       - name: Install dependencies
         run: npm ci
 
+      # 4) Create production build into ./dist.
       - name: Build
         run: npm run build
 
-      - name: Create 404.html for SPA routing
-        run: cp dist/index.html dist/404.html
-
+      # 5) Configure GitHub Pages deployment metadata.
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      # 6) Upload built site artifact from ./dist.
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
           path: './dist'
 
   deploy:
+    # Deploy uploaded artifact to github-pages environment.
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

@@ -61,13 +61,13 @@ const PantryListItem = React.memo<PantryListItemProps>(({
     if (item.quantity === 0) barColor = 'bg-red-500';
 
     // Dynamic styling
-    let containerClasses = 'group relative p-4 rounded-xl border transition-all duration-300 ';
+    let containerClasses = 'group relative p-4 rounded-xl border transition-all duration-300 glass-card ';
     if (isSelected) {
         containerClasses += 'bg-[var(--color-accent-500)]/10 border-[var(--color-accent-500)] shadow-[0_0_15px_rgba(var(--color-accent-500),0.1)]';
     } else if (expiryStatus === 'expired') {
         containerClasses += 'bg-red-950/20 border-red-900/50 hover:border-red-700';
     } else {
-        containerClasses += 'bg-zinc-900/40 border-zinc-800/60 hover:bg-zinc-900/80 hover:border-zinc-700';
+        containerClasses += 'border-zinc-800/60 hover:bg-zinc-900/80 hover:border-zinc-700';
     }
 
     return (
@@ -129,7 +129,7 @@ const PantryListItem = React.memo<PantryListItemProps>(({
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 flex-shrink-0">
-                    <div className="flex items-center bg-zinc-950 rounded-lg border border-zinc-800 overflow-hidden shadow-inner">
+                    <div className="flex items-center rounded-lg border border-zinc-800 overflow-hidden shadow-inner glass-card">
                         <button 
                             onClick={() => onAdjustQuantity(item, -1)} 
                             className="p-2 hover:bg-zinc-800 text-zinc-400 hover:text-red-400 transition-colors active:bg-zinc-700"

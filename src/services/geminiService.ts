@@ -373,3 +373,116 @@ export const generateRecipeImage = async (recipeTitle: string): Promise<string> 
         throw handleGeminiError(e, 'image generation');
     }
 };
+
+export const extractRecipeFromWebContent = async (
+    sourceUrl: string,
+    webContent: string
+): Promise<Recipe> => {
+    const ai = await getAIClient();
+    const model = 'gemini-2.5-flash';
+
+    const systemInstruction = 'Extract a complete recipe from provided website content. Return only valid JSON matching the required schema. If information is missing, use sensible defaults.';
+
+    const prompt = [
+        'Extract exactly one recipe from the following website content.',
+        `Quelle: ${sourceUrl}`,
+        'If multiple recipes exist, choose the most likely primary recipe.',
+        'Important: ingredients as a structured list, instructions as ordered steps, and sensible time/servings.',
+        '',
+        'WEB CONTENT (already sanitized):',
+        webContent.slice(0, 24000),
+    ].join('\n');
+
+    try {
+        const response = await ai.models.generateContent({
+            model,
+            contents: prompt,
+            config: {
+                systemInstruction,
+                responseMimeType: 'application/json',
+                responseSchema: recipeSchema,
+                thinkingConfig: { thinkingBudget: 2048 },
+                temperature: 0.3,
+            },
+        });
+
+        const jsonText = response.text?.trim();
+        if (!jsonText) {
+            throw new Error('AI returned an empty response.');
+        }
+
+        const parsed = JSON.parse(jsonText) as Recipe;
+        if (!parsed.recipeTitle || !Array.isArray(parsed.ingredients) || !Array.isArray(parsed.instructions)) {
+            throw new Error('AI returned a response with invalid structure.');
+        }
+        return parsed;
+    } catch (e: unknown) {
+        throw handleGeminiError(e, 'recipe import extraction');
+    }
+};
+
+export interface GeminiNutritionVerification {
+    summary: string;
+    warnings: string[];
+}
+
+export const verifyNutritionAndAllergensWithGemini = async (
+    recipe: Recipe,
+    localEstimate: { calories: number; protein: number; fat: number; carbs: number; allergens: string[] }
+): Promise<GeminiNutritionVerification> => {
+    const ai = await getAIClient();
+    const model = 'gemini-2.5-flash';
+
+    const verificationSchema = {
+        type: Type.OBJECT,
+        properties: {
+            summary: { type: Type.STRING },
+            warnings: { type: Type.ARRAY, items: { type: Type.STRING } },
+        },
+        required: ['summary', 'warnings'],
+    };
+
+    const ingredientPreview = recipe.ingredients
+        .flatMap((group) => group.items)
+        .slice(0, 40)
+        .map((item) => `${item.quantity} ${item.unit} ${item.name}`.trim())
+        .join('\n');
+
+    const prompt = [
+        'Validate nutrition/allergen estimate for this recipe.',
+        `Recipe title: ${recipe.recipeTitle}`,
+        `Servings: ${recipe.servings}`,
+        'Ingredients:',
+        ingredientPreview,
+        '',
+        `Local estimate kcal/protein/fat/carbs per serving: ${Math.round(localEstimate.calories)} / ${Math.round(localEstimate.protein)}g / ${Math.round(localEstimate.fat)}g / ${Math.round(localEstimate.carbs)}g`,
+        `Local allergens: ${localEstimate.allergens.join(', ') || 'none detected'}`,
+        '',
+        'Return concise verification summary and warnings (if uncertain ingredients or allergens).',
+    ].join('\n');
+
+    try {
+        const response = await ai.models.generateContent({
+            model,
+            contents: prompt,
+            config: {
+                responseMimeType: 'application/json',
+                responseSchema: verificationSchema,
+                temperature: 0.2,
+            },
+        });
+
+        const jsonText = response.text?.trim();
+        if (!jsonText) {
+            throw new Error('AI returned an empty verification response.');
+        }
+
+        const parsed = JSON.parse(jsonText) as GeminiNutritionVerification;
+        return {
+            summary: parsed.summary || 'No summary available.',
+            warnings: Array.isArray(parsed.warnings) ? parsed.warnings : [],
+        };
+    } catch (e: unknown) {
+        throw handleGeminiError(e, 'nutrition verification');
+    }
+};

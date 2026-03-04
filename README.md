@@ -25,6 +25,36 @@
 >
 > Die App läuft vollständig im Browser. Keine Registrierung erforderlich.
 
+> [!WARNING]
+> **Rechtlicher Hinweis (Educational Only):** CulinaSync dient nur zu Lern- und Demonstrationszwecken. Inhalte der KI sind unverbindlich, keine medizinische oder rechtliche Beratung. Beachte lokale Gesetze, Lebensmittel- und Gesundheitshinweise in deinem Land.
+
+---
+
+## 📦 Deployment Instructions
+
+1. Repository in GitHub öffnen.
+2. Unter `Settings -> Pages` als Source `GitHub Actions` auswählen.
+3. Push auf `main` oder Workflow manuell über `Actions -> Deploy to GitHub Pages -> Run workflow` starten.
+4. Live-URL prüfen: `https://qnbs.github.io/CulinaSync-de-/`.
+
+Die Pipeline nutzt den offiziellen Actions-Flow (Checkout v5, Setup Node v6, `npm ci`, `npm run build`, Configure Pages v5, Upload Artifact v4, Deploy Pages v4).
+
+## 🔐 How To Set Gemini API Key
+
+1. Öffne `Einstellungen -> API-Key` in der App.
+2. Erstelle einen Key in Google AI Studio: `https://aistudio.google.com/apikey`.
+3. Füge den Key in der App ein und speichere ihn.
+4. Der Key wird nur lokal in IndexedDB gespeichert und nie in `localStorage`, `.env` oder dem Build-Bundle.
+5. Empfohlene Restriktion in Google Cloud: HTTP Referrer auf `https://qnbs.github.io/*` beschränken.
+
+## 🧯 Troubleshooting
+
+- **Blank page auf GitHub Pages:** Prüfe, ob `base` in `vite.config.ts` auf `'/CulinaSync-de-/'` in CI gesetzt wird.
+- **Assets laden nicht:** Stelle sicher, dass alle statischen Links den Base-Pfad respektieren.
+- **SPA Routing liefert 404:** `public/404.html` und Root-`404.html` müssen vorhanden sein.
+- **KI-Funktionen bleiben deaktiviert:** API-Key unter Einstellungen eintragen und Domain-Restriktion prüfen.
+- **PWA installiert nicht:** HTTPS + kompatibler Browser nötig; ggf. App einmal vollständig laden und neu öffnen.
+
 ---
 
 ## 🚀 Vision & Philosophie
@@ -154,6 +184,17 @@ src/
 | `npm run build` | Produktions-Build erstellen |
 | `npm run preview` | Produktions-Build lokal testen |
 | `npm run lint` | Code-Qualität prüfen |
+| `npm run test` | Unit-Tests mit Vitest ausführen |
+| `npm run test:coverage` | Test-Coverage erstellen |
+| `npm run i18n:scan` | Hardcoded-UI-Strings für i18n scannen |
+| `npm run i18n:check:changed -- <baseRef>` | Neue hardcoded i18n-Strings in geänderten TS/TSX-Zeilen blockieren |
+
+### Test-Setup (P0)
+
+- Test Runner: `Vitest`
+- UI-Tests: `React Testing Library`
+- Netzwerk-Mocking: `MSW` (inkl. Gemini-Endpunkt-Mock)
+- Setup-Datei: `src/test/setupTests.ts`
 
 ---
 

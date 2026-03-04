@@ -24,7 +24,7 @@ const PlannedMealCard = React.memo<{
     // Handle notes
     if (meal.note) {
         return (
-             <div className="group relative p-3 rounded-xl bg-zinc-900/40 border border-dashed border-zinc-700/50 hover:bg-zinc-800/40 transition-all duration-300 backdrop-blur-sm">
+            <div className="group relative p-3 rounded-xl glass-card border-dashed border-zinc-700/50 hover:bg-zinc-800/40 transition-all duration-300">
                 <div className="flex items-start gap-3">
                     <div className="p-2 rounded-lg bg-zinc-800 text-zinc-400">
                         <FileText size={16} />
@@ -45,7 +45,7 @@ const PlannedMealCard = React.memo<{
     // Handle orphaned meal items
     if (!recipe) {
         return (
-            <div className="p-3 rounded-xl bg-red-950/20 border border-dashed border-red-900/50 flex items-center gap-3 relative group">
+            <div className="p-3 rounded-xl glass-card bg-red-950/20 border border-dashed border-red-900/50 flex items-center gap-3 relative group">
                 <AlertTriangle size={18} className="text-red-500/80"/>
                 <span className="text-sm text-red-400/80 italic">Rezept nicht verfügbar</span>
                  <button onClick={() => onAction('remove', meal)} className="absolute right-2 p-1 text-red-400 hover:text-red-300 hover:bg-red-900/40 rounded opacity-0 group-hover:opacity-100 transition-all">
@@ -65,7 +65,7 @@ const PlannedMealCard = React.memo<{
     const isVeg = recipe.tags?.diet?.includes('Vegetarisch') || recipe.tags?.diet?.includes('Vegan');
 
     return (
-        <div className={`group relative flex flex-col gap-2 p-3 rounded-xl border transition-all duration-300 ${meal.isCooked ? 'bg-zinc-900/30 border-zinc-800/30 opacity-60' : 'bg-zinc-800/40 border-zinc-700/50 hover:border-zinc-600 hover:bg-zinc-800/60 hover:shadow-lg'}`}>
+        <div className={`group relative flex flex-col gap-2 p-3 rounded-xl border transition-all duration-300 glass-card ${meal.isCooked ? 'border-zinc-800/30 opacity-60' : 'border-zinc-700/50 hover:border-zinc-600 hover:bg-zinc-800/60 hover:shadow-lg'}`}>
             <div className="flex justify-between items-start">
                 <h4 className={`font-bold text-sm text-zinc-100 leading-snug line-clamp-2 ${meal.isCooked && 'line-through text-zinc-500'}`}>
                     {recipe.recipeTitle}
@@ -76,7 +76,7 @@ const PlannedMealCard = React.memo<{
                         <MoreVertical size={16}/>
                     </button>
                     {isMenuOpen && (
-                        <div className="absolute top-full right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl w-48 z-20 overflow-hidden py-1 page-fade-in">
+                        <div className="absolute top-full right-0 mt-1 rounded-lg w-48 z-20 overflow-hidden py-1 page-fade-in glass-hud">
                             <button onClick={() => { onAction('view', recipe); setMenuOpen(false); }} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2.5 hover:bg-zinc-800 text-zinc-300"><BookOpen size={14}/> Rezept ansehen</button>
                             <button onClick={() => { onAction('cook', recipe); setMenuOpen(false); }} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2.5 hover:bg-zinc-800 text-zinc-300"><CookingPot size={14}/> Kochmodus</button>
                             {!meal.isCooked && <button onClick={() => { onAction('cooked', meal); setMenuOpen(false); }} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2.5 hover:bg-zinc-800 text-emerald-400"><CheckCircle size={14}/> Als gekocht markieren</button>}

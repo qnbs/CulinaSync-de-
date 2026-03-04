@@ -12,6 +12,7 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      injectRegister: false,
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'logo-192x192.png', 'logo-512x512.png'],
       workbox: {
@@ -92,6 +93,10 @@ export default defineConfig({
     ],
   },
   build: {
+    minify: 'esbuild',
+    cssCodeSplit: true,
+    assetsInlineLimit: 4096,
+    reportCompressedSize: true,
     rollupOptions: {
       output: {
         manualChunks: {

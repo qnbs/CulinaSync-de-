@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Search, LucideProps, Milk, BookOpen } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { db } from '../services/dbInstance';
 import { Recipe, PantryItem } from '../types';
 import { useAppDispatch } from '../store/hooks';
@@ -27,6 +28,7 @@ type PaletteItem = (Recipe & { type: 'recipe' })
 
 
 const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, commands }) => {
+    const { t } = useTranslation();
     const dispatch = useAppDispatch();
     const [searchTerm, setSearchTerm] = useState('');
     const [activeIndex, setActiveIndex] = useState(0);
@@ -99,11 +101,11 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
         const showGlobalSearch = list.length === 0 && searchTerm.trim().length > 1;
 
         if (showGlobalSearch) {
-             list.push({ id: 'search-recipes-dynamic', title: `Suche in Rezepten nach: "${searchTerm}"`, action: () => handleGlobalSearch('recipes', searchTerm), type: 'global' });
-             list.push({ id: 'search-pantry-dynamic', title: `Suche im Vorrat nach: "${searchTerm}"`, action: () => handleGlobalSearch('pantry', searchTerm), type: 'global' });
+             list.push({ id: 'search-recipes-dynamic', title: t('commandPalette.dynamicSearch.recipes', { searchTerm }), action: () => handleGlobalSearch('recipes', searchTerm), type: 'global' });
+             list.push({ id: 'search-pantry-dynamic', title: t('commandPalette.dynamicSearch.pantry', { searchTerm }), action: () => handleGlobalSearch('pantry', searchTerm), type: 'global' });
         }
         return list;
-    }, [groupedCommands, searchTerm, dbSearchResults, handleGlobalSearch]);
+    }, [groupedCommands, searchTerm, dbSearchResults, handleGlobalSearch, t]);
 
 
     useEffect(() => {
@@ -159,9 +161,9 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
         let action;
     
         const getSectionTitle = (currentItem: PaletteItem, previousItem: PaletteItem | null) => {
-            const currentSection = currentItem.type === 'recipe' ? 'Rezepte' : currentItem.type === 'pantry' ? 'Vorratskammer' : currentItem.type === 'global' ? 'Globale Suche' : currentItem.section;
+            const currentSection = currentItem.type === 'recipe' ? t('commandPalette.sections.recipes') : currentItem.type === 'pantry' ? t('commandPalette.sections.pantry') : currentItem.type === 'global' ? t('commandPalette.sections.globalSearch') : currentItem.section;
             if (!previousItem) return currentSection;
-            const previousSection = previousItem.type === 'recipe' ? 'Rezepte' : previousItem.type === 'pantry' ? 'Vorratskammer' : previousItem.type === 'global' ? 'Globale Suche' : previousItem.section;
+            const previousSection = previousItem.type === 'recipe' ? t('commandPalette.sections.recipes') : previousItem.type === 'pantry' ? t('commandPalette.sections.pantry') : previousItem.type === 'global' ? t('commandPalette.sections.globalSearch') : previousItem.section;
             return currentSection !== previousSection ? currentSection : null;
         };
     
@@ -208,16 +210,16 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
 
     return (
                 <div 
-                    className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24"
+                    className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 glass-overlay"
                     onClick={onClose}
                 >
           <div 
                         ref={modalRef}
-            className="relative w-full max-w-xl bg-zinc-900 border border-zinc-700/50 rounded-lg shadow-2xl modal-fade-in"
+            className="relative w-full max-w-xl rounded-lg modal-fade-in glass-modal"
             onClick={e => e.stopPropagation()}
                         role="dialog"
                         aria-modal="true"
-                        aria-label="Befehlspalette"
+                        aria-label={t('commandPalette.ariaLabel')}
                         tabIndex={-1}
           >
             <div className="flex items-center border-b border-zinc-700/50 p-1">
@@ -228,7 +230,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
                 autoFocus
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                placeholder="Befehl ausführen oder suchen..."
+                                placeholder={t('commandPalette.placeholder')}
                 className="w-full bg-transparent p-2 text-lg text-zinc-100 focus:outline-none placeholder-zinc-500"
               />
             </div>
@@ -237,7 +239,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
                     {flatCommandList.map((item, index) => renderItem(item, index))}
                 </ul>
             ) : (
-                <p className="p-4 text-center text-zinc-500">Keine Ergebnisse gefunden.</p>
+                                <p className="p-4 text-center text-zinc-500">{t('commandPalette.noResults')}</p>
             )}
           </div>
         </div>

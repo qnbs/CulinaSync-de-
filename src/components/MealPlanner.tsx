@@ -1,4 +1,6 @@
 import React, { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLiveQuery } from 'dexie-react-hooks';
 import { addRecipeToMealPlan, markMealAsCooked, removeRecipeFromMealPlan } from '../services/repositories/mealPlanRepository';
 import { Recipe, MealPlanItem } from '../types';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -11,6 +13,9 @@ import { DayColumn } from './meal-planner/DayColumn';
 import { PlannerSidebar } from './meal-planner/PlannerSidebar';
 import { Save, FileText, X } from 'lucide-react';
 import { useModalA11y } from '../hooks/useModalA11y';
+import { exportMealPlanWeekToIcs } from '../services/exportService';
+import { buildAutoPlanSuggestionsFromExpiring, getSoonExpiringPantryNames } from '../services/mealPlannerSmartService';
+import { db } from '../services/dbInstance';
 
 const AddMealNoteModal: React.FC<{
     date: string;
@@ -18,6 +23,7 @@ const AddMealNoteModal: React.FC<{
     onClose: () => void;
     onSave: (note: string) => void;
 }> = ({ date, mealType, onClose, onSave }) => {
+    const { t } = useTranslation();
     const [note, setNote] = useState('');
     const modalRef = React.useRef<HTMLDivElement>(null);
     const textRef = React.useRef<HTMLTextAreaElement>(null);
@@ -34,28 +40,28 @@ const AddMealNoteModal: React.FC<{
     };
 
     return (
-        <div className="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm flex items-center justify-center z-50 page-fade-in" onClick={onClose}>
-            <div ref={modalRef} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl scale-100" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="meal-note-title" tabIndex={-1}>
+        <div className="fixed inset-0 flex items-center justify-center z-50 page-fade-in glass-overlay" onClick={onClose}>
+            <div ref={modalRef} className="rounded-2xl p-6 w-full max-w-sm scale-100 glass-modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="meal-note-title" tabIndex={-1}>
                 <div className="flex items-center gap-3 mb-4 text-[var(--color-accent-400)]">
                     <FileText size={24}/> 
-                    <h3 id="meal-note-title" className="text-lg font-bold text-zinc-100">Notiz hinzufügen</h3>
+                    <h3 id="meal-note-title" className="text-lg font-bold text-zinc-100">{t('mealPlanner.addNote.title')}</h3>
                 </div>
                 <p className="text-xs text-zinc-400 mb-4">
-                    Für {mealType} am {new Date(date).toLocaleDateString('de-DE')}.
+                    {t('mealPlanner.addNote.subtitle', { mealType, date: new Date(date).toLocaleDateString('de-DE') })}
                 </p>
                 <textarea
                     ref={textRef}
                     value={note}
                     onChange={e => setNote(e.target.value)}
-                    placeholder="z.B. 'Essen gehen' oder 'Reste vom Vortag'"
+                    placeholder={t('mealPlanner.addNote.placeholder')}
                     className="w-full bg-zinc-950/50 border border-zinc-700 rounded-xl p-3 text-zinc-200 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none resize-none"
                     rows={3}
                     autoFocus
                 />
                 <div className="flex justify-end gap-3 pt-6">
-                    <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition-colors text-sm font-medium">Abbrechen</button>
+                    <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition-colors text-sm font-medium">{t('common.cancel')}</button>
                     <button type="button" onClick={handleSave} disabled={!note.trim()} className="px-4 py-2 rounded-lg bg-[var(--color-accent-500)] text-zinc-900 font-bold hover:bg-[var(--color-accent-400)] disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center gap-2 transition-all">
-                        <Save size={16}/> Speichern
+                        <Save size={16}/> {t('common.save')}
                     </button>
                 </div>
             </div>
@@ -64,11 +70,13 @@ const AddMealNoteModal: React.FC<{
 };
 
 const MealPlanner: React.FC = () => {
+    const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const settings = useAppSelector((state) => state.settings);
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const { recipes, recipesById, week, mealsByDate } = useMealPlan(currentDate, settings.weekStart === 'Monday');
+    const pantryItems = useLiveQuery(() => db.pantry.toArray(), []) ?? [];
   
   const [selectedRecipeForDetail, setSelectedRecipeForDetail] = useState<Recipe | null>(null);
   const [noteModalState, setNoteModalState] = useState<{isOpen: boolean; date: string; mealType: string} | null>(null);
@@ -95,7 +103,7 @@ const MealPlanner: React.FC = () => {
       await addRecipeToMealPlan({ date, mealType: mealType as 'Frühstück' | 'Mittagessen' | 'Abendessen', recipeId });
       if (pendingRecipeId) {
           setPendingRecipeId(null); // Clear pending state after placement
-          addToast('Rezept geplant.');
+          addToast(t('mealPlanner.toast.recipePlanned'));
       }
   };
 
@@ -112,7 +120,7 @@ const MealPlanner: React.FC = () => {
   const handleSelectRecipeForPlacement = (recipe: Recipe) => {
       setPendingRecipeId(prev => prev === recipe.id ? null : recipe.id!);
       if (pendingRecipeId !== recipe.id) {
-          addToast("Wähle nun einen Tag für das Rezept aus.", "info");
+          addToast(t('mealPlanner.toast.selectDayForRecipe'), 'info');
       }
   };
 
@@ -136,18 +144,18 @@ const MealPlanner: React.FC = () => {
         case 'cooked': {
             const { success, changes } = await markMealAsCooked((payload as MealPlanItem).id!);
             if (success) {
-                let message = "Mahlzeit als gekocht markiert.";
+                let message = t('mealPlanner.toast.markedCooked');
                 if(changes?.updated.length || changes.deleted.length) {
-                    message += ` ${[...changes.updated, ...changes.deleted].length} Artikel im Vorrat aktualisiert.`
+                    message += ` ${t('mealPlanner.toast.pantryUpdatedCount', { count: [...changes.updated, ...changes.deleted].length })}`;
                 }
                 addToast(message);
             }
             break;
         }
         case 'remove': {
-            if(window.confirm("Mahlzeit wirklich aus dem Plan entfernen?")) {
+            if(window.confirm(t('mealPlanner.confirm.removeMeal'))) {
                 await removeRecipeFromMealPlan((payload as MealPlanItem).id!);
-                addToast("Mahlzeit entfernt.");
+                addToast(t('mealPlanner.toast.mealRemoved'));
             }
             break;
         }
@@ -156,14 +164,44 @@ const MealPlanner: React.FC = () => {
   
   const handleSaveNote = useCallback(async (note: string, date: string, mealType: string) => {
     await addRecipeToMealPlan({ date, mealType: mealType as 'Frühstück' | 'Mittagessen' | 'Abendessen', note });
-    addToast('Notiz hinzugefügt.');
+        addToast(t('mealPlanner.toast.noteAdded'));
     setNoteModalState(null);
-  }, [addToast]);
+    }, [addToast, t]);
 
   const isToday = (date: Date) => {
       const today = new Date();
       return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
   };
+
+    const handleExportIcs = useCallback(() => {
+        exportMealPlanWeekToIcs(week, mealsByDate, recipesById);
+        addToast('ICS export created.', 'success');
+    }, [week, mealsByDate, recipesById, addToast]);
+
+    const handleAutoPlanExpiring = useCallback(async () => {
+        if (!recipes || recipes.length === 0) {
+            addToast(t('mealPlanner.actions.autoPlanEmpty'), 'info');
+            return;
+        }
+
+        const expiringNames = getSoonExpiringPantryNames(pantryItems, 4);
+        const suggestions = buildAutoPlanSuggestionsFromExpiring(week, mealsByDate, recipes, expiringNames);
+
+        if (suggestions.length === 0) {
+            addToast(t('mealPlanner.actions.autoPlanEmpty'), 'info');
+            return;
+        }
+
+        for (const suggestion of suggestions) {
+            await addRecipeToMealPlan({
+                date: suggestion.date,
+                mealType: suggestion.mealType,
+                recipeId: suggestion.recipeId,
+            });
+        }
+
+        addToast(t('mealPlanner.actions.autoPlanApplied', { count: suggestions.length }), 'success');
+    }, [recipes, pantryItems, week, mealsByDate, addToast, t]);
 
   if (selectedRecipeForDetail) {
     return <RecipeDetail recipe={selectedRecipeForDetail} onBack={() => setSelectedRecipeForDetail(null)} />;
@@ -187,7 +225,7 @@ const MealPlanner: React.FC = () => {
         {/* Placement Mode Indicator Overlay */}
         {pendingRecipe && (
             <div className="fixed top-20 left-1/2 -translate-x-1/2 z-40 bg-[var(--color-accent-500)] text-zinc-900 px-6 py-3 rounded-full shadow-xl font-bold flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
-                <span>Wähle einen Tag für "{pendingRecipe.recipeTitle}"</span>
+                <span>{t('mealPlanner.overlay.selectDayFor', { recipeTitle: pendingRecipe.recipeTitle })}</span>
                 <button onClick={() => setPendingRecipeId(null)} className="bg-black/20 p-1 rounded-full hover:bg-black/30">
                     <X size={16}/>
                 </button>
@@ -202,6 +240,8 @@ const MealPlanner: React.FC = () => {
                 mealsByDate={mealsByDate}
                 recipesById={recipesById}
                 weekDates={week}
+                onExportIcs={handleExportIcs}
+                onAutoPlanExpiring={handleAutoPlanExpiring}
             />
        
             {/* Kanban Board Scroll Container with Snap */}

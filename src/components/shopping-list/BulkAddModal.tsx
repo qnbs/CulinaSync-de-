@@ -39,10 +39,10 @@ export const BulkAddModal = () => {
     if (!isBulkAddModalOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 page-fade-in" onClick={handleClose}>
+        <div className="fixed inset-0 flex items-center justify-center z-50 page-fade-in glass-overlay" onClick={handleClose}>
              <div
                 ref={modalRef}
-                className="bg-zinc-800 rounded-lg p-6 w-full max-w-lg shadow-xl"
+            className="rounded-lg p-6 w-full max-w-lg glass-modal"
                 onClick={e => e.stopPropagation()}
                 role="dialog"
                 aria-modal="true"
@@ -62,7 +62,7 @@ export const BulkAddModal = () => {
                  ) : (
                     <>
                         <p className="text-zinc-400 text-sm mb-4">Überprüfe die erkannten Artikel. Du kannst sie nach dem Hinzufügen noch bearbeiten.</p>
-                        <div className="bg-zinc-900 rounded-md p-2 max-h-48 overflow-y-auto border border-zinc-700">
+                        <div className="glass-card rounded-md p-2 max-h-48 overflow-y-auto">
                             <ul>{parsedItems.map((item, i) => <li key={i} className="text-sm p-1"><b>{item.name}</b> ({item.quantity} {item.unit})</li>)}</ul>
                         </div>
                         <div className="flex justify-end gap-3 pt-4">

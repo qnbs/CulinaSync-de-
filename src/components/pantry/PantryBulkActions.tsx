@@ -12,7 +12,7 @@ export const PantryBulkActions = () => {
     if (!isSelectMode || selectedItems.length === 0) return null;
 
     return (
-        <div className="sticky bottom-4 z-20 bg-zinc-800/80 backdrop-blur-md border border-zinc-700 rounded-lg p-3 flex justify-between items-center w-full max-w-lg mx-auto shadow-xl page-fade-in">
+        <div className="sticky bottom-4 z-20 rounded-lg p-3 flex justify-between items-center w-full max-w-lg mx-auto page-fade-in glass-hud gpu">
             <span className="font-medium text-zinc-200">{selectedItems.length} Artikel ausgewählt</span>
             <div className="flex gap-2">
                 <button onClick={handleAddSelectedToShoppingList} disabled={selectedItems.length === 0} className="flex items-center gap-2 bg-[var(--color-accent-500)] text-zinc-900 font-bold py-2 px-3 rounded-md hover:bg-[var(--color-accent-400)] transition-colors disabled:bg-zinc-600 disabled:cursor-not-allowed text-sm">

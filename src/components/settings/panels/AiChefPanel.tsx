@@ -26,7 +26,7 @@ export const AiChefPanel: React.FC<AiChefPanelProps> = ({ settings, onChange }) 
     return (
         <div className="space-y-8 page-fade-in">
             {/* Personality Engine */}
-            <section className="bg-zinc-900/30 border border-zinc-800 rounded-2xl p-6 relative overflow-hidden">
+            <section className="glass-card rounded-2xl p-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4 opacity-10">
                     <BrainCircuit size={100} />
                 </div>
@@ -52,7 +52,7 @@ export const AiChefPanel: React.FC<AiChefPanelProps> = ({ settings, onChange }) 
                         <span>Präzise</span>
                         <span>Wild</span>
                     </div>
-                    <p className="mt-4 text-zinc-400 text-sm bg-zinc-900/50 p-3 rounded-lg border border-zinc-800/50 flex items-start gap-2">
+                    <p className="mt-4 text-zinc-400 text-sm glass-card p-3 rounded-lg flex items-start gap-2">
                         <Sparkles size={14} className="mt-0.5 text-[var(--color-accent-400)] flex-shrink-0"/>
                         {creativityInfo.desc}
                     </p>

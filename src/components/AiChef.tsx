@@ -10,6 +10,7 @@ import { AlertTriangle } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../services/dbInstance';
 import { addToast, setFocusAction, setVoiceAction } from '../store/slices/uiSlice';
+import { hasApiKey } from '../services/apiKeyService';
 
 const HISTORY_KEY = 'culinaSyncAiChefHistory';
 const MAX_HISTORY = 5;
@@ -23,6 +24,7 @@ const AiChef: React.FC = () => {
   const [includeIngredients, setIncludeIngredients] = useState<string[]>([]);
   const [excludeIngredients, setExcludeIngredients] = useState<string[]>([]);
   const [modifiers, setModifiers] = useState<string[]>([]);
+  const [apiKeyConfigured, setApiKeyConfigured] = useState<boolean | null>(null);
   
   const promptRef = useRef<HTMLTextAreaElement>(null);
 
@@ -47,6 +49,12 @@ const AiChef: React.FC = () => {
       dispatch(setFocusAction(null));
     }
   }, [focusAction, dispatch]);
+
+  useEffect(() => {
+    hasApiKey()
+      .then(setApiKeyConfigured)
+      .catch(() => setApiKeyConfigured(false));
+  }, [status]);
   
   const updateHistory = (prompt: StructuredPrompt) => {
     const newHistory = [prompt, ...history.filter(h => JSON.stringify(h) !== JSON.stringify(prompt))].slice(0, MAX_HISTORY);
@@ -113,6 +121,16 @@ const AiChef: React.FC = () => {
         <div className="flex items-start gap-4 bg-red-900/20 border border-red-500/30 text-red-300 p-4 rounded-lg page-fade-in">
           <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
           <div><h4 className="font-semibold">Generierung fehlgeschlagen</h4><p className="text-sm opacity-80">{error}</p></div>
+        </div>
+      )}
+
+      {apiKeyConfigured === false && (
+        <div className="flex items-start gap-4 bg-amber-900/20 border border-amber-500/30 text-amber-200 p-4 rounded-lg page-fade-in">
+          <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-semibold">Gemini API-Schlüssel fehlt</h4>
+            <p className="text-sm opacity-90">Bitte hinterlege deinen Schlüssel unter Einstellungen → API-Key. Ohne Schlüssel sind KI-Funktionen deaktiviert.</p>
+          </div>
         </div>
       )}
 

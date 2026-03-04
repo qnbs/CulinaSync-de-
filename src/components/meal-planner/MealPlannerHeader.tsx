@@ -1,9 +1,10 @@
 import React, { useMemo } from 'react';
-import { ChevronLeft, ChevronRight, RefreshCw, ShoppingCart } from 'lucide-react';
+import { ChevronLeft, ChevronRight, RefreshCw, ShoppingCart, CalendarPlus, WandSparkles } from 'lucide-react';
 import { Recipe, MealPlanItem } from '../../types';
 import { useAppDispatch } from '../../store/hooks';
 import { addToast } from '../../store/slices/uiSlice';
 import { generateFromPlanAsync } from '../../store/slices/shoppingListSlice';
+import { useTranslation } from 'react-i18next';
 
 interface MealPlannerHeaderProps {
     currentDate: Date;
@@ -12,6 +13,8 @@ interface MealPlannerHeaderProps {
     mealsByDate: Record<string, MealPlanItem>;
     recipesById: Map<number, Recipe>;
     weekDates: Date[];
+    onExportIcs: () => void;
+    onAutoPlanExpiring: () => void;
 }
 
 const NutrientBadge = ({ label, value, unit, color }: { label: string, value: number, unit: string, color: string }) => (
@@ -21,7 +24,8 @@ const NutrientBadge = ({ label, value, unit, color }: { label: string, value: nu
     </div>
 );
 
-export const MealPlannerHeader: React.FC<MealPlannerHeaderProps> = ({ setCurrentDate, weekString, mealsByDate, recipesById, weekDates }) => {
+export const MealPlannerHeader: React.FC<MealPlannerHeaderProps> = ({ setCurrentDate, weekString, mealsByDate, recipesById, weekDates, onExportIcs, onAutoPlanExpiring }) => {
+    const { t } = useTranslation();
     const dispatch = useAppDispatch();
 
     const weekNutrition = useMemo(() => {
@@ -70,6 +74,12 @@ export const MealPlannerHeader: React.FC<MealPlannerHeaderProps> = ({ setCurrent
                     <p className="text-zinc-400 mt-1">Organisiere deine kulinarische Woche.</p>
                 </div>
                 <div className="flex gap-2">
+                    <button type="button" onClick={onExportIcs} className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium py-2 px-4 rounded-xl transition-colors border border-zinc-700">
+                        <CalendarPlus size={18} /> <span className="hidden sm:inline">{t('mealPlanner.actions.exportIcs')}</span>
+                    </button>
+                    <button type="button" onClick={onAutoPlanExpiring} className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium py-2 px-4 rounded-xl transition-colors border border-zinc-700">
+                        <WandSparkles size={18} /> <span className="hidden sm:inline">{t('mealPlanner.actions.autoPlan')}</span>
+                    </button>
                     <button type="button" aria-label="Einkaufsliste aus Wochenplan generieren" onClick={handleGenerateShoppingList} className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium py-2 px-4 rounded-xl transition-colors border border-zinc-700">
                         <ShoppingCart size={18} /> <span className="hidden sm:inline">Einkaufsliste füllen</span>
                     </button>

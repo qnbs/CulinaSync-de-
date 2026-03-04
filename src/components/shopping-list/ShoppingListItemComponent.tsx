@@ -25,7 +25,7 @@ export const ShoppingListItemComponent = React.memo<{
     
     if (isEditing) {
         return (
-            <li className="p-3 bg-zinc-800 rounded-xl ring-2 ring-[var(--color-accent-500)] shadow-lg z-10">
+            <li className="p-3 rounded-xl ring-2 ring-[var(--color-accent-500)] shadow-lg z-10 glass-card">
                 <form onSubmit={e => { e.preventDefault(); onSaveEdit(); }} className="flex flex-wrap items-center gap-2">
                   <input type="text" value={editingItem!.name} onChange={e => setEditingItem({...editingItem!, name: e.target.value})} className="flex-grow bg-zinc-700 rounded-lg p-2 text-zinc-100" autoFocus/>
                   <div className="flex gap-2">
@@ -53,7 +53,7 @@ export const ShoppingListItemComponent = React.memo<{
         >
             {dropTargetId === item.id && !isShoppingMode && <div className="absolute -top-2 left-0 right-0 h-1 bg-[var(--color-accent-400)] rounded-full shadow-[0_0_10px_var(--color-accent-glow)] z-10" />}
             
-            <div className={`flex items-center gap-3 p-3 rounded-xl transition-all ${isDragged ? 'opacity-30 scale-95' : ''} ${!item.isChecked ? 'bg-zinc-800/40 hover:bg-zinc-800/60' : 'bg-transparent opacity-60'} ${isShoppingMode && !item.isChecked ? 'bg-zinc-800 border border-zinc-700/50 shadow-md min-h-[70px]' : ''}`}>
+            <div className={`flex items-center gap-3 p-3 rounded-xl transition-all ${isDragged ? 'opacity-30 scale-95' : ''} ${!item.isChecked ? 'glass-card hover:bg-zinc-800/60' : 'bg-transparent opacity-60'} ${isShoppingMode && !item.isChecked ? 'border border-zinc-700/50 shadow-md min-h-[70px]' : ''}`}>
                 
                 {!item.isChecked && !isShoppingMode && (
                     <GripVertical className="text-zinc-600 cursor-grab touch-none flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" size={18} />

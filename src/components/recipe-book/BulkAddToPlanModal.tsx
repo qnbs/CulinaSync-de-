@@ -42,10 +42,10 @@ export const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm flex items-center justify-center z-50 page-fade-in" onClick={onClose}>
+        <div className="fixed inset-0 flex items-center justify-center z-50 page-fade-in glass-overlay" onClick={onClose}>
             <div
                 ref={modalRef}
-                className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl relative"
+            className="rounded-2xl p-6 w-full max-w-sm relative glass-modal"
                 onClick={e => e.stopPropagation()}
                 role="dialog"
                 aria-modal="true"
@@ -97,7 +97,7 @@ export const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, 
                         </div>
                     </div>
                     
-                    <div className="bg-zinc-800/50 rounded-lg p-3 text-xs text-zinc-400 border border-zinc-800">
+                    <div className="glass-card rounded-lg p-3 text-xs text-zinc-400">
                         Die Rezepte werden ab dem <span className="text-zinc-200 font-medium">{new Date(startDate).toLocaleDateString('de-DE')}</span> als aufeinanderfolgende <span className="text-zinc-200 font-medium">{mealType}</span> geplant.
                     </div>
                 </div>

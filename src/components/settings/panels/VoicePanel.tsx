@@ -28,7 +28,7 @@ export const VoicePanel: React.FC<VoicePanelProps> = ({ settings, onChange }) =>
 
     return (
         <div className="space-y-8 page-fade-in">
-            <section className="bg-zinc-900/30 border border-zinc-800 rounded-2xl p-6">
+            <section className="glass-card rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-6">
                     <h3 className="text-lg font-bold text-zinc-100 flex items-center gap-2"><Volume2 className="text-[var(--color-accent-400)]"/> Sprachausgabe</h3>
                     <div className={`flex gap-1 items-end h-6 ${isPlayingTest ? 'opacity-100' : 'opacity-20'}`}>

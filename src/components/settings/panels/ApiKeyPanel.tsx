@@ -60,7 +60,7 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
     return (
         <div className="space-y-6 page-fade-in">
             {/* Security Notice */}
-            <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5">
+            <div className="glass-card bg-amber-500/10 border-amber-500/30 rounded-2xl p-5">
                 <div className="flex items-start gap-3">
                     <Shield className="text-amber-500 flex-shrink-0 mt-0.5" size={20} />
                     <div className="space-y-2">
@@ -75,7 +75,7 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
             </div>
 
             {/* Current Status & Input */}
-            <section className="bg-zinc-900/30 border border-zinc-800 rounded-2xl p-6">
+            <section className="glass-card rounded-2xl p-6">
                 <h3 className="text-lg font-bold text-zinc-100 mb-4 flex items-center gap-2">
                     <Key className="text-[var(--color-accent-400)]" /> Gemini API-Schlüssel
                 </h3>
@@ -129,13 +129,14 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
             </section>
 
             {/* How to get a key */}
-            <section className="bg-zinc-900/30 border border-zinc-800 rounded-2xl p-6">
+            <section className="glass-card rounded-2xl p-6">
                 <h4 className="font-bold text-zinc-300 mb-3 text-sm">So bekommst du einen API-Schlüssel:</h4>
                 <ol className="space-y-2 text-zinc-400 text-sm list-decimal list-inside">
                     <li>Öffne <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" className="text-[var(--color-accent-400)] underline hover:text-[var(--color-accent-300)] inline-flex items-center gap-1">Google AI Studio <ExternalLink size={12} /></a></li>
                     <li>Melde dich mit deinem Google-Konto an</li>
                     <li>Klicke auf &quot;Create API Key&quot;</li>
                     <li>Kopiere den Schlüssel und füge ihn oben ein</li>
+                    <li>Empfehlung: Beschränke den Schlüssel in Google Cloud auf <code>https://qnbs.github.io/*</code></li>
                 </ol>
             </section>
         </div>

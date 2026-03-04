@@ -51,10 +51,10 @@ export const PantryItemModal: React.FC<{
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 page-fade-in" onClick={onClose}>
+        <div className="fixed inset-0 flex items-center justify-center z-50 page-fade-in glass-overlay" onClick={onClose}>
             <div
                 ref={modalRef}
-                className="bg-zinc-800 rounded-lg p-6 w-full max-w-lg shadow-xl"
+            className="rounded-lg p-6 w-full max-w-lg glass-modal"
                 onClick={e => e.stopPropagation()}
                 role="dialog"
                 aria-modal="true"
