@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import reactCompiler from 'react/compiler';
 import { VitePWA } from 'vite-plugin-pwa';
 import { fileURLToPath, URL } from 'url';
 
@@ -10,7 +11,9 @@ const base = process.env.GITHUB_ACTIONS ? `/${REPO_NAME}/` : '/';
 export default defineConfig({
   base,
   plugins: [
-    react(),
+    react({
+      compiler: reactCompiler,
+    }),
     VitePWA({
       injectRegister: false,
       registerType: 'autoUpdate',

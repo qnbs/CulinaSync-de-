@@ -1,0 +1,4 @@
+Contact: mailto:security@culinasync.de
+Encryption: https://culinasync.de/pgp.txt
+Acknowledgements: https://culinasync.de/security
+Preferred-Languages: de, en
