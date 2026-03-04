@@ -8,10 +8,12 @@ export interface SectionDef {
     description: string;
 }
 
+import { Shield } from 'lucide-react';
 export const SETTINGS_SECTIONS: SectionDef[] = [
     { id: 'appearance', label: 'Design', icon: Palette, description: 'Farben & Darstellung' },
     { id: 'modules', label: 'Module', icon: SettingsIcon, description: 'Feature-Konfiguration' },
     { id: 'ai', label: 'KI-Chef', icon: Bot, description: 'Personalisierung & Intelligenz' },
+    { id: 'policies', label: 'Policies', icon: Shield, description: 'Allergie- & Haushaltsregeln' },
     { id: 'apikey', label: 'API-Key', icon: Key, description: 'Gemini Schlüssel verwalten' },
     { id: 'speech', label: 'Audio', icon: Mic, description: 'Sprachausgabe & Steuerung' },
     { id: 'data', label: 'Daten', icon: Database, description: 'Backup & Speicher' },

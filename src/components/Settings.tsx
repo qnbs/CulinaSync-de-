@@ -14,6 +14,7 @@ import { DataPanel } from './settings/panels/DataPanel';
 import { VoicePanel } from './settings/panels/VoicePanel';
 import { ModulesPanel } from './settings/panels/ModulesPanel';
 import { ApiKeyPanel } from './settings/panels/ApiKeyPanel';
+import { PolicyPanel } from './settings/panels/PolicyPanel';
 
 const ACCENT_COLORS: Record<AppSettings['appearance']['accentColor'], Record<string, string>> = {
   amber: { '300': '#fcd34d', '400': '#fbbf24', '500': '#f59e0b', glow: 'rgba(251, 191, 36, 0.3)', 'glow-soft': 'rgba(251, 191, 36, 0.2)', '400-semi': 'rgba(251, 191, 36, 0.8)' },
@@ -91,6 +92,7 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
         switch (activeSection) {
             case 'appearance': return <AppearancePanel settings={localSettings} onChange={handleChange} />;
             case 'ai': return <AiChefPanel settings={localSettings} onChange={handleChange} />;
+            case 'policies': return <PolicyPanel settings={localSettings} onChange={handleChange} />;
             case 'apikey': return <ApiKeyPanel addToast={addToastWrapper} />;
             case 'data': return <DataPanel addToast={addToastWrapper} installPromptEvent={installPromptEvent} onInstallPWA={onInstallPWA} isStandalone={isStandalone} />;
             case 'speech': return <VoicePanel settings={localSettings} onChange={handleChange} />;
@@ -109,6 +111,7 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
                          {activeSection === 'appearance' && t('settings.sections.appearance')}
                          {activeSection === 'modules' && t('settings.sections.modules')}
                          {activeSection === 'ai' && t('settings.sections.ai')}
+                         {activeSection === 'policies' && 'Policies'}
                          {activeSection === 'apikey' && t('settings.sections.apiKey')}
                          {activeSection === 'speech' && t('settings.sections.speech')}
                          {activeSection === 'data' && t('settings.sections.data')}

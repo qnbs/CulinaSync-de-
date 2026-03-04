@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { PantryItem } from '../../types';
+import { foodDatabase, FoodEntry } from '../../data/foodDatabase';
 import { Save } from 'lucide-react';
 import { getCategoryForItem } from '../../services/utils';
 import { useModalA11y } from '../../hooks/useModalA11y';
@@ -36,10 +37,16 @@ export const PantryItemModal: React.FC<{
         setFormData(prev => ({...prev, [field]: value}));
     };
     
+    // FoodDB-Autocomplete & Info
+    const [foodMatch, setFoodMatch] = useState<FoodEntry | null>(null);
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const name = e.target.value;
         const category = getCategoryForItem(name);
         setFormData(prev => ({ ...prev, name, category: prev.category || category }));
+        // Suche nach passendem FoodEntry (exakt oder fuzzy)
+        const match = foodDatabase.find(f => f.name.toLowerCase() === name.trim().toLowerCase())
+            || foodDatabase.find(f => name && f.name.toLowerCase().startsWith(name.trim().toLowerCase()));
+        setFoodMatch(match || null);
     };
 
     const handleSave = (e: React.FormEvent) => {
@@ -66,7 +73,19 @@ export const PantryItemModal: React.FC<{
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div className="sm:col-span-2">
                            <label htmlFor="itemName" className="block text-sm font-medium text-zinc-400 mb-1">Name</label>
-                           <input id="itemName" ref={nameInputRef} type="text" value={formData.name || ''} onChange={handleNameChange} className="w-full bg-zinc-700 rounded p-2 focus:ring-2 focus:ring-[var(--color-accent-500)]" required />
+                           <input
+                               id="itemName"
+                               ref={nameInputRef}
+                               type="text"
+                               value={formData.name || ''}
+                               onChange={handleNameChange}
+                               className="w-full bg-zinc-700 rounded p-2 focus:ring-2 focus:ring-[var(--color-accent-500)]"
+                               required
+                               list="food-autocomplete-list"
+                           />
+                           <datalist id="food-autocomplete-list">
+                               {foodDatabase.map(f => <option key={f.id} value={f.name} />)}
+                           </datalist>
                         </div>
                         <div>
                            <label htmlFor="itemCategory" className="block text-sm font-medium text-zinc-400 mb-1">Kategorie</label>
@@ -98,6 +117,15 @@ export const PantryItemModal: React.FC<{
                         <label htmlFor="itemNotes" className="block text-sm font-medium text-zinc-400 mb-1">Notizen (optional)</label>
                         <textarea id="itemNotes" value={formData.notes || ''} onChange={e => handleChange('notes', e.target.value)} className="w-full bg-zinc-700 rounded p-2 focus:ring-2 focus:ring-[var(--color-accent-500)]" rows={2}></textarea>
                     </div>
+                    {foodMatch && (
+                        <div className="bg-zinc-800 rounded-lg p-3 mb-2 text-xs text-zinc-300">
+                            <div className="font-bold text-sm mb-1">Nährwerte (pro 100g):</div>
+                            <div>Kcal: <span className="font-mono">{foodMatch.kcal}</span> | Protein: <span className="font-mono">{foodMatch.protein}g</span> | Fett: <span className="font-mono">{foodMatch.fat}g</span> | Kohlenhydrate: <span className="font-mono">{foodMatch.carbs}g</span></div>
+                            {foodMatch.allergens?.length ? (
+                                <div className="mt-1 text-red-400">Allergene: {foodMatch.allergens.join(', ')}</div>
+                            ) : null}
+                        </div>
+                    )}
                     <div className="flex justify-end gap-3 pt-4">
                         <button type="button" onClick={onClose} className="py-2 px-4 rounded-md text-zinc-300 hover:bg-zinc-700">Abbrechen</button>
                         <button type="submit" className="flex items-center gap-2 py-2 px-4 rounded bg-[var(--color-accent-500)] text-zinc-900 font-bold hover:bg-[var(--color-accent-400)]"><Save size={16}/> Speichern</button>

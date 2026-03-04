@@ -122,6 +122,11 @@ export interface AppSettings {
     kitchenMode: boolean;
     largeText: boolean;
   };
+  policies?: {
+    avoidAllergens?: string[]; // z.B. ['Milch', 'Erdnuss']
+    ingredientBlacklist?: string[]; // z.B. ['Koriander', 'Sellerie']
+    minPantryStock?: { name: string; min: number }[]; // z.B. [{name: 'Reis', min: 1}]
+  };
 }
 
 export interface StructuredPrompt {

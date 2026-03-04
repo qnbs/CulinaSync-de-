@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { syncUpload, syncDownload } from '../../../services/syncService';
 import { db } from '../../../services/dbInstance';
 import { importData } from '../../../services/repositories/dataRepository';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -151,6 +152,40 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     };
 
+    // --- Sync State ---
+    const [syncUrl, setSyncUrl] = useState('');
+    const [syncPassword, setSyncPassword] = useState('');
+    const [syncToken, setSyncToken] = useState('');
+    const [syncStatus, setSyncStatus] = useState<string | null>(null);
+    const [syncLoading, setSyncLoading] = useState(false);
+
+    const handleSyncUpload = async () => {
+        setSyncStatus(null);
+        setSyncLoading(true);
+        try {
+            await syncUpload(syncPassword, syncUrl, syncToken || undefined);
+            setSyncStatus('Backup erfolgreich hochgeladen!');
+        } catch (e: any) {
+            setSyncStatus('Fehler beim Hochladen: ' + (e?.message || e));
+        } finally {
+            setSyncLoading(false);
+        }
+    };
+    const handleSyncDownload = async () => {
+        setSyncStatus(null);
+        setSyncLoading(true);
+        try {
+            await syncDownload(syncPassword, syncUrl, syncToken || undefined);
+            setSyncStatus('Backup erfolgreich wiederhergestellt!');
+            addToast('Backup erfolgreich wiederhergestellt.', 'success');
+            setTimeout(() => window.location.reload(), 1500);
+        } catch (e: any) {
+            setSyncStatus('Fehler beim Wiederherstellen: ' + (e?.message || e));
+        } finally {
+            setSyncLoading(false);
+        }
+    };
+
     return (
         <div className="space-y-8 page-fade-in">
             <ResetConfirmationModal isOpen={isResetModalOpen} onClose={() => setResetModalOpen(false)} onConfirm={handleResetData} />
@@ -231,6 +266,57 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
                 </div>
             </section>
             
+            {/* Verschlüsselter Cloud-Sync */}
+            <section className="bg-zinc-900/30 border border-zinc-800 rounded-2xl p-6 mt-8">
+                <h3 className="text-lg font-bold text-zinc-100 mb-4 flex items-center gap-2">
+                    <HardDrive className="text-[var(--color-accent-400)]"/> Cloud Sync (Ende-zu-Ende-verschlüsselt)
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <input
+                        type="url"
+                        className="bg-zinc-950 border border-zinc-700 rounded-xl p-3 focus:ring-2 focus:ring-accent-500 focus:outline-none font-mono"
+                        placeholder="Sync-URL (z.B. WebDAV, S3, ...)"
+                        value={syncUrl}
+                        onChange={e => setSyncUrl(e.target.value)}
+                        autoComplete="off"
+                    />
+                    <input
+                        type="password"
+                        className="bg-zinc-950 border border-zinc-700 rounded-xl p-3 focus:ring-2 focus:ring-accent-500 focus:outline-none font-mono"
+                        placeholder="Sync-Passwort (nur lokal)"
+                        value={syncPassword}
+                        onChange={e => setSyncPassword(e.target.value)}
+                        autoComplete="new-password"
+                    />
+                    <input
+                        type="text"
+                        className="bg-zinc-950 border border-zinc-700 rounded-xl p-3 focus:ring-2 focus:ring-accent-500 focus:outline-none font-mono"
+                        placeholder="(Optional) Auth-Token"
+                        value={syncToken}
+                        onChange={e => setSyncToken(e.target.value)}
+                        autoComplete="off"
+                    />
+                </div>
+                <div className="flex gap-4 mb-2">
+                    <button
+                        onClick={handleSyncUpload}
+                        disabled={syncLoading || !syncUrl || !syncPassword}
+                        className="px-4 py-2 rounded-xl bg-accent-500 text-zinc-900 font-bold hover:bg-accent-400 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed transition-all"
+                    >
+                        {syncLoading ? 'Lade hoch...' : 'Backup hochladen'}
+                    </button>
+                    <button
+                        onClick={handleSyncDownload}
+                        disabled={syncLoading || !syncUrl || !syncPassword}
+                        className="px-4 py-2 rounded-xl bg-accent-500 text-zinc-900 font-bold hover:bg-accent-400 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed transition-all"
+                    >
+                        {syncLoading ? 'Stelle wieder her...' : 'Backup wiederherstellen'}
+                    </button>
+                </div>
+                {syncStatus && <div className="text-sm mt-2 text-zinc-400">{syncStatus}</div>}
+                <div className="text-xs text-zinc-500 mt-2">Alle Daten werden vor dem Upload lokal verschlüsselt. Das Passwort verlässt niemals dein Gerät.</div>
+            </section>
+
             <div className="flex justify-center pt-4">
                 <button onClick={() => setResetModalOpen(true)} className="text-red-500 hover:text-red-400 text-sm font-medium flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-red-500/10 transition-colors">
                     <AlertTriangle size={14}/>
