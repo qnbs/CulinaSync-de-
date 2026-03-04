@@ -9,6 +9,8 @@ import { CheckCircle, Bot, Milk, BookOpen, CalendarDays, ShoppingCart, Settings 
 import { useAppDispatch, useAppSelector } from './store/hooks';
 import { setCurrentPage, setCommandPaletteOpen, addToast as addToastAction, removeToast as removeToastAction } from './store/slices/uiSlice';
 import { handleDeepLink } from './deepLinking';
+import { WhatsNewModal } from './components/WhatsNewModal';
+import { GlobalErrorBoundary } from './components/GlobalErrorBoundary';
 
 
 // Lazy load page components for code splitting and faster initial load
@@ -260,6 +262,8 @@ const App: React.FC = () => {
   }
 
   return (
+    <GlobalErrorBoundary>
+      <WhatsNewModal />
       <div className="min-h-screen text-zinc-200">
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-[60] bg-zinc-900 border border-zinc-600 text-zinc-100 rounded px-3 py-2">
           {t('app.skipToContent')}
@@ -347,6 +351,10 @@ const App: React.FC = () => {
             </div>
         </div>
       </div>
+      <footer className="w-full text-center py-4 text-xs text-zinc-500">
+        <span>© 2026 CulinaSync</span> · <span className="ml-2 bg-zinc-800 px-2 py-1 rounded">v2026.03.04</span>
+      </footer>
+    </GlobalErrorBoundary>
   );
 };
 

@@ -1,22 +1,21 @@
 import { db } from '../dbInstance';
+import { retry } from '../retryUtils';
 import { MealPlanItem, PantryItem } from '../../types';
 import { scaleIngredientQuantity } from '../utils';
 
-export const addRecipeToMealPlan = async (
     meal: Omit<MealPlanItem, 'id' | 'isCooked' | 'cookedDate'>
 ): Promise<number> => {
-    return await db.mealPlan.add({
+    return await retry(() => db.mealPlan.add({
         ...meal,
         isCooked: false,
-    });
+    }), 3, 500);
 };
 
-export const removeRecipeFromMealPlan = async (mealId: number): Promise<void> => {
-    await db.mealPlan.delete(mealId);
+    await retry(() => db.mealPlan.delete(mealId), 3, 500);
 };
 
 export const markMealAsCooked = async (mealId: number): Promise<{ success: boolean; changes: { updated: PantryItem[]; deleted: PantryItem[] } }> => {
-    const meal = await db.mealPlan.get(mealId);
+    const meal = await retry(() => db.mealPlan.get(mealId), 3, 500);
     if (!meal) {
         return { success: false, changes: { updated: [], deleted: [] } };
     }
@@ -26,7 +25,7 @@ export const markMealAsCooked = async (mealId: number): Promise<{ success: boole
         return { success: true, changes: { updated: [], deleted: [] } };
     }
 
-    const recipe = await db.recipes.get(meal.recipeId);
+    const recipe = await retry(() => db.recipes.get(meal.recipeId), 3, 500);
     if (!recipe) { // Orphaned recipe
         await db.mealPlan.update(mealId, { isCooked: true, cookedDate: new Date().toISOString() });
         return { success: true, changes: { updated: [], deleted: [] } };
@@ -41,7 +40,8 @@ export const markMealAsCooked = async (mealId: number): Promise<{ success: boole
     const updated: PantryItem[] = [];
     const deleted: PantryItem[] = [];
 
-    await (db as any).transaction('rw', db.pantry, db.mealPlan, async () => {
+    await retry(async () => {
+        await (db as any).transaction('rw', db.pantry, db.mealPlan, async () => {
         for (const ingredient of ingredients) {
             const requiredQtyStr = scaleIngredientQuantity(ingredient.quantity, scaleFactor);
             const requiredQty = parseFloat(requiredQtyStr.replace(',', '.')) || 0;
@@ -59,8 +59,9 @@ export const markMealAsCooked = async (mealId: number): Promise<{ success: boole
                 }
             }
         }
-        await db.mealPlan.update(mealId, { isCooked: true, cookedDate: new Date().toISOString() });
-    });
+        await retry(() => db.mealPlan.update(mealId, { isCooked: true, cookedDate: new Date().toISOString() }), 3, 500);
+        });
+    }, 3, 500);
     
     return { success: true, changes: { updated, deleted } };
 };

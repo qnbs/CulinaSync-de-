@@ -1,4 +1,5 @@
 import { db } from '../dbInstance';
+import { retry } from '../retryUtils';
 import { PantryItem } from '../../types';
 import { getCategoryForItem } from '../utils';
 import { addShoppingListItem } from './shoppingListRepository';
@@ -7,11 +8,11 @@ export const addOrUpdatePantryItem = async (
   item: Omit<PantryItem, 'id' | 'createdAt' | 'updatedAt'>
 ): Promise<{ status: 'added' | 'updated'; item: PantryItem }> => {
   const now = Date.now();
-  const existingItem = await db.pantry.where('name').equalsIgnoreCase(item.name).first();
+  const existingItem = await retry(() => db.pantry.where('name').equalsIgnoreCase(item.name).first(), 3, 500);
 
   if (existingItem) {
     const newQuantity = existingItem.quantity + item.quantity;
-    await db.pantry.update(existingItem.id!, { quantity: newQuantity, updatedAt: now });
+    await retry(() => db.pantry.update(existingItem.id!, { quantity: newQuantity, updatedAt: now }), 3, 500);
     const updatedItem = { ...existingItem, quantity: newQuantity, updatedAt: now };
     return { status: 'updated', item: updatedItem };
   } else {
@@ -21,19 +22,19 @@ export const addOrUpdatePantryItem = async (
       createdAt: now,
       updatedAt: now,
     };
-    const id = await db.pantry.add(newItem);
+    const id = await retry(() => db.pantry.add(newItem), 3, 500);
     return { status: 'added', item: { ...newItem, id } };
   }
 };
 
 export const removeItemFromPantry = async (name: string): Promise<boolean> => {
-    const itemsDeleted = await db.pantry.where('name').equalsIgnoreCase(name).delete();
+    const itemsDeleted = await retry(() => db.pantry.where('name').equalsIgnoreCase(name).delete(), 3, 500);
     return itemsDeleted > 0;
 };
 
 export const addPantryItemsToShoppingList = async (itemIds: number[]): Promise<number> => {
-    const itemsToAdd = await db.pantry.where('id').anyOf(itemIds).toArray();
-    const currentShoppingList = await db.shoppingList.toArray();
+    const itemsToAdd = await retry(() => db.pantry.where('id').anyOf(itemIds).toArray(), 3, 500);
+    const currentShoppingList = await retry(() => db.shoppingList.toArray(), 3, 500);
     const shoppingListNames = new Set(currentShoppingList.map(i => i.name.toLowerCase()));
     
     let count = 0;

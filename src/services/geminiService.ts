@@ -31,6 +31,7 @@ export const extractPantryItemsFromImage = async (imageFile: File): Promise<stri
     }
 };
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
+import { retry } from './retryUtils';
 import { fakerDE as faker } from '@faker-js/faker';
 import { AppSettings, PantryItem, Recipe, StructuredPrompt, ShoppingListItem, RecipeIdea } from "../types";
 import { loadApiKey } from "./apiKeyService";
@@ -241,7 +242,6 @@ const constructBasePrompt = (
   return userPromptParts.join('\n');
 }
 
-export const generateRecipeIdeas = async (
   prompt: StructuredPrompt,
   pantryItems: PantryItem[],
   aiPreferences: AppSettings['aiPreferences']
@@ -251,7 +251,7 @@ export const generateRecipeIdeas = async (
         const model = "gemini-2.5-flash";
         const systemInstruction = `Du bist Culina, ein Weltklasse-Koch. Entwickle 3 kreative, unterschiedliche Rezeptideen auf Deutsch. Nutze deinen "Thinking Process", um sicherzustellen, dass die Ideen exakt zu den Vorräten und Einschränkungen passen.`;
         const fullPrompt = constructBasePrompt(prompt, pantryItems, aiPreferences);
-        const response = await ai.models.generateContent({
+        const response = await retry(() => ai.models.generateContent({
             model,
             contents: fullPrompt,
             config: { 
@@ -261,7 +261,7 @@ export const generateRecipeIdeas = async (
                 thinkingConfig: { thinkingBudget: 2048 },
                 temperature: aiPreferences.creativityLevel ?? 0.7,
             }
-        });
+        }), 3, 800);
         const jsonText = response.text?.trim();
         if (!jsonText) throw new Error("Die KI hat eine leere Antwort zurückgegeben.");
         const parsedData = JSON.parse(jsonText);

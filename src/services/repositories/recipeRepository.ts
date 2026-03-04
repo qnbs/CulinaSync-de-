@@ -1,9 +1,9 @@
 import { db } from '../dbInstance';
+import { retry } from '../retryUtils';
 import { Recipe } from '../../types';
 import { updatePantryMatches } from '../pantryMatcherService';
 import { addShoppingListItem } from './shoppingListRepository';
 
-export const syncSeedRecipes = async () => {
     try {
         const { allSeedRecipes: seedRecipes } = await import('../../data/recipes/index');
         const existingRecipes = await db.recipes.toArray();
@@ -15,7 +15,7 @@ export const syncSeedRecipes = async () => {
             if (import.meta.env.DEV) {
                 console.log(`Syncing database: Found ${newRecipes.length} new seed recipes to add.`);
             }
-            const newIds = await db.recipes.bulkAdd(newRecipes.map(r => ({ ...r, isFavorite: false, updatedAt: Date.now() })), { allKeys: true });
+            const newIds = await retry(() => db.recipes.bulkAdd(newRecipes.map(r => ({ ...r, isFavorite: false, updatedAt: Date.now() })), { allKeys: true }), 3, 500);
             if (import.meta.env.DEV) {
                 console.log("Database sync complete.");
             }
@@ -31,21 +31,20 @@ export const syncSeedRecipes = async () => {
     }
 };
 
-export const addRecipe = async (recipe: Omit<Recipe, 'id'>): Promise<number> => {
     const now = Date.now();
-    return db.recipes.add({ ...recipe, isFavorite: recipe.isFavorite ?? false, updatedAt: now });
+    return retry(() => db.recipes.add({ ...recipe, isFavorite: recipe.isFavorite ?? false, updatedAt: now }), 3, 500);
 };
 
-export const updateRecipeImage = async (recipeId: number, imageUrl: string): Promise<void> => {
-    await db.recipes.update(recipeId, { imageUrl, updatedAt: Date.now() });
+    await retry(() => db.recipes.update(recipeId, { imageUrl, updatedAt: Date.now() }), 3, 500);
 };
 
-export const deleteRecipe = async (recipeId: number): Promise<void> => {
-    await (db as any).transaction('rw', db.recipes, db.mealPlan, db.shoppingList, async () => {
-        await db.recipes.delete(recipeId);
-        await db.mealPlan.where('recipeId').equals(recipeId).delete();
-        await db.shoppingList.where('recipeId').equals(recipeId).modify({ recipeId: undefined });
-    });
+    await retry(async () => {
+        await (db as any).transaction('rw', db.recipes, db.mealPlan, db.shoppingList, async () => {
+            await db.recipes.delete(recipeId);
+            await db.mealPlan.where('recipeId').equals(recipeId).delete();
+            await db.shoppingList.where('recipeId').equals(recipeId).modify({ recipeId: undefined });
+        });
+    }, 3, 500);
 };
 
 export const addMissingIngredientsToShoppingList = async (recipeId: number): Promise<number> => {

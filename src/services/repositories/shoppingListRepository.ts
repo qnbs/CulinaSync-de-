@@ -1,4 +1,5 @@
 import { db } from '../dbInstance';
+import { retry } from '../retryUtils';
 import { ShoppingListItem, Recipe } from '../../types';
 import { getCategoryForItem, scaleIngredientQuantity } from '../utils';
 import { addOrUpdatePantryItem } from './pantryRepository';
@@ -6,45 +7,46 @@ import { addOrUpdatePantryItem } from './pantryRepository';
 export const addShoppingListItem = async (
   item: Omit<ShoppingListItem, 'id' | 'sortOrder' | 'category'>
 ): Promise<{ status: 'added' | 'updated'; item: ShoppingListItem }> => {
-  const existingItem = await db.shoppingList.where('name').equalsIgnoreCase(item.name).and(i => !i.isChecked).first();
+    const existingItem = await retry(() => db.shoppingList.where('name').equalsIgnoreCase(item.name).and(i => !i.isChecked).first(), 3, 500);
   const category = getCategoryForItem(item.name);
 
   if (existingItem) {
     const newQuantity = existingItem.quantity + item.quantity;
-    await db.shoppingList.update(existingItem.id!, { quantity: newQuantity });
+    await retry(() => db.shoppingList.update(existingItem.id!, { quantity: newQuantity }), 3, 500);
     const updatedItem = { ...existingItem, quantity: newQuantity };
     return { status: 'updated', item: updatedItem };
   } else {
-    const maxSortOrderItem = await db.shoppingList.where('category').equals(category).last();
+    const maxSortOrderItem = await retry(() => db.shoppingList.where('category').equals(category).last(), 3, 500);
     const sortOrder = maxSortOrderItem ? maxSortOrderItem.sortOrder + 100 : 100;
     const newItem: ShoppingListItem = {
       ...item,
       category,
       sortOrder,
     };
-    const id = await db.shoppingList.add(newItem);
+    const id = await retry(() => db.shoppingList.add(newItem), 3, 500);
     return { status: 'added', item: { ...newItem, id } };
   }
 };
 
 export const updateShoppingListItem = async (item: ShoppingListItem): Promise<void> => {
     if (item.id === undefined) return;
-    await db.shoppingList.update(item.id, item);
+    await retry(() => db.shoppingList.update(item.id, item), 3, 500);
 };
 
 export const clearShoppingList = async (): Promise<number> => {
-    const count = await db.shoppingList.count();
+    const count = await retry(() => db.shoppingList.count(), 3, 500);
     if(count > 0) {
-        await db.shoppingList.clear();
+        await retry(() => db.shoppingList.clear(), 3, 500);
     }
     return count;
 };
 
 export const moveCheckedToPantry = async (): Promise<number> => {
-    const checkedItems = await db.shoppingList.where('isChecked').equals(1).toArray();
+    const checkedItems = await retry(() => db.shoppingList.where('isChecked').equals(1).toArray(), 3, 500);
     let movedCount = 0;
     if (checkedItems.length > 0) {
-        await (db as any).transaction('rw', db.pantry, db.shoppingList, async () => {
+        await retry(async () => {
+            await (db as any).transaction('rw', db.pantry, db.shoppingList, async () => {
             for (const item of checkedItems) {
                 await addOrUpdatePantryItem({
                     name: item.name,
@@ -52,28 +54,31 @@ export const moveCheckedToPantry = async (): Promise<number> => {
                     unit: item.unit,
                     category: item.category,
                 });
-                await db.shoppingList.delete(item.id!);
+                await retry(() => db.shoppingList.delete(item.id!), 3, 500);
                 movedCount++;
             }
-        });
+            });
+        }, 3, 500);
     }
     return movedCount;
 };
 
 export const renameShoppingListCategory = async (oldName: string, newName: string): Promise<void> => {
-    await db.shoppingList.where('category').equals(oldName).modify({ category: newName });
+    await retry(() => db.shoppingList.where('category').equals(oldName).modify({ category: newName }), 3, 500);
 };
 
 export const batchAddShoppingListItems = async (items: Omit<ShoppingListItem, 'id'|'isChecked'|'sortOrder'|'category'>[]): Promise<{ added: number, updated: number }> => {
     let added = 0;
     let updated = 0;
-    await (db as any).transaction('rw', db.shoppingList, async () => {
+    await retry(async () => {
+        await (db as any).transaction('rw', db.shoppingList, async () => {
         for (const item of items) {
             const { status } = await addShoppingListItem({ ...item, isChecked: false });
             if (status === 'added') added++;
             else updated++;
         }
-    });
+        });
+    }, 3, 500);
     return { added, updated };
 };
 

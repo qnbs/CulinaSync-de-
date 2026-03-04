@@ -1,3 +1,4 @@
+import { retry } from "./retryUtils";
 /**
  * Secure API Key Management Service
  * 
@@ -44,52 +45,55 @@ const openDB = (): Promise<IDBDatabase> => {
   });
 };
 
-export const saveApiKey = async (key: string): Promise<void> => {
-  const idb = await openDB();
-  const tx = idb.transaction(STORE_NAME, 'readwrite');
-  const store = tx.objectStore(STORE_NAME);
-  store.put({ id: KEY_ID, value: obfuscate(key), updatedAt: Date.now() });
-  return new Promise((resolve, reject) => {
-    tx.oncomplete = () => { idb.close(); resolve(); };
-    tx.onerror = () => { idb.close(); reject(tx.error); };
-  });
+  await retry(async () => {
+    const idb = await openDB();
+    const tx = idb.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    store.put({ id: KEY_ID, value: obfuscate(key), updatedAt: Date.now() });
+    return new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => { idb.close(); resolve(); };
+      tx.onerror = () => { idb.close(); reject(tx.error); };
+    });
+  }, 3, 500);
 };
 
-export const loadApiKey = async (): Promise<string | null> => {
   try {
-    const idb = await openDB();
-    const tx = idb.transaction(STORE_NAME, 'readonly');
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.get(KEY_ID);
-    return new Promise((resolve, reject) => {
-      request.onsuccess = () => {
-        idb.close();
-        if (request.result?.value) {
-          try {
-            resolve(deobfuscate(request.result.value));
-          } catch {
+    return await retry(async () => {
+      const idb = await openDB();
+      const tx = idb.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const request = store.get(KEY_ID);
+      return new Promise<string | null>((resolve, reject) => {
+        request.onsuccess = () => {
+          idb.close();
+          if (request.result?.value) {
+            try {
+              resolve(deobfuscate(request.result.value));
+            } catch {
+              resolve(null);
+            }
+          } else {
             resolve(null);
           }
-        } else {
-          resolve(null);
-        }
-      };
-      request.onerror = () => { idb.close(); reject(request.error); };
-    });
+        };
+        request.onerror = () => { idb.close(); reject(request.error); };
+      });
+    }, 3, 500);
   } catch {
     return null;
   }
 };
 
-export const deleteApiKey = async (): Promise<void> => {
-  const idb = await openDB();
-  const tx = idb.transaction(STORE_NAME, 'readwrite');
-  const store = tx.objectStore(STORE_NAME);
-  store.delete(KEY_ID);
-  return new Promise((resolve, reject) => {
-    tx.oncomplete = () => { idb.close(); resolve(); };
-    tx.onerror = () => { idb.close(); reject(tx.error); };
-  });
+  await retry(async () => {
+    const idb = await openDB();
+    const tx = idb.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    store.delete(KEY_ID);
+    return new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => { idb.close(); resolve(); };
+      tx.onerror = () => { idb.close(); reject(tx.error); };
+    });
+  }, 3, 500);
 };
 
 export const hasApiKey = async (): Promise<boolean> => {

@@ -1,13 +1,33 @@
 <!DOCTYPE html>
 <html lang="de">
   <head>
+      <link rel="preload" href="/logo-192x192.png" as="image" />
+      <link rel="preload" href="/logo-512x512.png" as="image" />
+      <link rel="preload" href="/src/styles/print.css" as="style" />
+      <link rel="stylesheet" href="/src/styles/print.css" media="print" />
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="%BASE_URL%logo-192x192.png" />
     <link rel="apple-touch-icon" href="%BASE_URL%logo-192x192.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>CulinaSync</title>
-    <meta name="description" content="CulinaSync ist deine Local-First Küchen-App für Vorrat, Rezepte, Essensplanung und Einkaufsliste – offlinefähig, privat und KI-unterstützt." />
-    <meta name="theme-color" content="#09090b" />
+    <title>CulinaSync – Local-First KI-Küche</title>
+    <meta name="description" content="CulinaSync: Local-First PWA für Vorrat, Rezepte, KI-Planung, Einkauf & Community. Privacy-First, Offline, Gemini Vision, Whisper, Health Connect, IPFS, Tauri Native." />
+    <meta name="theme-color" content="#18181b" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="qnbs" />
+    <meta name="keywords" content="Küche, Rezepte, Vorrat, KI, PWA, Offline, Gemini, Whisper, Health, Privacy, Open Source" />
+    <!-- Open Graph -->
+    <meta property="og:title" content="CulinaSync – Local-First KI-Küche" />
+    <meta property="og:description" content="CulinaSync: Local-First PWA für Vorrat, Rezepte, KI-Planung, Einkauf & Community. Privacy-First, Offline, Gemini Vision, Whisper, Health Connect, IPFS, Tauri Native." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://qnbs.github.io/CulinaSync-de-/" />
+    <meta property="og:image" content="https://qnbs.github.io/CulinaSync-de-/logo-512x512.png" />
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="CulinaSync – Local-First KI-Küche" />
+    <meta name="twitter:description" content="CulinaSync: Local-First PWA für Vorrat, Rezepte, KI-Planung, Einkauf & Community. Privacy-First, Offline, Gemini Vision, Whisper, Health Connect, IPFS, Tauri Native." />
+    <meta name="twitter:image" content="https://qnbs.github.io/CulinaSync-de-/logo-512x512.png" />
+    <link rel="canonical" href="https://qnbs.github.io/CulinaSync-de-/" />
+    <!-- Dynamic SEO via React Helmet in App -->
 </head>
   <body class="bg-zinc-950 text-zinc-200 font-sans antialiased selection:bg-[var(--color-accent-500)] selection:text-black overscroll-none">
     <!-- Ambient Background Glow -->

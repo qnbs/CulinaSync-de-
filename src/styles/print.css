@@ -1,0 +1,27 @@
+@media print {
+  body, html {
+    background: #fff !important;
+    color: #111 !important;
+    font-size: 12pt;
+  }
+  header, nav, .glass-hud, .glass-card, .fixed, .skip-to-content, .no-print, .page-fade-in, .gpu, .shadow, .shadow-lg, .shadow-2xl {
+    display: none !important;
+  }
+  main, .print-area {
+    display: block !important;
+    background: #fff !important;
+    color: #111 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+  a {
+    color: #0a0a0a !important;
+    text-decoration: underline;
+  }
+  .print-hide {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}
