@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@ericblade/quagga2": "^1.8.4",
+    "@faker-js/faker": "^10.3.0",
     "@google/genai": "^1.16.0",
     "@reduxjs/toolkit": "^2.2.6",
     "dexie": "^4.2.0",

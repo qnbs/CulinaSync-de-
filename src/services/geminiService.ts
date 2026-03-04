@@ -1,4 +1,5 @@
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
+import { fakerDE as faker } from '@faker-js/faker';
 import { AppSettings, PantryItem, Recipe, StructuredPrompt, ShoppingListItem, RecipeIdea } from "../types";
 import { loadApiKey } from "./apiKeyService";
 
@@ -213,12 +214,11 @@ export const generateRecipeIdeas = async (
   pantryItems: PantryItem[],
   aiPreferences: AppSettings['aiPreferences']
 ): Promise<RecipeIdea[]> => {
-    const ai = await getAIClient();
-    const model = "gemini-2.5-flash";
-    const systemInstruction = `Du bist Culina, ein Weltklasse-Koch. Entwickle 3 kreative, unterschiedliche Rezeptideen auf Deutsch. Nutze deinen "Thinking Process", um sicherzustellen, dass die Ideen exakt zu den Vorräten und Einschränkungen passen.`;
-    const fullPrompt = constructBasePrompt(prompt, pantryItems, aiPreferences);
-
     try {
+        const ai = await getAIClient();
+        const model = "gemini-2.5-flash";
+        const systemInstruction = `Du bist Culina, ein Weltklasse-Koch. Entwickle 3 kreative, unterschiedliche Rezeptideen auf Deutsch. Nutze deinen "Thinking Process", um sicherzustellen, dass die Ideen exakt zu den Vorräten und Einschränkungen passen.`;
+        const fullPrompt = constructBasePrompt(prompt, pantryItems, aiPreferences);
         const response = await ai.models.generateContent({
             model,
             contents: fullPrompt,
@@ -232,7 +232,6 @@ export const generateRecipeIdeas = async (
         });
         const jsonText = response.text?.trim();
         if (!jsonText) throw new Error("Die KI hat eine leere Antwort zurückgegeben.");
-        
         const parsedData = JSON.parse(jsonText);
         if (parsedData.ideas && Array.isArray(parsedData.ideas) && parsedData.ideas.length > 0) {
             return parsedData.ideas;
@@ -240,59 +239,89 @@ export const generateRecipeIdeas = async (
             throw new Error("Die KI hat eine Antwort mit falscher Struktur gesendet.");
         }
     } catch (e: unknown) {
+        const errMsg = (e as Error)?.message || String(e);
+        if (errMsg.includes('Netzwerk') || errMsg.includes('KI-Dienst konnte nicht erreicht werden')) {
+            // Offline-Fallback: Generiere Dummy-Ideen lokal
+            const fallbackIdeas: RecipeIdea[] = Array.from({ length: 3 }).map(() => ({
+                recipeTitle: faker.lorem.words(3) + ' (Offline)',
+                shortDescription: faker.lorem.sentence(),
+            }));
+            return fallbackIdeas;
+        }
         throw handleGeminiError(e, 'ideas');
     }
 };
 
 export const generateRecipe = async (
-  prompt: StructuredPrompt,
-  pantryItems: PantryItem[],
-  aiPreferences: AppSettings['aiPreferences'],
-  chosenIdea: RecipeIdea
+    prompt: StructuredPrompt,
+    pantryItems: PantryItem[],
+    aiPreferences: AppSettings['aiPreferences'],
+    chosenIdea: RecipeIdea
 ): Promise<Recipe> => {
-  const ai = await getAIClient();
-  const model = "gemini-2.5-flash";
-  let fullPrompt = constructBasePrompt(prompt, pantryItems, aiPreferences);
-
-  fullPrompt += `\n\n**Spezifische Anforderung:**\nErstelle nun das VOLLSTÄNDIGE und detaillierte Rezept für die folgende, zuvor von dir vorgeschlagene Idee. Halte dich eng an Titel und Beschreibung der Idee.`;
-  fullPrompt += `\n- Titel: "${chosenIdea.recipeTitle}"`;
-  fullPrompt += `\n- Beschreibung: "${chosenIdea.shortDescription}"`;
-  
-  const systemInstruction = `Du bist Culina, ein Weltklasse-Koch. Erstelle ein präzises, deutsches Rezept. Nutze deinen "Thinking Process", um die Kochschritte logisch zu strukturieren und sicherzustellen, dass keine Zutat in der Anleitung vergessen wird.`;
-  
-  let response: GenerateContentResponse;
-  try {
-    response = await ai.models.generateContent({
-        model: model,
-        contents: fullPrompt,
-        config: {
-            systemInstruction,
-            responseMimeType: 'application/json',
-            responseSchema: recipeSchema,
-            thinkingConfig: { thinkingBudget: 4096 },
-            temperature: aiPreferences.creativityLevel ?? 0.7,
+    try {
+        const ai = await getAIClient();
+        const model = "gemini-2.5-flash";
+        let fullPrompt = constructBasePrompt(prompt, pantryItems, aiPreferences);
+        fullPrompt += `\n\n**Spezifische Anforderung:**\nErstelle nun das VOLLSTÄNDIGE und detaillierte Rezept für die folgende, zuvor von dir vorgeschlagene Idee. Halte dich eng an Titel und Beschreibung der Idee.`;
+        fullPrompt += `\n- Titel: "${chosenIdea.recipeTitle}"`;
+        fullPrompt += `\n- Beschreibung: "${chosenIdea.shortDescription}"`;
+        const systemInstruction = `Du bist Culina, ein Weltklasse-Koch. Erstelle ein präzises, deutsches Rezept. Nutze deinen "Thinking Process", um die Kochschritte logisch zu strukturieren und sicherzustellen, dass keine Zutat in der Anleitung vergessen wird.`;
+        const response = await ai.models.generateContent({
+                model: model,
+                contents: fullPrompt,
+                config: {
+                        systemInstruction,
+                        responseMimeType: 'application/json',
+                        responseSchema: recipeSchema,
+                        thinkingConfig: { thinkingBudget: 4096 },
+                        temperature: aiPreferences.creativityLevel ?? 0.7,
+                }
+        });
+        const jsonText = response.text?.trim();
+        if (!jsonText) {
+                throw new Error("Die KI hat eine leere Antwort zurückgegeben.");
         }
-    });
-  } catch (error: unknown) {
-     throw handleGeminiError(error, 'full recipe');
-  }
-
-  const jsonText = response.text?.trim();
-  if (!jsonText) {
-      throw new Error("Die KI hat eine leere Antwort zurückgegeben.");
-  }
-
-  try {
-    const recipeData = JSON.parse(jsonText);
-    if (recipeData.recipeTitle && Array.isArray(recipeData.ingredients) && Array.isArray(recipeData.instructions)) {
-        return recipeData as Recipe;
-    } else {
-      throw new Error("Die KI hat eine Antwort mit falscher Struktur gesendet.");
+        const recipeData = JSON.parse(jsonText);
+        if (recipeData.recipeTitle && Array.isArray(recipeData.ingredients) && Array.isArray(recipeData.instructions)) {
+                return recipeData as Recipe;
+        } else {
+            throw new Error("Die KI hat eine Antwort mit falscher Struktur gesendet.");
+        }
+    } catch (error) {
+        const errMsg = (error as Error)?.message || String(error);
+        if (errMsg.includes('Netzwerk') || errMsg.includes('KI-Dienst konnte nicht erreicht werden')) {
+            // Offline-Fallback: Dummy-Rezept generieren
+            const fallbackRecipe: Recipe = {
+                recipeTitle: chosenIdea.recipeTitle + ' (Offline)',
+                shortDescription: chosenIdea.shortDescription,
+                prepTime: '10 Min.',
+                cookTime: '20 Min.',
+                totalTime: '30 Min.',
+                servings: '2 Personen',
+                difficulty: 'Einfach',
+                ingredients: [
+                    {
+                        sectionTitle: '',
+                        items: pantryItems.slice(0, 5).map(item => ({
+                            quantity: item.quantity.toString(),
+                            unit: item.unit,
+                            name: item.name
+                        }))
+                    }
+                ],
+                instructions: [
+                    'Alle Zutaten vorbereiten.',
+                    'Zutaten vermengen und kochen.',
+                    'Servieren und genießen.'
+                ],
+                nutritionPerServing: { calories: '350', protein: '10g', fat: '12g', carbs: '40g' },
+                tags: { course: ['Hauptgericht'], cuisine: ['International'], occasion: [], mainIngredient: [], prepMethod: [], diet: [] },
+                expertTips: [{ title: 'Offline-Tipp', content: 'Dieses Rezept wurde ohne KI generiert.' }]
+            };
+            return fallbackRecipe;
+        }
+        throw handleGeminiError(error, 'full recipe');
     }
-  } catch (error) {
-    console.error("Failed to parse JSON from Gemini response:", jsonText);
-    throw new Error("Die KI hat eine Antwort gesendet, die kein gültiges JSON ist.");
-  }
 };
 
 
@@ -301,27 +330,25 @@ export const generateShoppingList = async (
     pantryItems: PantryItem[],
     currentListItems: ShoppingListItem[]
 ): Promise<Omit<ShoppingListItem, 'id' | 'isChecked'>[]> => {
-    const ai = await getAIClient();
-    const model = "gemini-2.5-flash";
-    const pantryList = pantryItems.map(item => item.name).join(', ') || 'keine';
-    const currentShoppingList = currentListItems.map(item => item.name).join(', ') || 'keine';
-
-    const fullPrompt = `
-        Du bist ein Einkaufs-Assistent für die App CulinaSync.
-        Der Benutzer hat folgende Anfrage für eine Einkaufsliste gestellt: "${prompt}".
-
-        KONTEXT:
-        1.  **Vorrat:** Folgende Artikel sind bereits im Vorrat vorhanden: ${pantryList}.
-        2.  **Einkaufsliste:** Folgende Artikel stehen bereits auf der Einkaufsliste: ${currentShoppingList}.
-
-        Deine Aufgabe ist es, eine umfassende Einkaufsliste auf Deutsch zu erstellen, die zur Anfrage des Benutzers passt.
-        BERÜCKSICHTIGE den Vorrat UND die bereits existierende Einkaufsliste. Füge Artikel, die bereits an einem der beiden Orte vorhanden sind, NICHT zur Liste hinzu, es sei denn, es ist sehr wahrscheinlich, dass mehr davon benötigt wird (z.B. Milch, Eier).
-        
-        Antworte NUR mit einem einzigen, gültigen JSON-Objekt, das dem bereitgestellten Schema entspricht.
-        Füge keinen anderen Text, keine Markdown-Formatierung oder Erklärungen vor oder nach dem JSON-Objekt hinzu.
-    `;
-
     try {
+        const ai = await getAIClient();
+        const model = "gemini-2.5-flash";
+        const pantryList = pantryItems.map(item => item.name).join(', ') || 'keine';
+        const currentShoppingList = currentListItems.map(item => item.name).join(', ') || 'keine';
+        const fullPrompt = `
+            Du bist ein Einkaufs-Assistent für die App CulinaSync.
+            Der Benutzer hat folgende Anfrage für eine Einkaufsliste gestellt: "${prompt}".
+
+            KONTEXT:
+            1.  **Vorrat:** Folgende Artikel sind bereits im Vorrat vorhanden: ${pantryList}.
+            2.  **Einkaufsliste:** Folgende Artikel stehen bereits auf der Einkaufsliste: ${currentShoppingList}.
+
+            Deine Aufgabe ist es, eine umfassende Einkaufsliste auf Deutsch zu erstellen, die zur Anfrage des Benutzers passt.
+            BERÜCKSICHTIGE den Vorrat UND die bereits existierende Einkaufsliste. Füge Artikel, die bereits an einem der beiden Orte vorhanden sind, NICHT zur Liste hinzu, es sei denn, es ist sehr wahrscheinlich, dass mehr davon benötigt wird (z.B. Milch, Eier).
+            
+            Antworte NUR mit einem einzigen, gültigen JSON-Objekt, das dem bereitgestellten Schema entspricht.
+            Füge keinen anderen Text, keine Markdown-Formatierung oder Erklärungen vor oder nach dem JSON-Objekt hinzu.
+        `;
         const response = await ai.models.generateContent({
             model: model,
             contents: fullPrompt,
@@ -330,21 +357,27 @@ export const generateShoppingList = async (
                 responseSchema: shoppingListSchema,
             }
         });
-        
         const jsonText = response.text?.trim();
         if (!jsonText) {
             throw new Error("Die KI hat eine leere Antwort zurückgegeben.");
         }
-
         const parsedData = JSON.parse(jsonText);
-        
         if (parsedData.items && Array.isArray(parsedData.items)) {
             return parsedData.items;
         } else {
             throw new Error("Die KI hat eine Antwort mit falscher Struktur gesendet.");
         }
-
     } catch (error) {
+        const errMsg = (error as Error)?.message || String(error);
+        if (errMsg.includes('Netzwerk') || errMsg.includes('KI-Dienst konnte nicht erreicht werden')) {
+            // Offline-Fallback: Dummy-Einkaufsliste
+            const fallbackItems = [
+                { name: 'Brot', quantity: 1, unit: 'Stück', category: 'Backwaren' },
+                { name: 'Milch', quantity: 1, unit: 'Liter', category: 'Milchprodukte' },
+                { name: 'Äpfel', quantity: 6, unit: 'Stück', category: 'Obst & Gemüse' }
+            ];
+            return fallbackItems;
+        }
         throw handleGeminiError(error, 'shopping list');
     }
 };

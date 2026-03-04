@@ -122,10 +122,23 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
         reader.readAsText(file);
     };
 
-    const handleExport = async () => {
-        const { exportFullDataAsJson } = await import('../../../services/exportService');
-        const success = await exportFullDataAsJson();
+    const handleExport = async (format: 'json' | 'md' | 'csv' | 'pdf') => {
+        let success = false;
+        if (format === 'json') {
+            const { exportFullDataAsJson } = await import('../../../services/exportService');
+            success = await exportFullDataAsJson();
+        } else if (format === 'md') {
+            const { exportFullDataAsMarkdown } = await import('../../../services/exportService');
+            success = await exportFullDataAsMarkdown();
+        } else if (format === 'csv') {
+            const { exportFullDataAsCsv } = await import('../../../services/exportService');
+            success = await exportFullDataAsCsv();
+        } else if (format === 'pdf') {
+            const { exportFullDataAsPdf } = await import('../../../services/exportService');
+            success = await exportFullDataAsPdf();
+        }
         if (success) addToast('Backup erstellt.', 'success');
+        else addToast('Backup fehlgeschlagen.', 'error');
     };
 
     // Format bytes
@@ -193,15 +206,29 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
             )}
 
             {/* Actions */}
-            <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <button onClick={() => fileInputRef.current?.click()} className="flex flex-col items-center justify-center gap-2 p-6 rounded-2xl bg-zinc-900/30 border border-zinc-800 hover:bg-zinc-800/50 hover:border-zinc-700 transition-all group">
                     <Upload className="text-zinc-500 group-hover:text-zinc-300 transition-colors" size={24}/>
                     <span className="font-bold text-zinc-300">Importieren</span>
                 </button>
-                 <button onClick={handleExport} className="flex flex-col items-center justify-center gap-2 p-6 rounded-2xl bg-zinc-900/30 border border-zinc-800 hover:bg-zinc-800/50 hover:border-zinc-700 transition-all group">
-                    <Download className="text-zinc-500 group-hover:text-zinc-300 transition-colors" size={24}/>
-                    <span className="font-bold text-zinc-300">Backup (JSON)</span>
-                </button>
+                <div className="flex flex-col gap-2">
+                    <button onClick={() => handleExport('json')} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900/30 border border-zinc-800 hover:bg-zinc-800/50 hover:border-zinc-700 transition-all group">
+                        <Download className="text-zinc-500 group-hover:text-zinc-300 transition-colors" size={20}/>
+                        <span className="font-bold text-zinc-300">Backup (JSON)</span>
+                    </button>
+                    <button onClick={() => handleExport('md')} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900/30 border border-zinc-800 hover:bg-zinc-800/50 hover:border-zinc-700 transition-all group">
+                        <Download className="text-zinc-500 group-hover:text-zinc-300 transition-colors" size={20}/>
+                        <span className="font-bold text-zinc-300">Backup (Markdown)</span>
+                    </button>
+                    <button onClick={() => handleExport('csv')} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900/30 border border-zinc-800 hover:bg-zinc-800/50 hover:border-zinc-700 transition-all group">
+                        <Download className="text-zinc-500 group-hover:text-zinc-300 transition-colors" size={20}/>
+                        <span className="font-bold text-zinc-300">Backup (CSV)</span>
+                    </button>
+                    <button onClick={() => handleExport('pdf')} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900/30 border border-zinc-800 hover:bg-zinc-800/50 hover:border-zinc-700 transition-all group">
+                        <Download className="text-zinc-500 group-hover:text-zinc-300 transition-colors" size={20}/>
+                        <span className="font-bold text-zinc-300">Backup (PDF)</span>
+                    </button>
+                </div>
             </section>
             
             <div className="flex justify-center pt-4">

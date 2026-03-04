@@ -36,6 +36,19 @@
     },
     "actions": {
       "discard": "Discard"
+    },
+    "backup": {
+      "import": "Import",
+      "export": "Backup",
+      "exportJson": "Backup (JSON)",
+      "exportMd": "Backup (Markdown)",
+      "exportCsv": "Backup (CSV)",
+      "exportPdf": "Backup (PDF)",
+      "success": "Backup created.",
+      "error": "Backup failed.",
+      "restore": "Restore",
+      "restoreSuccess": "Backup restored successfully.",
+      "restoreError": "Restore failed."
     }
   },
   "common": {
