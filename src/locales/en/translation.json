@@ -56,6 +56,13 @@
       "unavailable": "App cannot be installed right now.",
       "success": "App installed successfully!"
     },
+    "installReminder": {
+      "title": "Add CulinaSync to your home screen",
+      "description": "Install the app for faster access, offline usage, and a steadier kitchen workflow.",
+      "install": "Install",
+      "later": "Later",
+      "dismiss": "Don't remind"
+    },
     "commandSections": {
       "navigation": "Navigation",
       "pantry": "Pantry",

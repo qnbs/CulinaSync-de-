@@ -56,6 +56,13 @@
       "unavailable": "App kann derzeit nicht installiert werden.",
       "success": "App erfolgreich installiert!"
     },
+    "installReminder": {
+      "title": "CulinaSync auf dem Startbildschirm",
+      "description": "Installiere die App fuer schnelleren Zugriff, Offline-Nutzung und eine stabilere Kuechenansicht.",
+      "install": "Installieren",
+      "later": "Spaeter",
+      "dismiss": "Nicht mehr erinnern"
+    },
     "commandSections": {
       "navigation": "Navigation",
       "pantry": "Vorratskammer",

@@ -34,6 +34,8 @@ export const getDefaultSettings = (): AppSettings => ({
   appearance: {
     accentColor: 'amber',
     highContrast: false,
+    kitchenMode: false,
+    largeText: false,
   },
 });
 

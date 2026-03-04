@@ -39,11 +39,13 @@ const App: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { currentPage, toasts, isCommandPaletteOpen } = useAppSelector((state) => state.ui);
+  const settings = useAppSelector((state) => state.settings);
 
   const [appVersion, setAppVersion] = useState<string>('');
   const [installPromptEvent, setInstallPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showInstallReminder, setShowInstallReminder] = useState(false);
 
   useEffect(() => {
     void import('./services/db');
@@ -73,6 +75,31 @@ const App: React.FC = () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
   }, []);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle('high-contrast', settings.appearance.highContrast);
+    root.classList.toggle('kitchen-mode', settings.appearance.kitchenMode);
+    root.classList.toggle('large-text', settings.appearance.largeText);
+
+    return () => {
+      root.classList.remove('high-contrast', 'kitchen-mode', 'large-text');
+    };
+  }, [settings.appearance.highContrast, settings.appearance.kitchenMode, settings.appearance.largeText]);
+
+  useEffect(() => {
+    if (!installPromptEvent || isStandalone) {
+      return;
+    }
+
+    const dismissedUntil = Number(window.localStorage.getItem('culinaSyncInstallRemindAfter') || '0');
+    const permanentlyDismissed = window.localStorage.getItem('culinaSyncInstallDismissed') === 'true';
+    const now = Date.now();
+
+    if (!permanentlyDismissed && now >= dismissedUntil) {
+      setShowInstallReminder(true);
+    }
+  }, [installPromptEvent, isStandalone]);
 
   const handleOnboardingComplete = () => {
     localStorage.setItem('culinaSyncOnboarded', 'true');
@@ -106,8 +133,24 @@ const App: React.FC = () => {
     const { outcome } = await installPromptEvent.userChoice;
     if (outcome === 'accepted') {
       addToast(t('app.install.success'), 'success');
+      window.localStorage.removeItem('culinaSyncInstallRemindAfter');
+      window.localStorage.removeItem('culinaSyncInstallDismissed');
+      setShowInstallReminder(false);
+    } else {
+      window.localStorage.setItem('culinaSyncInstallRemindAfter', String(Date.now() + 3 * 24 * 60 * 60 * 1000));
+      setShowInstallReminder(false);
     }
     setInstallPromptEvent(null);
+  };
+
+  const handleInstallRemindLater = () => {
+    window.localStorage.setItem('culinaSyncInstallRemindAfter', String(Date.now() + 3 * 24 * 60 * 60 * 1000));
+    setShowInstallReminder(false);
+  };
+
+  const handleInstallDismiss = () => {
+    window.localStorage.setItem('culinaSyncInstallDismissed', 'true');
+    setShowInstallReminder(false);
   };
 
   const {
@@ -223,24 +266,46 @@ const App: React.FC = () => {
         <Suspense fallback={null}>
           {showOnboarding && <Onboarding onComplete={handleOnboardingComplete} />}
         </Suspense>
-        <Header 
-          currentPage={currentPage} 
-          setCurrentPage={navigate}
-          isListening={isListening}
-          startListening={startListening}
-          stopListening={stopListening}
-          hasRecognitionSupport={hasRecognitionSupport}
-          onCommandPaletteToggle={() => dispatch(setCommandPaletteOpen(true))}
-        />
+        <div data-tour="header">
+          <Header 
+            currentPage={currentPage} 
+            setCurrentPage={navigate}
+            isListening={isListening}
+            startListening={startListening}
+            stopListening={stopListening}
+            hasRecognitionSupport={hasRecognitionSupport}
+            onCommandPaletteToggle={() => dispatch(setCommandPaletteOpen(true))}
+          />
+        </div>
         <main id="main-content" key={currentPage} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 page-fade-in pb-20 md:pb-8">
           <Suspense fallback={<LoadingSpinner />}>
               {renderPage()}
           </Suspense>
         </main>
 
-        <Suspense fallback={null}>
-          <BottomNav currentPage={currentPage} setCurrentPage={navigate} />
-        </Suspense>
+        <div data-tour="bottom-nav">
+          <Suspense fallback={null}>
+            <BottomNav currentPage={currentPage} setCurrentPage={navigate} />
+          </Suspense>
+        </div>
+
+        {showInstallReminder && installPromptEvent && !isStandalone && (
+          <div className="fixed bottom-24 right-4 z-40 w-[min(92vw,24rem)] rounded-2xl border border-[var(--color-accent-500)]/30 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur">
+            <h4 className="text-sm font-bold text-zinc-100">{t('app.installReminder.title')}</h4>
+            <p className="mt-1 text-sm text-zinc-400">{t('app.installReminder.description')}</p>
+            <div className="mt-4 flex gap-2">
+              <button onClick={handleInstallPWA} className="flex-1 rounded-lg bg-[var(--color-accent-500)] px-3 py-2 text-sm font-bold text-zinc-900">
+                {t('app.installReminder.install')}
+              </button>
+              <button onClick={handleInstallRemindLater} className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-semibold text-zinc-300">
+                {t('app.installReminder.later')}
+              </button>
+              <button onClick={handleInstallDismiss} className="rounded-lg border border-zinc-800 px-3 py-2 text-sm font-semibold text-zinc-500">
+                {t('app.installReminder.dismiss')}
+              </button>
+            </div>
+          </div>
+        )}
 
         <Suspense fallback={null}>
           <CommandPalette 

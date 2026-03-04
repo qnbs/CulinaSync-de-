@@ -60,6 +60,36 @@ export const AppearancePanel: React.FC<AppearancePanelProps> = ({ settings, onCh
                             </button>
                         </div>
                     </div>
+
+                    <div className="bg-zinc-900/30 border border-white/5 rounded-xl p-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h4 className="font-bold text-zinc-200">Kitchen-Modus</h4>
+                                <p className="text-xs text-zinc-500 mt-1">Staerkere Kontraste und klare Flaechen fuer den Kochalltag.</p>
+                            </div>
+                            <button
+                                onClick={() => onChange('appearance.kitchenMode', !settings.appearance.kitchenMode)}
+                                className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${settings.appearance.kitchenMode ? 'bg-[var(--color-accent-500)]' : 'bg-zinc-700'}`}
+                            >
+                                <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform duration-300 shadow-md ${settings.appearance.kitchenMode ? 'translate-x-6' : ''}`} />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-zinc-900/30 border border-white/5 rounded-xl p-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h4 className="font-bold text-zinc-200">Grosse Schrift</h4>
+                                <p className="text-xs text-zinc-500 mt-1">Erhoeht Grundschrift und UI-Groessen fuer bessere Lesbarkeit.</p>
+                            </div>
+                            <button
+                                onClick={() => onChange('appearance.largeText', !settings.appearance.largeText)}
+                                className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${settings.appearance.largeText ? 'bg-[var(--color-accent-500)]' : 'bg-zinc-700'}`}
+                            >
+                                <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform duration-300 shadow-md ${settings.appearance.largeText ? 'translate-x-6' : ''}`} />
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Live Preview Card */}

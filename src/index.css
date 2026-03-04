@@ -209,3 +209,43 @@
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-accent-400);
 }
+
+html.high-contrast {
+  filter: contrast(1.12) saturate(1.05);
+}
+
+html.high-contrast .glass-panel,
+html.high-contrast .glass-card,
+html.high-contrast .glass-modal,
+html.high-contrast .glass-button,
+html.high-contrast .glass-hud {
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+html.kitchen-mode {
+  --color-accent-glow-soft: rgba(255, 214, 102, 0.25);
+}
+
+html.kitchen-mode body {
+  background:
+    radial-gradient(80rem 40rem at 10% -10%, rgba(245, 158, 11, 0.16), transparent 55%),
+    radial-gradient(65rem 35rem at 90% 0%, rgba(34, 197, 94, 0.11), transparent 50%),
+    linear-gradient(180deg, #09090b 0%, #050507 100%);
+}
+
+html.kitchen-mode .glass-panel,
+html.kitchen-mode .glass-card,
+html.kitchen-mode .glass-modal,
+html.kitchen-mode .glass-hud {
+  background: rgba(10, 10, 12, 0.82);
+}
+
+html.large-text {
+  font-size: 18px;
+}
+
+@media (max-width: 768px) {
+  html.large-text {
+    font-size: 17px;
+  }
+}

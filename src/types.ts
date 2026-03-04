@@ -119,6 +119,8 @@ export interface AppSettings {
   appearance: {
     accentColor: 'amber' | 'rose' | 'sky' | 'emerald';
     highContrast: boolean;
+    kitchenMode: boolean;
+    largeText: boolean;
   };
 }
 

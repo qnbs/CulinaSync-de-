@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Recipe } from '../types';
-import { X as XIcon, RefreshCw, Volume2, VolumeX, ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { X as XIcon, RefreshCw, Volume2, VolumeX, ChevronLeft, ChevronRight, CheckCircle2, TimerReset, Play, Pause, CircleCheck } from 'lucide-react';
 import { useWakeLock } from '../hooks/useWakeLock';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
@@ -15,6 +15,9 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
     const [currentStep, setCurrentStep] = useState(0);
     const [isSpeechEnabled, setIsSpeechEnabled] = useState(false);
     const [isUiVisible, setIsUiVisible] = useState(true);
+    const [checkedIngredients, setCheckedIngredients] = useState<string[]>([]);
+    const [timerSeconds, setTimerSeconds] = useState(180);
+    const [timerRunning, setTimerRunning] = useState(false);
     
     const inactivityTimerRef = useRef<number | null>(null);
 
@@ -24,6 +27,11 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
     // Hooks for wake lock and speech
     const [, requestWakeLock, releaseWakeLock] = useWakeLock();
     const { speak, cancel, isSpeaking } = useSpeechSynthesis();
+
+    const ingredientList = React.useMemo(() => {
+        const flattened = recipe.ingredients.flatMap(group => group.items.map(item => item.name.trim()));
+        return Array.from(new Set(flattened.filter(Boolean)));
+    }, [recipe.ingredients]);
 
     // Auto-Hide UI Logic
     const resetInactivityTimer = () => {
@@ -67,10 +75,31 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
         }
     }, [currentStep, isSpeechEnabled, recipe.instructions]);
 
+    useEffect(() => {
+        if (!timerRunning) {
+            return;
+        }
+        const id = window.setInterval(() => {
+            setTimerSeconds(prev => {
+                if (prev <= 1) {
+                    window.clearInterval(id);
+                    setTimerRunning(false);
+                    if (isSpeechEnabled) {
+                        speak('Timer abgelaufen.');
+                    }
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => window.clearInterval(id);
+    }, [timerRunning, isSpeechEnabled, speak]);
+
     // Handle voice commands from global state
     useEffect(() => {
         if (voiceAction) {
-            const { type } = voiceAction;
+            const { type, payload } = voiceAction;
             resetInactivityTimer(); // Show UI on voice command
             if (type === 'NEXT_STEP' && currentStep < recipe.instructions.length - 1) {
                 setCurrentStep(s => s + 1);
@@ -78,12 +107,32 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
                 setCurrentStep(s => s - 1);
             } else if (type === 'EXIT_COOK_MODE') {
                 onExit();
+            } else if (type === 'START_COOK_TIMER') {
+                const payloadSeconds = Number(String(payload).split('#')[0] || '0');
+                if (payloadSeconds > 0) {
+                    setTimerSeconds(payloadSeconds);
+                }
+                setTimerRunning(true);
+            } else if (type === 'PAUSE_COOK_TIMER') {
+                setTimerRunning(false);
+            } else if (type === 'CHECK_COOK_INGREDIENT') {
+                const raw = String(payload).split('#')[0].trim().toLowerCase();
+                const match = ingredientList.find(item => item.toLowerCase().includes(raw) || raw.includes(item.toLowerCase()));
+                if (match) {
+                    setCheckedIngredients(prev => prev.includes(match) ? prev : [...prev, match]);
+                }
+            } else if (type === 'UNCHECK_COOK_INGREDIENT') {
+                const raw = String(payload).split('#')[0].trim().toLowerCase();
+                const match = ingredientList.find(item => item.toLowerCase().includes(raw) || raw.includes(item.toLowerCase()));
+                if (match) {
+                    setCheckedIngredients(prev => prev.filter(item => item !== match));
+                }
             }
-            if (['NEXT_STEP', 'PREVIOUS_STEP', 'EXIT_COOK_MODE'].includes(type)) {
+            if (['NEXT_STEP', 'PREVIOUS_STEP', 'EXIT_COOK_MODE', 'START_COOK_TIMER', 'PAUSE_COOK_TIMER', 'CHECK_COOK_INGREDIENT', 'UNCHECK_COOK_INGREDIENT'].includes(type)) {
                 dispatch(setVoiceAction(null));
             }
         }
-    }, [voiceAction, dispatch, onExit, currentStep, recipe.instructions.length]);
+    }, [voiceAction, dispatch, onExit, currentStep, recipe.instructions.length, ingredientList]);
     
     // Cleanup speech on unmount
     useEffect(() => {
@@ -109,6 +158,17 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
     };
 
     const progressPercentage = ((currentStep + 1) / recipe.instructions.length) * 100;
+    const ingredientProgress = ingredientList.length ? Math.round((checkedIngredients.length / ingredientList.length) * 100) : 0;
+
+    const formatTimer = (seconds: number) => {
+        const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const rest = (seconds % 60).toString().padStart(2, '0');
+        return `${minutes}:${rest}`;
+    };
+
+    const toggleIngredient = (ingredient: string) => {
+        setCheckedIngredients(prev => prev.includes(ingredient) ? prev.filter(item => item !== ingredient) : [...prev, ingredient]);
+    };
 
     return (
         <div className="fixed inset-0 bg-zinc-950 z-[100] flex flex-col text-zinc-100 font-sans overflow-hidden cursor-default selection:bg-[var(--color-accent-500)] selection:text-black">
@@ -140,6 +200,23 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
                     <h3 className="text-xl md:text-2xl font-bold text-white truncate max-w-[50vw] text-shadow-lg leading-tight">{recipe.recipeTitle}</h3>
                 </div>
                 <div className="flex items-center gap-4">
+                    <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-full glass-button border border-white/10">
+                        <button
+                            onClick={() => setTimerRunning(prev => !prev)}
+                            className="text-zinc-200"
+                            title={timerRunning ? 'Timer pausieren' : 'Timer starten'}
+                        >
+                            {timerRunning ? <Pause size={20} /> : <Play size={20} />}
+                        </button>
+                        <span className="font-mono text-lg tracking-wider min-w-16 text-center">{formatTimer(timerSeconds)}</span>
+                        <button
+                            onClick={() => setTimerSeconds(180)}
+                            className="text-zinc-400 hover:text-zinc-100"
+                            title="Timer zurücksetzen"
+                        >
+                            <TimerReset size={18} />
+                        </button>
+                    </div>
                     <button 
                         onClick={handleRepeat} 
                         title="Schritt wiederholen" 
@@ -184,6 +261,55 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
                         >
                             {recipe.instructions[currentStep]}
                         </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 text-left">
+                        <div className="glass-panel rounded-2xl p-4 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <p className="text-xs uppercase tracking-widest font-bold text-zinc-400">Zutaten-Check</p>
+                                <p className="text-xs text-zinc-500">{checkedIngredients.length}/{ingredientList.length}</p>
+                            </div>
+                            <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                <div className="h-full bg-emerald-400 transition-all duration-500" style={{ width: `${ingredientProgress}%` }} />
+                            </div>
+                            <div className="max-h-36 overflow-y-auto space-y-2 pr-1">
+                                {ingredientList.map(item => {
+                                    const checked = checkedIngredients.includes(item);
+                                    return (
+                                        <button
+                                            key={item}
+                                            onClick={() => toggleIngredient(item)}
+                                            className={`w-full flex items-center justify-between rounded-xl px-3 py-2 border text-sm transition-colors ${checked ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-200' : 'bg-zinc-900/60 border-white/5 text-zinc-300'}`}
+                                        >
+                                            <span>{item}</span>
+                                            {checked && <CircleCheck size={16} />}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        <div className="glass-panel rounded-2xl p-4 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <p className="text-xs uppercase tracking-widest font-bold text-zinc-400">Schritt-Timer</p>
+                                <p className={`text-xs font-semibold ${timerRunning ? 'text-[var(--color-accent-300)]' : 'text-zinc-500'}`}>
+                                    {timerRunning ? 'Laufend' : 'Pausiert'}
+                                </p>
+                            </div>
+                            <p className="font-mono text-4xl md:text-5xl text-center tracking-widest text-zinc-100">{formatTimer(timerSeconds)}</p>
+                            <div className="grid grid-cols-3 gap-2">
+                                <button onClick={() => setTimerRunning(prev => !prev)} className="rounded-xl py-2 bg-[var(--color-accent-500)] text-zinc-900 font-bold">
+                                    {timerRunning ? 'Pause' : 'Start'}
+                                </button>
+                                <button onClick={() => setTimerSeconds(prev => prev + 30)} className="rounded-xl py-2 bg-zinc-800 text-zinc-200 font-bold border border-zinc-700">
+                                    +30s
+                                </button>
+                                <button onClick={() => { setTimerSeconds(180); setTimerRunning(false); }} className="rounded-xl py-2 bg-zinc-800 text-zinc-200 font-bold border border-zinc-700">
+                                    Reset
+                                </button>
+                            </div>
+                            <p className="text-xs text-zinc-500">Voice: "Timer starten für 5 Minuten", "Tomaten abhaken"</p>
+                        </div>
                     </div>
                  </div>
             </div>

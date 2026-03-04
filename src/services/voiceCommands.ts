@@ -2,7 +2,7 @@ import { Page, ShoppingListItem, PantryItem } from '../types';
 import { setVoiceAction } from '../store/slices/uiSlice';
 
 export interface CommandAction {
-  type: 'NAVIGATE' | 'SEARCH' | 'ADD_PANTRY_ITEM' | 'REMOVE_PANTRY_ITEM' | 'ADJUST_PANTRY_QUANTITY' | 'ADD_SHOPPING_ITEM' | 'CHECK_SHOPPING_ITEM' | 'GENERATE_RECIPE' | 'READ_LIST' | 'START_COOK_MODE' | 'NEXT_STEP' | 'PREVIOUS_STEP' | 'EXIT_COOK_MODE' | 'UNKNOWN';
+    type: 'NAVIGATE' | 'SEARCH' | 'ADD_PANTRY_ITEM' | 'REMOVE_PANTRY_ITEM' | 'ADJUST_PANTRY_QUANTITY' | 'ADD_SHOPPING_ITEM' | 'CHECK_SHOPPING_ITEM' | 'GENERATE_RECIPE' | 'READ_LIST' | 'START_COOK_MODE' | 'NEXT_STEP' | 'PREVIOUS_STEP' | 'EXIT_COOK_MODE' | 'CHECK_COOK_INGREDIENT' | 'UNCHECK_COOK_INGREDIENT' | 'START_COOK_TIMER' | 'PAUSE_COOK_TIMER' | 'UNKNOWN';
   payload?: unknown;
 }
 
@@ -103,6 +103,26 @@ export const processCommand = (transcript: string, currentPage: Page): CommandAc
     if (command.includes('vorheriger schritt') || command.includes('schritt zurück')) return { type: 'PREVIOUS_STEP' };
     if (command.includes('beende kochmodus') || command.includes('kochmodus beenden')) return { type: 'EXIT_COOK_MODE' };
     if (command.includes('starte kochmodus') && currentPage === 'recipes') return { type: 'START_COOK_MODE' };
+
+    const timerStartMatch = command.match(/timer (start|starte|starten)(?:\s+(?:für|fuer)\s+(\d+)\s*(sekunden|sekunde|minuten|minute))?/);
+    if (timerStartMatch) {
+        const amount = timerStartMatch[2] ? parseInt(timerStartMatch[2], 10) : 0;
+        const unit = timerStartMatch[3] || '';
+        const seconds = amount > 0 ? (unit.startsWith('minute') ? amount * 60 : amount) : 0;
+        return { type: 'START_COOK_TIMER', payload: String(seconds) };
+    }
+    if (command.includes('timer pause') || command.includes('timer pausieren') || command.includes('timer stopp') || command.includes('timer stoppen')) {
+        return { type: 'PAUSE_COOK_TIMER' };
+    }
+
+    const checkIngredientMatch = command.match(/^(?:zutat\s+)?(.+?)\s+(?:abhaken|abgehakt|als erledigt markieren)$/);
+    if (checkIngredientMatch?.[1]) {
+        return { type: 'CHECK_COOK_INGREDIENT', payload: checkIngredientMatch[1].trim() };
+    }
+    const uncheckIngredientMatch = command.match(/^(?:zutat\s+)?(.+?)\s+(?:zurücksetzen|entferne haken|nicht erledigt)$/);
+    if (uncheckIngredientMatch?.[1]) {
+        return { type: 'UNCHECK_COOK_INGREDIENT', payload: uncheckIngredientMatch[1].trim() };
+    }
 
 
     // Navigation Commands
