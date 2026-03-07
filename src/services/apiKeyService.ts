@@ -45,6 +45,7 @@ const openDB = (): Promise<IDBDatabase> => {
   });
 };
 
+export const saveApiKey = async (key: string): Promise<void> => {
   await retry(async () => {
     const idb = await openDB();
     const tx = idb.transaction(STORE_NAME, 'readwrite');
@@ -57,6 +58,7 @@ const openDB = (): Promise<IDBDatabase> => {
   }, 3, 500);
 };
 
+export const loadApiKey = async (): Promise<string | null> => {
   try {
     return await retry(async () => {
       const idb = await openDB();
@@ -84,6 +86,7 @@ const openDB = (): Promise<IDBDatabase> => {
   }
 };
 
+export const deleteApiKey = async (): Promise<void> => {
   await retry(async () => {
     const idb = await openDB();
     const tx = idb.transaction(STORE_NAME, 'readwrite');

@@ -16,6 +16,7 @@ export interface WhisperOptions {
 let whisperWorker: Worker | null = null;
 
 export const initWhisper = async (modelPath = '/whisper-tiny.bin'): Promise<void> => {
+  void modelPath;
   if (whisperWorker) return;
   whisperWorker = new Worker('/whisper.worker.js');
   // Worker-Init ggf. hier

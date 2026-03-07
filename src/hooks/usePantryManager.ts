@@ -26,7 +26,19 @@ export const usePantryManager = () => {
   
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const pantryItems = useLiveQuery<PantryItem[]>(() => db.pantry.orderBy('name').toArray(), []);
+  const pantryItems = useLiveQuery<PantryItem[]>(() => {
+    switch (sortOrder) {
+      case 'expiryDate':
+        return db.pantry.orderBy('expiryDate').toArray();
+      case 'updatedAt':
+        return db.pantry.orderBy('updatedAt').reverse().toArray();
+      case 'createdAt':
+        return db.pantry.orderBy('createdAt').reverse().toArray();
+      case 'name':
+      default:
+        return db.pantry.orderBy('name').toArray();
+    }
+  }, [sortOrder]);
 
   const initialSearchTerm = voiceAction?.type === 'SEARCH' ? voiceAction.payload : undefined;
 
@@ -77,20 +89,7 @@ export const usePantryManager = () => {
       const lowerCaseSearch = debouncedSearchTerm.toLowerCase();
       items = items.filter(item => item.name.toLowerCase().includes(lowerCaseSearch) || item.category?.toLowerCase().includes(lowerCaseSearch));
     }
-    if (sortOrder === 'expiryDate') {
-        return [...items].sort((a, b) => {
-            if (!a.expiryDate) return 1;
-            if (!b.expiryDate) return -1;
-            return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
-        });
-    }
-    if (sortOrder === 'createdAt') {
-        return [...items].sort((a, b) => b.createdAt - a.createdAt);
-    }
-     if (sortOrder === 'updatedAt') {
-        return [...items].sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
-    }
-    return items; // Already sorted by name from query
+    return items;
   }, [pantryItems, debouncedSearchTerm, expiryFilter, sortOrder]);
 
   const groupedItems = useMemo(() => {
@@ -140,11 +139,17 @@ export const usePantryManager = () => {
     if (newQuantity < 0) return;
     if (newQuantity === 0) {
         if (window.confirm(`Soll "${item.name}" wirklich aus dem Vorrat entfernt werden?`)) {
-            await db.pantry.delete(item.id!);
+            await db.transaction('rw', db.pantry, async () => {
+              await db.pantry.delete(item.id!);
+            });
             addToast(`"${item.name}" entfernt.`);
         }
     }
-    else await db.pantry.update(item.id!, { quantity: newQuantity, updatedAt: Date.now() });
+    else {
+      await db.transaction('rw', db.pantry, async () => {
+        await db.pantry.update(item.id!, { quantity: newQuantity, updatedAt: Date.now() });
+      });
+    }
   }, [addToast]);
 
   const toggleSelectItem = useCallback((id: number) => setSelectedItems(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]), []);
@@ -156,7 +161,9 @@ export const usePantryManager = () => {
 
   const handleDeleteSelected = useCallback(async () => {
     if (selectedItems.length > 0 && window.confirm(`${selectedItems.length} Artikel wirklich löschen?`)) {
-      await db.pantry.bulkDelete(selectedItems);
+      await db.transaction('rw', db.pantry, async () => {
+        await db.pantry.bulkDelete(selectedItems);
+      });
       addToast(`${selectedItems.length} Artikel gelöscht.`);
       setIsSelectMode(false); 
       setSelectedItems([]);

@@ -160,3 +160,14 @@ export interface FullBackupData {
     settings?: AppSettings;
     exportedAt?: string;
 }
+
+export interface AppLogEntry {
+  id?: number;
+  level: 'error' | 'warning' | 'info';
+  source: string;
+  message: string;
+  stack?: string;
+  metadata?: string;
+  createdAt: number;
+  synced: boolean;
+}

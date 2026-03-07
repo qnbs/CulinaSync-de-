@@ -1,29 +1,34 @@
-import React, { useState } from 'react';
-import { analyzeRecipeNutritionAndAllergens } from '../../../services/nutritionAllergyService';
+import { useState } from 'react';
 import { exportNutritionToHealthCsv, exportNutritionToHealthJson, HealthExportType } from '../../../services/healthConnectService';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../../services/db';
+import { analyzeRecipeNutritionInWorker } from '../../../services/nutritionWorkerService';
 
 export const HealthConnectPanel = () => {
   const recipes = useLiveQuery(() => db.recipes.toArray(), []);
   const [selectedRecipeId, setSelectedRecipeId] = useState<string>('');
   const [exportType, setExportType] = useState<HealthExportType>('apple');
+  const [isExporting, setIsExporting] = useState(false);
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (!recipes) return;
-    const recipe = recipes.find(r => r.id === selectedRecipeId);
+    const recipe = recipes.find(r => r.id === Number(selectedRecipeId));
     if (!recipe) return;
-    const nutrition = analyzeRecipeNutritionAndAllergens(recipe);
+    setIsExporting(true);
+    const nutrition = await analyzeRecipeNutritionInWorker(recipe);
     const date = new Date().toISOString();
     exportNutritionToHealthCsv({ type: exportType, date, nutrition, mealName: recipe.recipeTitle });
+    setIsExporting(false);
   };
-  const handleExportJson = () => {
+  const handleExportJson = async () => {
     if (!recipes) return;
-    const recipe = recipes.find(r => r.id === selectedRecipeId);
+    const recipe = recipes.find(r => r.id === Number(selectedRecipeId));
     if (!recipe) return;
-    const nutrition = analyzeRecipeNutritionAndAllergens(recipe);
+    setIsExporting(true);
+    const nutrition = await analyzeRecipeNutritionInWorker(recipe);
     const date = new Date().toISOString();
     exportNutritionToHealthJson({ type: exportType, date, nutrition, mealName: recipe.recipeTitle });
+    setIsExporting(false);
   };
 
   return (
@@ -47,8 +52,8 @@ export const HealthConnectPanel = () => {
         </select>
       </div>
       <div className="flex gap-2">
-        <button onClick={handleExport} className="bg-[var(--color-accent-500)] text-white px-4 py-2 rounded">CSV Export</button>
-        <button onClick={handleExportJson} className="bg-zinc-700 text-white px-4 py-2 rounded">JSON Export</button>
+        <button onClick={() => void handleExport()} disabled={isExporting} className="bg-[var(--color-accent-500)] text-white px-4 py-2 rounded disabled:opacity-60">CSV Export</button>
+        <button onClick={() => void handleExportJson()} disabled={isExporting} className="bg-zinc-700 text-white px-4 py-2 rounded disabled:opacity-60">JSON Export</button>
       </div>
       <p className="text-xs text-zinc-400">Die Daten werden nur lokal berechnet und exportiert. Kein Upload, keine Cloud.</p>
     </div>

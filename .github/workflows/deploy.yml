@@ -44,15 +44,25 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # 4) Create production build into ./dist.
+      # 4) Guard quality before deployment.
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      # 5) Create production build into ./dist.
       - name: Build
         run: npm run build
 
-      # 5) Configure GitHub Pages deployment metadata.
+      - name: Check bundle budget
+        run: npm run check:bundle-budget
+
+      # 6) Configure GitHub Pages deployment metadata.
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      # 6) Upload built site artifact from ./dist.
+      # 7) Upload built site artifact from ./dist.
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:

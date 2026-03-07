@@ -1,23 +1,25 @@
-import React from 'react';
+import React, { type ErrorInfo } from 'react';
+import { logAppError } from '../services/errorLoggingService';
 
 interface State {
   hasError: boolean;
-  error: any;
+  error: unknown;
 }
 
 export class GlobalErrorBoundary extends React.Component<{ children: React.ReactNode }, State> {
-  constructor(props: any) {
+  constructor(props: { children: React.ReactNode }) {
     super(props);
     this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError(error: any) {
+  static getDerivedStateFromError(error: unknown) {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: any, info: any) {
-    // Optional: Logging
-    // console.error('Global Error:', error, info);
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    void logAppError(error, 'react.error-boundary', {
+      componentStack: info.componentStack,
+    });
   }
 
   render() {

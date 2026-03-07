@@ -1,4 +1,3 @@
-import { exportFullDataAsJson } from './exportService';
 import { importData } from './repositories/dataRepository';
 import type { FullBackupData } from '../types';
 
@@ -62,13 +61,14 @@ export async function decryptBackup(blob: Uint8Array, password: string): Promise
 // Hier nur Demo: Upload/Download zu/von URL mit fetch (z. B. WebDAV-Server)
 
 export async function uploadEncryptedBackup(url: string, data: Uint8Array, token?: string) {
+  const uploadBuffer = new Uint8Array(data);
   const res = await fetch(url, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/octet-stream',
       ...(token ? { 'Authorization': `Bearer ${token}` } : {})
     },
-    body: data
+    body: new Blob([uploadBuffer.buffer], { type: 'application/octet-stream' })
   });
   if (!res.ok) throw new Error('Upload fehlgeschlagen');
 }

@@ -1,8 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { Plus, Wand2, Camera, Barcode } from 'lucide-react';
+import { Plus, Wand2, Camera } from 'lucide-react';
 import { usePantryManagerContext } from '../../contexts/PantryManagerContext';
-import Tesseract from 'tesseract.js';
-import { extractPantryItemsFromImage } from '../../services/geminiService';
+import { getAppServices } from '../../services/serviceRegistry';
 
 export const PantryQuickAdd = () => {
     const { handleQuickAdd } = usePantryManagerContext();
@@ -25,11 +24,10 @@ export const PantryQuickAdd = () => {
         try {
             let visionText = '';
             try {
-                visionText = await extractPantryItemsFromImage(file);
+                visionText = await getAppServices().ai.extractPantryItemsFromImage(file);
             } catch (err) {
                 // Fallback: OCR lokal
-                const { data } = await Tesseract.recognize(file, 'deu');
-                visionText = data.text?.trim() || '';
+                visionText = await getAppServices().scanner.recognizeTextFromImage(file, 'deu');
             }
             if (visionText) setInput(visionText);
         } catch (err) {
@@ -60,6 +58,7 @@ export const PantryQuickAdd = () => {
                     <input
                         type="file"
                         accept="image/*"
+                        capture="environment"
                         ref={fileInputRef}
                         onChange={handleImageInput}
                         className="hidden"

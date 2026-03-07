@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../../services/db';
 import { shareRecipeToIpfs, shareRecipeToNostr } from '../../../services/communityShareService';
@@ -17,7 +17,7 @@ export const CommunityPanel = () => {
     setLoading(true);
     try {
       if (!recipes) return;
-      const recipe = recipes.find(r => r.id === selectedRecipeId);
+      const recipe = recipes.find(r => r.id === Number(selectedRecipeId));
       if (!recipe) return;
       let url = '';
       if (backend === 'ipfs') {

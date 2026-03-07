@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useDeferredValue, useEffect, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { generateRecipeIdeasAsync, generateFullRecipeAsync, resetAiChef, backToIdeas } from '../store/slices/aiChefSlice';
 import { RecipeIdea, StructuredPrompt } from '../types';
 import RecipeDetail from './RecipeDetail';
 import { ChefInput } from './ai-chef/ChefInput';
@@ -11,13 +10,13 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../services/dbInstance';
 import { addToast, setFocusAction, setVoiceAction } from '../store/slices/uiSlice';
 import { hasApiKey } from '../services/apiKeyService';
+import { useAiChef } from '../features/ai-chef/hooks/useAiChef';
 
 const HISTORY_KEY = 'culinaSyncAiChefHistory';
 const MAX_HISTORY = 5;
 
 const AiChef: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { status, ideas: recipeIdeas, recipe: finalRecipe, error } = useAppSelector((state) => state.aiChef);
   const { voiceAction, focusAction } = useAppSelector(state => state.ui);
 
   const [craving, setCraving] = useState('');
@@ -33,6 +32,15 @@ const AiChef: React.FC = () => {
   const [history, setHistory] = useState<StructuredPrompt[]>(() => {
     try { const saved = localStorage.getItem(HISTORY_KEY); return saved ? JSON.parse(saved) : []; } catch { return []; }
   });
+
+  const deferredCraving = useDeferredValue(craving);
+  const currentPrompt: StructuredPrompt = {
+    craving: deferredCraving,
+    includeIngredients,
+    excludeIngredients,
+    modifiers,
+  };
+  const { ideas: recipeIdeas, recipe: finalRecipe, error, selectedIdea, isLoading, isLoadingRecipe, phase, generateIdeas, generateRecipe, reset, backToIdeas } = useAiChef(currentPrompt);
 
   const initialPrompt = voiceAction?.type === 'GENERATE_RECIPE' ? voiceAction.payload : undefined;
 
@@ -54,7 +62,7 @@ const AiChef: React.FC = () => {
     hasApiKey()
       .then(setApiKeyConfigured)
       .catch(() => setApiKeyConfigured(false));
-  }, [status]);
+  }, [phase]);
   
   const updateHistory = (prompt: StructuredPrompt) => {
     const newHistory = [prompt, ...history.filter(h => JSON.stringify(h) !== JSON.stringify(prompt))].slice(0, MAX_HISTORY);
@@ -67,7 +75,7 @@ const AiChef: React.FC = () => {
     setIncludeIngredients(prompt.includeIngredients);
     setExcludeIngredients(prompt.excludeIngredients);
     setModifiers(prompt.modifiers);
-    dispatch(resetAiChef());
+    reset();
   }
 
   const handleGenerateIdeas = async () => {
@@ -76,13 +84,12 @@ const AiChef: React.FC = () => {
         return; 
     }
     const structuredPrompt: StructuredPrompt = { craving, includeIngredients, excludeIngredients, modifiers };
-    dispatch(generateRecipeIdeasAsync(structuredPrompt));
+    generateIdeas(structuredPrompt);
     updateHistory(structuredPrompt);
   };
 
   const handleGenerateFullRecipe = async (chosenIdea: RecipeIdea) => {
-    const structuredPrompt: StructuredPrompt = { craving, includeIngredients, excludeIngredients, modifiers };
-    dispatch(generateFullRecipeAsync({ prompt: structuredPrompt, chosenIdea }));
+    generateRecipe(chosenIdea);
   };
 
   const handleSurpriseMe = () => {
@@ -97,17 +104,15 @@ const AiChef: React.FC = () => {
   };
   
   if (finalRecipe) {
-      return <RecipeDetail recipe={finalRecipe} onBack={() => dispatch(backToIdeas())} />
+      return <RecipeDetail recipe={finalRecipe} onBack={backToIdeas} />
   }
-
-  const isLoading = status === 'loadingIdeas' || status === 'loadingRecipe';
 
   if (isLoading) {
       return <ChefLoading />;
   }
 
-  if (status === 'ideasReady') {
-      return <ChefResults ideas={recipeIdeas} onSelectIdea={handleGenerateFullRecipe} onReset={() => dispatch(resetAiChef())} />;
+    if (phase === 'ideas') {
+      return <ChefResults ideas={recipeIdeas} onSelectIdea={handleGenerateFullRecipe} onReset={reset} pendingIdeaTitle={selectedIdea?.recipeTitle} isLoading={isLoadingRecipe} />;
   }
 
   return (

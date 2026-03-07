@@ -1,7 +1,8 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import reactCompiler from 'react/compiler';
 import { VitePWA } from 'vite-plugin-pwa';
+import viteCompression from 'vite-plugin-compression';
+import { visualizer } from 'rollup-plugin-visualizer';
 import { fileURLToPath, URL } from 'url';
 
 // GitHub Pages subpath: set automatically in CI via GITHUB_ACTIONS env
@@ -11,14 +12,14 @@ const base = process.env.GITHUB_ACTIONS ? `/${REPO_NAME}/` : '/';
 export default defineConfig({
   base,
   plugins: [
-    react({
-      compiler: reactCompiler,
-    }),
+    react(),
     VitePWA({
       injectRegister: false,
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'logo-192x192.png', 'logo-512x512.png'],
       workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
         globIgnores: [
           '**/jspdf.es.min-*.js',
           '**/html2canvas.esm-*.js',
@@ -89,6 +90,24 @@ export default defineConfig({
         ]
       },
     }),
+    viteCompression({
+      algorithm: 'gzip',
+      ext: '.gz',
+      threshold: 10240,
+    }),
+    viteCompression({
+      algorithm: 'brotliCompress',
+      ext: '.br',
+      threshold: 10240,
+    }),
+    ...(process.env.ANALYZE === 'true'
+      ? [visualizer({
+          filename: 'dist/stats.html',
+          gzipSize: true,
+          brotliSize: true,
+          open: false,
+        })]
+      : []),
   ],
   resolve: {
     alias: [
@@ -98,7 +117,7 @@ export default defineConfig({
   build: {
     minify: 'esbuild',
     cssCodeSplit: true,
-    assetsInlineLimit: 4096,
+    assetsInlineLimit: 2048,
     reportCompressedSize: true,
     rollupOptions: {
       output: {
@@ -106,6 +125,7 @@ export default defineConfig({
           'vendor-react': ['react', 'react-dom'],
           'vendor-redux': ['@reduxjs/toolkit', 'react-redux', 'redux-persist'],
           'vendor-dexie': ['dexie', 'dexie-react-hooks'],
+          'vendor-windowing': ['react-window'],
         },
       },
     },

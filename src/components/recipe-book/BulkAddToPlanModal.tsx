@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
-import { db } from '../../services/dbInstance';
 import { LoaderCircle, CalendarPlus, X } from 'lucide-react';
 import { useModalA11y } from '../../hooks/useModalA11y';
+import { addRecipeToMealPlan } from '../../services/repositories/mealPlanRepository';
 
 interface BulkAddToPlanModalProps {
     isOpen: boolean;
@@ -32,7 +32,7 @@ export const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, 
 
         for (const recipeId of recipeIds) {
             const dateString = date.toISOString().split('T')[0];
-            await db.mealPlan.add({ recipeId, date: dateString, mealType, isCooked: false });
+            await addRecipeToMealPlan({ recipeId, date: dateString, mealType });
             date.setDate(date.getDate() + 1); // Increment day for the next recipe
         }
         setIsSaving(false);

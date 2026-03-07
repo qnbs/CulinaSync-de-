@@ -24,15 +24,8 @@ export const shareRecipeToIpfs = async (recipe: Recipe): Promise<string> => {
 
 // --- Nostr ---
 export const shareRecipeToNostr = async (recipe: Recipe, relays: string[] = ['wss://relay.nostr.band']): Promise<string> => {
-  // nostr-tools dynamisch laden
-  const { relayInit, getEventHash, signEvent } = await import('nostr-tools');
-  const event = {
-    kind: 30023, // custom kind for recipe
-    created_at: Math.floor(Date.now() / 1000),
-    tags: [['app', 'CulinaSync']],
-    content: JSON.stringify(recipe),
-    pubkey: '', // User muss pubkey/signing bereitstellen
-  };
+  void recipe;
+  void relays;
   // Hinweis: Für echtes Signieren braucht es User-Interaktion (z.B. NIP-07 Extension)
   // Hier nur Demo-Link:
   return 'nostr:share (Demo, siehe README)';

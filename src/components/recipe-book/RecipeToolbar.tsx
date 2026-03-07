@@ -13,7 +13,7 @@ interface FilterOptions {
 interface RecipeToolbarProps {
     searchTerm: string;
     setSearchTerm: (term: string) => void;
-    searchInputRef: React.RefObject<HTMLInputElement>;
+    searchInputRef: React.RefObject<HTMLInputElement | null>;
     
     sortBy: string;
     setSortBy: (sort: string) => void;

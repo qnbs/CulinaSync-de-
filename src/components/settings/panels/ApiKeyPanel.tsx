@@ -1,17 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useActionState, useEffect, useOptimistic, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Key, Eye, EyeOff, CheckCircle, Trash2, Shield, ExternalLink } from 'lucide-react';
-import { saveApiKey, deleteApiKey, hasApiKey } from '../../../services/apiKeyService';
-import { invalidateAIClient } from '../../../services/geminiService';
+import { hasApiKey } from '../../../services/apiKeyService';
+import { apiKeyFormSchema, type ApiKeyFormValues } from '../../../features/settings/api-key/apiKeySchema';
+import { storeUserApiKey } from '../../../features/settings/api-key/commands/storeUserApiKey';
+import { removeUserApiKey } from '../../../features/settings/api-key/commands/removeUserApiKey';
 
 interface ApiKeyPanelProps {
     addToast: (msg: string, type: 'success' | 'error' | 'info') => void;
 }
 
+type ApiKeyActionState = {
+    status: 'idle' | 'success' | 'error';
+    message: string | null;
+};
+
 export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
-    const [keyInput, setKeyInput] = useState('');
     const [showKey, setShowKey] = useState(false);
     const [hasKey, setHasKey] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [optimisticHasKey, setOptimisticHasKey] = useOptimistic<boolean, boolean>(hasKey, (_current: boolean, nextValue: boolean) => nextValue);
+    const form = useForm<ApiKeyFormValues>({
+        resolver: zodResolver(apiKeyFormSchema),
+        defaultValues: { apiKey: '' },
+    });
+
+    const [saveState, runSaveAction, isSaving] = useActionState<ApiKeyActionState, ApiKeyFormValues>(async (
+        _previousState,
+        values: ApiKeyFormValues,
+    ): Promise<ApiKeyActionState> => {
+        try {
+            await storeUserApiKey(values.apiKey);
+            return { status: 'success', message: 'API-Schlüssel sicher gespeichert.' };
+        } catch {
+            return { status: 'error', message: 'Fehler beim Speichern des Schlüssels.' };
+        }
+    }, { status: 'idle', message: null });
+
+    const [deleteState, runDeleteAction, isDeleting] = useActionState<ApiKeyActionState>(async () => {
+        try {
+            await removeUserApiKey();
+            return { status: 'success', message: 'API-Schlüssel entfernt.' };
+        } catch {
+            return { status: 'error', message: 'Fehler beim Entfernen des Schlüssels.' };
+        }
+    }, { status: 'idle', message: null });
 
     useEffect(() => {
         hasApiKey().then(result => {
@@ -20,37 +54,31 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
         });
     }, []);
 
-    const handleSave = async () => {
-        if (!keyInput.trim()) {
-            addToast('Bitte gib einen API-Schlüssel ein.', 'error');
-            return;
-        }
-        if (!keyInput.startsWith('AIza')) {
-            addToast('Das sieht nicht nach einem gültigen Google API-Schlüssel aus.', 'error');
-            return;
-        }
-        try {
-            await saveApiKey(keyInput.trim());
-            invalidateAIClient();
+    useEffect(() => {
+        if (saveState.status === 'success') {
             setHasKey(true);
-            setKeyInput('');
-            addToast('API-Schlüssel sicher gespeichert.', 'success');
-        } catch {
-            addToast('Fehler beim Speichern des Schlüssels.', 'error');
+            form.reset();
+            addToast(saveState.message || 'API-Schlüssel sicher gespeichert.', 'success');
+        } else if (saveState.status === 'error' && saveState.message) {
+            setHasKey(false);
+            addToast(saveState.message, 'error');
         }
-    };
+    }, [addToast, form, saveState]);
+
+    useEffect(() => {
+        if (deleteState.status === 'success') {
+            setHasKey(false);
+            form.reset();
+            addToast(deleteState.message || 'API-Schlüssel entfernt.', 'info');
+        } else if (deleteState.status === 'error' && deleteState.message) {
+            addToast(deleteState.message, 'error');
+        }
+    }, [addToast, deleteState, form]);
 
     const handleDelete = async () => {
         if (!window.confirm('API-Schlüssel wirklich entfernen? KI-Funktionen werden deaktiviert.')) return;
-        try {
-            await deleteApiKey();
-            invalidateAIClient();
-            setHasKey(false);
-            setKeyInput('');
-            addToast('API-Schlüssel entfernt.', 'info');
-        } catch {
-            addToast('Fehler beim Entfernen des Schlüssels.', 'error');
-        }
+        setOptimisticHasKey(false);
+        runDeleteAction();
     };
 
     if (isLoading) {
@@ -81,21 +109,19 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
                 </h3>
 
                 <div className="flex items-center gap-3 mb-6">
-                    <div className={`w-3 h-3 rounded-full ${hasKey ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
-                    <span className={`text-sm font-medium ${hasKey ? 'text-emerald-400' : 'text-red-400'}`}>
-                        {hasKey ? 'API-Schlüssel konfiguriert – KI-Funktionen aktiv' : 'Kein API-Schlüssel – KI-Funktionen deaktiviert'}
+                    <div className={`w-3 h-3 rounded-full ${optimisticHasKey ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+                    <span className={`text-sm font-medium ${optimisticHasKey ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {optimisticHasKey ? 'API-Schlüssel konfiguriert – KI-Funktionen aktiv' : 'Kein API-Schlüssel – KI-Funktionen deaktiviert'}
                     </span>
                 </div>
 
                 <div className="space-y-4">
                     <div className="relative">
                         <input
+                            {...form.register('apiKey')}
                             type={showKey ? 'text' : 'password'}
-                            value={keyInput}
-                            onChange={e => setKeyInput(e.target.value)}
-                            placeholder={hasKey ? 'Neuen Schlüssel eingeben zum Ersetzen...' : 'AIza... API-Schlüssel hier einfügen'}
+                            placeholder={optimisticHasKey ? 'Neuen Schlüssel eingeben zum Ersetzen...' : 'AIza... API-Schlüssel hier einfügen'}
                             className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 pr-12 text-zinc-200 placeholder-zinc-500 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none font-mono text-sm"
-                            onKeyDown={e => e.key === 'Enter' && handleSave()}
                             aria-label="Gemini API-Schlüssel"
                         />
                         <button
@@ -108,20 +134,28 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
                         </button>
                     </div>
 
+                    {form.formState.errors.apiKey && (
+                        <p className="text-sm text-red-400">{form.formState.errors.apiKey.message}</p>
+                    )}
+
                     <div className="flex gap-3">
                         <button
-                            onClick={handleSave}
-                            disabled={!keyInput.trim()}
+                            onClick={form.handleSubmit((values) => {
+                                setOptimisticHasKey(true);
+                                runSaveAction(values);
+                            })}
+                            disabled={isSaving || isDeleting}
                             className="flex items-center gap-2 bg-[var(--color-accent-500)] text-zinc-900 font-bold py-2.5 px-5 rounded-xl hover:bg-[var(--color-accent-400)] transition-all disabled:bg-zinc-800 disabled:text-zinc-600 active:scale-95"
                         >
-                            <CheckCircle size={16} /> Speichern
+                            <CheckCircle size={16} /> {isSaving ? 'Speichere...' : 'Speichern'}
                         </button>
-                        {hasKey && (
+                        {optimisticHasKey && (
                             <button
                                 onClick={handleDelete}
+                                disabled={isSaving || isDeleting}
                                 className="flex items-center gap-2 bg-red-500/10 text-red-400 font-bold py-2.5 px-5 rounded-xl hover:bg-red-500/20 border border-red-500/30 transition-all active:scale-95"
                             >
-                                <Trash2 size={16} /> Entfernen
+                                <Trash2 size={16} /> {isDeleting ? 'Entferne...' : 'Entfernen'}
                             </button>
                         )}
                     </div>

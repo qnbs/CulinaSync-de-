@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { ShoppingListItem } from '../../types';
-import { generateShoppingList } from '../../services/geminiService';
+import { generateShoppingList } from '../../services/aiService';
 import { Bot, LoaderCircle, ArrowLeft, CheckSquare, Square } from 'lucide-react';
 import { useShoppingListContext } from '../../contexts/ShoppingListContext';
 import { useModalA11y } from '../../hooks/useModalA11y';

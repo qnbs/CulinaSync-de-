@@ -1,6 +1,8 @@
 import { db } from './dbInstance';
+import { ensureMigrationBackup, LATEST_DB_VERSION, PRIMARY_DATA_STORES, PRIMARY_DB_NAME } from './dbMigrations';
 import { debouncedUpdateAllPantryMatches, updatePantryMatches } from './pantryMatcherService';
 import { syncSeedRecipes } from './repositories/recipeRepository';
+import { logAppError } from './errorLoggingService';
 
 // --- Initialization Logic ---
 const populateDB = async () => {
@@ -8,22 +10,27 @@ const populateDB = async () => {
     try {
         const { allSeedRecipes: seedRecipes } = await import('../data/recipes/index');
         const now = Date.now();
-        await db.pantry.bulkPut([
-            { name: 'Tomatenmark', quantity: 1, unit: 'Dose', category: 'Konserven', createdAt: now - 200000, updatedAt: now - 200000, expiryDate: new Date(2025, 1, 1).toISOString().split('T')[0] },
-            { name: 'Knoblauch', quantity: 3, unit: 'Zehen', category: 'Frischeprodukte', createdAt: now - 100000, updatedAt: now - 100000 },
-            { name: 'Zwiebel', quantity: 1, unit: 'Stück', category: 'Frischeprodukte', createdAt: now, updatedAt: now, minQuantity: 2 },
-            { name: 'Spaghetti', quantity: 500, unit: 'g', category: 'Trockenwaren', createdAt: now - 300000, updatedAt: now - 300000 },
-            { name: 'Olivenöl', quantity: 250, unit: 'ml', category: 'Öle & Essige', createdAt: now - 400000, updatedAt: now - 400000, minQuantity: 100 },
-        ]);
-        console.log("Default pantry items added.");
+        await db.transaction('rw', db.pantry, db.recipes, async () => {
+            await db.pantry.bulkPut([
+                { name: 'Tomatenmark', quantity: 1, unit: 'Dose', category: 'Konserven', createdAt: now - 200000, updatedAt: now - 200000, expiryDate: new Date(2025, 1, 1).toISOString().split('T')[0] },
+                { name: 'Knoblauch', quantity: 3, unit: 'Zehen', category: 'Frischeprodukte', createdAt: now - 100000, updatedAt: now - 100000 },
+                { name: 'Zwiebel', quantity: 1, unit: 'Stück', category: 'Frischeprodukte', createdAt: now, updatedAt: now, minQuantity: 2 },
+                { name: 'Spaghetti', quantity: 500, unit: 'g', category: 'Trockenwaren', createdAt: now - 300000, updatedAt: now - 300000 },
+                { name: 'Olivenöl', quantity: 250, unit: 'ml', category: 'Öle & Essige', createdAt: now - 400000, updatedAt: now - 400000, minQuantity: 100 },
+            ]);
 
+            if (seedRecipes.length > 0) {
+                await db.recipes.bulkPut(seedRecipes.map(r => ({ ...r, isFavorite: false, updatedAt: now })));
+            }
+        });
+        console.log("Default pantry items added.");
         if (seedRecipes.length > 0) {
-            await db.recipes.bulkPut(seedRecipes.map(r => ({ ...r, isFavorite: false, updatedAt: now })));
             console.log(`${seedRecipes.length} seed recipes added during initial population.`);
         }
         // After populating, calculate all matches
         await updatePantryMatches();
     } catch (error) {
+        void logAppError(error, 'db.populate');
         if (import.meta.env.DEV) {
             console.error("Failed during initial database population:", error);
         }
@@ -47,9 +54,13 @@ db.recipes.hook('updating', (_modifications, primKey, _obj, trans) => {
 });
 
 // Open DB and sync
-(db as any).open().then(syncSeedRecipes).catch((err: Error) => {
-    console.error(`Failed to open and initialize database: ${(err as Error).stack || err}`);
-});
+void ensureMigrationBackup(PRIMARY_DB_NAME, LATEST_DB_VERSION, PRIMARY_DATA_STORES)
+    .then(() => (db as any).open())
+    .then(syncSeedRecipes)
+    .catch((err: Error) => {
+        void logAppError(err, 'db.open');
+        console.error(`Failed to open and initialize database: ${(err as Error).stack || err}`);
+    });
 
 // --- Exports ---
 // Export the db instance

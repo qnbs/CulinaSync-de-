@@ -30,15 +30,32 @@ export const extractPantryItemsFromImage = async (imageFile: File): Promise<stri
         throw handleGeminiError(e, 'vision');
     }
 };
-import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
+import type { GoogleGenAI } from "@google/genai";
 import { retry } from './retryUtils';
 import { fakerDE as faker } from '@faker-js/faker';
 import { AppSettings, PantryItem, Recipe, StructuredPrompt, ShoppingListItem, RecipeIdea } from "../types";
 import { loadApiKey } from "./apiKeyService";
+import { logAppError } from './errorLoggingService';
 
 // --- Dynamic AI Client (loaded from secure IndexedDB, never from env/build) ---
 let _aiClient: GoogleGenAI | null = null;
 let _lastKeyHash: string | null = null;
+let _genAiModulePromise: Promise<typeof import('@google/genai')> | null = null;
+
+const SchemaType = {
+    OBJECT: 'object',
+    ARRAY: 'array',
+    STRING: 'string',
+    NUMBER: 'number',
+} as const;
+
+const getGenAIModule = async () => {
+    if (!_genAiModulePromise) {
+        _genAiModulePromise = import('@google/genai');
+    }
+
+    return _genAiModulePromise;
+};
 
 const simpleHash = (str: string): string => {
   let hash = 0;
@@ -59,6 +76,7 @@ const getAIClient = async (): Promise<GoogleGenAI> => {
   }
   const keyHash = simpleHash(key);
   if (!_aiClient || _lastKeyHash !== keyHash) {
+        const { GoogleGenAI } = await getGenAIModule();
     _aiClient = new GoogleGenAI({ apiKey: key });
     _lastKeyHash = keyHash;
   }
@@ -71,29 +89,29 @@ export const invalidateAIClient = () => {
 };
 
 const recipeSchema = {
-    type: Type.OBJECT,
+    type: SchemaType.OBJECT,
     properties: {
-        recipeTitle: { type: Type.STRING, description: "Ein kreativer und ansprechender Titel für das Rezept auf Deutsch." },
-        shortDescription: { type: Type.STRING, description: "Eine kurze, verlockende Beschreibung des Gerichts auf Deutsch." },
-        prepTime: { type: Type.STRING, description: "Vorbereitungszeit als Text, z.B. '15 Min.'" },
-        cookTime: { type: Type.STRING, description: "Kochzeit als Text, z.B. '30 Min.'" },
-        totalTime: { type: Type.STRING, description: "Gesamtzeit als Text, z.B. '45 Min.'" },
-        servings: { type: Type.STRING, description: "Anzahl der Portionen, z.B. '4 Personen'" },
-        difficulty: { type: Type.STRING, description: "Schwierigkeitsgrad, z.B. 'Einfach', 'Mittel', 'Schwer'" },
+        recipeTitle: { type: SchemaType.STRING, description: "Ein kreativer und ansprechender Titel für das Rezept auf Deutsch." },
+        shortDescription: { type: SchemaType.STRING, description: "Eine kurze, verlockende Beschreibung des Gerichts auf Deutsch." },
+        prepTime: { type: SchemaType.STRING, description: "Vorbereitungszeit als Text, z.B. '15 Min.'" },
+        cookTime: { type: SchemaType.STRING, description: "Kochzeit als Text, z.B. '30 Min.'" },
+        totalTime: { type: SchemaType.STRING, description: "Gesamtzeit als Text, z.B. '45 Min.'" },
+        servings: { type: SchemaType.STRING, description: "Anzahl der Portionen, z.B. '4 Personen'" },
+        difficulty: { type: SchemaType.STRING, description: "Schwierigkeitsgrad, z.B. 'Einfach', 'Mittel', 'Schwer'" },
         ingredients: {
-            type: Type.ARRAY,
+            type: SchemaType.ARRAY,
             items: {
-                type: Type.OBJECT,
+                type: SchemaType.OBJECT,
                 properties: {
-                    sectionTitle: { type: Type.STRING, description: "Titel für eine Zutatengruppe, z.B. 'Für den Teig'." },
+                    sectionTitle: { type: SchemaType.STRING, description: "Titel für eine Zutatengruppe, z.B. 'Für den Teig'." },
                     items: {
-                        type: Type.ARRAY,
+                        type: SchemaType.ARRAY,
                         items: {
-                            type: Type.OBJECT,
+                            type: SchemaType.OBJECT,
                             properties: {
-                                quantity: { type: Type.STRING },
-                                unit: { type: Type.STRING },
-                                name: { type: Type.STRING }
+                                quantity: { type: SchemaType.STRING },
+                                unit: { type: SchemaType.STRING },
+                                name: { type: SchemaType.STRING }
                             },
                         }
                     }
@@ -101,37 +119,37 @@ const recipeSchema = {
             }
         },
         instructions: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
+            type: SchemaType.ARRAY,
+            items: { type: SchemaType.STRING },
             description: "Schritt-für-Schritt-Anleitung zur Zubereitung des Gerichts."
         },
         nutritionPerServing: {
-            type: Type.OBJECT,
+            type: SchemaType.OBJECT,
             properties: {
-                calories: { type: Type.STRING },
-                protein: { type: Type.STRING },
-                fat: { type: Type.STRING },
-                carbs: { type: Type.STRING }
+                calories: { type: SchemaType.STRING },
+                protein: { type: SchemaType.STRING },
+                fat: { type: SchemaType.STRING },
+                carbs: { type: SchemaType.STRING }
             }
         },
         tags: {
-            type: Type.OBJECT,
+            type: SchemaType.OBJECT,
             properties: {
-                course: { type: Type.ARRAY, items: { type: Type.STRING } },
-                cuisine: { type: Type.ARRAY, items: { type: Type.STRING } },
-                occasion: { type: Type.ARRAY, items: { type: Type.STRING } },
-                mainIngredient: { type: Type.ARRAY, items: { type: Type.STRING } },
-                prepMethod: { type: Type.ARRAY, items: { type: Type.STRING } },
-                diet: { type: Type.ARRAY, items: { type: Type.STRING } },
+                course: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+                cuisine: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+                occasion: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+                mainIngredient: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+                prepMethod: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+                diet: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
             }
         },
         expertTips: {
-            type: Type.ARRAY,
+            type: SchemaType.ARRAY,
             items: {
-                type: Type.OBJECT,
+                type: SchemaType.OBJECT,
                 properties: {
-                    title: { type: Type.STRING },
-                    content: { type: Type.STRING }
+                    title: { type: SchemaType.STRING },
+                    content: { type: SchemaType.STRING }
                 }
             }
         }
@@ -145,16 +163,16 @@ const recipeSchema = {
 };
 
 const recipeIdeasSchema = {
-    type: Type.OBJECT,
+    type: SchemaType.OBJECT,
     properties: {
         ideas: {
-            type: Type.ARRAY,
+            type: SchemaType.ARRAY,
             description: "Eine Liste von 3 unterschiedlichen, kreativen Rezeptideen.",
             items: {
-                type: Type.OBJECT,
+                type: SchemaType.OBJECT,
                 properties: {
-                    recipeTitle: { type: Type.STRING, description: "Ein kreativer und ansprechender Titel für die Rezeptidee auf Deutsch." },
-                    shortDescription: { type: Type.STRING, description: "Eine kurze, verlockende Beschreibung des Gerichts in einem Satz auf Deutsch." }
+                    recipeTitle: { type: SchemaType.STRING, description: "Ein kreativer und ansprechender Titel für die Rezeptidee auf Deutsch." },
+                    shortDescription: { type: SchemaType.STRING, description: "Eine kurze, verlockende Beschreibung des Gerichts in einem Satz auf Deutsch." }
                 },
                 required: ["recipeTitle", "shortDescription"]
             }
@@ -164,18 +182,18 @@ const recipeIdeasSchema = {
 };
 
 const shoppingListSchema = {
-    type: Type.OBJECT,
+    type: SchemaType.OBJECT,
     properties: {
         items: {
-            type: Type.ARRAY,
+            type: SchemaType.ARRAY,
             description: "Eine Liste von Einkaufsartikeln.",
             items: {
-                type: Type.OBJECT,
+                type: SchemaType.OBJECT,
                 properties: {
-                    name: { type: Type.STRING, description: "Der Name des Artikels." },
-                    quantity: { type: Type.NUMBER, description: "Die Menge des Artikels." },
-                    unit: { type: Type.STRING, description: "Die Einheit der Menge (z.B. 'kg', 'Liter', 'Stück')." },
-                    category: { type: Type.STRING, description: "Eine empfohlene Kategorie für den Supermarkt (z.B. 'Obst & Gemüse', 'Milchprodukte')." }
+                    name: { type: SchemaType.STRING, description: "Der Name des Artikels." },
+                    quantity: { type: SchemaType.NUMBER, description: "Die Menge des Artikels." },
+                    unit: { type: SchemaType.STRING, description: "Die Einheit der Menge (z.B. 'kg', 'Liter', 'Stück')." },
+                    category: { type: SchemaType.STRING, description: "Eine empfohlene Kategorie für den Supermarkt (z.B. 'Obst & Gemüse', 'Milchprodukte')." }
                 },
                 required: ["name", "quantity", "unit"]
             }
@@ -186,6 +204,7 @@ const shoppingListSchema = {
 
 const handleGeminiError = (error: unknown, context: string): Error => {
     console.error(`Error calling Gemini for ${context}:`, error);
+    void logAppError(error, `gemini.${context}`);
     const errorMessage = (error as Error)?.message || String(error);
 
     if (errorMessage.includes('API key not valid') || errorMessage.includes('API_KEY_INVALID')) {
@@ -242,6 +261,7 @@ const constructBasePrompt = (
   return userPromptParts.join('\n');
 }
 
+export const generateRecipeIdeas = async (
   prompt: StructuredPrompt,
   pantryItems: PantryItem[],
   aiPreferences: AppSettings['aiPreferences']
@@ -404,9 +424,9 @@ export const generateShoppingList = async (
         if (errMsg.includes('Netzwerk') || errMsg.includes('KI-Dienst konnte nicht erreicht werden')) {
             // Offline-Fallback: Dummy-Einkaufsliste
             const fallbackItems = [
-                { name: 'Brot', quantity: 1, unit: 'Stück', category: 'Backwaren' },
-                { name: 'Milch', quantity: 1, unit: 'Liter', category: 'Milchprodukte' },
-                { name: 'Äpfel', quantity: 6, unit: 'Stück', category: 'Obst & Gemüse' }
+                { name: 'Brot', quantity: 1, unit: 'Stück', category: 'Backwaren', sortOrder: 0 },
+                { name: 'Milch', quantity: 1, unit: 'Liter', category: 'Milchprodukte', sortOrder: 0 },
+                { name: 'Äpfel', quantity: 6, unit: 'Stück', category: 'Obst & Gemüse', sortOrder: 0 }
             ];
             return fallbackItems;
         }
@@ -499,10 +519,10 @@ export const verifyNutritionAndAllergensWithGemini = async (
     const model = 'gemini-2.5-flash';
 
     const verificationSchema = {
-        type: Type.OBJECT,
+        type: SchemaType.OBJECT,
         properties: {
-            summary: { type: Type.STRING },
-            warnings: { type: Type.ARRAY, items: { type: Type.STRING } },
+            summary: { type: SchemaType.STRING },
+            warnings: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
         },
         required: ['summary', 'warnings'],
     };

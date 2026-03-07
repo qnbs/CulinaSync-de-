@@ -14,7 +14,7 @@ interface ChefInputProps {
     modifiers: string[];
     setModifiers: (v: string[]) => void;
     pantryItems: PantryItem[];
-    promptRef: React.RefObject<HTMLTextAreaElement>;
+    promptRef: React.RefObject<HTMLTextAreaElement | null>;
     onSubmit: () => void;
     onSurpriseMe: () => void;
     history: StructuredPrompt[];

@@ -4,7 +4,6 @@ import storage from 'redux-persist/lib/storage';
 
 import uiReducer from './slices/uiSlice';
 import settingsReducer from './slices/settingsSlice';
-import aiChefReducer from './slices/aiChefSlice';
 import shoppingListReducer from './slices/shoppingListSlice';
 import { listenerMiddleware } from './listenerMiddleware';
 
@@ -18,7 +17,6 @@ const persistedSettingsReducer = persistReducer(settingsPersistConfig, settingsR
 const rootReducer = combineReducers({
   ui: uiReducer,
   settings: persistedSettingsReducer,
-  aiChef: aiChefReducer,
   shoppingList: shoppingListReducer,
 });
 

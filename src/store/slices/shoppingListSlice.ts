@@ -82,7 +82,9 @@ export const updateItemAsync = createAsyncThunk('shoppingList/updateItem', async
 
 export const deleteItemAsync = createAsyncThunk('shoppingList/deleteItem', async (id: number) => {
     const { db } = await import('../../services/dbInstance');
-    await db.shoppingList.delete(id);
+    await db.transaction('rw', db.shoppingList, async () => {
+        await db.shoppingList.delete(id);
+    });
     return id;
 });
 

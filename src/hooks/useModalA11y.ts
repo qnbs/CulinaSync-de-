@@ -3,8 +3,8 @@ import { RefObject, useEffect, useRef } from 'react';
 interface UseModalA11yOptions {
   isOpen: boolean;
   onClose: () => void;
-  containerRef: RefObject<HTMLElement>;
-  initialFocusRef?: RefObject<HTMLElement>;
+  containerRef: RefObject<HTMLElement | null>;
+  initialFocusRef?: RefObject<HTMLElement | null>;
   closeOnEscape?: boolean;
 }
 

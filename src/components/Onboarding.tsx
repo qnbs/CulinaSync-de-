@@ -48,12 +48,14 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
         setSeedLoading(true);
         try {
             const now = Date.now();
-            await db.pantry.bulkAdd([
-                { name: 'Tomaten', quantity: 6, unit: 'Stk', category: 'Gemuese', createdAt: now, updatedAt: now },
-                { name: 'Spaghetti', quantity: 1, unit: 'Packung', category: 'Trockenware', createdAt: now, updatedAt: now },
-                { name: 'Olivenoel', quantity: 1, unit: 'Flasche', category: 'Grundlagen', createdAt: now, updatedAt: now },
-                { name: 'Knoblauch', quantity: 3, unit: 'Zehen', category: 'Gemuese', createdAt: now, updatedAt: now },
-            ]);
+            await db.transaction('rw', db.pantry, async () => {
+                await db.pantry.bulkAdd([
+                    { name: 'Tomaten', quantity: 6, unit: 'Stk', category: 'Gemuese', createdAt: now, updatedAt: now },
+                    { name: 'Spaghetti', quantity: 1, unit: 'Packung', category: 'Trockenware', createdAt: now, updatedAt: now },
+                    { name: 'Olivenoel', quantity: 1, unit: 'Flasche', category: 'Grundlagen', createdAt: now, updatedAt: now },
+                    { name: 'Knoblauch', quantity: 3, unit: 'Zehen', category: 'Gemuese', createdAt: now, updatedAt: now },
+                ]);
+            });
             setSeedDone(true);
         } finally {
             setSeedLoading(false);

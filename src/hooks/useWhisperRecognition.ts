@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
-import { transcribeWithWhisper, WhisperResult } from '../services/whisperService';
+import { WhisperResult } from '../services/whisperService';
+import { getAppServices } from '../services/serviceRegistry';
 
 export interface WhisperRecognitionHook {
   isListening: boolean;
@@ -33,7 +34,7 @@ export const useWhisperRecognition = (): WhisperRecognitionHook => {
       mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
         try {
-          const result: WhisperResult = await transcribeWithWhisper(audioBlob);
+          const result: WhisperResult = await getAppServices().whisper.transcribeWithWhisper(audioBlob);
           setTranscript(result.text);
         } catch (err: any) {
           setError(err.message || 'Transkription fehlgeschlagen');

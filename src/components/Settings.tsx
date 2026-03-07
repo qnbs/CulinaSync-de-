@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppSettings, BeforeInstallPromptEvent } from '../types';
 import { Save, RotateCcw } from 'lucide-react';
@@ -11,12 +11,13 @@ import { SettingsSidebar } from './settings/SettingsSidebar';
 import { AppearancePanel } from './settings/panels/AppearancePanel';
 import { AiChefPanel } from './settings/panels/AiChefPanel';
 import { DataPanel } from './settings/panels/DataPanel';
-import { VoicePanel } from './settings/panels/VoicePanel';
 import { ModulesPanel } from './settings/panels/ModulesPanel';
 import { ApiKeyPanel } from './settings/panels/ApiKeyPanel';
 import { PolicyPanel } from './settings/panels/PolicyPanel';
 import { HealthConnectPanel } from './settings/panels/HealthConnectPanel';
 import { CommunityPanel } from './settings/panels/CommunityPanel';
+
+const VoicePanel = lazy(() => import('./settings/panels/VoicePanel').then((module) => ({ default: module.VoicePanel })));
 
 const ACCENT_COLORS: Record<AppSettings['appearance']['accentColor'], Record<string, string>> = {
   amber: { '300': '#fcd34d', '400': '#fbbf24', '500': '#f59e0b', glow: 'rgba(251, 191, 36, 0.3)', 'glow-soft': 'rgba(251, 191, 36, 0.2)', '400-semi': 'rgba(251, 191, 36, 0.8)' },
@@ -99,7 +100,11 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
             case 'community': return <CommunityPanel />;
             case 'apikey': return <ApiKeyPanel addToast={addToastWrapper} />;
             case 'data': return <DataPanel addToast={addToastWrapper} installPromptEvent={installPromptEvent} onInstallPWA={onInstallPWA} isStandalone={isStandalone} />;
-            case 'speech': return <VoicePanel settings={localSettings} onChange={handleChange} />;
+            case 'speech': return (
+                <Suspense fallback={<div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 text-zinc-400">Audio-Modul wird geladen...</div>}>
+                    <VoicePanel settings={localSettings} onChange={handleChange} />
+                </Suspense>
+            );
             case 'modules': return <ModulesPanel settings={localSettings} onChange={handleChange} />;
             default: return null;
         }

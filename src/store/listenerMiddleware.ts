@@ -1,6 +1,5 @@
 import { createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit';
 import { addToast } from './slices/uiSlice';
-import { generateRecipeIdeasAsync, generateFullRecipeAsync } from './slices/aiChefSlice';
 import {
   clearListAsync,
   generateFromPlanAsync,
@@ -14,8 +13,6 @@ export const listenerMiddleware = createListenerMiddleware();
 
 listenerMiddleware.startListening({
   matcher: isAnyOf(
-    generateRecipeIdeasAsync.rejected, 
-    generateFullRecipeAsync.rejected,
     clearListAsync.rejected,
     generateFromPlanAsync.rejected,
     addItemAsync.rejected,

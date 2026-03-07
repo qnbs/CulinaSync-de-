@@ -1,5 +1,6 @@
 node_modules
 dist
+storybook-static
 
 # Environment files with secrets
 .env

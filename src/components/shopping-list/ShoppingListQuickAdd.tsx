@@ -3,6 +3,7 @@ import { Plus, Send, Archive, Mic, Camera, LoaderCircle } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { lookupBarcodeItemName, parseReceiptTextToShoppingItems } from '../../services/smartInputService';
+import { getAppServices } from '../../services/serviceRegistry';
 
 interface SpeechRecognitionAlternative {
     transcript: string;
@@ -99,25 +100,12 @@ export const ShoppingListQuickAdd = () => {
         if (!file) return;
         setIsScanning(true);
         try {
-            const QuaggaModule = await import('@ericblade/quagga2');
-            const objectUrl = URL.createObjectURL(file);
-            try {
-                const result = await QuaggaModule.default.decodeSingle({
-                    src: objectUrl,
-                    numOfWorkers: 0,
-                    inputStream: { size: 800 },
-                    decoder: { readers: ['ean_reader', 'ean_8_reader', 'upc_reader', 'upc_e_reader'] },
-                });
+            const code = await getAppServices().scanner.scanBarcodeFromImage(file);
+            if (!code) return;
 
-                const code = result?.codeResult?.code;
-                if (!code) return;
-
-                const itemName = lookupBarcodeItemName(code) || code;
-                setQuickAddItem((prev) => (prev ? `${prev}, ${itemName}` : itemName));
-                addItemInputRef.current?.focus();
-            } finally {
-                URL.revokeObjectURL(objectUrl);
-            }
+            const itemName = lookupBarcodeItemName(code) || code;
+            setQuickAddItem((prev: string) => (prev ? `${prev}, ${itemName}` : itemName));
+            addItemInputRef.current?.focus();
         } catch {
             // Keep silent here to avoid noisy UX; user can retry with another image.
         } finally {
@@ -130,16 +118,10 @@ export const ShoppingListQuickAdd = () => {
         if (!file) return;
         setIsScanning(true);
         try {
-            const TesseractModule = await import('tesseract.js');
-            const objectUrl = URL.createObjectURL(file);
-            try {
-                const result = await TesseractModule.recognize(objectUrl, 'deu+eng');
-                const parsedItems = parseReceiptTextToShoppingItems(result.data.text);
-                if (parsedItems.length > 0) {
-                    await handleBulkAdd(parsedItems.map((item) => ({ ...item, recipeId: undefined })));
-                }
-            } finally {
-                URL.revokeObjectURL(objectUrl);
+            const text = await getAppServices().scanner.recognizeTextFromImage(file, 'deu+eng');
+            const parsedItems = parseReceiptTextToShoppingItems(text);
+            if (parsedItems.length > 0) {
+                await handleBulkAdd(parsedItems.map((item) => ({ ...item, recipeId: undefined })));
             }
         } catch {
             // Ignore and let user retry.
@@ -190,7 +172,7 @@ export const ShoppingListQuickAdd = () => {
                         </button>
                         <button
                             type="button"
-                            onClick={() => setScanModeOpen((prev) => !prev)}
+                            onClick={() => setScanModeOpen((prev: boolean) => !prev)}
                             className="flex-shrink-0 flex items-center justify-center bg-zinc-800 text-zinc-300 h-10 w-10 rounded-xl hover:bg-zinc-700 transition-colors"
                             aria-label={t('shoppingList.quickAdd.cameraAria')}
                         >

@@ -8,7 +8,6 @@ import { processCommand, executeVoiceAction } from './services/voiceCommands';
 import { CheckCircle, Bot, Milk, BookOpen, CalendarDays, ShoppingCart, Settings as SettingsIcon, HelpCircle, PlusCircle, RefreshCw, Trash2, Download, Upload, Mic, AlertTriangle, Info, X } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from './store/hooks';
 import { setCurrentPage, setCommandPaletteOpen, addToast as addToastAction, removeToast as removeToastAction } from './store/slices/uiSlice';
-import { handleDeepLink } from './deepLinking';
 import { WhatsNewModal } from './components/WhatsNewModal';
 import { GlobalErrorBoundary } from './components/GlobalErrorBoundary';
 
@@ -49,6 +48,7 @@ const App: React.FC = () => {
   const [isStandalone, setIsStandalone] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showInstallReminder, setShowInstallReminder] = useState(false);
+  const [showUpdateReadyNotice, setShowUpdateReadyNotice] = useState(false);
 
   useEffect(() => {
     void import('./services/db');
@@ -104,6 +104,15 @@ const App: React.FC = () => {
     }
   }, [installPromptEvent, isStandalone]);
 
+  useEffect(() => {
+    const handleUpdateReady = () => {
+      setShowUpdateReadyNotice(true);
+    };
+
+    window.addEventListener('culinasync:pwa-update-ready', handleUpdateReady);
+    return () => window.removeEventListener('culinasync:pwa-update-ready', handleUpdateReady);
+  }, []);
+
   const handleOnboardingComplete = () => {
     localStorage.setItem('culinaSyncOnboarded', 'true');
     setShowOnboarding(false);
@@ -154,6 +163,11 @@ const App: React.FC = () => {
   const handleInstallDismiss = () => {
     window.localStorage.setItem('culinaSyncInstallDismissed', 'true');
     setShowInstallReminder(false);
+  };
+
+  const handleReloadForUpdate = () => {
+    setShowUpdateReadyNotice(false);
+    window.location.reload();
   };
 
   const {
@@ -307,6 +321,21 @@ const App: React.FC = () => {
               </button>
               <button onClick={handleInstallDismiss} className="rounded-lg border border-zinc-800 px-3 py-2 text-sm font-semibold text-zinc-500">
                 {t('app.installReminder.dismiss')}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {showUpdateReadyNotice && (
+          <div className="fixed bottom-24 left-4 z-40 w-[min(92vw,24rem)] rounded-2xl border border-sky-400/30 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur">
+            <h4 className="text-sm font-bold text-zinc-100">Update bereit</h4>
+            <p className="mt-1 text-sm text-zinc-400">Eine neue Version wurde installiert und kann nach dem Neuladen sofort genutzt werden.</p>
+            <div className="mt-4 flex gap-2">
+              <button onClick={handleReloadForUpdate} className="flex-1 rounded-lg bg-sky-400 px-3 py-2 text-sm font-bold text-zinc-950">
+                Neu laden
+              </button>
+              <button onClick={() => setShowUpdateReadyNotice(false)} className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-semibold text-zinc-300">
+                Spaeter
               </button>
             </div>
           </div>

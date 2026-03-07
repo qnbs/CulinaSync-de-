@@ -1,18 +1,18 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useActionState, useState, useMemo, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Recipe, PantryItem, IngredientItem } from '../types';
 import { db } from '../services/dbInstance';
 import { addRecipe, deleteRecipe, addMissingIngredientsToShoppingList, updateRecipeImage } from '../services/repositories/recipeRepository';
 import { addRecipeToMealPlan } from '../services/repositories/mealPlanRepository';
 import { addShoppingListItem } from '../services/repositories/shoppingListRepository';
-import { analyzeRecipeNutritionAndAllergens } from '../services/nutritionAllergyService';
-import { verifyNutritionAndAllergensWithGemini } from '../services/geminiService';
+import type { NutritionAllergyReport } from '../services/nutritionAllergyService';
+import { analyzeRecipeNutritionInWorker } from '../services/nutritionWorkerService';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { ArrowLeft, Clock, Users, BarChart, UtensilsCrossed, Lightbulb, Save, Trash2, CheckCircle, CalendarPlus, FileDown, Star, ChevronDown, Plus, Minus, CookingPot, ShoppingCartIcon, AlertCircle, ImagePlus, LoaderCircle, ShieldAlert } from 'lucide-react';
 import { scaleIngredientQuantity } from '../services/utils';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { addToast, setVoiceAction } from '../store/slices/uiSlice';
-import { generateImageAsync } from '../store/slices/aiChefSlice';
+import { generateChefImage } from '../features/ai-chef/commands/generateChefImage';
 import CookModeView from './CookModeView';
 import { useModalA11y } from '../hooks/useModalA11y';
 
@@ -21,6 +21,12 @@ interface RecipeDetailProps {
   recipe: Recipe;
   onBack: () => void;
 }
+
+type ImageActionState = {
+  recipeTitle: string | null;
+  imageUrl: string | null;
+  error: string | null;
+};
 
 const MealPlanModal: React.FC<{recipeId: number, onClose: () => void, onSave: () => void}> = ({recipeId, onClose, onSave}) => {
   const { t } = useTranslation();
@@ -73,7 +79,6 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { voiceAction } = useAppSelector(state => state.ui);
-  const { imageStatus, generatedImageUrl } = useAppSelector(state => state.aiChef);
 
   const [currentRecipe, setCurrentRecipe] = useState(recipe);
   const [isSaved, setIsSaved] = useState(!!currentRecipe.id);
@@ -81,10 +86,43 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
   const [isExportOpen, setExportOpen] = useState(false);
   const [isCookMode, setIsCookMode] = useState(false);
   const [isGeminiCheckLoading, setGeminiCheckLoading] = useState(false);
+  const [isNutritionLoading, setIsNutritionLoading] = useState(true);
   const [geminiVerification, setGeminiVerification] = useState<{ summary: string; warnings: string[] } | null>(null);
+  const [nutritionReport, setNutritionReport] = useState<NutritionAllergyReport>({
+    calories: 0,
+    protein: 0,
+    fat: 0,
+    carbs: 0,
+    allergens: [],
+    matchedIngredients: 0,
+    totalIngredients: 0,
+  });
+
+  const [imageState, requestRecipeImage, isGeneratingImage] = useActionState<ImageActionState, string>(async (
+    _previousState,
+    recipeTitle: string,
+  ): Promise<ImageActionState> => {
+    try {
+      return {
+        recipeTitle,
+        imageUrl: await generateChefImage(recipeTitle),
+        error: null,
+      };
+    } catch (error) {
+      return {
+        recipeTitle,
+        imageUrl: null,
+        error: error instanceof Error ? error.message : t('common.error'),
+      };
+    }
+  }, {
+    recipeTitle: null,
+    imageUrl: null,
+    error: null,
+  });
 
   // If the recipe has an image, use it. If not, and we just generated one, use that.
-  const displayImage = currentRecipe.imageUrl || (currentRecipe.recipeTitle === recipe.recipeTitle ? generatedImageUrl : null);
+  const displayImage = currentRecipe.imageUrl || (currentRecipe.recipeTitle === imageState.recipeTitle ? imageState.imageUrl : null);
 
   const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
   const pantryMap: Map<string, number> = useMemo(() => new Map(pantryItems?.map((p: PantryItem) => [p.name.toLowerCase(), p.quantity]) || []), [pantryItems]);
@@ -103,11 +141,31 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
       return currentServings / originalServings;
   }, [currentServings, originalServings]);
 
-  const nutritionReport = useMemo(() => analyzeRecipeNutritionAndAllergens(currentRecipe), [currentRecipe]);
+  useEffect(() => {
+    let isActive = true;
+    setIsNutritionLoading(true);
+
+    void analyzeRecipeNutritionInWorker(currentRecipe)
+      .then((report) => {
+        if (isActive) {
+          setNutritionReport(report);
+        }
+      })
+      .finally(() => {
+        if (isActive) {
+          setIsNutritionLoading(false);
+        }
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [currentRecipe]);
 
   const handleGeminiNutritionCheck = async () => {
     setGeminiCheckLoading(true);
     try {
+      const { verifyNutritionAndAllergensWithGemini } = await import('../services/geminiService');
       const verification = await verifyNutritionAndAllergensWithGemini(currentRecipe, {
         calories: nutritionReport.calories,
         protein: nutritionReport.protein,
@@ -154,16 +212,26 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
   };
 
   const handleGenerateImage = async () => {
-      const result = await dispatch(generateImageAsync(currentRecipe.recipeTitle));
-      if (generateImageAsync.fulfilled.match(result)) {
-          // If recipe is already saved, update it in DB
-          if (currentRecipe.id) {
-              await updateRecipeImage(currentRecipe.id, result.payload);
-              setCurrentRecipe(prev => ({ ...prev, imageUrl: result.payload }));
-                dispatch(addToast({ message: t('recipeDetail.toast.imageSaved') }));
-          }
-      }
+      requestRecipeImage(currentRecipe.recipeTitle);
   };
+
+  useEffect(() => {
+    if (imageState.error) {
+      dispatch(addToast({ message: imageState.error, type: 'error' }));
+    }
+  }, [imageState.error, dispatch]);
+
+  useEffect(() => {
+    if (!imageState.imageUrl || imageState.recipeTitle !== currentRecipe.recipeTitle) {
+      return;
+    }
+
+    setCurrentRecipe(prev => ({ ...prev, imageUrl: imageState.imageUrl ?? prev.imageUrl }));
+    if (currentRecipe.id) {
+      void updateRecipeImage(currentRecipe.id, imageState.imageUrl)
+        .then(() => dispatch(addToast({ message: t('recipeDetail.toast.imageSaved') })));
+    }
+  }, [currentRecipe.id, currentRecipe.recipeTitle, dispatch, imageState.imageUrl, imageState.recipeTitle, t]);
   
   const handleExport = async (format: 'pdf' | 'csv' | 'json' | 'md' | 'txt') => {
     setExportOpen(false);
@@ -189,7 +257,8 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
     if (currentRecipe.id) {
         try {
             const newIsFavorite = !currentRecipe.isFavorite;
-            await db.recipes.update(currentRecipe.id, { isFavorite: newIsFavorite, updatedAt: Date.now() });
+        const { setRecipeFavorite } = await import('../services/repositories/recipeRepository');
+        await setRecipeFavorite(currentRecipe.id, newIsFavorite);
             setCurrentRecipe(prev => ({...prev, isFavorite: newIsFavorite}));
             dispatch(addToast({message: newIsFavorite ? t('recipeDetail.toast.favoriteAdded') : t('recipeDetail.toast.favoriteRemoved')}));
         } catch (error) {
@@ -263,7 +332,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
               </>
           ) : (
               <div className="flex flex-col items-center justify-center h-full text-zinc-500">
-                  {imageStatus === 'loading' ? (
+                {isGeneratingImage ? (
                        <div className="flex flex-col items-center gap-2 animate-pulse text-[var(--color-accent-400)]">
                            <LoaderCircle size={40} className="animate-spin" />
                              <span className="text-sm font-medium">{t('recipeDetail.generatingImage')}</span>
@@ -317,10 +386,10 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
             <button
               type="button"
               onClick={handleGeminiNutritionCheck}
-              disabled={isGeminiCheckLoading}
+              disabled={isGeminiCheckLoading || isNutritionLoading}
               className="py-1.5 px-3 rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors text-sm font-medium disabled:opacity-60"
             >
-              {isGeminiCheckLoading ? 'Gemini prueft...' : 'Mit Gemini verifizieren'}
+              {isGeminiCheckLoading ? 'Gemini prueft...' : isNutritionLoading ? 'Analyse laeuft...' : 'Mit Gemini verifizieren'}
             </button>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm mb-3">

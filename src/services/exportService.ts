@@ -261,7 +261,7 @@ export const exportShoppingListToPdf = async (list: ShoppingListItem[]) => {
 
 // --- Full Data Export ---
 
-const getFullData = async () => {
+export const getFullData = async () => {
     const [pantry, recipes, mealPlan, shoppingList] = await Promise.all([
         db.pantry.toArray(),
         db.recipes.toArray(),
