@@ -48,7 +48,12 @@ export const useWhisperRecognition = (): WhisperRecognitionHook => {
   };
 
   const stopListening = () => {
-    mediaRecorderRef.current?.stop();
+    const recorder = mediaRecorderRef.current;
+    if (recorder) {
+      recorder.stop();
+      // MediaStream-Tracks stoppen um Mikrofon freizugeben
+      recorder.stream?.getTracks().forEach(t => t.stop());
+    }
     setIsListening(false);
   };
 

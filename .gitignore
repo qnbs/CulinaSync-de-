@@ -2,6 +2,13 @@ node_modules
 dist
 storybook-static
 
+# Generated output
+coverage/
+reports/
+*.gz
+*.br
+stats.html
+
 # Environment files with secrets
 .env
 .env.local

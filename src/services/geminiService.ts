@@ -1,7 +1,7 @@
 // --- Gemini Vision: Zutaten aus Bild extrahieren ---
 export const extractPantryItemsFromImage = async (imageFile: File): Promise<string> => {
     const ai = await getAIClient();
-    const model = "gemini-pro-vision";
+    const model = "gemini-2.5-flash";
     // Bild als base64 kodieren
     const fileToBase64 = (file: File) => new Promise<string>((resolve, reject) => {
         const reader = new FileReader();

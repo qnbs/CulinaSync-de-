@@ -5,9 +5,6 @@
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
   <url>
     <loc>https://qnbs.github.io/CulinaSync-de-/#features</loc>
     <changefreq>weekly</changefreq>
