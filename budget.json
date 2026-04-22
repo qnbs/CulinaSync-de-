@@ -1,7 +1,7 @@
 {
   "resourceSizes": [
     { "resourceType": "total", "budget": 250 },
-    { "resourceType": "script", "budget": 130 },
+    { "resourceType": "script", "budget": 155 },
     { "resourceType": "style", "budget": 40 },
     { "resourceType": "image", "budget": 60 }
   ],

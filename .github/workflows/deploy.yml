@@ -33,36 +33,42 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      # 2) Install LTS Node.js and enable npm dependency cache.
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      # 2) Install pnpm before enabling Node.js package manager cache.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
         with:
-          node-version: 'lts/*'
-          cache: 'npm'
+          version: 9
 
-      # 3) Install exact lockfile dependencies.
+      # 3) Install Node.js 22 and enable pnpm dependency cache.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      # 4) Install exact lockfile dependencies.
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
-      # 4) Guard quality before deployment.
+      # 5) Guard quality before deployment.
       - name: Lint
-        run: npm run lint
+        run: pnpm run lint
 
       - name: Test
-        run: npm test
+        run: pnpm run test
 
-      # 5) Create production build into ./dist.
+      # 6) Create production build into ./dist.
       - name: Build
-        run: npm run build
+        run: pnpm run build
 
       - name: Check bundle budget
-        run: npm run check:bundle-budget
+        run: pnpm run check:bundle-budget
 
-      # 6) Configure GitHub Pages deployment metadata.
+      # 7) Configure GitHub Pages deployment metadata.
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      # 7) Upload built site artifact from ./dist.
+      # 8) Upload built site artifact from ./dist.
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
