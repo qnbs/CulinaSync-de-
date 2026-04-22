@@ -88,6 +88,17 @@
 - Security: CodeQL-Analyse bei PRs und Push auf `main` (`.github/workflows/codeql.yml`)
 - `base` in `vite.config.ts` wird dynamisch gesetzt: `/CulinaSync-de-/` in CI, `/` lokal.
 
+## Terminal-Nutzung
+- Terminal-Befehle dürfen ausgeführt werden, wenn sie zur Aufgabe beitragen (z. B. `pnpm install`, `pnpm run build`, `tsc --noEmit`, `pnpm test`).
+- Verwende immer nur **ein einziges** Terminal.
+- Öffne niemals ein neues Terminal, solange ein bestehendes aktiv ist.
+- Führe mehrere Befehle nach Möglichkeit nacheinander im selben Terminal aus, z. B. mit `&&` oder `;`.
+- Kombiniere Befehle, wenn es sinnvoll ist, statt sie in neuen oder separaten Terminals zu starten.
+- Warte geduldig auf die Ausgabe eines Befehls, bevor du den nächsten startest. Gehe nicht vorschnell von einem Hänger aus, nur weil ein Schritt 5 bis 15 Sekunden dauert.
+- Wenn ein Befehl länger läuft, frage zuerst nach, bevor du parallel etwas Neues startest.
+- Long-Running-Prozesse wie `pnpm run dev` oder andere Dev-Server dürfen nur dann im Hintergrund gestartet werden, wenn dies ausdrücklich erlaubt wurde.
+- Beispiel für die gewünschte Nutzung eines einzelnen Terminals: `cd frontend && pnpm run dev`.
+
 ## Projekt-spezifische Konventionen
 - Bevorzuge deutsche UX-Texte; Änderungen in Übersetzungen in `src/locales/de/translation.json` und `src/locales/en/translation.json` synchron halten.
 - Behalte bestehende Namensmuster bei: Async-Thunks mit Suffix `Async`, UI-Hooks kapseln Handler/Toasts, Services enthalten Geschäftslogik.

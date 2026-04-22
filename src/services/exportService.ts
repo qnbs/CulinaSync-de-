@@ -15,6 +15,16 @@ const SAFE_TEXT_MIME_TYPES = new Set([
     'text/plain;charset=utf-8',
 ]);
 
+const SAFE_FILENAME_EXTENSIONS: Record<string, string> = {
+    'application/json': '.json',
+    'application/json;charset=utf-8': '.json',
+    'application/pdf': '.pdf',
+    'text/calendar;charset=utf-8': '.ics',
+    'text/csv;charset=utf-8': '.csv',
+    'text/markdown;charset=utf-8': '.md',
+    'text/plain;charset=utf-8': '.txt',
+};
+
 const getPapaModule = async () => {
     if (!papaModulePromise) {
         papaModulePromise = import('papaparse');
@@ -30,13 +40,22 @@ const getJsPdfCtor = async () => {
     return jsPDF;
 };
 
+const sanitizeFilename = (filename: string, mimeType: string) => {
+    const safeExtension = SAFE_FILENAME_EXTENSIONS[mimeType] ?? '.bin';
+    const withoutPath = filename.split(/[\\/]/).pop() ?? 'download';
+    const withoutDangerousChars = withoutPath.replace(/[^a-zA-Z0-9._-]+/g, '_').replace(/^\.+/, '');
+    const baseName = withoutDangerousChars.replace(/\.[^.]*$/, '') || 'download';
+    return `${baseName}${safeExtension}`;
+};
+
 // Helper function to trigger download
 const downloadFile = (filename: string, content: string | Blob, mimeType: string) => {
     const normalizedMimeType = SAFE_TEXT_MIME_TYPES.has(mimeType) ? mimeType : 'application/octet-stream';
-    const blob = content instanceof Blob ? content : new Blob([content], { type: normalizedMimeType });
+    const blob = content instanceof Blob ? new Blob([content], { type: normalizedMimeType }) : new Blob([content], { type: normalizedMimeType });
+    const safeFilename = sanitizeFilename(filename, normalizedMimeType);
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = filename;
+    link.download = safeFilename;
     link.rel = 'noopener noreferrer';
     document.body.appendChild(link);
     link.click();

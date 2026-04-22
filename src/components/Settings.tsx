@@ -26,8 +26,106 @@ const ACCENT_COLORS: Record<AppSettings['appearance']['accentColor'], Record<str
   emerald: { '300': '#6ee7b7', '400': '#34d399', '500': '#10b981', glow: 'rgba(16, 185, 129, 0.3)', 'glow-soft': 'rgba(16, 185, 129, 0.2)', '400-semi': 'rgba(52, 211, 153, 0.8)' },
 };
 
-const BLOCKED_PATH_SEGMENTS = new Set(['__proto__', 'prototype', 'constructor']);
-const hasOwn = (value: object, key: string) => Object.prototype.hasOwnProperty.call(value, key);
+type SettingsPath =
+    | 'language'
+    | 'displayName'
+    | 'defaultServings'
+    | 'weekStart'
+    | 'shoppingList.autoCategorize'
+    | 'pantry.expiryWarningDays'
+    | 'appearance.accentColor'
+    | 'appearance.highContrast'
+    | 'appearance.kitchenMode'
+    | 'appearance.largeText'
+    | 'aiPreferences.creativityLevel'
+    | 'aiPreferences.dietaryRestrictions'
+    | 'aiPreferences.preferredCuisines'
+    | 'aiPreferences.customInstruction'
+    | 'policies.avoidAllergens'
+    | 'policies.ingredientBlacklist'
+    | 'policies.minPantryStock'
+    | 'speechSynthesis.voice'
+    | 'speechSynthesis.rate'
+    | 'speechSynthesis.pitch';
+
+const isAccentColor = (value: unknown): value is AppSettings['appearance']['accentColor'] =>
+    typeof value === 'string' && ['amber', 'rose', 'sky', 'emerald'].includes(value);
+
+const isLanguage = (value: unknown): value is AppSettings['language'] => value === 'de' || value === 'en';
+const isWeekStart = (value: unknown): value is AppSettings['weekStart'] => value === 'Monday' || value === 'Sunday';
+const isStringArray = (value: unknown): value is string[] => Array.isArray(value) && value.every((entry) => typeof entry === 'string');
+const isMinPantryStock = (value: unknown): value is NonNullable<AppSettings['policies']>['minPantryStock'] =>
+    Array.isArray(value) && value.every((entry) => {
+        if (!entry || typeof entry !== 'object') {
+            return false;
+        }
+
+        const candidate = entry as { name?: unknown; min?: unknown };
+        return typeof candidate.name === 'string' && typeof candidate.min === 'number' && Number.isFinite(candidate.min) && candidate.min >= 0;
+    });
+
+const settingsMutators: Record<SettingsPath, (draft: AppSettings, value: unknown) => void> = {
+    language: (draft, value) => {
+        if (isLanguage(value)) draft.language = value;
+    },
+    displayName: (draft, value) => {
+        if (typeof value === 'string') draft.displayName = value;
+    },
+    defaultServings: (draft, value) => {
+        if (typeof value === 'number' && Number.isFinite(value) && value >= 1) draft.defaultServings = value;
+    },
+    weekStart: (draft, value) => {
+        if (isWeekStart(value)) draft.weekStart = value;
+    },
+    'shoppingList.autoCategorize': (draft, value) => {
+        if (typeof value === 'boolean') draft.shoppingList.autoCategorize = value;
+    },
+    'pantry.expiryWarningDays': (draft, value) => {
+        if (typeof value === 'number' && Number.isFinite(value) && value >= 1) draft.pantry.expiryWarningDays = value;
+    },
+    'appearance.accentColor': (draft, value) => {
+        if (isAccentColor(value)) draft.appearance.accentColor = value;
+    },
+    'appearance.highContrast': (draft, value) => {
+        if (typeof value === 'boolean') draft.appearance.highContrast = value;
+    },
+    'appearance.kitchenMode': (draft, value) => {
+        if (typeof value === 'boolean') draft.appearance.kitchenMode = value;
+    },
+    'appearance.largeText': (draft, value) => {
+        if (typeof value === 'boolean') draft.appearance.largeText = value;
+    },
+    'aiPreferences.creativityLevel': (draft, value) => {
+        if (typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1) draft.aiPreferences.creativityLevel = value;
+    },
+    'aiPreferences.dietaryRestrictions': (draft, value) => {
+        if (isStringArray(value)) draft.aiPreferences.dietaryRestrictions = value;
+    },
+    'aiPreferences.preferredCuisines': (draft, value) => {
+        if (isStringArray(value)) draft.aiPreferences.preferredCuisines = value;
+    },
+    'aiPreferences.customInstruction': (draft, value) => {
+        if (typeof value === 'string') draft.aiPreferences.customInstruction = value;
+    },
+    'policies.avoidAllergens': (draft, value) => {
+        if (isStringArray(value)) draft.policies = { ...(draft.policies ?? {}), avoidAllergens: value };
+    },
+    'policies.ingredientBlacklist': (draft, value) => {
+        if (isStringArray(value)) draft.policies = { ...(draft.policies ?? {}), ingredientBlacklist: value };
+    },
+    'policies.minPantryStock': (draft, value) => {
+        if (isMinPantryStock(value)) draft.policies = { ...(draft.policies ?? {}), minPantryStock: value };
+    },
+    'speechSynthesis.voice': (draft, value) => {
+        if (value === null || typeof value === 'string') draft.speechSynthesis.voice = value;
+    },
+    'speechSynthesis.rate': (draft, value) => {
+        if (typeof value === 'number' && Number.isFinite(value) && value >= 0.5 && value <= 2) draft.speechSynthesis.rate = value;
+    },
+    'speechSynthesis.pitch': (draft, value) => {
+        if (typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 2) draft.speechSynthesis.pitch = value;
+    },
+};
 
 interface SettingsProps {
     installPromptEvent: BeforeInstallPromptEvent | null;
@@ -76,26 +174,15 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
     };
 
     const handleChange = useCallback((path: string, value: unknown) => {
-        const keys = path.split('.');
-        if (keys.length === 0 || keys.some((key) => BLOCKED_PATH_SEGMENTS.has(key))) {
+        const mutator = settingsMutators[path as SettingsPath];
+        if (!mutator) {
             return;
         }
 
         setDraftSettings(prev => {
             const sourceState = prev ?? globalSettings;
             const newState = structuredClone(sourceState);
-            let current: Record<string, unknown> = newState as unknown as Record<string, unknown>;
-            for (let i = 0; i < keys.length - 1; i++) {
-                const next = current[keys[i]];
-                if (!next || typeof next !== 'object' || !hasOwn(current, keys[i])) {
-                    return sourceState;
-                }
-                current = next as Record<string, unknown>;
-            }
-            if (!hasOwn(current, keys[keys.length - 1])) {
-                return sourceState;
-            }
-            current[keys[keys.length - 1]] = value;
+            mutator(newState, value);
             return newState;
         });
     }, [globalSettings]);

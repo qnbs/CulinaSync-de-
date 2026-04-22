@@ -82,5 +82,27 @@
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-pwa": "^0.20.0",
     "vitest": "^4.0.18"
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "allowAny": [
+        "react",
+        "react-dom",
+        "eslint",
+        "vite",
+        "esbuild"
+      ]
+    },
+    "allowedDeprecatedVersions": {
+      "deep-diff": "*",
+      "glob": "*",
+      "node-domexception": "*",
+      "popper.js": "*"
+    },
+    "overrides": {
+      "glob": "^11.0.0",
+      "source-map": "^0.7.4",
+      "sourcemap-codec": "npm:@jridgewell/sourcemap-codec@^1.4.15"
+    }
   }
 }
