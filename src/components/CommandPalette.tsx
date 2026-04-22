@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Search, LucideProps, Milk, BookOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { db } from '../services/dbInstance';
@@ -6,6 +6,8 @@ import { Recipe, PantryItem } from '../types';
 import { useAppDispatch } from '../store/hooks';
 import { navigateToItem as navigateToItemAction, setCurrentPage, setVoiceAction } from '../store/slices/uiSlice';
 import { useModalA11y } from '../hooks/useModalA11y';
+
+const EMPTY_DB_SEARCH_RESULTS = { recipes: [], pantry: [] } as const;
 
 export interface Command {
     id: string;
@@ -32,27 +34,34 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
     const dispatch = useAppDispatch();
     const [searchTerm, setSearchTerm] = useState('');
     const [activeIndex, setActiveIndex] = useState(0);
-    const [dbSearchResults, setDbSearchResults] = useState<{recipes: Recipe[], pantry: PantryItem[]}>({recipes: [], pantry: []});
+    const [dbSearchResults, setDbSearchResults] = useState<{recipes: Recipe[], pantry: PantryItem[]}>({ recipes: [], pantry: [] });
     const modalRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
+    const handleClose = useCallback(() => {
+        setSearchTerm('');
+        setActiveIndex(0);
+        setDbSearchResults({ recipes: [], pantry: [] });
+        onClose();
+    }, [onClose]);
+
     useModalA11y({
         isOpen,
-        onClose,
+        onClose: handleClose,
         containerRef: modalRef,
         initialFocusRef: inputRef,
         closeOnEscape: false,
     });
 
-    const navigateToItem = (page: 'recipes' | 'pantry', id: number) => {
+    const navigateToItem = useCallback((page: 'recipes' | 'pantry', id: number) => {
         dispatch(navigateToItemAction({ page, id }));
-    };
+    }, [dispatch]);
 
-    const handleGlobalSearch = (type: 'pantry' | 'recipes', term: string) => {
+    const handleGlobalSearch = useCallback((type: 'pantry' | 'recipes', term: string) => {
         dispatch(setCurrentPage({ page: type }));
         dispatch(setVoiceAction({ type: 'SEARCH', payload: `${term}#${Date.now()}` }));
-        onClose();
-    };
+        handleClose();
+    }, [dispatch, handleClose]);
 
 
     useEffect(() => {
@@ -66,10 +75,10 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
             };
             const debounce = setTimeout(search, 150);
             return () => clearTimeout(debounce);
-        } else {
-            setDbSearchResults({recipes: [], pantry: []});
         }
     }, [searchTerm, isOpen]);
+
+    const visibleDbSearchResults = isOpen && searchTerm.length > 1 ? dbSearchResults : EMPTY_DB_SEARCH_RESULTS;
 
     const filteredCommands = useMemo(() => {
         if (!searchTerm) {
@@ -94,8 +103,8 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
 
     const flatCommandList = useMemo(() => {
         let list: PaletteItem[] = [];
-        list = list.concat(dbSearchResults.recipes.map(r => ({ ...r, type: 'recipe' })));
-        list = list.concat(dbSearchResults.pantry.map(p => ({...p, type: 'pantry' })));
+        list = list.concat(visibleDbSearchResults.recipes.map(r => ({ ...r, type: 'recipe' })));
+        list = list.concat(visibleDbSearchResults.pantry.map(p => ({...p, type: 'pantry' })));
         list = list.concat(Object.values(groupedCommands).flat().map(c => ({...c, type: 'command'})));
         
         const showGlobalSearch = list.length === 0 && searchTerm.trim().length > 1;
@@ -105,26 +114,16 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
              list.push({ id: 'search-pantry-dynamic', title: t('commandPalette.dynamicSearch.pantry', { searchTerm }), action: () => handleGlobalSearch('pantry', searchTerm), type: 'global' });
         }
         return list;
-    }, [groupedCommands, searchTerm, dbSearchResults, handleGlobalSearch, t]);
+    }, [groupedCommands, searchTerm, visibleDbSearchResults, handleGlobalSearch, t]);
 
-
-    useEffect(() => {
-        if (!isOpen) {
-            setSearchTerm('');
-            setActiveIndex(0);
-        }
-    }, [isOpen]);
-
-    useEffect(() => {
-        setActiveIndex(0);
-    }, [searchTerm, flatCommandList.length]);
+    const currentActiveIndex = flatCommandList.length > 0 ? Math.min(activeIndex, flatCommandList.length - 1) : 0;
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (!isOpen) return;
 
             if (e.key === 'Escape') {
-                onClose();
+                handleClose();
             } else if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 setActiveIndex(prev => (prev + 1) % (flatCommandList.length || 1));
@@ -133,30 +132,30 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
                 setActiveIndex(prev => (prev - 1 + (flatCommandList.length || 1)) % (flatCommandList.length || 1));
             } else if (e.key === 'Enter') {
                 e.preventDefault();
-                const item = flatCommandList[activeIndex];
+                const item = flatCommandList[currentActiveIndex];
                 if (item) {
                     if (item.type === 'recipe') navigateToItem('recipes', item.id!);
                     else if (item.type === 'pantry') navigateToItem('pantry', item.id!);
                     else if (item.action) item.action();
-                    onClose();
+                    handleClose();
                 }
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, activeIndex, flatCommandList, onClose, navigateToItem]);
+    }, [isOpen, currentActiveIndex, flatCommandList, handleClose, navigateToItem]);
     
     useEffect(() => {
-        document.getElementById(`command-item-${activeIndex}`)?.scrollIntoView({ block: 'nearest' });
-    }, [activeIndex]);
+        document.getElementById(`command-item-${currentActiveIndex}`)?.scrollIntoView({ block: 'nearest' });
+    }, [currentActiveIndex]);
 
     if (!isOpen) {
         return null;
     }
     
     const renderItem = (item: PaletteItem, index: number): React.ReactNode => {
-        const isSelected = activeIndex === index;
+        const isSelected = currentActiveIndex === index;
         let content;
         let action;
     
@@ -170,22 +169,22 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
         switch (item.type) {
             case 'recipe':
                 content = <><BookOpen className="h-5 w-5 mr-3 text-zinc-500" /><span>{item.recipeTitle}</span></>;
-                action = () => { navigateToItem('recipes', item.id!); onClose(); };
+                action = () => { navigateToItem('recipes', item.id!); handleClose(); };
                 break;
             case 'pantry':
                 content = <><Milk className="h-5 w-5 mr-3 text-zinc-500" /><span>{item.name}</span></>;
-                action = () => { navigateToItem('pantry', item.id!); onClose(); };
+                action = () => { navigateToItem('pantry', item.id!); handleClose(); };
                 break;
             case 'command': {
                 const Icon = item.icon;
                 content = <><Icon className="h-5 w-5 mr-3" /><span>{item.title}</span></>;
-                action = () => { item.action(); onClose(); };
+                action = () => { item.action(); handleClose(); };
                 break;
             }
             case 'global': {
                 const GlobalIcon = item.id.includes('recipes') ? BookOpen : Milk;
                 content = <><GlobalIcon className="h-5 w-5 mr-3" /><span>{item.title}</span></>;
-                action = () => { item.action(); onClose(); };
+                action = () => { item.action(); handleClose(); };
                 break;
             }
             default:
@@ -211,7 +210,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
     return (
                 <div 
                     className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 glass-overlay"
-                    onClick={onClose}
+                    onClick={handleClose}
                 >
           <div 
                         ref={modalRef}
@@ -229,7 +228,10 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
                 type="text"
                 autoFocus
                 value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
+                                onChange={(e) => {
+                                        setSearchTerm(e.target.value);
+                                        setActiveIndex(0);
+                                }}
                                 placeholder={t('commandPalette.placeholder')}
                 className="w-full bg-transparent p-2 text-lg text-zinc-100 focus:outline-none placeholder-zinc-500"
               />

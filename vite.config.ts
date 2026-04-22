@@ -5,6 +5,13 @@ import viteCompression from 'vite-plugin-compression';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { fileURLToPath, URL } from 'url';
 
+const chunkGroups: Array<[string, string[]]> = [
+  ['vendor-react', ['react', 'react-dom']],
+  ['vendor-redux', ['@reduxjs/toolkit', 'react-redux', 'redux-persist']],
+  ['vendor-dexie', ['dexie', 'dexie-react-hooks']],
+  ['vendor-windowing', ['react-window']],
+];
+
 // GitHub Pages subpath: set automatically in CI via GITHUB_ACTIONS env
 const REPO_NAME = 'CulinaSync-de-';
 const base = process.env.GITHUB_ACTIONS ? `/${REPO_NAME}/` : '/';
@@ -121,11 +128,18 @@ export default defineConfig({
     reportCompressedSize: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-redux': ['@reduxjs/toolkit', 'react-redux', 'redux-persist'],
-          'vendor-dexie': ['dexie', 'dexie-react-hooks'],
-          'vendor-windowing': ['react-window'],
+        manualChunks: (id) => {
+          if (!id.includes('node_modules')) {
+            return undefined;
+          }
+
+          for (const [chunkName, packages] of chunkGroups) {
+            if (packages.some((pkg) => id.includes(`/node_modules/${pkg}/`) || id.includes(`\\node_modules\\${pkg}\\`))) {
+              return chunkName;
+            }
+          }
+
+          return undefined;
         },
       },
     },

@@ -12,13 +12,15 @@ const PantryManagerView: React.FC = () => {
 
     return (
         <div className="space-y-8 pb-24">
-            <PantryItemModal 
-                isOpen={modalState.isOpen}
-                item={modalState.item}
-                onClose={() => setModalState({ isOpen: false, item: null })}
-                onSave={handleSaveItem}
-                pantryItems={pantryItems || []}
-            />
+        {modalState.isOpen && (
+          <PantryItemModal 
+            key={modalState.item?.id ?? 'new'}
+            item={modalState.item}
+            onClose={() => setModalState({ isOpen: false, item: null })}
+            onSave={handleSaveItem}
+            pantryItems={pantryItems || []}
+          />
+        )}
             <PantryHeader />
             <PantryToolbar />
             <div className="space-y-4">

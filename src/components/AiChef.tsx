@@ -1,4 +1,4 @@
-import React, { useDeferredValue, useEffect, useRef, useState } from 'react';
+import React, { useDeferredValue, useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { RecipeIdea, StructuredPrompt } from '../types';
 import RecipeDetail from './RecipeDetail';
@@ -33,7 +33,10 @@ const AiChef: React.FC = () => {
     try { const saved = localStorage.getItem(HISTORY_KEY); return saved ? JSON.parse(saved) : []; } catch { return []; }
   });
 
-  const deferredCraving = useDeferredValue(craving);
+  const initialPrompt = voiceAction?.type === 'GENERATE_RECIPE' ? voiceAction.payload : undefined;
+  const voiceCraving = useMemo(() => initialPrompt?.split('#')[0] ?? '', [initialPrompt]);
+  const effectiveCraving = voiceCraving || craving;
+  const deferredCraving = useDeferredValue(effectiveCraving);
   const currentPrompt: StructuredPrompt = {
     craving: deferredCraving,
     includeIngredients,
@@ -42,14 +45,12 @@ const AiChef: React.FC = () => {
   };
   const { ideas: recipeIdeas, recipe: finalRecipe, error, selectedIdea, isLoading, isLoadingRecipe, phase, generateIdeas, generateRecipe, reset, backToIdeas } = useAiChef(currentPrompt);
 
-  const initialPrompt = voiceAction?.type === 'GENERATE_RECIPE' ? voiceAction.payload : undefined;
-
-  useEffect(() => {
+  const handleCravingChange = useCallback((value: string) => {
     if (initialPrompt) {
-        setCraving(initialPrompt.split('#')[0]);
-        dispatch(setVoiceAction(null));
+      dispatch(setVoiceAction(null));
     }
-  }, [initialPrompt, dispatch]);
+    setCraving(value);
+  }, [dispatch, initialPrompt]);
 
   useEffect(() => {
     if (focusAction === 'prompt' && promptRef.current) {
@@ -71,6 +72,9 @@ const AiChef: React.FC = () => {
   };
   
   const loadFromHistory = (prompt: StructuredPrompt) => {
+    if (initialPrompt) {
+      dispatch(setVoiceAction(null));
+    }
     setCraving(prompt.craving);
     setIncludeIngredients(prompt.includeIngredients);
     setExcludeIngredients(prompt.excludeIngredients);
@@ -79,11 +83,14 @@ const AiChef: React.FC = () => {
   }
 
   const handleGenerateIdeas = async () => {
-    if (!craving.trim()) { 
+    if (!effectiveCraving.trim()) { 
         dispatch(addToast({ message: 'Bitte gib ein, worauf du Appetit hast.', type: 'error' }));
         return; 
     }
-    const structuredPrompt: StructuredPrompt = { craving, includeIngredients, excludeIngredients, modifiers };
+    if (initialPrompt) {
+      dispatch(setVoiceAction(null));
+    }
+    const structuredPrompt: StructuredPrompt = { craving: effectiveCraving, includeIngredients, excludeIngredients, modifiers };
     generateIdeas(structuredPrompt);
     updateHistory(structuredPrompt);
   };
@@ -93,6 +100,9 @@ const AiChef: React.FC = () => {
   };
 
   const handleSurpriseMe = () => {
+    if (initialPrompt) {
+      dispatch(setVoiceAction(null));
+    }
     if (!pantryItems || pantryItems.length === 0) { setCraving("Ein einfaches Gericht ohne viele Zutaten"); return; }
     const shuffled = [...pantryItems].sort(() => 0.5 - Math.random());
     const count = Math.min(shuffled.length, 2);
@@ -140,7 +150,7 @@ const AiChef: React.FC = () => {
       )}
 
       <ChefInput 
-        craving={craving} setCraving={setCraving}
+        craving={effectiveCraving} setCraving={handleCravingChange}
         includeIngredients={includeIngredients} setIncludeIngredients={setIncludeIngredients}
         excludeIngredients={excludeIngredients} setExcludeIngredients={setExcludeIngredients}
         modifiers={modifiers} setModifiers={setModifiers}

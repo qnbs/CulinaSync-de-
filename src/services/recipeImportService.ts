@@ -152,8 +152,7 @@ const normalizeExistingRecipeJson = (data: unknown): Recipe | null => {
 const extractJsonLdBlocks = (html: string): string[] => {
   const regex = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
   const blocks: string[] = [];
-  let match: RegExpExecArray | null = null;
-  while ((match = regex.exec(html)) !== null) {
+  for (const match of html.matchAll(regex)) {
     blocks.push(match[1]);
   }
   return blocks;

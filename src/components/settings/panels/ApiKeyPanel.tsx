@@ -1,4 +1,4 @@
-import React, { useActionState, useEffect, useOptimistic, useState } from 'react';
+import React, { useEffect, useOptimistic, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Key, Eye, EyeOff, CheckCircle, Trash2, Shield, ExternalLink } from 'lucide-react';
@@ -11,41 +11,17 @@ interface ApiKeyPanelProps {
     addToast: (msg: string, type: 'success' | 'error' | 'info') => void;
 }
 
-type ApiKeyActionState = {
-    status: 'idle' | 'success' | 'error';
-    message: string | null;
-};
-
 export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
     const [showKey, setShowKey] = useState(false);
     const [hasKey, setHasKey] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [optimisticHasKey, setOptimisticHasKey] = useOptimistic<boolean, boolean>(hasKey, (_current: boolean, nextValue: boolean) => nextValue);
     const form = useForm<ApiKeyFormValues>({
         resolver: zodResolver(apiKeyFormSchema),
         defaultValues: { apiKey: '' },
     });
-
-    const [saveState, runSaveAction, isSaving] = useActionState<ApiKeyActionState, ApiKeyFormValues>(async (
-        _previousState,
-        values: ApiKeyFormValues,
-    ): Promise<ApiKeyActionState> => {
-        try {
-            await storeUserApiKey(values.apiKey);
-            return { status: 'success', message: 'API-Schlüssel sicher gespeichert.' };
-        } catch {
-            return { status: 'error', message: 'Fehler beim Speichern des Schlüssels.' };
-        }
-    }, { status: 'idle', message: null });
-
-    const [deleteState, runDeleteAction, isDeleting] = useActionState<ApiKeyActionState>(async () => {
-        try {
-            await removeUserApiKey();
-            return { status: 'success', message: 'API-Schlüssel entfernt.' };
-        } catch {
-            return { status: 'error', message: 'Fehler beim Entfernen des Schlüssels.' };
-        }
-    }, { status: 'idle', message: null });
 
     useEffect(() => {
         hasApiKey().then(result => {
@@ -54,31 +30,39 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
         });
     }, []);
 
-    useEffect(() => {
-        if (saveState.status === 'success') {
+    const handleSave = form.handleSubmit(async (values) => {
+        const previousHasKey = hasKey;
+        setOptimisticHasKey(true);
+        setIsSaving(true);
+        try {
+            await storeUserApiKey(values.apiKey);
             setHasKey(true);
             form.reset();
-            addToast(saveState.message || 'API-Schlüssel sicher gespeichert.', 'success');
-        } else if (saveState.status === 'error' && saveState.message) {
-            setHasKey(false);
-            addToast(saveState.message, 'error');
+            addToast('API-Schlüssel sicher gespeichert.', 'success');
+        } catch {
+            setOptimisticHasKey(previousHasKey);
+            addToast('Fehler beim Speichern des Schlüssels.', 'error');
+        } finally {
+            setIsSaving(false);
         }
-    }, [addToast, form, saveState]);
-
-    useEffect(() => {
-        if (deleteState.status === 'success') {
-            setHasKey(false);
-            form.reset();
-            addToast(deleteState.message || 'API-Schlüssel entfernt.', 'info');
-        } else if (deleteState.status === 'error' && deleteState.message) {
-            addToast(deleteState.message, 'error');
-        }
-    }, [addToast, deleteState, form]);
+    });
 
     const handleDelete = async () => {
         if (!window.confirm('API-Schlüssel wirklich entfernen? KI-Funktionen werden deaktiviert.')) return;
+        const previousHasKey = hasKey;
         setOptimisticHasKey(false);
-        runDeleteAction();
+        setIsDeleting(true);
+        try {
+            await removeUserApiKey();
+            setHasKey(false);
+            form.reset();
+            addToast('API-Schlüssel entfernt.', 'info');
+        } catch {
+            setOptimisticHasKey(previousHasKey);
+            addToast('Fehler beim Entfernen des Schlüssels.', 'error');
+        } finally {
+            setIsDeleting(false);
+        }
     };
 
     if (isLoading) {
@@ -140,10 +124,7 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
 
                     <div className="flex gap-3">
                         <button
-                            onClick={form.handleSubmit((values) => {
-                                setOptimisticHasKey(true);
-                                runSaveAction(values);
-                            })}
+                            onClick={handleSave}
                             disabled={isSaving || isDeleting}
                             className="flex items-center gap-2 bg-[var(--color-accent-500)] text-zinc-900 font-bold py-2.5 px-5 rounded-xl hover:bg-[var(--color-accent-400)] transition-all disabled:bg-zinc-800 disabled:text-zinc-600 active:scale-95"
                         >

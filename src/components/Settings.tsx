@@ -26,6 +26,9 @@ const ACCENT_COLORS: Record<AppSettings['appearance']['accentColor'], Record<str
   emerald: { '300': '#6ee7b7', '400': '#34d399', '500': '#10b981', glow: 'rgba(16, 185, 129, 0.3)', 'glow-soft': 'rgba(16, 185, 129, 0.2)', '400-semi': 'rgba(52, 211, 153, 0.8)' },
 };
 
+const BLOCKED_PATH_SEGMENTS = new Set(['__proto__', 'prototype', 'constructor']);
+const hasOwn = (value: object, key: string) => Object.prototype.hasOwnProperty.call(value, key);
+
 interface SettingsProps {
     installPromptEvent: BeforeInstallPromptEvent | null;
     onInstallPWA: () => void;
@@ -38,22 +41,17 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
     const globalSettings = useAppSelector(state => state.settings);
     const { focusAction } = useAppSelector(state => state.ui);
     
-    const [localSettings, setLocalSettings] = useState<AppSettings>(globalSettings);
-    const [activeSection, setActiveSection] = useState('appearance');
-    
-    // Sync logic
-    useEffect(() => {
-        setLocalSettings(globalSettings);
-    }, [globalSettings]);
-
-    // Deep linking support via focusAction
-    useEffect(() => {
+    const [draftSettings, setDraftSettings] = useState<AppSettings | null>(null);
+    const [selectedSection, setSelectedSection] = useState('appearance');
+    const localSettings = draftSettings ?? globalSettings;
+    const activeSection = useMemo(() => {
         if (focusAction) {
-             if (['import', 'export'].includes(focusAction)) setActiveSection('data');
-             else if (['speech', 'voice'].includes(focusAction)) setActiveSection('speech');
-             else if (['apikey', 'api-key', 'api'].includes(focusAction)) setActiveSection('apikey');
+            if (['import', 'export'].includes(focusAction)) return 'data';
+            if (['speech', 'voice'].includes(focusAction)) return 'speech';
+            if (['apikey', 'api-key', 'api'].includes(focusAction)) return 'apikey';
         }
-    }, [focusAction]);
+        return selectedSection;
+    }, [focusAction, selectedSection]);
 
     // Live Theme Application
     useEffect(() => {
@@ -64,30 +62,43 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
       });
     }, [localSettings.appearance.accentColor]);
 
-    const isDirty = useMemo(() => JSON.stringify(localSettings) !== JSON.stringify(globalSettings), [localSettings, globalSettings]);
+    const isDirty = useMemo(() => draftSettings !== null && JSON.stringify(draftSettings) !== JSON.stringify(globalSettings), [draftSettings, globalSettings]);
 
     const handleSave = () => {
         dispatch(updateSettings(localSettings));
+        setDraftSettings(null);
         dispatch(addToastAction({ message: t('settings.toast.saved'), type: 'success' }));
     };
 
     const handleDiscard = () => {
-        setLocalSettings(globalSettings);
+        setDraftSettings(null);
         dispatch(addToastAction({ message: t('settings.toast.discarded'), type: 'info' }));
     };
 
-    const handleChange = useCallback((path: string, value: any) => {
-        setLocalSettings(prev => {
-            const newState = JSON.parse(JSON.stringify(prev));
-            const keys = path.split('.');
-            let current = newState;
+    const handleChange = useCallback((path: string, value: unknown) => {
+        const keys = path.split('.');
+        if (keys.length === 0 || keys.some((key) => BLOCKED_PATH_SEGMENTS.has(key))) {
+            return;
+        }
+
+        setDraftSettings(prev => {
+            const sourceState = prev ?? globalSettings;
+            const newState = structuredClone(sourceState);
+            let current: Record<string, unknown> = newState as unknown as Record<string, unknown>;
             for (let i = 0; i < keys.length - 1; i++) {
-                current = current[keys[i]];
+                const next = current[keys[i]];
+                if (!next || typeof next !== 'object' || !hasOwn(current, keys[i])) {
+                    return sourceState;
+                }
+                current = next as Record<string, unknown>;
+            }
+            if (!hasOwn(current, keys[keys.length - 1])) {
+                return sourceState;
             }
             current[keys[keys.length - 1]] = value;
             return newState;
         });
-    }, []);
+    }, [globalSettings]);
     
     const addToastWrapper = (msg: string, type: 'success' | 'error' | 'info') => dispatch(addToastAction({ message: msg, type }));
 
@@ -112,7 +123,7 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
 
     return (
         <div className="flex flex-col md:flex-row gap-8 lg:gap-12 pb-24 min-h-[60vh]">
-             <SettingsSidebar activeSection={activeSection} setActiveSection={setActiveSection} />
+             <SettingsSidebar activeSection={activeSection} setActiveSection={setSelectedSection} />
              
              <div className="flex-grow min-w-0">
                  <div className="flex justify-between items-center mb-6">

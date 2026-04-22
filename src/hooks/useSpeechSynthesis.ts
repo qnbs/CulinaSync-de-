@@ -11,13 +11,12 @@ interface SpeechSynthesisHook {
 
 export const useSpeechSynthesis = (): SpeechSynthesisHook => {
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [supported, setSupported] = useState(false);
+  const [supported] = useState(() => typeof window !== 'undefined' && 'speechSynthesis' in window);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const settings = useAppSelector(state => state.settings);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      setSupported(true);
+    if (supported) {
       const handleVoicesChanged = () => {
         setVoices(window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('de')));
       };
@@ -30,7 +29,7 @@ export const useSpeechSynthesis = (): SpeechSynthesisHook => {
         window.speechSynthesis.cancel();
       };
     }
-  }, []);
+  }, [supported]);
 
   const speak = useCallback((text: string) => {
     if (!supported || !text) return;

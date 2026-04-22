@@ -1,4 +1,4 @@
-import { useActionState, useEffect, useOptimistic, useState } from 'react';
+import { useActionState, useMemo, useOptimistic, useState } from 'react';
 import { useAppSelector } from '../../../store/hooks';
 import { logAppError } from '../../../services/errorLoggingService';
 import type { Recipe, RecipeIdea, StructuredPrompt } from '../../../types';
@@ -35,10 +35,8 @@ const toErrorMessage = (error: unknown) => error instanceof Error ? error.messag
 
 export const useAiChef = (prompt: StructuredPrompt) => {
   const aiPreferences = useAppSelector((state) => state.settings.aiPreferences);
-  const [ideas, setIdeas] = useState<RecipeIdea[]>([]);
-  const [recipe, setRecipe] = useState<Recipe | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [selectedIdea, setSelectedIdea] = useState<RecipeIdea | null>(null);
+  const [isReset, setIsReset] = useState(false);
   const [optimisticSelectedIdea, setOptimisticSelectedIdea] = useOptimistic<RecipeIdea | null, RecipeIdea | null>(selectedIdea, (_current: RecipeIdea | null, nextIdea: RecipeIdea | null) => nextIdea);
 
   const [ideasState, requestIdeas, isIdeasPending] = useActionState<IdeaActionState, StructuredPrompt>(
@@ -83,56 +81,60 @@ export const useAiChef = (prompt: StructuredPrompt) => {
     initialRecipeState,
   );
 
-  useEffect(() => {
-    if (!ideasState.promptKey) {
-      return;
+  const ideas = useMemo(() => {
+    if (isReset || !ideasState.promptKey) {
+      return [];
     }
+    return ideasState.ideas;
+  }, [ideasState.ideas, ideasState.promptKey, isReset]);
 
-    setIdeas(ideasState.ideas);
-    setRecipe(null);
-    setSelectedIdea(null);
-    setError(ideasState.error);
-  }, [ideasState]);
-
-  useEffect(() => {
-    if (!recipeState.recipeKey) {
-      return;
+  const recipe = useMemo(() => {
+    if (isReset || !selectedIdea || recipeState.recipeKey !== selectedIdea.recipeTitle) {
+      return null;
     }
+    return recipeState.recipe;
+  }, [isReset, recipeState.recipe, recipeState.recipeKey, selectedIdea]);
 
-    setRecipe(recipeState.recipe);
-    setError(recipeState.error);
-    if (recipeState.error) {
-      setSelectedIdea(null);
+  const error = useMemo(() => {
+    if (isReset) {
+      return null;
     }
-  }, [recipeState]);
+    if (selectedIdea && recipeState.recipeKey === selectedIdea.recipeTitle) {
+      return recipeState.error;
+    }
+    return ideasState.error;
+  }, [ideasState.error, isReset, recipeState.error, recipeState.recipeKey, selectedIdea]);
 
   const generateIdeas = (nextPrompt: StructuredPrompt) => {
+    setIsReset(false);
+    setSelectedIdea(null);
+    setOptimisticSelectedIdea(null);
     requestIdeas(nextPrompt);
   };
 
   const generateRecipe = (chosenIdea: RecipeIdea) => {
+    setIsReset(false);
     setSelectedIdea(chosenIdea);
     setOptimisticSelectedIdea(chosenIdea);
     requestRecipe(chosenIdea);
   };
 
   const reset = () => {
-    setIdeas([]);
-    setRecipe(null);
-    setError(null);
+    setIsReset(true);
     setSelectedIdea(null);
+    setOptimisticSelectedIdea(null);
   };
 
   const backToIdeas = () => {
-    setRecipe(null);
-    setError(null);
+    setSelectedIdea(null);
+    setOptimisticSelectedIdea(null);
   };
 
   return {
     ideas,
     recipe,
     error,
-    selectedIdea: optimisticSelectedIdea,
+    selectedIdea: recipeState.error ? null : optimisticSelectedIdea,
     isLoadingIdeas: isIdeasPending,
     isLoadingRecipe: isRecipePending,
     isLoading: isIdeasPending || isRecipePending,

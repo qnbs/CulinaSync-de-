@@ -15,7 +15,7 @@ export function handleDeepLink(url: string) {
       window.dispatchEvent(new CustomEvent('deeplink', { detail: { type: 'shoppinglist' } }));
     }
     // Weitere Deep-Links nach Bedarf
-  } catch (e) {
+  } catch {
     // Ungültige URL ignorieren
   }
 }

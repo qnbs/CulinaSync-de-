@@ -5,6 +5,16 @@ import { loadSettings } from './settingsService';
 let papaModulePromise: Promise<typeof import('papaparse')> | null = null;
 let jsPdfModulePromise: Promise<typeof import('jspdf')> | null = null;
 
+const SAFE_TEXT_MIME_TYPES = new Set([
+    'application/json',
+    'application/json;charset=utf-8',
+    'application/pdf',
+    'text/calendar;charset=utf-8',
+    'text/csv;charset=utf-8',
+    'text/markdown;charset=utf-8',
+    'text/plain;charset=utf-8',
+]);
+
 const getPapaModule = async () => {
     if (!papaModulePromise) {
         papaModulePromise = import('papaparse');
@@ -22,10 +32,12 @@ const getJsPdfCtor = async () => {
 
 // Helper function to trigger download
 const downloadFile = (filename: string, content: string | Blob, mimeType: string) => {
-    const blob = content instanceof Blob ? content : new Blob([content], { type: mimeType });
+    const normalizedMimeType = SAFE_TEXT_MIME_TYPES.has(mimeType) ? mimeType : 'application/octet-stream';
+    const blob = content instanceof Blob ? content : new Blob([content], { type: normalizedMimeType });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = filename;
+    link.rel = 'noopener noreferrer';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -295,7 +307,7 @@ export const exportFullDataAsTxt = async (): Promise<boolean> => {
 
         downloadFile('culinasync_backup.txt', text, 'text/plain;charset=utf-8');
         return true;
-    } catch(e) { return false; }
+    } catch { return false; }
 };
 export const exportFullDataAsMarkdown = async (): Promise<boolean> => {
     try {
@@ -309,7 +321,7 @@ export const exportFullDataAsMarkdown = async (): Promise<boolean> => {
 
         downloadFile('culinasync_backup.md', md, 'text/markdown;charset=utf-8');
         return true;
-    } catch(e) { return false; }
+    } catch { return false; }
 };
 
 export const exportFullDataAsCsv = async (): Promise<boolean> => {
@@ -323,7 +335,7 @@ export const exportFullDataAsCsv = async (): Promise<boolean> => {
         const combined = `=== PANTRY ===\n${pantryCsv}\n\n=== RECIPES ===\n${recipesCsv}\n\n=== SHOPPING LIST ===\n${shoppingCsv}`;
         downloadFile('culinasync_backup.csv', combined, 'text/csv;charset=utf-8');
         return true;
-    } catch(e) { return false; }
+    } catch { return false; }
 };
 
 export const exportFullDataAsPdf = async (): Promise<boolean> => {

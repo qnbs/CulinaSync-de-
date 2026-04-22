@@ -20,11 +20,18 @@ listenerMiddleware.startListening({
     renameCategoryAsync.rejected,
     moveToPantryAsync.rejected
     ),
-  effect: (action: any, listenerApi) => {
-    if (action.payload) {
-      listenerApi.dispatch(addToast({ message: action.payload as string, type: 'error' }));
-    } else if (action.error.message) {
-      listenerApi.dispatch(addToast({ message: action.error.message, type: 'error' }));
+  effect: (action, listenerApi) => {
+    const errorMessage = typeof action.error === 'object'
+      && action.error !== null
+      && 'message' in action.error
+      && typeof action.error.message === 'string'
+      ? action.error.message
+      : null;
+
+    if (typeof action.payload === 'string') {
+      listenerApi.dispatch(addToast({ message: action.payload, type: 'error' }));
+    } else if (errorMessage) {
+      listenerApi.dispatch(addToast({ message: errorMessage, type: 'error' }));
     }
   },
 });

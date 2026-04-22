@@ -36,14 +36,14 @@ export const useWhisperRecognition = (): WhisperRecognitionHook => {
         try {
           const result: WhisperResult = await getAppServices().whisper.transcribeWithWhisper(audioBlob);
           setTranscript(result.text);
-        } catch (err: any) {
-          setError(err.message || 'Transkription fehlgeschlagen');
+        } catch (error) {
+          setError(error instanceof Error ? error.message : 'Transkription fehlgeschlagen');
         }
       };
       mediaRecorder.start();
       setIsListening(true);
-    } catch (err: any) {
-      setError(err.message || 'Audioaufnahme nicht möglich');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Audioaufnahme nicht möglich');
     }
   };
 

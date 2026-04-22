@@ -11,24 +11,20 @@ import { useAppDispatch } from '../../../store/hooks';
 import { useModalA11y } from '../../../hooks/useModalA11y';
 
 const ResetConfirmationModal: React.FC<{
-    isOpen: boolean;
     onClose: () => void;
     onConfirm: () => void;
-}> = ({ isOpen, onClose, onConfirm }) => {
+}> = ({ onClose, onConfirm }) => {
     const [confirmationText, setConfirmationText] = useState('');
     const CONFIRMATION_KEYWORD = 'LÖSCHEN';
     const modalRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
     useModalA11y({
-        isOpen,
+        isOpen: true,
         onClose,
         containerRef: modalRef,
         initialFocusRef: inputRef,
     });
-
-    useEffect(() => { if (isOpen) setConfirmationText(''); }, [isOpen]);
-    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 flex items-center justify-center z-50 page-fade-in glass-overlay" onClick={onClose}>
@@ -114,7 +110,7 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
                 if (data.settings) dispatch(updateSettings(data.settings));
                 addToast('Daten erfolgreich importiert. Neustart...', 'success');
                 setTimeout(() => window.location.reload(), 1500);
-            } catch (error) {
+            } catch {
                 addToast('Import fehlgeschlagen. Ungültige Datei.', 'error');
             } finally {
                 if (fileInputRef.current) fileInputRef.current.value = "";
@@ -165,8 +161,9 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
         try {
             await syncUpload(syncPassword, syncUrl, syncToken || undefined);
             setSyncStatus('Backup erfolgreich hochgeladen!');
-        } catch (e: any) {
-            setSyncStatus('Fehler beim Hochladen: ' + (e?.message || e));
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            setSyncStatus('Fehler beim Hochladen: ' + message);
         } finally {
             setSyncLoading(false);
         }
@@ -179,8 +176,9 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
             setSyncStatus('Backup erfolgreich wiederhergestellt!');
             addToast('Backup erfolgreich wiederhergestellt.', 'success');
             setTimeout(() => window.location.reload(), 1500);
-        } catch (e: any) {
-            setSyncStatus('Fehler beim Wiederherstellen: ' + (e?.message || e));
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            setSyncStatus('Fehler beim Wiederherstellen: ' + message);
         } finally {
             setSyncLoading(false);
         }
@@ -188,7 +186,7 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
 
     return (
         <div className="space-y-8 page-fade-in">
-            <ResetConfirmationModal isOpen={isResetModalOpen} onClose={() => setResetModalOpen(false)} onConfirm={handleResetData} />
+            {isResetModalOpen && <ResetConfirmationModal onClose={() => setResetModalOpen(false)} onConfirm={handleResetData} />}
             <input type="file" ref={fileInputRef} onChange={handleImportData} className="hidden" accept="application/json" />
 
             {/* Storage Visualization */}

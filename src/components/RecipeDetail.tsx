@@ -28,6 +28,16 @@ type ImageActionState = {
   error: string | null;
 };
 
+const EMPTY_NUTRITION_REPORT: NutritionAllergyReport = {
+  calories: 0,
+  protein: 0,
+  fat: 0,
+  carbs: 0,
+  allergens: [],
+  matchedIngredients: 0,
+  totalIngredients: 0,
+};
+
 const MealPlanModal: React.FC<{recipeId: number, onClose: () => void, onSave: () => void}> = ({recipeId, onClose, onSave}) => {
   const { t } = useTranslation();
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -86,16 +96,10 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
   const [isExportOpen, setExportOpen] = useState(false);
   const [isCookMode, setIsCookMode] = useState(false);
   const [isGeminiCheckLoading, setGeminiCheckLoading] = useState(false);
-  const [isNutritionLoading, setIsNutritionLoading] = useState(true);
   const [geminiVerification, setGeminiVerification] = useState<{ summary: string; warnings: string[] } | null>(null);
-  const [nutritionReport, setNutritionReport] = useState<NutritionAllergyReport>({
-    calories: 0,
-    protein: 0,
-    fat: 0,
-    carbs: 0,
-    allergens: [],
-    matchedIngredients: 0,
-    totalIngredients: 0,
+  const [nutritionResult, setNutritionResult] = useState<{ key: string | null; report: NutritionAllergyReport }>({
+    key: null,
+    report: EMPTY_NUTRITION_REPORT,
   });
 
   const [imageState, requestRecipeImage, isGeneratingImage] = useActionState<ImageActionState, string>(async (
@@ -141,26 +145,28 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
       return currentServings / originalServings;
   }, [currentServings, originalServings]);
 
+  const nutritionKey = useMemo(() => JSON.stringify({
+    recipeTitle: currentRecipe.recipeTitle,
+    ingredients: currentRecipe.ingredients,
+    instructions: currentRecipe.instructions,
+  }), [currentRecipe.ingredients, currentRecipe.instructions, currentRecipe.recipeTitle]);
+  const isNutritionLoading = nutritionResult.key !== nutritionKey;
+  const nutritionReport = nutritionResult.key === nutritionKey ? nutritionResult.report : EMPTY_NUTRITION_REPORT;
+
   useEffect(() => {
     let isActive = true;
-    setIsNutritionLoading(true);
 
     void analyzeRecipeNutritionInWorker(currentRecipe)
       .then((report) => {
         if (isActive) {
-          setNutritionReport(report);
-        }
-      })
-      .finally(() => {
-        if (isActive) {
-          setIsNutritionLoading(false);
+          setNutritionResult({ key: nutritionKey, report });
         }
       });
 
     return () => {
       isActive = false;
     };
-  }, [currentRecipe]);
+  }, [currentRecipe, nutritionKey]);
 
   const handleGeminiNutritionCheck = async () => {
     setGeminiCheckLoading(true);
@@ -226,7 +232,6 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
       return;
     }
 
-    setCurrentRecipe(prev => ({ ...prev, imageUrl: imageState.imageUrl ?? prev.imageUrl }));
     if (currentRecipe.id) {
       void updateRecipeImage(currentRecipe.id, imageState.imageUrl)
         .then(() => dispatch(addToast({ message: t('recipeDetail.toast.imageSaved') })));
@@ -271,13 +276,13 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
   const handleStartCookMode = useCallback(() => {
     setIsCookMode(true);
   }, []);
-
-  useEffect(() => {
+  const isCookModeActive = isCookMode || voiceAction?.type === 'START_COOK_MODE';
+  const handleExitCookMode = useCallback(() => {
+    setIsCookMode(false);
     if (voiceAction?.type === 'START_COOK_MODE') {
-        handleStartCookMode();
-        dispatch(setVoiceAction(null));
+      dispatch(setVoiceAction(null));
     }
-  }, [voiceAction, dispatch, handleStartCookMode]);
+  }, [dispatch, voiceAction]);
   
   const handleAddMissingToShoppingList = async () => {
       if(!recipe.id) return;
@@ -316,7 +321,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
   return (
     <div className="page-fade-in pb-20">
       {isModalOpen && currentRecipe.id && <MealPlanModal recipeId={currentRecipe.id} onClose={() => setIsModalOpen(false)} onSave={() => dispatch(addToast({message: t('recipeDetail.toast.addedToMealPlan')}))} />}
-      {isCookMode && <CookModeView recipe={currentRecipe} onExit={() => setIsCookMode(false)} />}
+      {isCookModeActive && <CookModeView recipe={currentRecipe} onExit={handleExitCookMode} />}
 
       <button onClick={onBack} className="flex items-center text-[var(--color-accent-400)] hover:text-[var(--color-accent-300)] mb-6 font-semibold">
         <ArrowLeft size={20} className="mr-2" />

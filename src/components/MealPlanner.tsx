@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { addRecipeToMealPlan, markMealAsCooked, removeRecipeFromMealPlan } from '../services/repositories/mealPlanRepository';
@@ -76,7 +76,8 @@ const MealPlanner: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const { recipes, recipesById, week, mealsByDate } = useMealPlan(currentDate, settings.weekStart === 'Monday');
-    const pantryItems = useLiveQuery(() => db.pantry.toArray(), []) ?? [];
+    const pantryItemsResult = useLiveQuery(() => db.pantry.toArray(), []);
+    const pantryItems = useMemo(() => pantryItemsResult ?? [], [pantryItemsResult]);
   
   const [selectedRecipeForDetail, setSelectedRecipeForDetail] = useState<Recipe | null>(null);
   const [noteModalState, setNoteModalState] = useState<{isOpen: boolean; date: string; mealType: string} | null>(null);
@@ -87,9 +88,9 @@ const MealPlanner: React.FC = () => {
   // New State for "Tap to Place" interaction (Mobile support)
   const [pendingRecipeId, setPendingRecipeId] = useState<number | null>(null);
 
-  const addToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    const addToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success') => {
     dispatch(addToastAction({ message, type }));
-  };
+    }, [dispatch]);
   
   const weekString = `${week[0].toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })} - ${week[6].toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })}`;
   
@@ -160,7 +161,7 @@ const MealPlanner: React.FC = () => {
             break;
         }
     }
-  }, [addToast]);
+    }, [addToast, t]);
   
   const handleSaveNote = useCallback(async (note: string, date: string, mealType: string) => {
     await addRecipeToMealPlan({ date, mealType: mealType as 'Frühstück' | 'Mittagessen' | 'Abendessen', note });

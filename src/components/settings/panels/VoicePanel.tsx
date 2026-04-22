@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AppSettings } from '../../../types';
 import { useSpeechSynthesis } from '../../../hooks/useSpeechSynthesis';
 import { useWhisperRecognition } from '../../../hooks/useWhisperRecognition';
@@ -6,25 +6,21 @@ import { Mic2, Play, Square, Volume2 } from 'lucide-react';
 
 interface VoicePanelProps {
     settings: AppSettings;
-    onChange: (path: string, value: any) => void;
+    onChange: (path: string, value: unknown) => void;
 }
+
+const VOICE_TEST_BAR_HEIGHTS = ['35%', '60%', '85%', '55%', '75%'] as const;
 
 export const VoicePanel: React.FC<VoicePanelProps> = ({ settings, onChange }) => {
     const { voices, speak, isSpeaking, cancel } = useSpeechSynthesis();
     const [mode, setMode] = useState<'browser' | 'whisper'>('browser');
     const whisper = useWhisperRecognition();
-    const [isPlayingTest, setIsPlayingTest] = useState(false);
-
-    useEffect(() => {
-        if (!isSpeaking) setIsPlayingTest(false);
-    }, [isSpeaking]);
+    const isPlayingTest = isSpeaking;
 
     const handleTest = () => {
         if (isSpeaking) {
             cancel();
-            setIsPlayingTest(false);
         } else {
-            setIsPlayingTest(true);
             speak('Hallo! Ich bin dein persönlicher Küchenassistent.');
         }
     };
@@ -36,7 +32,7 @@ export const VoicePanel: React.FC<VoicePanelProps> = ({ settings, onChange }) =>
                     <h3 className="text-lg font-bold text-zinc-100 flex items-center gap-2"><Volume2 className="text-[var(--color-accent-400)]"/> Sprachausgabe</h3>
                     <div className={`flex gap-1 items-end h-6 ${isPlayingTest ? 'opacity-100' : 'opacity-20'}`}>
                          {[...Array(5)].map((_, i) => (
-                             <div key={i} className={`w-1 bg-[var(--color-accent-500)] rounded-full transition-all duration-100 ${isPlayingTest ? 'animate-pulse' : 'h-1'}`} style={{ height: isPlayingTest ? `${Math.random() * 100}%` : '20%', animationDelay: `${i * 0.1}s` }} />
+                             <div key={i} className={`w-1 bg-[var(--color-accent-500)] rounded-full transition-all duration-100 ${isPlayingTest ? 'animate-pulse' : 'h-1'}`} style={{ height: isPlayingTest ? VOICE_TEST_BAR_HEIGHTS[i] : '20%', animationDelay: `${i * 0.1}s` }} />
                          ))}
                     </div>
                 </div>

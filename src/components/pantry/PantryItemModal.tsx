@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { PantryItem } from '../../types';
 import { foodDatabase, FoodEntry } from '../../data/foodDatabase';
 import { Save } from 'lucide-react';
@@ -7,33 +7,30 @@ import { useModalA11y } from '../../hooks/useModalA11y';
 
 const DEFAULT_UNITS = ["Stück", "g", "kg", "ml", "l", "TL", "EL", "Dose", "Bund", "Zehen", "Flasche", "Packung"];
 
+const createInitialFormData = (item?: PantryItem | null): Partial<PantryItem> => (
+    item ? { ...item } : { name: '', quantity: 1, unit: 'Stück', category: '', expiryDate: '', minQuantity: undefined, notes: '' }
+);
+
 export const PantryItemModal: React.FC<{
-    isOpen: boolean;
     item?: PantryItem | null;
     onClose: () => void;
     onSave: (item: PantryItem) => void;
     pantryItems: PantryItem[];
-}> = ({ isOpen, item, onClose, onSave, pantryItems }) => {
-    const [formData, setFormData] = useState<Partial<PantryItem>>({});
+}> = ({ item, onClose, onSave, pantryItems }) => {
+    const [formData, setFormData] = useState<Partial<PantryItem>>(() => createInitialFormData(item));
     const nameInputRef = useRef<HTMLInputElement>(null);
     const modalRef = useRef<HTMLDivElement>(null);
 
     useModalA11y({
-        isOpen,
+        isOpen: true,
         onClose,
         containerRef: modalRef,
         initialFocusRef: nameInputRef,
     });
 
     const existingCategories = useMemo(() => Array.from(new Set(pantryItems.map(p => p.category).filter(Boolean))), [pantryItems]);
-
-    useEffect(() => {
-        if (isOpen) {
-            setFormData(item ? { ...item } : { name: '', quantity: 1, unit: 'Stück', category: '', expiryDate: '', minQuantity: undefined, notes: '' });
-        }
-    }, [isOpen, item]);
     
-    const handleChange = (field: keyof PantryItem, value: any) => {
+    const handleChange = (field: keyof PantryItem, value: PantryItem[keyof PantryItem] | undefined) => {
         setFormData(prev => ({...prev, [field]: value}));
     };
     
@@ -54,8 +51,6 @@ export const PantryItemModal: React.FC<{
         if (!formData.name?.trim()) return;
         onSave(formData as PantryItem);
     };
-
-    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 flex items-center justify-center z-50 page-fade-in glass-overlay" onClick={onClose}>

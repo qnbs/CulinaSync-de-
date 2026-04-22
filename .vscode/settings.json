@@ -1,0 +1,14 @@
+{
+  "editor.minimap.enabled": false,
+  "telemetry.telemetryLevel": "off",
+  "editor.smoothScrolling": false,
+  "workbench.enableExperiments": false,
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true
+  },
+  "eslint.run": "onSave",
+  "i18n-ally.localesPaths": [
+    "src/locales"
+  ]
+}

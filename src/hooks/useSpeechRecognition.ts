@@ -47,18 +47,23 @@ interface SpeechRecognitionHook {
   error: string | null;
 }
 
-const SpeechRecognition: { new (): ISpeechRecognition } = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+type SpeechRecognitionWindow = Window & typeof globalThis & {
+  SpeechRecognition?: new () => ISpeechRecognition;
+  webkitSpeechRecognition?: new () => ISpeechRecognition;
+};
+
+const speechRecognitionWindow = typeof window !== 'undefined' ? (window as SpeechRecognitionWindow) : undefined;
+const SpeechRecognition = speechRecognitionWindow?.SpeechRecognition || speechRecognitionWindow?.webkitSpeechRecognition;
 
 export const useSpeechRecognition = (): SpeechRecognitionHook => {
   const [isListening, setIsListening] = useState(false);
   const [finalTranscript, setFinalTranscript] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(() => SpeechRecognition ? null : 'Dein Browser unterstützt keine Sprachsteuerung.');
   const recognitionRef = useRef<ISpeechRecognition | null>(null);
 
   useEffect(() => {
     if (!SpeechRecognition) {
-      setError('Dein Browser unterstützt keine Sprachsteuerung.');
       return;
     }
 

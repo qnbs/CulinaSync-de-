@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback, type SetStateAction } from 'react';
 import { db } from '../services/dbInstance';
 import { addOrUpdatePantryItem, addPantryItemsToShoppingList } from '../services/repositories/pantryRepository';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -17,10 +17,10 @@ export const usePantryManager = () => {
   const { pantry: pantrySettings } = useAppSelector(state => state.settings);
   const { defaultSort: sortOrder, isGrouped } = pantrySettings;
   
+  const closedModalState = useMemo<{ isOpen: boolean; item?: PantryItem | null }>(() => ({ isOpen: false, item: null }), []);
   const [searchTerm, setSearchTerm] = useState('');
-  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const [userModalState, setUserModalState] = useState<{ isOpen: boolean; item?: PantryItem | null }>(closedModalState);
   const [expiryFilter, setExpiryFilter] = useState<'all' | 'nearing' | 'expired'>('all');
-  const [modalState, setModalState] = useState<{ isOpen: boolean; item?: PantryItem | null }>({ isOpen: false, item: null });
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   
@@ -41,10 +41,49 @@ export const usePantryManager = () => {
   }, [sortOrder]);
 
   const initialSearchTerm = voiceAction?.type === 'SEARCH' ? voiceAction.payload : undefined;
+  const voiceSearchTerm = useMemo(() => initialSearchTerm?.split('#')[0] ?? '', [initialSearchTerm]);
+  const effectiveSearchTerm = voiceSearchTerm || searchTerm;
+  const debouncedSearchTerm = useDebounce(effectiveSearchTerm, 300);
+  const autoEditItem = useMemo(
+    () => initialSelectedId && pantryItems?.length ? pantryItems.find(item => item.id === initialSelectedId) ?? null : null,
+    [initialSelectedId, pantryItems],
+  );
+  const modalState = useMemo(() => {
+    if (userModalState.isOpen) {
+      return userModalState;
+    }
+    if (autoEditItem) {
+      return { isOpen: true, item: autoEditItem };
+    }
+    if (focusAction === 'addItem') {
+      return { isOpen: true, item: null };
+    }
+    return closedModalState;
+  }, [autoEditItem, closedModalState, focusAction, userModalState]);
 
   const addToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success') => {
     dispatch(addToastAction({ message, type }));
   }, [dispatch]);
+
+  const handleSearchTermChange = useCallback((value: string) => {
+    if (initialSearchTerm) {
+      dispatch(setVoiceAction(null));
+    }
+    setSearchTerm(value);
+  }, [dispatch, initialSearchTerm]);
+
+  const setModalState = useCallback((nextState: SetStateAction<{ isOpen: boolean; item?: PantryItem | null }>) => {
+    const resolvedState = typeof nextState === 'function' ? nextState(modalState) : nextState;
+    setUserModalState(resolvedState);
+    if (!resolvedState.isOpen) {
+      if (focusAction === 'addItem') {
+        dispatch(setFocusAction(null));
+      }
+      if (initialSelectedId) {
+        dispatch(clearInitialSelectedId());
+      }
+    }
+  }, [dispatch, focusAction, initialSelectedId, modalState]);
 
   const setSortOrder = (order: string) => {
     dispatch(setPantrySort(order as AppSettings['pantry']['defaultSort']));
@@ -53,32 +92,14 @@ export const usePantryManager = () => {
   const setIsGrouped = (grouped: boolean) => {
     dispatch(setPantryGrouping(grouped));
   };
-
-
-  useEffect(() => {
-    if (initialSearchTerm) {
-        setSearchTerm(initialSearchTerm.split('#')[0]);
-        dispatch(setVoiceAction(null));
-    }
-  }, [initialSearchTerm, dispatch]);
-  
   useEffect(() => {
     if (focusAction) {
-        if(focusAction === 'addItem') setModalState({ isOpen: true, item: null });
-        else if (focusAction === 'search' && searchInputRef.current) searchInputRef.current.focus();
+        if (focusAction === 'search' && searchInputRef.current) {
+          searchInputRef.current.focus();
+        }
         dispatch(setFocusAction(null));
     }
   }, [focusAction, dispatch]);
-
-  useEffect(() => {
-    if (initialSelectedId && pantryItems && pantryItems.length > 0) {
-        const itemToEdit = pantryItems.find(item => item.id === initialSelectedId);
-        if (itemToEdit) {
-            setModalState({ isOpen: true, item: itemToEdit });
-            dispatch(clearInitialSelectedId());
-        }
-    }
-  }, [initialSelectedId, pantryItems, dispatch]);
 
   const filteredItems = useMemo(() => {
     let items = pantryItems || [];
@@ -90,7 +111,7 @@ export const usePantryManager = () => {
       items = items.filter(item => item.name.toLowerCase().includes(lowerCaseSearch) || item.category?.toLowerCase().includes(lowerCaseSearch));
     }
     return items;
-  }, [pantryItems, debouncedSearchTerm, expiryFilter, sortOrder]);
+  }, [pantryItems, debouncedSearchTerm, expiryFilter]);
 
   const groupedItems = useMemo(() => {
     if (!isGrouped) return null;
@@ -109,12 +130,12 @@ export const usePantryManager = () => {
             ? `"${item.name.trim()}" hinzugefügt.`
             : `"${item.name.trim()}" aktualisiert.`;
         addToast(message);
-        setModalState({ isOpen: false, item: null });
+        setModalState(closedModalState);
     } catch (error) {
         addToast('Speichern fehlgeschlagen.', 'error');
         console.error(error);
     }
-  }, [addToast]);
+      }, [addToast, closedModalState, setModalState]);
 
   // New Quick Add Function
   const handleQuickAdd = useCallback(async (input: string) => {
@@ -129,7 +150,7 @@ export const usePantryManager = () => {
             ? `"${item.name}" hinzugefügt (${item.quantity} ${item.unit}).`
             : `"${item.name}" aktualisiert.`;
         addToast(message, 'success');
-      } catch(e) {
+        } catch {
           addToast('Fehler beim Hinzufügen.', 'error');
       }
   }, [addToast]);
@@ -190,7 +211,7 @@ export const usePantryManager = () => {
   }, [addToast]);
 
   return {
-    searchTerm, setSearchTerm, sortOrder, setSortOrder, isGrouped, setIsGrouped,
+    searchTerm: effectiveSearchTerm, setSearchTerm: handleSearchTermChange, sortOrder, setSortOrder, isGrouped, setIsGrouped,
     expiryFilter, setExpiryFilter, modalState, setModalState, isSelectMode,
     selectedItems, pantryItems, filteredItems, groupedItems, searchInputRef,
     adjustQuantity, toggleSelectItem, toggleSelectMode, handleDeleteSelected,

@@ -8,7 +8,7 @@ const CUISINE_SUGGESTIONS = ['Italienisch', 'Asiatisch', 'Indisch', 'Mexikanisch
 
 interface AiChefPanelProps {
     settings: AppSettings;
-    onChange: (path: string, value: any) => void;
+    onChange: (path: string, value: unknown) => void;
 }
 
 export const AiChefPanel: React.FC<AiChefPanelProps> = ({ settings, onChange }) => {

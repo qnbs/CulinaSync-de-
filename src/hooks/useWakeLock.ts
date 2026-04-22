@@ -6,14 +6,21 @@ type WakeLockSentinel = EventTarget & {
   release: () => Promise<void>;
 };
 
+type WakeLockNavigator = Navigator & {
+  wakeLock?: {
+    request: (type: 'screen') => Promise<WakeLockSentinel>;
+  };
+};
+
 export const useWakeLock = (): [boolean, () => Promise<void>, () => Promise<void>] => {
   const [isLocked, setIsLocked] = useState(false);
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
 
   const requestWakeLock = useCallback(async () => {
-    if ('wakeLock' in navigator && !wakeLockRef.current) {
+    const wakeLockNavigator = navigator as WakeLockNavigator;
+    if (wakeLockNavigator.wakeLock && !wakeLockRef.current) {
       try {
-        const lock = await (navigator as any).wakeLock.request('screen');
+        const lock = await wakeLockNavigator.wakeLock.request('screen');
         wakeLockRef.current = lock;
         setIsLocked(true);
         console.log('Wake Lock is active.');
@@ -22,8 +29,9 @@ export const useWakeLock = (): [boolean, () => Promise<void>, () => Promise<void
           setIsLocked(false);
           wakeLockRef.current = null;
         });
-      } catch (err: any) {
-        console.error(`Wake Lock Error: ${err.name}, ${err.message}`);
+      } catch (error) {
+        const message = error instanceof Error ? `${error.name}, ${error.message}` : String(error);
+        console.error(`Wake Lock Error: ${message}`);
         setIsLocked(false);
       }
     }

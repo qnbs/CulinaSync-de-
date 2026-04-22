@@ -45,8 +45,13 @@ const App: React.FC = () => {
 
   const [appVersion, setAppVersion] = useState<string>('');
   const [installPromptEvent, setInstallPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isStandalone, setIsStandalone] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isStandalone] = useState(() => typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches);
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+    return !window.localStorage.getItem('culinaSyncOnboarded');
+  });
   const [showInstallReminder, setShowInstallReminder] = useState(false);
   const [showUpdateReadyNotice, setShowUpdateReadyNotice] = useState(false);
 
@@ -61,23 +66,22 @@ const App: React.FC = () => {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setInstallPromptEvent(e as BeforeInstallPromptEvent);
+
+      const dismissedUntil = Number(window.localStorage.getItem('culinaSyncInstallRemindAfter') || '0');
+      const permanentlyDismissed = window.localStorage.getItem('culinaSyncInstallDismissed') === 'true';
+      const now = Date.now();
+
+      if (!isStandalone && !permanentlyDismissed && now >= dismissedUntil) {
+        setShowInstallReminder(true);
+      }
     };
 
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsStandalone(true);
-    }
-
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    const hasOnboarded = localStorage.getItem('culinaSyncOnboarded');
-    if (!hasOnboarded) {
-      setShowOnboarding(true);
-    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, []);
+  }, [isStandalone]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -89,20 +93,6 @@ const App: React.FC = () => {
       root.classList.remove('high-contrast', 'kitchen-mode', 'large-text');
     };
   }, [settings.appearance.highContrast, settings.appearance.kitchenMode, settings.appearance.largeText]);
-
-  useEffect(() => {
-    if (!installPromptEvent || isStandalone) {
-      return;
-    }
-
-    const dismissedUntil = Number(window.localStorage.getItem('culinaSyncInstallRemindAfter') || '0');
-    const permanentlyDismissed = window.localStorage.getItem('culinaSyncInstallDismissed') === 'true';
-    const now = Date.now();
-
-    if (!permanentlyDismissed && now >= dismissedUntil) {
-      setShowInstallReminder(true);
-    }
-  }, [installPromptEvent, isStandalone]);
 
   useEffect(() => {
     const handleUpdateReady = () => {

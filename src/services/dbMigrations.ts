@@ -1,13 +1,16 @@
-import Dexie from 'dexie';
-import type { IngredientGroup } from '../types';
+import Dexie, { type Transaction } from 'dexie';
+import type { IngredientGroup, PantryItem, Recipe } from '../types';
 
 type MigrationTableMap = Record<string, string | null>;
 type MigrationDefinition = {
   version: number;
   description: string;
   stores: MigrationTableMap;
-  upgrade?: (tx: any) => Promise<unknown> | unknown;
+  upgrade?: (tx: Transaction) => Promise<unknown> | unknown;
 };
+
+type PantryMigrationRecord = Partial<PantryItem> & Pick<PantryItem, 'createdAt'>;
+type RecipeMigrationRecord = Partial<Recipe> & Pick<Recipe, 'ingredients'>;
 
 const baseStores: MigrationTableMap = {
   pantry: '++id, name, expiryDate, createdAt, category, updatedAt',
@@ -39,15 +42,17 @@ export const DB_MIGRATION_HISTORY: MigrationDefinition[] = [
     version: 8,
     description: 'Fuegt updatedAt-Felder fuer Vorrat und Rezepte ein.',
     stores: baseStores,
-    upgrade: (tx: any) => Promise.all([
-      tx.table('pantry').toCollection().modify((item: any) => {
-        if (item.updatedAt === undefined) {
-          item.updatedAt = item.createdAt;
+    upgrade: (tx) => Promise.all([
+      tx.table('pantry').toCollection().modify((item) => {
+        const pantryItem = item as PantryMigrationRecord;
+        if (pantryItem.updatedAt === undefined) {
+          pantryItem.updatedAt = pantryItem.createdAt;
         }
       }),
-      tx.table('recipes').toCollection().modify((item: any) => {
-        if (item.updatedAt === undefined) {
-          item.updatedAt = Date.now();
+      tx.table('recipes').toCollection().modify((item) => {
+        const recipe = item as Partial<Recipe>;
+        if (recipe.updatedAt === undefined) {
+          recipe.updatedAt = Date.now();
         }
       }),
     ]),
@@ -56,12 +61,13 @@ export const DB_MIGRATION_HISTORY: MigrationDefinition[] = [
     version: 9,
     description: 'Ergaenzt Pantry-Match-Metadaten fuer Rezepte.',
     stores: version9Stores,
-    upgrade: (tx: any) => tx.table('recipes').toCollection().modify((item: any) => {
-      if (item.pantryMatchPercentage === undefined) {
-        item.pantryMatchPercentage = 0;
+    upgrade: (tx) => tx.table('recipes').toCollection().modify((item) => {
+      const recipe = item as RecipeMigrationRecord;
+      if (recipe.pantryMatchPercentage === undefined) {
+        recipe.pantryMatchPercentage = 0;
       }
-      if (item.ingredientCount === undefined) {
-        item.ingredientCount = item.ingredients.flatMap((group: IngredientGroup) => group.items).length;
+      if (recipe.ingredientCount === undefined) {
+        recipe.ingredientCount = recipe.ingredients.flatMap((group: IngredientGroup) => group.items).length;
       }
     }),
   },
@@ -69,9 +75,10 @@ export const DB_MIGRATION_HISTORY: MigrationDefinition[] = [
     version: 10,
     description: 'Normalisiert Rezeptbilder in bestehenden Datensaetzen.',
     stores: version9Stores,
-    upgrade: (tx: any) => tx.table('recipes').toCollection().modify((item: any) => {
-      if (item.imageUrl === undefined) {
-        item.imageUrl = undefined;
+    upgrade: (tx) => tx.table('recipes').toCollection().modify((item) => {
+      const recipe = item as Partial<Recipe>;
+      if (recipe.imageUrl === undefined) {
+        recipe.imageUrl = undefined;
       }
     }),
   },
@@ -93,9 +100,9 @@ export const LATEST_DB_VERSION = DB_MIGRATION_HISTORY[DB_MIGRATION_HISTORY.lengt
 
 export const applyDbMigrations = (db: Dexie) => {
   for (const migration of DB_MIGRATION_HISTORY) {
-    const versionBuilder = (db as any).version(migration.version).stores(migration.stores);
+    const versionBuilder = db.version(migration.version).stores(migration.stores);
     if (migration.upgrade) {
-      versionBuilder.upgrade(migration.upgrade);
+      versionBuilder.upgrade((tx) => Promise.resolve(migration.upgrade?.(tx)).then(() => undefined));
     }
   }
 };

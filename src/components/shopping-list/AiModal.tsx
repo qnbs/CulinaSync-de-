@@ -39,9 +39,9 @@ export const AiModal = () => {
             const items = await generateShoppingList(prompt, pantryItems, activeItems);
             setReviewItems(items);
             setSelectedItems(new Map(items.map(item => [item.name, true])));
-        } catch (err: any) {
-            setError(err.message || 'Liste konnte nicht generiert werden. Bitte versuche es erneut.');
-            console.error(err);
+        } catch (error) {
+            setError(error instanceof Error ? error.message : 'Liste konnte nicht generiert werden. Bitte versuche es erneut.');
+            console.error(error);
         } finally {
             setIsLoading(false);
         }
@@ -83,7 +83,7 @@ export const AiModal = () => {
                 <h3 id="ai-modal-title" className="text-xl font-bold mb-4 flex items-center gap-2"><Bot /> KI-gestützte Einkaufsliste</h3>
                 {!reviewItems ? (
                     <>
-                        <p className="text-zinc-400 text-sm mb-4">Beschreibe, was du vorhast (z.B. "Grillparty für 6 Personen" oder "Zutaten für Lasagne"), und die KI erstellt eine passende Einkaufsliste für dich. Dein aktueller Vorrat wird dabei berücksichtigt.</p>
+                        <p className="text-zinc-400 text-sm mb-4">Beschreibe, was du vorhast (z.B. &quot;Grillparty für 6 Personen&quot; oder &quot;Zutaten für Lasagne&quot;), und die KI erstellt eine passende Einkaufsliste für dich. Dein aktueller Vorrat wird dabei berücksichtigt.</p>
                         <textarea ref={promptRef} value={prompt} onChange={e => setPrompt(e.target.value)} placeholder="z.B. Zutaten für einen Schokoladenkuchen..." className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 h-24 focus:ring-2 focus:ring-[var(--color-accent-500)]" />
                         {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
                         <div className="flex justify-end gap-3 pt-4">

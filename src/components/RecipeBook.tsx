@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../services/dbInstance';
 import { Recipe } from '../types';
@@ -23,10 +23,13 @@ const RecipeBook: React.FC = () => {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const savedRecipes = useLiveQuery(() => db.recipes.toArray(), []);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const initialSearchTerm = voiceAction?.type === 'SEARCH' ? voiceAction.payload : undefined;
+  const voiceSearchTerm = useMemo(() => initialSearchTerm?.split('#')[0] ?? '', [initialSearchTerm]);
 
   // State for Search & Sort
   const [searchTerm, setSearchTerm] = useState('');
-  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const effectiveSearchTerm = voiceSearchTerm || searchTerm;
+  const debouncedSearchTerm = useDebounce(effectiveSearchTerm, 300);
   const [sortBy, setSortBy] = useState('newest');
 
   // State for Filters
@@ -47,11 +50,29 @@ const RecipeBook: React.FC = () => {
   const [isImportModalOpen, setImportModalOpen] = useState(false);
 
   // Voice and external actions handling
-  const initialSearchTerm = voiceAction?.type === 'SEARCH' ? voiceAction.payload : undefined;
+  const initialSelectedRecipe = useMemo(
+    () => initialSelectedId && savedRecipes ? savedRecipes.find(r => r.id === initialSelectedId) ?? null : null,
+    [initialSelectedId, savedRecipes],
+  );
+  const displayedSelectedRecipe = selectedRecipe ?? initialSelectedRecipe;
 
   const addToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     dispatch(addToastAction({ message, type }));
   };
+
+  const handleSearchTermChange = useCallback((term: string) => {
+    if (initialSearchTerm) {
+      dispatch(setVoiceAction(null));
+    }
+    setSearchTerm(term);
+  }, [dispatch, initialSearchTerm]);
+
+  const handleRecipeBack = useCallback(() => {
+    setSelectedRecipe(null);
+    if (initialSelectedId) {
+      dispatch(clearInitialSelectedId());
+    }
+  }, [dispatch, initialSelectedId]);
 
   const handleImportedRecipe = async (recipe: Recipe) => {
     const { id, ...recipeWithoutId } = recipe;
@@ -74,28 +95,11 @@ const RecipeBook: React.FC = () => {
   };
   
   useEffect(() => {
-    if (initialSearchTerm) {
-        setSearchTerm(initialSearchTerm.split('#')[0]);
-        dispatch(setVoiceAction(null));
-    }
-  }, [initialSearchTerm, dispatch]);
-
-  useEffect(() => {
     if (focusAction === 'search' && searchInputRef.current) {
         searchInputRef.current.focus();
         dispatch(setFocusAction(null));
     }
   }, [focusAction, dispatch]);
-
-  useEffect(() => {
-    if (initialSelectedId && savedRecipes) {
-      const recipeToSelect = savedRecipes.find(r => r.id === initialSelectedId);
-      if (recipeToSelect) {
-        setSelectedRecipe(recipeToSelect);
-        dispatch(clearInitialSelectedId());
-      }
-    }
-  }, [initialSelectedId, savedRecipes, dispatch]);
 
   const filterOptions = useMemo(() => {
     if (!savedRecipes) return { courses: [], cuisines: [], mainIngredients: [], difficulties: [], diets: [] };
@@ -123,7 +127,7 @@ const RecipeBook: React.FC = () => {
   }, [savedRecipes]);
 
   const clearFilters = () => {
-    setSearchTerm('');
+    handleSearchTermChange('');
     setSortBy('newest');
     setFilters({
         course: '',
@@ -169,14 +173,14 @@ const RecipeBook: React.FC = () => {
   }, [savedRecipes, debouncedSearchTerm, filters, sortBy]);
 
   const hasActiveFilters = useMemo(() => {
-      return !!(searchTerm || Object.values(filters).some(v => !!v));
-  }, [searchTerm, filters]);
+      return !!(effectiveSearchTerm || Object.values(filters).some(v => !!v));
+  }, [effectiveSearchTerm, filters]);
 
-  if (selectedRecipe) {
+  if (displayedSelectedRecipe) {
     return (
       <RecipeDetail
-        recipe={selectedRecipe}
-        onBack={() => setSelectedRecipe(null)}
+        recipe={displayedSelectedRecipe}
+        onBack={handleRecipeBack}
       />
     );
   }
@@ -207,7 +211,7 @@ const RecipeBook: React.FC = () => {
       <RecipeBookHeader recipes={savedRecipes} />
 
       <RecipeToolbar 
-        searchTerm={searchTerm} setSearchTerm={setSearchTerm} searchInputRef={searchInputRef}
+        searchTerm={effectiveSearchTerm} setSearchTerm={handleSearchTermChange} searchInputRef={searchInputRef}
         sortBy={sortBy} setSortBy={setSortBy}
         filters={filters} setFilters={setFilters} clearFilters={clearFilters}
         hasActiveFilters={hasActiveFilters} filterOptions={filterOptions}

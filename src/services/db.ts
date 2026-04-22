@@ -38,7 +38,7 @@ const populateDB = async () => {
 };
 
 // Setup hooks outside the class constructor to avoid circular dependencies in class definition file
-(db as any).on('populate', populateDB);
+db.on('populate', populateDB);
 
 // When pantry changes, recalculate for all recipes (debounced)
 db.pantry.hook('creating', debouncedUpdateAllPantryMatches);
@@ -47,15 +47,15 @@ db.pantry.hook('deleting', debouncedUpdateAllPantryMatches);
 
 // When a recipe is created or updated, calculate for just that recipe
 db.recipes.hook('creating', (primKey, _obj, trans) => {
-    (trans as any).on('complete', () => updatePantryMatches([primKey as number]));
+    trans.on('complete', () => updatePantryMatches([primKey as number]));
 });
 db.recipes.hook('updating', (_modifications, primKey, _obj, trans) => {
-    (trans as any).on('complete', () => updatePantryMatches([primKey as number]));
+    trans.on('complete', () => updatePantryMatches([primKey as number]));
 });
 
 // Open DB and sync
 void ensureMigrationBackup(PRIMARY_DB_NAME, LATEST_DB_VERSION, PRIMARY_DATA_STORES)
-    .then(() => (db as any).open())
+    .then(() => db.open())
     .then(syncSeedRecipes)
     .catch((err: Error) => {
         void logAppError(err, 'db.open');

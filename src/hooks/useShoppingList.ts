@@ -32,16 +32,20 @@ export const useShoppingList = () => {
   const { voiceAction, focusAction } = useAppSelector(state => state.ui);
   const shoppingListState = useAppSelector(state => state.shoppingList);
 
-  const shoppingList: ShoppingListItem[] = useLiveQuery(() => db.shoppingList.orderBy(['category', 'sortOrder']).toArray(), []) ?? [];
-  const pantryItems: PantryItem[] = useLiveQuery(() => db.pantry.toArray(), []) ?? [];
-  const recipes: Recipe[] = useLiveQuery(() => db.recipes.toArray(), []) ?? [];
+  const shoppingListResult = useLiveQuery(() => db.shoppingList.orderBy(['category', 'sortOrder']).toArray(), []);
+  const pantryItemsResult = useLiveQuery(() => db.pantry.toArray(), []);
+  const recipesResult = useLiveQuery(() => db.recipes.toArray(), []);
+
+  const shoppingList: ShoppingListItem[] = useMemo(() => shoppingListResult ?? [], [shoppingListResult]);
+  const pantryItems: PantryItem[] = useMemo(() => pantryItemsResult ?? [], [pantryItemsResult]);
+  const recipes: Recipe[] = useMemo(() => recipesResult ?? [], [recipesResult]);
 
   const [quickAddItem, setQuickAddItem] = useState('');
   const [draggedItem, setDraggedItem] = useState<ShoppingListItem | null>(null);
   const [dropTargetInfo, setDropTargetInfo] = useState<{ itemId?: number; category: string } | null>(null);
 
   const addItemInputRef = useRef<HTMLInputElement>(null);
-  const recipesById = useMemo(() => new Map<number, Recipe>((recipes || []).map(r => [r.id!, r])), [recipes]);
+  const recipesById = useMemo(() => new Map<number, Recipe>(recipes.map(r => [r.id!, r])), [recipes]);
   
   const triggerCheckItem = voiceAction?.type === 'CHECK_SHOPPING_ITEM' ? voiceAction.payload : undefined;
 

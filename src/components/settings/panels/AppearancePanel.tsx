@@ -11,7 +11,7 @@ const ACCENT_COLORS: Record<AppSettings['appearance']['accentColor'], { label: s
 
 interface AppearancePanelProps {
     settings: AppSettings;
-    onChange: (path: string, value: any) => void;
+    onChange: (path: string, value: unknown) => void;
 }
 
 export const AppearancePanel: React.FC<AppearancePanelProps> = ({ settings, onChange }) => {

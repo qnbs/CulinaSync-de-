@@ -10,18 +10,18 @@ const steps = [
 
 export const ChefLoading = () => {
     const [currentStep, setCurrentStep] = useState(0);
-    const [score, setScore] = useState(0);
+    const [score, setScore] = useState(steps[0].points);
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setCurrentStep(prev => (prev + 1) % steps.length);
+            setCurrentStep(prev => {
+                const nextStep = (prev + 1) % steps.length;
+                setScore(prevScore => prevScore + steps[nextStep].points);
+                return nextStep;
+            });
         }, 1500);
         return () => clearInterval(interval);
     }, []);
-
-    useEffect(() => {
-        setScore(prev => prev + steps[currentStep].points);
-    }, [currentStep]);
 
     const StepIcon = steps[currentStep].icon;
     const progress = Math.round(((currentStep + 1) / steps.length) * 100);

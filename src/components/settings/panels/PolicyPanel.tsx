@@ -6,7 +6,7 @@ const ALLERGEN_SUGGESTIONS = ['Milch', 'Ei', 'Erdnuss', 'Schalenfrüchte', 'Soja
 
 interface PolicyPanelProps {
   settings: AppSettings;
-  onChange: (path: string, value: any) => void;
+  onChange: (path: string, value: unknown) => void;
 }
 
 export const PolicyPanel: React.FC<PolicyPanelProps> = ({ settings, onChange }) => {

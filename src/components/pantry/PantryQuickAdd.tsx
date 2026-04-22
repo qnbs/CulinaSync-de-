@@ -25,12 +25,12 @@ export const PantryQuickAdd = () => {
             let visionText = '';
             try {
                 visionText = await getAppServices().ai.extractPantryItemsFromImage(file);
-            } catch (err) {
+            } catch {
                 // Fallback: OCR lokal
                 visionText = await getAppServices().scanner.recognizeTextFromImage(file, 'deu');
             }
             if (visionText) setInput(visionText);
-        } catch (err) {
+        } catch {
             alert('Bild konnte nicht erkannt werden.');
         } finally {
             setVisionLoading(false);

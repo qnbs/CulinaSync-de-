@@ -26,8 +26,8 @@ export const CommunityPanel = () => {
         url = await shareRecipeToNostr(recipe);
       }
       setShareUrl(url);
-    } catch (e: any) {
-      setError(e.message || 'Fehler beim Teilen');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Fehler beim Teilen');
     } finally {
       setLoading(false);
     }

@@ -13,15 +13,19 @@ const CHANGELOG = [
 ];
 
 export const WhatsNewModal: React.FC = () => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(() => {
+    try {
+      return localStorage.getItem('culinasync_version') !== VERSION;
+    } catch {
+      return false;
+    }
+  });
 
   useEffect(() => {
-    const lastVersion = localStorage.getItem('culinasync_version');
-    if (lastVersion !== VERSION) {
-      setOpen(true);
+    if (open) {
       localStorage.setItem('culinasync_version', VERSION);
     }
-  }, []);
+  }, [open]);
 
   if (!open) return null;
 
