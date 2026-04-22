@@ -57,6 +57,9 @@
 - **Konfiguration:** `vitest.config.ts` im Root.
 - **Coverage:** Aktuell ~35 % (nur `geminiService` getestet). Neue Features sollten Tests mitbringen.
 - **Ausfuehrung:** `pnpm run test` oder `pnpm run test:coverage`.
+- Vor `pnpm run build` immer zuerst Diagnostics fuer die geaenderten Dateien pruefen (`get_errors` bzw. Problems-Panel).
+- Wenn TypeScript-relevante Dateien betroffen sind, vor dem Full-Build mindestens einen Typecheck fuer den geaenderten Slice oder `pnpm exec tsc --noEmit` ausfuehren.
+- Der Full-Build ist der Integrations-Check am Ende und soll nicht der erste Schritt sein, in dem neue Typefehler entdeckt werden.
 
 ## Error-Handling
 - Zentrale Fehler-Logging-Funktion: `logAppError()` aus `src/services/errorLoggingService.ts`.
@@ -83,6 +86,7 @@
 - Lint: `pnpm run lint`
 - Test: `pnpm run test`
 - Preview: `pnpm run preview`
+- Reihenfolge fuer Agent-Aenderungen: lokales Lesen/Suchen, kleine Edits, fokussierte Tests/Diagnostics, Typecheck/Lint fuer den geaenderten Slice, erst danach Full-Build.
 - Deploy: Automatisch via GitHub Actions bei Push auf `main` (`.github/workflows/deploy.yml`)
 - CI: Lint + TypeScript-Check + Tests + Bundle-Budget bei PRs und Push auf `main` (`.github/workflows/ci.yml`)
 - Security: CodeQL-Analyse bei PRs und Push auf `main` (`.github/workflows/codeql.yml`)

@@ -79,8 +79,8 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
                         <h4 className="font-bold text-amber-400 text-sm">Sicherheitshinweis</h4>
                         <p className="text-zinc-400 text-xs leading-relaxed">
                             Dein API-Schlüssel wird <strong className="text-zinc-300">ausschließlich lokal</strong> auf deinem Gerät 
-                            in einer geschützten IndexedDB gespeichert. Er wird niemals an unsere Server gesendet – 
-                            nur direkt an die Google Gemini API.
+                            verschlüsselt in IndexedDB gespeichert. Er wird niemals an unsere Server gesendet – 
+                            nur direkt an die Google Gemini API. Gegen XSS im selben Ursprung schützt das allein jedoch nicht.
                         </p>
                     </div>
                 </div>

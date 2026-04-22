@@ -25,6 +25,8 @@ const SAFE_FILENAME_EXTENSIONS: Record<string, string> = {
     'text/plain;charset=utf-8': '.txt',
 };
 
+const CSV_FORMULA_PREFIX_PATTERN = /^[\t\r\n ]*[=+\-@]/;
+
 const getPapaModule = async () => {
     if (!papaModulePromise) {
         papaModulePromise = import('papaparse');
@@ -46,6 +48,20 @@ const sanitizeFilename = (filename: string, mimeType: string) => {
     const withoutDangerousChars = withoutPath.replace(/[^a-zA-Z0-9._-]+/g, '_').replace(/^\.+/, '');
     const baseName = withoutDangerousChars.replace(/\.[^.]*$/, '') || 'download';
     return `${baseName}${safeExtension}`;
+};
+
+export const sanitizeCsvCell = (value: unknown): unknown => {
+    if (typeof value !== 'string') {
+        return value;
+    }
+
+    return CSV_FORMULA_PREFIX_PATTERN.test(value) ? `'${value}` : value;
+};
+
+const sanitizeCsvRows = <T extends object>(rows: T[]): T[] => {
+    return rows.map((row) => Object.fromEntries(
+        Object.entries(row as Record<string, unknown>).map(([key, value]) => [key, sanitizeCsvCell(value)])
+    ) as T);
 };
 
 // Helper function to trigger download
@@ -144,7 +160,7 @@ export const exportRecipeToMarkdown = (recipe: Recipe) => {
 };
 
 export const exportRecipeToCsv = async (recipe: Recipe) => {
-    const data = recipe.ingredients.flatMap(group => 
+    const data = sanitizeCsvRows(recipe.ingredients.flatMap(group => 
         group.items.map(item => ({
             'Rezept': recipe.recipeTitle,
             'Gruppe': group.sectionTitle || '',
@@ -152,7 +168,7 @@ export const exportRecipeToCsv = async (recipe: Recipe) => {
             'Einheit': item.unit,
             'Zutat': item.name,
         }))
-    );
+    ));
     const Papa = await getPapaModule();
     const csv = Papa.unparse(data);
     const filename = `${recipe.recipeTitle.replace(/\s/g, '_')}_Zutaten.csv`;
@@ -253,13 +269,13 @@ export const exportShoppingListToMarkdown = (list: ShoppingListItem[]) => {
 };
 
 export const exportShoppingListToCsv = async (list: ShoppingListItem[]) => {
-    const data = list.map(item => ({
+    const data = sanitizeCsvRows(list.map(item => ({
         Kategorie: item.category,
         Menge: item.quantity,
         Einheit: item.unit,
         Artikel: item.name,
         Erledigt: item.isChecked ? 'Ja' : 'Nein',
-    }));
+    })));
     const Papa = await getPapaModule();
     const csv = Papa.unparse(data);
     downloadFile('einkaufsliste.csv', csv, 'text/csv;charset=utf-8');
@@ -347,9 +363,9 @@ export const exportFullDataAsCsv = async (): Promise<boolean> => {
     try {
         const data = await getFullData();
         const Papa = await getPapaModule();
-        const pantryCsv = Papa.unparse(data.pantry);
-        const recipesCsv = Papa.unparse(data.recipes.map(r => ({title: r.recipeTitle, servings: r.servings, difficulty: r.difficulty})));
-        const shoppingCsv = Papa.unparse(data.shoppingList);
+        const pantryCsv = Papa.unparse(sanitizeCsvRows(data.pantry));
+        const recipesCsv = Papa.unparse(sanitizeCsvRows(data.recipes.map(r => ({ title: r.recipeTitle, servings: r.servings, difficulty: r.difficulty }))));
+        const shoppingCsv = Papa.unparse(sanitizeCsvRows(data.shoppingList));
         
         const combined = `=== PANTRY ===\n${pantryCsv}\n\n=== RECIPES ===\n${recipesCsv}\n\n=== SHOPPING LIST ===\n${shoppingCsv}`;
         downloadFile('culinasync_backup.csv', combined, 'text/csv;charset=utf-8');
