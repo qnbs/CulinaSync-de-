@@ -108,16 +108,16 @@ describe('apiKeyService', () => {
       String.fromCharCode(char.charCodeAt(0) ^ legacyFingerprint.charCodeAt(index % legacyFingerprint.length))
     )).join(''));
 
-    await new Promise<void>(async (resolve) => {
-      const db = await new Promise<IDBDatabase>((innerResolve, innerReject) => {
-        const request = indexedDB.open('culinasync_secure', 1);
-        request.onupgradeneeded = () => {
-          request.result.createObjectStore('keys', { keyPath: 'id' });
-        };
-        request.onsuccess = () => innerResolve(request.result);
-        request.onerror = () => innerReject(request.error);
-      });
+    const db = await new Promise<IDBDatabase>((innerResolve, innerReject) => {
+      const request = indexedDB.open('culinasync_secure', 1);
+      request.onupgradeneeded = () => {
+        request.result.createObjectStore('keys', { keyPath: 'id' });
+      };
+      request.onsuccess = () => innerResolve(request.result);
+      request.onerror = () => innerReject(request.error);
+    });
 
+    await new Promise<void>((resolve) => {
       const tx = db.transaction('keys', 'readwrite');
       tx.objectStore('keys').put({ id: 'gemini_api_key', value: legacyValue, updatedAt: Date.now() });
       tx.oncomplete = () => {
