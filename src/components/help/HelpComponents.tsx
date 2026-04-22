@@ -18,19 +18,24 @@ export const FaqSection = ({ searchTerm }: { searchTerm: string }) => {
         <div className="space-y-3">
             {filteredFaqs.map((faq) => {
                 const isOpen = openId === faq.id;
+                const answerId = `faq-answer-${faq.id}`;
                 return (
                     <div 
                         key={faq.id} 
                         className={`border rounded-xl overflow-hidden transition-all duration-300 ${isOpen ? 'bg-zinc-800/60 border-[var(--color-accent-500)]/30 shadow-lg' : 'bg-zinc-900/30 border-zinc-800 hover:bg-zinc-800/40'}`}
                     >
                         <button 
+                            type="button"
                             onClick={() => setOpenId(isOpen ? null : faq.id)}
+                            aria-expanded={isOpen}
+                            aria-controls={answerId}
                             className="w-full flex items-center justify-between p-4 text-left"
                         >
                             <span className={`font-medium ${isOpen ? 'text-[var(--color-accent-400)]' : 'text-zinc-200'}`}>{faq.question}</span>
                             <ChevronDown className={`transition-transform duration-300 ${isOpen ? 'rotate-180 text-[var(--color-accent-400)]' : 'text-zinc-500'}`} size={20} />
                         </button>
                         <div 
+                            id={answerId}
                             className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}`}
                         >
                             <div className="p-4 pt-0 text-sm text-zinc-400 leading-relaxed border-t border-white/5 mt-2">

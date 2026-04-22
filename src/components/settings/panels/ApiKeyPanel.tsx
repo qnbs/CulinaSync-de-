@@ -2,6 +2,7 @@ import React, { useEffect, useOptimistic, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Key, Eye, EyeOff, CheckCircle, Trash2, Shield, ExternalLink } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { hasApiKey } from '../../../services/apiKeyService';
 import { apiKeyFormSchema, type ApiKeyFormValues } from '../../../features/settings/api-key/apiKeySchema';
 import { storeUserApiKey } from '../../../features/settings/api-key/commands/storeUserApiKey';
@@ -12,6 +13,7 @@ interface ApiKeyPanelProps {
 }
 
 export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
+    const { t } = useTranslation();
     const [showKey, setShowKey] = useState(false);
     const [hasKey, setHasKey] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -106,13 +108,13 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
                             type={showKey ? 'text' : 'password'}
                             placeholder={optimisticHasKey ? 'Neuen Schlüssel eingeben zum Ersetzen...' : 'AIza... API-Schlüssel hier einfügen'}
                             className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 pr-12 text-zinc-200 placeholder-zinc-500 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none font-mono text-sm"
-                            aria-label="Gemini API-Schlüssel"
+                            aria-label={t('settings.apiKey.ariaLabel')}
                         />
                         <button
                             type="button"
                             onClick={() => setShowKey(!showKey)}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
-                            aria-label={showKey ? 'Schlüssel verbergen' : 'Schlüssel anzeigen'}
+                            aria-label={showKey ? t('settings.apiKey.hideKeyAria') : t('settings.apiKey.showKeyAria')}
                         >
                             {showKey ? <EyeOff size={18} /> : <Eye size={18} />}
                         </button>

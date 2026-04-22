@@ -34,6 +34,11 @@
       "speech": "Sprachsteuerung & Audio",
       "data": "Daten & Speicher"
     },
+    "apiKey": {
+      "ariaLabel": "Gemini API-Schluessel",
+      "showKeyAria": "Schluessel anzeigen",
+      "hideKeyAria": "Schluessel verbergen"
+    },
     "actions": {
       "discard": "Verwerfen"
     },
@@ -60,6 +65,12 @@
     "search": "Suchen...",
     "loading": "Wird geladen...",
     "error": "Ein Fehler ist aufgetreten"
+  },
+  "help": {
+    "search": {
+      "inputAria": "Suche in der Wissensdatenbank",
+      "resetAria": "Suche zuruecksetzen"
+    }
   },
   "app": {
     "loading": "Inhalt wird geladen",
@@ -145,6 +156,9 @@
       "pantry": "Suche im Vorrat nach: \"{{searchTerm}}\""
     }
   },
+  "voiceControl": {
+    "listening": "Hoere zu..."
+  },
   "mealPlanner": {
     "addNote": {
       "title": "Notiz hinzufügen",
@@ -168,11 +182,29 @@
     "actions": {
       "exportIcs": "Kalender exportieren (ICS)",
       "autoPlan": "Auto-Vorschlag (Ablauf)",
+      "generateShoppingListAria": "Einkaufsliste aus Wochenplan generieren",
+      "previousWeekAria": "Vorherige Woche",
+      "nextWeekAria": "Naechste Woche",
       "autoPlanApplied": "Auto-Vorschlag angewendet: {{count}} Mahlzeit(en).",
       "autoPlanEmpty": "Keine passenden Vorschläge aus bald ablaufenden Zutaten gefunden."
     }
   },
   "shoppingList": {
+    "toolbar": {
+      "expandAllAria": "Alle Kategorien ausklappen",
+      "expandAllTitle": "Alle ausklappen",
+      "collapseAllAria": "Alle Kategorien einklappen",
+      "collapseAllTitle": "Alle einklappen"
+    },
+    "item": {
+      "saveChangesAria": "Aenderungen speichern",
+      "cancelEditAria": "Bearbeitung abbrechen",
+      "toggleCompleteAria": "{{itemName}} als {{state}} markieren",
+      "stateComplete": "erledigt",
+      "stateIncomplete": "nicht erledigt",
+      "editItemAria": "{{itemName}} bearbeiten",
+      "deleteItemAria": "{{itemName}} loeschen"
+    },
     "quickAdd": {
       "placeholder": "Schnell hinzufügen (z.B. 500g Mehl)",
       "voiceAria": "Sprach-Eingabe starten",
@@ -180,6 +212,38 @@
       "submitAria": "Artikel hinzufügen",
       "scanBarcode": "Barcode per Kamera/Foto",
       "scanReceipt": "Rechnung per OCR scannen"
+    }
+  },
+  "pantry": {
+    "listAria": "Vorratsliste",
+    "item": {
+      "addToShoppingListTitle": "Zur Einkaufsliste",
+      "editTitle": "Bearbeiten"
+    },
+    "quickAdd": {
+      "placeholder": "Smart Add: z.B. '500g Spaghetti'",
+      "inputAria": "Schnellzugabe fuer Vorrat",
+      "imageAria": "Foto oder Textbild erkennen",
+      "submitAria": "Zum Vorrat hinzufuegen"
+    },
+    "toolbar": {
+      "searchAria": "Vorrat durchsuchen",
+      "resetSearchAria": "Suche leeren",
+      "expiryFilterAria": "Ablaufstatus filtern",
+      "sortAria": "Sortierreihenfolge waehlen",
+      "ungroupAria": "Gruppierung aufheben",
+      "groupByCategoryAria": "Nach Kategorie gruppieren",
+      "ungroupTitle": "Gruppierung aufheben",
+      "groupByCategoryTitle": "Nach Kategorie gruppieren",
+      "toggleSelectionModeAria": "Auswahlmodus umschalten",
+      "selectionModeTitle": "Auswahlmodus"
+    }
+  },
+  "cookMode": {
+    "actions": {
+      "previousStepAria": "Vorheriger Schritt",
+      "nextStepAria": "Naechster Schritt",
+      "finishAria": "Fertigstellen"
     }
   },
   "recipeDetail": {
@@ -219,6 +283,23 @@
       "addedToMealPlan": "Zum Essensplan hinzugefügt!"
     }
   },
+  "recipeBook": {
+    "selection": {
+      "startAria": "Auswahlmodus starten",
+      "startTitle": "Auswahlmodus starten",
+      "endAria": "Auswahlmodus beenden"
+    },
+    "toolbar": {
+      "searchAria": "Rezepte durchsuchen",
+      "resetSearchAria": "Suche zuruecksetzen",
+      "sortAria": "Sortierung waehlen",
+      "courseFilterAria": "Nach Gang filtern",
+      "cuisineFilterAria": "Nach Kueche filtern",
+      "mainIngredientFilterAria": "Nach Hauptzutat filtern",
+      "difficultyFilterAria": "Nach Schwierigkeit filtern",
+      "dietFilterAria": "Nach Ernaehrungsform filtern"
+    }
+  },
   "recipeImport": {
     "openButton": "Rezept importieren",
     "title": "Rezept importieren",
@@ -248,5 +329,8 @@
       "generic": "Import fehlgeschlagen. Bitte versuche es erneut.",
       "fileRead": "Datei konnte nicht gelesen werden."
     }
+  },
+  "tagInput": {
+    "removeTagAria": "Entferne {{tag}}"
   }
 }

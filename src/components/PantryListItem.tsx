@@ -1,6 +1,7 @@
 import React from 'react';
 import { PantryItem } from '../types';
 import { Minus, Plus, Square, CheckSquare, Edit3, AlertTriangle, ShoppingCart, Calendar, Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAppSelector } from '../store/hooks';
 
 // Improved date formatter for "In 3 days" style
@@ -46,6 +47,7 @@ const PantryListItem = React.memo<PantryListItemProps>(({
     item, isSelectMode, isSelected,
     onStartEdit, onAdjustQuantity, onToggleSelect, onAddToShoppingList
 }) => {
+    const { t } = useTranslation();
     const { pantry: pantrySettings } = useAppSelector(state => state.settings);
     const expiryStatus = getExpiryStatus(item.expiryDate, pantrySettings.expiryWarningDays);
     const isRunningLow = item.minQuantity != null && item.quantity <= item.minQuantity;
@@ -154,7 +156,7 @@ const PantryListItem = React.memo<PantryListItemProps>(({
                             <button 
                                 onClick={() => onAddToShoppingList(item)} 
                                 className="p-2 rounded-lg bg-zinc-800 hover:bg-[var(--color-accent-500)] text-zinc-400 hover:text-zinc-900 transition-all shadow-sm"
-                                title="Zur Einkaufsliste"
+                                title={t('pantry.item.addToShoppingListTitle')}
                             >
                                 <ShoppingCart size={18} />
                             </button>
@@ -162,7 +164,7 @@ const PantryListItem = React.memo<PantryListItemProps>(({
                         <button 
                             onClick={() => onStartEdit(item)} 
                             className="p-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-zinc-100 transition-all shadow-sm"
-                            title="Bearbeiten"
+                            title={t('pantry.item.editTitle')}
                         >
                             <Edit3 size={18} />
                         </button>

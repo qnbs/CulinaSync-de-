@@ -73,7 +73,7 @@
 - Alle Seiten-Komponenten werden via `React.lazy()` geladen (`src/App.tsx`).
 - `manualChunks` in `vite.config.ts` splittet: `react-vendor`, `redux-vendor`, `dexie-vendor`, `react-window`.
 - Schwere Dependencies (`tesseract.js`, `@ericblade/quagga2`, Export-Libs) sollten immer via dynamischem `import()` geladen werden.
-- `vite-plugin-compression` generiert Brotli + Gzip für statische Assets.
+- `vite-plugin-compression` generiert Brotli fuer statische Assets.
 
 ## Barrierefreiheit (A11y)
 - Alle Modals: `useModalA11y` Hook verwenden (inkl. `role="dialog"`, `aria-modal`, Fokus-Trap).

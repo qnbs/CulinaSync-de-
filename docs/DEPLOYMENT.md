@@ -35,6 +35,7 @@ Das Repository verwendet GitHub Actions fuer CI, Deploy und CodeQL.
 ## Pages-spezifische Fakten
 
 - `vite.config.ts` setzt `base` in Actions auf `/CulinaSync-de-/`.
+- Das Web-App-Manifest wird zur Build-Zeit durch `vite-plugin-pwa` aus `vite.config.ts` erzeugt; es gibt bewusst kein zweites statisches `public/manifest.json` mehr.
 - Die Live-Demo liegt unter `https://qnbs.github.io/CulinaSync-de-/`.
 - SPA-Verhalten benoetigt weiterhin passende 404-Weiterleitung und korrekte Asset-Pfade.
 

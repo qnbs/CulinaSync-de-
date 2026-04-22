@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useReducer } from 'react';
 import { Recipe } from '../types';
 import { X as XIcon, RefreshCw, Volume2, VolumeX, ChevronLeft, ChevronRight, CheckCircle2, TimerReset, Play, Pause, CircleCheck } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useWakeLock } from '../hooks/useWakeLock';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
@@ -105,6 +106,7 @@ const cookModeReducer = (state: CookModeState, action: CookModeAction): CookMode
 };
 
 const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
+    const { t } = useTranslation();
     const [cookModeState, dispatchCookMode] = useReducer(cookModeReducer, initialCookModeState);
     const [isSpeechEnabled, setIsSpeechEnabled] = useState(false);
     const [isUiVisible, setIsUiVisible] = useState(true);
@@ -406,7 +408,7 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
                     onClick={handlePrev} 
                     disabled={currentStep === 0} 
                     className="flex-1 glass-button flex flex-col items-center justify-center h-24 rounded-3xl text-zinc-300 active:text-white disabled:opacity-20 disabled:cursor-not-allowed active:scale-95 border-white/10 touch-manipulation"
-                    aria-label="Vorheriger Schritt"
+                    aria-label={t('cookMode.actions.previousStepAria')}
                 >
                     <ChevronLeft size={40} />
                     <span className="text-xs uppercase font-bold tracking-widest mt-1">Zurück</span>
@@ -416,7 +418,7 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
                     <button 
                         onClick={handleNext} 
                         className="flex-[2] flex flex-col items-center justify-center h-28 rounded-3xl bg-[var(--color-accent-500)] text-zinc-900 active:bg-[var(--color-accent-400)] active:scale-95 transition-all shadow-[0_0_40px_rgba(var(--color-accent-glow),0.4)] border-4 border-white/5 hover:border-[var(--color-accent-300)] touch-manipulation"
-                        aria-label="Nächster Schritt"
+                        aria-label={t('cookMode.actions.nextStepAria')}
                     >
                         <ChevronRight size={56} />
                         <span className="text-sm uppercase font-black tracking-widest">Weiter</span>
@@ -425,7 +427,7 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
                     <button 
                         onClick={onExit} 
                         className="flex-[2] flex flex-col items-center justify-center h-28 rounded-3xl bg-emerald-500 text-zinc-900 active:bg-emerald-400 active:scale-95 transition-all shadow-[0_0_40px_rgba(16,185,129,0.4)] border-4 border-white/5 hover:border-emerald-300 touch-manipulation"
-                        aria-label="Fertigstellen"
+                        aria-label={t('cookMode.actions.finishAria')}
                     >
                         <CheckCircle2 size={56} />
                         <span className="text-sm uppercase font-black tracking-widest">Fertig</span>

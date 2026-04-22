@@ -80,7 +80,7 @@ export const MealPlannerHeader: React.FC<MealPlannerHeaderProps> = ({ setCurrent
                     <button type="button" onClick={onAutoPlanExpiring} className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium py-2 px-4 rounded-xl transition-colors border border-zinc-700">
                         <WandSparkles size={18} /> <span className="hidden sm:inline">{t('mealPlanner.actions.autoPlan')}</span>
                     </button>
-                    <button type="button" aria-label="Einkaufsliste aus Wochenplan generieren" onClick={handleGenerateShoppingList} className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium py-2 px-4 rounded-xl transition-colors border border-zinc-700">
+                    <button type="button" aria-label={t('mealPlanner.actions.generateShoppingListAria')} onClick={handleGenerateShoppingList} className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium py-2 px-4 rounded-xl transition-colors border border-zinc-700">
                         <ShoppingCart size={18} /> <span className="hidden sm:inline">Einkaufsliste füllen</span>
                     </button>
                 </div>
@@ -89,14 +89,14 @@ export const MealPlannerHeader: React.FC<MealPlannerHeaderProps> = ({ setCurrent
             <div className="flex flex-col xl:flex-row gap-4 items-center bg-zinc-950/50 border border-zinc-800 rounded-2xl p-2 backdrop-blur-sm">
                 {/* Navigation */}
                 <div className="flex items-center justify-between w-full xl:w-auto gap-4 bg-zinc-900/80 rounded-xl p-1.5 border border-zinc-800/50">
-                    <button type="button" aria-label="Vorherige Woche" onClick={() => setCurrentDate(d => new Date(d.setDate(d.getDate() - 7)))} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors">
+                    <button type="button" aria-label={t('mealPlanner.actions.previousWeekAria')} onClick={() => setCurrentDate(d => new Date(d.setDate(d.getDate() - 7)))} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors">
                         <ChevronLeft size={20}/>
                     </button>
                     <div className="flex flex-col items-center px-4">
                          <span className="text-xs text-zinc-500 font-medium uppercase tracking-wide">Aktuelle Woche</span>
                          <span className="font-bold text-zinc-100 tabular-nums">{weekString}</span>
                     </div>
-                    <button type="button" aria-label="Nächste Woche" onClick={() => setCurrentDate(d => new Date(d.setDate(d.getDate() + 7)))} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors">
+                    <button type="button" aria-label={t('mealPlanner.actions.nextWeekAria')} onClick={() => setCurrentDate(d => new Date(d.setDate(d.getDate() + 7)))} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors">
                         <ChevronRight size={20}/>
                     </button>
                      <div className="w-px h-8 bg-zinc-800 mx-2 hidden sm:block"></div>

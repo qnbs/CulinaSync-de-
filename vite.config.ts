@@ -4,6 +4,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 import viteCompression from 'vite-plugin-compression';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { fileURLToPath, URL } from 'url';
+import pkg from './package.json';
 
 const chunkGroups: Array<[string, string[]]> = [
   ['vendor-react', ['react', 'react-dom']],
@@ -18,6 +19,9 @@ const base = process.env.GITHUB_ACTIONS ? `/${REPO_NAME}/` : '/';
 
 export default defineConfig({
   base,
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+  },
   plugins: [
     react(),
     VitePWA({
@@ -96,11 +100,6 @@ export default defineConfig({
           }
         ]
       },
-    }),
-    viteCompression({
-      algorithm: 'gzip',
-      ext: '.gz',
-      threshold: 10240,
     }),
     viteCompression({
       algorithm: 'brotliCompress',

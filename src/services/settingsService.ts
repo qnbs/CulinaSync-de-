@@ -1,6 +1,58 @@
 import { AppSettings } from '../types';
 
 export const SETTINGS_KEY = 'culinaSyncSettings';
+export const PERSISTED_SETTINGS_KEY = 'persist:settings';
+
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
+
+const parseJson = (value: string): unknown => JSON.parse(value);
+
+const mergeWithDefaults = (parsed: unknown): AppSettings => {
+  const defaults = getDefaultSettings();
+  const source = isRecord(parsed) ? parsed : {};
+
+  return {
+    ...defaults,
+    ...source,
+    aiPreferences: { ...defaults.aiPreferences, ...(isRecord(source.aiPreferences) ? source.aiPreferences : {}) },
+    pantry: { ...defaults.pantry, ...(isRecord(source.pantry) ? source.pantry : {}) },
+    recipeBook: { ...defaults.recipeBook, ...(isRecord(source.recipeBook) ? source.recipeBook : {}) },
+    shoppingList: { ...defaults.shoppingList, ...(isRecord(source.shoppingList) ? source.shoppingList : {}) },
+    speechSynthesis: { ...defaults.speechSynthesis, ...(isRecord(source.speechSynthesis) ? source.speechSynthesis : {}) },
+    appearance: { ...defaults.appearance, ...(isRecord(source.appearance) ? source.appearance : {}) },
+  };
+};
+
+const loadPersistedSettings = (): AppSettings | null => {
+  const persistedSettings = window.localStorage.getItem(PERSISTED_SETTINGS_KEY);
+
+  if (!persistedSettings) {
+    return null;
+  }
+
+  const parsedPersistedSettings = parseJson(persistedSettings);
+  if (!isRecord(parsedPersistedSettings)) {
+    return null;
+  }
+
+  const hydratedSettings = Object.fromEntries(
+    Object.entries(parsedPersistedSettings)
+      .filter(([key]) => key !== '_persist')
+      .map(([key, value]) => {
+        if (typeof value !== 'string') {
+          return [key, value];
+        }
+
+        try {
+          return [key, parseJson(value)];
+        } catch {
+          return [key, value];
+        }
+      })
+  );
+
+  return mergeWithDefaults(hydratedSettings);
+};
 
 export const getDefaultSettings = (): AppSettings => ({
   language: 'de',
@@ -41,23 +93,14 @@ export const getDefaultSettings = (): AppSettings => ({
 
 export const loadSettings = (): AppSettings => {
   try {
+    const persistedSettings = loadPersistedSettings();
+    if (persistedSettings) {
+      return persistedSettings;
+    }
+
     const storedSettings = window.localStorage.getItem(SETTINGS_KEY);
     if (storedSettings) {
-      // Merge with defaults to handle new settings being added in updates
-      const parsed = JSON.parse(storedSettings);
-      const defaults = getDefaultSettings();
-      
-      // Deep merge needed for nested objects to ensure new fields (like creativityLevel) are added
-      return { 
-          ...defaults, 
-          ...parsed, 
-          aiPreferences: { ...defaults.aiPreferences, ...(parsed.aiPreferences || {}) },
-          pantry: { ...defaults.pantry, ...(parsed.pantry || {}) },
-          recipeBook: { ...defaults.recipeBook, ...(parsed.recipeBook || {}) },
-          shoppingList: { ...defaults.shoppingList, ...(parsed.shoppingList || {}) },
-          speechSynthesis: { ...defaults.speechSynthesis, ...(parsed.speechSynthesis || {}) },
-          appearance: { ...defaults.appearance, ...(parsed.appearance || {}) },
-        };
+      return mergeWithDefaults(parseJson(storedSettings));
     }
   } catch (error) {
     console.error("Failed to load settings from localStorage", error);
@@ -67,7 +110,10 @@ export const loadSettings = (): AppSettings => {
 
 export const saveSettings = (settings: AppSettings): void => {
   try {
-    window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    window.localStorage.setItem(PERSISTED_SETTINGS_KEY, JSON.stringify({
+      ...Object.fromEntries(Object.entries(settings).map(([key, value]) => [key, JSON.stringify(value)])),
+      _persist: JSON.stringify({ version: -1, rehydrated: true }),
+    }));
   } catch (error) {
     console.error("Failed to save settings to localStorage", error);
   }

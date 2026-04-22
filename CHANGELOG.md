@@ -27,6 +27,30 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - CodeQL-Matrix auf eine einzige JavaScript/TypeScript-Analyse reduziert, um doppelte Alerts fuer denselben Code zu vermeiden
 - CSV-/Spreadsheet-Formula-Injection in `exportService.ts` neutralisiert
 - API-Key-Speicherung von XOR-Obfuskation auf WebCrypto-basierte Verschluesselung mit Legacy-Migration gehaertet
+- Health-CSV-Export in `healthConnectService.ts` gegen Formula-Injection und kaputte CSV-Struktur gehaertet
+- Backup-/Sync-Verschluesselung in `syncService.ts` auf zufaelliges Salt pro Export mit Legacy-Decrypt umgestellt
+- `geminiService.ts` gegen Prompt-Injection aus Web-Import-Inhalten und gegen unvalidierte KI-JSON-Antworten gehaertet
+- Settings-Persistenz auf einen konsolidierten Redux-Persist-Source-of-Truth umgestellt und Legacy-Load-Fallback beibehalten
+- `index.html` um eine konservative Content-Security-Policy fuer die Web/PWA-Variante erweitert
+- Migrations-Backups in `dbMigrations.ts` auf eine kleine Anzahl aktueller Snapshots begrenzt
+- `@faker-js/faker` aus dem Production-Pfad entfernt und nur noch fuer Offline-Fallbacks dynamisch geladen
+- App-Version auf Build-Time-Define umgestellt und Paketmetadaten in `package.json` bereinigt
+- GitHub-Pages-SPA-Redirect in `public/404.html` auf einen same-origin URL-Aufbau gehaertet
+- Build-Kompression auf Brotli-only vereinfacht und redundante Gzip-Artefakte entfernt
+- `useWindowSize` auf debouncte Resize-Updates umgestellt, um Re-Render-Spitzen zu reduzieren
+- `WhatsNewModal` mit Dialog-Semantik, Escape-Close und Fokus-Management an das bestehende Modal-A11y-Muster angeglichen
+- das DayColumn-Aktionsmenue im Meal Planner per `focus-within` auch fuer Tastatur-Navigation zugaenglich gemacht
+- die globale Error Boundary fuer Screenreader mit `role="alert"` und assertiver Live-Region versehen
+- das Export-Menue in `RecipeDetail` von klickbaren Links auf echte Buttons mit Menu-Attributen umgestellt
+- das Help-Suchfeld und das FAQ-Accordion um fehlende A11y-Attribute wie `aria-label`, `aria-expanded` und `aria-controls` ergaenzt
+- `VoiceControlUI` auf einen i18n-basierten Listening-Fallback umgestellt und erste hartcodierte `aria-label`-Werte in PantryList/CookModeView lokalisiert
+- die Rezeptaktions-Buttons in `ChefResults` um explizite Screenreader-Labels ergaenzt
+- weitere feste `aria-label`-Werte im `RecipeToolbar` ueber i18n lokalisiert
+- feste Toolbar-Labels in `PantryToolbar` und `ShoppingListToolbar` ebenfalls ueber i18n gezogen
+- weitere A11y-/i18n-Slices in `ShoppingListItemComponent`, `PantryQuickAdd`, `TagInput` und den Selection-Mode-Buttons in `RecipeBook` lokalisiert
+- weitere A11y-/i18n-Slices in `ApiKeyPanel`, `Help`, `WhatsNewModal` und `BulkAddToPlanModal` lokalisiert
+- das veraltete statische `public/manifest.json` entfernt, sodass das von `vite-plugin-pwa` generierte Manifest der einzige Pfad bleibt
+- das redundante Typ-Paket `@types/react-redux` entfernt, da `react-redux` 9.x eigene Typdefinitionen mitbringt
 
 ### Behoben
 - **tsconfig.json:** `ignoreDeprecations: "6.0"` hinzugefügt für TS 7 Kompatibilität, Root-Dateien in `include` aufgenommen

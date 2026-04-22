@@ -19,6 +19,7 @@ export const ChefResults: React.FC<ChefResultsProps> = ({ ideas, onSelectIdea, o
                     <p className="text-zinc-400">Wähle deinen Favoriten, um das vollständige Rezept zu generieren.</p>
                 </div>
                 <button 
+                    type="button"
                     onClick={onReset}
                     className="text-sm font-medium text-zinc-400 hover:text-zinc-200 flex items-center gap-2 py-2 px-4 rounded-lg hover:bg-zinc-800 transition-colors"
                 >
@@ -45,8 +46,10 @@ export const ChefResults: React.FC<ChefResultsProps> = ({ ideas, onSelectIdea, o
                             </p>
 
                             <button 
+                                type="button"
                                 onClick={() => onSelectIdea(idea)}
                                 disabled={isLoading}
+                                aria-label={`Rezeptidee ${idea.recipeTitle} auswaehlen und vollstaendiges Rezept erstellen`}
                                 className="mt-6 w-full py-3 rounded-xl bg-zinc-800 text-zinc-200 font-bold group-hover:bg-[var(--color-accent-500)] group-hover:text-zinc-900 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-wait"
                             >
                                 {isPending ? 'Wird erstellt...' : 'Rezept erstellen'} <ArrowRight size={18}/>

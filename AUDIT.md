@@ -52,37 +52,35 @@ Noch offen ist vor allem strukturelle Nacharbeit, nicht der unmittelbare Produkt
 
 ## 1. Code-Qualität & Architektur
 
-### 🔴 K1 — `@faker-js/faker` in Production-Bundle
+### ✅ K1 — `@faker-js/faker` in Production-Bundle — behoben am 2026-04-22
 
-**Datei:** `package.json` (dependencies), `src/services/geminiService.ts:35`
+**Datei:** `package.json`, `src/services/geminiService.ts`
 
-**Problem:** `@faker-js/faker` (~800 KB unkomprimiert) steht in `dependencies` statt `devDependencies` und wird via statischem `import { fakerDE as faker }` eingebunden. Das gesamte Modul landet im Production-Bundle und sprengt das 130 KB Script-Budget.
+**Problem:** `@faker-js/faker` (~800 KB unkomprimiert) stand in `dependencies` statt `devDependencies` und wurde via statischem `import { fakerDE as faker }` eingebunden. Das gesamte Modul landete im Production-Bundle und sprengte das 130 KB Script-Budget.
 
-**Empfehlung:**
-1. `@faker-js/faker` nach `devDependencies` verschieben
-2. Den statischen Import durch dynamischen `import()` ersetzen:
-   ```ts
-   const { fakerDE: faker } = await import('@faker-js/faker');
-   ```
-3. Alternativ: Einen kleinen lokalen Fake-Daten-Generator als Offline-Fallback schreiben (~2 KB statt 800 KB)
+**Fix:** `@faker-js/faker` wurde nach `devDependencies` verschoben und wird in `geminiService.ts` nur noch dynamisch im echten Offline-Fallback geladen.
 
-**Aufwand:** Mittel (2-3h) — Alle Offline-Fallback-Funktionen in `geminiService.ts` müssen auf async umgestellt werden.
+**Verifikation:** `src/services/__tests__/geminiService.test.ts`, `pnpm exec tsc --noEmit`, `pnpm run lint`
+
+**Aufwand:** Erledigt
 
 ---
 
-### 🔴 K2 — Settings doppelt persistiert
+### ✅ K2 — Settings doppelt persistiert — behoben am 2026-04-22
 
 **Dateien:** `src/store/index.ts`, `src/store/slices/settingsSlice.ts`, `src/services/settingsService.ts`
 
-**Problem:** Settings werden gleichzeitig über zwei Mechanismen gespeichert:
+**Problem:** Settings wurden gleichzeitig über zwei Mechanismen gespeichert:
 - Redux Persist → `localStorage['persist:settings']`
 - `settingsService.ts` → `localStorage['culinaSyncSettings']`
 
-`loadSettings()` liest aus `culinaSyncSettings`, aber Redux Persist rehydriert aus `persist:settings`. Bei Divergenz gewinnt der zuletzt geschriebene Wert — Race Condition.
+`loadSettings()` las aus `culinaSyncSettings`, aber Redux Persist rehydrierte aus `persist:settings`. Bei Divergenz gewann der zuletzt geschriebene Wert — Race Condition.
 
-**Empfehlung:** Eine der beiden Persistierungen entfernen. Da Redux Persist bereits konfiguriert ist, `settingsService` auf reinen Read-Only-Zugriff für initiale Defaults umstellen und die manuelle `localStorage.setItem`-Logik entfernen.
+**Fix:** Redux Persist ist jetzt der alleinige Schreibpfad fuer Settings. `settingsService.ts` liest bevorzugt `persist:settings` als Source of Truth und faellt nur noch lesend auf das Legacy-Format zurueck. Die konkurrierenden Direkt-Schreibzugriffe aus `settingsSlice.ts` wurden entfernt.
 
-**Aufwand:** Mittel (2-3h) — Erfordert sorgfältiges Testing der Settings-Rehydrierung.
+**Verifikation:** `src/services/__tests__/settingsService.test.ts`
+
+**Aufwand:** Erledigt
 
 ---
 
@@ -110,18 +108,17 @@ Noch offen ist vor allem strukturelle Nacharbeit, nicht der unmittelbare Produkt
 
 ---
 
-### 🟠 H3 — `package.json` Version `0.0.0`
+### ✅ H3 — `package.json` Version `0.0.0` — behoben am 2026-04-22
 
 **Datei:** `package.json`
 
-**Problem:** Keine Versionierung. `fetch('./package.json')` in `App.tsx` liest die Version zur Laufzeit, aber `package.json` liegt nach einem Vite-Build nicht im Output. Gleichzeitig ist die Version im Footer hartcodiert als `v2026.03.04`.
+**Problem:** Keine belastbare Versionierung. `fetch('./package.json')` in `App.tsx` las die Version zur Laufzeit, aber `package.json` liegt nach einem Vite-Build nicht im Output. Gleichzeitig war die Version im Footer hartcodiert als `v2026.03.04`.
 
-**Empfehlung:** Version auf `0.1.0` setzen (oder passendes CalVer `2026.3.4`). `fetch('./package.json')` entfernen und Version aus einem Build-Time-Replacement via `define` in `vite.config.ts` beziehen:
-```ts
-define: { __APP_VERSION__: JSON.stringify(pkg.version) }
-```
+**Fix:** `package.json` nutzt jetzt `0.1.1` als Versionsnummer, Vite injiziert diese ueber `define` als `__APP_VERSION__`, und `App.tsx` sowie `WhatsNewModal.tsx` verwenden denselben Build-Time-Wert statt eines Laufzeit-Fetches oder harter UI-Konstanten.
 
-**Aufwand:** Niedrig (30min)
+**Verifikation:** `pnpm exec tsc --noEmit`, `pnpm run lint`
+
+**Aufwand:** Erledigt
 
 ---
 
@@ -149,15 +146,15 @@ define: { __APP_VERSION__: JSON.stringify(pkg.version) }
 
 ---
 
-### 🟡 M3 — `CommandPalette.tsx` — Memoisierung gebrochen
+### ✅ M3 — `CommandPalette.tsx` — Memoisierung gebrochen — verifiziert am 2026-04-22
 
 **Datei:** `src/components/CommandPalette.tsx:56`
 
-**Problem:** `handleGlobalSearch` ist eine reguläre Funktion in der Dependency-Liste von `useMemo`. Da sie bei jedem Render neu erstellt wird, ist die Memo-Optimierung wirkungslos.
+**Problem:** Der Audit-Stand ging davon aus, dass `handleGlobalSearch` als reguläre Funktion in einer `useMemo`-Dependency-Liste die Memo-Optimierung unwirksam macht.
 
-**Empfehlung:** `handleGlobalSearch` in `useCallback` wrappen.
+**Ergebnis:** Kein weiterer Fix noetig. `handleGlobalSearch` ist bereits in `useCallback` gekapselt und wird stabil in den abhängigen Memo-/Effect-Pfaden verwendet.
 
-**Aufwand:** Niedrig (15min)
+**Aufwand:** Erledigt
 
 ---
 
@@ -183,11 +180,17 @@ define: { __APP_VERSION__: JSON.stringify(pkg.version) }
 
 ---
 
-### 🔵 N2 — `useWindowSize` ohne Debounce
+### ✅ N2 — `useWindowSize` ohne Debounce — behoben am 2026-04-22
 
 **Datei:** `src/hooks/useWindowSize.ts`
 
 **Problem:** Kein Debounce auf `resize`-Event → viele Re-Renders bei schnellem Resize.
+
+**Fix:** `useWindowSize()` gibt jetzt einen mit `useDebounce` verzoegerten Fensterzustand zurueck und reduziert damit Resize-getriebene Re-Render-Spitzen, ohne die Hook-API fuer Aufrufer zu aendern.
+
+**Verifikation:** `pnpm exec tsc --noEmit`, `pnpm run lint`
+
+**Aufwand:** Erledigt
 
 **Empfehlung:** `useDebounce` Hook (bereits vorhanden) einbinden.
 
@@ -211,42 +214,52 @@ define: { __APP_VERSION__: JSON.stringify(pkg.version) }
 
 ---
 
-### 🟠 S2 — Statisches PBKDF2-Salt in syncService.ts
+### ✅ S2 — Statisches PBKDF2-Salt in syncService.ts — behoben am 2026-04-22
 
-**Datei:** `src/services/syncService.ts:18`
+**Datei:** `src/services/syncService.ts`
 
-**Problem:** `salt: enc.encode('culinasync-salt')` — festes Salt schwächt PBKDF2 (Rainbow-Table-anfällig).
+**Problem:** `salt: enc.encode('culinasync-salt')` — festes Salt schwächt PBKDF2 (Rainbow-Table-anfaellig).
 
-**Empfehlung:** Zufälliges Salt generieren (`crypto.getRandomValues`) und mit dem Ciphertext speichern.
+**Fix:** Neue Backups speichern jetzt einen Header, ein zufaelliges Salt pro Export und die IV vor dem Ciphertext. `decryptBackup()` bleibt rueckwaertskompatibel und liest weiterhin das Legacy-Format mit festem Salt.
 
-**Aufwand:** Mittel (1-2h)
+**Verifikation:** `src/services/__tests__/syncService.test.ts`
+
+**Aufwand:** Erledigt
 
 ---
 
-### 🟠 S3 — Prompt-Injection-Risiko bei Web-Content-Extraktion
+### ✅ S3 — Prompt-Injection-Risiko bei Web-Content-Extraktion — behoben am 2026-04-22
 
 **Datei:** `src/services/geminiService.ts` — `extractRecipeFromWebContent`
 
-**Problem:** Unvalidierter Web-Content wird per `webContent.slice(0, 24000)` direkt an Gemini gesendet. Bösartiger Content könnte Prompt-Injection versuchen.
+**Problem:** Unvalidierter Web-Content wurde per `webContent.slice(0, 24000)` direkt an Gemini gesendet. Bösartiger Content konnte Prompt-Injection versuchen.
 
-**Empfehlung:** Web-Content vor Senden sanitizen (HTML-Tags strippen, nur Text extrahieren). Zusätzlich System-Prompt mit klarer Anweisung an das Modell, eingebettete Befehle zu ignorieren.
+**Fix:** Web-Content wird jetzt vor dem Prompt auf Text reduziert, instruktionaehnliche Zeilen werden gefiltert und der Prompt markiert den Inhalt explizit als untrusted data. Zusaetzlich validiert `geminiService.ts` KI-JSON-Antworten jetzt mit Runtime-Guards statt nur per `JSON.parse` plus Minimalcheck.
 
-**Aufwand:** Niedrig-Mittel (1h)
+**Verifikation:** `src/services/__tests__/geminiService.test.ts`
+
+**Aufwand:** Erledigt
 
 ---
 
-### 🟡 S4 — Keine CSP-Header
+### ✅ S4 — Keine CSP-Header — teilweise behoben am 2026-04-22
 
 **Datei:** `index.html`
 
-**Problem:** Kein `Content-Security-Policy` Meta-Tag. Für eine PWA empfohlen.
+**Problem:** Kein `Content-Security-Policy` Meta-Tag. Fuer eine PWA empfohlen.
 
-**Empfehlung:** Mindest-CSP hinzufügen:
+**Fix:** `index.html` setzt jetzt eine konservative Meta-CSP mit `default-src 'self'`, restriktiveren Script-/Object-/Frame-Regeln sowie freigegebenen HTTPS-Connect-Zielen, Data-/Blob-Bildern und Worker-Sources.
+
+**Rest-Risiko:** Fuer GitHub Pages bleibt dies eine Meta-Policy statt eines HTTP-Headers; fuer Tauri oder spaetere Hostings ist eine headerbasierte Variante weiterhin vorzuziehen.
+
+**Verifikation:** Diagnostics fuer `index.html`
+
+**Aufwand:** Erledigt
+
+**Referenz:**
 ```html
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';">
 ```
-
-**Aufwand:** Niedrig (30min) — aber erfordert Testing aller externen Ressourcen
 
 ---
 
@@ -272,79 +285,91 @@ define: { __APP_VERSION__: JSON.stringify(pkg.version) }
 
 ## 3. Barrierefreiheit (A11y)
 
-### 🔴 A1 — `WhatsNewModal` komplett ohne A11y
+### ✅ A1 — `WhatsNewModal` komplett ohne A11y — behoben am 2026-04-22
 
 **Datei:** `src/components/WhatsNewModal.tsx`
 
-**Problem:** Kein `role="dialog"`, kein `aria-modal`, kein Fokus-Trap, kein `aria-label`. Schließen-Button nutzt `×` ohne `aria-label`. Wird allen Nutzern nach Updates angezeigt.
+**Problem:** Kein `role="dialog"`, kein `aria-modal`, kein Fokus-Trap, kein `aria-label`. Schließen-Button nutzte `×` ohne `aria-label`. Wird allen Nutzern nach Updates angezeigt.
 
-**Empfehlung:** `useModalA11y` Hook einbinden (wie in allen anderen Modals). `aria-label="Schließen"` für den ×-Button.
+**Fix:** `WhatsNewModal` nutzt jetzt `useModalA11y`, setzt Dialog-Semantik via `role="dialog"` und `aria-modal`, schliesst per Overlay und Escape und setzt den initialen Fokus auf den beschrifteten Schliessen-Button.
 
-**Aufwand:** Niedrig (30min)
+**Verifikation:** `pnpm exec eslint src/components/WhatsNewModal.tsx`, `pnpm exec tsc --noEmit`
+
+**Aufwand:** Erledigt
 
 ---
 
-### 🟠 A2 — `DayColumn` Dropdown nur via Hover
+### ✅ A2 — `DayColumn` Dropdown nur via Hover — behoben am 2026-04-22
 
 **Datei:** `src/components/meal-planner/DayColumn.tsx:69`
 
 **Problem:** Tag-Aktionen-Dropdown nur per CSS `:hover` sichtbar — nicht keyboard-zugänglich.
 
-**Empfehlung:** `:focus-within` hinzufügen oder Button-gesteuerten Toggle implementieren.
+**Fix:** Das bestehende Dropdown reagiert jetzt zusaetzlich auf `:focus-within`, sodass der Aktionen-Button das Menue auch per Tastatur sichtbar und bedienbar macht, ohne neues State-Management einzufuehren.
 
-**Aufwand:** Niedrig (30min)
+**Verifikation:** `pnpm exec eslint src/components/meal-planner/DayColumn.tsx`, `pnpm exec tsc --noEmit`
+
+**Aufwand:** Erledigt
 
 ---
 
-### 🟠 A3 — `RecipeDetail` Export-Links
+### ✅ A3 — `RecipeDetail` Export-Links — behoben am 2026-04-22
 
 **Datei:** `src/components/RecipeDetail.tsx`
 
 **Problem:** Export-Menü nutzt `<a onClick>` statt `<button>` — nicht per Tastatur aktivierbar.
 
-**Empfehlung:** Auf `<button>` umstellen.
+**Fix:** Die Export-Eintraege sind jetzt echte Buttons mit Menu-Semantik, und der Export-Trigger setzt `aria-haspopup`, `aria-expanded` und `aria-controls`.
 
-**Aufwand:** Niedrig (15min)
+**Verifikation:** `pnpm exec eslint src/components/RecipeDetail.tsx`, `pnpm exec tsc --noEmit`
+
+**Aufwand:** Erledigt
 
 ---
 
-### 🟠 A4 — `GlobalErrorBoundary` ohne `role="alert"`
+### ✅ A4 — `GlobalErrorBoundary` ohne `role="alert"` — behoben am 2026-04-22
 
 **Datei:** `src/components/GlobalErrorBoundary.tsx`
 
 **Problem:** Fehlermeldung hat kein `role="alert"` für Screenreader.
 
-**Empfehlung:** `role="alert"` auf Container-Element setzen.
+**Fix:** Der Fallback-Container der globalen Fehlergrenze setzt jetzt `role="alert"` und `aria-live="assertive"`, damit kritische App-Fehler unmittelbar angesagt werden.
 
-**Aufwand:** Niedrig (5min)
+**Verifikation:** `pnpm exec eslint src/components/GlobalErrorBoundary.tsx`, `pnpm exec tsc --noEmit`
+
+**Aufwand:** Erledigt
 
 ---
 
-### 🟡 A5 — `Help.tsx` Suchinput ohne Label
+### ✅ A5 — `Help.tsx` Suchinput ohne Label — behoben am 2026-04-22
 
 **Datei:** `src/components/Help.tsx:56`
 
 **Problem:** Input ohne `aria-label` oder `<label>`.
 
-**Empfehlung:** `aria-label="Suche in der Wissensdatenbank"` hinzufügen.
+**Fix:** Das Suchfeld setzt jetzt ein explizites `aria-label`, und der Reset-Button ist ebenfalls als Aktion beschriftet.
 
-**Aufwand:** Niedrig (5min)
+**Verifikation:** `pnpm exec eslint src/components/Help.tsx src/components/help/HelpComponents.tsx`, `pnpm exec tsc --noEmit`
+
+**Aufwand:** Erledigt
 
 ---
 
-### 🟡 A6 — `HelpComponents.tsx` FAQ ohne `aria-expanded`
+### ✅ A6 — `HelpComponents.tsx` FAQ ohne `aria-expanded` — behoben am 2026-04-22
 
 **Datei:** `src/components/help/HelpComponents.tsx`
 
 **Problem:** FAQ-Accordion-Buttons haben kein `aria-expanded`-Attribut.
 
-**Empfehlung:** `aria-expanded={isOpen}` hinzufügen.
+**Fix:** FAQ-Buttons setzen jetzt `aria-expanded`, `aria-controls` und referenzieren den zugehoerigen Antwortbereich per ID.
 
-**Aufwand:** Niedrig (10min)
+**Verifikation:** `pnpm exec eslint src/components/Help.tsx src/components/help/HelpComponents.tsx`, `pnpm exec tsc --noEmit`
+
+**Aufwand:** Erledigt
 
 ---
 
-### 🟡 A7 — Hartcodierte `aria-label` auf Deutsch
+### 🟡 A7 — Hartcodierte `aria-label` auf Deutsch — teilweise reduziert am 2026-04-22
 
 **Dateien:** `src/components/pantry/PantryList.tsx:55`, `src/components/CookModeView.tsx`, diverse
 
@@ -352,29 +377,39 @@ define: { __APP_VERSION__: JSON.stringify(pkg.version) }
 
 **Empfehlung:** Alle `aria-label`-Werte über `t()` lokalisieren.
 
-**Aufwand:** Mittel (1-2h, zusammen mit i18n-Migration)
+**Zwischenstand:** `src/components/pantry/PantryList.tsx`, `src/components/pantry/PantryToolbar.tsx`, `src/components/pantry/PantryQuickAdd.tsx`, `src/components/CookModeView.tsx`, `src/components/Help.tsx`, `src/components/RecipeBook.tsx`, `src/components/WhatsNewModal.tsx`, `src/components/settings/panels/ApiKeyPanel.tsx`, `src/components/recipe-book/BulkAddToPlanModal.tsx`, `src/components/recipe-book/RecipeToolbar.tsx`, `src/components/TagInput.tsx`, `src/components/shopping-list/ShoppingListToolbar.tsx` und `src/components/shopping-list/ShoppingListItemComponent.tsx` nutzen ihre `aria-label`-Werte jetzt ueber i18n-Keys. Weitere hartcodierte Labels in anderen Komponenten bleiben als eigener Rest-Slice offen.
+
+**Verifikation:** `pnpm exec eslint src/components/pantry/PantryList.tsx src/components/CookModeView.tsx`, `pnpm exec tsc --noEmit`
+
+**Aufwand:** In Arbeit
 
 ---
 
-### 🟡 A8 — `VoiceControlUI` hartcodierter Text
+### ✅ A8 — `VoiceControlUI` hartcodierter Text — behoben am 2026-04-22
 
 **Datei:** `src/components/VoiceControlUI.tsx:18`
 
 **Problem:** "Höre zu..." nicht über i18n.
 
-**Empfehlung:** i18n-Key verwenden.
+**Fix:** Der Listening-Fallback kommt jetzt aus `translation.json` statt aus einem hartcodierten deutschen String.
 
-**Aufwand:** Niedrig (5min)
+**Verifikation:** `pnpm exec eslint src/components/VoiceControlUI.tsx`, `pnpm exec tsc --noEmit`
+
+**Aufwand:** Erledigt
 
 ---
 
-### 🔵 A9 — `ChefResults` Keyboard-Navigation
+### ✅ A9 — `ChefResults` Keyboard-Navigation — behoben am 2026-04-22
 
 **Datei:** `src/components/ai-chef/ChefResults.tsx`
 
 **Problem:** Rezeptkarten ohne `aria-label` oder erweiterte Keyboard-Navigation.
 
-**Empfehlung:** `aria-label` mit Rezeptname auf Karten-Button setzen.
+**Fix:** Die Aktionsbuttons in `ChefResults` setzen jetzt einen expliziten, rezeptbezogenen `aria-label` und nutzen saubere `type="button"`-Semantik.
+
+**Verifikation:** `pnpm exec eslint src/components/ai-chef/ChefResults.tsx`, `pnpm exec tsc --noEmit`
+
+**Aufwand:** Erledigt
 
 **Aufwand:** Niedrig (15min)
 
@@ -429,15 +464,17 @@ define: { __APP_VERSION__: JSON.stringify(pkg.version) }
 
 ## 5. Performance & Bundle
 
-### 🔴 P1 — `@faker-js/faker` im Bundle
+### ✅ P1 — `@faker-js/faker` im Bundle — behoben am 2026-04-22
 
-Siehe K1 oben. ~800 KB im Production-Bundle.
+Siehe K1 oben. Offline-Fallback laedt Faker jetzt nur noch dynamisch.
 
 ---
 
-### 🟠 P2 — `package.json`-Fetch zur Laufzeit
+### ✅ P2 — `package.json`-Fetch zur Laufzeit — behoben am 2026-04-22
 
-**Datei:** `src/App.tsx:62-65`
+**Datei:** `src/App.tsx`, `vite.config.ts`, `src/components/WhatsNewModal.tsx`
+
+**Fix:** Die App-Version kommt jetzt zur Build-Zeit aus `package.json` und wird konsistent an Help-, Footer- und WhatsNew-Pfade weitergereicht.
 
 **Problem:** `fetch('./package.json')` zur Laufzeit. `package.json` liegt nach Vite-Build nicht im Output-Verzeichnis.
 
@@ -450,27 +487,29 @@ define: { __APP_VERSION__: JSON.stringify(require('./package.json').version) }
 
 ---
 
-### 🟡 P3 — Tesseract.js und Quagga2 nicht in manualChunks
+### ✅ P3 — Tesseract.js und Quagga2 nicht in manualChunks — verifiziert am 2026-04-22
 
 **Datei:** `vite.config.ts`
 
-**Problem:** Schwere Scan-Dependencies ohne explizites Chunk-Splitting. Ob sie dynamisch importiert werden, muss geprüft werden.
+**Problem:** Schwere Scan-Dependencies ohne explizites Chunk-Splitting. Ob sie dynamisch importiert werden, musste geprueft werden.
 
-**Empfehlung:** Prüfen ob `import()` genutzt wird. Falls nicht, `manualChunks`-Eintrag hinzufügen oder auf dynamischen Import umstellen.
+**Ergebnis:** Kein weiterer Fix noetig. `src/services/scannerService.ts` laedt `@ericblade/quagga2` und `tesseract.js` bereits dynamisch via `import()` und haelt sie damit aus dem initialen Bundle.
 
-**Aufwand:** Niedrig (30min)
+**Aufwand:** Erledigt
 
 ---
 
-### 🟡 P4 — Brotli + Gzip doppelt generiert
+### ✅ P4 — Brotli + Gzip doppelt generiert — behoben am 2026-04-22
 
 **Datei:** `vite.config.ts:93-103`
 
-**Problem:** Build-Zeit verdoppelt sich durch zwei Kompressionsformate.
+**Problem:** Build-Zeit verdoppelte sich durch zwei Kompressionsformate.
 
-**Empfehlung:** Nur Brotli generieren (besser für GitHub Pages/CDN). Gzip nur wenn spezifischer Server es erfordert.
+**Fix:** `vite.config.ts` generiert jetzt nur noch Brotli-Artefakte. Der Bundle-Budget-Check bevorzugt weiterhin `.br`, faellt aber notfalls auf ungepackte Dateien zurueck.
 
-**Aufwand:** Niedrig (5min)
+**Verifikation:** `pnpm exec tsc --noEmit`, `pnpm run lint`
+
+**Aufwand:** Erledigt
 
 ---
 
@@ -613,9 +652,9 @@ updates:
 
 ## 8. Dependencies
 
-### 🔴 D1 — `@faker-js/faker` in `dependencies`
+### ✅ D1 — `@faker-js/faker` in `dependencies` — behoben am 2026-04-22
 
-Siehe K1. Muss nach `devDependencies` + dynamischer Import.
+Siehe K1. Nach `devDependencies` verschoben und im Runtime-Pfad dynamisiert.
 
 ---
 
@@ -643,27 +682,29 @@ Siehe K1. Muss nach `devDependencies` + dynamischer Import.
 
 ---
 
-### 🟡 D4 — `@types/react-redux` überflüssig
+### ✅ D4 — `@types/react-redux` ueberfluessig — behoben am 2026-04-22
 
 **Datei:** `package.json` (devDependencies)
 
-**Problem:** `react-redux` 9.x hat eingebaute TypeScript-Types. `@types/react-redux` ist überflüssig und kann zu Konflikten führen.
+**Problem:** `react-redux` 9.x hat eingebaute TypeScript-Types. `@types/react-redux` war ueberfluessig und konnte zu Konflikten fuehren.
 
-**Empfehlung:** Entfernen: `npm uninstall @types/react-redux`
+**Fix:** Das separate Typ-Paket wurde aus `devDependencies` und dem Lockfile entfernt. Damit bleibt nur noch die von `react-redux` selbst gepflegte Typquelle aktiv.
 
-**Aufwand:** Niedrig (5min)
+**Verifikation:** `pnpm exec tsc --noEmit`
+
+**Aufwand:** Erledigt
 
 ---
 
-### 🔵 D5 — Storybook-Dependencies ohne Stories
+### ✅ D5 — Storybook-Dependencies ohne Stories — verifiziert am 2026-04-22
 
 **Datei:** `package.json` (devDependencies: Chromatic, Storybook)
 
-**Problem:** 4 Storybook-Dependencies und 2 Scripts, aber keine `.stories.*`-Dateien.
+**Problem:** Der Audit-Stand nahm an, dass 4 Storybook-Dependencies und 2 Scripts ohne echte Nutzung im Repo liegen.
 
-**Empfehlung:** Entweder Stories erstellen oder Dependencies entfernen.
+**Ergebnis:** Kein Fix noetig. Das Repo enthaelt mit `src/components/ai-chef/ChefLoading.stories.tsx` mindestens eine reale Story sowie eine aktive `.storybook/`-Konfiguration.
 
-**Aufwand:** Niedrig (Entfernen: 5min)
+**Aufwand:** Erledigt
 
 ---
 
@@ -686,22 +727,22 @@ Siehe K1. Muss nach `devDependencies` + dynamischer Import.
 ## Priorisierte Maßnahmen-Roadmap
 
 ### Sprint 1 (Quick Wins, 1-2 Tage)
-- [ ] A1: WhatsNewModal A11y (`useModalA11y`)
-- [ ] A2: DayColumn `:focus-within`
-- [ ] A3: RecipeDetail Export-Buttons
-- [ ] A4: GlobalErrorBoundary `role="alert"`
-- [ ] M3: CommandPalette `useCallback`
-- [ ] N2: useWindowSize Debounce
+- [x] A1: WhatsNewModal A11y (`useModalA11y`)
+- [x] A2: DayColumn `:focus-within`
+- [x] A3: RecipeDetail Export-Buttons
+- [x] A4: GlobalErrorBoundary `role="alert"`
+- [x] M3: CommandPalette `useCallback`
+- [x] N2: useWindowSize Debounce
 - [ ] H3: package.json Version + Build-Time define
-- [ ] D4: `@types/react-redux` entfernen
+- [x] D4: `@types/react-redux` entfernen
 - [ ] CI3: CodeQL Matrix korrigieren
 - [ ] CI4: Action-Versions vereinheitlichen
 
 ### Sprint 2 (Architektur, 3-5 Tage)
 - [ ] K1: faker.js aus Production-Bundle
-- [ ] K2: Settings-Doppelpersistierung auflösen
-- [ ] S2: Statisches Salt in syncService
-- [ ] S3: Web-Content-Sanitization
+- [x] K2: Settings-Doppelpersistierung auflösen
+- [x] S2: Statisches Salt in syncService
+- [x] S3: Web-Content-Sanitization
 - [ ] I1 Welle 1: i18n für CookMode, Onboarding, WhatsNewModal, ErrorBoundary (~60 Strings)
 - [ ] CI1: DevContainer einrichten
 - [ ] CI2: Dependabot konfigurieren

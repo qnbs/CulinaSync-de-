@@ -1,9 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { Plus, Wand2, Camera } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { usePantryManagerContext } from '../../contexts/PantryManagerContext';
 import { getAppServices } from '../../services/serviceRegistry';
 
 export const PantryQuickAdd = () => {
+    const { t } = useTranslation();
     const { handleQuickAdd } = usePantryManagerContext();
     const [input, setInput] = useState('');
     const [visionLoading, setVisionLoading] = useState(false);
@@ -52,7 +54,8 @@ export const PantryQuickAdd = () => {
                         type="text" 
                         value={input} 
                         onChange={e => setInput(e.target.value)} 
-                        placeholder="Smart Add: z.B. '500g Spaghetti'" 
+                        placeholder={t('pantry.quickAdd.placeholder')} 
+                        aria-label={t('pantry.quickAdd.inputAria')}
                         className="flex-grow bg-transparent focus:outline-none p-1 text-zinc-100 placeholder-zinc-500 text-base"
                     />
                     <input
@@ -67,7 +70,7 @@ export const PantryQuickAdd = () => {
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
                         className="flex-shrink-0 flex items-center justify-center bg-zinc-800 text-[var(--color-accent-400)] h-10 w-10 rounded-xl hover:bg-zinc-700 transition-colors shadow-lg active:scale-95 mr-1"
-                        aria-label="Foto/Textbild erkennen (Gemini Vision oder OCR)"
+                        aria-label={t('pantry.quickAdd.imageAria')}
                         disabled={visionLoading}
                     >
                         {visionLoading ? <span className="animate-spin">⏳</span> : <Camera size={20}/>} 
@@ -88,7 +91,7 @@ export const PantryQuickAdd = () => {
                         type="submit" 
                         disabled={!input.trim() || visionLoading}
                         className="flex-shrink-0 flex items-center justify-center bg-[var(--color-accent-500)] text-zinc-900 font-bold h-10 w-10 rounded-xl hover:bg-[var(--color-accent-400)] disabled:bg-zinc-800 disabled:text-zinc-600 transition-colors shadow-lg active:scale-95" 
-                        aria-label="Hinzufügen"
+                        aria-label={t('pantry.quickAdd.submitAria')}
                     >
                         {visionLoading ? <span className="animate-spin">⏳</span> : <Plus size={20}/>} 
                     </button>

@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { PackageOpen, Layers } from 'lucide-react';
 import { VariableSizeList, type ListChildComponentProps } from 'react-window';
+import { useTranslation } from 'react-i18next';
 import { usePantryManagerContext } from '../../contexts/PantryManagerContext';
 import PantryListItem from '../PantryListItem';
 import { PantryItem } from '../../types';
@@ -23,6 +24,7 @@ const EmptyState: React.FC<{ totalItemCount: number }> = ({ totalItemCount }) =>
 );
 
 export const PantryList = () => {
+    const { t } = useTranslation();
     const {
         groupedItems,
         filteredItems,
@@ -119,7 +121,7 @@ export const PantryList = () => {
     };
 
     return (
-        <div className="space-y-8 pb-20" aria-label="Vorratsliste">
+        <div className="space-y-8 pb-20" aria-label={t('pantry.listAria')}>
             {!hasFilteredContent ? (
                 <EmptyState totalItemCount={pantryItems?.length ?? 0} />
             ) : shouldVirtualize ? (

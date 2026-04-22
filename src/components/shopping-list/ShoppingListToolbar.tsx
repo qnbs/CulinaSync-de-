@@ -1,7 +1,9 @@
 import { useShoppingListContext } from '../../contexts/ShoppingListContext';
 import { FileDown, Bot, TextQuote, RefreshCw, Trash2, ListTree, ListCollapse, ChevronDown, LoaderCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export const ShoppingListToolbar = () => {
+    const { t } = useTranslation();
     const {
         shoppingList,
         isExportOpen,
@@ -20,8 +22,8 @@ export const ShoppingListToolbar = () => {
         <div className="bg-zinc-950/50 border border-zinc-800 rounded-lg p-4 space-y-4">
             <div className="flex flex-wrap gap-2 justify-between items-center">
                 <div className="flex items-center gap-2">
-                    <button type="button" aria-label="Alle Kategorien ausklappen" onClick={expandAll} className="flex items-center gap-2 p-2 rounded-md bg-zinc-700 text-sm hover:bg-zinc-600" title="Alle ausklappen"><ListTree size={16}/></button>
-                    <button type="button" aria-label="Alle Kategorien einklappen" onClick={collapseAll} className="flex items-center gap-2 p-2 rounded-md bg-zinc-700 text-sm hover:bg-zinc-600" title="Alle einklappen"><ListCollapse size={16}/></button>
+                    <button type="button" aria-label={t('shoppingList.toolbar.expandAllAria')} onClick={expandAll} className="flex items-center gap-2 p-2 rounded-md bg-zinc-700 text-sm hover:bg-zinc-600" title={t('shoppingList.toolbar.expandAllTitle')}><ListTree size={16}/></button>
+                    <button type="button" aria-label={t('shoppingList.toolbar.collapseAllAria')} onClick={collapseAll} className="flex items-center gap-2 p-2 rounded-md bg-zinc-700 text-sm hover:bg-zinc-600" title={t('shoppingList.toolbar.collapseAllTitle')}><ListCollapse size={16}/></button>
                 </div>
                 <div className="flex flex-wrap gap-2 justify-end">
                     <button type="button" onClick={handleGenerateFromPlan} disabled={isGenerating} className="flex items-center gap-2 bg-zinc-700 font-semibold py-2 px-3 rounded-md hover:bg-zinc-600 text-sm disabled:bg-zinc-800 disabled:text-zinc-500">

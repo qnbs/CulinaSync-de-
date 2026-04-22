@@ -34,6 +34,11 @@
       "speech": "Voice Control & Audio",
       "data": "Data & Storage"
     },
+    "apiKey": {
+      "ariaLabel": "Gemini API key",
+      "showKeyAria": "Show key",
+      "hideKeyAria": "Hide key"
+    },
     "actions": {
       "discard": "Discard"
     },
@@ -60,6 +65,12 @@
     "search": "Search...",
     "loading": "Loading...",
     "error": "An error occurred"
+  },
+  "help": {
+    "search": {
+      "inputAria": "Search the knowledge base",
+      "resetAria": "Reset search"
+    }
   },
   "app": {
     "loading": "Loading content",
@@ -145,6 +156,9 @@
       "pantry": "Search pantry for: \"{{searchTerm}}\""
     }
   },
+  "voiceControl": {
+    "listening": "Listening..."
+  },
   "mealPlanner": {
     "addNote": {
       "title": "Add note",
@@ -168,11 +182,29 @@
     "actions": {
       "exportIcs": "Export calendar (ICS)",
       "autoPlan": "Auto-suggest (expiring)",
+      "generateShoppingListAria": "Generate shopping list from weekly plan",
+      "previousWeekAria": "Previous week",
+      "nextWeekAria": "Next week",
       "autoPlanApplied": "Auto-suggestion applied: {{count}} meal(s).",
       "autoPlanEmpty": "No matching suggestions from soon-expiring ingredients."
     }
   },
   "shoppingList": {
+    "toolbar": {
+      "expandAllAria": "Expand all categories",
+      "expandAllTitle": "Expand all",
+      "collapseAllAria": "Collapse all categories",
+      "collapseAllTitle": "Collapse all"
+    },
+    "item": {
+      "saveChangesAria": "Save changes",
+      "cancelEditAria": "Cancel editing",
+      "toggleCompleteAria": "Mark {{itemName}} as {{state}}",
+      "stateComplete": "complete",
+      "stateIncomplete": "incomplete",
+      "editItemAria": "Edit {{itemName}}",
+      "deleteItemAria": "Delete {{itemName}}"
+    },
     "quickAdd": {
       "placeholder": "Quick add (e.g. 500g flour)",
       "voiceAria": "Start voice input",
@@ -180,6 +212,38 @@
       "submitAria": "Add item",
       "scanBarcode": "Scan barcode via camera/photo",
       "scanReceipt": "Scan receipt with OCR"
+    }
+  },
+  "pantry": {
+    "listAria": "Pantry list",
+    "item": {
+      "addToShoppingListTitle": "Add to shopping list",
+      "editTitle": "Edit"
+    },
+    "quickAdd": {
+      "placeholder": "Smart add: e.g. '500g spaghetti'",
+      "inputAria": "Quick add pantry item",
+      "imageAria": "Recognize photo or text image",
+      "submitAria": "Add to pantry"
+    },
+    "toolbar": {
+      "searchAria": "Search pantry",
+      "resetSearchAria": "Clear search",
+      "expiryFilterAria": "Filter by expiry status",
+      "sortAria": "Choose sort order",
+      "ungroupAria": "Remove grouping",
+      "groupByCategoryAria": "Group by category",
+      "ungroupTitle": "Remove grouping",
+      "groupByCategoryTitle": "Group by category",
+      "toggleSelectionModeAria": "Toggle selection mode",
+      "selectionModeTitle": "Selection mode"
+    }
+  },
+  "cookMode": {
+    "actions": {
+      "previousStepAria": "Previous step",
+      "nextStepAria": "Next step",
+      "finishAria": "Finish"
     }
   },
   "recipeDetail": {
@@ -219,6 +283,23 @@
       "addedToMealPlan": "Added to meal plan!"
     }
   },
+  "recipeBook": {
+    "selection": {
+      "startAria": "Start selection mode",
+      "startTitle": "Start selection mode",
+      "endAria": "End selection mode"
+    },
+    "toolbar": {
+      "searchAria": "Search recipes",
+      "resetSearchAria": "Reset search",
+      "sortAria": "Choose sorting",
+      "courseFilterAria": "Filter by course",
+      "cuisineFilterAria": "Filter by cuisine",
+      "mainIngredientFilterAria": "Filter by main ingredient",
+      "difficultyFilterAria": "Filter by difficulty",
+      "dietFilterAria": "Filter by diet"
+    }
+  },
   "recipeImport": {
     "openButton": "Import recipe",
     "title": "Import recipe",
@@ -248,5 +329,8 @@
       "generic": "Import failed. Please try again.",
       "fileRead": "Could not read file."
     }
+  },
+  "tagInput": {
+    "removeTagAria": "Remove {{tag}}"
   }
 }

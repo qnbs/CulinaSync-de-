@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { LoaderCircle, CalendarPlus, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useModalA11y } from '../../hooks/useModalA11y';
 import { addRecipeToMealPlan } from '../../services/repositories/mealPlanRepository';
 
@@ -11,6 +12,7 @@ interface BulkAddToPlanModalProps {
 }
 
 export const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, onClose, recipeIds, onSave }) => {
+    const { t } = useTranslation();
     const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
     const [mealType, setMealType] = useState<'Frühstück' | 'Mittagessen' | 'Abendessen'>('Abendessen');
     const [isSaving, setIsSaving] = useState(false);
@@ -52,7 +54,7 @@ export const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, 
                 aria-labelledby="bulk-plan-modal-title"
                 tabIndex={-1}
             >
-                <button type="button" aria-label="Dialog schließen" onClick={onClose} className="absolute top-4 right-4 text-zinc-500 hover:text-zinc-300 transition-colors">
+                <button type="button" aria-label={t('app.close')} onClick={onClose} className="absolute top-4 right-4 text-zinc-500 hover:text-zinc-300 transition-colors">
                     <X size={20} />
                 </button>
                 

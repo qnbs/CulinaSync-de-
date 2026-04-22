@@ -11,6 +11,7 @@ import { setCurrentPage, setCommandPaletteOpen, addToast as addToastAction, remo
 import { WhatsNewModal } from './components/WhatsNewModal';
 import { GlobalErrorBoundary } from './components/GlobalErrorBoundary';
 
+const APP_VERSION = __APP_VERSION__;
 
 // Lazy load page components for code splitting and faster initial load
 const AiChef = lazy(() => import('./components/AiChef'));
@@ -43,7 +44,7 @@ const App: React.FC = () => {
   const { currentPage, toasts, isCommandPaletteOpen } = useAppSelector((state) => state.ui);
   const settings = useAppSelector((state) => state.settings);
 
-  const [appVersion, setAppVersion] = useState<string>('');
+  const [appVersion] = useState<string>(APP_VERSION || 'N/A');
   const [installPromptEvent, setInstallPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone] = useState(() => typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches);
   const [showOnboarding, setShowOnboarding] = useState(() => {
@@ -57,11 +58,6 @@ const App: React.FC = () => {
 
   useEffect(() => {
     void import('./services/db');
-
-    fetch('./package.json')
-      .then(res => res.json())
-      .then(data => setAppVersion(data.version || 'N/A'))
-      .catch(() => setAppVersion('N/A'));
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
@@ -371,7 +367,7 @@ const App: React.FC = () => {
         </div>
       </div>
       <footer className="w-full text-center py-4 text-xs text-zinc-500">
-        <span>© 2026 CulinaSync</span> · <span className="ml-2 bg-zinc-800 px-2 py-1 rounded">v2026.03.04</span>
+        <span>© 2026 CulinaSync</span> · <span className="ml-2 bg-zinc-800 px-2 py-1 rounded">v{appVersion}</span>
       </footer>
     </GlobalErrorBoundary>
   );

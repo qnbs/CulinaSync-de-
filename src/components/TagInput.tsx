@@ -1,5 +1,6 @@
 import React, { useState, KeyboardEvent, useId } from 'react';
 import { X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface TagInputProps {
   tags: string[];
@@ -9,6 +10,7 @@ interface TagInputProps {
 }
 
 const TagInput: React.FC<TagInputProps> = ({ tags, setTags, placeholder, suggestions }) => {
+  const { t } = useTranslation();
   const [inputValue, setInputValue] = useState('');
   const suggestionsId = useId();
 
@@ -36,7 +38,7 @@ const TagInput: React.FC<TagInputProps> = ({ tags, setTags, placeholder, suggest
       {tags.map(tag => (
         <div key={tag} className="bg-zinc-700 text-zinc-200 rounded-md px-2 py-1 flex items-center gap-1.5 text-sm">
           <span>{tag}</span>
-          <button onClick={() => removeTag(tag)} className="text-zinc-400 hover:text-white" aria-label={`Entferne ${tag}`}>
+          <button onClick={() => removeTag(tag)} className="text-zinc-400 hover:text-white" aria-label={t('tagInput.removeTagAria', { tag })}>
             <X size={14} />
           </button>
         </div>

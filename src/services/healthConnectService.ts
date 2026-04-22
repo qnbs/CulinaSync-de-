@@ -1,6 +1,7 @@
 // Health Connect Service: Export zu Apple Health, Google Fit, Samsung Health
 // Privacy-first: Nur lokale Berechnung, Export als Health-CSV/JSON für Import in Health-Apps
 import { NutritionAllergyReport } from './nutritionAllergyService';
+import { sanitizeCsvCell } from './exportService';
 
 export type HealthExportType = 'apple' | 'google' | 'samsung';
 
@@ -24,29 +25,44 @@ const getHealthCsvHeaders = (type: HealthExportType) => {
   }
 };
 
+const serializeCsvValue = (value: unknown) => {
+  const sanitizedValue = sanitizeCsvCell(value);
+
+  if (sanitizedValue === null || sanitizedValue === undefined) {
+    return '';
+  }
+
+  const normalizedValue = String(sanitizedValue);
+  const escapedValue = normalizedValue.replace(/"/g, '""');
+  return `"${escapedValue}"`;
+};
+
+const serializeCsvRow = (values: unknown[]) => values.map(serializeCsvValue).join(',');
+
 export const exportNutritionToHealthCsv = (opts: HealthExportOptions) => {
   const { type, date, nutrition, mealName } = opts;
   let csv = getHealthCsvHeaders(type) + '\n';
   if(type === 'apple') {
-    csv += [
+    csv += serializeCsvRow([
       'DietaryEnergyConsumed', date, date, nutrition.calories, 'kcal', mealName || ''
-    ].join(',') + '\n';
-    csv += [
+    ]) + '\n';
+    csv += serializeCsvRow([
       'DietaryProtein', date, date, nutrition.protein, 'g', mealName || ''
-    ].join(',') + '\n';
-    csv += [
+    ]) + '\n';
+    csv += serializeCsvRow([
       'DietaryFatTotal', date, date, nutrition.fat, 'g', mealName || ''
-    ].join(',') + '\n';
-    csv += [
+    ]) + '\n';
+    csv += serializeCsvRow([
       'DietaryCarbohydrates', date, date, nutrition.carbs, 'g', mealName || ''
-    ].join(',') + '\n';
+    ]) + '\n';
   } else {
-    csv += [date, nutrition.calories, nutrition.protein, nutrition.fat, nutrition.carbs, mealName || ''].join(',') + '\n';
+    csv += serializeCsvRow([date, nutrition.calories, nutrition.protein, nutrition.fat, nutrition.carbs, mealName || '']) + '\n';
   }
-  const blob = new Blob([csv], { type: 'text/csv' });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
   link.download = `culinasync_nutrition_${type}_${date}.csv`;
+  link.rel = 'noopener noreferrer';
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

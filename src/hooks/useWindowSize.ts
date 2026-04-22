@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useDebounce } from './useDebounce';
 
 interface WindowSize {
   width: number;
@@ -18,6 +19,7 @@ const getWindowSize = (): WindowSize => {
 
 export const useWindowSize = (): WindowSize => {
   const [size, setSize] = useState<WindowSize>(() => getWindowSize());
+  const debouncedSize = useDebounce(size, 120);
 
   useEffect(() => {
     const handleResize = () => {
@@ -28,5 +30,5 @@ export const useWindowSize = (): WindowSize => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  return size;
+  return debouncedSize;
 };

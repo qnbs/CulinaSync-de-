@@ -120,6 +120,7 @@ type MigrationBackupRecord = {
 
 const BACKUP_DB_NAME = 'CulinaSyncMigrationBackups';
 const BACKUP_STORE_NAME = 'backups';
+const MAX_MIGRATION_BACKUPS = 5;
 
 const requestToPromise = <T>(request: IDBRequest<T>): Promise<T> => new Promise((resolve, reject) => {
   request.onsuccess = () => resolve(request.result);
@@ -179,7 +180,18 @@ const getStoreSnapshot = async (database: IDBDatabase, storeName: string): Promi
 const saveMigrationBackup = async (record: MigrationBackupRecord): Promise<void> => {
   const database = await openNativeDb(BACKUP_DB_NAME, 1);
   const transaction = database.transaction(BACKUP_STORE_NAME, 'readwrite');
-  transaction.objectStore(BACKUP_STORE_NAME).put(record);
+  const store = transaction.objectStore(BACKUP_STORE_NAME);
+  store.put(record);
+
+  const existingRecords = await requestToPromise(store.getAll()) as MigrationBackupRecord[];
+  const staleRecords = existingRecords
+    .sort((left, right) => right.createdAt - left.createdAt)
+    .slice(MAX_MIGRATION_BACKUPS);
+
+  staleRecords.forEach((staleRecord) => {
+    store.delete(staleRecord.id);
+  });
+
   await transactionDone(transaction);
   database.close();
 };

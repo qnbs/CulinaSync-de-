@@ -506,15 +506,15 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
                 </>
              )}
              <div className="relative inline-block">
-                <button onClick={() => setExportOpen(!isExportOpen)} className="flex items-center gap-2 bg-zinc-800 text-zinc-200 font-bold py-2 px-4 rounded-md hover:bg-zinc-700 transition-colors border border-zinc-700">
+              <button type="button" onClick={() => setExportOpen(!isExportOpen)} className="flex items-center gap-2 bg-zinc-800 text-zinc-200 font-bold py-2 px-4 rounded-md hover:bg-zinc-700 transition-colors border border-zinc-700" aria-haspopup="menu" aria-expanded={isExportOpen} aria-controls="recipe-export-menu">
                     <FileDown size={18} /> Export <ChevronDown size={16} className={`transition-transform ${isExportOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {isExportOpen && (
-                    <div className="absolute bottom-full mb-2 w-full bg-zinc-800 border border-zinc-700 rounded-md shadow-xl z-10 overflow-hidden">
-                        <a onClick={() => handleExport('pdf')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">PDF</a>
-                        <a onClick={() => handleExport('csv')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">CSV</a>
-                        <a onClick={() => handleExport('json')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">JSON</a>
-                        <a onClick={() => handleExport('md')} className="block text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer">Markdown</a>
+                <div id="recipe-export-menu" className="absolute bottom-full mb-2 w-full bg-zinc-800 border border-zinc-700 rounded-md shadow-xl z-10 overflow-hidden" role="menu" aria-label="Rezept exportieren">
+                  <button type="button" onClick={() => handleExport('pdf')} className="block w-full text-left text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer" role="menuitem">PDF</button>
+                  <button type="button" onClick={() => handleExport('csv')} className="block w-full text-left text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer" role="menuitem">CSV</button>
+                  <button type="button" onClick={() => handleExport('json')} className="block w-full text-left text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer" role="menuitem">JSON</button>
+                  <button type="button" onClick={() => handleExport('md')} className="block w-full text-left text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer" role="menuitem">Markdown</button>
                     </div>
                 )}
              </div>

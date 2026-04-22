@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShoppingListItem } from '../../types';
 import { Save, X, Edit3, Trash2, CheckCircle, GripVertical, ChefHat, Circle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export const ShoppingListItemComponent = React.memo<{
     item: ShoppingListItem;
@@ -22,6 +23,7 @@ export const ShoppingListItemComponent = React.memo<{
     onDragEnd: (e: React.DragEvent) => void;
     isShoppingMode?: boolean;
 }>(({ item, isEditing, editingItem, recipeName, isDragged, dropTargetId, onToggle, onStartEdit, onCancelEdit, onSaveEdit, setEditingItem, onDeleteItem, onDragStart, onDragOver, onDragLeave, onDrop, onDragEnd, isShoppingMode = false }) => {
+    const { t } = useTranslation();
     
     if (isEditing) {
         return (
@@ -33,8 +35,8 @@ export const ShoppingListItemComponent = React.memo<{
                       <input type="text" value={editingItem!.unit} onChange={e => setEditingItem({...editingItem!, unit: e.target.value})} className="w-24 bg-zinc-700 rounded-lg p-2 text-zinc-100" />
                   </div>
                   <div className="flex gap-1 ml-auto">
-                          <button type="submit" aria-label="Änderungen speichern" className="p-2 rounded-lg bg-[var(--color-accent-500)] hover:bg-[var(--color-accent-400)] text-zinc-900"><Save size={18}/></button>
-                          <button type="button" aria-label="Bearbeitung abbrechen" onClick={onCancelEdit} className="p-2 rounded-lg bg-zinc-600 hover:bg-zinc-500"><X size={18}/></button>
+                      <button type="submit" aria-label={t('shoppingList.item.saveChangesAria')} className="p-2 rounded-lg bg-[var(--color-accent-500)] hover:bg-[var(--color-accent-400)] text-zinc-900"><Save size={18}/></button>
+                      <button type="button" aria-label={t('shoppingList.item.cancelEditAria')} onClick={onCancelEdit} className="p-2 rounded-lg bg-zinc-600 hover:bg-zinc-500"><X size={18}/></button>
                   </div>
                 </form>
             </li>
@@ -63,7 +65,10 @@ export const ShoppingListItemComponent = React.memo<{
                     type="button"
                     onClick={() => onToggle(item)} 
                     className={`flex-shrink-0 transition-all duration-200 ${isShoppingMode ? 'p-2' : 'mt-0.5'}`}
-                    aria-label={`Mark ${item.name} as ${item.isChecked ? 'incomplete' : 'complete'}`}
+                    aria-label={t('shoppingList.item.toggleCompleteAria', {
+                        itemName: item.name,
+                        state: item.isChecked ? t('shoppingList.item.stateIncomplete') : t('shoppingList.item.stateComplete'),
+                    })}
                 >
                     {item.isChecked ? (
                         <CheckCircle className="text-zinc-500" size={isShoppingMode ? 32 : 24}/>
@@ -92,8 +97,8 @@ export const ShoppingListItemComponent = React.memo<{
 
                 {!item.isChecked && !isShoppingMode && (
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                        <button type="button" aria-label={`${item.name} bearbeiten`} onClick={(e) => { e.stopPropagation(); onStartEdit(item); }} className="p-2 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-700"><Edit3 size={16}/></button>
-                        <button type="button" aria-label={`${item.name} löschen`} onClick={(e) => { e.stopPropagation(); onDeleteItem(item.id!); }} className="p-2 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-900/20"><Trash2 size={16}/></button>
+                        <button type="button" aria-label={t('shoppingList.item.editItemAria', { itemName: item.name })} onClick={(e) => { e.stopPropagation(); onStartEdit(item); }} className="p-2 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-700"><Edit3 size={16}/></button>
+                        <button type="button" aria-label={t('shoppingList.item.deleteItemAria', { itemName: item.name })} onClick={(e) => { e.stopPropagation(); onDeleteItem(item.id!); }} className="p-2 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-900/20"><Trash2 size={16}/></button>
                     </div>
                 )}
             </div>

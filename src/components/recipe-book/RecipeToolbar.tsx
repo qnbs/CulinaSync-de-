@@ -64,10 +64,11 @@ export const RecipeToolbar: React.FC<RecipeToolbarProps> = ({
                             placeholder="Rezepte durchsuchen..."
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
+                            aria-label={t('recipeBook.toolbar.searchAria')}
                             className="w-full bg-zinc-900/50 border border-zinc-800 rounded-lg py-2.5 pl-10 pr-10 text-sm text-zinc-200 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none transition-all"
                         />
                         {searchTerm && (
-                            <button type="button" aria-label="Suche zurücksetzen" onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"><X size={16} /></button>
+                            <button type="button" aria-label={t('recipeBook.toolbar.resetSearchAria')} onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"><X size={16} /></button>
                         )}
                     </div>
 
@@ -119,7 +120,7 @@ export const RecipeToolbar: React.FC<RecipeToolbarProps> = ({
                             <select 
                                 value={sortBy} 
                                 onChange={e => setSortBy(e.target.value)} 
-                                aria-label="Sortierung wählen"
+                                aria-label={t('recipeBook.toolbar.sortAria')}
                                 className="appearance-none h-full bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-800 rounded-lg py-2 pl-9 pr-8 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none cursor-pointer transition-all"
                             >
                                 <option value="newest">Neueste</option>
@@ -137,35 +138,35 @@ export const RecipeToolbar: React.FC<RecipeToolbarProps> = ({
                 <div className="bg-zinc-900/95 backdrop-blur-md border border-zinc-800 rounded-xl p-4 shadow-xl grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 page-fade-in">
                      <div className="space-y-1.5">
                         <label className="text-xs font-bold text-zinc-500 uppercase">Gang</label>
-                        <select aria-label="Nach Gang filtern" value={filters.course} onChange={e => handleSelectChange('course', e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] outline-none">
+                        <select aria-label={t('recipeBook.toolbar.courseFilterAria')} value={filters.course} onChange={e => handleSelectChange('course', e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] outline-none">
                             <option value="">Alle</option>
                             {filterOptions.courses.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                     </div>
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-zinc-500 uppercase">Küche</label>
-                        <select aria-label="Nach Küche filtern" value={filters.cuisine} onChange={e => handleSelectChange('cuisine', e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] outline-none">
+                        <select aria-label={t('recipeBook.toolbar.cuisineFilterAria')} value={filters.cuisine} onChange={e => handleSelectChange('cuisine', e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] outline-none">
                             <option value="">Alle</option>
                             {filterOptions.cuisines.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                     </div>
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-zinc-500 uppercase">Hauptzutat</label>
-                        <select aria-label="Nach Hauptzutat filtern" value={filters.mainIngredient} onChange={e => handleSelectChange('mainIngredient', e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] outline-none">
+                        <select aria-label={t('recipeBook.toolbar.mainIngredientFilterAria')} value={filters.mainIngredient} onChange={e => handleSelectChange('mainIngredient', e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] outline-none">
                             <option value="">Alle</option>
                             {filterOptions.mainIngredients.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                     </div>
                      <div className="space-y-1.5">
                         <label className="text-xs font-bold text-zinc-500 uppercase">Schwierigkeit</label>
-                        <select aria-label="Nach Schwierigkeit filtern" value={filters.difficulty} onChange={e => handleSelectChange('difficulty', e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] outline-none">
+                                <select aria-label={t('recipeBook.toolbar.difficultyFilterAria')} value={filters.difficulty} onChange={e => handleSelectChange('difficulty', e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] outline-none">
                             <option value="">Alle</option>
                             {filterOptions.difficulties.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                     </div>
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-zinc-500 uppercase">Ernährung</label>
-                        <select aria-label="Nach Ernährungsform filtern" value={filters.diet} onChange={e => handleSelectChange('diet', e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] outline-none">
+                        <select aria-label={t('recipeBook.toolbar.dietFilterAria')} value={filters.diet} onChange={e => handleSelectChange('diet', e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] outline-none">
                             <option value="">Alle</option>
                             {filterOptions.diets.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>

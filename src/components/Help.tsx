@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Search, Book, Info, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAppDispatch } from '../store/hooks';
 import { setCommandPaletteOpen, setCurrentPage, setVoiceAction } from '../store/slices/uiSlice';
 import { FaqSection, TipsSection, AboutSection } from './help/HelpComponents';
@@ -10,6 +11,7 @@ interface HelpProps {
 }
 
 const Help: React.FC<HelpProps> = ({ appVersion }) => {
+    const { t } = useTranslation();
   const dispatch = useAppDispatch();
   
   const [activeTab, setActiveTab] = useState<'knowledge' | 'about'>('knowledge');
@@ -57,10 +59,11 @@ const Help: React.FC<HelpProps> = ({ appVersion }) => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Wie kann ich...?"
+                    aria-label={t('help.search.inputAria')}
                     className="w-full bg-transparent border-none focus:ring-0 text-zinc-100 placeholder-zinc-500 h-12 px-4 text-lg"
                 />
                 {searchTerm && (
-                    <button onClick={() => setSearchTerm('')} className="mr-2 p-1 hover:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-300">
+                    <button type="button" onClick={() => setSearchTerm('')} className="mr-2 p-1 hover:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-300" aria-label={t('help.search.resetAria')}>
                         <X size={18}/>
                     </button>
                 )}

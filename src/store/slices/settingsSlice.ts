@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AppSettings } from '../../types';
-import { loadSettings, saveSettings } from '../../services/settingsService';
+import { loadSettings } from '../../services/settingsService';
 
 const initialState: AppSettings = loadSettings();
 
@@ -8,17 +8,12 @@ const settingsSlice = createSlice({
   name: 'settings',
   initialState,
   reducers: {
-    updateSettings: (_state, action: PayloadAction<AppSettings>) => {
-      saveSettings(action.payload);
-      return action.payload;
-    },
+    updateSettings: (_state, action: PayloadAction<AppSettings>) => action.payload,
     setPantrySort: (state, action: PayloadAction<AppSettings['pantry']['defaultSort']>) => {
       state.pantry.defaultSort = action.payload;
-      saveSettings(state);
     },
     setPantryGrouping: (state, action: PayloadAction<boolean>) => {
       state.pantry.isGrouped = action.payload;
-      saveSettings(state);
     },
   },
 });

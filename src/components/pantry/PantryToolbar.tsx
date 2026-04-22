@@ -1,7 +1,9 @@
 import { Search, ArrowUpDown, ListTree, Filter, CheckSquare, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { usePantryManagerContext } from '../../contexts/PantryManagerContext';
 
 export const PantryToolbar = () => {
+    const { t } = useTranslation();
     const {
         searchTerm,
         setSearchTerm,
@@ -28,12 +30,13 @@ export const PantryToolbar = () => {
                         value={searchTerm}
                         ref={searchInputRef}
                         onChange={e => setSearchTerm(e.target.value)}
+                        aria-label={t('pantry.toolbar.searchAria')}
                         className="w-full bg-zinc-900/50 border border-zinc-800 rounded-lg py-2.5 pl-10 pr-10 text-sm text-zinc-200 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent focus:bg-zinc-900 outline-none transition-all placeholder-zinc-600"
                     />
                     {searchTerm && (
                         <button 
                             type="button"
-                            aria-label="Suche leeren"
+                            aria-label={t('pantry.toolbar.resetSearchAria')}
                             onClick={() => setSearchTerm('')}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
                         >
@@ -52,7 +55,7 @@ export const PantryToolbar = () => {
                         <select 
                             value={expiryFilter} 
                             onChange={e => setExpiryFilter(e.target.value as 'all' | 'nearing' | 'expired')} 
-                            aria-label="Ablaufstatus filtern"
+                            aria-label={t('pantry.toolbar.expiryFilterAria')}
                             className="appearance-none h-full bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-800 rounded-lg py-2.5 pl-9 pr-8 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none cursor-pointer transition-all"
                         >
                             <option value="all">Alle Status</option>
@@ -69,7 +72,7 @@ export const PantryToolbar = () => {
                         <select 
                             value={sortOrder} 
                             onChange={e => setSortOrder(e.target.value)} 
-                            aria-label="Sortierreihenfolge wählen"
+                            aria-label={t('pantry.toolbar.sortAria')}
                             className="appearance-none h-full bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-800 rounded-lg py-2.5 pl-9 pr-8 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none cursor-pointer transition-all"
                         >
                             <option value="name">Name (A-Z)</option>
@@ -84,20 +87,20 @@ export const PantryToolbar = () => {
                     {/* Toggles */}
                     <button 
                         type="button"
-                        aria-label={isGrouped ? 'Gruppierung aufheben' : 'Nach Kategorie gruppieren'}
+                        aria-label={isGrouped ? t('pantry.toolbar.ungroupAria') : t('pantry.toolbar.groupByCategoryAria')}
                         onClick={() => setIsGrouped(!isGrouped)} 
                         className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-all flex-shrink-0 ${isGrouped ? 'bg-[var(--color-accent-500)]/10 border-[var(--color-accent-500)] text-[var(--color-accent-400)]' : 'bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`} 
-                        title={isGrouped ? "Gruppierung aufheben" : "Nach Kategorie gruppieren"}
+                        title={isGrouped ? t('pantry.toolbar.ungroupTitle') : t('pantry.toolbar.groupByCategoryTitle')}
                     >
                         <ListTree size={20} />
                     </button>
                     
                     <button 
                         type="button"
-                        aria-label="Auswahlmodus umschalten"
+                        aria-label={t('pantry.toolbar.toggleSelectionModeAria')}
                         onClick={toggleSelectMode} 
                         className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-all flex-shrink-0 ${isSelectMode ? 'bg-[var(--color-accent-500)] text-zinc-900 border-[var(--color-accent-500)] shadow-[0_0_15px_var(--color-accent-glow)]' : 'bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`} 
-                        title="Auswahlmodus"
+                        title={t('pantry.toolbar.selectionModeTitle')}
                     >
                         <CheckSquare size={20} />
                     </button>
