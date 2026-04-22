@@ -60,6 +60,8 @@
 - Vor `pnpm run build` immer zuerst Diagnostics fuer die geaenderten Dateien pruefen (`get_errors` bzw. Problems-Panel).
 - Wenn TypeScript-relevante Dateien betroffen sind, vor dem Full-Build mindestens einen Typecheck fuer den geaenderten Slice oder `pnpm exec tsc --noEmit` ausfuehren.
 - Der Full-Build ist der Integrations-Check am Ende und soll nicht der erste Schritt sein, in dem neue Typefehler entdeckt werden.
+- Vor Commit oder Push immer mindestens fuer den geaenderten Slice ausfuehren: Diagnostics (`get_errors`), relevante Tests, Typecheck bei TS-Aenderungen und `pnpm run lint`.
+- Falls spaeter ein dedizierter Formatter wie Prettier konfiguriert wird, soll er vor Commit/Push ebenfalls fuer den geaenderten Slice laufen. Aktuell ist kein Prettier-Setup im Repo vorhanden, daher nichts erzwingen, was nicht existiert.
 
 ## Error-Handling
 - Zentrale Fehler-Logging-Funktion: `logAppError()` aus `src/services/errorLoggingService.ts`.
@@ -87,6 +89,7 @@
 - Test: `pnpm run test`
 - Preview: `pnpm run preview`
 - Reihenfolge fuer Agent-Aenderungen: lokales Lesen/Suchen, kleine Edits, fokussierte Tests/Diagnostics, Typecheck/Lint fuer den geaenderten Slice, erst danach Full-Build.
+- Vor Commit/Push dieselbe Reihenfolge einhalten; Committen oder Pushen ohne vorherige lokale Validierung ist nur im echten Notfall zulaessig und muss dann im Verlauf explizit benannt werden.
 - Deploy: Automatisch via GitHub Actions bei Push auf `main` (`.github/workflows/deploy.yml`)
 - CI: Lint + TypeScript-Check + Tests + Bundle-Budget bei PRs und Push auf `main` (`.github/workflows/ci.yml`)
 - Security: CodeQL-Analyse bei PRs und Push auf `main` (`.github/workflows/codeql.yml`)
