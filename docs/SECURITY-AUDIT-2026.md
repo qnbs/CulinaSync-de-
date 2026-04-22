@@ -16,6 +16,12 @@ Geprueft wurden insbesondere diese Bereiche:
 
 Die App zeigt aktuell keine direkte, kritische DOM-XSS-Senke im regulären React-Rendering. Nutzer- und KI-Texte werden ueberwiegend als normale React-Textknoten gerendert, was HTML standardmaessig escaped. Der HTML-Importpfad fuer Rezepte sanitisiert Fremd-HTML bereits mit DOMPurify und extrahiert anschliessend nur Text.
 
+Status 2026-04-22:
+
+- Die juengste Session hat keine neuen kritischen Security-Befunde aufgedeckt.
+- Sie hat vor allem Accessibility- und i18n-Nacharbeit vorangetrieben, darunter die Entfernung verbliebener nativer Confirm-Dialoge zugunsten kontrollierter Modalfluesse.
+- Die Aufteilung der Locale-Dateien in modulare Domains ist vor allem ein Wartbarkeitsgewinn; sicherheitsrelevante Datenpfade wurden dadurch nicht erweitert.
+
 Es wurden inzwischen fünf reale Sicherheitsluecken bestaetigt und behoben:
 
 1. CSV-/Spreadsheet-Formula-Injection in `exportService.ts`

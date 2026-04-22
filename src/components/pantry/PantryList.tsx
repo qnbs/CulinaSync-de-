@@ -7,21 +7,25 @@ import PantryListItem from '../PantryListItem';
 import { PantryItem } from '../../types';
 import { useWindowSize } from '../../hooks/useWindowSize';
 
-const EmptyState: React.FC<{ totalItemCount: number }> = ({ totalItemCount }) => (
-    <div className="flex flex-col items-center justify-center py-24 px-4 text-center border-2 border-dashed border-zinc-800/50 rounded-2xl bg-zinc-900/20">
-        <div className="bg-zinc-900 p-4 rounded-full mb-4 ring-1 ring-white/5">
-            <PackageOpen size={40} className="text-zinc-600"/>
+const EmptyState: React.FC<{ totalItemCount: number }> = ({ totalItemCount }) => {
+    const { t } = useTranslation();
+
+    return (
+        <div className="flex flex-col items-center justify-center py-24 px-4 text-center border-2 border-dashed border-zinc-800/50 rounded-2xl bg-zinc-900/20">
+            <div className="bg-zinc-900 p-4 rounded-full mb-4 ring-1 ring-white/5">
+                <PackageOpen size={40} className="text-zinc-600"/>
+            </div>
+            <h3 className="text-xl font-bold text-zinc-300 mb-2">
+                {totalItemCount > 0 ? t('pantry.emptyState.noResultsTitle') : t('pantry.emptyState.emptyTitle')}
+            </h3>
+            <p className="text-zinc-500 max-w-sm mx-auto leading-relaxed">
+                {totalItemCount > 0
+                    ? t('pantry.emptyState.noResultsDescription')
+                    : t('pantry.emptyState.emptyDescription')}
+            </p>
         </div>
-        <h3 className="text-xl font-bold text-zinc-300 mb-2">
-            {totalItemCount > 0 ? "Keine Ergebnisse gefunden" : "Deine Vorratskammer ist leer"}
-        </h3>
-        <p className="text-zinc-500 max-w-sm mx-auto leading-relaxed">
-            {totalItemCount > 0 
-                ? "Versuche, deine Suchbegriffe oder Filter anzupassen." 
-                : "Füge deinen ersten Artikel oben rechts hinzu, um den Überblick zu behalten."}
-        </p>
-    </div>
-);
+    );
+};
 
 export const PantryList = () => {
     const { t } = useTranslation();

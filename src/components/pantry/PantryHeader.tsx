@@ -4,6 +4,7 @@ import type { LucideIcon } from 'lucide-react';
 import { usePantryManagerContext } from '../../contexts/PantryManagerContext';
 import { getExpiryStatus } from '../PantryListItem';
 import { useAppSelector } from '../../store/hooks';
+import { useTranslation } from 'react-i18next';
 
 const StatCard = ({ icon: Icon, label, value, colorClass, bgClass }: { icon: LucideIcon, label: string, value: number, colorClass: string, bgClass: string }) => (
     <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border border-white/5 shadow-lg backdrop-blur-sm ${bgClass}`}>
@@ -18,6 +19,7 @@ const StatCard = ({ icon: Icon, label, value, colorClass, bgClass }: { icon: Luc
 );
 
 export const PantryHeader = () => {
+    const { t } = useTranslation();
     const { setModalState, pantryItems } = usePantryManagerContext();
     const { pantry: pantrySettings } = useAppSelector(state => state.settings);
 
@@ -43,10 +45,10 @@ export const PantryHeader = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight text-zinc-100 bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
-                        Meine Vorratskammer
+                        {t('pantry.header.title')}
                     </h2>
                     <p className="text-zinc-400 mt-1">
-                        Dein intelligentes Inventar.
+                        {t('pantry.header.subtitle')}
                     </p>
                 </div>
                 <button 
@@ -55,7 +57,7 @@ export const PantryHeader = () => {
                     className="group flex items-center justify-center gap-2 bg-gradient-to-br from-[var(--color-accent-500)] to-[var(--color-accent-600)] text-zinc-100 font-bold py-2.5 px-5 rounded-xl hover:shadow-[0_0_20px_var(--color-accent-glow)] transition-all duration-300 active:scale-95"
                 >
                     <PlusCircle size={18} className="group-hover:rotate-90 transition-transform duration-300"/> 
-                    <span>Artikel hinzufügen</span>
+                    <span>{t('pantry.header.addItem')}</span>
                 </button>
             </div>
 
@@ -63,21 +65,21 @@ export const PantryHeader = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <StatCard 
                     icon={Package} 
-                    label="Gesamtbestand" 
+                    label={t('pantry.header.totalStock')} 
                     value={stats.total} 
                     colorClass="text-blue-400" 
                     bgClass="bg-zinc-900/40"
                 />
                 <StatCard 
                     icon={AlertTriangle} 
-                    label="Kritisch / Ablauf" 
+                    label={t('pantry.header.expiring')} 
                     value={stats.expiring} 
                     colorClass="text-red-400" 
                     bgClass="bg-red-900/10 border-red-500/20"
                 />
                 <StatCard 
                     icon={ShoppingCart} 
-                    label="Nachkaufen" 
+                    label={t('pantry.header.restock')} 
                     value={stats.low} 
                     colorClass="text-amber-400" 
                     bgClass="bg-amber-900/10 border-amber-500/20"

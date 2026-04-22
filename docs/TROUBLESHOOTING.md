@@ -28,11 +28,34 @@ Massnahmen:
 
 ## Settings verhalten sich unerwartet
 
-Es existiert aktuell noch doppelte Settings-Persistenz zwischen `settingsService.ts` und Redux Persist. Bei inkonsistentem Verhalten:
+Der regulaere Schreibpfad laeuft ueber Redux Persist. `settingsService.ts` haelt nur noch einen Legacy-Fallback fuer aeltere lokale Daten. Bei inkonsistentem Verhalten:
 
 - Browser-Storage pruefen
+- `persist:settings` und eventuelle Legacy-Daten unter `culinaSyncSettings` vergleichen
 - Settings-Rehydrierung und Slice-Werte vergleichen
-- nach Persistenz-Aenderungen beide Pfade bewusst validieren
+- nach Persistenz-Aenderungen Load-Fallback und Rehydrierung bewusst validieren
+
+## Uebersetzungen fehlen oder rohe i18n-Keys erscheinen
+
+Pruefen:
+
+- ob der Key in beiden Sprachen vorhanden ist
+- ob der Key in der passenden Domain-Datei liegt: `core.json`, `settings.json` oder `features.json`
+- ob `src/locales/de/index.ts` und `src/locales/en/index.ts` die Domain-Dateien korrekt aggregieren
+- ob der aufrufende Component-Hook wirklich `useTranslation()` nutzt oder in Klassenkomponenten direkt das zentrale `i18n` verwendet
+
+Typisches Fehlerbild:
+
+- Nach dem Split der grossen Locale-Dateien landet ein neuer Key nur in einer Sprache oder in der falschen Domain-Datei. Dann rendert die UI den Roh-Key oder faellt auf eine unerwartete Sprache zurueck.
+
+## Confirm-Dialoge verhalten sich inkonsistent
+
+Pruefen:
+
+- ob der Dialog ueber `useModalA11y` angeschlossen ist
+- ob `onClose`, Initialfokus und Overlay-Klick denselben Cancel-Pfad verwenden
+- ob ein Hook oder Container den Pending-State korrekt zuruecksetzt
+- ob die destructive Aktion erst nach explizitem Confirm ausgefuehrt wird
 
 ## Export funktioniert nicht wie erwartet
 

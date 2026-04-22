@@ -95,12 +95,12 @@ const PantryListItem = React.memo<PantryListItemProps>(({
                         {/* Status Badges */}
                         {expiryStatus === 'expired' && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide bg-red-500/20 text-red-400 border border-red-500/20">
-                                <AlertTriangle size={10}/> Abgelaufen
+                                <AlertTriangle size={10}/> {t('pantry.item.expired')}
                             </span>
                         )}
                         {expiryStatus === 'nearing' && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide bg-amber-500/20 text-amber-400 border border-amber-500/20">
-                                <Clock size={10}/> Läuft bald ab
+                                <Clock size={10}/> {t('pantry.item.nearingExpiry')}
                             </span>
                         )}
                     </div>
@@ -115,7 +115,7 @@ const PantryListItem = React.memo<PantryListItemProps>(({
                         {isRunningLow && (
                             <span className="flex items-center gap-1.5 text-amber-500 font-medium">
                                 <AlertTriangle size={14}/>
-                                {item.quantity === 0 ? 'Leer' : 'Wird knapp'}
+                                {item.quantity === 0 ? t('pantry.item.empty') : t('pantry.item.runningLow')}
                             </span>
                         )}
                     </div>

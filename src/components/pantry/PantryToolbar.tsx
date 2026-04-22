@@ -26,7 +26,7 @@ export const PantryToolbar = () => {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-[var(--color-accent-400)] transition-colors" size={20} />
                     <input
                         type="text"
-                        placeholder="Suchen..."
+                        placeholder={t('common.search')}
                         value={searchTerm}
                         ref={searchInputRef}
                         onChange={e => setSearchTerm(e.target.value)}
@@ -58,9 +58,9 @@ export const PantryToolbar = () => {
                             aria-label={t('pantry.toolbar.expiryFilterAria')}
                             className="appearance-none h-full bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-800 rounded-lg py-2.5 pl-9 pr-8 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none cursor-pointer transition-all"
                         >
-                            <option value="all">Alle Status</option>
-                            <option value="nearing">Läuft bald ab</option>
-                            <option value="expired">Bereits abgelaufen</option>
+                            <option value="all">{t('pantry.toolbar.allStatuses')}</option>
+                            <option value="nearing">{t('pantry.toolbar.nearingExpiry')}</option>
+                            <option value="expired">{t('pantry.toolbar.expired')}</option>
                         </select>
                     </div>
 
@@ -75,10 +75,10 @@ export const PantryToolbar = () => {
                             aria-label={t('pantry.toolbar.sortAria')}
                             className="appearance-none h-full bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-800 rounded-lg py-2.5 pl-9 pr-8 text-sm text-zinc-300 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none cursor-pointer transition-all"
                         >
-                            <option value="name">Name (A-Z)</option>
-                            <option value="expiryDate">Ablaufdatum</option>
-                            <option value="updatedAt">Zuletzt geändert</option>
-                            <option value="createdAt">Neu hinzugefügt</option>
+                            <option value="name">{t('pantry.toolbar.sortName')}</option>
+                            <option value="expiryDate">{t('pantry.toolbar.sortExpiryDate')}</option>
+                            <option value="updatedAt">{t('pantry.toolbar.sortUpdatedAt')}</option>
+                            <option value="createdAt">{t('pantry.toolbar.sortCreatedAt')}</option>
                         </select>
                     </div>
 

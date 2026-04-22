@@ -1,0 +1,491 @@
+{
+  "help": {
+    "title": "Wissensdatenbank",
+    "subtitle": "Anleitungen, Tipps & Systemstatus.",
+    "emptyFaq": "Keine passenden Fragen gefunden.",
+    "faq": {
+      "heading": "Haeufige Fragen",
+      "categories": {
+        "general": "Allgemein",
+        "privacy": "Datenschutz",
+        "features": "Funktionen"
+      },
+      "localFirst": {
+        "question": "Was bedeutet 'Local-First'?",
+        "answer": "'Local-First' bedeutet, dass alle deine Daten (Rezepte, Vorraete, Plaene) primaer auf deinem Geraet gespeichert werden. Es gibt keine Cloud-Datenbank, die wir kontrollieren. Das garantiert maximale Geschwindigkeit, Privatsphaere und Offline-Verfuegbarkeit."
+      },
+      "aiPrivacy": {
+        "question": "Was passiert mit meinen Daten beim KI-Chef?",
+        "answer": "Nur der Text deiner Anfrage (Zutaten, Wuensche) wird an die Google Gemini API gesendet. Deine persoenlichen Vorratsdaten oder Essensplaene verlassen dein Geraet nicht, es sei denn, sie sind Teil der spezifischen Anfrage."
+      },
+      "pantryColor": {
+        "question": "Was bedeuten die Farben im Essensplaner?",
+        "answer": "Der Balken unter einem Gericht zeigt die Zutaten-Verfuegbarkeit: Gruen (Alles da), Gelb (Einiges fehlt), Rot (Vieles fehlt). So siehst du sofort, ob du einkaufen musst."
+      },
+      "syncDevices": {
+        "question": "Kann ich Daten zwischen Geraeten synchronisieren?",
+        "answer": "Aktuell ist CulinaSync als Offline-First-App konzipiert. Eine Synchronisation ist fuer eine spaetere Version geplant. Nutze bis dahin die Export-/Import-Funktion in den Einstellungen."
+      }
+    },
+    "tips": {
+      "heading": "Pro-Tipps (Interaktiv)",
+      "cmdPalette": {
+        "title": "Power-User Navigation",
+        "description": "Nutze die Befehlspalette fuer blitzschnellen Zugriff auf alles.",
+        "actionLabel": "Oeffnen (⌘K)"
+      },
+      "voiceControl": {
+        "title": "Hands-Free Kochen",
+        "description": "Steuere den Kochmodus komplett mit deiner Stimme.",
+        "actionLabel": "Mikrofon testen"
+      },
+      "shoppingGenerate": {
+        "title": "Intelligenter Einkauf",
+        "description": "Lass die App deine Einkaufsliste basierend auf dem Plan fuellen.",
+        "actionLabel": "Zur Einkaufsliste"
+      }
+    },
+    "tech": {
+      "react": "Modernste UI-Library",
+      "gemini": "Fortschrittliche KI-Modelle",
+      "dexie": "IndexedDB-Wrapper",
+      "redux": "State-Management",
+      "tailwind": "Utility-First-Styling",
+      "vite": "Progressive Web App"
+    },
+    "philosophy": {
+      "offlineFirst": {
+        "title": "Offline First",
+        "description": "Funktioniert immer und ueberall, auch im tiefsten Supermarkt-Keller."
+      },
+      "privacy": {
+        "title": "Privatsphaere",
+        "description": "Deine Daten gehoeren dir. Kein Tracking, keine Werbung."
+      },
+      "performance": {
+        "title": "Performance",
+        "description": "Keine Ladezeiten. Sofortige Reaktion auf jede Eingabe."
+      }
+    },
+    "search": {
+      "placeholder": "Wie kann ich...?",
+      "inputAria": "Suche in der Wissensdatenbank",
+      "resetAria": "Suche zuruecksetzen"
+    },
+    "tabs": {
+      "knowledge": "Wissen & FAQ",
+      "about": "System & Ueber"
+    },
+    "about": {
+      "technology": "Technologie",
+      "systemStatus": "Systemstatus",
+      "systemNormal": "System Normal",
+      "status": "Status",
+      "online": "Online",
+      "version": "Version",
+      "storage": "Speicher",
+      "indexedDbActive": "IndexedDB Aktiv"
+    }
+  },
+  "whatsNew": {
+    "title": "Was ist neu?",
+    "description": "Uebersicht der wichtigsten Aenderungen in dieser Version.",
+    "items": {
+      "audit": "Universal Audit: Performance, Sicherheit, Barrierefreiheit, Best Practices",
+      "geminiVision": "Gemini Vision (Multi-Modal Input)",
+      "healthConnect": "Health Connect Export (Apple/Google/Samsung)",
+      "community": "Community-Sharing (IPFS/Nostr, Opt-in)",
+      "voice": "Voice 2.0 (Whisper.cpp lokal)",
+      "nativeWrapper": "Native Wrapper (Tauri/Capacitor, Deep-Linking)",
+      "errorBoundary": "Global Error Boundary & Retry-Logik",
+      "seo": "SEO/Meta/OG/Twitter, Preload, Print-Styles, Version-Badge"
+    }
+  },
+  "onboarding": {
+    "title": "Willkommen bei CulinaSync!",
+    "description": "Starte mit einer gefuehrten Tour oder lade Demo-Daten fuer ein interaktives Tutorial.",
+    "startTour": "Tour starten",
+    "tour": {
+      "title": "Gefuehrte Tour",
+      "description": "In 3 Schritten Navigation und Kernbereiche kennenlernen."
+    },
+    "demo": {
+      "title": "Interaktives Tutorial",
+      "description": "Fuellt deinen Vorrat mit Beispielartikeln, damit du direkt testen kannst.",
+      "load": "Demo laden",
+      "loading": "Lade Demo...",
+      "loaded": "Demo geladen"
+    }
+  },
+  "mealPlanner": {
+    "card": {
+      "removeNoteTitle": "Notiz entfernen",
+      "recipeUnavailable": "Rezept nicht verfuegbar",
+      "viewRecipe": "Rezept ansehen",
+      "cookMode": "Kochmodus",
+      "markCooked": "Als gekocht markieren",
+      "remove": "Entfernen",
+      "veggie": "Veggie",
+      "servingsShort": "{{count}} Port.",
+      "pantry": "Vorrat"
+    },
+    "header": {
+      "title": "Essensplaner",
+      "subtitle": "Organisiere deine kulinarische Woche.",
+      "currentWeek": "Aktuelle Woche",
+      "weeklyAverage": "Wochen-Schnitt",
+      "calories": "Kalorien",
+      "protein": "Protein",
+      "carbs": "Kohlenh.",
+      "fat": "Fett"
+    },
+    "addNote": {
+      "aria": "{{mealType}}: Notiz hinzufuegen",
+      "title": "Notiz hinzufügen",
+      "subtitle": "Für {{mealType}} am {{date}}.",
+      "placeholder": "z.B. 'Essen gehen' oder 'Reste vom Vortag'"
+    },
+    "toast": {
+      "recipePlanned": "Rezept geplant.",
+      "selectDayForRecipe": "Wähle nun einen Tag für das Rezept aus.",
+      "markedCooked": "Mahlzeit als gekocht markiert.",
+      "pantryUpdatedCount": "{{count}} Artikel im Vorrat aktualisiert.",
+      "mealRemoved": "Mahlzeit entfernt.",
+      "noteAdded": "Notiz hinzugefügt.",
+      "shoppingListUpdated": "Einkaufsliste aktualisiert: +{{added}} Artikel."
+    },
+    "confirm": {
+      "removeMeal": "Mahlzeit wirklich aus dem Plan entfernen?",
+      "removeMealTitle": "Mahlzeit entfernen?",
+      "removeMealAction": "Entfernen",
+      "clearDayTitle": "Tag leeren?",
+      "clearDayDescription": "Moechtest du wirklich alle Mahlzeiten fuer den {{date}} loeschen?",
+      "clearDayAction": "Tag leeren"
+    },
+    "overlay": {
+      "selectDayFor": "Wähle einen Tag für \"{{recipeTitle}}\"",
+      "insertHere": "Hier einfuegen"
+    },
+    "actions": {
+      "exportIcs": "Kalender exportieren (ICS)",
+      "autoPlan": "Auto-Vorschlag (Ablauf)",
+      "fillShoppingList": "Einkaufsliste fuellen",
+      "dayActionsAria": "Aktionen fuer {{date}}",
+      "generateShoppingListAria": "Einkaufsliste aus Wochenplan generieren",
+      "previousWeekAria": "Vorherige Woche",
+      "nextWeekAria": "Naechste Woche",
+      "today": "Heute",
+      "autoPlanApplied": "Auto-Vorschlag angewendet: {{count}} Mahlzeit(en).",
+      "autoPlanEmpty": "Keine passenden Vorschläge aus bald ablaufenden Zutaten gefunden."
+    },
+    "sidebar": {
+      "showRecipesTitle": "Rezepte anzeigen",
+      "title": "Rezepte",
+      "subtitle": "Drag & Drop oder Antippen",
+      "collapseTitle": "Einklappen",
+      "empty": "Keine Rezepte gefunden."
+    }
+  },
+  "shoppingList": {
+    "empty": {
+      "title": "Deine Einkaufsliste ist leer",
+      "description": "Fuege Artikel manuell hinzu, erstelle eine KI-Liste oder generiere sie aus deinem Essensplan."
+    },
+    "completed": {
+      "title": "Alle Artikel erledigt!",
+      "description": "Du kannst die gekauften Artikel nun in den Vorrat verschieben."
+    },
+    "bulkAdd": {
+      "title": "Liste einfuegen",
+      "description": "Fuege eine Liste von Zutaten ein, einen Artikel pro Zeile. Mengen und Einheiten werden automatisch erkannt.",
+      "placeholder": "250g Mehl\n1 Prise Salz\nEier",
+      "analyze": "Analysieren",
+      "reviewDescription": "Ueberpruefe die erkannten Artikel. Du kannst sie nach dem Hinzufuegen noch bearbeiten.",
+      "back": "Zurueck",
+      "addToList": "Zur Liste hinzufuegen"
+    },
+    "ai": {
+      "title": "KI-gestuetzte Einkaufsliste",
+      "description": "Beschreibe, was du vorhast, und die KI erstellt eine passende Einkaufsliste fuer dich. Dein aktueller Vorrat wird dabei beruecksichtigt.",
+      "placeholder": "z.B. Zutaten fuer einen Schokoladenkuchen...",
+      "error": "Liste konnte nicht generiert werden. Bitte versuche es erneut.",
+      "generating": "Generiere...",
+      "createList": "Liste erstellen",
+      "reviewDescription": "Ueberpruefe die Vorschlaege der KI. Entferne Artikel, die du nicht benoetigst.",
+      "back": "Zurueck",
+      "addSelected": "{{count}} Artikel hinzufuegen"
+    },
+    "confirm": {
+      "clearTitle": "Einkaufsliste leeren?",
+      "clearDescription": "Moechtest du die Einkaufsliste wirklich komplett leeren?",
+      "clearAction": "Leeren",
+      "exportTitle": "Einkaufsliste exportieren?",
+      "exportDescription": "Moechtest du die Einkaufsliste wirklich als {{format}}-Datei exportieren?",
+      "exportAction": "Exportieren",
+      "moveToPantryTitle": "Artikel in den Vorrat verschieben?",
+      "moveToPantryDescription": "{{count}} gekaufte(r) Artikel werden in den Vorrat verschoben.",
+      "moveToPantryAction": "Verschieben",
+      "deleteItemTitle": "Artikel loeschen?",
+      "deleteItemDescription": "Artikel wirklich loeschen?",
+      "deleteItemDescriptionNamed": "\"{{itemName}}\" wirklich loeschen?"
+    },
+    "toolbar": {
+      "generateFromPlan": "Aus Plan generieren",
+      "pasteList": "Liste einfuegen",
+      "aiList": "KI-Liste",
+      "export": "Exportieren",
+      "exportPdf": "PDF (.pdf)",
+      "exportCsv": "CSV (.csv)",
+      "exportJson": "JSON (.json)",
+      "exportMarkdown": "Markdown (.md)",
+      "exportText": "Text (.txt)",
+      "expandAllAria": "Alle Kategorien ausklappen",
+      "expandAllTitle": "Alle ausklappen",
+      "collapseAllAria": "Alle Kategorien einklappen",
+      "collapseAllTitle": "Alle einklappen"
+    },
+    "item": {
+      "saveChangesAria": "Aenderungen speichern",
+      "cancelEditAria": "Bearbeitung abbrechen",
+      "toggleCompleteAria": "{{itemName}} als {{state}} markieren",
+      "stateComplete": "erledigt",
+      "stateIncomplete": "nicht erledigt",
+      "editItemAria": "{{itemName}} bearbeiten",
+      "deleteItemAria": "{{itemName}} loeschen"
+    },
+    "quickAdd": {
+      "placeholder": "Schnell hinzufuegen (z.B. 500g Mehl)",
+      "voiceAria": "Sprach-Eingabe starten",
+      "cameraAria": "Kamera-Scan oeffnen",
+      "submitAria": "Artikel hinzufuegen",
+      "scanBarcode": "Barcode per Kamera/Foto",
+      "scanReceipt": "Rechnung per OCR scannen"
+    }
+  },
+  "pantry": {
+    "confirm": {
+      "removeItemTitle": "Artikel aus dem Vorrat entfernen?",
+      "removeItemDescription": "Soll \"{{itemName}}\" wirklich aus dem Vorrat entfernt werden?",
+      "deleteSelectedTitle": "Ausgewaehlte Artikel loeschen?",
+      "deleteSelectedDescription": "{{count}} Artikel wirklich loeschen?"
+    },
+    "listAria": "Vorratsliste",
+    "item": {
+      "addToShoppingListTitle": "Zur Einkaufsliste",
+      "editTitle": "Bearbeiten",
+      "expired": "Abgelaufen",
+      "nearingExpiry": "Laeuft bald ab",
+      "empty": "Leer",
+      "runningLow": "Wird knapp"
+    },
+    "emptyState": {
+      "noResultsTitle": "Keine Ergebnisse gefunden",
+      "emptyTitle": "Deine Vorratskammer ist leer",
+      "noResultsDescription": "Versuche, deine Suchbegriffe oder Filter anzupassen.",
+      "emptyDescription": "Fuege deinen ersten Artikel oben rechts hinzu, um den Ueberblick zu behalten."
+    },
+    "quickAdd": {
+      "placeholder": "Smart Add: z.B. '500g Spaghetti'",
+      "inputAria": "Schnellzugabe fuer Vorrat",
+      "imageAria": "Foto oder Textbild erkennen",
+      "imageError": "Bild konnte nicht erkannt werden.",
+      "submitAria": "Zum Vorrat hinzufuegen"
+    },
+    "header": {
+      "title": "Meine Vorratskammer",
+      "subtitle": "Dein intelligentes Inventar.",
+      "addItem": "Artikel hinzufuegen",
+      "totalStock": "Gesamtbestand",
+      "expiring": "Kritisch / Ablauf",
+      "restock": "Nachkaufen"
+    },
+    "toolbar": {
+      "searchAria": "Vorrat durchsuchen",
+      "resetSearchAria": "Suche leeren",
+      "expiryFilterAria": "Ablaufstatus filtern",
+      "sortAria": "Sortierreihenfolge waehlen",
+      "allStatuses": "Alle Status",
+      "nearingExpiry": "Laeuft bald ab",
+      "expired": "Bereits abgelaufen",
+      "sortName": "Name (A-Z)",
+      "sortExpiryDate": "Ablaufdatum",
+      "sortUpdatedAt": "Zuletzt geaendert",
+      "sortCreatedAt": "Neu hinzugefuegt",
+      "ungroupAria": "Gruppierung aufheben",
+      "groupByCategoryAria": "Nach Kategorie gruppieren",
+      "ungroupTitle": "Gruppierung aufheben",
+      "groupByCategoryTitle": "Nach Kategorie gruppieren",
+      "toggleSelectionModeAria": "Auswahlmodus umschalten",
+      "selectionModeTitle": "Auswahlmodus"
+    },
+    "modal": {
+      "editTitle": "Artikel bearbeiten",
+      "newTitle": "Neuer Artikel im Vorrat",
+      "nameLabel": "Name",
+      "categoryLabel": "Kategorie",
+      "quantityLabel": "Menge",
+      "unitLabel": "Einheit",
+      "expiryDateLabel": "Ablaufdatum (optional)",
+      "minQuantityLabel": "Mindestmenge (optional)",
+      "minQuantityPlaceholder": "z.B. 1",
+      "minQuantityHint": "Wenn die Menge darunter faellt, wird eine Warnung angezeigt.",
+      "notesLabel": "Notizen (optional)",
+      "nutritionTitle": "Naehrwerte (pro 100g):",
+      "nutritionSummary": "Kcal: {{kcal}} | Protein: {{protein}}g | Fett: {{fat}}g | Kohlenhydrate: {{carbs}}g",
+      "allergensLabel": "Allergene"
+    }
+  },
+  "recipeDetail": {
+    "back": "Zurück zur Übersicht",
+    "generatingImage": "Generiere Bild...",
+    "generateImage": "Bild generieren",
+    "adjustServings": "Portionen anpassen:",
+    "meta": {
+      "totalTimeTitle": "Gesamtzeit",
+      "servingsTitle": "Portionen",
+      "difficultyTitle": "Schwierigkeit",
+      "servingsSingular": "Person",
+      "servingsPlural": "Personen"
+    },
+    "mealType": {
+      "breakfast": "Frühstück",
+      "lunch": "Mittagessen",
+      "dinner": "Abendessen"
+    },
+    "modal": {
+      "addToMealPlanTitle": "Zum Essensplan hinzufügen",
+      "date": "Datum",
+      "mealType": "Mahlzeit"
+    },
+    "confirm": {
+      "deleteTitle": "Rezept loeschen?",
+      "deleteRecipe": "Möchtest du das Rezept \"{{recipeTitle}}\" wirklich endgültig löschen?",
+      "exportTitle": "Rezept exportieren?",
+      "exportRecipe": "Möchtest du das Rezept wirklich als {{format}}-Datei exportieren?",
+      "exportAction": "Exportieren"
+    },
+    "actions": {
+      "decreaseServingsAria": "Portionen verringern",
+      "increaseServingsAria": "Portionen erhoehen",
+      "addToShoppingListTitle": "Zur Einkaufsliste hinzufuegen",
+      "startCookMode": "Kochmodus",
+      "export": "Export",
+      "removeFavorite": "Favorit entfernen",
+      "markFavorite": "Als Favorit markieren"
+    },
+    "ingredientStatus": {
+      "haveTitle": "Im Vorrat",
+      "lowTitle": "Wird knapp! Du hast {{pantryQty}}{{unit}}",
+      "noneDetected": "Keine klaren Allergene erkannt."
+    },
+    "toast": {
+      "saved": "Rezept erfolgreich gespeichert!",
+      "saveFailed": "Speichern fehlgeschlagen.",
+      "deleteFailed": "Löschen fehlgeschlagen.",
+      "imageSaved": "Bild gespeichert.",
+      "favoriteAdded": "Als Favorit markiert!",
+      "favoriteRemoved": "Favorit entfernt.",
+      "actionFailed": "Aktion fehlgeschlagen.",
+      "missingItemsAdded": "{{count}} fehlende(r) Artikel zur Einkaufsliste hinzugefügt.",
+      "noMissingItems": "Alle Zutaten sind bereits im Vorrat oder auf der Liste!",
+      "singleItemAdded": "\"{{itemName}}\" zur Einkaufsliste hinzugefügt.",
+      "addedToMealPlan": "Zum Essensplan hinzugefügt!"
+    }
+  },
+  "recipeBook": {
+    "toolbar": {
+      "searchPlaceholder": "Rezepte suchen...",
+      "searchAria": "Rezepte durchsuchen",
+      "resetSearchAria": "Rezeptsuche leeren",
+      "pantryReady": "Kochbereit",
+      "favorites": "Favoriten",
+      "filters": "Filter",
+      "sortAria": "Sortierung waehlen",
+      "sortNewest": "Neueste",
+      "sortFavorites": "Favoriten",
+      "sortAz": "A-Z",
+      "sortZa": "Z-A",
+      "courseLabel": "Gang",
+      "courseFilterAria": "Nach Gang filtern",
+      "cuisineLabel": "Kueche",
+      "cuisineFilterAria": "Nach Kueche filtern",
+      "mainIngredientLabel": "Hauptzutat",
+      "mainIngredientFilterAria": "Nach Hauptzutat filtern",
+      "difficultyLabel": "Schwierigkeit",
+      "difficultyFilterAria": "Nach Schwierigkeit filtern",
+      "dietLabel": "Ernaehrung",
+      "dietFilterAria": "Nach Ernaehrung filtern",
+      "all": "Alle",
+      "resetAllFilters": "ALLE FILTER ZURUECKSETZEN"
+    },
+    "bulkPlan": {
+      "title": "Zum Plan hinzufuegen",
+      "selectedRecipes": "{{count}} Rezepte ausgewaehlt",
+      "startDate": "Startdatum",
+      "mealType": "Mahlzeit",
+      "summaryPrefix": "Die Rezepte werden ab dem",
+      "summaryMiddle": "als aufeinanderfolgende",
+      "summarySuffix": "geplant.",
+      "plan": "Planen"
+    },
+    "empty": {
+      "title": "Keine Rezepte gefunden",
+      "tryOtherFilters": "Versuche es mit anderen Filtern oder Suchbegriffen.",
+      "bookEmpty": "Dein Kochbuch ist noch leer. Besuche den KI-Chef, um Rezepte zu erstellen!",
+      "resetFilters": "Filter zuruecksetzen"
+    },
+    "selection": {
+      "startAria": "Auswahlmodus starten",
+      "startTitle": "Auswahlmodus starten",
+      "endAria": "Auswahlmodus beenden"
+    },
+    "toolbar": {
+      "searchPlaceholder": "Rezepte durchsuchen...",
+      "pantryReady": "Kochbereit",
+      "favorites": "Favoriten",
+      "filters": "Filter",
+      "searchAria": "Rezepte durchsuchen",
+      "resetSearchAria": "Suche zuruecksetzen",
+      "sortAria": "Sortierung waehlen",
+      "courseFilterAria": "Nach Gang filtern",
+      "cuisineFilterAria": "Nach Kueche filtern",
+      "mainIngredientFilterAria": "Nach Hauptzutat filtern",
+      "difficultyFilterAria": "Nach Schwierigkeit filtern",
+      "dietFilterAria": "Nach Ernaehrungsform filtern"
+    }
+  },
+  "recipeCard": {
+    "pantry": "Vorrat",
+    "pantryReady": "Kochbereit",
+    "ingredientsCount": "{{haveCount}}/{{totalCount}} Zutaten"
+  },
+  "cookMode": {
+    "label": "Kochmodus",
+    "stepProgress": "Schritt {{current}} / {{total}}",
+    "ingredientsCheck": "Zutaten-Check",
+    "stepTimer": "Schritt-Timer",
+    "timerRunning": "Laufend",
+    "timerPaused": "Pausiert",
+    "start": "Start",
+    "pause": "Pause",
+    "addThirtySeconds": "+30s",
+    "reset": "Reset",
+    "voiceHint": "Voice: \"Timer starten fuer 5 Minuten\", \"Tomaten abhaken\"",
+    "previous": "Zurueck",
+    "next": "Weiter",
+    "finish": "Fertig",
+    "timerExpired": "Timer abgelaufen.",
+    "actions": {
+      "previousStepAria": "Vorheriger Schritt",
+      "nextStepAria": "Naechster Schritt",
+      "finishAria": "Fertigstellen",
+      "startTimerTitle": "Timer starten",
+      "pauseTimerTitle": "Timer pausieren",
+      "resetTimerTitle": "Timer zuruecksetzen",
+      "repeatStepTitle": "Schritt wiederholen",
+      "enableSpeechTitle": "Sprachausgabe aktivieren",
+      "disableSpeechTitle": "Sprachausgabe deaktivieren",
+      "exitTitle": "Beenden"
+    }
+  }
+}

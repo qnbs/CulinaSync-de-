@@ -1,12 +1,13 @@
 import React from 'react';
 import { AppSettings } from '../../../types';
 import { Check, Moon, Sun } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-const ACCENT_COLORS: Record<AppSettings['appearance']['accentColor'], { label: string; hex: string; gradient: string }> = {
-  amber: { label: 'Bernstein', hex: '#f59e0b', gradient: 'from-amber-400 to-amber-600' },
-  rose: { label: 'Rosenrot', hex: '#f43f5e', gradient: 'from-rose-400 to-rose-600' },
-  sky: { label: 'Himmelblau', hex: '#0ea5e9', gradient: 'from-sky-400 to-sky-600' },
-  emerald: { label: 'Smaragd', hex: '#10b981', gradient: 'from-emerald-400 to-emerald-600' },
+const ACCENT_COLORS: Record<AppSettings['appearance']['accentColor'], { labelKey: string; hex: string; gradient: string }> = {
+    amber: { labelKey: 'settings.appearance.colors.amber', hex: '#f59e0b', gradient: 'from-amber-400 to-amber-600' },
+    rose: { labelKey: 'settings.appearance.colors.rose', hex: '#f43f5e', gradient: 'from-rose-400 to-rose-600' },
+    sky: { labelKey: 'settings.appearance.colors.sky', hex: '#0ea5e9', gradient: 'from-sky-400 to-sky-600' },
+    emerald: { labelKey: 'settings.appearance.colors.emerald', hex: '#10b981', gradient: 'from-emerald-400 to-emerald-600' },
 };
 
 interface AppearancePanelProps {
@@ -15,6 +16,7 @@ interface AppearancePanelProps {
 }
 
 export const AppearancePanel: React.FC<AppearancePanelProps> = ({ settings, onChange }) => {
+    const { t } = useTranslation();
     const currentAccent = settings.appearance.accentColor;
 
     return (
@@ -23,7 +25,7 @@ export const AppearancePanel: React.FC<AppearancePanelProps> = ({ settings, onCh
                 {/* Controls */}
                 <div className="space-y-6">
                      <div>
-                        <h3 className="text-lg font-bold text-zinc-100 mb-4">Akzentfarbe</h3>
+                        <h3 className="text-lg font-bold text-zinc-100 mb-4">{t('settings.appearance.accentColorTitle')}</h3>
                         <div className="grid grid-cols-2 gap-4">
                             {Object.entries(ACCENT_COLORS).map(([key, config]) => (
                                 <button
@@ -38,7 +40,7 @@ export const AppearancePanel: React.FC<AppearancePanelProps> = ({ settings, onCh
                                     <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${config.gradient} shadow-lg flex items-center justify-center`}>
                                         {currentAccent === key && <Check size={16} className="text-white font-bold" />}
                                     </div>
-                                    <span className={`font-medium ${currentAccent === key ? 'text-zinc-100' : 'text-zinc-400'}`}>{config.label}</span>
+                                    <span className={`font-medium ${currentAccent === key ? 'text-zinc-100' : 'text-zinc-400'}`}>{t(config.labelKey)}</span>
                                 </button>
                             ))}
                         </div>
@@ -47,8 +49,8 @@ export const AppearancePanel: React.FC<AppearancePanelProps> = ({ settings, onCh
                     <div className="bg-zinc-900/30 border border-white/5 rounded-xl p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h4 className="font-bold text-zinc-200">Hoher Kontrast</h4>
-                                <p className="text-xs text-zinc-500 mt-1">Erhöht die Lesbarkeit von Texten und Rändern.</p>
+                                <h4 className="font-bold text-zinc-200">{t('settings.appearance.highContrast.title')}</h4>
+                                <p className="text-xs text-zinc-500 mt-1">{t('settings.appearance.highContrast.description')}</p>
                             </div>
                             <button 
                                 onClick={() => onChange('appearance.highContrast', !settings.appearance.highContrast)}
@@ -64,8 +66,8 @@ export const AppearancePanel: React.FC<AppearancePanelProps> = ({ settings, onCh
                     <div className="bg-zinc-900/30 border border-white/5 rounded-xl p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h4 className="font-bold text-zinc-200">Kitchen-Modus</h4>
-                                <p className="text-xs text-zinc-500 mt-1">Staerkere Kontraste und klare Flaechen fuer den Kochalltag.</p>
+                                <h4 className="font-bold text-zinc-200">{t('settings.appearance.kitchenMode.title')}</h4>
+                                <p className="text-xs text-zinc-500 mt-1">{t('settings.appearance.kitchenMode.description')}</p>
                             </div>
                             <button
                                 onClick={() => onChange('appearance.kitchenMode', !settings.appearance.kitchenMode)}
@@ -79,8 +81,8 @@ export const AppearancePanel: React.FC<AppearancePanelProps> = ({ settings, onCh
                     <div className="bg-zinc-900/30 border border-white/5 rounded-xl p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h4 className="font-bold text-zinc-200">Grosse Schrift</h4>
-                                <p className="text-xs text-zinc-500 mt-1">Erhoeht Grundschrift und UI-Groessen fuer bessere Lesbarkeit.</p>
+                                <h4 className="font-bold text-zinc-200">{t('settings.appearance.largeText.title')}</h4>
+                                <p className="text-xs text-zinc-500 mt-1">{t('settings.appearance.largeText.description')}</p>
                             </div>
                             <button
                                 onClick={() => onChange('appearance.largeText', !settings.appearance.largeText)}
@@ -97,7 +99,7 @@ export const AppearancePanel: React.FC<AppearancePanelProps> = ({ settings, onCh
                     <div className="absolute -inset-0.5 bg-gradient-to-r from-[var(--color-accent-400)] to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
                     <div className="relative bg-zinc-950 border border-zinc-800 rounded-2xl p-6 shadow-2xl overflow-hidden">
                         <div className="absolute top-0 right-0 p-4 opacity-50">
-                            <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Live Vorschau</span>
+                            <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">{t('settings.appearance.preview.title')}</span>
                         </div>
                         
                         <div className="space-y-6 mt-2">
@@ -115,18 +117,18 @@ export const AppearancePanel: React.FC<AppearancePanelProps> = ({ settings, onCh
                             {/* Mock Buttons */}
                             <div className="flex gap-3">
                                 <button className="flex-1 py-2 rounded-lg bg-[var(--color-accent-500)] text-zinc-900 text-sm font-bold shadow-[0_0_15px_var(--color-accent-glow)]">
-                                    Aktion
+                                    {t('settings.appearance.preview.action')}
                                 </button>
                                 <button className="flex-1 py-2 rounded-lg bg-zinc-800 text-zinc-300 text-sm font-medium border border-zinc-700">
-                                    Abbrechen
+                                    {t('settings.appearance.preview.cancel')}
                                 </button>
                             </div>
                             
                             {/* Mock Badge */}
                             <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-900 border border-zinc-800">
-                                <span className="text-sm text-zinc-400">Status</span>
+                                <span className="text-sm text-zinc-400">{t('settings.appearance.preview.status')}</span>
                                 <span className="px-2 py-0.5 rounded bg-[var(--color-accent-500)]/20 text-[var(--color-accent-300)] text-xs font-bold border border-[var(--color-accent-500)]/20">
-                                    Aktiv
+                                    {t('settings.appearance.preview.active')}
                                 </span>
                             </div>
                         </div>

@@ -4,68 +4,68 @@ import { ShoppingCart, TerminalSquare, Mic, ShieldCheck, WifiOff, Zap } from 'lu
 export const FAQS = [
     {
         id: 'local-first',
-        category: 'Allgemein',
-        question: "Was bedeutet 'Local-First'?",
-        answer: "'Local-First' bedeutet, dass alle deine Daten (Rezepte, Vorräte, Pläne) primär auf deinem Gerät gespeichert werden. Es gibt keine Cloud-Datenbank, die wir kontrollieren. Das garantiert maximale Geschwindigkeit, Privatsphäre und Offline-Verfügbarkeit."
+        categoryKey: 'help.faq.categories.general',
+        questionKey: 'help.faq.localFirst.question',
+        answerKey: 'help.faq.localFirst.answer'
     },
     {
         id: 'ai-privacy',
-        category: 'Datenschutz',
-        question: "Was passiert mit meinen Daten beim KI-Chef?",
-        answer: "Nur der Text deiner Anfrage (Zutaten, Wünsche) wird an die Google Gemini API gesendet. Deine persönlichen Vorratsdaten oder Essenspläne verlassen dein Gerät nicht, es sei denn, sie sind Teil der spezifischen Anfrage."
+        categoryKey: 'help.faq.categories.privacy',
+        questionKey: 'help.faq.aiPrivacy.question',
+        answerKey: 'help.faq.aiPrivacy.answer'
     },
     {
         id: 'pantry-color',
-        category: 'Funktionen',
-        question: "Was bedeuten die Farben im Essensplaner?",
-        answer: "Der Balken unter einem Gericht zeigt die Zutaten-Verfügbarkeit: Grün (Alles da), Gelb (Einiges fehlt), Rot (Vieles fehlt). So siehst du sofort, ob du einkaufen musst."
+        categoryKey: 'help.faq.categories.features',
+        questionKey: 'help.faq.pantryColor.question',
+        answerKey: 'help.faq.pantryColor.answer'
     },
     {
         id: 'sync-devices',
-        category: 'Allgemein',
-        question: "Kann ich Daten zwischen Geräten synchronisieren?",
-        answer: "Aktuell ist CulinaSync als Offline-First App konzipiert. Eine Synchronisation ist für eine spätere Version geplant. Nutze bis dahin die Export/Import-Funktion in den Einstellungen."
+        categoryKey: 'help.faq.categories.general',
+        questionKey: 'help.faq.syncDevices.question',
+        answerKey: 'help.faq.syncDevices.answer'
     }
 ];
 
 export const PRO_TIPS = [
     {
         id: 'cmd-palette',
-        title: "Power-User Navigation",
-        description: "Nutze die Befehlspalette für blitzschnellen Zugriff auf alles.",
         icon: TerminalSquare,
-        actionLabel: "Öffnen (⌘K)",
+        titleKey: 'help.tips.cmdPalette.title',
+        descriptionKey: 'help.tips.cmdPalette.description',
+        actionLabelKey: 'help.tips.cmdPalette.actionLabel',
         actionId: 'OPEN_CMD'
     },
     {
         id: 'voice-control',
-        title: "Hands-Free Kochen",
-        description: "Steuere den Kochmodus komplett mit deiner Stimme.",
         icon: Mic,
-        actionLabel: "Mikrofon testen",
+        titleKey: 'help.tips.voiceControl.title',
+        descriptionKey: 'help.tips.voiceControl.description',
+        actionLabelKey: 'help.tips.voiceControl.actionLabel',
         actionId: 'TOGGLE_VOICE'
     },
     {
         id: 'shopping-generate',
-        title: "Intelligenter Einkauf",
-        description: "Lass die App deine Einkaufsliste basierend auf dem Plan füllen.",
         icon: ShoppingCart,
-        actionLabel: "Zur Einkaufsliste",
+        titleKey: 'help.tips.shoppingGenerate.title',
+        descriptionKey: 'help.tips.shoppingGenerate.description',
+        actionLabelKey: 'help.tips.shoppingGenerate.actionLabel',
         actionId: 'NAV_SHOPPING'
     }
 ];
 
 export const TECH_STACK = [
-    { name: "React 19", icon: "⚛️", desc: "Modernste UI-Library" },
-    { name: "Google Gemini", icon: "🧠", desc: "Advanced AI Models" },
-    { name: "Dexie.js", icon: "🗄️", desc: "IndexedDB Wrapper" },
-    { name: "Redux Toolkit", icon: "🔄", desc: "State Management" },
-    { name: "Tailwind CSS", icon: "🎨", desc: "Utility-First Styling" },
-    { name: "Vite PWA", icon: "📱", desc: "Progressive Web App" }
+    { id: 'react', name: 'React 19', icon: '⚛️', descKey: 'help.tech.react' },
+    { id: 'gemini', name: 'Google Gemini', icon: '🧠', descKey: 'help.tech.gemini' },
+    { id: 'dexie', name: 'Dexie.js', icon: '🗄️', descKey: 'help.tech.dexie' },
+    { id: 'redux', name: 'Redux Toolkit', icon: '🔄', descKey: 'help.tech.redux' },
+    { id: 'tailwind', name: 'Tailwind CSS', icon: '🎨', descKey: 'help.tech.tailwind' },
+    { id: 'vite', name: 'Vite PWA', icon: '📱', descKey: 'help.tech.vite' }
 ];
 
 export const PHILOSOPHY = [
-    { title: "Offline First", icon: WifiOff, desc: "Funktioniert immer und überall, auch im tiefsten Supermarkt-Keller." },
-    { title: "Privatsphäre", icon: ShieldCheck, desc: "Deine Daten gehören dir. Kein Tracking, keine Werbung." },
-    { title: "Performance", icon: Zap, desc: "Keine Ladezeiten. Sofortige Reaktion auf jede Eingabe." }
+    { id: 'offlineFirst', icon: WifiOff, titleKey: 'help.philosophy.offlineFirst.title', descKey: 'help.philosophy.offlineFirst.description' },
+    { id: 'privacy', icon: ShieldCheck, titleKey: 'help.philosophy.privacy.title', descKey: 'help.philosophy.privacy.description' },
+    { id: 'performance', icon: Zap, titleKey: 'help.philosophy.performance.title', descKey: 'help.philosophy.performance.description' }
 ];

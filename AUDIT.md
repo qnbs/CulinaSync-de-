@@ -14,8 +14,10 @@ Seit dem urspruenglichen Audit wurden mehrere kritische Betriebs- und Sicherheit
 - Der `redux-persist`-Browser-Storage laeuft jetzt ueber einen expliziten Adapter in `src/store/persistStorage.ts`.
 - Die Settings-Seite schreibt keine freien verschachtelten Pfade mehr, sondern verwendet erlaubte, validierte Mutatoren.
 - Download-Exporte nutzen erlaubte MIME-Typen und bereinigte Dateinamen.
+- Native `window.confirm()`-Dialoge wurden in den aktiven Kern-Features durch modalbasierte, a11y-konforme Dialogfluesse ersetzt.
+- Die Lokalisierung wurde in modulare Sprachdomänen fuer `core`, `settings` und `features` aufgeteilt und ueber weitere Kernoberflaechen hinweg fortgesetzt.
 
-Noch offen ist vor allem strukturelle Nacharbeit, nicht der unmittelbare Produktionsbetrieb. Das betrifft insbesondere doppelte Settings-Persistenz, die statische `@faker-js/faker`-Einbindung im Produktionskontext und weitere im Audit genannte mittel- bis langfristige Architekturthemen.
+Noch offen ist vor allem strukturelle Nacharbeit, nicht der unmittelbare Produktionsbetrieb. Das betrifft insbesondere den verbleibenden Legacy-Fallback fuer alte Settings-Daten, weitere i18n-Restsweeps und andere im Audit genannte mittel- bis langfristige Architekturthemen.
 
 ---
 
@@ -168,13 +170,15 @@ Noch offen ist vor allem strukturelle Nacharbeit, nicht der unmittelbare Produkt
 
 ---
 
-### 🔵 N1 — `window.confirm()` statt modale Dialoge
+### ✅ N1 — `window.confirm()` statt modale Dialoge — behoben am 2026-04-22
 
-**Dateien:** `src/hooks/usePantryManager.ts`, `src/hooks/useShoppingList.ts`, `src/components/meal-planner/DayColumn.tsx`, `src/components/RecipeDetail.tsx`
+**Dateien:** `src/hooks/usePantryManager.ts`, `src/hooks/useShoppingList.ts`, `src/components/ShoppingList.tsx`, `src/components/meal-planner/DayColumn.tsx`, `src/components/RecipeDetail.tsx`, `src/components/MealPlanner.tsx`, `src/components/settings/panels/ApiKeyPanel.tsx`
 
 **Problem:** Native Browser-Dialoge brechen den visuellen Stil und sind nicht testbar.
 
-**Empfehlung:** Durch eine zentrale `ConfirmDialog`-Komponente ersetzen.
+**Fix:** `ApiKeyPanel`, `DayColumn`, `MealPlanner`, `RecipeDetail`, `ShoppingList`/`useShoppingList` und `PantryManager`/`usePantryManager` nutzen jetzt modalbasierte Bestatigungen mit `useModalA11y` statt `window.confirm()`.
+
+**Verifikation:** `grep` auf `window.confirm`/`confirm(` unter `src/` ohne Treffer, gezielte `pnpm exec eslint`-Laeufe fuer `useShoppingList`, `ShoppingList`, `usePantryManager`, `PantryManager`, `get_errors` auf den geaenderten Dateien
 
 **Aufwand:** Mittel (3-4h)
 
@@ -717,8 +721,8 @@ Siehe K1. Nach `devDependencies` verschoben und im Runtime-Pfad dynamisiert.
 | README.md | ✅ Umfangreich | Roadmap-Einträge verifizieren (viele `[x]` → realistisch?) |
 | CHANGELOG.md | ✅ Erstellt | Fortlaufend pflegen |
 | AUDIT.md | ✅ Erstellt | Bei Follow-up-Fixes aktualisieren |
-| CONTRIBUTING.md | ❌ Fehlt | Erstellen für Community-Beiträge |
-| CODE_OF_CONDUCT.md | ❌ Fehlt | Erstellen für Open-Source-Standard |
+| CONTRIBUTING.md | ✅ Vorhanden | Fortlaufend mit Workflow-Stand synchron halten |
+| CODE_OF_CONDUCT.md | ✅ Vorhanden | Bei Community-Prozess-Aenderungen pflegen |
 | Architektur-Diagramme | ❌ Fehlt | Mermaid-Diagramm in README oder eigene Datei |
 | API-/Service-Doku | ❌ Fehlt | JSDoc in Service-Dateien als Minimum |
 
@@ -733,17 +737,17 @@ Siehe K1. Nach `devDependencies` verschoben und im Runtime-Pfad dynamisiert.
 - [x] A4: GlobalErrorBoundary `role="alert"`
 - [x] M3: CommandPalette `useCallback`
 - [x] N2: useWindowSize Debounce
-- [ ] H3: package.json Version + Build-Time define
+- [x] H3: package.json Version + Build-Time define
 - [x] D4: `@types/react-redux` entfernen
-- [ ] CI3: CodeQL Matrix korrigieren
-- [ ] CI4: Action-Versions vereinheitlichen
+- [x] CI3: CodeQL Matrix korrigieren
+- [x] CI4: Action-Versions vereinheitlichen
 
 ### Sprint 2 (Architektur, 3-5 Tage)
-- [ ] K1: faker.js aus Production-Bundle
+- [x] K1: faker.js aus Production-Bundle
 - [x] K2: Settings-Doppelpersistierung auflösen
 - [x] S2: Statisches Salt in syncService
 - [x] S3: Web-Content-Sanitization
-- [ ] I1 Welle 1: i18n für CookMode, Onboarding, WhatsNewModal, ErrorBoundary (~60 Strings)
+- [x] I1 Welle 1: i18n für CookMode, Onboarding, WhatsNewModal, ErrorBoundary (~60 Strings)
 - [ ] CI1: DevContainer einrichten
 - [ ] CI2: Dependabot konfigurieren
 

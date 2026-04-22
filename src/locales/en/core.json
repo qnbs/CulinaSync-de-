@@ -1,0 +1,94 @@
+{
+  "nav": {
+    "chef": "AI Chef",
+    "pantry": "Pantry",
+    "recipes": "Recipes",
+    "mealPlanner": "Plan",
+    "shoppingList": "Shopping"
+  },
+  "common": {
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "search": "Search...",
+    "loading": "Loading...",
+    "error": "An error occurred"
+  },
+  "app": {
+    "loading": "Loading content",
+    "skipToContent": "Skip to content",
+    "close": "Close",
+    "globalErrorBoundary": {
+      "title": "Unexpected error",
+      "description": "Something went wrong. Please reload the page or try again later.",
+      "reload": "Reload page"
+    },
+    "install": {
+      "unavailable": "App cannot be installed right now.",
+      "success": "App installed successfully!"
+    },
+    "installReminder": {
+      "title": "Add CulinaSync to your home screen",
+      "description": "Install the app for faster access, offline usage, and a steadier kitchen workflow.",
+      "install": "Install",
+      "later": "Later",
+      "dismiss": "Don't remind"
+    },
+    "commandSections": {
+      "navigation": "Navigation",
+      "pantry": "Pantry",
+      "chef": "AI Chef",
+      "shoppingList": "Shopping List",
+      "data": "Data",
+      "global": "Global"
+    },
+    "commands": {
+      "nav": {
+        "pantry": "Go to pantry",
+        "chef": "Go to AI chef",
+        "recipes": "Go to recipe book",
+        "mealPlanner": "Go to meal planner",
+        "shoppingList": "Go to shopping list",
+        "settings": "Go to settings",
+        "help": "Go to help"
+      },
+      "pantry": {
+        "addItem": "Add a new pantry item"
+      },
+      "chef": {
+        "generateRecipe": "Generate a new recipe"
+      },
+      "shoppingList": {
+        "addItem": "Add item to shopping list",
+        "generateFromPlan": "Generate shopping list from plan",
+        "clear": "Clear shopping list"
+      },
+      "data": {
+        "export": "Export data",
+        "import": "Import data"
+      },
+      "global": {
+        "toggleVoiceControl": "Toggle voice control",
+        "installApp": "Install app"
+      }
+    }
+  },
+  "header": {
+    "nav": {
+      "pantry": "Pantry",
+      "chef": "AI Chef",
+      "recipes": "Recipes",
+      "mealPlanner": "Meal Planner",
+      "shoppingList": "Shopping List"
+    },
+    "actions": {
+      "openCommandPalette": "Open command palette (⌘K)",
+      "startVoiceControl": "Enable voice control",
+      "stopVoiceControl": "Disable voice control",
+      "settings": "Settings",
+      "help": "Help"
+    }
+  }
+}

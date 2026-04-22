@@ -2,6 +2,7 @@ import { useState, useMemo, useRef, useEffect, useCallback, type SetStateAction 
 import { db } from '../services/dbInstance';
 import { addOrUpdatePantryItem, addPantryItemsToShoppingList } from '../services/repositories/pantryRepository';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { useTranslation } from 'react-i18next';
 import { PantryItem, AppSettings } from '../types';
 import { useDebounce } from './useDebounce';
 import { getExpiryStatus } from '../components/PantryListItem';
@@ -10,8 +11,12 @@ import { setVoiceAction, addToast as addToastAction, setFocusAction, clearInitia
 import { setPantryGrouping, setPantrySort } from '../store/slices/settingsSlice';
 import { parseShoppingItemString, getCategoryForItem } from '../services/utils';
 
+type PendingPantryAction =
+  | { type: 'removeItem'; item: PantryItem }
+  | { type: 'deleteSelected'; count: number; itemIds: number[] };
 
 export const usePantryManager = () => {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { voiceAction, focusAction, initialSelectedId } = useAppSelector(state => state.ui);
   const { pantry: pantrySettings } = useAppSelector(state => state.settings);
@@ -23,6 +28,7 @@ export const usePantryManager = () => {
   const [expiryFilter, setExpiryFilter] = useState<'all' | 'nearing' | 'expired'>('all');
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [pendingAction, setPendingAction] = useState<PendingPantryAction | null>(null);
   
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -159,19 +165,14 @@ export const usePantryManager = () => {
     const newQuantity = item.quantity + amount;
     if (newQuantity < 0) return;
     if (newQuantity === 0) {
-        if (window.confirm(`Soll "${item.name}" wirklich aus dem Vorrat entfernt werden?`)) {
-            await db.transaction('rw', db.pantry, async () => {
-              await db.pantry.delete(item.id!);
-            });
-            addToast(`"${item.name}" entfernt.`);
-        }
+        setPendingAction({ type: 'removeItem', item });
     }
     else {
       await db.transaction('rw', db.pantry, async () => {
         await db.pantry.update(item.id!, { quantity: newQuantity, updatedAt: Date.now() });
       });
     }
-  }, [addToast]);
+  }, []);
 
   const toggleSelectItem = useCallback((id: number) => setSelectedItems(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]), []);
   
@@ -181,15 +182,58 @@ export const usePantryManager = () => {
   }, []);
 
   const handleDeleteSelected = useCallback(async () => {
-    if (selectedItems.length > 0 && window.confirm(`${selectedItems.length} Artikel wirklich löschen?`)) {
-      await db.transaction('rw', db.pantry, async () => {
-        await db.pantry.bulkDelete(selectedItems);
-      });
-      addToast(`${selectedItems.length} Artikel gelöscht.`);
-      setIsSelectMode(false); 
-      setSelectedItems([]);
+    if (selectedItems.length > 0) {
+      setPendingAction({ type: 'deleteSelected', count: selectedItems.length, itemIds: selectedItems });
     }
-  }, [selectedItems, addToast]);
+  }, [selectedItems]);
+
+  const confirmPendingAction = useCallback(async () => {
+    if (!pendingAction) {
+      return;
+    }
+
+    const actionToRun = pendingAction;
+    setPendingAction(null);
+
+    if (actionToRun.type === 'removeItem') {
+      await db.transaction('rw', db.pantry, async () => {
+        await db.pantry.delete(actionToRun.item.id!);
+      });
+      addToast(`"${actionToRun.item.name}" entfernt.`);
+      return;
+    }
+
+    await db.transaction('rw', db.pantry, async () => {
+      await db.pantry.bulkDelete(actionToRun.itemIds);
+    });
+    addToast(`${actionToRun.count} Artikel gelöscht.`);
+    setIsSelectMode(false);
+    setSelectedItems([]);
+  }, [pendingAction, addToast]);
+
+  const cancelPendingAction = useCallback(() => {
+    setPendingAction(null);
+  }, []);
+
+  const confirmationDialog = useMemo(() => {
+    if (!pendingAction) {
+      return null;
+    }
+
+    if (pendingAction.type === 'removeItem') {
+      return {
+        title: t('pantry.confirm.removeItemTitle'),
+        description: t('pantry.confirm.removeItemDescription', { itemName: pendingAction.item.name }),
+        actionLabel: t('common.delete'),
+      };
+    }
+
+    return {
+      title: t('pantry.confirm.deleteSelectedTitle'),
+      description: t('pantry.confirm.deleteSelectedDescription', { count: pendingAction.count }),
+      actionLabel: t('common.delete'),
+    };
+  }, [pendingAction, t]);
   
   const handleAddSelectedToShoppingList = useCallback(async () => {
     if (selectedItems.length > 0) {
@@ -214,6 +258,7 @@ export const usePantryManager = () => {
     searchTerm: effectiveSearchTerm, setSearchTerm: handleSearchTermChange, sortOrder, setSortOrder, isGrouped, setIsGrouped,
     expiryFilter, setExpiryFilter, modalState, setModalState, isSelectMode,
     selectedItems, pantryItems, filteredItems, groupedItems, searchInputRef,
+    pendingAction, confirmationDialog, confirmPendingAction, cancelPendingAction,
     adjustQuantity, toggleSelectItem, toggleSelectMode, handleDeleteSelected,
     handleAddSelectedToShoppingList, handleSaveItem, handleAddToShoppingList, handleQuickAdd
   };

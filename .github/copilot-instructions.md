@@ -33,12 +33,12 @@
 ## KI-Integration (Gemini)
 - Gemini-Aufrufe liegen ausschließlich in `src/services/geminiService.ts`.
 - **API-Key wird NICHT im Build eingebettet.** Nutzer geben ihren Key über UI ein (Einstellungen → API-Schlüssel).
-- Key-Speicherung erfolgt obfuskiert in IndexedDB via `src/services/apiKeyService.ts` – niemals localStorage oder env-Variablen.
+- Key-Speicherung erfolgt lokal verschlüsselt in IndexedDB via `src/services/apiKeyService.ts` – niemals localStorage oder env-Variablen.
 - Der `GoogleGenAI`-Client wird dynamisch per `getAIClient()` aus dem gespeicherten Key erstellt und gecacht.
 - Antworten werden über JSON-Schema (`responseSchema`) erzwungen; beibehalten statt freiem Textparsing.
 - Fehler werden auf nutzerfreundliche deutsche Meldungen gemappt (`handleGeminiError`).
 - Beim Erweitern von KI-Features: bestehende Struktur `generate*` + typed Rückgaben + rejectWithValue in Slices befolgen.
-- Offline-Fallback nutzt `@faker-js/faker` für Demo-Daten. Dieser Import sollte langfristig auf dynamischen `import()` umgestellt werden.
+- Offline-Fallback nutzt `@faker-js/faker` für Demo-Daten bereits nur noch per dynamischem `import()`.
 
 ## Path-Alias
 - `@/*` mappt auf `src/*` (konfiguriert in `tsconfig.json` und `vite.config.ts`).
@@ -46,9 +46,10 @@
 
 ## i18n, Settings, Persistenz
 - i18n wird einmalig in `index.tsx` über `import './src/i18n'` initialisiert.
+- Locale-Dateien sind pro Sprache in `src/locales/{de,en}/core.json`, `settings.json` und `features.json` aufgeteilt und werden über `index.ts` aggregiert.
 - Sprach-/App-Defaults kommen aus `loadSettings()` (`src/services/settingsService.ts`) und sind tief gemerged.
 - Redux Persist speichert nur den `settings`-Slice (`src/store/index.ts`), nicht die Dexie-Tabellen.
-- **Bekanntes Issue:** Settings werden aktuell doppelt persistiert (Redux Persist + `settingsService` localStorage). Bei Änderungen an der Persistierung darauf achten.
+- `settingsService.ts` lädt bevorzugt Redux-Persist-Daten und hält nur noch einen Legacy-Fallback für ältere lokale Settings-Daten.
 
 ## Testing
 - **Framework:** Vitest + MSW (Mock Service Worker) fuer Service- und UI-nahe Tests.
@@ -95,6 +96,10 @@
 - Security: CodeQL-Analyse bei PRs und Push auf `main` (`.github/workflows/codeql.yml`)
 - `base` in `vite.config.ts` wird dynamisch gesetzt: `/CulinaSync-de-/` in CI, `/` lokal.
 - GitHub-verwaltete Pages-Actions koennen trotz Node-24-Opt-in aktuell noch Node-20-Depracation-Warnungen emittieren. Das ist derzeit ein Upstream-Thema.
+- Nach JEDEM Push muss der zugehörige CI-/Deploy-Lauf aktiv beobachtet werden, bis CI, CodeQL und Deploy erfolgreich abgeschlossen bzw. nachvollziehbar grün sind.
+- Wenn nach einem Push ein relevanter Workflow fehlschlägt, ist der Vorgang nicht abgeschlossen: Fehlerursachen muessen vollständig analysiert, lokal behoben, erneut validiert, committed, gepusht und wieder beobachtet werden.
+- Dieser Fix-/Commit-/Push-/Beobachtungszyklus wird so lange wiederholt, bis der Repo-Zustand grün ist und der Deploy-Lauf erfolgreich abgeschlossen wurde.
+- Ein Push ohne anschließende Beobachtung der Workflows gilt in diesem Repo nicht als Abschluss.
 
 ## Terminal-Nutzung
 - Terminal-Befehle dürfen ausgeführt werden, wenn sie zur Aufgabe beitragen (z. B. `pnpm install`, `pnpm run build`, `tsc --noEmit`, `pnpm run test`).
@@ -108,7 +113,7 @@
 - Beispiel für die gewünschte Nutzung eines einzelnen Terminals: `cd frontend && pnpm run dev`.
 
 ## Projekt-spezifische Konventionen
-- Bevorzuge deutsche UX-Texte; Änderungen in Übersetzungen in `src/locales/de/translation.json` und `src/locales/en/translation.json` synchron halten.
+- Bevorzuge deutsche UX-Texte; Änderungen in Übersetzungen in `src/locales/de/` und `src/locales/en/` synchron halten und in die passende Domain-Datei (`core`, `settings`, `features`) einsortieren.
 - Behalte bestehende Namensmuster bei: Async-Thunks mit Suffix `Async`, UI-Hooks kapseln Handler/Toasts, Services enthalten Geschäftslogik.
 - Verwende bestehende Utility-Pfade (`src/services/utils.ts`, Export-Services) statt duplizierter Parsing-/Export-Logik.
 - **Niemals** API-Keys über `process.env` oder `VITE_`-Variablen einbetten – immer `apiKeyService.ts` nutzen.

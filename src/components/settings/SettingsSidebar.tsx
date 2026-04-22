@@ -1,5 +1,6 @@
 import React from 'react';
 import { Palette, Settings as SettingsIcon, Bot, Mic, Database, Key, LucideProps } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export interface SectionDef {
     id: string;
@@ -9,17 +10,6 @@ export interface SectionDef {
 }
 
 import { Shield } from 'lucide-react';
-export const SETTINGS_SECTIONS: SectionDef[] = [
-    { id: 'appearance', label: 'Design', icon: Palette, description: 'Farben & Darstellung' },
-    { id: 'modules', label: 'Module', icon: SettingsIcon, description: 'Feature-Konfiguration' },
-    { id: 'ai', label: 'KI-Chef', icon: Bot, description: 'Personalisierung & Intelligenz' },
-    { id: 'policies', label: 'Policies', icon: Shield, description: 'Allergie- & Haushaltsregeln' },
-    { id: 'health', label: 'Health Connect', icon: Database, description: 'Nährwert-Export zu Health-Apps' },
-    { id: 'community', label: 'Community', icon: Database, description: 'Rezepte teilen (opt-in)' },
-    { id: 'apikey', label: 'API-Key', icon: Key, description: 'Gemini Schlüssel verwalten' },
-    { id: 'speech', label: 'Audio', icon: Mic, description: 'Sprachausgabe & Steuerung' },
-    { id: 'data', label: 'Daten', icon: Database, description: 'Backup & Speicher' },
-];
 
 interface SettingsSidebarProps {
     activeSection: string;
@@ -27,9 +17,21 @@ interface SettingsSidebarProps {
 }
 
 export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ activeSection, setActiveSection }) => {
+    const { t } = useTranslation();
+    const settingsSections: SectionDef[] = [
+        { id: 'appearance', label: t('settings.sidebar.appearance.label'), icon: Palette, description: t('settings.sidebar.appearance.description') },
+        { id: 'modules', label: t('settings.sidebar.modules.label'), icon: SettingsIcon, description: t('settings.sidebar.modules.description') },
+        { id: 'ai', label: t('settings.sidebar.ai.label'), icon: Bot, description: t('settings.sidebar.ai.description') },
+        { id: 'policies', label: t('settings.sidebar.policies.label'), icon: Shield, description: t('settings.sidebar.policies.description') },
+        { id: 'health', label: t('settings.sidebar.health.label'), icon: Database, description: t('settings.sidebar.health.description') },
+        { id: 'community', label: t('settings.sidebar.community.label'), icon: Database, description: t('settings.sidebar.community.description') },
+        { id: 'apikey', label: t('settings.sidebar.apiKey.label'), icon: Key, description: t('settings.sidebar.apiKey.description') },
+        { id: 'speech', label: t('settings.sidebar.speech.label'), icon: Mic, description: t('settings.sidebar.speech.description') },
+        { id: 'data', label: t('settings.sidebar.data.label'), icon: Database, description: t('settings.sidebar.data.description') },
+    ];
     return (
         <nav className="flex flex-row overflow-x-auto md:flex-col gap-2 md:w-64 lg:w-72 flex-shrink-0 md:pr-4 no-scrollbar pb-2 md:pb-0 border-b md:border-b-0 md:border-r border-white/5">
-            {SETTINGS_SECTIONS.map((section) => {
+            {settingsSections.map((section) => {
                 const isActive = activeSection === section.id;
                 return (
                     <button

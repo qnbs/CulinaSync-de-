@@ -2,10 +2,12 @@ import { useRef, useState } from 'react';
 import { ShoppingListItem } from '../../types';
 import { generateShoppingList } from '../../services/aiService';
 import { Bot, LoaderCircle, ArrowLeft, CheckSquare, Square } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useShoppingListContext } from '../../contexts/ShoppingListContext';
 import { useModalA11y } from '../../hooks/useModalA11y';
 
 export const AiModal = () => {
+    const { t } = useTranslation();
     const { isAiModalOpen, setAiModalOpen, handleAiAdd, pantryItems, activeItems } = useShoppingListContext();
 
     const [prompt, setPrompt] = useState('');
@@ -40,7 +42,7 @@ export const AiModal = () => {
             setReviewItems(items);
             setSelectedItems(new Map(items.map(item => [item.name, true])));
         } catch (error) {
-            setError(error instanceof Error ? error.message : 'Liste konnte nicht generiert werden. Bitte versuche es erneut.');
+            setError(error instanceof Error ? error.message : t('shoppingList.ai.error'));
             console.error(error);
         } finally {
             setIsLoading(false);
@@ -80,22 +82,22 @@ export const AiModal = () => {
                 aria-labelledby="ai-modal-title"
                 tabIndex={-1}
             >
-                <h3 id="ai-modal-title" className="text-xl font-bold mb-4 flex items-center gap-2"><Bot /> KI-gestützte Einkaufsliste</h3>
+                <h3 id="ai-modal-title" className="text-xl font-bold mb-4 flex items-center gap-2"><Bot /> {t('shoppingList.ai.title')}</h3>
                 {!reviewItems ? (
                     <>
-                        <p className="text-zinc-400 text-sm mb-4">Beschreibe, was du vorhast (z.B. &quot;Grillparty für 6 Personen&quot; oder &quot;Zutaten für Lasagne&quot;), und die KI erstellt eine passende Einkaufsliste für dich. Dein aktueller Vorrat wird dabei berücksichtigt.</p>
-                        <textarea ref={promptRef} value={prompt} onChange={e => setPrompt(e.target.value)} placeholder="z.B. Zutaten für einen Schokoladenkuchen..." className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 h-24 focus:ring-2 focus:ring-[var(--color-accent-500)]" />
+                        <p className="text-zinc-400 text-sm mb-4">{t('shoppingList.ai.description')}</p>
+                        <textarea ref={promptRef} value={prompt} onChange={e => setPrompt(e.target.value)} placeholder={t('shoppingList.ai.placeholder')} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 h-24 focus:ring-2 focus:ring-[var(--color-accent-500)]" />
                         {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
                         <div className="flex justify-end gap-3 pt-4">
-                            <button type="button" onClick={handleClose} className="py-2 px-4 rounded-md text-zinc-300 hover:bg-zinc-700">Abbrechen</button>
+                            <button type="button" onClick={handleClose} className="py-2 px-4 rounded-md text-zinc-300 hover:bg-zinc-700">{t('common.cancel')}</button>
                             <button onClick={handleGenerate} disabled={!prompt.trim() || isLoading} className="py-2 px-4 rounded-md bg-[var(--color-accent-500)] text-zinc-900 font-bold hover:bg-[var(--color-accent-400)] disabled:bg-zinc-600 flex items-center gap-2">
-                                {isLoading ? <><LoaderCircle size={18} className="animate-spin"/> Generiere...</> : 'Liste erstellen'}
+                                {isLoading ? <><LoaderCircle size={18} className="animate-spin"/> {t('shoppingList.ai.generating')}</> : t('shoppingList.ai.createList')}
                             </button>
                         </div>
                     </>
                 ) : (
                     <>
-                        <p className="text-zinc-400 text-sm mb-4">Überprüfe die Vorschläge der KI. Entferne Artikel, die du nicht benötigst.</p>
+                        <p className="text-zinc-400 text-sm mb-4">{t('shoppingList.ai.reviewDescription')}</p>
                         <div className="glass-card rounded-md p-2 max-h-60 overflow-y-auto space-y-1">
                             {reviewItems.map(item => (
                                 <div key={item.name} onClick={() => handleToggleItem(item.name)} className="flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-zinc-800">
@@ -106,9 +108,9 @@ export const AiModal = () => {
                             ))}
                         </div>
                         <div className="flex justify-between items-center gap-3 pt-4">
-                            <button type="button" onClick={() => setReviewItems(null)} className="py-2 px-4 rounded-md text-zinc-300 hover:bg-zinc-700 flex items-center gap-2"><ArrowLeft size={16} /> Zurück</button>
+                            <button type="button" onClick={() => setReviewItems(null)} className="py-2 px-4 rounded-md text-zinc-300 hover:bg-zinc-700 flex items-center gap-2"><ArrowLeft size={16} /> {t('shoppingList.ai.back')}</button>
                             <button onClick={handleAddSelected} disabled={selectedCount === 0} className="py-2 px-4 rounded-md bg-[var(--color-accent-500)] text-zinc-900 font-bold hover:bg-[var(--color-accent-400)] disabled:bg-zinc-600 flex items-center gap-2">
-                                {selectedCount} Artikel hinzufügen
+                                {t('shoppingList.ai.addSelected', { count: selectedCount })}
                             </button>
                         </div>
                     </>

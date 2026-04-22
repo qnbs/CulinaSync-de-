@@ -3,16 +3,16 @@ import { useTranslation } from 'react-i18next';
 import { useModalA11y } from '../hooks/useModalA11y';
 
 const VERSION = __APP_VERSION__;
-const CHANGELOG = [
-  'Universal Audit: Performance, Security, Accessibility, Best Practices',
-  'Gemini Vision (Multi-Modal Input)',
-  'Health Connect Export (Apple/Google/Samsung)',
-  'Community-Sharing (IPFS/Nostr, opt-in)',
-  'Voice 2.0 (Whisper.cpp lokal)',
-  'Native Wrapper (Tauri/Capacitor, Deep-Linking)',
-  'Global Error Boundary & Retry-Logik',
-  'SEO/Meta/OG/Twitter, Preload, Print-Styles, Version-Badge',
-];
+const CHANGELOG_KEYS = [
+  'whatsNew.items.audit',
+  'whatsNew.items.geminiVision',
+  'whatsNew.items.healthConnect',
+  'whatsNew.items.community',
+  'whatsNew.items.voice',
+  'whatsNew.items.nativeWrapper',
+  'whatsNew.items.errorBoundary',
+  'whatsNew.items.seo',
+] as const;
 
 export const WhatsNewModal: React.FC = () => {
   const { t } = useTranslation();
@@ -54,10 +54,10 @@ export const WhatsNewModal: React.FC = () => {
         tabIndex={-1}
       >
         <button ref={closeButtonRef} type="button" onClick={() => setOpen(false)} className="absolute top-3 right-3 text-zinc-400 hover:text-zinc-100 text-xl" aria-label={t('app.close')}>×</button>
-        <h2 id="whats-new-title" className="text-xl font-bold mb-2 text-[var(--color-accent-400)]">Was ist neu? <span className="ml-2 text-xs bg-zinc-800 px-2 py-1 rounded">v{VERSION}</span></h2>
-        <p id="whats-new-description" className="sr-only">Uebersicht der wichtigsten Aenderungen in dieser Version.</p>
+        <h2 id="whats-new-title" className="text-xl font-bold mb-2 text-[var(--color-accent-400)]">{t('whatsNew.title')} <span className="ml-2 text-xs bg-zinc-800 px-2 py-1 rounded">v{VERSION}</span></h2>
+        <p id="whats-new-description" className="sr-only">{t('whatsNew.description')}</p>
         <ul className="list-disc pl-6 text-sm text-zinc-200 space-y-1">
-          {CHANGELOG.map((item, i) => <li key={i}>{item}</li>)}
+          {CHANGELOG_KEYS.map((itemKey) => <li key={itemKey}>{t(itemKey)}</li>)}
         </ul>
       </div>
     </div>

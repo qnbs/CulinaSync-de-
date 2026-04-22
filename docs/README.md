@@ -4,6 +4,7 @@ Dieser Ordner sammelt die projektbezogene Fach- und Betriebsdokumentation fuer C
 
 ## Inhalte
 
+- [STATUS-2026-04-22.md](./STATUS-2026-04-22.md): aktueller Session- und Arbeitsstand zu Accessibility-, i18n- und Validierungsfortschritt
 - [ARCHITECTURE.md](./ARCHITECTURE.md): Architektur, Datenfluss, Persistenz und Hauptabstraktionen
 - [PROJECT-STRUCTURE.md](./PROJECT-STRUCTURE.md): Repo-Struktur und Verantwortung der wichtigsten Ordner
 - [DEVELOPMENT.md](./DEVELOPMENT.md): lokales Setup, Befehle, Konventionen und Arbeitsablaeufe
@@ -13,6 +14,7 @@ Dieser Ordner sammelt die projektbezogene Fach- und Betriebsdokumentation fuer C
 
 ## Einstieg je nach Aufgabe
 
+- Aktueller Repo-Stand oder Session-Handoff: [STATUS-2026-04-22.md](./STATUS-2026-04-22.md)
 - Neue Features: [DEVELOPMENT.md](./DEVELOPMENT.md) und [ARCHITECTURE.md](./ARCHITECTURE.md)
 - Produktionsproblem: [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) und [DEPLOYMENT.md](./DEPLOYMENT.md)
 - Refactor oder Querschnittsaenderung: [PROJECT-STRUCTURE.md](./PROJECT-STRUCTURE.md)

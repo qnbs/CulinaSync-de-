@@ -35,10 +35,14 @@
 ### `src/contexts/`
 
 - Context-Provider fuer komplexere Features wie Vorratsverwaltung und Einkaufsliste
+- Diese Provider tragen inzwischen auch zustandsgetriebene Confirm-/Modal-Flows fuer destructive Aktionen.
 
 ### `src/locales/`
 
 - Deutsche und englische Uebersetzungen
+- Je Sprache Aufteilung in `core.json`, `settings.json` und `features.json`
+- Aggregation ueber `src/locales/de/index.ts` und `src/locales/en/index.ts`
+- Neue Sprachschluessel sollen in den vorhandenen Domains erweitert werden, nicht in neue Monolith-Dateien
 
 ### `src/test/`
 
@@ -57,4 +61,6 @@
 - Persistente Domaindaten: `src/services/db.ts` plus Repositories
 - Neue Seite: `src/components/`
 - Neue Modalkomponente: eigener Komponentenfile plus `useModalA11y`
+- Neue Confirm-Logik fuer irreversible Aktionen: pending state im Hook/Container, nicht direkt `window.confirm()` in Komponenten
+- Neue Uebersetzungen: `src/locales/{de,en}/` in der passenden Domain-Datei erweitern
 - Neue Doku: Root-Datei fuer Maintainer-/Community-Themen, `docs/` fuer Fach- und Betriebsdokumentation

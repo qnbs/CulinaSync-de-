@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Joyride, { CallBackProps, STATUS, Step } from 'react-joyride';
 import { ChefHat, FlaskConical, Sparkles, PlayCircle, Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useModalA11y } from '../hooks/useModalA11y';
 import { db } from '../services/dbInstance';
 
@@ -24,6 +25,7 @@ const tourSteps: Step[] = [
 ];
 
 const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
+    const { t } = useTranslation();
     const [runTour, setRunTour] = useState(false);
     const [seedLoading, setSeedLoading] = useState(false);
     const [seedDone, setSeedDone] = useState(false);
@@ -93,24 +95,24 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
                     <div ref={modalRef} className="w-full max-w-lg text-center rounded-2xl p-8 space-y-6 modal-fade-in glass-modal" role="dialog" aria-modal="true" aria-labelledby="onboarding-title" aria-describedby="onboarding-description" tabIndex={-1}>
                     <div className="flex justify-center items-center gap-4 text-[var(--color-accent-400)]">
                        <ChefHat size={32} />
-                       <h2 id="onboarding-title" className="text-2xl font-bold text-zinc-100">Willkommen bei CulinaSync!</h2>
+                              <h2 id="onboarding-title" className="text-2xl font-bold text-zinc-100">{t('onboarding.title')}</h2>
                     </div>
 
-                    <p id="onboarding-description" className="text-zinc-400">Starte mit einer gefuehrten Tour oder lade Demo-Daten fuer ein interaktives Tutorial.</p>
+                          <p id="onboarding-description" className="text-zinc-400">{t('onboarding.description')}</p>
 
                     <div className="grid grid-cols-1 gap-3 text-left">
                         <div className="glass-card rounded-xl p-4 flex items-start gap-3">
                             <PlayCircle className="text-[var(--color-accent-400)] mt-0.5" size={20} />
                             <div>
-                                <h3 className="font-semibold text-zinc-100">Gefuehrte Tour</h3>
-                                <p className="text-sm text-zinc-400">In 3 Schritten Navigation und Kernbereiche kennenlernen.</p>
+                                <h3 className="font-semibold text-zinc-100">{t('onboarding.tour.title')}</h3>
+                                <p className="text-sm text-zinc-400">{t('onboarding.tour.description')}</p>
                             </div>
                         </div>
                         <div className="glass-card rounded-xl p-4 flex items-start gap-3">
                             <FlaskConical className="text-emerald-400 mt-0.5" size={20} />
                             <div>
-                                <h3 className="font-semibold text-zinc-100">Interaktives Tutorial</h3>
-                                <p className="text-sm text-zinc-400">Fuellt deinen Vorrat mit Beispielartikeln, damit du direkt testen kannst.</p>
+                                <h3 className="font-semibold text-zinc-100">{t('onboarding.demo.title')}</h3>
+                                <p className="text-sm text-zinc-400">{t('onboarding.demo.description')}</p>
                             </div>
                         </div>
                     </div>
@@ -122,7 +124,7 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
                             onClick={() => setRunTour(true)}
                             className="flex-1 flex items-center justify-center gap-2 bg-[var(--color-accent-500)] text-zinc-900 font-bold py-3 px-4 rounded-md hover:bg-[var(--color-accent-400)] transition-colors"
                         >
-                            <Sparkles size={18} /> Tour starten
+                            <Sparkles size={18} /> {t('onboarding.startTour')}
                         </button>
                         <button
                             type="button"
@@ -131,7 +133,7 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
                             className="flex-1 flex items-center justify-center gap-2 bg-zinc-800 text-zinc-100 font-bold py-3 px-4 rounded-md border border-zinc-700 hover:bg-zinc-700 disabled:opacity-50"
                         >
                             {seedDone ? <Check size={18} /> : <FlaskConical size={18} />}
-                            {seedDone ? 'Demo geladen' : (seedLoading ? 'Lade Demo...' : 'Demo laden')}
+                            {seedDone ? t('onboarding.demo.loaded') : (seedLoading ? t('onboarding.demo.loading') : t('onboarding.demo.load'))}
                         </button>
                     </div>
 

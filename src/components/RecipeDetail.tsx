@@ -28,6 +28,10 @@ type ImageActionState = {
   error: string | null;
 };
 
+type PendingRecipeAction =
+  | { type: 'delete' }
+  | { type: 'export'; format: 'pdf' | 'csv' | 'json' | 'md' | 'txt' };
+
 const EMPTY_NUTRITION_REPORT: NutritionAllergyReport = {
   calories: 0,
   protein: 0,
@@ -36,6 +40,43 @@ const EMPTY_NUTRITION_REPORT: NutritionAllergyReport = {
   allergens: [],
   matchedIngredients: 0,
   totalIngredients: 0,
+};
+
+const RecipeActionConfirmationModal: React.FC<{
+  title: string;
+  description: string;
+  actionLabel: string;
+  onClose: () => void;
+  onConfirm: () => void;
+}> = ({ title, description, actionLabel, onClose, onConfirm }) => {
+  const { t } = useTranslation();
+  const modalRef = React.useRef<HTMLDivElement>(null);
+  const cancelButtonRef = React.useRef<HTMLButtonElement>(null);
+
+  useModalA11y({
+    isOpen: true,
+    onClose,
+    containerRef: modalRef,
+    initialFocusRef: cancelButtonRef,
+  });
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center z-50 glass-overlay" onClick={onClose}>
+      <div ref={modalRef} className="rounded-lg p-6 w-full max-w-sm glass-modal" onClick={event => event.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="recipe-action-confirm-title" aria-describedby="recipe-action-confirm-description" tabIndex={-1}>
+        <div className="flex items-center gap-3 mb-4 text-red-400">
+          <div className="p-2 bg-red-500/10 rounded-full"><ShieldAlert size={22} /></div>
+          <h3 id="recipe-action-confirm-title" className="text-lg font-bold text-zinc-100">{title}</h3>
+        </div>
+        <p id="recipe-action-confirm-description" className="text-sm text-zinc-400 mb-6">{description}</p>
+        <div className="flex justify-end gap-3">
+          <button ref={cancelButtonRef} type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition-colors text-sm font-medium">{t('common.cancel')}</button>
+          <button type="button" onClick={onConfirm} className="px-4 py-2 rounded-lg bg-red-600 text-white font-bold hover:bg-red-500 flex items-center gap-2 transition-all">
+            <ShieldAlert size={16} /> {actionLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const MealPlanModal: React.FC<{recipeId: number, onClose: () => void, onSave: () => void}> = ({recipeId, onClose, onSave}) => {
@@ -94,6 +135,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
   const [isSaved, setIsSaved] = useState(!!currentRecipe.id);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isExportOpen, setExportOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<PendingRecipeAction | null>(null);
   const [isCookMode, setIsCookMode] = useState(false);
   const [isGeminiCheckLoading, setGeminiCheckLoading] = useState(false);
   const [geminiVerification, setGeminiVerification] = useState<{ summary: string; warnings: string[] } | null>(null);
@@ -206,14 +248,16 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
   };
 
   const handleDelete = async () => {
-    if (currentRecipe.id && window.confirm(t('recipeDetail.confirm.deleteRecipe', { recipeTitle: currentRecipe.recipeTitle }))) {
-      try {
-        await deleteRecipe(currentRecipe.id);
-        onBack();
-      } catch (error) {
-        console.error("Failed to delete recipe:", error);
-        dispatch(addToast({message: t('recipeDetail.toast.deleteFailed'), type: 'error'}));
-      }
+    if (!currentRecipe.id) {
+      return;
+    }
+
+    try {
+      await deleteRecipe(currentRecipe.id);
+      onBack();
+    } catch (error) {
+      console.error("Failed to delete recipe:", error);
+      dispatch(addToast({message: t('recipeDetail.toast.deleteFailed'), type: 'error'}));
     }
   };
 
@@ -239,23 +283,36 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
   }, [currentRecipe.id, currentRecipe.recipeTitle, dispatch, imageState.imageUrl, imageState.recipeTitle, t]);
   
   const handleExport = async (format: 'pdf' | 'csv' | 'json' | 'md' | 'txt') => {
-    setExportOpen(false);
-    if (window.confirm(t('recipeDetail.confirm.exportRecipe', { format: format.toUpperCase() }))) {
-      const {
-        exportRecipeToPdf,
-        exportRecipeToCsv,
-        exportRecipeToJson,
-        exportRecipeToMarkdown,
-        exportRecipeToTxt,
-      } = await import('../services/exportService');
-      switch (format) {
-        case 'pdf': await exportRecipeToPdf(currentRecipe); break;
-        case 'csv': await exportRecipeToCsv(currentRecipe); break;
-        case 'json': await exportRecipeToJson(currentRecipe); break;
-        case 'md': await exportRecipeToMarkdown(currentRecipe); break;
-        case 'txt': await exportRecipeToTxt(currentRecipe); break;
-      }
+    const {
+      exportRecipeToPdf,
+      exportRecipeToCsv,
+      exportRecipeToJson,
+      exportRecipeToMarkdown,
+      exportRecipeToTxt,
+    } = await import('../services/exportService');
+    switch (format) {
+      case 'pdf': await exportRecipeToPdf(currentRecipe); break;
+      case 'csv': await exportRecipeToCsv(currentRecipe); break;
+      case 'json': await exportRecipeToJson(currentRecipe); break;
+      case 'md': await exportRecipeToMarkdown(currentRecipe); break;
+      case 'txt': await exportRecipeToTxt(currentRecipe); break;
     }
+  };
+
+  const handleConfirmPendingAction = async () => {
+    if (!pendingAction) {
+      return;
+    }
+
+    const actionToRun = pendingAction;
+    setPendingAction(null);
+
+    if (actionToRun.type === 'delete') {
+      await handleDelete();
+      return;
+    }
+
+    await handleExport(actionToRun.format);
   };
 
   const handleToggleFavorite = async () => {
@@ -320,6 +377,17 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
 
   return (
     <div className="page-fade-in pb-20">
+      {pendingAction && (
+        <RecipeActionConfirmationModal
+          title={pendingAction.type === 'delete' ? t('recipeDetail.confirm.deleteTitle') : t('recipeDetail.confirm.exportTitle')}
+          description={pendingAction.type === 'delete'
+            ? t('recipeDetail.confirm.deleteRecipe', { recipeTitle: currentRecipe.recipeTitle })
+            : t('recipeDetail.confirm.exportRecipe', { format: pendingAction.format.toUpperCase() })}
+          actionLabel={pendingAction.type === 'delete' ? t('common.delete') : t('recipeDetail.confirm.exportAction')}
+          onClose={() => setPendingAction(null)}
+          onConfirm={() => void handleConfirmPendingAction()}
+        />
+      )}
       {isModalOpen && currentRecipe.id && <MealPlanModal recipeId={currentRecipe.id} onClose={() => setIsModalOpen(false)} onSave={() => dispatch(addToast({message: t('recipeDetail.toast.addedToMealPlan')}))} />}
       {isCookModeActive && <CookModeView recipe={currentRecipe} onExit={handleExitCookMode} />}
 
@@ -361,17 +429,17 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
         <p className="text-zinc-300 mb-6 text-lg leading-relaxed">{currentRecipe.shortDescription}</p>
         
         <div className="flex flex-wrap gap-x-6 gap-y-4 text-zinc-300 mb-6 pb-6 border-b border-zinc-700">
-            <span className="flex items-center" title="Gesamtzeit"><Clock size={18} className="mr-2 text-[var(--color-accent-400)]" /> {currentRecipe.totalTime}</span>
-            <span className="flex items-center" title="Portionen"><Users size={18} className="mr-2 text-[var(--color-accent-400)]" /> {currentServings} Person{currentServings > 1 ? 'en' : ''}</span>
-            <span className="flex items-center" title="Schwierigkeit"><BarChart size={18} className="mr-2 text-[var(--color-accent-400)]" /> {currentRecipe.difficulty}</span>
+          <span className="flex items-center" title={t('recipeDetail.meta.totalTimeTitle')}><Clock size={18} className="mr-2 text-[var(--color-accent-400)]" /> {currentRecipe.totalTime}</span>
+          <span className="flex items-center" title={t('recipeDetail.meta.servingsTitle')}><Users size={18} className="mr-2 text-[var(--color-accent-400)]" /> {currentServings} {t(currentServings > 1 ? 'recipeDetail.meta.servingsPlural' : 'recipeDetail.meta.servingsSingular')}</span>
+          <span className="flex items-center" title={t('recipeDetail.meta.difficultyTitle')}><BarChart size={18} className="mr-2 text-[var(--color-accent-400)]" /> {currentRecipe.difficulty}</span>
         </div>
         
         <div className="my-6 p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg flex flex-col sm:flex-row items-center justify-center gap-4">
           <label htmlFor="servings-input" className="font-semibold text-zinc-200">{t('recipeDetail.adjustServings')}</label>
             <div className="flex items-center gap-2">
-                <button onClick={() => handleServingsChange(currentServings - 1)} className="p-2 rounded-full bg-zinc-800 hover:bg-zinc-700 transition-colors disabled:opacity-50" disabled={currentServings <= 1} aria-label="Portionen verringern"><Minus size={18} /></button>
+              <button onClick={() => handleServingsChange(currentServings - 1)} className="p-2 rounded-full bg-zinc-800 hover:bg-zinc-700 transition-colors disabled:opacity-50" disabled={currentServings <= 1} aria-label={t('recipeDetail.actions.decreaseServingsAria')}><Minus size={18} /></button>
                 <input id="servings-input" type="number" value={currentServings} onChange={(e) => handleServingsChange(parseInt(e.target.value, 10))} className="w-16 text-center bg-transparent border-b-2 border-[var(--color-accent-500)] font-bold text-xl text-zinc-100 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" min="1" max="100"/>
-                <button onClick={() => handleServingsChange(currentServings + 1)} className="p-2 rounded-full bg-zinc-800 hover:bg-zinc-700 transition-colors disabled:opacity-50" disabled={currentServings >= 100} aria-label="Portionen erhöhen"><Plus size={18} /></button>
+              <button onClick={() => handleServingsChange(currentServings + 1)} className="p-2 rounded-full bg-zinc-800 hover:bg-zinc-700 transition-colors disabled:opacity-50" disabled={currentServings >= 100} aria-label={t('recipeDetail.actions.increaseServingsAria')}><Plus size={18} /></button>
             </div>
         </div>
         
@@ -411,7 +479,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
               <span key={allergen} className="text-xs px-2 py-1 rounded-full border border-amber-600/40 text-amber-300 bg-amber-900/20">
                 {allergen}
               </span>
-            )) : <span className="text-xs text-zinc-400">Keine klaren Allergene erkannt.</span>}
+            )) : <span className="text-xs text-zinc-400">{t('recipeDetail.ingredientStatus.noneDetected')}</span>}
           </div>
           {geminiVerification && (
             <div className="mt-3 p-3 rounded-lg border border-zinc-700 bg-zinc-900/60 text-sm">
@@ -445,14 +513,14 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
                       return (
                       <li key={item.name} className="flex items-start text-zinc-300 group bg-zinc-900/30 p-2 rounded-lg hover:bg-zinc-900/80 transition-colors">
                         <div className="flex-grow flex items-center">
-                           {status === 'have' && <span title="Im Vorrat" className="flex-shrink-0 mr-3"><CheckCircle size={16} className="text-emerald-500"/></span>}
-                           {status === 'low' && <span title={`Wird knapp! Du hast ${pantryQty}${item.unit}`} className="flex-shrink-0 mr-3"><AlertCircle size={16} className="text-amber-500"/></span>}
+                           {status === 'have' && <span title={t('recipeDetail.ingredientStatus.haveTitle')} className="flex-shrink-0 mr-3"><CheckCircle size={16} className="text-emerald-500"/></span>}
+                           {status === 'low' && <span title={t('recipeDetail.ingredientStatus.lowTitle', { pantryQty, unit: item.unit })} className="flex-shrink-0 mr-3"><AlertCircle size={16} className="text-amber-500"/></span>}
                            {status === 'missing' && <div className="w-4 h-4 rounded-full border-2 border-zinc-700 mr-3 flex-shrink-0"/>}
                            <div className="flex-grow">
                             <span className="font-medium text-zinc-100">{scaledQuantityStr} {item.unit}</span> <span className="text-zinc-400">{item.name}</span>
                            </div>
                         </div>
-                        {status !== 'have' && <button onClick={() => handleAddSingleToShoppingList(item)} className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-zinc-800 rounded text-zinc-400 hover:text-[var(--color-accent-400)]" title="Zur Einkaufsliste hinzufügen"><ShoppingCartIcon size={16}/></button>}
+                        {status !== 'have' && <button onClick={() => handleAddSingleToShoppingList(item)} className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-zinc-800 rounded text-zinc-400 hover:text-[var(--color-accent-400)]" title={t('recipeDetail.actions.addToShoppingListTitle')}><ShoppingCartIcon size={16}/></button>}
                       </li>
                     )})}
                   </ul>
@@ -495,7 +563,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
              {isSaved && (
                 <>
                     <button onClick={handleStartCookMode} className="flex items-center gap-2 bg-[var(--color-accent-500)] text-zinc-900 font-bold py-2 px-4 rounded-md hover:bg-[var(--color-accent-400)] transition-colors shadow-lg shadow-[var(--color-accent-500)]/20">
-                        <CookingPot size={18} /> Kochmodus
+                      <CookingPot size={18} /> {t('recipeDetail.actions.startCookMode')}
                     </button>
                     <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-zinc-800 text-zinc-200 font-bold py-2 px-4 rounded-md hover:bg-zinc-700 transition-colors border border-zinc-700">
                         <CalendarPlus size={18} /> Planen
@@ -507,14 +575,14 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
              )}
              <div className="relative inline-block">
               <button type="button" onClick={() => setExportOpen(!isExportOpen)} className="flex items-center gap-2 bg-zinc-800 text-zinc-200 font-bold py-2 px-4 rounded-md hover:bg-zinc-700 transition-colors border border-zinc-700" aria-haspopup="menu" aria-expanded={isExportOpen} aria-controls="recipe-export-menu">
-                    <FileDown size={18} /> Export <ChevronDown size={16} className={`transition-transform ${isExportOpen ? 'rotate-180' : ''}`} />
+                  <FileDown size={18} /> {t('recipeDetail.actions.export')} <ChevronDown size={16} className={`transition-transform ${isExportOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {isExportOpen && (
-                <div id="recipe-export-menu" className="absolute bottom-full mb-2 w-full bg-zinc-800 border border-zinc-700 rounded-md shadow-xl z-10 overflow-hidden" role="menu" aria-label="Rezept exportieren">
-                  <button type="button" onClick={() => handleExport('pdf')} className="block w-full text-left text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer" role="menuitem">PDF</button>
-                  <button type="button" onClick={() => handleExport('csv')} className="block w-full text-left text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer" role="menuitem">CSV</button>
-                  <button type="button" onClick={() => handleExport('json')} className="block w-full text-left text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer" role="menuitem">JSON</button>
-                  <button type="button" onClick={() => handleExport('md')} className="block w-full text-left text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer" role="menuitem">Markdown</button>
+                <div id="recipe-export-menu" className="absolute bottom-full mb-2 w-full bg-zinc-800 border border-zinc-700 rounded-md shadow-xl z-10 overflow-hidden" role="menu" aria-label={t('recipeDetail.confirm.exportTitle')}>
+                  <button type="button" onClick={() => { setExportOpen(false); setPendingAction({ type: 'export', format: 'pdf' }); }} className="block w-full text-left text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer" role="menuitem">PDF</button>
+                  <button type="button" onClick={() => { setExportOpen(false); setPendingAction({ type: 'export', format: 'csv' }); }} className="block w-full text-left text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer" role="menuitem">CSV</button>
+                  <button type="button" onClick={() => { setExportOpen(false); setPendingAction({ type: 'export', format: 'json' }); }} className="block w-full text-left text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer" role="menuitem">JSON</button>
+                  <button type="button" onClick={() => { setExportOpen(false); setPendingAction({ type: 'export', format: 'md' }); }} className="block w-full text-left text-sm px-4 py-2 hover:bg-zinc-700 cursor-pointer" role="menuitem">Markdown</button>
                     </div>
                 )}
              </div>
@@ -527,7 +595,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
                     </button>
                 )}
                 {isSaved ? (
-                    <button onClick={handleDelete} className="flex items-center gap-2 bg-red-900/20 text-red-400 font-bold py-2 px-4 rounded-md hover:bg-red-900/40 transition-colors border border-red-900/50">
+                    <button type="button" onClick={() => setPendingAction({ type: 'delete' })} className="flex items-center gap-2 bg-red-900/20 text-red-400 font-bold py-2 px-4 rounded-md hover:bg-red-900/40 transition-colors border border-red-900/50">
                     <Trash2 size={18} /> {t('common.delete')}
                     </button>
                 ) : (

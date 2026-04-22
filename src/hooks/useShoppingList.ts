@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef, useCallback, useEffect, type FormEvent, type DragEvent } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { useTranslation } from 'react-i18next';
 import { db } from '../services/dbInstance';
 import { ShoppingListItem, Recipe, PantryItem } from '../types';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -27,7 +28,14 @@ import {
     toggleCompletedVisible,
 } from '../store/slices/shoppingListSlice';
 
+type PendingShoppingListAction =
+  | { type: 'clear' }
+  | { type: 'export'; format: 'pdf' | 'csv' | 'json' | 'md' | 'txt' }
+  | { type: 'moveToPantry'; count: number }
+  | { type: 'deleteItem'; id: number; itemName?: string };
+
 export const useShoppingList = () => {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { voiceAction, focusAction } = useAppSelector(state => state.ui);
   const shoppingListState = useAppSelector(state => state.shoppingList);
@@ -43,6 +51,7 @@ export const useShoppingList = () => {
   const [quickAddItem, setQuickAddItem] = useState('');
   const [draggedItem, setDraggedItem] = useState<ShoppingListItem | null>(null);
   const [dropTargetInfo, setDropTargetInfo] = useState<{ itemId?: number; category: string } | null>(null);
+  const [pendingAction, setPendingAction] = useState<PendingShoppingListAction | null>(null);
 
   const addItemInputRef = useRef<HTMLInputElement>(null);
   const recipesById = useMemo(() => new Map<number, Recipe>(recipes.map(r => [r.id!, r])), [recipes]);
@@ -58,11 +67,9 @@ export const useShoppingList = () => {
   }, [dispatch]);
 
   const handleClearList = useCallback(async () => {
-    if (window.confirm('Möchtest du die Einkaufsliste wirklich komplett leeren?')) {
-        const result = await dispatch(clearListAsync());
-        if(clearListAsync.fulfilled.match(result) && result.payload > 0) addToast('Liste geleert.');
-    }
-  }, [dispatch, addToast]);
+    if (shoppingList.length === 0) return;
+    setPendingAction({ type: 'clear' });
+  }, [shoppingList.length]);
 
   const handleGenerateFromPlan = useCallback(async () => {
       const resultAction = await dispatch(generateFromPlanAsync());
@@ -72,15 +79,32 @@ export const useShoppingList = () => {
           else addToast(`${added} neue(r) Artikel hinzugefügt, ${existing} bereits auf der Liste.`, 'success');
       }
   }, [dispatch, addToast]);
+
+  const effectivePendingAction = useMemo<PendingShoppingListAction | null>(() => {
+    if (pendingAction) {
+      return pendingAction;
+    }
+
+    if (focusAction === 'clear' && shoppingList.length > 0) {
+      return { type: 'clear' };
+    }
+
+    return null;
+  }, [pendingAction, focusAction, shoppingList.length]);
   
   useEffect(() => {
     if (focusAction) {
         if(focusAction === 'addItem' && addItemInputRef.current) addItemInputRef.current.focus();
         if(focusAction === 'generate') handleGenerateFromPlan();
-        if(focusAction === 'clear') handleClearList();
+        if(focusAction === 'clear') {
+          if (shoppingList.length === 0) {
+            dispatch(setFocusAction(null));
+          }
+          return;
+        }
         dispatch(setFocusAction(null));
     }
-  }, [focusAction, dispatch, handleGenerateFromPlan, handleClearList]);
+  }, [focusAction, dispatch, handleGenerateFromPlan, shoppingList.length]);
 
 
   useEffect(() => {
@@ -194,22 +218,7 @@ export const useShoppingList = () => {
   const handleExport = async (format: 'pdf' | 'csv' | 'json' | 'md' | 'txt') => {
     dispatch(setExportOpen(false));
     if (!shoppingList?.length) return;
-    if (window.confirm(`Möchtest du die Einkaufsliste wirklich als ${format.toUpperCase()}-Datei exportieren?`)) {
-      const {
-        exportShoppingListToPdf,
-        exportShoppingListToCsv,
-        exportShoppingListToJson,
-        exportShoppingListToMarkdown,
-        exportShoppingListToTxt,
-      } = await import('../services/exportService');
-      switch(format) {
-          case 'pdf': await exportShoppingListToPdf(shoppingList); break;
-          case 'csv': await exportShoppingListToCsv(shoppingList); break;
-          case 'json': await exportShoppingListToJson(shoppingList); break;
-          case 'md': await exportShoppingListToMarkdown(shoppingList); break;
-          case 'txt': await exportShoppingListToTxt(shoppingList); break;
-      }
-    }
+    setPendingAction({ type: 'export', format });
   };
 
   const activeItems = useMemo(() => shoppingList?.filter(item => !item.isChecked) || [], [shoppingList]);
@@ -223,18 +232,104 @@ export const useShoppingList = () => {
   }, {} as Record<string, ShoppingListItem[]>), [activeItems]);
 
   const handleMoveToPantry = useCallback(async () => {
-      if (completedItems.length > 0 && window.confirm(`${completedItems.length} gekaufte(r) Artikel in den Vorrat verschieben?`)) {
-        const resultAction = await dispatch(moveToPantryAsync());
-        if(moveToPantryAsync.fulfilled.match(resultAction) && resultAction.payload > 0) {
-            addToast(`${resultAction.payload} Artikel in den Vorrat verschoben.`, 'success');
-        }
+      if (completedItems.length > 0) {
+        setPendingAction({ type: 'moveToPantry', count: completedItems.length });
       }
-  }, [completedItems, dispatch, addToast]);
+  }, [completedItems.length]);
+
+  const confirmPendingAction = useCallback(async () => {
+    if (!effectivePendingAction) {
+      return;
+    }
+
+    const actionToRun = effectivePendingAction;
+    setPendingAction(null);
+
+    if (actionToRun.type === 'clear') {
+      const result = await dispatch(clearListAsync());
+      dispatch(setFocusAction(null));
+      if (clearListAsync.fulfilled.match(result) && result.payload > 0) {
+        addToast('Liste geleert.');
+      }
+      return;
+    }
+
+    if (actionToRun.type === 'export') {
+      const {
+        exportShoppingListToPdf,
+        exportShoppingListToCsv,
+        exportShoppingListToJson,
+        exportShoppingListToMarkdown,
+        exportShoppingListToTxt,
+      } = await import('../services/exportService');
+      switch(actionToRun.format) {
+          case 'pdf': await exportShoppingListToPdf(shoppingList); break;
+          case 'csv': await exportShoppingListToCsv(shoppingList); break;
+          case 'json': await exportShoppingListToJson(shoppingList); break;
+          case 'md': await exportShoppingListToMarkdown(shoppingList); break;
+          case 'txt': await exportShoppingListToTxt(shoppingList); break;
+      }
+      return;
+    }
+
+    if (actionToRun.type === 'moveToPantry') {
+      const resultAction = await dispatch(moveToPantryAsync());
+      if(moveToPantryAsync.fulfilled.match(resultAction) && resultAction.payload > 0) {
+        addToast(`${resultAction.payload} Artikel in den Vorrat verschoben.`, 'success');
+      }
+      return;
+    }
+
+    dispatch(deleteItemAsync(actionToRun.id));
+  }, [effectivePendingAction, dispatch, addToast, shoppingList]);
+
+  const cancelPendingAction = useCallback(() => {
+    setPendingAction(null);
+    if (focusAction === 'clear') {
+      dispatch(setFocusAction(null));
+    }
+  }, [focusAction, dispatch]);
+
+  const confirmationDialog = useMemo(() => {
+    if (!effectivePendingAction) {
+      return null;
+    }
+
+    switch (effectivePendingAction.type) {
+      case 'clear':
+        return {
+          title: t('shoppingList.confirm.clearTitle'),
+          description: t('shoppingList.confirm.clearDescription'),
+          actionLabel: t('shoppingList.confirm.clearAction'),
+        };
+      case 'export':
+        return {
+          title: t('shoppingList.confirm.exportTitle'),
+          description: t('shoppingList.confirm.exportDescription', { format: effectivePendingAction.format.toUpperCase() }),
+          actionLabel: t('shoppingList.confirm.exportAction'),
+        };
+      case 'moveToPantry':
+        return {
+          title: t('shoppingList.confirm.moveToPantryTitle'),
+          description: t('shoppingList.confirm.moveToPantryDescription', { count: effectivePendingAction.count }),
+          actionLabel: t('shoppingList.confirm.moveToPantryAction'),
+        };
+      case 'deleteItem':
+        return {
+          title: t('shoppingList.confirm.deleteItemTitle'),
+          description: effectivePendingAction.itemName
+            ? t('shoppingList.confirm.deleteItemDescriptionNamed', { itemName: effectivePendingAction.itemName })
+            : t('shoppingList.confirm.deleteItemDescription'),
+          actionLabel: t('common.delete'),
+        };
+    }
+  }, [effectivePendingAction, t]);
 
   return {
     shoppingList, pantryItems, recipes, quickAddItem, ...shoppingListState,
     draggedItem, dropTargetInfo, addItemInputRef, recipesById,
     activeItems, completedItems, groupedList,
+    pendingAction, confirmationDialog,
 
     setQuickAddItem,
     setAiModalOpen: (isOpen: boolean) => dispatch(setAiModalOpen(isOpen)),
@@ -252,9 +347,11 @@ export const useShoppingList = () => {
     expandAll: handleExpandAll,
     handleDragStart, handleDragOver, handleDrop, onCategoryDrop, onDragEnd,
     handleClearList, handleExport, handleMoveToPantry,
+    confirmPendingAction, cancelPendingAction,
     updateItem: (item: ShoppingListItem) => dispatch(updateItemAsync(item)),
-    deleteItem: (id: number) => { 
-        if(window.confirm("Artikel löschen?")) dispatch(deleteItemAsync(id)); 
+    deleteItem: (id: number) => {
+      const itemName = shoppingList.find((item) => item.id === id)?.name;
+      setPendingAction({ type: 'deleteItem', id, itemName });
     },
   };
 };

@@ -63,14 +63,14 @@ export const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, 
                         <CalendarPlus size={24} />
                     </div>
                     <div>
-                        <h3 id="bulk-plan-modal-title" className="text-lg font-bold text-zinc-100">Zum Plan hinzufügen</h3>
-                        <p className="text-xs text-zinc-400">{recipeIds.length} Rezepte ausgewählt</p>
+                        <h3 id="bulk-plan-modal-title" className="text-lg font-bold text-zinc-100">{t('recipeBook.bulkPlan.title')}</h3>
+                        <p className="text-xs text-zinc-400">{t('recipeBook.bulkPlan.selectedRecipes', { count: recipeIds.length })}</p>
                     </div>
                 </div>
 
                 <div className="space-y-5">
                     <div className="space-y-1.5">
-                        <label htmlFor="startDate" className="block text-xs font-bold text-zinc-400 uppercase tracking-wider">Startdatum</label>
+                        <label htmlFor="startDate" className="block text-xs font-bold text-zinc-400 uppercase tracking-wider">{t('recipeBook.bulkPlan.startDate')}</label>
                         <input 
                             ref={startDateRef}
                             type="date" 
@@ -81,7 +81,7 @@ export const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, 
                         />
                     </div>
                     <div className="space-y-1.5">
-                        <label htmlFor="mealType" className="block text-xs font-bold text-zinc-400 uppercase tracking-wider">Mahlzeit</label>
+                        <label htmlFor="mealType" className="block text-xs font-bold text-zinc-400 uppercase tracking-wider">{t('recipeBook.bulkPlan.mealType')}</label>
                         <div className="relative">
                             <select 
                                 id="mealType" 
@@ -100,13 +100,13 @@ export const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, 
                     </div>
                     
                     <div className="glass-card rounded-lg p-3 text-xs text-zinc-400">
-                        Die Rezepte werden ab dem <span className="text-zinc-200 font-medium">{new Date(startDate).toLocaleDateString('de-DE')}</span> als aufeinanderfolgende <span className="text-zinc-200 font-medium">{mealType}</span> geplant.
+                        {t('recipeBook.bulkPlan.summaryPrefix')} <span className="text-zinc-200 font-medium">{new Date(startDate).toLocaleDateString('de-DE')}</span> {t('recipeBook.bulkPlan.summaryMiddle')} <span className="text-zinc-200 font-medium">{mealType}</span> {t('recipeBook.bulkPlan.summarySuffix')}
                     </div>
                 </div>
 
                 <div className="flex gap-3 mt-8">
                     <button type="button" onClick={onClose} className="flex-1 py-2.5 px-4 rounded-xl text-zinc-400 font-medium hover:bg-zinc-800 hover:text-zinc-200 transition-colors">
-                        Abbrechen
+                        {t('common.cancel')}
                     </button>
                     <button 
                         type="button"
@@ -114,7 +114,7 @@ export const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, 
                         disabled={isSaving} 
                         className="flex-1 py-2.5 px-4 rounded-xl bg-[var(--color-accent-500)] text-zinc-900 font-bold hover:bg-[var(--color-accent-400)] hover:shadow-[0_0_15px_var(--color-accent-glow)] transition-all disabled:bg-zinc-700 disabled:text-zinc-500 disabled:shadow-none flex items-center justify-center gap-2"
                     >
-                        {isSaving ? <LoaderCircle size={18} className="animate-spin" /> : 'Planen'}
+                        {isSaving ? <LoaderCircle size={18} className="animate-spin" /> : t('recipeBook.bulkPlan.plan')}
                     </button>
                 </div>
             </div>

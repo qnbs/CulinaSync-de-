@@ -178,13 +178,13 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
         }
         const id = window.setInterval(() => {
             if (timerSeconds <= 1 && isSpeechEnabled) {
-                speak('Timer abgelaufen.');
+                speak(t('cookMode.timerExpired'));
             }
             dispatchCookMode({ type: 'TICK_TIMER' });
         }, 1000);
 
         return () => window.clearInterval(id);
-    }, [timerRunning, timerSeconds, isSpeechEnabled, speak]);
+    }, [timerRunning, timerSeconds, isSpeechEnabled, speak, t]);
 
     // Handle voice commands from global state
     useEffect(() => {
@@ -284,7 +284,7 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
             {/* Header */}
             <header className={`relative z-20 flex justify-between items-center p-4 md:p-6 transition-all duration-700 ${isUiVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-8 pointer-events-none'}`}>
                 <div className="flex flex-col">
-                    <span className="text-xs font-bold text-[var(--color-accent-400)] uppercase tracking-widest mb-1 text-shadow-sm">Kochmodus</span>
+                    <span className="text-xs font-bold text-[var(--color-accent-400)] uppercase tracking-widest mb-1 text-shadow-sm">{t('cookMode.label')}</span>
                     <h3 className="text-xl md:text-2xl font-bold text-white truncate max-w-[50vw] text-shadow-lg leading-tight">{recipe.recipeTitle}</h3>
                 </div>
                 <div className="flex items-center gap-4">
@@ -292,7 +292,7 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
                         <button
                             onClick={() => dispatchCookMode({ type: timerRunning ? 'PAUSE_TIMER' : 'START_TIMER' })}
                             className="text-zinc-200"
-                            title={timerRunning ? 'Timer pausieren' : 'Timer starten'}
+                            title={timerRunning ? t('cookMode.actions.pauseTimerTitle') : t('cookMode.actions.startTimerTitle')}
                         >
                             {timerRunning ? <Pause size={20} /> : <Play size={20} />}
                         </button>
@@ -300,14 +300,14 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
                         <button
                             onClick={() => dispatchCookMode({ type: 'RESET_TIMER', seconds: 180 })}
                             className="text-zinc-400 hover:text-zinc-100"
-                            title="Timer zurücksetzen"
+                            title={t('cookMode.actions.resetTimerTitle')}
                         >
                             <TimerReset size={18} />
                         </button>
                     </div>
                     <button 
                         onClick={handleRepeat} 
-                        title="Schritt wiederholen" 
+                        title={t('cookMode.actions.repeatStepTitle')} 
                         className="glass-button p-3 rounded-full text-zinc-300 active:text-white disabled:opacity-30 touch-manipulation" 
                         disabled={!isSpeechEnabled || isSpeaking}
                     >
@@ -315,7 +315,7 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
                     </button>
                     <button 
                         onClick={() => setIsSpeechEnabled(p => !p)} 
-                        title={isSpeechEnabled ? "Sprachausgabe deaktivieren" : "Sprachausgabe aktivieren"} 
+                        title={isSpeechEnabled ? t('cookMode.actions.disableSpeechTitle') : t('cookMode.actions.enableSpeechTitle')} 
                         className={`p-3 rounded-full backdrop-blur-md transition-all border border-white/10 touch-manipulation ${isSpeechEnabled ? 'bg-[var(--color-accent-500)] text-zinc-900 shadow-[0_0_20px_rgba(var(--color-accent-glow),0.4)]' : 'glass-button text-zinc-300 active:text-white'}`}
                     >
                         {isSpeechEnabled ? <Volume2 size={24} /> : <VolumeX size={24} />}
@@ -323,7 +323,7 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
                     <button 
                         onClick={onExit} 
                         className="glass-button p-3 rounded-full text-red-400 active:bg-red-500/20 active:text-red-300 border-red-500/20 touch-manipulation"
-                        title="Beenden"
+                        title={t('cookMode.actions.exitTitle')}
                     >
                         <XIcon size={24} />
                     </button>
@@ -339,7 +339,7 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
 
                  <div className="max-w-5xl w-full space-y-8 text-center relative">
                     <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-panel border-white/5 text-zinc-300 text-sm font-bold tracking-wide transition-opacity duration-700 ${isUiVisible ? 'opacity-100' : 'opacity-0'}`}>
-                        <span>Schritt {currentStep + 1} / {recipe.instructions.length}</span>
+                        <span>{t('cookMode.stepProgress', { current: currentStep + 1, total: recipe.instructions.length })}</span>
                     </div>
                     
                     <div className="min-h-[20vh] flex items-center justify-center overflow-y-auto max-h-[50vh]">
@@ -354,7 +354,7 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 text-left">
                         <div className="glass-panel rounded-2xl p-4 space-y-3">
                             <div className="flex items-center justify-between">
-                                <p className="text-xs uppercase tracking-widest font-bold text-zinc-400">Zutaten-Check</p>
+                                <p className="text-xs uppercase tracking-widest font-bold text-zinc-400">{t('cookMode.ingredientsCheck')}</p>
                                 <p className="text-xs text-zinc-500">{checkedIngredients.length}/{ingredientList.length}</p>
                             </div>
                             <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
@@ -379,24 +379,24 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
 
                         <div className="glass-panel rounded-2xl p-4 space-y-3">
                             <div className="flex items-center justify-between">
-                                <p className="text-xs uppercase tracking-widest font-bold text-zinc-400">Schritt-Timer</p>
+                                <p className="text-xs uppercase tracking-widest font-bold text-zinc-400">{t('cookMode.stepTimer')}</p>
                                 <p className={`text-xs font-semibold ${timerRunning ? 'text-[var(--color-accent-300)]' : 'text-zinc-500'}`}>
-                                    {timerRunning ? 'Laufend' : 'Pausiert'}
+                                    {timerRunning ? t('cookMode.timerRunning') : t('cookMode.timerPaused')}
                                 </p>
                             </div>
                             <p className="font-mono text-4xl md:text-5xl text-center tracking-widest text-zinc-100">{formatTimer(timerSeconds)}</p>
                             <div className="grid grid-cols-3 gap-2">
                                 <button onClick={() => dispatchCookMode({ type: timerRunning ? 'PAUSE_TIMER' : 'START_TIMER' })} className="rounded-xl py-2 bg-[var(--color-accent-500)] text-zinc-900 font-bold">
-                                    {timerRunning ? 'Pause' : 'Start'}
+                                    {timerRunning ? t('cookMode.pause') : t('cookMode.start')}
                                 </button>
                                 <button onClick={() => dispatchCookMode({ type: 'ADD_TIMER_SECONDS', seconds: 30 })} className="rounded-xl py-2 bg-zinc-800 text-zinc-200 font-bold border border-zinc-700">
-                                    +30s
+                                    {t('cookMode.addThirtySeconds')}
                                 </button>
                                 <button onClick={() => dispatchCookMode({ type: 'RESET_TIMER', seconds: 180 })} className="rounded-xl py-2 bg-zinc-800 text-zinc-200 font-bold border border-zinc-700">
-                                    Reset
+                                    {t('cookMode.reset')}
                                 </button>
                             </div>
-                            <p className="text-xs text-zinc-500">Voice: &quot;Timer starten für 5 Minuten&quot;, &quot;Tomaten abhaken&quot;</p>
+                            <p className="text-xs text-zinc-500">{t('cookMode.voiceHint')}</p>
                         </div>
                     </div>
                  </div>
@@ -411,7 +411,7 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
                     aria-label={t('cookMode.actions.previousStepAria')}
                 >
                     <ChevronLeft size={40} />
-                    <span className="text-xs uppercase font-bold tracking-widest mt-1">Zurück</span>
+                    <span className="text-xs uppercase font-bold tracking-widest mt-1">{t('cookMode.previous')}</span>
                 </button>
                 
                 {currentStep < recipe.instructions.length - 1 ? (
@@ -421,7 +421,7 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
                         aria-label={t('cookMode.actions.nextStepAria')}
                     >
                         <ChevronRight size={56} />
-                        <span className="text-sm uppercase font-black tracking-widest">Weiter</span>
+                        <span className="text-sm uppercase font-black tracking-widest">{t('cookMode.next')}</span>
                     </button>
                 ) : (
                     <button 
@@ -430,7 +430,7 @@ const CookModeView: React.FC<CookModeViewProps> = ({ recipe, onExit }) => {
                         aria-label={t('cookMode.actions.finishAria')}
                     >
                         <CheckCircle2 size={56} />
-                        <span className="text-sm uppercase font-black tracking-widest">Fertig</span>
+                        <span className="text-sm uppercase font-black tracking-widest">{t('cookMode.finish')}</span>
                     </button>
                 )}
             </footer>

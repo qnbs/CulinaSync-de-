@@ -36,6 +36,7 @@ Das Repository verwendet GitHub Actions fuer CI, Deploy und CodeQL.
 
 - `vite.config.ts` setzt `base` in Actions auf `/CulinaSync-de-/`.
 - Das Web-App-Manifest wird zur Build-Zeit durch `vite-plugin-pwa` aus `vite.config.ts` erzeugt; es gibt bewusst kein zweites statisches `public/manifest.json` mehr.
+- Die Locale-Ressourcen werden zur Build-Zeit aus `src/locales/{de,en}/index.ts` aggregiert; es gibt keine separaten Runtime-Fetches fuer Sprachdateien.
 - Die Live-Demo liegt unter `https://qnbs.github.io/CulinaSync-de-/`.
 - SPA-Verhalten benoetigt weiterhin passende 404-Weiterleitung und korrekte Asset-Pfade.
 
@@ -48,6 +49,11 @@ Trotz erfolgreicher Pipeline und gesetztem `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=t
 - `actions/deploy-pages@v4`
 
 Diese Warnungen stammen aktuell von Upstream-Runtimes der GitHub-verwalteten Actions und sind nicht durch Projektcode allein entfernbar.
+
+## Aktueller Arbeitsstand 2026-04-22
+
+- Der lokale Session-Stand wurde zuletzt bis zu gezielten Diagnostics, fokussierten Lint-Pruefungen auf den bearbeiteten Slices und einem erfolgreichen `pnpm exec tsc --noEmit` abgesichert.
+- Vor einem release-nahen Push auf `main` bleiben weiterhin die ueblichen Gates `pnpm run lint`, `pnpm run test`, `pnpm run build` und bei Bedarf `pnpm run check:bundle-budget` massgeblich.
 
 ## Operative Checks nach einem produktionsrelevanten Fix
 

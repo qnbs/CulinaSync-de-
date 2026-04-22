@@ -18,6 +18,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - `.github/copilot-instructions.md` um die Vorgabe erweitert, vor Full-Builds immer erst Diagnostics und Typecheck fuer den geaenderten Slice auszufuehren
 - `.github/copilot-instructions.md` um Commit-/Push-Gates fuer Diagnostics, Tests, Typecheck und Lint erweitert; Formatter nur wenn im Repo konfiguriert
 - `AUDIT.md` um einen aktuellen Status-Block fuer die zuletzt behobenen Laufzeit-, Security- und Pipeline-Themen ergaenzt
+- i18n-Ressourcen von monolithischen `translation.json`-Dateien auf aggregierte Sprachdomänen (`core`, `settings`, `features`) pro Sprache umgestellt
+- Root- und Fachdokumentation auf den aktuellen Accessibility-, i18n- und Validierungsstand synchronisiert und um `docs/STATUS-2026-04-22.md` ergaenzt
 
 ### Behoben
 - Live-Demo-Black-Screen durch expliziten Redux-Persist-Storage-Adapter behoben
@@ -49,6 +51,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - feste Toolbar-Labels in `PantryToolbar` und `ShoppingListToolbar` ebenfalls ueber i18n gezogen
 - weitere A11y-/i18n-Slices in `ShoppingListItemComponent`, `PantryQuickAdd`, `TagInput` und den Selection-Mode-Buttons in `RecipeBook` lokalisiert
 - weitere A11y-/i18n-Slices in `ApiKeyPanel`, `Help`, `WhatsNewModal` und `BulkAddToPlanModal` lokalisiert
+- alle bisherigen `window.confirm()`-Flows in `ApiKeyPanel`, `DayColumn`, `MealPlanner`, `RecipeDetail`, `ShoppingList` und `PantryManager` durch zugaengliche Modals ersetzt
+- weitere i18n-Slices in `CookModeView`, `RecipeToolbar`, `RecipeCard`, `Help`, `AppearancePanel` und `GlobalErrorBoundary` lokalisiert
 - das veraltete statische `public/manifest.json` entfernt, sodass das von `vite-plugin-pwa` generierte Manifest der einzige Pfad bleibt
 - das redundante Typ-Paket `@types/react-redux` entfernt, da `react-redux` 9.x eigene Typdefinitionen mitbringt
 

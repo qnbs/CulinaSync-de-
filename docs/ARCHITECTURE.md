@@ -31,6 +31,13 @@ CulinaSync ist eine local-first PWA. Persistente Domaindaten werden im Browser g
 - `src/services/exportService.ts` kapselt alle Export-Sinks.
 - `src/services/voiceCommands.ts` uebersetzt Sprachkommandos in App-Aktionen.
 
+### Lokalisierung
+
+- `src/i18n.ts` initialisiert die Sprachressourcen ueber aggregierte Sprachmodule.
+- Die Sprachdateien sind je Sprache in `core.json`, `settings.json` und `features.json` getrennt.
+- `src/locales/de/index.ts` und `src/locales/en/index.ts` aggregieren diese Domain-Dateien fuer i18next.
+- Neue Texte sollen in beiden Sprachen synchron in der passenden Domain gepflegt werden, statt wieder grosse Sammeldateien aufzubauen.
+
 ## Datenfluss
 
 1. UI triggert einen Handler in Komponente, Hook oder Slice.
@@ -38,6 +45,13 @@ CulinaSync ist eine local-first PWA. Persistente Domaindaten werden im Browser g
 3. Dexie speichert die Daten in IndexedDB.
 4. Hooks lesen ueber `useLiveQuery` und aktualisieren die UI reaktiv.
 5. Redux bleibt fuer Shell-, Fokus-, Modal- und Prozesszustand reserviert.
+
+## Interaktionsmuster
+
+- Irreversible oder destructive Aktionen laufen nicht mehr ueber native Browser-Dialoge.
+- Bestaetigungen werden ueber eigene Modal-Komponenten mit `useModalA11y` umgesetzt.
+- Domain-Hooks oder Feature-Container halten dazu einen `pendingAction`-aehnlichen Zustand und exponieren bestaetigte sowie abgebrochene Pfade explizit.
+- Dieses Muster ist insbesondere in Pantry, Shopping List, Meal Planner, Recipe Detail und API-Key-Verwaltung bereits etabliert.
 
 ## Persistenz und Sicherheit
 
@@ -55,5 +69,6 @@ CulinaSync ist eine local-first PWA. Persistente Domaindaten werden im Browser g
 
 ## Wichtige aktuelle technische Punkte
 
-- `settingsService.ts` und Redux Persist speichern Settings derzeit noch doppelt. Das ist ein bekannter Konsolidierungspunkt.
+- `settingsService.ts` laedt bevorzugt den Redux-Persist-Bestand und faellt nur fuer Legacy-Daten noch auf den alten Schluessel zurueck.
 - `@faker-js/faker` wird fuer Offline-Fallbacks genutzt und sollte langfristig ueber dynamischen Import oder einen kleineren lokalen Fallback ersetzt werden.
+- Der i18n-Bestand ist seit 2026-04-22 modularisiert; weitere Rest-Hartcodierungen sollten als nachgelagerter Sweep auf den neuen Locale-Domains aufsetzen.

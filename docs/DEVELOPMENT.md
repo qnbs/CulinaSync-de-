@@ -39,6 +39,13 @@ pnpm run preview
 - Deutsche und englische Lokalisierung synchron halten.
 - Schwere Bibliotheken wenn moeglich dynamisch importieren.
 
+## i18n- und Modal-Konventionen
+
+- Sprachtexte liegen nicht mehr in einzelnen grossen `translation.json`-Dateien, sondern je Sprache in `core.json`, `settings.json` und `features.json`.
+- Neue Keys immer parallel in `src/locales/de/` und `src/locales/en/` pflegen.
+- Irreversible Aktionen nicht mit `window.confirm()` absichern.
+- Stattdessen eigene Modal-Komponenten mit `useModalA11y` verwenden und die Aktion ueber expliziten Pending-State im Hook oder Container steuern.
+
 ## Arbeiten an Settings, Export und Persistenz
 
 - Freie Objektpfad-Updates vermeiden; stattdessen erlaubte Felder explizit behandeln.
@@ -50,6 +57,15 @@ pnpm run preview
 - `vite.config.ts` setzt `base` in GitHub Actions automatisch auf den Repo-Unterpfad.
 - Pages-spezifische Fehler sind oft Base-Path-, Cache- oder Service-Worker-Probleme.
 - Vor dem Merge fuer Deploy-relevante Aenderungen nach Moeglichkeit `pnpm run build` und `pnpm run check:bundle-budget` ausfuehren.
+
+## Empfohlene Validierungsreihenfolge
+
+1. Diagnostics fuer die geaenderten Dateien pruefen.
+2. Bei TS-Slices mindestens einen TypeScript-Check fuer den betroffenen Bereich oder `pnpm exec tsc --noEmit` ausfuehren.
+3. Bei Codeaenderungen einen fokussierten ESLint- oder Testlauf fuer den betroffenen Slice ausfuehren.
+4. Erst danach den groesseren Integrationslauf mit `pnpm run lint`, `pnpm run test` oder `pnpm run build` starten.
+
+Stand 2026-04-22: Die Accessibility-/i18n-Nacharbeiten wurden bis zu gezielten Diagnostics, fokussierten ESLint-Laeufen und einem erfolgreichen `pnpm exec tsc --noEmit` validiert. Ein kompletter Lint-/Test-/Build-Gesamtlauf fuer den gesamten unstaged Arbeitsstand steht weiterhin als Abschluss-Check aus.
 
 ## Doku-Pflege
 

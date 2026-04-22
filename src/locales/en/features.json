@@ -1,0 +1,491 @@
+{
+  "help": {
+    "title": "Knowledge base",
+    "subtitle": "Guides, tips & system status.",
+    "emptyFaq": "No matching questions found.",
+    "faq": {
+      "heading": "Frequently asked questions",
+      "categories": {
+        "general": "General",
+        "privacy": "Privacy",
+        "features": "Features"
+      },
+      "localFirst": {
+        "question": "What does 'Local-First' mean?",
+        "answer": "'Local-First' means that all your data, such as recipes, pantry stock, and plans, is stored primarily on your device. There is no cloud database that we control. That guarantees maximum speed, privacy, and offline availability."
+      },
+      "aiPrivacy": {
+        "question": "What happens to my data when using AI Chef?",
+        "answer": "Only the text of your request, such as ingredients and preferences, is sent to the Google Gemini API. Your personal pantry data or meal plans do not leave your device unless they are explicitly part of the request."
+      },
+      "pantryColor": {
+        "question": "What do the colors in the meal planner mean?",
+        "answer": "The bar under a dish shows ingredient availability: green means everything is available, yellow means some items are missing, and red means many items are missing. That way you can immediately see whether you need to shop."
+      },
+      "syncDevices": {
+        "question": "Can I sync data between devices?",
+        "answer": "CulinaSync is currently designed as an offline-first app. Synchronization is planned for a later version. Until then, use the export and import function in settings."
+      }
+    },
+    "tips": {
+      "heading": "Pro tips (interactive)",
+      "cmdPalette": {
+        "title": "Power-user navigation",
+        "description": "Use the command palette for lightning-fast access to everything.",
+        "actionLabel": "Open (⌘K)"
+      },
+      "voiceControl": {
+        "title": "Hands-free cooking",
+        "description": "Control cook mode completely with your voice.",
+        "actionLabel": "Test microphone"
+      },
+      "shoppingGenerate": {
+        "title": "Smart shopping",
+        "description": "Let the app fill your shopping list based on the plan.",
+        "actionLabel": "Go to shopping list"
+      }
+    },
+    "tech": {
+      "react": "Modern UI library",
+      "gemini": "Advanced AI models",
+      "dexie": "IndexedDB wrapper",
+      "redux": "State management",
+      "tailwind": "Utility-first styling",
+      "vite": "Progressive web app"
+    },
+    "philosophy": {
+      "offlineFirst": {
+        "title": "Offline first",
+        "description": "Works anytime and anywhere, even in the deepest supermarket basement."
+      },
+      "privacy": {
+        "title": "Privacy",
+        "description": "Your data belongs to you. No tracking, no ads."
+      },
+      "performance": {
+        "title": "Performance",
+        "description": "No loading times. Immediate response to every interaction."
+      }
+    },
+    "search": {
+      "placeholder": "How can I...?",
+      "inputAria": "Search the knowledge base",
+      "resetAria": "Reset search"
+    },
+    "tabs": {
+      "knowledge": "Knowledge & FAQ",
+      "about": "System & About"
+    },
+    "about": {
+      "technology": "Technology",
+      "systemStatus": "System status",
+      "systemNormal": "System normal",
+      "status": "Status",
+      "online": "Online",
+      "version": "Version",
+      "storage": "Storage",
+      "indexedDbActive": "IndexedDB active"
+    }
+  },
+  "whatsNew": {
+    "title": "What's new?",
+    "description": "Overview of the most important changes in this version.",
+    "items": {
+      "audit": "Universal audit: performance, security, accessibility, best practices",
+      "geminiVision": "Gemini Vision (multi-modal input)",
+      "healthConnect": "Health Connect export (Apple/Google/Samsung)",
+      "community": "Community sharing (IPFS/Nostr, opt-in)",
+      "voice": "Voice 2.0 (local Whisper.cpp)",
+      "nativeWrapper": "Native wrapper (Tauri/Capacitor, deep linking)",
+      "errorBoundary": "Global error boundary & retry logic",
+      "seo": "SEO/meta/OG/Twitter, preload, print styles, version badge"
+    }
+  },
+  "onboarding": {
+    "title": "Welcome to CulinaSync!",
+    "description": "Start with a guided tour or load demo data for an interactive tutorial.",
+    "startTour": "Start tour",
+    "tour": {
+      "title": "Guided tour",
+      "description": "Learn navigation and core areas in 3 steps."
+    },
+    "demo": {
+      "title": "Interactive tutorial",
+      "description": "Fills your pantry with sample items so you can test immediately.",
+      "load": "Load demo",
+      "loading": "Loading demo...",
+      "loaded": "Demo loaded"
+    }
+  },
+  "mealPlanner": {
+    "card": {
+      "removeNoteTitle": "Remove note",
+      "recipeUnavailable": "Recipe unavailable",
+      "viewRecipe": "View recipe",
+      "cookMode": "Cook mode",
+      "markCooked": "Mark as cooked",
+      "remove": "Remove",
+      "veggie": "Veggie",
+      "servingsShort": "{{count}} serv.",
+      "pantry": "Pantry"
+    },
+    "header": {
+      "title": "Meal planner",
+      "subtitle": "Organize your culinary week.",
+      "currentWeek": "Current week",
+      "weeklyAverage": "Weekly average",
+      "calories": "Calories",
+      "protein": "Protein",
+      "carbs": "Carbs",
+      "fat": "Fat"
+    },
+    "addNote": {
+      "aria": "{{mealType}}: add note",
+      "title": "Add note",
+      "subtitle": "For {{mealType}} on {{date}}.",
+      "placeholder": "e.g. 'Eat out' or 'Leftovers from yesterday'"
+    },
+    "toast": {
+      "recipePlanned": "Recipe planned.",
+      "selectDayForRecipe": "Now select a day for the recipe.",
+      "markedCooked": "Meal marked as cooked.",
+      "pantryUpdatedCount": "{{count}} pantry items updated.",
+      "mealRemoved": "Meal removed.",
+      "noteAdded": "Note added.",
+      "shoppingListUpdated": "Shopping list updated: +{{added}} item(s)."
+    },
+    "confirm": {
+      "removeMeal": "Remove this meal from the plan?",
+      "removeMealTitle": "Remove meal?",
+      "removeMealAction": "Remove",
+      "clearDayTitle": "Clear day?",
+      "clearDayDescription": "Do you really want to delete all meals for {{date}}?",
+      "clearDayAction": "Clear day"
+    },
+    "overlay": {
+      "selectDayFor": "Select a day for \"{{recipeTitle}}\"",
+      "insertHere": "Insert here"
+    },
+    "actions": {
+      "exportIcs": "Export calendar (ICS)",
+      "autoPlan": "Auto-suggest (expiring)",
+      "fillShoppingList": "Fill shopping list",
+      "dayActionsAria": "Actions for {{date}}",
+      "generateShoppingListAria": "Generate shopping list from weekly plan",
+      "previousWeekAria": "Previous week",
+      "nextWeekAria": "Next week",
+      "today": "Today",
+      "autoPlanApplied": "Auto-suggestion applied: {{count}} meal(s).",
+      "autoPlanEmpty": "No matching suggestions from soon-expiring ingredients."
+    },
+    "sidebar": {
+      "showRecipesTitle": "Show recipes",
+      "title": "Recipes",
+      "subtitle": "Drag & drop or tap",
+      "collapseTitle": "Collapse",
+      "empty": "No recipes found."
+    }
+  },
+  "shoppingList": {
+    "empty": {
+      "title": "Your shopping list is empty",
+      "description": "Add items manually, create an AI list, or generate it from your meal plan."
+    },
+    "completed": {
+      "title": "All items completed!",
+      "description": "You can now move the purchased items to the pantry."
+    },
+    "bulkAdd": {
+      "title": "Paste list",
+      "description": "Paste a list of ingredients, one item per line. Quantities and units are recognized automatically.",
+      "placeholder": "250g flour\n1 pinch salt\neggs",
+      "analyze": "Analyze",
+      "reviewDescription": "Review the detected items. You can still edit them after adding.",
+      "back": "Back",
+      "addToList": "Add to list"
+    },
+    "ai": {
+      "title": "AI-powered shopping list",
+      "description": "Describe what you are planning, and the AI will create a matching shopping list for you. Your current pantry will be taken into account.",
+      "placeholder": "e.g. ingredients for a chocolate cake...",
+      "error": "Could not generate list. Please try again.",
+      "generating": "Generating...",
+      "createList": "Create list",
+      "reviewDescription": "Review the AI suggestions. Remove items you do not need.",
+      "back": "Back",
+      "addSelected": "Add {{count}} item(s)"
+    },
+    "confirm": {
+      "clearTitle": "Clear shopping list?",
+      "clearDescription": "Do you really want to clear the shopping list completely?",
+      "clearAction": "Clear",
+      "exportTitle": "Export shopping list?",
+      "exportDescription": "Do you really want to export the shopping list as a {{format}} file?",
+      "exportAction": "Export",
+      "moveToPantryTitle": "Move items to pantry?",
+      "moveToPantryDescription": "{{count}} purchased item(s) will be moved to the pantry.",
+      "moveToPantryAction": "Move",
+      "deleteItemTitle": "Delete item?",
+      "deleteItemDescription": "Do you really want to delete this item?",
+      "deleteItemDescriptionNamed": "Do you really want to delete \"{{itemName}}\"?"
+    },
+    "toolbar": {
+      "generateFromPlan": "Generate from plan",
+      "pasteList": "Paste list",
+      "aiList": "AI list",
+      "export": "Export",
+      "exportPdf": "PDF (.pdf)",
+      "exportCsv": "CSV (.csv)",
+      "exportJson": "JSON (.json)",
+      "exportMarkdown": "Markdown (.md)",
+      "exportText": "Text (.txt)",
+      "expandAllAria": "Expand all categories",
+      "expandAllTitle": "Expand all",
+      "collapseAllAria": "Collapse all categories",
+      "collapseAllTitle": "Collapse all"
+    },
+    "item": {
+      "saveChangesAria": "Save changes",
+      "cancelEditAria": "Cancel editing",
+      "toggleCompleteAria": "Mark {{itemName}} as {{state}}",
+      "stateComplete": "complete",
+      "stateIncomplete": "incomplete",
+      "editItemAria": "Edit {{itemName}}",
+      "deleteItemAria": "Delete {{itemName}}"
+    },
+    "quickAdd": {
+      "placeholder": "Quick add (e.g. 500g flour)",
+      "voiceAria": "Start voice input",
+      "cameraAria": "Open camera scan",
+      "submitAria": "Add item",
+      "scanBarcode": "Scan barcode via camera/photo",
+      "scanReceipt": "Scan receipt with OCR"
+    }
+  },
+  "pantry": {
+    "confirm": {
+      "removeItemTitle": "Remove item from pantry?",
+      "removeItemDescription": "Do you really want to remove \"{{itemName}}\" from the pantry?",
+      "deleteSelectedTitle": "Delete selected items?",
+      "deleteSelectedDescription": "Do you really want to delete {{count}} item(s)?"
+    },
+    "listAria": "Pantry list",
+    "item": {
+      "addToShoppingListTitle": "Add to shopping list",
+      "editTitle": "Edit",
+      "expired": "Expired",
+      "nearingExpiry": "Expiring soon",
+      "empty": "Empty",
+      "runningLow": "Running low"
+    },
+    "emptyState": {
+      "noResultsTitle": "No results found",
+      "emptyTitle": "Your pantry is empty",
+      "noResultsDescription": "Try adjusting your search terms or filters.",
+      "emptyDescription": "Add your first item in the top right to keep track of everything."
+    },
+    "quickAdd": {
+      "placeholder": "Smart add: e.g. '500g spaghetti'",
+      "inputAria": "Quick add pantry item",
+      "imageAria": "Recognize photo or text image",
+      "imageError": "The image could not be recognized.",
+      "submitAria": "Add to pantry"
+    },
+    "header": {
+      "title": "My pantry",
+      "subtitle": "Your intelligent inventory.",
+      "addItem": "Add item",
+      "totalStock": "Total stock",
+      "expiring": "Critical / expiring",
+      "restock": "Restock"
+    },
+    "toolbar": {
+      "searchAria": "Search pantry",
+      "resetSearchAria": "Clear search",
+      "expiryFilterAria": "Filter by expiry status",
+      "sortAria": "Choose sort order",
+      "allStatuses": "All statuses",
+      "nearingExpiry": "Expiring soon",
+      "expired": "Already expired",
+      "sortName": "Name (A-Z)",
+      "sortExpiryDate": "Expiry date",
+      "sortUpdatedAt": "Last updated",
+      "sortCreatedAt": "Recently added",
+      "ungroupAria": "Remove grouping",
+      "groupByCategoryAria": "Group by category",
+      "ungroupTitle": "Remove grouping",
+      "groupByCategoryTitle": "Group by category",
+      "toggleSelectionModeAria": "Toggle selection mode",
+      "selectionModeTitle": "Selection mode"
+    },
+    "modal": {
+      "editTitle": "Edit item",
+      "newTitle": "New pantry item",
+      "nameLabel": "Name",
+      "categoryLabel": "Category",
+      "quantityLabel": "Quantity",
+      "unitLabel": "Unit",
+      "expiryDateLabel": "Expiry date (optional)",
+      "minQuantityLabel": "Minimum quantity (optional)",
+      "minQuantityPlaceholder": "e.g. 1",
+      "minQuantityHint": "A warning will be shown if the quantity falls below this value.",
+      "notesLabel": "Notes (optional)",
+      "nutritionTitle": "Nutrition (per 100g):",
+      "nutritionSummary": "Kcal: {{kcal}} | Protein: {{protein}}g | Fat: {{fat}}g | Carbs: {{carbs}}g",
+      "allergensLabel": "Allergens"
+    }
+  },
+  "recipeDetail": {
+    "back": "Back to overview",
+    "generatingImage": "Generating image...",
+    "generateImage": "Generate image",
+    "adjustServings": "Adjust servings:",
+    "meta": {
+      "totalTimeTitle": "Total time",
+      "servingsTitle": "Servings",
+      "difficultyTitle": "Difficulty",
+      "servingsSingular": "person",
+      "servingsPlural": "people"
+    },
+    "mealType": {
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner"
+    },
+    "modal": {
+      "addToMealPlanTitle": "Add to meal plan",
+      "date": "Date",
+      "mealType": "Meal"
+    },
+    "confirm": {
+      "deleteTitle": "Delete recipe?",
+      "deleteRecipe": "Do you really want to permanently delete the recipe \"{{recipeTitle}}\"?",
+      "exportTitle": "Export recipe?",
+      "exportRecipe": "Do you really want to export the recipe as a {{format}} file?",
+      "exportAction": "Export"
+    },
+    "actions": {
+      "decreaseServingsAria": "Decrease servings",
+      "increaseServingsAria": "Increase servings",
+      "addToShoppingListTitle": "Add to shopping list",
+      "startCookMode": "Cook mode",
+      "export": "Export",
+      "removeFavorite": "Remove favorite",
+      "markFavorite": "Mark as favorite"
+    },
+    "ingredientStatus": {
+      "haveTitle": "In pantry",
+      "lowTitle": "Running low! You have {{pantryQty}}{{unit}}",
+      "noneDetected": "No clear allergens detected."
+    },
+    "toast": {
+      "saved": "Recipe saved successfully!",
+      "saveFailed": "Saving failed.",
+      "deleteFailed": "Deleting failed.",
+      "imageSaved": "Image saved.",
+      "favoriteAdded": "Marked as favorite!",
+      "favoriteRemoved": "Favorite removed.",
+      "actionFailed": "Action failed.",
+      "missingItemsAdded": "Added {{count}} missing item(s) to shopping list.",
+      "noMissingItems": "All ingredients are already in pantry or shopping list!",
+      "singleItemAdded": "Added \"{{itemName}}\" to shopping list.",
+      "addedToMealPlan": "Added to meal plan!"
+    }
+  },
+  "recipeBook": {
+    "toolbar": {
+      "searchPlaceholder": "Search recipes...",
+      "searchAria": "Search recipes",
+      "resetSearchAria": "Clear recipe search",
+      "pantryReady": "Pantry-ready",
+      "favorites": "Favorites",
+      "filters": "Filters",
+      "sortAria": "Choose sorting",
+      "sortNewest": "Newest",
+      "sortFavorites": "Favorites",
+      "sortAz": "A-Z",
+      "sortZa": "Z-A",
+      "courseLabel": "Course",
+      "courseFilterAria": "Filter by course",
+      "cuisineLabel": "Cuisine",
+      "cuisineFilterAria": "Filter by cuisine",
+      "mainIngredientLabel": "Main ingredient",
+      "mainIngredientFilterAria": "Filter by main ingredient",
+      "difficultyLabel": "Difficulty",
+      "difficultyFilterAria": "Filter by difficulty",
+      "dietLabel": "Diet",
+      "dietFilterAria": "Filter by diet",
+      "all": "All",
+      "resetAllFilters": "RESET ALL FILTERS"
+    },
+    "bulkPlan": {
+      "title": "Add to plan",
+      "selectedRecipes": "{{count}} recipes selected",
+      "startDate": "Start date",
+      "mealType": "Meal",
+      "summaryPrefix": "The recipes will be scheduled from",
+      "summaryMiddle": "as consecutive",
+      "summarySuffix": ".",
+      "plan": "Plan"
+    },
+    "empty": {
+      "title": "No recipes found",
+      "tryOtherFilters": "Try other filters or search terms.",
+      "bookEmpty": "Your cookbook is still empty. Visit the AI chef to create recipes!",
+      "resetFilters": "Reset filters"
+    },
+    "selection": {
+      "startAria": "Start selection mode",
+      "startTitle": "Start selection mode",
+      "endAria": "End selection mode"
+    },
+    "toolbar": {
+      "searchPlaceholder": "Search recipes...",
+      "pantryReady": "Pantry-ready",
+      "favorites": "Favorites",
+      "filters": "Filters",
+      "searchAria": "Search recipes",
+      "resetSearchAria": "Reset search",
+      "sortAria": "Choose sorting",
+      "courseFilterAria": "Filter by course",
+      "cuisineFilterAria": "Filter by cuisine",
+      "mainIngredientFilterAria": "Filter by main ingredient",
+      "difficultyFilterAria": "Filter by difficulty",
+      "dietFilterAria": "Filter by diet"
+    }
+  },
+  "recipeCard": {
+    "pantry": "Pantry",
+    "pantryReady": "Pantry-ready",
+    "ingredientsCount": "{{haveCount}}/{{totalCount}} ingredients"
+  },
+  "cookMode": {
+    "label": "Cook mode",
+    "stepProgress": "Step {{current}} / {{total}}",
+    "ingredientsCheck": "Ingredient check",
+    "stepTimer": "Step timer",
+    "timerRunning": "Running",
+    "timerPaused": "Paused",
+    "start": "Start",
+    "pause": "Pause",
+    "addThirtySeconds": "+30s",
+    "reset": "Reset",
+    "voiceHint": "Voice: \"Start timer for 5 minutes\", \"Check off tomatoes\"",
+    "previous": "Back",
+    "next": "Next",
+    "finish": "Done",
+    "timerExpired": "Timer finished.",
+    "actions": {
+      "previousStepAria": "Previous step",
+      "nextStepAria": "Next step",
+      "finishAria": "Finish",
+      "startTimerTitle": "Start timer",
+      "pauseTimerTitle": "Pause timer",
+      "resetTimerTitle": "Reset timer",
+      "repeatStepTitle": "Repeat step",
+      "enableSpeechTitle": "Enable speech output",
+      "disableSpeechTitle": "Disable speech output",
+      "exitTitle": "Exit"
+    }
+  }
+}

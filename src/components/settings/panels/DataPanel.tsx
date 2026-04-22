@@ -9,13 +9,15 @@ import { BeforeInstallPromptEvent, FullBackupData } from '../../../types';
 import { updateSettings } from '../../../store/slices/settingsSlice';
 import { useAppDispatch } from '../../../store/hooks';
 import { useModalA11y } from '../../../hooks/useModalA11y';
+import { useTranslation } from 'react-i18next';
 
 const ResetConfirmationModal: React.FC<{
     onClose: () => void;
     onConfirm: () => void;
 }> = ({ onClose, onConfirm }) => {
+    const { t } = useTranslation();
     const [confirmationText, setConfirmationText] = useState('');
-    const CONFIRMATION_KEYWORD = 'LÖSCHEN';
+    const CONFIRMATION_KEYWORD = t('settings.data.reset.confirmationKeyword');
     const modalRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -31,28 +33,28 @@ const ResetConfirmationModal: React.FC<{
             <div ref={modalRef} className="rounded-2xl p-6 w-full max-w-md glass-modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="reset-confirmation-title" tabIndex={-1}>
                 <div className="flex items-center gap-3 text-red-500 mb-4">
                     <div className="p-2 bg-red-500/10 rounded-full"><AlertTriangle size={24} /></div>
-                    <h3 id="reset-confirmation-title" className="text-lg font-bold">Daten unwiderruflich löschen?</h3>
+                    <h3 id="reset-confirmation-title" className="text-lg font-bold">{t('settings.data.reset.title')}</h3>
                 </div>
                 <p className="text-zinc-400 text-sm mb-6">
-                    Alle Rezepte, Vorräte und Einstellungen werden entfernt. Diese Aktion kann nicht rückgängig gemacht werden.
+                    {t('settings.data.reset.description')}
                 </p>
                 <input
                     ref={inputRef}
                     type="text"
                     value={confirmationText}
                     onChange={(e) => setConfirmationText(e.target.value)}
-                    placeholder={`Tippe "${CONFIRMATION_KEYWORD}"`}
+                    placeholder={t('settings.data.reset.placeholder', { keyword: CONFIRMATION_KEYWORD })}
                     className="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:outline-none font-mono text-center uppercase"
                 />
                 <div className="flex justify-end gap-3 mt-6">
-                    <button type="button" onClick={onClose} className="py-2.5 px-4 rounded-xl text-zinc-400 hover:bg-zinc-800 font-medium">Abbrechen</button>
+                    <button type="button" onClick={onClose} className="py-2.5 px-4 rounded-xl text-zinc-400 hover:bg-zinc-800 font-medium">{t('common.cancel')}</button>
                     <button
                         type="button"
                         onClick={onConfirm}
                         disabled={confirmationText !== CONFIRMATION_KEYWORD}
                         className="py-2.5 px-4 rounded-xl bg-red-600 text-white font-bold hover:bg-red-500 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
                     >
-                        <Trash2 size={16}/> Endgültig löschen
+                        <Trash2 size={16}/> {t('settings.data.reset.action')}
                     </button>
                 </div>
             </div>
@@ -68,6 +70,7 @@ interface DataPanelProps {
 }
 
 export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEvent, onInstallPWA, isStandalone }) => {
+    const { t } = useTranslation();
     const dispatch = useAppDispatch();
     const [isResetModalOpen, setResetModalOpen] = useState(false);
     const [storageEstimate, setStorageEstimate] = useState<{ used: number; quota: number } | null>(null);
@@ -88,10 +91,10 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
         setResetModalOpen(false);
         (db as Dexie).delete().then(() => {
             localStorage.clear();
-            addToast('App wird neu gestartet...', 'info');
+            addToast(t('settings.data.toast.restarting'), 'info');
             setTimeout(() => window.location.reload(), 1500);
         }).catch((err: unknown) => {
-            addToast('Fehler beim Zurücksetzen.', 'error');
+            addToast(t('settings.data.toast.resetError'), 'error');
             if (import.meta.env.DEV) {
                 console.error(err);
             }
@@ -108,10 +111,10 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
                 const data = JSON.parse(reader.result as string) as FullBackupData;
                 await importData(data);
                 if (data.settings) dispatch(updateSettings(data.settings));
-                addToast('Daten erfolgreich importiert. Neustart...', 'success');
+                addToast(t('settings.data.toast.importSuccess'), 'success');
                 setTimeout(() => window.location.reload(), 1500);
             } catch {
-                addToast('Import fehlgeschlagen. Ungültige Datei.', 'error');
+                addToast(t('settings.data.toast.importError'), 'error');
             } finally {
                 if (fileInputRef.current) fileInputRef.current.value = "";
             }
@@ -134,16 +137,21 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
             const { exportFullDataAsPdf } = await import('../../../services/exportService');
             success = await exportFullDataAsPdf();
         }
-        if (success) addToast('Backup erstellt.', 'success');
-        else addToast('Backup fehlgeschlagen.', 'error');
+        if (success) addToast(t('settings.backup.success'), 'success');
+        else addToast(t('settings.backup.error'), 'error');
     };
 
     // Format bytes
     const formatBytes = (bytes: number, decimals = 2) => {
-        if (!bytes) return '0 Bytes';
+        if (!bytes) return t('settings.data.storage.zeroBytes');
         const k = 1024;
         const dm = decimals < 0 ? 0 : decimals;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const sizes = [
+            t('settings.data.storage.units.bytes'),
+            t('settings.data.storage.units.kb'),
+            t('settings.data.storage.units.mb'),
+            t('settings.data.storage.units.gb'),
+        ];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     };
@@ -160,10 +168,10 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
         setSyncLoading(true);
         try {
             await syncUpload(syncPassword, syncUrl, syncToken || undefined);
-            setSyncStatus('Backup erfolgreich hochgeladen!');
+            setSyncStatus(t('settings.data.sync.uploadSuccess'));
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
-            setSyncStatus('Fehler beim Hochladen: ' + message);
+            setSyncStatus(`${t('settings.data.sync.uploadError')} ${message}`);
         } finally {
             setSyncLoading(false);
         }
@@ -173,12 +181,12 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
         setSyncLoading(true);
         try {
             await syncDownload(syncPassword, syncUrl, syncToken || undefined);
-            setSyncStatus('Backup erfolgreich wiederhergestellt!');
-            addToast('Backup erfolgreich wiederhergestellt.', 'success');
+            setSyncStatus(t('settings.data.sync.restoreSuccess'));
+            addToast(t('settings.backup.restoreSuccess'), 'success');
             setTimeout(() => window.location.reload(), 1500);
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
-            setSyncStatus('Fehler beim Wiederherstellen: ' + message);
+            setSyncStatus(`${t('settings.data.sync.restoreError')} ${message}`);
         } finally {
             setSyncLoading(false);
         }
@@ -192,7 +200,7 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
             {/* Storage Visualization */}
             <section className="bg-zinc-900/30 border border-zinc-800 rounded-2xl p-6">
                 <h3 className="text-lg font-bold text-zinc-100 mb-6 flex items-center gap-2">
-                    <HardDrive className="text-[var(--color-accent-400)]"/> Speicherstatus
+                    <HardDrive className="text-[var(--color-accent-400)]"/> {t('settings.data.storage.title')}
                 </h3>
                 
                 <div className="flex items-center justify-center mb-6 relative">
@@ -208,18 +216,18 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
                          </svg>
                          <div className="absolute inset-0 flex flex-col items-center justify-center text-zinc-200">
                              <span className="text-2xl font-bold">{storageEstimate ? formatBytes(storageEstimate.used) : '...'}</span>
-                             <span className="text-xs text-zinc-500">verwendet</span>
+                             <span className="text-xs text-zinc-500">{t('settings.data.storage.used')}</span>
                          </div>
                     </div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4 text-center">
                      <div className="p-3 bg-zinc-900/50 rounded-xl border border-zinc-800/50">
-                         <div className="text-xs text-zinc-500 uppercase font-bold mb-1">Rezepte</div>
+                         <div className="text-xs text-zinc-500 uppercase font-bold mb-1">{t('nav.recipes')}</div>
                          <div className="text-xl font-mono font-bold text-zinc-100">{recipeCount ?? '-'}</div>
                      </div>
                      <div className="p-3 bg-zinc-900/50 rounded-xl border border-zinc-800/50">
-                         <div className="text-xs text-zinc-500 uppercase font-bold mb-1">Vorrat</div>
+                         <div className="text-xs text-zinc-500 uppercase font-bold mb-1">{t('nav.pantry')}</div>
                          <div className="text-xl font-mono font-bold text-zinc-100">{pantryCount ?? '-'}</div>
                      </div>
                 </div>
@@ -229,11 +237,11 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
             {installPromptEvent && !isStandalone && (
                  <section className="bg-gradient-to-r from-[var(--color-accent-500)]/10 to-transparent border border-[var(--color-accent-500)]/20 rounded-2xl p-6 flex items-center justify-between">
                     <div>
-                        <h4 className="font-bold text-[var(--color-accent-400)]">App installieren</h4>
-                        <p className="text-sm text-zinc-400">Für das beste Offline-Erlebnis.</p>
+                        <h4 className="font-bold text-[var(--color-accent-400)]">{t('settings.data.install.title')}</h4>
+                        <p className="text-sm text-zinc-400">{t('settings.data.install.description')}</p>
                     </div>
                     <button onClick={onInstallPWA} className="bg-[var(--color-accent-500)] text-zinc-900 font-bold py-2 px-4 rounded-xl hover:bg-[var(--color-accent-400)] transition-colors shadow-lg">
-                        Installieren
+                        {t('app.installReminder.install')}
                     </button>
                  </section>
             )}
@@ -242,24 +250,24 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
             <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <button onClick={() => fileInputRef.current?.click()} className="flex flex-col items-center justify-center gap-2 p-6 rounded-2xl bg-zinc-900/30 border border-zinc-800 hover:bg-zinc-800/50 hover:border-zinc-700 transition-all group">
                     <Upload className="text-zinc-500 group-hover:text-zinc-300 transition-colors" size={24}/>
-                    <span className="font-bold text-zinc-300">Importieren</span>
+                    <span className="font-bold text-zinc-300">{t('settings.backup.import')}</span>
                 </button>
                 <div className="flex flex-col gap-2">
                     <button onClick={() => handleExport('json')} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900/30 border border-zinc-800 hover:bg-zinc-800/50 hover:border-zinc-700 transition-all group">
                         <Download className="text-zinc-500 group-hover:text-zinc-300 transition-colors" size={20}/>
-                        <span className="font-bold text-zinc-300">Backup (JSON)</span>
+                        <span className="font-bold text-zinc-300">{t('settings.backup.exportJson')}</span>
                     </button>
                     <button onClick={() => handleExport('md')} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900/30 border border-zinc-800 hover:bg-zinc-800/50 hover:border-zinc-700 transition-all group">
                         <Download className="text-zinc-500 group-hover:text-zinc-300 transition-colors" size={20}/>
-                        <span className="font-bold text-zinc-300">Backup (Markdown)</span>
+                        <span className="font-bold text-zinc-300">{t('settings.backup.exportMd')}</span>
                     </button>
                     <button onClick={() => handleExport('csv')} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900/30 border border-zinc-800 hover:bg-zinc-800/50 hover:border-zinc-700 transition-all group">
                         <Download className="text-zinc-500 group-hover:text-zinc-300 transition-colors" size={20}/>
-                        <span className="font-bold text-zinc-300">Backup (CSV)</span>
+                        <span className="font-bold text-zinc-300">{t('settings.backup.exportCsv')}</span>
                     </button>
                     <button onClick={() => handleExport('pdf')} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900/30 border border-zinc-800 hover:bg-zinc-800/50 hover:border-zinc-700 transition-all group">
                         <Download className="text-zinc-500 group-hover:text-zinc-300 transition-colors" size={20}/>
-                        <span className="font-bold text-zinc-300">Backup (PDF)</span>
+                        <span className="font-bold text-zinc-300">{t('settings.backup.exportPdf')}</span>
                     </button>
                 </div>
             </section>
@@ -267,13 +275,13 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
             {/* Verschlüsselter Cloud-Sync */}
             <section className="bg-zinc-900/30 border border-zinc-800 rounded-2xl p-6 mt-8">
                 <h3 className="text-lg font-bold text-zinc-100 mb-4 flex items-center gap-2">
-                    <HardDrive className="text-[var(--color-accent-400)]"/> Cloud Sync (Ende-zu-Ende-verschlüsselt)
+                    <HardDrive className="text-[var(--color-accent-400)]"/> {t('settings.data.sync.title')}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <input
                         type="url"
                         className="bg-zinc-950 border border-zinc-700 rounded-xl p-3 focus:ring-2 focus:ring-accent-500 focus:outline-none font-mono"
-                        placeholder="Sync-URL (z.B. WebDAV, S3, ...)"
+                        placeholder={t('settings.data.sync.urlPlaceholder')}
                         value={syncUrl}
                         onChange={e => setSyncUrl(e.target.value)}
                         autoComplete="off"
@@ -281,7 +289,7 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
                     <input
                         type="password"
                         className="bg-zinc-950 border border-zinc-700 rounded-xl p-3 focus:ring-2 focus:ring-accent-500 focus:outline-none font-mono"
-                        placeholder="Sync-Passwort (nur lokal)"
+                        placeholder={t('settings.data.sync.passwordPlaceholder')}
                         value={syncPassword}
                         onChange={e => setSyncPassword(e.target.value)}
                         autoComplete="new-password"
@@ -289,7 +297,7 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
                     <input
                         type="text"
                         className="bg-zinc-950 border border-zinc-700 rounded-xl p-3 focus:ring-2 focus:ring-accent-500 focus:outline-none font-mono"
-                        placeholder="(Optional) Auth-Token"
+                        placeholder={t('settings.data.sync.tokenPlaceholder')}
                         value={syncToken}
                         onChange={e => setSyncToken(e.target.value)}
                         autoComplete="off"
@@ -301,24 +309,24 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
                         disabled={syncLoading || !syncUrl || !syncPassword}
                         className="px-4 py-2 rounded-xl bg-accent-500 text-zinc-900 font-bold hover:bg-accent-400 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed transition-all"
                     >
-                        {syncLoading ? 'Lade hoch...' : 'Backup hochladen'}
+                        {syncLoading ? t('settings.data.sync.uploading') : t('settings.data.sync.upload')}
                     </button>
                     <button
                         onClick={handleSyncDownload}
                         disabled={syncLoading || !syncUrl || !syncPassword}
                         className="px-4 py-2 rounded-xl bg-accent-500 text-zinc-900 font-bold hover:bg-accent-400 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed transition-all"
                     >
-                        {syncLoading ? 'Stelle wieder her...' : 'Backup wiederherstellen'}
+                        {syncLoading ? t('settings.data.sync.restoring') : t('settings.data.sync.restore')}
                     </button>
                 </div>
                 {syncStatus && <div className="text-sm mt-2 text-zinc-400">{syncStatus}</div>}
-                <div className="text-xs text-zinc-500 mt-2">Alle Daten werden vor dem Upload lokal verschlüsselt. Das Passwort verlässt niemals dein Gerät.</div>
+                <div className="text-xs text-zinc-500 mt-2">{t('settings.data.sync.helper')}</div>
             </section>
 
             <div className="flex justify-center pt-4">
                 <button onClick={() => setResetModalOpen(true)} className="text-red-500 hover:text-red-400 text-sm font-medium flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-red-500/10 transition-colors">
                     <AlertTriangle size={14}/>
-                    Werkseinstellungen & Daten löschen
+                    {t('settings.data.reset.trigger')}
                 </button>
             </div>
         </div>

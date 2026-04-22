@@ -1,0 +1,94 @@
+{
+  "nav": {
+    "chef": "KI Koch",
+    "pantry": "Vorrat",
+    "recipes": "Rezepte",
+    "mealPlanner": "Planer",
+    "shoppingList": "Einkauf"
+  },
+  "common": {
+    "add": "Hinzufügen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "search": "Suchen...",
+    "loading": "Wird geladen...",
+    "error": "Ein Fehler ist aufgetreten"
+  },
+  "app": {
+    "loading": "Inhalt wird geladen",
+    "skipToContent": "Zum Inhalt springen",
+    "close": "Schließen",
+    "globalErrorBoundary": {
+      "title": "Unerwarteter Fehler",
+      "description": "Etwas ist schiefgelaufen. Bitte lade die Seite neu oder versuche es spaeter erneut.",
+      "reload": "Seite neu laden"
+    },
+    "install": {
+      "unavailable": "App kann derzeit nicht installiert werden.",
+      "success": "App erfolgreich installiert!"
+    },
+    "installReminder": {
+      "title": "CulinaSync auf dem Startbildschirm",
+      "description": "Installiere die App fuer schnelleren Zugriff, Offline-Nutzung und eine stabilere Kuechenansicht.",
+      "install": "Installieren",
+      "later": "Spaeter",
+      "dismiss": "Nicht mehr erinnern"
+    },
+    "commandSections": {
+      "navigation": "Navigation",
+      "pantry": "Vorratskammer",
+      "chef": "KI-Chef",
+      "shoppingList": "Einkaufsliste",
+      "data": "Daten",
+      "global": "Global"
+    },
+    "commands": {
+      "nav": {
+        "pantry": "Gehe zur Vorratskammer",
+        "chef": "Gehe zum KI-Chef",
+        "recipes": "Gehe zum Kochbuch",
+        "mealPlanner": "Gehe zum Essensplaner",
+        "shoppingList": "Gehe zur Einkaufsliste",
+        "settings": "Gehe zu den Einstellungen",
+        "help": "Gehe zur Hilfe"
+      },
+      "pantry": {
+        "addItem": "Neuen Artikel zum Vorrat hinzufügen"
+      },
+      "chef": {
+        "generateRecipe": "Neues Rezept generieren"
+      },
+      "shoppingList": {
+        "addItem": "Artikel zur Einkaufsliste hinzufügen",
+        "generateFromPlan": "Einkaufsliste aus Plan generieren",
+        "clear": "Einkaufsliste leeren"
+      },
+      "data": {
+        "export": "Daten exportieren",
+        "import": "Daten importieren"
+      },
+      "global": {
+        "toggleVoiceControl": "Sprachsteuerung umschalten",
+        "installApp": "App installieren"
+      }
+    }
+  },
+  "header": {
+    "nav": {
+      "pantry": "Vorratskammer",
+      "chef": "KI-Chef",
+      "recipes": "Rezepte",
+      "mealPlanner": "Essensplaner",
+      "shoppingList": "Einkaufsliste"
+    },
+    "actions": {
+      "openCommandPalette": "Befehlspalette öffnen (⌘K)",
+      "startVoiceControl": "Sprachsteuerung aktivieren",
+      "stopVoiceControl": "Sprachsteuerung stoppen",
+      "settings": "Einstellungen",
+      "help": "Hilfe"
+    }
+  }
+}

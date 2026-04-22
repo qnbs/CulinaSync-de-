@@ -1,5 +1,6 @@
 import React, { type ErrorInfo } from 'react';
 import { logAppError } from '../services/errorLoggingService';
+import i18n from '../i18n';
 
 interface State {
   hasError: boolean;
@@ -24,12 +25,14 @@ export class GlobalErrorBoundary extends React.Component<{ children: React.React
 
   render() {
     if (this.state.hasError) {
+      const { t } = i18n;
+
       return (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70">
           <div className="bg-zinc-900 rounded-2xl shadow-2xl max-w-md w-full p-6 text-center animate-fade-in" role="alert" aria-live="assertive">
-            <h2 className="text-xl font-bold mb-2 text-red-400">Unerwarteter Fehler</h2>
-            <p className="mb-4 text-zinc-200">Etwas ist schiefgelaufen. Bitte lade die Seite neu oder versuche es später erneut.</p>
-            <button className="bg-[var(--color-accent-500)] text-white px-4 py-2 rounded" onClick={() => window.location.reload()}>Seite neu laden</button>
+            <h2 className="text-xl font-bold mb-2 text-red-400">{t('app.globalErrorBoundary.title')}</h2>
+            <p className="mb-4 text-zinc-200">{t('app.globalErrorBoundary.description')}</p>
+            <button className="bg-[var(--color-accent-500)] text-white px-4 py-2 rounded" onClick={() => window.location.reload()}>{t('app.globalErrorBoundary.reload')}</button>
           </div>
         </div>
       );

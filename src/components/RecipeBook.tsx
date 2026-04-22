@@ -233,13 +233,13 @@ const RecipeBook: React.FC = () => {
                 <div className="bg-zinc-900 p-4 rounded-full mb-4">
                     <BookOpen className="h-10 w-10 text-zinc-600" />
                 </div>
-                <h3 className="text-lg font-medium text-zinc-300">Keine Rezepte gefunden</h3>
+                <h3 className="text-lg font-medium text-zinc-300">{t('recipeBook.empty.title')}</h3>
                 <p className="mt-1 text-sm text-zinc-500 max-w-md">
-                    {savedRecipes.length > 0 ? 'Versuche es mit anderen Filtern oder Suchbegriffen.' : 'Dein Kochbuch ist noch leer. Besuche den KI-Chef, um Rezepte zu erstellen!'}
+                  {savedRecipes.length > 0 ? t('recipeBook.empty.tryOtherFilters') : t('recipeBook.empty.bookEmpty')}
                 </p>
                 {hasActiveFilters && (
                     <button onClick={clearFilters} className="mt-6 flex items-center gap-2 bg-zinc-800 text-zinc-200 font-medium py-2 px-4 rounded-lg hover:bg-zinc-700 transition-colors">
-                        <ListFilter size={16} /> Filter zurücksetzen
+                    <ListFilter size={16} /> {t('recipeBook.empty.resetFilters')}
                     </button>
                 )}
             </div>

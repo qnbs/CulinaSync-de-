@@ -1,0 +1,296 @@
+{
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "english": "English",
+    "german": "German",
+    "appearance": "Appearance",
+    "accentColor": "Accent Color",
+    "highContrast": "High Contrast",
+    "save": "Save",
+    "cancel": "Cancel",
+    "general": "General",
+    "displayName": "Display Name",
+    "defaultServings": "Default Servings",
+    "weekStart": "Week Starts On",
+    "monday": "Monday",
+    "sunday": "Sunday",
+    "toast": {
+      "saved": "Settings saved",
+      "discarded": "Changes discarded"
+    },
+    "sections": {
+      "appearance": "Design & Colors",
+      "modules": "Module Configuration",
+      "ai": "AI Chef Preferences",
+      "apiKey": "API Key",
+      "speech": "Voice Control & Audio",
+      "data": "Data & Storage"
+    },
+    "sidebar": {
+      "appearance": {
+        "label": "Design",
+        "description": "Colors & appearance",
+        "accentColorTitle": "Accent color",
+        "colors": {
+          "amber": "Amber",
+          "rose": "Rose",
+          "sky": "Sky blue",
+          "emerald": "Emerald"
+        },
+        "highContrast": {
+          "title": "High contrast",
+          "description": "Improves readability of text and borders."
+        },
+        "kitchenMode": {
+          "title": "Kitchen mode",
+          "description": "Stronger contrast and clearer surfaces for everyday cooking."
+        },
+        "largeText": {
+          "title": "Large text",
+          "description": "Increases base font and UI sizing for better readability."
+        },
+        "preview": {
+          "title": "Live preview",
+          "action": "Action",
+          "cancel": "Cancel",
+          "status": "Status",
+          "active": "Active"
+        }
+      },
+      "modules": {
+        "label": "Modules",
+        "description": "Feature configuration"
+      },
+      "ai": {
+        "label": "AI Chef",
+        "description": "Personalization & intelligence"
+      },
+      "policies": {
+        "label": "Policies",
+        "description": "Allergy & household rules"
+      },
+      "health": {
+        "label": "Health Connect",
+        "description": "Nutrition export to health apps"
+      },
+      "community": {
+        "label": "Community",
+        "description": "Share recipes (opt-in)"
+      },
+      "apiKey": {
+        "label": "API Key",
+        "description": "Manage Gemini key"
+      },
+      "speech": {
+        "label": "Audio",
+        "description": "Speech output & control"
+      },
+      "data": {
+        "label": "Data",
+        "description": "Backup & storage"
+      }
+    },
+    "apiKey": {
+      "title": "Gemini API key",
+      "ariaLabel": "Gemini API key",
+      "showKeyAria": "Show key",
+      "hideKeyAria": "Hide key",
+      "deleting": "Removing...",
+      "saving": "Saving...",
+      "placeholder": "Paste AIza... API key here",
+      "replacePlaceholder": "Enter a new key to replace the current one...",
+      "securityTitle": "Security notice",
+      "securityNotice": "Your API key is stored only locally on your device, encrypted in IndexedDB. It is never sent to our servers, only directly to the Google Gemini API. This alone does not protect against XSS on the same origin.",
+      "status": {
+        "configured": "API key configured - AI features active",
+        "missing": "No API key - AI features disabled"
+      },
+      "toast": {
+        "saved": "API key stored securely.",
+        "saveError": "Error while saving the key.",
+        "removed": "API key removed.",
+        "removeError": "Error while removing the key."
+      },
+      "howToTitle": "How to get an API key:",
+      "steps": {
+        "open": "Open",
+        "signIn": "Sign in with your Google account",
+        "create": "Click \"Create API Key\"",
+        "copy": "Copy the key and paste it above",
+        "recommendation": "Recommendation: Restrict the key in Google Cloud to https://qnbs.github.io/*"
+      },
+      "confirm": {
+        "title": "Remove API key?",
+        "description": "The stored API key will be removed and AI features will be disabled.",
+        "action": "Remove"
+      }
+    },
+    "speech": {
+      "outputTitle": "Speech output",
+      "voiceLabel": "Voice",
+      "systemDefault": "System default",
+      "rateLabel": "Rate",
+      "pitchLabel": "Pitch",
+      "test": "Test",
+      "stop": "Stop",
+      "start": "Start",
+      "modeTitle": "Speech mode",
+      "browserMode": "Browser SpeechRecognition",
+      "whisperMode": "Whisper.cpp (local, privacy-first)"
+    },
+    "actions": {
+      "discard": "Discard"
+    },
+    "backup": {
+      "import": "Import",
+      "export": "Backup",
+      "exportJson": "Backup (JSON)",
+      "exportMd": "Backup (Markdown)",
+      "exportCsv": "Backup (CSV)",
+      "exportPdf": "Backup (PDF)",
+      "success": "Backup created.",
+      "error": "Backup failed.",
+      "restore": "Restore",
+      "restoreSuccess": "Backup restored successfully.",
+      "restoreError": "Restore failed."
+    },
+    "community": {
+      "title": "Community sharing (opt-in)",
+      "recipeLabel": "Choose recipe:",
+      "backendLabel": "Backend:",
+      "sharing": "Sharing...",
+      "share": "Share recipe",
+      "shared": "Shared:",
+      "helper": "Recipes are shared only on request. No automatic publishing. IPFS is public, Nostr can be self-hosted.",
+      "error": "Error while sharing",
+      "backends": {
+        "ipfs": "IPFS (decentralized, anonymized)",
+        "nostr": "Nostr (self-hosted, privacy-first)"
+      }
+    },
+    "healthConnect": {
+      "title": "Health Connect",
+      "recipeLabel": "Choose recipe:",
+      "exportFormatLabel": "Export format:",
+      "exportCsv": "CSV export",
+      "exportJson": "JSON export",
+      "helper": "The data is calculated and exported locally only. No upload, no cloud.",
+      "formats": {
+        "apple": "Apple Health",
+        "google": "Google Fit",
+        "samsung": "Samsung Health"
+      }
+    },
+    "aiChef": {
+      "title": "AI creativity",
+      "precise": "Precise",
+      "wild": "Wild",
+      "dietaryLabel": "Dietary style",
+      "dietaryPlaceholder": "Custom (e.g. 'No coriander')...",
+      "cuisinesLabel": "Preferred cuisines",
+      "cuisinesPlaceholder": "Add...",
+      "customInstructionLabel": "System instruction",
+      "customInstructionPlaceholder": "e.g. \"I have children, please avoid spicy seasonings\" or \"I love garlic\"",
+      "input": {
+        "title": "Your craving",
+        "surpriseMe": "Surprise me",
+        "promptPlaceholder": "What are you craving today? (e.g. 'Something warming with curry' or 'A light summer dish')",
+        "askChef": "Ask chef",
+        "ingredientsTitle": "Ingredients & pantry",
+        "rescueExpiringTitle": "Rescue expiring items",
+        "rescueExpiringDescription": "Add {{items}} automatically.",
+        "includeLabel": "Must include",
+        "includePlaceholder": "+ Ingredient",
+        "excludeLabel": "Must not include",
+        "excludePlaceholder": "- Ingredient",
+        "contextTitle": "Context & modifiers",
+        "noExtras": "No extras"
+      },
+      "results": {
+        "title": "I have {{count}} ideas for you.",
+        "description": "Choose your favorite to generate the full recipe.",
+        "newRequest": "New request",
+        "selectAria": "Select recipe idea {{title}} and generate full recipe",
+        "creating": "Creating...",
+        "createRecipe": "Create recipe"
+      },
+      "creativity": {
+        "conservative": {
+          "label": "Conservative",
+          "desc": "Sticks closely to classic recipes."
+        },
+        "balanced": {
+          "label": "Balanced",
+          "desc": "Good balance of tradition and modern ideas."
+        },
+        "creative": {
+          "label": "Creative",
+          "desc": "Original combinations and ideas."
+        },
+        "experimental": {
+          "label": "Experimental",
+          "desc": "Wild, innovative fusion cuisine."
+        }
+      }
+    },
+    "policy": {
+      "title": "Household & allergy policies",
+      "avoidAllergensLabel": "Allergens to avoid",
+      "avoidAllergensPlaceholder": "e.g. milk, peanut...",
+      "blacklistLabel": "Ingredient blacklist",
+      "blacklistPlaceholder": "e.g. coriander, celery...",
+      "minStockLabel": "Minimum pantry stock",
+      "itemPlaceholder": "Food item",
+      "amountPlaceholder": "Minimum amount",
+      "remove": "Remove",
+      "addMinStock": "+ Add minimum pantry stock"
+    },
+    "data": {
+      "toast": {
+        "restarting": "App will restart...",
+        "resetError": "Error while resetting.",
+        "importSuccess": "Data imported successfully. Restarting...",
+        "importError": "Import failed. Invalid file."
+      },
+      "install": {
+        "title": "Install app",
+        "description": "For the best offline experience."
+      },
+      "storage": {
+        "title": "Storage status",
+        "used": "used",
+        "zeroBytes": "0 Bytes",
+        "units": {
+          "bytes": "Bytes",
+          "kb": "KB",
+          "mb": "MB",
+          "gb": "GB"
+        }
+      },
+      "sync": {
+        "title": "Cloud sync (end-to-end encrypted)",
+        "urlPlaceholder": "Sync URL (e.g. WebDAV, S3, ...)",
+        "passwordPlaceholder": "Sync password (local only)",
+        "tokenPlaceholder": "(Optional) auth token",
+        "upload": "Upload backup",
+        "uploading": "Uploading...",
+        "restore": "Restore backup",
+        "restoring": "Restoring...",
+        "uploadSuccess": "Backup uploaded successfully!",
+        "uploadError": "Error while uploading:",
+        "restoreSuccess": "Backup restored successfully!",
+        "restoreError": "Error while restoring:",
+        "helper": "All data is encrypted locally before upload. The password never leaves your device."
+      },
+      "reset": {
+        "title": "Delete data permanently?",
+        "description": "All recipes, pantry items, and settings will be removed. This action cannot be undone.",
+        "confirmationKeyword": "DELETE",
+        "placeholder": "Type \"{{keyword}}\"",
+        "action": "Delete permanently",
+        "trigger": "Factory reset & delete data"
+      }
+    }
+  }
+}

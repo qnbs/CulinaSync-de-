@@ -1,6 +1,7 @@
 import React from 'react';
 import { Recipe } from '../types';
 import { Clock, Users, BarChart, Star, Leaf, CheckCircle, CheckSquare, Square, Image as ImageIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -12,6 +13,7 @@ interface RecipeCardProps {
 }
 
 const RecipeCardBase: React.FC<RecipeCardProps> = ({ recipe, onSelectRecipe, size = 'normal', isSelectMode, isSelected, onToggleSelect }) => {
+    const { t } = useTranslation();
   const isSmall = size === 'small';
   const isVeg = recipe.tags.diet.includes('Vegetarisch') || recipe.tags.diet.includes('Vegan');
 
@@ -74,7 +76,7 @@ const RecipeCardBase: React.FC<RecipeCardProps> = ({ recipe, onSelectRecipe, siz
             <div className="flex justify-between items-start mb-auto">
                  <div className="flex gap-2">
                     {isVeg && <div className="glass-button !bg-green-500/20 !border-green-500/30 text-green-400 p-1.5 rounded-lg backdrop-blur-md shadow-sm"><Leaf size={14} /></div>}
-                    {isCookable && <div className="glass-button !bg-emerald-500/20 !border-emerald-500/30 text-emerald-400 p-1.5 rounded-lg backdrop-blur-md shadow-sm flex items-center gap-1.5"><CheckCircle size={14} /> <span className="text-[10px] font-bold uppercase hidden md:inline">Kochbereit</span></div>}
+                          {isCookable && <div className="glass-button !bg-emerald-500/20 !border-emerald-500/30 text-emerald-400 p-1.5 rounded-lg backdrop-blur-md shadow-sm flex items-center gap-1.5"><CheckCircle size={14} /> <span className="text-[10px] font-bold uppercase hidden md:inline">{t('recipeCard.pantryReady')}</span></div>}
                  </div>
                  <div className="min-h-[32px] min-w-[32px] flex justify-end"> 
                      {/* Increased hit area for selection on mobile */}
@@ -129,8 +131,8 @@ const RecipeCardBase: React.FC<RecipeCardProps> = ({ recipe, onSelectRecipe, siz
                              />
                         </div>
                         <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider mt-1.5 text-zinc-400">
-                            <span className="text-shadow-sm">Vorrat</span>
-                            <span className={`text-shadow-sm ${matchPercentage === 100 ? "text-emerald-400" : "text-[var(--color-accent-400)]"}`}>{haveCount}/{totalCount} Zutaten</span>
+                            <span className="text-shadow-sm">{t('recipeCard.pantry')}</span>
+                            <span className={`text-shadow-sm ${matchPercentage === 100 ? "text-emerald-400" : "text-[var(--color-accent-400)]"}`}>{t('recipeCard.ingredientsCount', { haveCount, totalCount })}</span>
                         </div>
                     </div>
                  )}

@@ -69,6 +69,40 @@ const AddMealNoteModal: React.FC<{
     );
 };
 
+const RemoveMealConfirmationModal: React.FC<{
+    onClose: () => void;
+    onConfirm: () => void;
+}> = ({ onClose, onConfirm }) => {
+    const { t } = useTranslation();
+    const modalRef = React.useRef<HTMLDivElement>(null);
+    const cancelButtonRef = React.useRef<HTMLButtonElement>(null);
+
+    useModalA11y({
+        isOpen: true,
+        onClose,
+        containerRef: modalRef,
+        initialFocusRef: cancelButtonRef,
+    });
+
+    return (
+        <div className="fixed inset-0 flex items-center justify-center z-50 page-fade-in glass-overlay" onClick={onClose}>
+            <div ref={modalRef} className="rounded-2xl p-6 w-full max-w-sm scale-100 glass-modal" onClick={event => event.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="remove-meal-title" aria-describedby="remove-meal-description" tabIndex={-1}>
+                <div className="flex items-center gap-3 mb-4 text-red-500">
+                    <div className="p-2 bg-red-500/10 rounded-full"><X size={24}/></div>
+                    <h3 id="remove-meal-title" className="text-lg font-bold text-zinc-100">{t('mealPlanner.confirm.removeMealTitle')}</h3>
+                </div>
+                <p id="remove-meal-description" className="text-sm text-zinc-400 mb-6">{t('mealPlanner.confirm.removeMeal')}</p>
+                <div className="flex justify-end gap-3">
+                    <button ref={cancelButtonRef} type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition-colors text-sm font-medium">{t('common.cancel')}</button>
+                    <button type="button" onClick={onConfirm} className="px-4 py-2 rounded-lg bg-red-600 text-white font-bold hover:bg-red-500 flex items-center gap-2 transition-all">
+                        <X size={16}/> {t('mealPlanner.confirm.removeMealAction')}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const MealPlanner: React.FC = () => {
     const { t } = useTranslation();
   const dispatch = useAppDispatch();
@@ -81,6 +115,7 @@ const MealPlanner: React.FC = () => {
   
   const [selectedRecipeForDetail, setSelectedRecipeForDetail] = useState<Recipe | null>(null);
   const [noteModalState, setNoteModalState] = useState<{isOpen: boolean; date: string; mealType: string} | null>(null);
+    const [mealToRemove, setMealToRemove] = useState<MealPlanItem | null>(null);
   const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isCookMode, setIsCookMode] = useState(false);
   const [recipeForCookMode, setRecipeForCookMode] = useState<Recipe | null>(null);
@@ -154,14 +189,22 @@ const MealPlanner: React.FC = () => {
             break;
         }
         case 'remove': {
-            if(window.confirm(t('mealPlanner.confirm.removeMeal'))) {
-                await removeRecipeFromMealPlan((payload as MealPlanItem).id!);
-                addToast(t('mealPlanner.toast.mealRemoved'));
-            }
+            setMealToRemove(payload as MealPlanItem);
             break;
         }
     }
     }, [addToast, t]);
+
+  const handleConfirmRemoveMeal = useCallback(async () => {
+    if (!mealToRemove?.id) {
+        setMealToRemove(null);
+        return;
+    }
+
+    await removeRecipeFromMealPlan(mealToRemove.id);
+    addToast(t('mealPlanner.toast.mealRemoved'));
+    setMealToRemove(null);
+  }, [addToast, mealToRemove, t]);
   
   const handleSaveNote = useCallback(async (note: string, date: string, mealType: string) => {
     await addRecipeToMealPlan({ date, mealType: mealType as 'Frühstück' | 'Mittagessen' | 'Abendessen', note });
@@ -213,6 +256,12 @@ const MealPlanner: React.FC = () => {
   return (
     <div className="flex flex-col lg:flex-row gap-6 h-full min-h-[calc(100vh-140px)] relative pb-24 md:pb-8">
          {isCookMode && recipeForCookMode && <CookModeView recipe={recipeForCookMode} onExit={() => setIsCookMode(false)} />}
+            {mealToRemove && (
+                <RemoveMealConfirmationModal
+                     onClose={() => setMealToRemove(null)}
+                     onConfirm={handleConfirmRemoveMeal}
+                />
+            )}
          
          {noteModalState?.isOpen && (
             <AddMealNoteModal

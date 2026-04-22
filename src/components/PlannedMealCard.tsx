@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MealPlanItem, Recipe } from '../types';
 import { CheckCircle, Trash2, BookOpen, MoreVertical, FileText, CookingPot, AlertTriangle, Clock, Leaf } from 'lucide-react';
 
@@ -8,6 +9,7 @@ const PlannedMealCard = React.memo<{
     pantryStatus: { status: 'ok' | 'partial' | 'missing' | 'unknown'; have: number; total: number };
     onAction: (action: string, payload: Recipe | MealPlanItem) => void;
 }>(({ meal, recipe, pantryStatus, onAction }) => {
+    const { t } = useTranslation();
     const [isMenuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -34,7 +36,7 @@ const PlannedMealCard = React.memo<{
                  <button 
                     onClick={(e) => { e.stopPropagation(); onAction('remove', meal); }} 
                     className="absolute top-2 right-2 p-1.5 rounded-md text-zinc-500 hover:text-red-400 hover:bg-zinc-800 opacity-0 group-hover:opacity-100 transition-all"
-                    title="Notiz entfernen"
+                    title={t('mealPlanner.card.removeNoteTitle')}
                 >
                     <Trash2 size={14}/>
                 </button>
@@ -47,7 +49,7 @@ const PlannedMealCard = React.memo<{
         return (
             <div className="p-3 rounded-xl glass-card bg-red-950/20 border border-dashed border-red-900/50 flex items-center gap-3 relative group">
                 <AlertTriangle size={18} className="text-red-500/80"/>
-                <span className="text-sm text-red-400/80 italic">Rezept nicht verfügbar</span>
+                <span className="text-sm text-red-400/80 italic">{t('mealPlanner.card.recipeUnavailable')}</span>
                  <button onClick={() => onAction('remove', meal)} className="absolute right-2 p-1 text-red-400 hover:text-red-300 hover:bg-red-900/40 rounded opacity-0 group-hover:opacity-100 transition-all">
                     <Trash2 size={14}/>
                 </button>
@@ -77,11 +79,11 @@ const PlannedMealCard = React.memo<{
                     </button>
                     {isMenuOpen && (
                         <div className="absolute top-full right-0 mt-1 rounded-lg w-48 z-20 overflow-hidden py-1 page-fade-in glass-hud">
-                            <button onClick={() => { onAction('view', recipe); setMenuOpen(false); }} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2.5 hover:bg-zinc-800 text-zinc-300"><BookOpen size={14}/> Rezept ansehen</button>
-                            <button onClick={() => { onAction('cook', recipe); setMenuOpen(false); }} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2.5 hover:bg-zinc-800 text-zinc-300"><CookingPot size={14}/> Kochmodus</button>
-                            {!meal.isCooked && <button onClick={() => { onAction('cooked', meal); setMenuOpen(false); }} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2.5 hover:bg-zinc-800 text-emerald-400"><CheckCircle size={14}/> Als gekocht markieren</button>}
+                            <button onClick={() => { onAction('view', recipe); setMenuOpen(false); }} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2.5 hover:bg-zinc-800 text-zinc-300"><BookOpen size={14}/> {t('mealPlanner.card.viewRecipe')}</button>
+                            <button onClick={() => { onAction('cook', recipe); setMenuOpen(false); }} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2.5 hover:bg-zinc-800 text-zinc-300"><CookingPot size={14}/> {t('mealPlanner.card.cookMode')}</button>
+                            {!meal.isCooked && <button onClick={() => { onAction('cooked', meal); setMenuOpen(false); }} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2.5 hover:bg-zinc-800 text-emerald-400"><CheckCircle size={14}/> {t('mealPlanner.card.markCooked')}</button>}
                             <div className="border-t border-zinc-800 my-1"></div>
-                            <button onClick={() => { onAction('remove', meal); setMenuOpen(false); }} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2.5 hover:bg-zinc-800 text-red-400"><Trash2 size={14}/> Entfernen</button>
+                            <button onClick={() => { onAction('remove', meal); setMenuOpen(false); }} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2.5 hover:bg-zinc-800 text-red-400"><Trash2 size={14}/> {t('mealPlanner.card.remove')}</button>
                         </div>
                     )}
                 </div>
@@ -90,15 +92,15 @@ const PlannedMealCard = React.memo<{
             <div className="flex items-center justify-between mt-1">
                 <div className="flex items-center gap-3 text-xs text-zinc-500">
                     <span className="flex items-center gap-1"><Clock size={12}/> {recipe.totalTime}</span>
-                    {isVeg && <span className="flex items-center gap-1 text-green-600/80"><Leaf size={12}/> Veggie</span>}
+                    {isVeg && <span className="flex items-center gap-1 text-green-600/80"><Leaf size={12}/> {t('mealPlanner.card.veggie')}</span>}
                 </div>
-                {meal.servings && meal.servings !== parseInt(recipe.servings) && <span className="text-[10px] font-bold bg-zinc-900 text-zinc-400 px-1.5 py-0.5 rounded">{meal.servings} Port.</span>}
+                {meal.servings && meal.servings !== parseInt(recipe.servings) && <span className="text-[10px] font-bold bg-zinc-900 text-zinc-400 px-1.5 py-0.5 rounded">{t('mealPlanner.card.servingsShort', { count: meal.servings })}</span>}
             </div>
 
             {/* Pantry Match Indicator */}
             <div className="mt-1">
                 <div className="flex items-center justify-between text-[10px] text-zinc-500 mb-1">
-                    <span>Vorrat</span>
+                    <span>{t('mealPlanner.card.pantry')}</span>
                     <span>{pantryStatus.have}/{pantryStatus.total}</span>
                 </div>
                 <div className="h-1 w-full bg-zinc-900 rounded-full overflow-hidden">

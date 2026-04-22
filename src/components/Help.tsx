@@ -44,9 +44,9 @@ const Help: React.FC<HelpProps> = ({ appVersion }) => {
          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
             <div>
                 <h2 className="text-3xl font-bold tracking-tight text-zinc-100 bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
-                    Wissensdatenbank
+                    {t('help.title')}
                 </h2>
-                <p className="text-zinc-400 mt-1">Anleitungen, Tipps & Systemstatus.</p>
+                <p className="text-zinc-400 mt-1">{t('help.subtitle')}</p>
             </div>
          </div>
 
@@ -58,7 +58,7 @@ const Help: React.FC<HelpProps> = ({ appVersion }) => {
                     type="text" 
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Wie kann ich...?"
+                    placeholder={t('help.search.placeholder')}
                     aria-label={t('help.search.inputAria')}
                     className="w-full bg-transparent border-none focus:ring-0 text-zinc-100 placeholder-zinc-500 h-12 px-4 text-lg"
                 />
@@ -78,14 +78,14 @@ const Help: React.FC<HelpProps> = ({ appVersion }) => {
             className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'knowledge' ? 'bg-zinc-800 text-zinc-100 shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
         >
             <Book size={16} /> 
-            <span>Wissen & FAQ</span>
+            <span>{t('help.tabs.knowledge')}</span>
         </button>
         <button 
             onClick={() => setActiveTab('about')}
             className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'about' ? 'bg-zinc-800 text-zinc-100 shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
         >
             <Info size={16} /> 
-            <span>System & Über</span>
+            <span>{t('help.tabs.about')}</span>
         </button>
       </div>
 
@@ -95,13 +95,13 @@ const Help: React.FC<HelpProps> = ({ appVersion }) => {
               <div className="space-y-8 page-fade-in">
                   {!searchTerm && (
                       <div className="space-y-4">
-                        <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-wider pl-1">Pro-Tipps (Interaktiv)</h3>
+                                <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-wider pl-1">{t('help.tips.heading')}</h3>
                         <TipsSection onAction={handleAction} searchTerm={searchTerm} />
                       </div>
                   )}
                   
                   <div className="space-y-4">
-                     <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-wider pl-1">Häufige Fragen</h3>
+                            <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-wider pl-1">{t('help.faq.heading')}</h3>
                      <FaqSection searchTerm={searchTerm} />
                   </div>
               </div>

@@ -33,7 +33,7 @@ export const PantryQuickAdd = () => {
             }
             if (visionText) setInput(visionText);
         } catch {
-            alert('Bild konnte nicht erkannt werden.');
+            alert(t('pantry.quickAdd.imageError'));
         } finally {
             setVisionLoading(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
@@ -81,7 +81,7 @@ export const PantryQuickAdd = () => {
                         type="button"
                         onClick={handleBarcodeScan}
                         className="flex-shrink-0 flex items-center justify-center bg-zinc-800 text-[var(--color-accent-400)] h-10 w-10 rounded-xl hover:bg-zinc-700 transition-colors shadow-lg active:scale-95 mr-1"
-                        aria-label="Barcode scannen"
+                        aria-label={t('pantry.quickAdd.scanBarcode')}
                         disabled={visionLoading}
                     >
                         <Barcode size={20}/>

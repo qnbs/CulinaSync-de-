@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, ChevronLeft, ChevronsRight, ChefHat } from 'lucide-react';
 import { Recipe } from '../../types';
 import RecipeCard from '../RecipeCard';
@@ -13,6 +14,7 @@ interface PlannerSidebarProps {
 }
 
 export const PlannerSidebar: React.FC<PlannerSidebarProps> = ({ recipes, onDragStart, onSelectRecipe, selectedRecipeId, isCollapsed, onToggle }) => {
+    const { t } = useTranslation();
     const [searchTerm, setSearchTerm] = useState('');
     
     const filteredRecipes = useMemo(() => {
@@ -26,7 +28,7 @@ export const PlannerSidebar: React.FC<PlannerSidebarProps> = ({ recipes, onDragS
              <div className="hidden lg:flex flex-col items-center w-16 border-l border-white/5 bg-zinc-950/30 backdrop-blur-xl pt-4 h-[calc(100vh-8rem)] sticky top-24 rounded-l-2xl">
                 <button 
                     onClick={onToggle} 
-                    title="Rezepte anzeigen" 
+                    title={t('mealPlanner.sidebar.showRecipesTitle')} 
                     className="p-3 rounded-xl hover:bg-zinc-800 text-zinc-400 hover:text-[var(--color-accent-400)] transition-colors"
                 >
                     <ChevronLeft size={24} />
@@ -42,13 +44,13 @@ export const PlannerSidebar: React.FC<PlannerSidebarProps> = ({ recipes, onDragS
         <div className="w-full lg:w-80 flex-shrink-0 bg-zinc-950/30 backdrop-blur-xl border-l border-white/5 p-4 flex flex-col h-[calc(100vh-8rem)] sticky top-24 rounded-l-2xl">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h3 className="text-lg font-bold text-zinc-100">Rezepte</h3>
-                    <p className="text-xs text-zinc-500">Drag & Drop oder Antippen</p>
+                    <h3 className="text-lg font-bold text-zinc-100">{t('mealPlanner.sidebar.title')}</h3>
+                    <p className="text-xs text-zinc-500">{t('mealPlanner.sidebar.subtitle')}</p>
                 </div>
                 <button 
                     onClick={onToggle} 
                     className="hidden lg:flex p-2 rounded-lg hover:bg-zinc-800 text-zinc-400 transition-colors"
-                    title="Einklappen"
+                    title={t('mealPlanner.sidebar.collapseTitle')}
                 >
                     <ChevronsRight size={20}/>
                 </button>
@@ -58,7 +60,7 @@ export const PlannerSidebar: React.FC<PlannerSidebarProps> = ({ recipes, onDragS
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
                 <input 
                     type="text" 
-                    placeholder="Suchen..." 
+                    placeholder={t('common.search')} 
                     value={searchTerm} 
                     onChange={e => setSearchTerm(e.target.value)} 
                     className="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl py-2.5 pl-10 pr-3 text-sm text-zinc-200 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none transition-all placeholder-zinc-600" 
@@ -81,7 +83,7 @@ export const PlannerSidebar: React.FC<PlannerSidebarProps> = ({ recipes, onDragS
                 ) : (
                     <div className="text-center py-10 opacity-50">
                         <ChefHat className="mx-auto mb-2 text-zinc-600" size={32} />
-                        <p className="text-sm text-zinc-500">Keine Rezepte gefunden.</p>
+                        <p className="text-sm text-zinc-500">{t('mealPlanner.sidebar.empty')}</p>
                     </div>
                 )}
             </div>

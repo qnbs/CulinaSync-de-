@@ -4,6 +4,14 @@ Local-first Koch-, Vorrats-, Rezept- und Einkaufslisten-App auf Basis von React,
 
 [Live-Demo](https://qnbs.github.io/CulinaSync-de-/) | [Architektur](./docs/ARCHITECTURE.md) | [Entwicklung](./docs/DEVELOPMENT.md) | [Deployment](./docs/DEPLOYMENT.md) | [Testing](./docs/TESTING.md) | [Troubleshooting](./docs/TROUBLESHOOTING.md) | [Beitragen](./CONTRIBUTING.md) | [Security](./SECURITY.md)
 
+## Status 2026-04-22
+
+Der aktuelle Arbeitsstand ist in [docs/STATUS-2026-04-22.md](./docs/STATUS-2026-04-22.md) festgehalten. Fuer die letzte Session sind vor allem drei Punkte relevant:
+
+- Bestatigungsdialoge wurden im aktiven UI-Scope von nativen Browser-Confirms auf modalbasierte, a11y-konforme Dialoge umgestellt.
+- Die bisherigen monolithischen Locale-Dateien wurden in modulare Sprachsegmente fuer `core`, `settings` und `features` aufgeteilt.
+- Die Lokalisierung wurde ueber weitere Kernoberflaechen hinweg fortgesetzt; ein gezielter TypeScript-Check mit `pnpm exec tsc --noEmit` war zum Session-Ende gruen.
+
 ## Ueberblick
 
 CulinaSync ist eine installierbare Progressive Web App fuer Haushaltsorganisation rund um Vorrat, Rezepte, Essensplanung und Einkauf. Die App ist local-first aufgebaut: persistente Domaindaten liegen in IndexedDB via Dexie, waehrend Redux Toolkit hauptsaechlich UI- und Session-Zustand verwaltet.
@@ -102,6 +110,7 @@ Die aktuelle Pages-URL ist auf den Repo-Namen ausgerichtet. `vite.config.ts` set
 ## Dokumentation
 
 - [docs/README.md](./docs/README.md): Dokumentationsindex
+- [docs/STATUS-2026-04-22.md](./docs/STATUS-2026-04-22.md): vollstaendiger Session- und Arbeitsstand vom 2026-04-22
 - [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md): System- und Datenarchitektur
 - [docs/PROJECT-STRUCTURE.md](./docs/PROJECT-STRUCTURE.md): Repo- und Ordnerstruktur
 - [docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md): Setup, lokale Entwicklung und Konventionen
@@ -115,7 +124,7 @@ Die aktuelle Pages-URL ist auf den Repo-Namen ausgerichtet. `vite.config.ts` set
 ## Bekannte technische Punkte
 
 - Die GitHub-Actions-Laufe sind gruen, aber GitHub-eigene Actions wie `actions/configure-pages`, `actions/upload-pages-artifact` und `actions/deploy-pages` melden derzeit weiterhin Node-20-Depracation-Warnungen, obwohl sie ueber `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` bereits auf Node 24 erzwungen werden. Das ist aktuell ein Upstream-Thema der GitHub-verwalteten Actions.
-- `settingsService.ts` und Redux Persist speichern Settings weiterhin ueber zwei Wege. Das ist im Repo bekannt und sollte bei kuenftigen Persistenz-Aenderungen bewusst konsolidiert werden.
+- Settings werden bevorzugt ueber Redux Persist geladen; `settingsService.ts` behaelt nur noch einen Legacy-Fallback fuer alte lokale Daten bei. Bei kuenftigen Persistenz-Aenderungen sollte dieser Rueckwaertskompatibilitaetspfad bewusst mitgepflegt oder gezielt entfernt werden.
 
 ## Lizenz
 
