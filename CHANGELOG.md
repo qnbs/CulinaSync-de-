@@ -7,6 +7,21 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefuegt
+- Neue Root-Dokumentation fuer Beitragende und Nutzer: `CONTRIBUTING.md`, `SECURITY.md`, `SUPPORT.md`, `CODE_OF_CONDUCT.md`
+- Neuer `docs/`-Bereich mit Architektur-, Struktur-, Entwicklungs-, Testing-, Deployment- und Troubleshooting-Dokumentation
+
+### Geaendert
+- `README.md` vollstaendig auf den tatsaechlichen Projektstand mit pnpm, Vite 8, GitHub Pages und aktueller Architektur aktualisiert
+- `.github/copilot-instructions.md` an den aktuellen Tooling- und Workflow-Stand mit pnpm und Vite 8 angepasst
+- `AUDIT.md` um einen aktuellen Status-Block fuer die zuletzt behobenen Laufzeit-, Security- und Pipeline-Themen ergaenzt
+
+### Behoben
+- Live-Demo-Black-Screen durch expliziten Redux-Persist-Storage-Adapter behoben
+- Prototype-Pollution-Risiko in den Settings durch allowlist-basierte Mutatoren entfernt
+- Download-Sink in `exportService.ts` mit Dateinamen- und MIME-Haertung abgesichert
+- CI-, Deploy- und CodeQL-Workflows auf aktuelle Actions-Majors und pnpm-basierte Ausfuehrung modernisiert
+
 ### Behoben
 - **tsconfig.json:** `ignoreDeprecations: "6.0"` hinzugefügt für TS 7 Kompatibilität, Root-Dateien in `include` aufgenommen
 - **sitemap.xml:** Ungültiges XML mit orphaned `</url>`-Tags korrigiert
@@ -17,7 +32,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ### Entfernt
 - **types.ts (Root):** Redundante, divergierende Typ-Datei gelöscht (Quelle der Wahrheit ist `src/types.ts`)
 
-### Geändert
+### Geaendert
 - **.gitignore:** `coverage/`, `reports/`, `*.gz`, `*.br`, `stats.html` hinzugefügt
 - **.gitattributes:** Erstellt mit `* text=auto` für LF-Normalisierung
 - **copilot-instructions.md:** Umfassend überarbeitet mit Testing, Architektur, Performance, A11y und Error-Handling Konventionen
@@ -29,7 +44,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ## [0.1.0] — 2026-03-04
 
 ### Hinzugefügt
-- React 19 + Vite 5 PWA mit Local-First Architektur (Dexie/IndexedDB)
+- React 19 + Vite PWA mit Local-First Architektur (Dexie/IndexedDB)
 - Vorratskammer-Manager mit Kategorien, Ablaufdatum-Tracking, Barcode-Scanner
 - Rezeptbuch mit KI-gestützter Generierung via Gemini 2.5 Flash
 - Essensplaner mit Drag & Drop, Wochen-/Monatsansicht, Nährwertübersicht

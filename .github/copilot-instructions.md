@@ -1,7 +1,7 @@
 # Copilot Instructions for CulinaSync
 
 ## Projekt-Orientierung
-- CulinaSync ist eine React 19 + Vite 5 PWA mit **Local-First** Datenhaltung in IndexedDB via Dexie.
+- CulinaSync ist eine React 19 + Vite 8 PWA mit **Local-First** Datenhaltung in IndexedDB via Dexie.
 - Die App ist feature-orientiert aufgebaut (`src/components/*`, `src/hooks/*`, `src/services/*`, `src/store/*`).
 - `src/App.tsx` ist der Shell-Orchestrator: Navigation, lazy-loaded Seiten, Command Palette, Voice-Trigger, Toasts.
 - **Root-Level-Dateien:** `index.tsx` (App-Entry) liegt im Root, nicht in `src/`. Es wird in `tsconfig.json` via `include` eingebunden.
@@ -51,12 +51,12 @@
 - **Bekanntes Issue:** Settings werden aktuell doppelt persistiert (Redux Persist + `settingsService` localStorage). Bei Änderungen an der Persistierung darauf achten.
 
 ## Testing
-- **Framework:** Vitest + MSW (Mock Service Worker) für Service-Tests.
-- **Testverzeichnis:** `src/test/` (z. B. `src/test/geminiService.test.ts`, `src/test/msw/`).
+- **Framework:** Vitest + MSW (Mock Service Worker) fuer Service- und UI-nahe Tests.
+- **Testverzeichnisse:** `src/test/`, `src/components/**/__tests__/`, `src/services/__tests__/`.
 - **Benennung:** `*.test.ts` / `*.test.tsx` für Testdateien.
 - **Konfiguration:** `vitest.config.ts` im Root.
 - **Coverage:** Aktuell ~35 % (nur `geminiService` getestet). Neue Features sollten Tests mitbringen.
-- **Ausführung:** `npm test` oder `npm run test:coverage`.
+- **Ausfuehrung:** `pnpm run test` oder `pnpm run test:coverage`.
 
 ## Error-Handling
 - Zentrale Fehler-Logging-Funktion: `logAppError()` aus `src/services/errorLoggingService.ts`.
@@ -78,18 +78,19 @@
 - `aria-expanded` für Accordions und Dropdowns.
 
 ## Workflows
-- Dev: `npm run dev`
-- Build: `npm run build` (tsc + vite build)
-- Lint: `npm run lint`
-- Test: `npm test`
-- Preview: `npm run preview`
+- Dev: `pnpm run dev`
+- Build: `pnpm run build` (tsc + vite build)
+- Lint: `pnpm run lint`
+- Test: `pnpm run test`
+- Preview: `pnpm run preview`
 - Deploy: Automatisch via GitHub Actions bei Push auf `main` (`.github/workflows/deploy.yml`)
 - CI: Lint + TypeScript-Check + Tests + Bundle-Budget bei PRs und Push auf `main` (`.github/workflows/ci.yml`)
 - Security: CodeQL-Analyse bei PRs und Push auf `main` (`.github/workflows/codeql.yml`)
 - `base` in `vite.config.ts` wird dynamisch gesetzt: `/CulinaSync-de-/` in CI, `/` lokal.
+- GitHub-verwaltete Pages-Actions koennen trotz Node-24-Opt-in aktuell noch Node-20-Depracation-Warnungen emittieren. Das ist derzeit ein Upstream-Thema.
 
 ## Terminal-Nutzung
-- Terminal-Befehle dürfen ausgeführt werden, wenn sie zur Aufgabe beitragen (z. B. `pnpm install`, `pnpm run build`, `tsc --noEmit`, `pnpm test`).
+- Terminal-Befehle dürfen ausgeführt werden, wenn sie zur Aufgabe beitragen (z. B. `pnpm install`, `pnpm run build`, `tsc --noEmit`, `pnpm run test`).
 - Verwende immer nur **ein einziges** Terminal.
 - Öffne niemals ein neues Terminal, solange ein bestehendes aktiv ist.
 - Führe mehrere Befehle nach Möglichkeit nacheinander im selben Terminal aus, z. B. mit `&&` oder `;`.

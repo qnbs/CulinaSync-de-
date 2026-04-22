@@ -5,6 +5,20 @@
 
 ---
 
+## Status-Update 2026-04-22
+
+Seit dem urspruenglichen Audit wurden mehrere kritische Betriebs- und Sicherheitsprobleme bereits behoben:
+
+- GitHub-Actions-Workflows wurden auf pnpm, aktuelle Action-Majors und Node-24-Opt-in umgestellt.
+- Das GitHub-Pages-Deployment ist wieder gruen und die Live-Demo rendert nach einem vorherigen Persistenz-Crash wieder normal.
+- Der `redux-persist`-Browser-Storage laeuft jetzt ueber einen expliziten Adapter in `src/store/persistStorage.ts`.
+- Die Settings-Seite schreibt keine freien verschachtelten Pfade mehr, sondern verwendet erlaubte, validierte Mutatoren.
+- Download-Exporte nutzen erlaubte MIME-Typen und bereinigte Dateinamen.
+
+Noch offen ist vor allem strukturelle Nacharbeit, nicht der unmittelbare Produktionsbetrieb. Das betrifft insbesondere doppelte Settings-Persistenz, die statische `@faker-js/faker`-Einbindung im Produktionskontext und weitere im Audit genannte mittel- bis langfristige Architekturthemen.
+
+---
+
 ## Zusammenfassung
 
 | Kategorie | Kritisch | Hoch | Mittel | Niedrig |
@@ -605,27 +619,27 @@ Siehe K1. Muss nach `devDependencies` + dynamischer Import.
 
 ---
 
-### 🟠 D2 — Vite 5 (Vite 6 verfügbar)
+### ✅ D2 — Vite-Upgrade umgesetzt
 
 **Datei:** `package.json`
 
-**Problem:** Vite 6 bringt Environment API, besseres SSR, Performance-Verbesserungen.
+**Status:** Das Repo laeuft inzwischen auf Vite 8 und dieser Punkt ist nicht mehr offen.
 
-**Empfehlung:** Migration planen, ist kein Breaking Change für die meisten Projekte.
+**Hinweis:** Weitere Vite-Arbeit betrifft eher Plugin- und Deprecation-Cleanup als ein Grundupgrade.
 
-**Aufwand:** Mittel (2-3h inkl. Testing)
+**Aufwand:** Erledigt
 
 ---
 
-### 🟠 D3 — ESLint 8 + TypeScript-ESLint 7 (ESLint 9 + TS-ESLint 8 verfügbar)
+### ✅ D3 — ESLint-/TypeScript-ESLint-Upgrade umgesetzt
 
 **Datei:** `package.json`
 
-**Problem:** ESLint 9 nutzt Flat Config. TypeScript-ESLint 8 bringt bessere Performance.
+**Status:** Das Repo nutzt inzwischen `eslint` 10 und `typescript-eslint` 8. Der reine Versionsupgrade ist damit erledigt.
 
-**Empfehlung:** Migration planen. Erfordert `.eslintrc.cjs` → `eslint.config.mjs` Umstellung.
+**Hinweis:** Offene Arbeit liegt eher in Regelqualitaet und schrittweisem Schaerfen bestehender Lint-Regeln als in der Tool-Version selbst.
 
-**Aufwand:** Mittel-Hoch (3-4h)
+**Aufwand:** Erledigt
 
 ---
 

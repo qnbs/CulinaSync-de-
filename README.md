@@ -1,218 +1,122 @@
-<div align="center">
-  <h1>CulinaSync</h1>
-  <p><strong>DE + EN Full Documentation</strong></p>
-  <p>
-    <em>Progressive Web App · Local-First · Multimodal AI · Native-Ready · Privacy-First · 2026 Best Practices</em>
-  </p>
-  <p>
-    <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19"></a>
-    <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"></a>
-    <a href="https://vitejs.dev/"><img src="https://img.shields.io/badge/Vite-5-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite"></a>
-    <a href="https://dexie.org/"><img src="https://img.shields.io/badge/IndexedDB-Dexie-323330?style=for-the-badge&logo=database&logoColor=white" alt="Dexie"></a>
-    <a href="https://github.com/qnbs/CulinaSync-de-/actions/workflows/codeql.yml"><img src="https://github.com/qnbs/CulinaSync-de-/actions/workflows/codeql.yml/badge.svg" alt="CodeQL"></a>
-    <a href="https://github.com/qnbs/CulinaSync-de-/actions/workflows/ci.yml"><img src="https://github.com/qnbs/CulinaSync-de-/actions/workflows/ci.yml/badge.svg" alt="CI/CD"></a>
-    <a href="https://github.com/qnbs/CulinaSync-de-/blob/main/budget.json"><img src="https://img.shields.io/badge/Lighthouse-Budget-green?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse Budget"></a>
-  </p>
-</div>
+# CulinaSync
 
----
+Local-first Koch-, Vorrats-, Rezept- und Einkaufslisten-App auf Basis von React, Vite, Dexie und GitHub Pages.
 
-# Universal Audit & Quality Board
+[Live-Demo](https://qnbs.github.io/CulinaSync-de-/) | [Architektur](./docs/ARCHITECTURE.md) | [Entwicklung](./docs/DEVELOPMENT.md) | [Deployment](./docs/DEPLOYMENT.md) | [Testing](./docs/TESTING.md) | [Troubleshooting](./docs/TROUBLESHOOTING.md) | [Beitragen](./CONTRIBUTING.md) | [Security](./SECURITY.md)
 
-- **Last Audit:** 2026-03-04
-- **Lighthouse:** LCP 1.7s, INP 80ms, CLS 0.03, TTI 2.2s (Score: 98)
-- **WCAG 2.2 AA:** Full compliance, focus-visible, skip-to-content, ARIA, touch targets, reduced motion
-- **Security:** IndexedDB Vault, API-Key encrypted, CSP, CodeQL, legal/security.txt
-- **CI/CD:** Lint, Test, Build, i18n, Lighthouse, CodeQL, PWA, Tauri/Capacitor Native
-- **PWA:** Standalone, offline, installable, Workbox, manifest, scope, deep-linking
-- **AI:** Gemini Vision, Whisper.cpp, local fallback, schema validation, privacy-first
-- **Data:** Local-First, encrypted sync, opt-in community sharing (IPFS/Nostr)
-- **Testing:** Vitest, RTL, MSW, coverage, accessibility checks
-- **Legal:** Open Source, educational, no liability, privacy-first
+## Ueberblick
 
----
+CulinaSync ist eine installierbare Progressive Web App fuer Haushaltsorganisation rund um Vorrat, Rezepte, Essensplanung und Einkauf. Die App ist local-first aufgebaut: persistente Domaindaten liegen in IndexedDB via Dexie, waehrend Redux Toolkit hauptsaechlich UI- und Session-Zustand verwaltet.
 
-## Inhaltsverzeichnis / Table of Contents
-- [Live Demo](#live-demo)
-- [Features](#features)
-- [Architektur](#architektur--architecture)
-- [Security & Privacy](#security--privacy)
-- [Accessibility](#accessibility)
-- [Performance](#performance)
-- [Testing & CI/CD](#testing--ci-cd)
-- [AI & Multimodal](#ai--multimodal)
-- [PWA & Native](#pwa--native)
-- [Community & Governance](#community--governance)
-- [Setup & Deployment](#setup--deployment)
-- [Contribution](#contribution)
-- [Roadmap](#roadmap)
-- [Legal & Audit](#legal--audit)
-- [Troubleshooting](#troubleshooting)
-- [English Quickstart](#english-quickstart)
+Die Anwendung laeuft lokal, auf GitHub Pages und optional in nativen Wrappern. KI-Funktionen sind optional und verwenden einen vom Nutzer hinterlegten Gemini-API-Key, der nicht in den Build eingebettet wird.
 
----
+## Kernfunktionen
 
-## Live Demo
-> **https://qnbs.github.io/CulinaSync-de-/**
+- Vorratsverwaltung mit Ablaufdaten, Filterung, Suche und Smart-Input.
+- Rezeptbuch mit Detailansichten, Zutatenabgleich und Exportfunktionen.
+- Essensplanung mit planerischer Uebersicht und Querverknuepfung zu Rezepten.
+- Einkaufsliste mit Kategorisierung und Sprach-/Smart-Input.
+- KI-Chef fuer Rezept- und Listenunterstuetzung auf Basis von Gemini.
+- PWA-Unterstuetzung mit Offline-Grundfaehigkeit, Installierbarkeit und GitHub-Pages-Deployment.
+- Deutsche und englische UI-Texte ueber i18next.
 
----
+## Tech-Stack
 
-## Features
-- ✨ **Multimodal Input:** Kamera → Gemini Vision, OCR, Barcode, Sprache (Whisper.cpp, Browser)
-- 🧠 **KI-Rezepte:** Schema-validiert, lokal/offline fallback, Gemini API
-- 🛒 **Smart Shopping:** Text, Sprache, Barcode, OCR, Drag & Drop, Kalenderexport
-- 🥗 **Nährwert & Allergie:** Lokale Datenbank, Makros, Allergene, Health Connect Export (Apple/Google/Samsung)
-- 🏠 **Local-First:** IndexedDB, Dexie, verschlüsselter Sync, kein Cloud-Zwang
-- 🌐 **PWA & Native:** Installierbar, offline, Deep-Linking, Tauri/Capacitor Wrapper
-- 🦾 **Accessibility:** WCAG 2.2 AA, Focus, ARIA, Touch, Reduced Motion, Skip-to-Content
-- 🔒 **Security:** API-Key Vault, CSP, CodeQL, legal/security.txt, Privacy-by-Design
-- 🌍 **Community:** Opt-in Rezept-Sharing via IPFS/Nostr, anonymisiert
-- 🧩 **Atomic Design:** Modular, testbar, i18n, Dark-Mode, Tailwind
+- React 19
+- TypeScript 5
+- Vite 8
+- Redux Toolkit
+- Dexie / IndexedDB
+- Vitest + MSW
+- GitHub Actions + GitHub Pages
+- pnpm 10
 
----
+## Architektur in Kurzform
 
-## Architektur / Architecture
-- **React 19 + Compiler:** Modernste React-Features, Memoization, Code-Splitting
-- **Vite + PWA:** Schnell, HMR, Workbox, Manifest, Lighthouse-Budget
-- **Redux Toolkit:** UI/Session-State, Dexie für Domaindaten
-- **Dexie/IndexedDB:** Source of Truth, reaktive Queries, Vault für Secrets
-- **Gemini/Whisper:** AI-Integration, Vision, Speech, Fallbacks, Privacy-First
-- **Repositories:** Transaktionale Businesslogik, Validierung, Hash-Checks
-- **Service Worker:** CacheFirst/NetworkFirst, Offline-Strategien
-- **Tauri/Capacitor:** Native-Ready, Deep-Linking, Secure Shell
+- `index.tsx` initialisiert i18n, Redux Provider und Persist Gate.
+- `src/App.tsx` orchestriert Navigation, Lazy Loading, Command Palette, Voice-Trigger und globale Modals.
+- `src/store/` enthaelt Redux-Slices fuer UI-/Session-Zustand und Persist-Konfiguration.
+- `src/services/db.ts` ist der Einstiegspunkt fuer Datenbank- und Repository-Zugriffe.
+- `src/hooks/useMealPlan.ts` und `src/hooks/useShoppingList.ts` lesen reaktive Daten aus Dexie via `useLiveQuery`.
+- `src/components/` enthaelt Seiten sowie Feature-Unterordner fuer spezifische Teiloberflaechen.
 
----
+Mehr Details stehen in [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) und [docs/PROJECT-STRUCTURE.md](./docs/PROJECT-STRUCTURE.md).
 
-## Security & Privacy
-- **API-Key:** Niemals im Build, niemals in localStorage, nur verschlüsselt in IndexedDB
-- **CSP:** Strikte Policies für Web/Tauri, keine Inline-Skripte
-- **Data Vault:** Alle sensiblen Daten lokal, optional verschlüsselt synchronisierbar
-- **Legal/Security.txt:** Offen, transparent, Kontakt für Security-Reports
-- **CodeQL:** Automatisierte Security-Analyse in CI/CD
-- **Opt-in Sharing:** Community-Features nur auf Wunsch, Privacy-by-Default
+## Schnellstart
 
----
+### Voraussetzungen
 
-## Accessibility
-- **WCAG 2.2 AA:** Vollständige Umsetzung, geprüft mit axe, Lighthouse, manuell
-- **Focus-Visible:** Immer sichtbar, Outline, keine Obscured-Focus
-- **Touch Targets:** ≥48px, mobile-friendly
-- **ARIA:** Labels, Live-Regions, Roles, Skip-to-Content, Screenreader-Optimierung
-- **Reduced Motion:** media-query, Animationen abschaltbar
-- **Consistent Help:** Hilfelinks, Tooltips, verständliche Fehler
-- **Accessible Auth:** Kein Zwangs-Login, keine CAPTCHAs
+- Node.js 22 oder neuer
+- pnpm 10 oder neuer
 
----
+### Installation
 
-## Performance
-- **React Compiler:** Aktiviert, Memoization, useCallback, useMemo
-- **Code-Splitting:** Lazy Loading, Suspense, dynamische Imports
-- **Bundle-Budget:** budget.json, Lighthouse CI, <250kb Zielgröße
-- **PWA:** Workbox, Cache-Strategien, Offline-First, Fast-First
-- **Lighthouse:** LCP <2s, INP <100ms, CLS <0.1, TTI <2.5s
-- **Canvas/Worker:** (optional) requestAnimationFrame, Offscreen-Worker
+```bash
+pnpm install
+```
 
----
+### Entwicklung starten
 
-## Testing & CI/CD
-- **Vitest:** Unit, Integration, Coverage
-- **Testing Library:** RTL, MSW, Accessibility-Checks
-- **ESLint:** Strict, React 19, TypeScript, Prettier
-- **CI/CD:** Lint, Test, Build, i18n, Lighthouse, CodeQL, PWA, Release
-- **Reproducible Builds:** Deterministisch, Release-Tagging
+```bash
+pnpm run dev
+```
 
----
+### Wichtige Befehle
 
-## AI & Multimodal
-- **Gemini Vision:** Bilderkennung, Zutatenextraktion, fallbackfähig
-- **Whisper.cpp:** Lokale Spracherkennung, WebAssembly, Privacy-First
-- **Schema-Validation:** KI-Antworten immer strukturiert, keine Halluzinationen
-- **Offline-Fallback:** Dummy- und Heuristik-Logik bei KI-Ausfall
-- **Voice 2.0:** Moduswahl, Browser/Whisper, ARIA-live
+```bash
+pnpm run lint
+pnpm run test
+pnpm run build
+pnpm run test:coverage
+pnpm run check:bundle-budget
+pnpm run preview
+```
 
----
+## KI und API-Key
 
-## PWA & Native
-- **Manifest:** Standalone, Scope, Icons, Theme, Shortcuts
-- **Workbox:** SW-Strategien, Offline, Update-Flow
-- **Tauri/Capacitor:** Native-Wrapper, Deep-Linking, Secure Shell
-- **Installierbar:** Desktop, Mobile, Add-to-Home
-- **Deep-Linking:** culinasync://recipe/123, Shoppinglist etc.
+- Gemini-Aufrufe leben ausschliesslich in `src/services/geminiService.ts`.
+- Der API-Key wird durch den Nutzer ueber die Einstellungen hinterlegt.
+- Der Key wird nicht ueber `process.env`, `VITE_*`, `localStorage` oder den Build verteilt.
+- Die Speicherung erfolgt obfuskiert in IndexedDB ueber `src/services/apiKeyService.ts`.
 
----
+## Deployment
 
-## Community & Governance
-- **IPFS/Nostr:** Opt-in Rezept-Sharing, anonymisiert, privacy-first
-- **Open Source:** MIT, Community-Driven, Contribution Guide
-- **Security.txt:** Responsible Disclosure, PGP, Acknowledgements
-- **Legal.txt:** Haftungsausschluss, Bildungszweck
-- **Roadmap:** Transparent, Community-Voting
+Das Repo deployt automatisch auf GitHub Pages, wenn `main` aktualisiert wird.
 
----
+- CI: `.github/workflows/ci.yml`
+- Deploy: `.github/workflows/deploy.yml`
+- CodeQL: `.github/workflows/codeql.yml`
 
-## Setup & Deployment
-- **Node.js 18+, npm 9+**
-- **Install:** `npm install`
-- **Dev:** `npm run dev`
-- **Build:** `npm run build`
-- **Test:** `npm run test`
-- **Lint:** `npm run lint`
-- **Preview:** `npm run preview`
-- **Deploy:** GitHub Actions, Pages, Tauri/Capacitor
-- **API-Key:** In-App unter Einstellungen
+Die aktuelle Pages-URL ist auf den Repo-Namen ausgerichtet. `vite.config.ts` setzt `base` in GitHub Actions automatisch auf `/CulinaSync-de-/`.
 
----
+## Qualitaet und Sicherheit
 
-## Contribution
-- **Atomic Design:** Komponenten, Hooks, Services, Slices, Repositories
-- **i18n:** Alle UI-Texte in `de` und `en`
-- **Security:** Keine Secrets im Source/Env/LocalStorage
-- **Tests:** Vor PR: `npm run lint && npm run test && npm run build`
-- **Accessibility:** ARIA, Focus, Touch, Help, Reduced Motion
-- **Docs:** README, Changelog, Audit-Report aktuell halten
+- ESLint fuer statische Qualitaetschecks.
+- Vitest und MSW fuer Tests.
+- CodeQL fuer Security-Scanning.
+- Bundle-Budget-Check ueber `scripts/check-bundle-budget.mjs`.
+- Persistenter Browser-Storage fuer Redux ueber einen expliziten Adapter statt fragiler Default-Interop.
+- Settings-Aenderungen werden ueber eine erlaubte Mutator-Map statt ueber freie Objektpfade geschrieben.
+- Downloads werden mit erlaubten MIME-Typen und bereinigten Dateinamen erzeugt.
 
----
+## Dokumentation
 
-## Roadmap
-- [x] Multi-Modal Input (Kamera, Vision, OCR, Barcode, Sprache)
-- [x] Health Connect (Apple/Google/Samsung Export)
-- [x] Community-Sharing (IPFS/Nostr, opt-in)
-- [x] Voice 2.0 (Whisper.cpp lokal)
-- [x] Native Wrapper (Tauri/Capacitor, Deep-Linking)
-- [x] Universal Audit (Performance, Security, Accessibility, Best Practices)
-- [ ] Erweiterte Computer-Vision (Objekterkennung, Barcode)
-- [ ] KI-gestützte Haushaltsautomatisierung
-- [ ] Noch mehr Privacy-Features (z.B. lokale Differential Privacy)
+- [docs/README.md](./docs/README.md): Dokumentationsindex
+- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md): System- und Datenarchitektur
+- [docs/PROJECT-STRUCTURE.md](./docs/PROJECT-STRUCTURE.md): Repo- und Ordnerstruktur
+- [docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md): Setup, lokale Entwicklung und Konventionen
+- [docs/TESTING.md](./docs/TESTING.md): Teststrategie und Testbefehle
+- [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md): CI/CD, Pages und Betriebsdetails
+- [docs/TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md): haeufige Fehlerbilder und Gegenmassnahmen
+- [CONTRIBUTING.md](./CONTRIBUTING.md): Beitragsregeln
+- [SECURITY.md](./SECURITY.md): Security-Prozess und Hinweise
+- [SUPPORT.md](./SUPPORT.md): Support- und Meldewege
 
----
+## Bekannte technische Punkte
 
-## Legal & Audit
-- **Legal Disclaimer:** Open Source, educational, no liability, privacy-first
-- **Security.txt:** Kontakt, PGP, Disclosure
-- **Audit-Report:** Siehe Abschnitt oben (Universal Audit & Quality Board)
-- **Lighthouse Budget:** budget.json
-- **CodeQL:** .github/workflows/codeql.yml
+- Die GitHub-Actions-Laufe sind gruen, aber GitHub-eigene Actions wie `actions/configure-pages`, `actions/upload-pages-artifact` und `actions/deploy-pages` melden derzeit weiterhin Node-20-Depracation-Warnungen, obwohl sie ueber `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` bereits auf Node 24 erzwungen werden. Das ist aktuell ein Upstream-Thema der GitHub-verwalteten Actions.
+- `settingsService.ts` und Redux Persist speichern Settings weiterhin ueber zwei Wege. Das ist im Repo bekannt und sollte bei kuenftigen Persistenz-Aenderungen bewusst konsolidiert werden.
 
----
+## Lizenz
 
-## Troubleshooting
-| Problem | Lösung |
-|---|---|
-| Leere Seite | base in vite.config.ts prüfen |
-| Assets fehlen | relative/base-aware Pfade |
-| SPA 404 | public/404.html + Root 404.html |
-| KI inaktiv | API-Key gesetzt? |
-| PWA nicht installierbar | HTTPS + kompatibler Browser |
-| Accessibility-Check | axe, Lighthouse, manuell |
-| Security-Check | CodeQL, npm audit, security.txt |
-
----
-
-## English Quickstart
-> See above for full English documentation and all advanced features. All code, docs, and UI are fully bilingual.
-
----
-
-<div align="center">
-  <small>Built with precision using React 19, Dexie, PWA standards, Gemini/Whisper AI, and 2026 best practices. Universal Audit: Performance, Security, Accessibility, Privacy, Community, and Governance – all in one.</small>
-</div>
+Das Projekt steht unter der in [LICENSE](./LICENSE) enthaltenen Lizenz.
