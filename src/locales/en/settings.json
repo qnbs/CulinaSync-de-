@@ -4,7 +4,34 @@
     "language": "Language",
     "english": "English",
     "german": "German",
-    "appearance": "Appearance",
+    "appearance": {
+      "accentColorTitle": "Accent color",
+      "colors": {
+        "amber": "Amber",
+        "rose": "Rose",
+        "sky": "Sky blue",
+        "emerald": "Emerald"
+      },
+      "highContrast": {
+        "title": "High contrast",
+        "description": "Improves readability of text and borders."
+      },
+      "kitchenMode": {
+        "title": "Kitchen mode",
+        "description": "Stronger contrast and clearer surfaces for everyday cooking."
+      },
+      "largeText": {
+        "title": "Large text",
+        "description": "Increases base font and UI sizing for better readability."
+      },
+      "preview": {
+        "title": "Live preview",
+        "action": "Action",
+        "cancel": "Cancel",
+        "status": "Status",
+        "active": "Active"
+      }
+    },
     "accentColor": "Accent Color",
     "highContrast": "High Contrast",
     "save": "Save",

@@ -4,7 +4,34 @@
     "language": "Sprache",
     "english": "Englisch",
     "german": "Deutsch",
-    "appearance": "Erscheinungsbild",
+    "appearance": {
+      "accentColorTitle": "Akzentfarbe",
+      "colors": {
+        "amber": "Bernstein",
+        "rose": "Rosenrot",
+        "sky": "Himmelblau",
+        "emerald": "Smaragd"
+      },
+      "highContrast": {
+        "title": "Hoher Kontrast",
+        "description": "Erhöht die Lesbarkeit von Texten und Rändern."
+      },
+      "kitchenMode": {
+        "title": "Kitchen-Modus",
+        "description": "Stärkere Kontraste und klare Flächen für den Kochalltag."
+      },
+      "largeText": {
+        "title": "Große Schrift",
+        "description": "Erhöht Grundschrift und UI-Größen für bessere Lesbarkeit."
+      },
+      "preview": {
+        "title": "Live-Vorschau",
+        "action": "Aktion",
+        "cancel": "Abbrechen",
+        "status": "Status",
+        "active": "Aktiv"
+      }
+    },
     "accentColor": "Akzentfarbe",
     "highContrast": "Hoher Kontrast",
     "save": "Speichern",
