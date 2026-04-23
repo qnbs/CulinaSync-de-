@@ -8,18 +8,32 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Hinzugefuegt
+- `@typescript/native-preview@beta` (TypeScript 7.0 Beta, Go-basierter Compiler): `tsgo`-Binary fuer bis zu 10x schnellere Typechecks
+- `type-check`-Script `tsgo` in `package.json` hinzugefuegt (ersetzt `pnpm exec tsc --noEmit` im Alltag)
+- `ROADMAP.md` neu erstellt: vollstaendige Milestones 0–7 auf Basis aller Audit-Findings, inkl. DevInfra, i18n, Architektur, Security, Testing, Dokumentation und TS7-GA
+- `docs/STATUS-2026-04-23.md` Status-Snapshot nach TS7-Upgrade und erstem Audit-Zyklus
+- i18n-Keys `app.pwaUpdate` (title, description, reload, later) in `de/core.json` und `en/core.json` fuer den PWA-Update-Banner ergaenzt
 - Neue Root-Dokumentation fuer Beitragende und Nutzer: `CONTRIBUTING.md`, `SECURITY.md`, `SUPPORT.md`, `CODE_OF_CONDUCT.md`
 - Neuer `docs/`-Bereich mit Architektur-, Struktur-, Entwicklungs-, Testing-, Deployment- und Troubleshooting-Dokumentation
 - Security-Audit-Bericht `docs/SECURITY-AUDIT-2026.md` mit Befunden zu Storage, API-Key-Handling, DOM-Rendering und Exporten
 
 ### Geaendert
+- `typescript` von `^5.2.2` auf `^6.0.3` angehoben (stabiler Tooling-Layer fuer ESLint, Vitest, Storybook)
+- Build-Script von `tsc && vite build` auf `tsgo && vite build` umgestellt (Go-Compiler)
+- `tsconfig.json`: `baseUrl` entfernt (in TS7 abgeschafft), `@/*`-Pfad-Alias auf `./src/*` korrigiert (relative Pfade erforderlich)
+- ESLint-Konfiguration bereinigt: redundanten zweiten Config-Block entfernt, der `react-hooks/exhaustive-deps` faelschlicherweise auf `error` ueberschrieb
+- PWA-Update-Banner in `App.tsx` von hardcodierten DE-Strings auf `t('app.pwaUpdate.*')` umgestellt
+- Footer-Jahr in `App.tsx` von statisch `2026` auf dynamisch `new Date().getFullYear()` umgestellt
+- Indent-Bug im zweiten `runtimeCaching`-Eintrag in `vite.config.ts` korrigiert (fehlende 2 Leerzeichen)
+- `healthConnectService.ts`: Fehlende `link.rel = 'noopener noreferrer'` im JSON-Export nachgeholt (Sicherheits-Haertung analog zum CSV-Export)
 - `README.md` vollstaendig auf den tatsaechlichen Projektstand mit pnpm, Vite 8, GitHub Pages und aktueller Architektur aktualisiert
 - `.github/copilot-instructions.md` an den aktuellen Tooling- und Workflow-Stand mit pnpm und Vite 8 angepasst
 - `.github/copilot-instructions.md` um die Vorgabe erweitert, vor Full-Builds immer erst Diagnostics und Typecheck fuer den geaenderten Slice auszufuehren
 - `.github/copilot-instructions.md` um Commit-/Push-Gates fuer Diagnostics, Tests, Typecheck und Lint erweitert; Formatter nur wenn im Repo konfiguriert
-- `AUDIT.md` um einen aktuellen Status-Block fuer die zuletzt behobenen Laufzeit-, Security- und Pipeline-Themen ergaenzt
-- i18n-Ressourcen von monolithischen `translation.json`-Dateien auf aggregierte Sprachdomänen (`core`, `settings`, `features`) pro Sprache umgestellt
-- Root- und Fachdokumentation auf den aktuellen Accessibility-, i18n- und Validierungsstand synchronisiert und um `docs/STATUS-2026-04-22.md` ergaenzt
+- `AUDIT.md` um aktuellen Status-Block fuer die behobenen Laufzeit-, Security- und Pipeline-Themen sowie den TS7-Upgrade-Abschluss ergaenzt
+- i18n-Ressourcen von monolithischen `translation.json`-Dateien auf aggregierte Sprachdomaenen (`core`, `settings`, `features`) pro Sprache umgestellt
+- Root- und Fachdokumentation auf den aktuellen Accessibility-, i18n- und Validierungsstand synchronisiert und um `docs/STATUS-2026-04-22.md` und `docs/STATUS-2026-04-23.md` ergaenzt
+- `docs/DEVELOPMENT.md` um `tsgo`-Workflow, Unterschied `tsgo`/`tsc` und aktualisierte Validierungsreihenfolge ergaenzt
 
 ### Behoben
 - Live-Demo-Black-Screen durch expliziten Redux-Persist-Storage-Adapter behoben

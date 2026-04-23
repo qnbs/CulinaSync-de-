@@ -5,6 +5,22 @@
 
 ---
 
+## Status-Update 2026-04-23
+
+TypeScript-7.0-Beta-Upgrade und ESLint-Config-Fix abgeschlossen:
+
+- `typescript` auf `^6.0.3` angehoben (stabiler Tooling-Layer fuer ESLint, Vitest, Storybook).
+- `@typescript/native-preview@beta` als devDependency hinzugefuegt — liefert `tsgo`-Binary (Go-basierter Compiler, bis zu 10x schneller als `tsc`).
+- Build-Script auf `tsgo && vite build` umgestellt; `type-check`-Script `tsgo` hinzugefuegt.
+- `tsconfig.json` fuer TS7-Kompatibilitaet angepasst: `baseUrl` entfernt (in TS7 abgeschafft), `@/*`-Pfad auf `./src/*` korrigiert (relative Pfade erzwungen).
+- ESLint-Konfigurationsfehler behoben: redundanter zweiter Config-Block, der `react-hooks/exhaustive-deps` faelschlicherweise auf `error` ueberschrieb, entfernt.
+- `ROADMAP.md` neu erstellt: vollstaendige Milestones 0-7 als strategischer Rahmen fuer alle offenen und geplanten Arbeiten.
+- Alle Validierungsschritte (tsgo, lint, test, build, bundle-budget) beendet gruen.
+
+Still offen: Alles in ROADMAP.md ab Milestone 1 (DevInfra, i18n, Architektur, Security, Testing, Doku, TS7-GA).
+
+---
+
 ## Status-Update 2026-04-22
 
 Seit dem urspruenglichen Audit wurden mehrere kritische Betriebs- und Sicherheitsprobleme bereits behoben:

@@ -48,17 +48,4 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'error',
     },
   },
-  {
-    files: ['**/*.{js,jsx,ts,tsx}'],
-    plugins: {
-      '@typescript-eslint': tseslint.plugin,
-      'react-hooks': reactHooksPlugin,
-    },
-    rules: {
-      'react/prop-types': 'off',
-      'react/display-name': 'off',
-      '@typescript-eslint/no-explicit-any': 'error',
-      'react-hooks/exhaustive-deps': 'error',
-    },
-  }
 );

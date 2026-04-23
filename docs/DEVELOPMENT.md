@@ -22,14 +22,29 @@ pnpm run dev
 Weitere zentrale Befehle:
 
 ```bash
+pnpm run type-check      # Schneller Typecheck via tsgo (TypeScript 7.0 Beta, Go-Compiler)
 pnpm run lint
 pnpm run test
-pnpm run build
+pnpm run build           # tsgo && vite build
 pnpm run test:coverage
 pnpm run analyze:bundle
 pnpm run check:bundle-budget
 pnpm run preview
 ```
+
+## TypeScript-Binaries
+
+Das Repo nutzt zwei TypeScript-Binaries nebeneinander:
+
+| Binary | Paket | Zweck |
+|---|---|---|
+| `tsgo` | `@typescript/native-preview` | Schneller Build/Typecheck (Go-Compiler, bis zu 10x schneller) |
+| `tsc` | `typescript` | Tooling-Layer (ESLint, Vitest, Storybook konsumieren die TS-API) |
+
+Fuer den taeglichen Workflow gilt:
+- `pnpm run type-check` oder `pnpm exec tsgo` fuer schnelle Typechecks.
+- `pnpm run build` ruft `tsgo && vite build` auf.
+- `tsc` wird automatisch von ESLint und Vitest ueber die stabile `typescript`-Version genutzt — keine manuelle Anpassung noetig.
 
 ## Wichtige Konventionen
 
@@ -61,7 +76,7 @@ pnpm run preview
 ## Empfohlene Validierungsreihenfolge
 
 1. Diagnostics fuer die geaenderten Dateien pruefen.
-2. Bei TS-Slices mindestens einen TypeScript-Check fuer den betroffenen Bereich oder `pnpm exec tsc --noEmit` ausfuehren.
+2. Bei TS-Slices `pnpm run type-check` (`tsgo`) oder `pnpm exec tsgo` ausfuehren.
 3. Bei Codeaenderungen einen fokussierten ESLint- oder Testlauf fuer den betroffenen Slice ausfuehren.
 4. Erst danach den groesseren Integrationslauf mit `pnpm run lint`, `pnpm run test` oder `pnpm run build` starten.
 
