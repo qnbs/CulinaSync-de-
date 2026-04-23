@@ -11,6 +11,15 @@ const chunkGroups: Array<[string, string[]]> = [
   ['vendor-redux', ['@reduxjs/toolkit', 'react-redux', 'redux-persist']],
   ['vendor-dexie', ['dexie', 'dexie-react-hooks']],
   ['vendor-windowing', ['react-window']],
+  ['vendor-i18n', ['i18next', 'react-i18next', 'i18next-browser-languagedetector', 'i18next-http-backend']],
+  ['vendor-icons', ['lucide-react']],
+  ['vendor-ai', ['@google/genai']],
+  ['vendor-forms', ['react-hook-form', '@hookform/resolvers', 'zod', 'dompurify']],
+  // Heavy/optional libs — excluded from SW precache via globIgnores, runtime-cached instead
+  ['vendor-scanner', ['@ericblade/quagga2', 'tesseract.js']],
+  ['vendor-tour', ['react-joyride']],
+  ['vendor-faker', ['@faker-js/faker']],
+  ['vendor-workbox', ['workbox-window', 'workbox-core', 'workbox-routing', 'workbox-strategies', 'workbox-precaching', 'workbox-expiration', 'workbox-cacheable-response']],
 ];
 
 // GitHub Pages subpath: set automatically in CI via GITHUB_ACTIONS env
@@ -36,6 +45,12 @@ export default defineConfig({
           '**/html2canvas.esm-*.js',
           '**/papaparse.min-*.js',
           '**/index.es-*.js',
+          // Large vendor chunks excluded from precache — runtime-cached on first use
+          '**/vendor-scanner-*.js',
+          '**/vendor-tour-*.js',
+          '**/vendor-faker-*.js',
+          '**/vendor-workbox-*.js',
+          '**/vendor-misc-*.js',
         ],
         runtimeCaching: [
           {
@@ -45,6 +60,20 @@ export default defineConfig({
               cacheName: 'export-libs-cache',
               expiration: {
                 maxEntries: 12,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          {
+          urlPattern: /\/assets\/(vendor-scanner-|vendor-tour-|vendor-faker-|vendor-workbox-|vendor-misc-).*\.js$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'heavy-vendor-cache',
+              expiration: {
+                maxEntries: 20,
                 maxAgeSeconds: 60 * 60 * 24 * 30,
               },
               cacheableResponse: {
@@ -125,6 +154,14 @@ export default defineConfig({
     cssCodeSplit: true,
     assetsInlineLimit: 2048,
     reportCompressedSize: true,
+    modulePreload: {
+      // Prevent heavy optional chunks from being preloaded on every page load.
+      // They are loaded on demand via dynamic import() and cached by the SW.
+      resolveDependencies: (_filename, deps) => {
+        const deferredChunks = ['vendor-faker', 'vendor-scanner', 'vendor-tour', 'vendor-workbox', 'vendor-misc'];
+        return deps.filter(dep => !deferredChunks.some(chunk => dep.includes(`/${chunk}-`)));
+      },
+    },
     rollupOptions: {
       output: {
         manualChunks: (id) => {
@@ -138,7 +175,7 @@ export default defineConfig({
             }
           }
 
-          return undefined;
+          return 'vendor-misc';
         },
       },
     },
