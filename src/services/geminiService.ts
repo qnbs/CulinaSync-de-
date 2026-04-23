@@ -31,10 +31,12 @@ export const extractPantryItemsFromImage = async (imageFile: File): Promise<stri
     }
 };
 import type { GoogleGenAI } from "@google/genai";
+import DOMPurify from 'dompurify';
 import { retry } from './retryUtils';
 import { AppSettings, PantryItem, Recipe, StructuredPrompt, ShoppingListItem, RecipeIdea } from "../types";
 import { loadApiKey } from "./apiKeyService";
 import { logAppError } from './errorLoggingService';
+import i18next from 'i18next';
 
 // --- Dynamic AI Client (loaded from secure IndexedDB, never from env/build) ---
 let _aiClient: GoogleGenAI | null = null;
@@ -77,13 +79,15 @@ const isFiniteNumber = (value: unknown): value is number => typeof value === 'nu
 const isStringArray = (value: unknown): value is string[] => Array.isArray(value) && value.every(isString);
 
 const sanitizeWebContentForPrompt = (webContent: string): string => {
-    const withoutScriptBlocks = webContent
-        .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-        .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-        .replace(/<!--([\s\S]*?)-->/g, ' ')
-        .replace(/<[^>]+>/g, ' ');
+    // Use DOMPurify to strip all HTML safely — regex-based stripping misses edge cases
+    // like </script foo="bar"> which browsers accept as valid end tags (CodeQL js/bad-tag-filter)
+    const stripped = DOMPurify.sanitize(webContent, {
+        ALLOWED_TAGS: [],
+        ALLOWED_ATTR: [],
+        FORBID_CONTENTS: ['script', 'style', 'noscript'],
+    });
 
-    const normalizedLines = withoutScriptBlocks
+    const normalizedLines = stripped
         .split(/\r?\n/)
         .map((line) => line.replace(/\s+/g, ' ').trim())
         .filter(Boolean)
@@ -98,11 +102,11 @@ const parseAiJson = <T>(jsonText: string, validator: (value: unknown) => value i
     try {
         parsed = JSON.parse(jsonText);
     } catch {
-        throw new Error('Die KI hat ungueltiges JSON gesendet.');
+        throw new Error('invalid JSON');
     }
 
     if (!validator(parsed)) {
-        throw new Error('Die KI hat eine Antwort mit falscher Struktur gesendet.');
+        throw new Error('invalid structure');
     }
 
     return parsed;
@@ -217,9 +221,7 @@ const simpleHash = (str: string): string => {
 const getAIClient = async (): Promise<GoogleGenAI> => {
   const key = await loadApiKey();
   if (!key) {
-    throw new Error(
-      "Kein API-Schlüssel konfiguriert. Bitte hinterlege deinen Google Gemini API-Schlüssel unter Einstellungen → API-Schlüssel."
-    );
+    throw new Error(i18next.t('gemini.error.noApiKey'));
   }
   const keyHash = simpleHash(key);
   if (!_aiClient || _lastKeyHash !== keyHash) {
@@ -349,27 +351,30 @@ const shoppingListSchema = {
     required: ["items"]
 };
 
+const isNetworkError = (errMsg: string): boolean =>
+    errMsg.includes('FETCH_ERROR') || errMsg.includes('NetworkError') || errMsg.includes('Failed to fetch') || errMsg.includes('network');
+
 const handleGeminiError = (error: unknown, context: string): Error => {
     console.error(`Error calling Gemini for ${context}:`, error);
     void logAppError(error, `gemini.${context}`);
     const errorMessage = (error as Error)?.message || String(error);
 
     if (errorMessage.includes('API key not valid') || errorMessage.includes('API_KEY_INVALID')) {
-         return new Error("Der API-Schlüssel ist ungültig. Bitte überprüfe ihn unter Einstellungen → API-Schlüssel.");
+         return new Error(i18next.t('gemini.error.invalidApiKey'));
     }
-    if (errorMessage.includes('FETCH_ERROR') || errorMessage.includes('NetworkError')) {
-        return new Error("Der KI-Dienst konnte nicht erreicht werden. Bitte prüfe deine Netzwerkverbindung.");
+    if (isNetworkError(errorMessage)) {
+        return new Error(i18next.t('gemini.error.networkError'));
     }
      if (errorMessage.includes('429')) {
-        return new Error("Zu viele Anfragen an den KI-Dienst. Bitte warte einen Moment.");
+        return new Error(i18next.t('gemini.error.rateLimited'));
     }
-    if (errorMessage.includes('ungueltiges JSON') || errorMessage.includes('falscher Struktur') || errorMessage.includes('invalid structure')) {
-        return new Error("Der KI-Dienst hat eine ungueltige Antwort gesendet. Bitte versuche es erneut.");
+    if (errorMessage.includes('ungueltiges JSON') || errorMessage.includes('falscher Struktur') || errorMessage.includes('invalid structure') || errorMessage.includes('invalid JSON')) {
+        return new Error(i18next.t('gemini.error.invalidResponse'));
     }
-    if (errorMessage.includes('Kein API-Schlüssel konfiguriert')) {
+    if (errorMessage.includes('Kein API-Schlüssel konfiguriert') || errorMessage.includes('No API key configured') || errorMessage.includes(i18next.t('gemini.error.noApiKey'))) {
         return new Error(errorMessage);
     }
-    return new Error("Ein unerwarteter Fehler beim KI-Dienst ist aufgetreten.");
+    return new Error(i18next.t('gemini.error.unexpected'));
 };
 
 const constructBasePrompt = (
@@ -377,36 +382,40 @@ const constructBasePrompt = (
     pantryItems: PantryItem[],
     aiPreferences: AppSettings['aiPreferences']
 ): string => {
-  const pantryList = pantryItems.map(item => `${item.quantity} ${item.unit} ${item.name}`).join(', ') || 'leer';
+  const lang = i18next.language?.startsWith('en') ? 'en' : 'de';
+  const isEn = lang === 'en';
+  const pantryList = pantryItems.map(item => `${item.quantity} ${item.unit} ${item.name}`).join(', ') || (isEn ? 'empty' : 'leer');
   const userPromptParts: string[] = [];
-  userPromptParts.push(`Ein Nutzer möchte etwas kochen. Hier sind die Spezifikationen:`);
-  userPromptParts.push(`- Hauptwunsch: "${prompt.craving}"`);
+  userPromptParts.push(isEn
+    ? `A user wants to cook something. Here are the specifications:`
+    : `Ein Nutzer möchte etwas kochen. Hier sind die Spezifikationen:`);
+  userPromptParts.push(`- ${isEn ? 'Main request' : 'Hauptwunsch'}: "${prompt.craving}"`);
 
   if (prompt.includeIngredients.length > 0) {
-      userPromptParts.push(`- Muss folgende Zutaten enthalten: ${prompt.includeIngredients.join(', ')}`);
+      userPromptParts.push(`- ${isEn ? 'Must include' : 'Muss folgende Zutaten enthalten'}: ${prompt.includeIngredients.join(', ')}`);
   }
   if (prompt.excludeIngredients.length > 0) {
-      userPromptParts.push(`- Darf folgende Zutaten NICHT enthalten: ${prompt.excludeIngredients.join(', ')}`);
+      userPromptParts.push(`- ${isEn ? 'Must NOT include' : 'Darf folgende Zutaten NICHT enthalten'}: ${prompt.excludeIngredients.join(', ')}`);
   }
   if (prompt.modifiers.length > 0) {
-      userPromptParts.push(`- Gewünschte Eigenschaften des Gerichts: ${prompt.modifiers.join(', ')}`);
+      userPromptParts.push(`- ${isEn ? 'Desired properties' : 'Gewünschte Eigenschaften des Gerichts'}: ${prompt.modifiers.join(', ')}`);
   }
 
-  userPromptParts.push(`\n**Globale Nutzereinstellungen, die IMMER zu beachten sind:**`);
+  userPromptParts.push(`\n**${isEn ? 'Global user settings that MUST ALWAYS be respected' : 'Globale Nutzereinstellungen, die IMMER zu beachten sind'}:**`);
   if (aiPreferences.dietaryRestrictions.length > 0) {
-    userPromptParts.push(`- Zwingend erforderliche Ernährungsbeschränkungen: ${aiPreferences.dietaryRestrictions.join(', ')}.`);
+    userPromptParts.push(`- ${isEn ? 'Required dietary restrictions' : 'Zwingend erforderliche Ernährungsbeschränkungen'}: ${aiPreferences.dietaryRestrictions.join(', ')}.`);
   }
   if (aiPreferences.preferredCuisines.length > 0) {
-    userPromptParts.push(`- Bevorzugte Küchen: ${aiPreferences.preferredCuisines.join(', ')}.`);
+    userPromptParts.push(`- ${isEn ? 'Preferred cuisines' : 'Bevorzugte Küchen'}: ${aiPreferences.preferredCuisines.join(', ')}.`);
   }
   if (aiPreferences.customInstruction) {
-    userPromptParts.push(`- Generelle Anweisung des Nutzers: "${aiPreferences.customInstruction}".`);
+    userPromptParts.push(`- ${isEn ? "User's general instruction" : 'Generelle Anweisung des Nutzers'}: "${aiPreferences.customInstruction}".`);
   }
   
-  userPromptParts.push(`\n**Verfügbare Zutaten in der Vorratskammer:**`);
+  userPromptParts.push(`\n**${isEn ? 'Available pantry ingredients' : 'Verfügbare Zutaten in der Vorratskammer'}:**`);
   userPromptParts.push(pantryList);
   
-  userPromptParts.push(`\nBitte erstelle basierend auf ALL diesen Informationen eine passende, kreative Antwort.`);
+  userPromptParts.push(`\n${isEn ? 'Please create a suitable, creative response based on ALL this information.' : 'Bitte erstelle basierend auf ALL diesen Informationen eine passende, kreative Antwort.'}`);
 
   return userPromptParts.join('\n');
 }
@@ -419,7 +428,10 @@ export const generateRecipeIdeas = async (
     try {
         const ai = await getAIClient();
         const model = "gemini-2.5-flash";
-        const systemInstruction = `Du bist Culina, ein Weltklasse-Koch. Entwickle 3 kreative, unterschiedliche Rezeptideen auf Deutsch. Nutze deinen "Thinking Process", um sicherzustellen, dass die Ideen exakt zu den Vorräten und Einschränkungen passen.`;
+        const isEn = i18next.language?.startsWith('en');
+        const systemInstruction = isEn
+            ? `You are Culina, a world-class chef. Develop 3 creative, diverse recipe ideas in English. Use your "Thinking Process" to ensure the ideas precisely match the pantry items and restrictions.`
+            : `Du bist Culina, ein Weltklasse-Koch. Entwickle 3 kreative, unterschiedliche Rezeptideen auf Deutsch. Nutze deinen "Thinking Process", um sicherzustellen, dass die Ideen exakt zu den Vorräten und Einschränkungen passen.`;
         const fullPrompt = constructBasePrompt(prompt, pantryItems, aiPreferences);
         const response = await retry(() => ai.models.generateContent({
             model,
@@ -433,16 +445,16 @@ export const generateRecipeIdeas = async (
             }
         }), 3, 800);
         const jsonText = response.text?.trim();
-        if (!jsonText) throw new Error("Die KI hat eine leere Antwort zurückgegeben.");
+        if (!jsonText) throw new Error(i18next.t('gemini.error.emptyResponse'));
         const parsedData = parseAiJson(jsonText, isRecipeIdeasResponse);
         if (parsedData.ideas.length > 0) {
             return parsedData.ideas;
         } else {
-            throw new Error("Die KI hat eine Antwort mit falscher Struktur gesendet.");
+            throw new Error(i18next.t('gemini.error.invalidResponse'));
         }
     } catch (e: unknown) {
         const errMsg = (e as Error)?.message || String(e);
-        if (errMsg.includes('Netzwerk') || errMsg.includes('KI-Dienst konnte nicht erreicht werden')) {
+        if (isNetworkError(errMsg)) {
             // Offline-Fallback: Generiere Dummy-Ideen lokal
             const { fakerDE: faker } = await getFakerModule();
             const fallbackIdeas: RecipeIdea[] = Array.from({ length: 3 }).map(() => ({
@@ -464,11 +476,20 @@ export const generateRecipe = async (
     try {
         const ai = await getAIClient();
         const model = "gemini-2.5-flash";
+        const isEn = i18next.language?.startsWith('en');
         let fullPrompt = constructBasePrompt(prompt, pantryItems, aiPreferences);
-        fullPrompt += `\n\n**Spezifische Anforderung:**\nErstelle nun das VOLLSTÄNDIGE und detaillierte Rezept für die folgende, zuvor von dir vorgeschlagene Idee. Halte dich eng an Titel und Beschreibung der Idee.`;
-        fullPrompt += `\n- Titel: "${chosenIdea.recipeTitle}"`;
-        fullPrompt += `\n- Beschreibung: "${chosenIdea.shortDescription}"`;
-        const systemInstruction = `Du bist Culina, ein Weltklasse-Koch. Erstelle ein präzises, deutsches Rezept. Nutze deinen "Thinking Process", um die Kochschritte logisch zu strukturieren und sicherzustellen, dass keine Zutat in der Anleitung vergessen wird.`;
+        if (isEn) {
+            fullPrompt += `\n\n**Specific requirement:**\nNow create the COMPLETE and detailed recipe for the following idea you previously suggested. Stay close to the title and description of the idea.`;
+            fullPrompt += `\n- Title: "${chosenIdea.recipeTitle}"`;
+            fullPrompt += `\n- Description: "${chosenIdea.shortDescription}"`;
+        } else {
+            fullPrompt += `\n\n**Spezifische Anforderung:**\nErstelle nun das VOLLSTÄNDIGE und detaillierte Rezept für die folgende, zuvor von dir vorgeschlagene Idee. Halte dich eng an Titel und Beschreibung der Idee.`;
+            fullPrompt += `\n- Titel: "${chosenIdea.recipeTitle}"`;
+            fullPrompt += `\n- Beschreibung: "${chosenIdea.shortDescription}"`;
+        }
+        const systemInstruction = isEn
+            ? `You are Culina, a world-class chef. Create a precise recipe in English. Use your "Thinking Process" to logically structure the cooking steps and ensure no ingredient is missing from the instructions.`
+            : `Du bist Culina, ein Weltklasse-Koch. Erstelle ein präzises, deutsches Rezept. Nutze deinen "Thinking Process", um die Kochschritte logisch zu strukturieren und sicherzustellen, dass keine Zutat in der Anleitung vergessen wird.`;
         const response = await ai.models.generateContent({
                 model: model,
                 contents: fullPrompt,
@@ -482,17 +503,17 @@ export const generateRecipe = async (
         });
         const jsonText = response.text?.trim();
         if (!jsonText) {
-                throw new Error("Die KI hat eine leere Antwort zurückgegeben.");
+                throw new Error(i18next.t('gemini.error.emptyResponse'));
         }
         const recipeData = parseAiJson(jsonText, isRecipe);
         if (recipeData.ingredients.length > 0 && recipeData.instructions.length > 0) {
             return recipeData;
         } else {
-            throw new Error("Die KI hat eine Antwort mit falscher Struktur gesendet.");
+            throw new Error(i18next.t('gemini.error.invalidResponse'));
         }
     } catch (error) {
         const errMsg = (error as Error)?.message || String(error);
-        if (errMsg.includes('Netzwerk') || errMsg.includes('KI-Dienst konnte nicht erreicht werden')) {
+        if (isNetworkError(errMsg)) {
             // Offline-Fallback: Dummy-Rezept generieren
             const fallbackRecipe: Recipe = {
                 recipeTitle: chosenIdea.recipeTitle + ' (Offline)',
@@ -536,9 +557,23 @@ export const generateShoppingList = async (
     try {
         const ai = await getAIClient();
         const model = "gemini-2.5-flash";
-        const pantryList = pantryItems.map(item => item.name).join(', ') || 'keine';
-        const currentShoppingList = currentListItems.map(item => item.name).join(', ') || 'keine';
-        const fullPrompt = `
+        const isEn = i18next.language?.startsWith('en');
+        const pantryList = pantryItems.map(item => item.name).join(', ') || (isEn ? 'none' : 'keine');
+        const currentShoppingList = currentListItems.map(item => item.name).join(', ') || (isEn ? 'none' : 'keine');
+        const fullPrompt = isEn ? `
+            You are a shopping assistant for the CulinaSync app.
+            The user has made the following request for a shopping list: "${prompt}".
+
+            CONTEXT:
+            1.  **Pantry:** The following items are already in the pantry: ${pantryList}.
+            2.  **Shopping List:** The following items are already on the shopping list: ${currentShoppingList}.
+
+            Your task is to create a comprehensive shopping list in English that matches the user's request.
+            CONSIDER the pantry AND the existing shopping list. Do NOT add items that are already in either place, unless it is very likely that more of them will be needed (e.g. milk, eggs).
+            
+            Respond ONLY with a single, valid JSON object matching the provided schema.
+            Do not add any other text, markdown formatting or explanations before or after the JSON object.
+        ` : `
             Du bist ein Einkaufs-Assistent für die App CulinaSync.
             Der Benutzer hat folgende Anfrage für eine Einkaufsliste gestellt: "${prompt}".
 
@@ -562,17 +597,17 @@ export const generateShoppingList = async (
         });
         const jsonText = response.text?.trim();
         if (!jsonText) {
-            throw new Error("Die KI hat eine leere Antwort zurückgegeben.");
+            throw new Error(i18next.t('gemini.error.emptyResponse'));
         }
         const parsedData = parseAiJson(jsonText, isShoppingListResponse);
         if (parsedData.items.length >= 0) {
             return parsedData.items;
         } else {
-            throw new Error("Die KI hat eine Antwort mit falscher Struktur gesendet.");
+            throw new Error(i18next.t('gemini.error.invalidResponse'));
         }
     } catch (error) {
         const errMsg = (error as Error)?.message || String(error);
-        if (errMsg.includes('Netzwerk') || errMsg.includes('KI-Dienst konnte nicht erreicht werden')) {
+        if (isNetworkError(errMsg)) {
             // Offline-Fallback: Dummy-Einkaufsliste
             const fallbackItems = [
                 { name: 'Brot', quantity: 1, unit: 'Stück', category: 'Backwaren', sortOrder: 0 },
@@ -648,12 +683,12 @@ export const extractRecipeFromWebContent = async (
 
         const jsonText = response.text?.trim();
         if (!jsonText) {
-            throw new Error('AI returned an empty response.');
+            throw new Error(i18next.t('gemini.error.emptyResponse'));
         }
 
         const parsed = parseAiJson(jsonText, isRecipe);
         if (!parsed.recipeTitle || parsed.ingredients.length === 0 || parsed.instructions.length === 0) {
-            throw new Error('AI returned a response with invalid structure.');
+            throw new Error(i18next.t('gemini.error.invalidResponse'));
         }
         return parsed;
     } catch (e: unknown) {
@@ -714,7 +749,7 @@ export const verifyNutritionAndAllergensWithGemini = async (
 
         const jsonText = response.text?.trim();
         if (!jsonText) {
-            throw new Error('AI returned an empty verification response.');
+            throw new Error(i18next.t('gemini.error.emptyResponse'));
         }
 
         const parsed = parseAiJson(jsonText, isGeminiNutritionVerification);

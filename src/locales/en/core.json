@@ -95,6 +95,15 @@
       "stopVoiceControl": "Disable voice control",
       "settings": "Settings",
       "help": "Help"
-    }
-  }
+    }  },
+  "gemini": {
+    "error": {
+      "invalidApiKey": "The API key is invalid. Please check it under Settings \u2192 API Key.",
+      "networkError": "The AI service could not be reached. Please check your internet connection.",
+      "rateLimited": "Too many requests to the AI service. Please wait a moment.",
+      "invalidResponse": "The AI service returned an invalid response. Please try again.",
+      "unexpected": "An unexpected error occurred with the AI service.",
+      "noApiKey": "No API key configured. Please enter your Gemini API key under Settings.",
+      "emptyResponse": "The AI returned an empty response."
+    }  }
 }

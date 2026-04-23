@@ -111,9 +111,9 @@ const MealPlanModal: React.FC<{recipeId: number, onClose: () => void, onSave: ()
                     <div>
                 <label htmlFor="mealType" className="block text-sm font-medium text-zinc-400 mb-1">{t('recipeDetail.modal.mealType')}</label>
               <select id="mealType" value={mealType} onChange={e => setMealType(e.target.value as 'Frühstück' | 'Mittagessen' | 'Abendessen')} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:outline-none">
-                  <option>{t('recipeDetail.mealType.breakfast')}</option>
-                  <option>{t('recipeDetail.mealType.lunch')}</option>
-                  <option>{t('recipeDetail.mealType.dinner')}</option>
+                  <option value="Frühstück">{t('recipeDetail.mealType.breakfast')}</option>
+                  <option value="Mittagessen">{t('recipeDetail.mealType.lunch')}</option>
+                  <option value="Abendessen">{t('recipeDetail.mealType.dinner')}</option>
                         </select>
                     </div>
                     <div className="flex justify-end gap-3 pt-4">

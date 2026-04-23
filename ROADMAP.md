@@ -60,8 +60,8 @@
 
 | # | Maßnahme | Herkunft | Komponente / Service | Strings | Aufwand | Status |
 |---|---|---|---|---|---|---|
-| 2.1 | Feature-Subkomponenten: Pantry, Shopping, Meal, Recipe, Settings | I1 Welle 2 | diverse `src/components/*/` | ~55 | Hoch (4–6 h) | 🔲 |
-| 2.2 | Services und Prompts: `geminiService`, `voiceCommands`, `exportService` | I1 Welle 3 | `src/services/` | ~43 | Mittel (2–3 h) | 🔲 |
+| 2.1 | Feature-Subkomponenten: `ShoppingListHeader`, `RecipeBookHeader`, `VoiceControlWhisperUI`, `ShoppingListQuickAdd`, `Onboarding` Tour-Steps, `AiChefPanel` Suggestions-Arrays | I1 Welle 2 | diverse `src/components/*/` | ~25 | Mittel (2–3 h) | ✅ |
+| 2.2 | Services und Prompts: `geminiService` (Language-Aware Prompts + Error-Messages), `voiceCommands` (Toast i18n + EN-Keywords), `exportService` (MealType-Label), `DayColumn`/`MealPlanner` (MealType Display), `foodDatabase` (Kategorie-Lookup) | I1 Welle 3 | `src/services/`, `src/components/` | ~40 | Hoch (4–6 h) | ✅ |
 | 2.3 | Verbleibende hartcodierte `aria-label`-Werte lokalisieren | A7 | `src/components/` | — | Niedrig (1 h) | 🔲 |
 
 **Hinweis:** Gemini-Prompts können ggf. auf Deutsch bleiben, wenn der KI-Kontext deutsch sein soll — Einzelfallentscheidung bei 2.2.
@@ -89,6 +89,7 @@
 | 4.1 | Alle Gemini-Responses mit Zod oder manuellen Type-Guards validieren (post-`JSON.parse`) | S5 | `src/services/geminiService.ts` | Mittel (2–3 h) | 🔲 |
 | 4.2 | API-Key-Kommentare korrigieren: "obfuskiert" statt "verschlüsselt" | S1 | `src/services/apiKeyService.ts` | Niedrig (15 min) | 🔲 |
 | 4.3 | CSP auf Header-Ebene für Tauri / künftiges Hosting vorbereiten | S4 | `src-tauri/tauri.conf.json`, Deployment-Doku | Mittel (1–2 h) | 🔲 |
+| 4.4 | CodeQL Alert #7 beheben: schlechten HTML-Regex in `sanitizeWebContentForPrompt` durch DOMPurify ersetzen | CodeQL #7 | `src/services/geminiService.ts` | Niedrig (30 min) | ✅ |
 
 ---
 

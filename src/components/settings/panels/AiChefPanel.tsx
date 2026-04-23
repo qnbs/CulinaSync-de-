@@ -4,8 +4,8 @@ import TagInput from '../../TagInput';
 import { BrainCircuit, Sparkles, Thermometer } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-const DIETARY_SUGGESTIONS = ['Vegetarisch', 'Vegan', 'Glutenfrei', 'Laktosefrei', 'Nussfrei', 'Wenig Kohlenhydrate', 'Paleo', 'Keto'];
-const CUISINE_SUGGESTIONS = ['Italienisch', 'Asiatisch', 'Indisch', 'Mexikanisch', 'Deutsch', 'Französisch', 'Mediterran', 'Levantinisch'];
+const DIETARY_SUGGESTIONS_FALLBACK = ['Vegetarisch', 'Vegan', 'Glutenfrei', 'Laktosefrei', 'Nussfrei', 'Wenig Kohlenhydrate', 'Paleo', 'Keto'];
+const CUISINE_SUGGESTIONS_FALLBACK = ['Italienisch', 'Asiatisch', 'Indisch', 'Mexikanisch', 'Deutsch', 'Franz\u00f6sisch', 'Mediterran', 'Levantinisch'];
 
 interface AiChefPanelProps {
     settings: AppSettings;
@@ -15,6 +15,8 @@ interface AiChefPanelProps {
 export const AiChefPanel: React.FC<AiChefPanelProps> = ({ settings, onChange }) => {
     const { t } = useTranslation();
     const creativity = settings.aiPreferences.creativityLevel ?? 0.7;
+    const dietarySuggestions = t('settings.aiChef.dietarySuggestions', { returnObjects: true, defaultValue: DIETARY_SUGGESTIONS_FALLBACK }) as string[];
+    const cuisineSuggestions = t('settings.aiChef.cuisineSuggestions', { returnObjects: true, defaultValue: CUISINE_SUGGESTIONS_FALLBACK }) as string[];
 
     const getCreativityLabel = (val: number) => {
         if (val < 0.3) return { label: t('settings.aiChef.creativity.conservative.label'), desc: t('settings.aiChef.creativity.conservative.desc') };
@@ -68,7 +70,7 @@ export const AiChefPanel: React.FC<AiChefPanelProps> = ({ settings, onChange }) 
                         tags={settings.aiPreferences.dietaryRestrictions} 
                         setTags={(tags) => onChange('aiPreferences.dietaryRestrictions', tags)} 
                         placeholder={t('settings.aiChef.dietaryPlaceholder')} 
-                        suggestions={DIETARY_SUGGESTIONS} 
+                        suggestions={dietarySuggestions} 
                     />
                 </div>
 
@@ -78,7 +80,7 @@ export const AiChefPanel: React.FC<AiChefPanelProps> = ({ settings, onChange }) 
                         tags={settings.aiPreferences.preferredCuisines} 
                         setTags={(tags) => onChange('aiPreferences.preferredCuisines', tags)} 
                         placeholder={t('settings.aiChef.cuisinesPlaceholder')} 
-                        suggestions={CUISINE_SUGGESTIONS}
+                        suggestions={cuisineSuggestions}
                     />
                 </div>
 

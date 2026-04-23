@@ -2,8 +2,21 @@ import { useShoppingListContext } from '../../contexts/ShoppingListContext';
 import { ShoppingListItemComponent } from './ShoppingListItemComponent';
 import { ChevronDown, GripVertical } from 'lucide-react';
 import { ShoppingListItem } from '../../types';
+import { useTranslation } from 'react-i18next';
 
 export const ShoppingListActive = () => {
+    const { t } = useTranslation();
+    const CATEGORY_KEY_MAP: Record<string, string> = {
+        'Obst & Gemüse': 'fruitsVegetables',
+        'Milchprodukte & Eier': 'dairy',
+        'Backwaren': 'bakery',
+        'Fette & Öle': 'fatsOils',
+        'Fleisch & Fisch': 'meat',
+        'Getreide & Hülsenfrüchte': 'grainsLegumes',
+        'Nüsse & Samen': 'nutsSeeds',
+    };
+    const getCategoryLabel = (category: string) =>
+        t(`pantry.categories.${CATEGORY_KEY_MAP[category] ?? ''}`, { defaultValue: category });
     const {
         groupedList,
         collapsedCategories,
@@ -62,7 +75,7 @@ export const ShoppingListActive = () => {
                                     className="font-bold text-[var(--color-accent-400)] text-lg flex items-center gap-2"
                                 >
                                     {!isShoppingMode && <GripVertical size={16} className="text-zinc-600" />}
-                                    {category} 
+                                    {getCategoryLabel(category)} 
                                     <span className="text-xs font-normal text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded-full">{items.length}</span>
                                 </h3>
                             )}

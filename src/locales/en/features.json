@@ -107,7 +107,10 @@
     "startTour": "Start tour",
     "tour": {
       "title": "Guided tour",
-      "description": "Learn navigation and core areas in 3 steps."
+      "description": "Learn navigation and core areas in 3 steps.",
+      "step1": "Up here you find navigation, voice control, and quick access to settings.",
+      "step2": "Here you work in the current area: Pantry, Recipes, Planner, or Shopping List.",
+      "step3": "Down here you can quickly switch between modules in your daily cooking routine."
     },
     "demo": {
       "title": "Interactive tutorial",
@@ -118,6 +121,11 @@
     }
   },
   "mealPlanner": {
+    "mealTypes": {
+      "Fr\u00fchst\u00fcck": "Breakfast",
+      "Mittagessen": "Lunch",
+      "Abendessen": "Dinner"
+    },
     "card": {
       "removeNoteTitle": "Remove note",
       "recipeUnavailable": "Recipe unavailable",
@@ -187,6 +195,18 @@
     }
   },
   "shoppingList": {
+    "header": {
+      "title": "Shopping list",
+      "titleShoppingMode": "Shopping mode",
+      "subtitle": "Plan your next shopping trip.",
+      "subtitleShoppingMode": "Display stays on. Tap to check off.",
+      "open": "Open",
+      "inCart": "In cart",
+      "startShopping": "Start shopping",
+      "stopShopping": "Stop shopping",
+      "start": "Start",
+      "done": "Done"
+    },
     "empty": {
       "title": "Your shopping list is empty",
       "description": "Add items manually, create an AI list, or generate it from your meal plan."
@@ -259,10 +279,20 @@
       "cameraAria": "Open camera scan",
       "submitAria": "Add item",
       "scanBarcode": "Scan barcode via camera/photo",
-      "scanReceipt": "Scan receipt with OCR"
+      "scanReceipt": "Scan receipt with OCR",
+      "doneMoveToPantry": "{{count}} done • Move to pantry"
     }
   },
   "pantry": {
+    "categories": {
+      "fruitsVegetables": "Fruits & Vegetables",
+      "dairy": "Dairy & Eggs",
+      "meat": "Meat & Fish",
+      "grainsLegumes": "Grains & Legumes",
+      "fatsOils": "Fats & Oils",
+      "bakery": "Bakery",
+      "nutsSeeds": "Nuts & Seeds"
+    },
     "confirm": {
       "removeItemTitle": "Remove item from pantry?",
       "removeItemDescription": "Do you really want to remove \"{{itemName}}\" from the pantry?",
@@ -393,6 +423,16 @@
     }
   },
   "recipeBook": {
+    "header": {
+      "title": "My cookbook",
+      "subtitle": "Your curated collection of culinary masterpieces.",
+      "stats": {
+        "recipes": "Recipes",
+        "favorites": "Favorites",
+        "cookable": "Cookable now",
+        "of": "of"
+      }
+    },
     "toolbar": {
       "searchPlaceholder": "Search recipes...",
       "searchAria": "Search recipes",
@@ -487,5 +527,20 @@
       "disableSpeechTitle": "Disable speech output",
       "exitTitle": "Exit"
     }
+  },
+  "voiceControl": {
+    "whisper": {
+      "listening": "Listening (local)\u2026",
+      "waitingForSpeech": "Waiting for speech\u2026"
+    }
+  },
+  "voiceCommands": {
+    "navigatedTo": "Navigated to: {{page}}",
+    "addedToShoppingList": "\"{{name}}\" added to shopping list.",
+    "addedToPantry": "\"{{name}}\" added to pantry.",
+    "updatedInPantry": "Pantry updated for \"{{name}}\".",
+    "removedFromPantry": "\"{{name}}\" removed from pantry.",
+    "notFoundInPantry": "\"{{name}}\" not found in pantry.",
+    "commandNotRecognized": "Command not recognized."
   }
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { BookOpen, Star, CheckCircle2, ChefHat } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Recipe } from '../../types';
 
 interface RecipeBookHeaderProps {
@@ -23,6 +24,7 @@ const StatItem = ({ icon: Icon, label, value, subValue, colorClass }: { icon: Lu
 );
 
 export const RecipeBookHeader: React.FC<RecipeBookHeaderProps> = ({ recipes = [] }) => {
+    const { t } = useTranslation();
     const stats = React.useMemo(() => {
         return {
             total: recipes.length,
@@ -38,11 +40,11 @@ export const RecipeBookHeader: React.FC<RecipeBookHeaderProps> = ({ recipes = []
                     <div className="flex items-center gap-3 mb-1">
                         <ChefHat className="text-[var(--color-accent-400)]" size={28}/>
                         <h2 className="text-3xl font-bold tracking-tight text-zinc-100 bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
-                            Mein Kochbuch
+                            {t('recipeBook.header.title')}
                         </h2>
                     </div>
                     <p className="text-zinc-400 max-w-lg">
-                        Deine kuratierte Sammlung kulinarischer Meisterwerke.
+                        {t('recipeBook.header.subtitle')}
                     </p>
                 </div>
             </div>
@@ -50,21 +52,21 @@ export const RecipeBookHeader: React.FC<RecipeBookHeaderProps> = ({ recipes = []
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <StatItem 
                     icon={BookOpen} 
-                    label="Rezepte" 
+                    label={t('recipeBook.header.stats.recipes')} 
                     value={stats.total} 
                     colorClass="text-blue-400"
                 />
                 <StatItem 
                     icon={Star} 
-                    label="Favoriten" 
+                    label={t('recipeBook.header.stats.favorites')} 
                     value={stats.favorites} 
                     colorClass="text-[var(--color-accent-400)]"
                 />
                 <StatItem 
                     icon={CheckCircle2} 
-                    label="Jetzt kochbar" 
+                    label={t('recipeBook.header.stats.cookable')} 
                     value={stats.cookable} 
-                    subValue={`von ${stats.total}`}
+                    subValue={`${t('recipeBook.header.stats.of')} ${stats.total}`}
                     colorClass="text-green-400"
                 />
             </div>

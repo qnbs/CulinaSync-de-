@@ -5,27 +5,28 @@ import { useTranslation } from 'react-i18next';
 import { useModalA11y } from '../hooks/useModalA11y';
 import { db } from '../services/dbInstance';
 
-const tourSteps: Step[] = [
-    {
-        target: '[data-tour="header"]',
-        content: 'Oben findest du Navigation, Sprachsteuerung und Schnellzugriff auf Einstellungen.',
-        placement: 'bottom',
-        disableBeacon: true,
-    },
-    {
-        target: '#main-content',
-        content: 'Hier arbeitest du im aktuellen Bereich: Vorrat, Rezepte, Planung oder Einkaufsliste.',
-        placement: 'top',
-    },
-    {
-        target: '[data-tour="bottom-nav"]',
-        content: 'Unten kannst du im Kochalltag schnell zwischen den Modulen wechseln.',
-        placement: 'top',
-    },
-];
-
 const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
     const { t } = useTranslation();
+
+    const tourSteps: Step[] = [
+        {
+            target: '[data-tour="header"]',
+            content: t('onboarding.tour.step1'),
+            placement: 'bottom',
+            disableBeacon: true,
+        },
+        {
+            target: '#main-content',
+            content: t('onboarding.tour.step2'),
+            placement: 'top',
+        },
+        {
+            target: '[data-tour="bottom-nav"]',
+            content: t('onboarding.tour.step3'),
+            placement: 'top',
+        },
+    ];
+
     const [runTour, setRunTour] = useState(false);
     const [seedLoading, setSeedLoading] = useState(false);
     const [seedDone, setSeedDone] = useState(false);

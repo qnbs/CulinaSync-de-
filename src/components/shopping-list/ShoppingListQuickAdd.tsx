@@ -145,7 +145,7 @@ export const ShoppingListQuickAdd = () => {
                         className="w-full flex items-center justify-center gap-3 bg-zinc-900/95 backdrop-blur-xl border border-[var(--color-accent-500)]/30 text-zinc-200 font-bold py-3.5 px-4 rounded-2xl hover:bg-[var(--color-accent-500)] hover:text-zinc-900 transition-all shadow-2xl group mb-3 active:scale-[0.98]"
                     >
                         <Archive size={20} className="group-hover:scale-110 transition-transform"/>
-                        <span>{completedItems.length} erledigt • In Vorrat verschieben</span>
+                        <span>{t('shoppingList.quickAdd.doneMoveToPantry', { count: completedItems.length })}</span>
                     </button>
                 ) : null}
 

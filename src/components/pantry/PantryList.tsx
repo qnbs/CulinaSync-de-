@@ -29,6 +29,17 @@ const EmptyState: React.FC<{ totalItemCount: number }> = ({ totalItemCount }) =>
 
 export const PantryList = () => {
     const { t } = useTranslation();
+    const CATEGORY_KEY_MAP: Record<string, string> = {
+        'Obst & Gemüse': 'fruitsVegetables',
+        'Milchprodukte & Eier': 'dairy',
+        'Backwaren': 'bakery',
+        'Fette & Öle': 'fatsOils',
+        'Fleisch & Fisch': 'meat',
+        'Getreide & Hülsenfrüchte': 'grainsLegumes',
+        'Nüsse & Samen': 'nutsSeeds',
+    };
+    const getCategoryLabel = (category: string) =>
+        t(`pantry.categories.${CATEGORY_KEY_MAP[category] ?? ''}`, { defaultValue: category });
     const {
         groupedItems,
         filteredItems,
@@ -146,7 +157,7 @@ export const PantryList = () => {
                         <div className="sticky top-36 z-20 py-3 px-1 -mx-1 bg-gradient-to-b from-zinc-950 via-zinc-950/95 to-transparent backdrop-blur-sm mb-2">
                              <h4 className="inline-flex items-center gap-2 text-sm font-bold text-[var(--color-accent-400)] uppercase tracking-widest bg-zinc-900/80 border border-[var(--color-accent-500)]/20 px-3 py-1.5 rounded-full shadow-lg">
                                 <Layers size={14} />
-                                {category} 
+                                {getCategoryLabel(category)} 
                                 <span className="bg-[var(--color-accent-500)]/20 text-[var(--color-accent-300)] px-1.5 py-0.5 rounded text-[10px] ml-1">{items.length}</span>
                              </h4>
                         </div>

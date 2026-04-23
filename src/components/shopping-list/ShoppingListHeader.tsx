@@ -1,7 +1,9 @@
 import { ShoppingCart, CheckCircle, ShoppingBag } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useShoppingListContext } from '../../contexts/ShoppingListContext';
 
 export const ShoppingListHeader = () => {
+    const { t } = useTranslation();
     const { activeItems, completedItems, isShoppingMode, setShoppingMode } = useShoppingListContext();
     
     const totalCount = activeItems.length + completedItems.length;
@@ -20,11 +22,11 @@ export const ShoppingListHeader = () => {
                         {isShoppingMode ? <ShoppingBag size={24} /> : <ShoppingCart size={24} />}
                     </div>
                     <h2 className="text-3xl font-bold tracking-tight text-zinc-100 bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
-                        {isShoppingMode ? 'Einkaufsmodus' : 'Einkaufsliste'}
+                        {isShoppingMode ? t('shoppingList.header.titleShoppingMode') : t('shoppingList.header.title')}
                     </h2>
                 </div>
                 <p className="text-zinc-400 text-sm ml-12">
-                    {isShoppingMode ? 'Display bleibt an. Tippen zum Abhaken.' : 'Plane deinen nächsten Einkauf.'}
+                    {isShoppingMode ? t('shoppingList.header.subtitleShoppingMode') : t('shoppingList.header.subtitle')}
                 </p>
             </div>
 
@@ -61,11 +63,11 @@ export const ShoppingListHeader = () => {
 
                 <div className="flex-grow flex flex-col gap-1 mr-2">
                     <div className="flex justify-between text-xs font-medium text-zinc-400 uppercase tracking-wider">
-                        <span>Offen</span>
+                        <span>{t('shoppingList.header.open')}</span>
                         <span className="text-white">{activeItems.length}</span>
                     </div>
                     <div className="flex justify-between text-xs font-medium text-zinc-400 uppercase tracking-wider">
-                        <span>Im Wagen</span>
+                        <span>{t('shoppingList.header.inCart')}</span>
                         <span className="text-green-400">{completedItems.length}</span>
                     </div>
                 </div>
@@ -73,10 +75,10 @@ export const ShoppingListHeader = () => {
                 <button 
                     onClick={() => setShoppingMode(!isShoppingMode)}
                     className={`flex flex-col items-center justify-center w-16 h-16 rounded-xl border transition-all ${isShoppingMode ? 'bg-red-500/10 border-red-500/50 text-red-400 hover:bg-red-500/20' : 'bg-green-500/10 border-green-500/50 text-green-400 hover:bg-green-500/20'}`}
-                    title={isShoppingMode ? "Modus beenden" : "Einkauf starten"}
+                    title={isShoppingMode ? t('shoppingList.header.stopShopping') : t('shoppingList.header.startShopping')}
                 >
                    {isShoppingMode ? <CheckCircle size={24}/> : <ShoppingBag size={24}/>}
-                   <span className="text-[10px] font-bold mt-1">{isShoppingMode ? 'Fertig' : 'Start'}</span>
+                   <span className="text-[10px] font-bold mt-1">{isShoppingMode ? t('shoppingList.header.done') : t('shoppingList.header.start')}</span>
                 </button>
             </div>
         </div>

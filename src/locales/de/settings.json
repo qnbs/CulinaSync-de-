@@ -67,15 +67,15 @@
         },
         "highContrast": {
           "title": "Hoher Kontrast",
-          "description": "Erhoeht die Lesbarkeit von Texten und Raendern."
+          "description": "Erhöht die Lesbarkeit von Texten und Rändern."
         },
         "kitchenMode": {
           "title": "Kitchen-Modus",
-          "description": "Staerkere Kontraste und klare Flaechen fuer den Kochalltag."
+          "description": "Stärkere Kontraste und klare Flächen für den Kochalltag."
         },
         "largeText": {
-          "title": "Grosse Schrift",
-          "description": "Erhoeht Grundschrift und UI-Groessen fuer bessere Lesbarkeit."
+          "title": "Große Schrift",
+          "description": "Erhöht Grundschrift und UI-Größen für bessere Lesbarkeit."
         },
         "preview": {
           "title": "Live Vorschau",
@@ -259,7 +259,9 @@
           "label": "Experimentell",
           "desc": "Wilde, innovative Fusion-Kueche."
         }
-      }
+      },
+      "dietarySuggestions": ["Vegetarisch", "Vegan", "Glutenfrei", "Laktosefrei", "Nussfrei", "Wenig Kohlenhydrate", "Paleo", "Keto"],
+      "cuisineSuggestions": ["Italienisch", "Asiatisch", "Indisch", "Mexikanisch", "Deutsch", "Franz\u00f6sisch", "Mediterran", "Levantinisch"]
     },
     "policy": {
       "title": "Haushalts- & Allergie-Policies",

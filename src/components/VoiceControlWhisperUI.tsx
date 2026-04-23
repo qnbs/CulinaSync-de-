@@ -1,5 +1,6 @@
 import React from 'react';
 import { Mic } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface VoiceControlWhisperUIProps {
   isListening: boolean;
@@ -8,6 +9,7 @@ interface VoiceControlWhisperUIProps {
 }
 
 const VoiceControlWhisperUI: React.FC<VoiceControlWhisperUIProps> = ({ isListening, transcript, error }) => {
+  const { t } = useTranslation();
   if (!isListening && !transcript && !error) {
     return null;
   }
@@ -17,7 +19,7 @@ const VoiceControlWhisperUI: React.FC<VoiceControlWhisperUIProps> = ({ isListeni
       <div className="flex items-center gap-4">
         <Mic className={isListening ? 'text-red-500 animate-pulse' : 'text-zinc-400'} size={24} />
         <p className="text-lg text-zinc-300 italic">
-          {error ? <span className="text-red-400">{error}</span> : transcript || (isListening ? 'Höre zu (lokal)…' : 'Warte auf Sprache…')}
+          {error ? <span className="text-red-400">{error}</span> : transcript || (isListening ? t('voiceControl.whisper.listening') : t('voiceControl.whisper.waitingForSpeech'))}
         </p>
       </div>
     </div>

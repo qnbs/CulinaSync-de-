@@ -1,6 +1,7 @@
 import { Recipe, ShoppingListItem, MealPlanItem } from '../types';
 import { db } from './db';
 import { loadSettings } from './settingsService';
+import i18next from 'i18next';
 
 let papaModulePromise: Promise<typeof import('papaparse')> | null = null;
 let jsPdfModulePromise: Promise<typeof import('jspdf')> | null = null;
@@ -447,8 +448,8 @@ export const exportMealPlanWeekToIcs = (
 
             const recipe = meal.recipeId ? recipesById.get(meal.recipeId) : undefined;
             const summary = recipe
-                ? `${mealType}: ${recipe.recipeTitle}`
-                : `${mealType}: ${meal.note || 'Meal note'}`;
+                ? `${i18next.t(`mealPlanner.mealTypes.${mealType}`, { defaultValue: mealType })}: ${recipe.recipeTitle}`
+                : `${i18next.t(`mealPlanner.mealTypes.${mealType}`, { defaultValue: mealType })}: ${meal.note || 'Meal note'}`;
 
             const description = recipe
                 ? `${recipe.shortDescription || ''}\\nPortionen: ${meal.servings || recipe.servings}`

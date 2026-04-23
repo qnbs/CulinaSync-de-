@@ -88,6 +88,7 @@ const ClearDayConfirmationModal: React.FC<{
 
 export const DayColumn: React.FC<DayColumnProps> = ({ date, isToday, meals, recipesById, onDrop, onSlotClick, onMealAction, isPlacementMode }) => {
     const { t } = useTranslation();
+    const getMealTypeLabel = (mt: string) => t(`mealPlanner.mealTypes.${mt}`, { defaultValue: mt });
     const dateString = date.toISOString().split('T')[0];
     const [dragOverType, setDragOverType] = useState<string | null>(null);
     const [isClearDayModalOpen, setIsClearDayModalOpen] = useState(false);
@@ -172,10 +173,10 @@ export const DayColumn: React.FC<DayColumnProps> = ({ date, isToday, meals, reci
                                         </div>
                                     ) : (
                                         <>
-                                            <p className="text-[10px] uppercase tracking-widest font-bold mb-1">{mealType}</p>
+                                            <p className="text-[10px] uppercase tracking-widest font-bold mb-1">{getMealTypeLabel(mealType)}</p>
                                             <button 
                                                 type="button"
-                                                aria-label={t('mealPlanner.addNote.aria', { mealType })}
+                                                aria-label={t('mealPlanner.addNote.aria', { mealType: getMealTypeLabel(mealType) })}
                                                 className="p-2 rounded-full bg-zinc-800 text-zinc-400 hover:text-[var(--color-accent-400)] hover:bg-zinc-700 shadow-sm"
                                                 title={t('mealPlanner.addNote.title')}
                                             >
@@ -189,13 +190,13 @@ export const DayColumn: React.FC<DayColumnProps> = ({ date, isToday, meals, reci
                             {/* Label for empty slots to guide user, visible when not hovering */}
                             {!meal && !isDragOver && !isPlacementMode && (
                                 <div className="absolute top-2 left-2 text-[10px] font-bold text-zinc-800 uppercase tracking-wider pointer-events-none">
-                                    {mealType}
+                                    {getMealTypeLabel(mealType)}
                                 </div>
                             )}
 
                             {meal && (
                                 <>
-                                    <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1 px-1">{mealType}</div>
+                                    <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1 px-1">{getMealTypeLabel(mealType)}</div>
                                     <PlannedMealCard 
                                         meal={meal} 
                                         recipe={recipe} 

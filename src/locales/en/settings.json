@@ -259,7 +259,9 @@
           "label": "Experimental",
           "desc": "Wild, innovative fusion cuisine."
         }
-      }
+      },
+      "dietarySuggestions": ["Vegetarian", "Vegan", "Gluten-free", "Lactose-free", "Nut-free", "Low carb", "Paleo", "Keto"],
+      "cuisineSuggestions": ["Italian", "Asian", "Indian", "Mexican", "German", "French", "Mediterranean", "Levantine"]
     },
     "policy": {
       "title": "Household & allergy policies",

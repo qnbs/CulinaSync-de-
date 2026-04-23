@@ -107,7 +107,10 @@
     "startTour": "Tour starten",
     "tour": {
       "title": "Gefuehrte Tour",
-      "description": "In 3 Schritten Navigation und Kernbereiche kennenlernen."
+      "description": "In 3 Schritten Navigation und Kernbereiche kennenlernen.",
+      "step1": "Oben findest du Navigation, Sprachsteuerung und Schnellzugriff auf Einstellungen.",
+      "step2": "Hier arbeitest du im aktuellen Bereich: Vorrat, Rezepte, Planung oder Einkaufsliste.",
+      "step3": "Unten kannst du im Kochalltag schnell zwischen den Modulen wechseln."
     },
     "demo": {
       "title": "Interaktives Tutorial",
@@ -118,6 +121,11 @@
     }
   },
   "mealPlanner": {
+    "mealTypes": {
+      "Fr\u00fchst\u00fcck": "Fr\u00fchst\u00fcck",
+      "Mittagessen": "Mittagessen",
+      "Abendessen": "Abendessen"
+    },
     "card": {
       "removeNoteTitle": "Notiz entfernen",
       "recipeUnavailable": "Rezept nicht verfuegbar",
@@ -187,6 +195,18 @@
     }
   },
   "shoppingList": {
+    "header": {
+      "title": "Einkaufsliste",
+      "titleShoppingMode": "Einkaufsmodus",
+      "subtitle": "Plane deinen n\u00e4chsten Einkauf.",
+      "subtitleShoppingMode": "Display bleibt an. Tippen zum Abhaken.",
+      "open": "Offen",
+      "inCart": "Im Wagen",
+      "startShopping": "Einkauf starten",
+      "stopShopping": "Modus beenden",
+      "start": "Start",
+      "done": "Fertig"
+    },
     "empty": {
       "title": "Deine Einkaufsliste ist leer",
       "description": "Fuege Artikel manuell hinzu, erstelle eine KI-Liste oder generiere sie aus deinem Essensplan."
@@ -259,10 +279,20 @@
       "cameraAria": "Kamera-Scan oeffnen",
       "submitAria": "Artikel hinzufuegen",
       "scanBarcode": "Barcode per Kamera/Foto",
-      "scanReceipt": "Rechnung per OCR scannen"
+      "scanReceipt": "Rechnung per OCR scannen",
+      "doneMoveToPantry": "{{count}} erledigt \u2022 In Vorrat verschieben"
     }
   },
   "pantry": {
+    "categories": {
+      "fruitsVegetables": "Obst & Gem\u00fcse",
+      "dairy": "Milchprodukte & Eier",
+      "meat": "Fleisch & Fisch",
+      "grainsLegumes": "Getreide & H\u00fclsenfr\u00fcchte",
+      "fatsOils": "Fette & \u00d6le",
+      "bakery": "Backwaren",
+      "nutsSeeds": "N\u00fcsse & Samen"
+    },
     "confirm": {
       "removeItemTitle": "Artikel aus dem Vorrat entfernen?",
       "removeItemDescription": "Soll \"{{itemName}}\" wirklich aus dem Vorrat entfernt werden?",
@@ -393,6 +423,16 @@
     }
   },
   "recipeBook": {
+    "header": {
+      "title": "Mein Kochbuch",
+      "subtitle": "Deine kuratierte Sammlung kulinarischer Meisterwerke.",
+      "stats": {
+        "recipes": "Rezepte",
+        "favorites": "Favoriten",
+        "cookable": "Jetzt kochbar",
+        "of": "von"
+      }
+    },
     "toolbar": {
       "searchPlaceholder": "Rezepte suchen...",
       "searchAria": "Rezepte durchsuchen",
@@ -487,5 +527,20 @@
       "disableSpeechTitle": "Sprachausgabe deaktivieren",
       "exitTitle": "Beenden"
     }
+  },
+  "voiceControl": {
+    "whisper": {
+      "listening": "H\u00f6re zu (lokal)\u2026",
+      "waitingForSpeech": "Warte auf Sprache\u2026"
+    }
+  },
+  "voiceCommands": {
+    "navigatedTo": "Navigiere zu: {{page}}",
+    "addedToShoppingList": "\"{{name}}\" zur Einkaufsliste hinzugef\u00fcgt.",
+    "addedToPantry": "\"{{name}}\" zum Vorrat hinzugef\u00fcgt.",
+    "updatedInPantry": "Vorrat f\u00fcr \"{{name}}\" aktualisiert.",
+    "removedFromPantry": "\"{{name}}\" aus dem Vorrat entfernt.",
+    "notFoundInPantry": "\"{{name}}\" nicht im Vorrat gefunden.",
+    "commandNotRecognized": "Befehl nicht erkannt."
   }
 }

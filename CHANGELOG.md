@@ -8,6 +8,21 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Hinzugefuegt
+- CodeQL Alert #7 behoben: `sanitizeWebContentForPrompt` in `geminiService.ts` nutzt jetzt DOMPurify statt fehleranfaelliger HTML-Regex (schlechter Regex liess `</script foo>` als validen End-Tag passieren)
+- Vollstaendige i18n-Completion Wave 2+3: alle verbleibenden ~65 hartcodierten deutschen Strings auf Locale-Keys migriert
+  - `ShoppingListHeader.tsx`, `RecipeBookHeader.tsx`, `VoiceControlWhisperUI.tsx`, `ShoppingListQuickAdd.tsx`: `useTranslation` nachgezogen, alle Texte auf i18n-Keys
+  - `Onboarding.tsx`: Tour-Step-Texte in `getTourSteps(t)` verschoben
+  - `AiChefPanel.tsx`: `DIETARY_SUGGESTIONS` und `CUISINE_SUGGESTIONS` in Locale-Dateien ausgelagert
+  - `RecipeDetail.tsx` Meal-Typ-Auswahl: Options mit expliziten `value`-Attributen (DB-Key bleibt DE, Display uebersetzt)
+  - `DayColumn.tsx`: Mahlzeitentyp-Labels per `getMealTypeLabel()`-Helper lokalisiert
+  - `MealPlanner.tsx`/`exportService.ts`: Locale-Locale-Lookup fuer Mahlzeitstypen
+  - `voiceCommands.ts`: Toast-Messages und Nav-Toasts per `i18next.t()`, EN-Sprachbefehle ergaenzt
+  - `geminiService.ts`: Error-Messages lokalisiert, AI-Prompts language-aware (EN-User erhaelt englische KI-Ausgaben)
+  - `foodDatabase.ts`: Kategorie-Display-Lookup in Locale-Datei
+  - `de/settings.json`: Fehlkodierte Umlauts korrigiert (sidebar-Objekt)
+- Neue i18n-Keys: `shoppingList.header.*`, `recipeBook.header.*`, `voiceControl.whisper.*`, `onboarding.tour.*`, `features.pantry.categories.*`, `voiceCommands.*`, diverse weitere
+
+### Hinzugefuegt (vorherige Eintraege)
 - `@typescript/native-preview@beta` (TypeScript 7.0 Beta, Go-basierter Compiler): `tsgo`-Binary fuer bis zu 10x schnellere Typechecks
 - `type-check`-Script `tsgo` in `package.json` hinzugefuegt (ersetzt `pnpm exec tsc --noEmit` im Alltag)
 - `ROADMAP.md` neu erstellt: vollstaendige Milestones 0–10 auf Basis aller Audit-Findings, inkl. DevInfra, i18n, Architektur, Security, Testing, Dokumentation, TS7-GA, Tauri, Bundle-Optimierungen und Multi-Device-Sync
