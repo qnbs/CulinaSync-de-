@@ -36,6 +36,12 @@
       "later": "Spaeter",
       "dismiss": "Nicht mehr erinnern"
     },
+    "pwaUpdate": {
+      "title": "Update bereit",
+      "description": "Eine neue Version wurde installiert und steht nach dem Neuladen sofort zur Verfügung.",
+      "reload": "Neu laden",
+      "later": "Später"
+    },
     "commandSections": {
       "navigation": "Navigation",
       "pantry": "Vorratskammer",

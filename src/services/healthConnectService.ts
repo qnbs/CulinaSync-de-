@@ -85,6 +85,7 @@ export const exportNutritionToHealthJson = (opts: HealthExportOptions) => {
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
   link.download = `culinasync_nutrition_${type}_${date}.json`;
+  link.rel = 'noopener noreferrer';
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

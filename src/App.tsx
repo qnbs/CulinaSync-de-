@@ -314,14 +314,14 @@ const App: React.FC = () => {
 
         {showUpdateReadyNotice && (
           <div className="fixed bottom-24 left-4 z-40 w-[min(92vw,24rem)] rounded-2xl border border-sky-400/30 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur">
-            <h4 className="text-sm font-bold text-zinc-100">Update bereit</h4>
-            <p className="mt-1 text-sm text-zinc-400">Eine neue Version wurde installiert und kann nach dem Neuladen sofort genutzt werden.</p>
+            <h4 className="text-sm font-bold text-zinc-100">{t('app.pwaUpdate.title')}</h4>
+            <p className="mt-1 text-sm text-zinc-400">{t('app.pwaUpdate.description')}</p>
             <div className="mt-4 flex gap-2">
               <button onClick={handleReloadForUpdate} className="flex-1 rounded-lg bg-sky-400 px-3 py-2 text-sm font-bold text-zinc-950">
-                Neu laden
+                {t('app.pwaUpdate.reload')}
               </button>
               <button onClick={() => setShowUpdateReadyNotice(false)} className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-semibold text-zinc-300">
-                Spaeter
+                {t('app.pwaUpdate.later')}
               </button>
             </div>
           </div>
@@ -367,7 +367,7 @@ const App: React.FC = () => {
         </div>
       </div>
       <footer className="w-full text-center py-4 text-xs text-zinc-500">
-        <span>© 2026 CulinaSync</span> · <span className="ml-2 bg-zinc-800 px-2 py-1 rounded">v{appVersion}</span>
+        <span>© {new Date().getFullYear()} CulinaSync</span> · <span className="ml-2 bg-zinc-800 px-2 py-1 rounded">v{appVersion}</span>
       </footer>
     </GlobalErrorBoundary>
   );

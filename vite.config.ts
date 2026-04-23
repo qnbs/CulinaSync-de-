@@ -68,7 +68,7 @@ export default defineConfig({
             },
           },
           {
-          urlPattern: /\/assets\/(vendor-scanner-|vendor-tour-|vendor-faker-|vendor-workbox-|vendor-misc-).*\.js$/,
+            urlPattern: /\/assets\/(vendor-scanner-|vendor-tour-|vendor-faker-|vendor-workbox-|vendor-misc-).*\.js$/,
             handler: 'CacheFirst',
             options: {
               cacheName: 'heavy-vendor-cache',

@@ -36,6 +36,12 @@
       "later": "Later",
       "dismiss": "Don't remind"
     },
+    "pwaUpdate": {
+      "title": "Update ready",
+      "description": "A new version has been installed and is ready after reloading.",
+      "reload": "Reload",
+      "later": "Later"
+    },
     "commandSections": {
       "navigation": "Navigation",
       "pantry": "Pantry",
