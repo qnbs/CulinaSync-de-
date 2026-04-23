@@ -13,8 +13,11 @@ on:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/validate.yml
 
+  i18n-check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -35,19 +38,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Lint
-        run: pnpm run lint
-
-      - name: Test
-        run: pnpm run test
-
-      - name: Build
-        run: pnpm run build
-
       - name: Fetch PR base branch
-        if: github.event_name == 'pull_request'
         run: git fetch --no-tags --prune --depth=1 origin ${{ github.base_ref }}
 
       - name: i18n changed-lines check
-        if: github.event_name == 'pull_request'
         run: pnpm run i18n:check:changed -- origin/${{ github.base_ref }}

@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+    "lokalise.i18n-ally",
+    "rust-lang.rust-analyzer",
+    "tauri-apps.tauri-vscode",
+    "GitHub.vscode-github-actions",
+    "github.vscode-pull-request-github"
+  ]
+}

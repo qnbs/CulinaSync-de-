@@ -25,16 +25,30 @@
 
 ---
 
-## Milestone 1 — DevInfra & CI-Hygiene
+## Milestone 0.1 — Kritische Audit-Reste
 
-**Ziel:** Reproduzierbare Entwicklungsumgebung, automatisierte Dependency-Updates, saubere CI-Pipelines.
+**Ziel:** Die im Audit markierten kurzfristigen Kritikalitäten K1 und K2 schließen.
 
 | # | Maßnahme | Herkunft | Datei(en) | Aufwand | Status |
 |---|---|---|---|---|---|
-| 1.1 | DevContainer einrichten (Node 22, pnpm 10, VS Code Extensions) | CI1 | `.devcontainer/devcontainer.json` | Niedrig (30 min) | 🔲 |
-| 1.2 | Dependabot konfigurieren (npm + github-actions, weekly) | CI2 | `.github/dependabot.yml` | Niedrig (10 min) | 🔲 |
-| 1.3 | CI-Duplizierung auflösen: Lint+Test in `deploy.yml` entfernen, `needs: ci` | CI5 | `.github/workflows/deploy.yml` | Mittel (1 h) | 🔲 |
-| 1.4 | GitHub Issue- und PR-Templates anlegen | CI6 | `.github/ISSUE_TEMPLATE/`, `PULL_REQUEST_TEMPLATE.md` | Niedrig (1 h) | 🔲 |
+| 0.1.1 | `@faker-js/faker` aus Production-Dependencies entfernen (nur noch devDep + dynamischer Import) | K1 | `package.json` | Niedrig | ✅ |
+| 0.1.2 | `saveSettings()` aus `settingsService.ts` entfernen (dead code, 0 Callers) | K2 | `src/services/settingsService.ts` | Niedrig | ✅ |
+| 0.1.3 | Bundle-Budget erneut prüfen nach K1/K2 | K1 | `budget.json`, `scripts/check-bundle-budget.mjs` | Niedrig | ✅ |
+
+---
+
+## Milestone 1 — DevInfra & CI-Hygiene
+
+**Ziel:** Reproduzierbare Entwicklungsumgebung, automatisierte Dependency-Updates, saubere CI-Pipelines und Commit-Gates.
+
+| # | Maßnahme | Herkunft | Datei(en) | Aufwand | Status |
+|---|---|---|---|---|---|
+| 1.1 | DevContainer einrichten (Node 22, pnpm 10, Rust/Cargo, VS Code Extensions) | CI1 | `.devcontainer/devcontainer.json` | Niedrig (30 min) | ✅ |
+| 1.2 | Dependabot konfigurieren (npm + github-actions, weekly) | CI2 | `.github/dependabot.yml` | Niedrig (10 min) | ✅ |
+| 1.3 | CI-Duplizierung auflösen: gemeinsamen Reusable Workflow `validate.yml` extrahieren | CI5 | `.github/workflows/validate.yml`, `ci.yml`, `deploy.yml` | Mittel (1 h) | ✅ |
+| 1.4 | GitHub Issue- und PR-Templates anlegen | CI6 | `.github/ISSUE_TEMPLATE/`, `PULL_REQUEST_TEMPLATE.md` | Niedrig (1 h) | ✅ |
+| 1.5 | Husky + lint-staged + commitlint einrichten (pre-commit Gates) | CI3 | `.husky/`, `lint-staged.config.mjs`, `commitlint.config.mjs` | Niedrig (45 min) | ✅ |
+| 1.6 | `.vscode/extensions.json` mit Empfehlungen anlegen | CI4 | `.vscode/extensions.json` | Niedrig (10 min) | ✅ |
 
 ---
 
@@ -136,7 +150,54 @@ _Vorbedingung: TS 7.0 Stable Release (voraussichtlich Q3 2026)_
 |---|---|---|
 | `api-key` Kommentar "Secure API Key Management" ist irreführend (XOR-Obfuskation, kein echter Crypto) | S1 | Bei Milestone 4.2 beheben |
 | `react-hooks/exhaustive-deps: 'off'` — stale-closure-Risiko in diversen Hooks | H1/H2 | Nach Milestone 3 schrittweise auf `warn` heben und Hooks bereinigen |
-| Settings Legacy-Fallback (`culinaSyncSettings` in localStorage) | K2 | Kann nach ~3 Monaten Laufzeit entfernt werden |
+| Settings Legacy-Fallback (`culinaSyncSettings` in localStorage) | K2 | Kann nach ~3 Monaten Laufzeit entfernt werden (SETTINGS_KEY bleibt als Lese-Fallback) |
+
+---
+
+## Milestone 8 — Tauri Desktop-Release
+
+**Ziel:** Erste plattformübergreifende Desktop-Builds (.exe, .dmg, .AppImage) via Tauri 2.
+
+_Vorbedingung: M1 (DevContainer mit Rust), Tauri 2 stabil_
+
+| # | Maßnahme | Datei(en) | Aufwand | Status |
+|---|---|---|---|---|
+| 8.1 | `tauri.conf.json` für Release konfigurieren (Bundle-Identifier, Icons, Fenster-Einstellungen) | `src-tauri/tauri.conf.json` | Niedrig | 🔲 |
+| 8.2 | GitHub Actions Release-Workflow für Tauri-Builds (matrix: windows, macos, linux) | `.github/workflows/tauri-release.yml` | Mittel (3–4 h) | 🔲 |
+| 8.3 | Plattformspezifische CSP und native Dialoge in `src-tauri/main.rs` | `src-tauri/main.rs` | Mittel (2 h) | 🔲 |
+| 8.4 | README.md um Desktop-Download-Sektion und Installationsanleitung ergänzen | `README.md` | Niedrig (1 h) | 🔲 |
+
+**Gesamtaufwand Milestone 8:** ~8–12 h
+
+---
+
+## Milestone 9 — Bundle-Optimierungen
+
+**Ziel:** Initiale Ladezeit senken durch gezieltes Lazy-Loading schwerer Bibliotheken.
+
+| # | Maßnahme | Herkunft | Datei(en) | Aufwand | Status |
+|---|---|---|---|---|---|
+| 9.1 | `jsPDF` auf dynamischen Import umstellen (nur bei PDF-Export laden) | P1 | `src/services/exportService.ts` | Niedrig (1 h) | 🔲 |
+| 9.2 | `tesseract.js` auf dynamischen Import umstellen (OCR-Modul) | P1 | `src/services/` | Niedrig (1 h) | 🔲 |
+| 9.3 | `vendor-misc`-Chunk analysieren (886 KB) und ggf. weiter splitten | P2 | `vite.config.ts` `manualChunks` | Mittel (2–3 h) | 🔲 |
+| 9.4 | `vendor-faker`-Chunk (2.6 MB) prüfen — nur noch Dev-Fallback, niemals im initialen Bundle | P1 | Lazy-Import verifizieren | Niedrig (30 min) | 🔲 |
+
+**Gesamtaufwand Milestone 9:** ~5–7 h
+
+---
+
+## Milestone 10 — Optionaler Multi-Device-Sync
+
+**Ziel:** Geräteübergreifende Datensynchronisation ohne zentralen Server.
+
+| # | Maßnahme | Datei(en) | Aufwand | Status |
+|---|---|---|---|---|
+| 10.1 | QR-Code-Export/Import für Pantry + Rezepte (lokaler Sync über LAN) | `src/services/` | Hoch (6–8 h) | 🔲 |
+| 10.2 | WebDAV-Sync-Adapter (Nextcloud, ownCloud) als optionaler Provider | `src/services/syncService.ts` | Hoch (8–12 h) | 🔲 |
+| 10.3 | Sync-Status-UI im Settings-Panel | `src/components/Settings.tsx` | Mittel (3–4 h) | 🔲 |
+| 10.4 | Konflikt-Resolution-Strategie (Last-Write-Wins mit Timestamp) | `src/services/` | Mittel (3–4 h) | 🔲 |
+
+**Gesamtaufwand Milestone 10:** ~20–28 h
 
 ---
 
@@ -144,4 +205,5 @@ _Vorbedingung: TS 7.0 Stable Release (voraussichtlich Q3 2026)_
 
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.1 | 2026-04-23 | M0.1 (K1+K2 geschlossen) hinzugefügt; M1 um 1.3–1.6 erweitert (Husky, Reusable CI, Templates, VS Code); M8–M10 (Tauri, Bundle, Sync) angehängt |
 | 1.0 | 2026-04-23 | Initiale Roadmap auf Basis des vollständigen Audits; M0 abgeschlossen |

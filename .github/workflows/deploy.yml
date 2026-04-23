@@ -29,53 +29,10 @@ concurrency:
 
 jobs:
   build:
-    # Build once and upload static artifact for the deploy job.
-    runs-on: ubuntu-latest
-    steps:
-      # 1) Pull repository source code.
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      # 2) Install pnpm before enabling Node.js package manager cache.
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6
-        with:
-          version: 10
-
-      # 3) Install Node.js 22 and enable pnpm dependency cache.
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: 'pnpm'
-
-      # 4) Install exact lockfile dependencies.
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      # 5) Guard quality before deployment.
-      - name: Lint
-        run: pnpm run lint
-
-      - name: Test
-        run: pnpm run test
-
-      # 6) Create production build into ./dist.
-      - name: Build
-        run: pnpm run build
-
-      - name: Check bundle budget
-        run: pnpm run check:bundle-budget
-
-      # 7) Configure GitHub Pages deployment metadata.
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      # 8) Upload built site artifact from ./dist.
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: './dist'
+    # Build, validate and upload static artifact for the deploy job.
+    uses: ./.github/workflows/validate.yml
+    with:
+      upload-pages-artifact: true
 
   deploy:
     # Deploy uploaded artifact to github-pages environment.

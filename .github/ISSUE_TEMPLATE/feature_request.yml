@@ -1,0 +1,55 @@
+name: Feature Request
+description: Eine neue Funktion oder Verbesserung vorschlagen
+title: '[Feature]: '
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke für deinen Vorschlag! Bitte beschreibe deine Idee so genau wie möglich.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problembeschreibung
+      description: Welches Problem löst diese Funktion? Was fehlt dir aktuell?
+      placeholder: Ich bin frustriert, wenn ich... / Es wäre hilfreich, wenn...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Gewünschte Lösung
+      description: Wie sollte die Funktion deiner Meinung nach funktionieren?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativlösungen
+      description: Hast du andere Ansätze oder Workarounds in Betracht gezogen?
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Bereich
+      description: Welchen Bereich der App betrifft dein Vorschlag?
+      options:
+        - Vorratsverwaltung (Pantry)
+        - Rezeptbuch
+        - Wochenplanung
+        - Einkaufsliste
+        - KI-Assistent (AiChef)
+        - Einstellungen
+        - PWA / Installation
+        - Barrierefreiheit
+        - Sonstiges
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Zusätzlicher Kontext
+      description: Mockups, Skizzen oder weitere Informationen.

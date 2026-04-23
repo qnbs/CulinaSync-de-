@@ -82,6 +82,36 @@ Fuer den taeglichen Workflow gilt:
 
 Stand 2026-04-22: Die Accessibility-/i18n-Nacharbeiten wurden bis zu gezielten Diagnostics, fokussierten ESLint-Laeufen und einem erfolgreichen `pnpm exec tsc --noEmit` validiert. Ein kompletter Lint-/Test-/Build-Gesamtlauf fuer den gesamten unstaged Arbeitsstand steht weiterhin als Abschluss-Check aus.
 
+## Commit-Konventionen (Conventional Commits)
+
+Dieses Repo erzwingt [Conventional Commits](https://www.conventionalcommits.org/) via `commitlint`.
+Jede Commit-Message muss dem Format folgen:
+
+```
+<type>(<scope>): <Beschreibung>
+```
+
+Erlaubte Typen: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
+
+Beispiele:
+```bash
+feat(pantry): add expiry warning filter
+fix(gemini): handle empty API key response
+docs: update DEVELOPMENT.md with commit conventions
+chore(deps): upgrade typescript to 6.0.3
+ci: extract reusable validate workflow
+```
+
+## Pre-Commit-Gates (Husky + lint-staged)
+
+Beim Commit laufen automatisch:
+1. **lint-staged:** ESLint auf alle staged `*.ts`- und `*.tsx`-Dateien (schnell, nur staged)
+2. **commitlint:** Validiert die Commit-Message gegen Conventional Commits
+
+Falls ein Gate fehlschlägt, wird der Commit blockiert. Fehler beheben und erneut committen.
+
+> **Hinweis:** `pnpm run type-check` (`tsgo`) laeuft **nicht** im pre-commit-Hook, weil `tsgo` immer den gesamten Projektgraph prüft und fuer staged-only-Checks zu langsam wäre. `tsgo` laeuft weiter in CI und beim expliziten `pnpm run build`.
+
 ## Doku-Pflege
 
 - Nennenswerte technische Aenderungen in `CHANGELOG.md` eintragen.

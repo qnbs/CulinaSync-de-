@@ -1,0 +1,32 @@
+{
+  "name": "CulinaSync",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:22",
+  "features": {
+    "ghcr.io/devcontainers/features/rust:1": {
+      "version": "stable",
+      "profile": "minimal"
+    }
+  },
+  "onCreateCommand": "npm install -g pnpm@10",
+  "postCreateCommand": "pnpm install",
+  "postStartCommand": "pnpm exec tsgo --version",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "bradlc.vscode-tailwindcss",
+        "lokalise.i18n-ally",
+        "rust-lang.rust-analyzer",
+        "tauri-apps.tauri-vscode",
+        "GitHub.vscode-github-actions",
+        "github.vscode-pull-request-github"
+      ],
+      "settings": {
+        "editor.formatOnSave": false,
+        "eslint.run": "onSave",
+        "i18n-ally.localesPaths": ["src/locales"]
+      }
+    }
+  },
+  "remoteUser": "node"
+}

@@ -107,14 +107,3 @@ export const loadSettings = (): AppSettings => {
   }
   return getDefaultSettings();
 };
-
-export const saveSettings = (settings: AppSettings): void => {
-  try {
-    window.localStorage.setItem(PERSISTED_SETTINGS_KEY, JSON.stringify({
-      ...Object.fromEntries(Object.entries(settings).map(([key, value]) => [key, JSON.stringify(value)])),
-      _persist: JSON.stringify({ version: -1, rehydrated: true }),
-    }));
-  } catch (error) {
-    console.error("Failed to save settings to localStorage", error);
-  }
-};

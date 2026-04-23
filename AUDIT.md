@@ -5,6 +5,25 @@
 
 ---
 
+## Status-Update 2026-04-23 (Nachtrag: M0.1 + M1 abgeschlossen)
+
+Milestone 0.1 (kritische Audit-Reste) und Milestone 1 (DevInfra) vollstaendig umgesetzt:
+
+- **K1 geschlossen:** `@faker-js/faker` ist seit Sprint 2 in `devDependencies`; nur noch dynamisch geladen.
+- **K2 geschlossen:** `saveSettings()` aus `settingsService.ts` entfernt (dead code ohne Callers; Settings-Persistenz laeuft vollstaendig ueber Redux Persist).
+- **Bundle-Budget:** Eingehalten (total 187 KB / 250 KB, script 140 KB / 155 KB).
+- **DevContainer:** `.devcontainer/devcontainer.json` mit Node 22, pnpm 10 und Rust/Cargo fuer kuenftige Tauri-Builds (M8) eingerichtet.
+- **Dependabot:** `.github/dependabot.yml` fuer woeichentliche npm- und github-actions-Updates aktiviert.
+- **Husky + lint-staged + commitlint:** Pre-commit-Gates und Conventional-Commits-Enforcement eingerichtet.
+- **CI-Reusable Workflow:** `validate.yml` extrahiert; `ci.yml` und `deploy.yml` nutzen ihn jetzt ohne Duplikation.
+- **GitHub-Templates:** Bug-Report, Feature-Request und PR-Template angelegt.
+- **VS Code Extensions:** `.vscode/extensions.json` mit Empfehlungen fuer das gesamte Stack erstellt.
+- Alle Validierungsschritte (tsgo, lint, test, build, bundle-budget) beendet gruen.
+
+Still offen: Alles in ROADMAP.md ab Milestone 2 (i18n-Completion, Architektur, Security, Testing, Doku, TS7-GA, Tauri, Bundle-Opt., Multi-Sync).
+
+---
+
 ## Status-Update 2026-04-23
 
 TypeScript-7.0-Beta-Upgrade und ESLint-Config-Fix abgeschlossen:

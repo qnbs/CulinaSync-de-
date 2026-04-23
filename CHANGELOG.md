@@ -10,8 +10,18 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ### Hinzugefuegt
 - `@typescript/native-preview@beta` (TypeScript 7.0 Beta, Go-basierter Compiler): `tsgo`-Binary fuer bis zu 10x schnellere Typechecks
 - `type-check`-Script `tsgo` in `package.json` hinzugefuegt (ersetzt `pnpm exec tsc --noEmit` im Alltag)
-- `ROADMAP.md` neu erstellt: vollstaendige Milestones 0–7 auf Basis aller Audit-Findings, inkl. DevInfra, i18n, Architektur, Security, Testing, Dokumentation und TS7-GA
+- `ROADMAP.md` neu erstellt: vollstaendige Milestones 0–10 auf Basis aller Audit-Findings, inkl. DevInfra, i18n, Architektur, Security, Testing, Dokumentation, TS7-GA, Tauri, Bundle-Optimierungen und Multi-Device-Sync
 - `docs/STATUS-2026-04-23.md` Status-Snapshot nach TS7-Upgrade und erstem Audit-Zyklus
+- `.devcontainer/devcontainer.json`: reproduzierbare Entwicklungsumgebung (Node 22, pnpm 10, Rust/Cargo fuer Tauri M8)
+- `.github/dependabot.yml`: woeichentliche automatische Dependency-Updates fuer npm und github-actions
+- `.github/workflows/validate.yml`: gemeinsamer Reusable-CI-Workflow (checkout → install → lint → test → build), genutzt von `ci.yml` und `deploy.yml`
+- `.husky/pre-commit` + `.husky/commit-msg`: pre-commit-Gate (lint-staged) und commit-msg-Validierung (commitlint)
+- `lint-staged.config.mjs`: ESLint auf staged TypeScript/TSX-Dateien
+- `commitlint.config.mjs`: Conventional-Commits-Enforcement via `@commitlint/config-conventional`
+- `.vscode/extensions.json`: VS Code Extension-Empfehlungen (ESLint, Tailwind, i18n-ally, rust-analyzer, Tauri, GitHub Actions)
+- `.github/ISSUE_TEMPLATE/bug_report.yml` + `feature_request.yml`: strukturierte GitHub-Issue-Formulare
+- `.github/PULL_REQUEST_TEMPLATE.md`: PR-Checklist (Tests, i18n, A11y, Changelog)
+- `husky`, `lint-staged`, `@commitlint/cli`, `@commitlint/config-conventional` als devDependencies hinzugefuegt
 - i18n-Keys `app.pwaUpdate` (title, description, reload, later) in `de/core.json` und `en/core.json` fuer den PWA-Update-Banner ergaenzt
 - Neue Root-Dokumentation fuer Beitragende und Nutzer: `CONTRIBUTING.md`, `SECURITY.md`, `SUPPORT.md`, `CODE_OF_CONDUCT.md`
 - Neuer `docs/`-Bereich mit Architektur-, Struktur-, Entwicklungs-, Testing-, Deployment- und Troubleshooting-Dokumentation
@@ -22,20 +32,22 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - Build-Script von `tsc && vite build` auf `tsgo && vite build` umgestellt (Go-Compiler)
 - `tsconfig.json`: `baseUrl` entfernt (in TS7 abgeschafft), `@/*`-Pfad-Alias auf `./src/*` korrigiert (relative Pfade erforderlich)
 - ESLint-Konfiguration bereinigt: redundanten zweiten Config-Block entfernt, der `react-hooks/exhaustive-deps` faelschlicherweise auf `error` ueberschrieb
+- `package.json`: `prepare`-Script (`husky`) hinzugefuegt; DevInfra-Pakete ergaenzt
+- `ci.yml` + `deploy.yml`: CI-Duplizierung aufgeloest — beide Workflows nutzen jetzt den gemeinsamen Reusable Workflow `validate.yml`
+- `ROADMAP.md` auf v1.1 aktualisiert: M0.1 geschlossen, M1 vollstaendig umgesetzt, M8–M10 ergaenzt
+- `docs/DEVELOPMENT.md` um `tsgo`-Workflow, Unterschied `tsgo`/`tsc`, Husky/commitlint-Gates und aktualisierte Validierungsreihenfolge ergaenzt
 - PWA-Update-Banner in `App.tsx` von hardcodierten DE-Strings auf `t('app.pwaUpdate.*')` umgestellt
 - Footer-Jahr in `App.tsx` von statisch `2026` auf dynamisch `new Date().getFullYear()` umgestellt
 - Indent-Bug im zweiten `runtimeCaching`-Eintrag in `vite.config.ts` korrigiert (fehlende 2 Leerzeichen)
 - `healthConnectService.ts`: Fehlende `link.rel = 'noopener noreferrer'` im JSON-Export nachgeholt (Sicherheits-Haertung analog zum CSV-Export)
 - `README.md` vollstaendig auf den tatsaechlichen Projektstand mit pnpm, Vite 8, GitHub Pages und aktueller Architektur aktualisiert
 - `.github/copilot-instructions.md` an den aktuellen Tooling- und Workflow-Stand mit pnpm und Vite 8 angepasst
-- `.github/copilot-instructions.md` um die Vorgabe erweitert, vor Full-Builds immer erst Diagnostics und Typecheck fuer den geaenderten Slice auszufuehren
-- `.github/copilot-instructions.md` um Commit-/Push-Gates fuer Diagnostics, Tests, Typecheck und Lint erweitert; Formatter nur wenn im Repo konfiguriert
 - `AUDIT.md` um aktuellen Status-Block fuer die behobenen Laufzeit-, Security- und Pipeline-Themen sowie den TS7-Upgrade-Abschluss ergaenzt
 - i18n-Ressourcen von monolithischen `translation.json`-Dateien auf aggregierte Sprachdomaenen (`core`, `settings`, `features`) pro Sprache umgestellt
 - Root- und Fachdokumentation auf den aktuellen Accessibility-, i18n- und Validierungsstand synchronisiert und um `docs/STATUS-2026-04-22.md` und `docs/STATUS-2026-04-23.md` ergaenzt
-- `docs/DEVELOPMENT.md` um `tsgo`-Workflow, Unterschied `tsgo`/`tsc` und aktualisierte Validierungsreihenfolge ergaenzt
 
 ### Behoben
+- `saveSettings()` aus `settingsService.ts` entfernt (dead code ohne Callers; Settings-Persistenz laeuft vollstaendig ueber Redux Persist)
 - Live-Demo-Black-Screen durch expliziten Redux-Persist-Storage-Adapter behoben
 - Prototype-Pollution-Risiko in den Settings durch allowlist-basierte Mutatoren entfernt
 - Download-Sink in `exportService.ts` mit Dateinamen- und MIME-Haertung abgesichert

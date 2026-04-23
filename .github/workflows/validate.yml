@@ -1,0 +1,61 @@
+name: Validate
+
+# Reusable workflow — called by ci.yml and deploy.yml to avoid duplication.
+# Runs: install → lint → test → build → (optionally) budget check + pages artifact upload.
+
+on:
+  workflow_call:
+    inputs:
+      upload-pages-artifact:
+        description: 'Configure Pages and upload the dist/ artifact after build'
+        type: boolean
+        default: false
+        required: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Test
+        run: pnpm run test
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Check bundle budget
+        if: inputs.upload-pages-artifact
+        run: pnpm run check:bundle-budget
+
+      - name: Setup Pages
+        if: inputs.upload-pages-artifact
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        if: inputs.upload-pages-artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: './dist'
