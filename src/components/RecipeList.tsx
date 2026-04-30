@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { FixedSizeList, type ListChildComponentProps } from 'react-window';
+import { List, type RowComponentProps } from 'react-window';
 import { Recipe } from '../types';
 import RecipeCard from './RecipeCard';
 import { useWindowSize } from '../hooks/useWindowSize';
@@ -11,6 +11,32 @@ interface RecipeListProps {
   selectedIds?: number[];
   onToggleSelect?: (id: number) => void;
 }
+
+type RecipeRowProps = {
+  rows: Recipe[][];
+  columns: number;
+  onSelectRecipe: (recipe: Recipe) => void;
+  isSelectMode?: boolean;
+  selectedIds?: number[];
+  onToggleSelect?: (id: number) => void;
+};
+
+const RecipeRow = ({ index, style, rows, columns, onSelectRecipe, isSelectMode, selectedIds, onToggleSelect }: RowComponentProps<RecipeRowProps>) => (
+  <div style={style} className="px-0.5 py-4">
+    <div className="grid gap-8" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
+      {rows[index].map((recipe) => (
+        <RecipeCard
+          key={recipe.id || recipe.recipeTitle}
+          recipe={recipe}
+          onSelectRecipe={onSelectRecipe}
+          isSelectMode={isSelectMode}
+          isSelected={selectedIds?.includes(recipe.id!)}
+          onToggleSelect={onToggleSelect}
+        />
+      ))}
+    </div>
+  </div>
+);
 
 const RecipeList: React.FC<RecipeListProps> = ({ recipes, onSelectRecipe, isSelectMode, selectedIds, onToggleSelect }) => {
   const { width, height } = useWindowSize();
@@ -24,34 +50,25 @@ const RecipeList: React.FC<RecipeListProps> = ({ recipes, onSelectRecipe, isSele
     recipes.slice(rowIndex * columns, rowIndex * columns + columns)
   )), [columns, recipes, rowCount]);
 
-  const Row = ({ index, style }: ListChildComponentProps) => (
-    <div style={style} className="px-0.5 py-4">
-      <div className="grid gap-8" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
-        {rows[index].map((recipe) => (
-          <RecipeCard
-            key={recipe.id || recipe.recipeTitle}
-            recipe={recipe}
-            onSelectRecipe={onSelectRecipe}
-            isSelectMode={isSelectMode}
-            isSelected={selectedIds?.includes(recipe.id!)}
-            onToggleSelect={onToggleSelect}
-          />
-        ))}
-      </div>
-    </div>
-  );
+  const rowProps = useMemo((): RecipeRowProps => ({
+    rows,
+    columns,
+    onSelectRecipe,
+    isSelectMode,
+    selectedIds,
+    onToggleSelect,
+  }), [rows, columns, onSelectRecipe, isSelectMode, selectedIds, onToggleSelect]);
 
   if (shouldVirtualize) {
     return (
       <div className="rounded-2xl border border-zinc-900/70 bg-zinc-950/20 p-2">
-        <FixedSizeList
-          height={listHeight}
-          itemCount={rowCount}
-          itemSize={392}
-          width={listWidth}
-        >
-          {Row}
-        </FixedSizeList>
+        <List
+          rowCount={rowCount}
+          rowHeight={392}
+          rowComponent={RecipeRow}
+          rowProps={rowProps}
+          style={{ height: listHeight, width: listWidth }}
+        />
       </div>
     );
   }
@@ -60,9 +77,9 @@ const RecipeList: React.FC<RecipeListProps> = ({ recipes, onSelectRecipe, isSele
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {recipes.map((recipe) => (
-          <RecipeCard 
-            key={recipe.id || recipe.recipeTitle} 
-            recipe={recipe} 
+          <RecipeCard
+            key={recipe.id || recipe.recipeTitle}
+            recipe={recipe}
             onSelectRecipe={onSelectRecipe}
             isSelectMode={isSelectMode}
             isSelected={selectedIds?.includes(recipe.id!)}
