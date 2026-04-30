@@ -398,6 +398,8 @@
       "decreaseServingsAria": "Decrease servings",
       "increaseServingsAria": "Increase servings",
       "addToShoppingListTitle": "Add to shopping list",
+      "plan": "Schedule",
+      "addMissingToShopping": "Shop",
       "startCookMode": "Cook mode",
       "export": "Export",
       "removeFavorite": "Remove favorite",

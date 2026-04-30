@@ -10,6 +10,24 @@ vi.mock('../apiKeyService', () => ({
   loadApiKey: mockLoadApiKey,
 }));
 
+vi.mock('i18next', () => ({
+  default: {
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        'gemini.error.noApiKey': 'No API key configured.',
+        'gemini.error.invalidApiKey': 'Invalid API key.',
+        'gemini.error.networkError': 'Network error.',
+        'gemini.error.rateLimited': 'Rate limit reached.',
+        'gemini.error.invalidResponse': 'Invalid AI response.',
+        'gemini.error.unexpected': 'Unexpected error.',
+        'gemini.error.emptyResponse': 'Empty AI response.',
+      };
+      return map[key] ?? key;
+    },
+    language: 'en',
+  },
+}));
+
 vi.mock('@google/genai', () => ({
   GoogleGenAI: vi.fn(function GoogleGenAI() {
     return {
@@ -44,7 +62,7 @@ describe('geminiService', () => {
 
     await expect(
       generateShoppingList('Pasta fuer 2', [], [])
-    ).rejects.toThrow(/Kein API-Schlüssel konfiguriert/i);
+    ).rejects.toThrow(/No API key configured/i);
   });
 
   it('maps invalid API key errors to user-friendly German message', async () => {
@@ -53,7 +71,7 @@ describe('geminiService', () => {
 
     await expect(
       generateShoppingList('Pasta fuer 2', [], [])
-    ).rejects.toThrow(/API-Schlüssel ist ungültig/i);
+    ).rejects.toThrow(/Invalid API key/i);
   });
 
   it('returns parsed shopping items on valid AI JSON response', async () => {
@@ -88,7 +106,7 @@ describe('geminiService', () => {
 
     await expect(
       generateShoppingList('Pasta fuer 2', [], [])
-    ).rejects.toThrow(/ungueltige Antwort/i);
+    ).rejects.toThrow(/Invalid AI response/i);
   });
 
   it('sanitizes web content before recipe extraction prompts reach Gemini', async () => {

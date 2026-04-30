@@ -1,35 +1,3 @@
-// --- Gemini Vision: Zutaten aus Bild extrahieren ---
-export const extractPantryItemsFromImage = async (imageFile: File): Promise<string> => {
-    const ai = await getAIClient();
-    const model = "gemini-2.5-flash";
-    // Bild als base64 kodieren
-    const fileToBase64 = (file: File) => new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve((reader.result as string).split(",")[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-    const base64 = await fileToBase64(imageFile);
-    const prompt = `Analysiere das Foto und erkenne alle Lebensmittel/Zutaten. Gib eine möglichst natürliche, aber strukturierte Zusammenfassung wie: 'Das sind deine 8 Eier, 2 Zucchini, 1 Packung Butter, ...'. Antworte nur mit einem einzigen deutschen Satz.`;
-    try {
-        const response = await ai.models.generateContent({
-            model,
-            contents: [
-                { role: "user", parts: [
-                    { inlineData: { mimeType: imageFile.type, data: base64 } },
-                    { text: prompt }
-                ] }
-            ],
-            config: {
-                responseMimeType: "text/plain",
-                temperature: 0.2,
-            }
-        });
-        return response.text?.trim() || "";
-    } catch (e) {
-        throw handleGeminiError(e, 'vision');
-    }
-};
 import type { GoogleGenAI } from "@google/genai";
 import DOMPurify from 'dompurify';
 import { retry } from './retryUtils';
@@ -600,11 +568,7 @@ export const generateShoppingList = async (
             throw new Error(i18next.t('gemini.error.emptyResponse'));
         }
         const parsedData = parseAiJson(jsonText, isShoppingListResponse);
-        if (parsedData.items.length >= 0) {
-            return parsedData.items;
-        } else {
-            throw new Error(i18next.t('gemini.error.invalidResponse'));
-        }
+        return parsedData.items;
     } catch (error) {
         const errMsg = (error as Error)?.message || String(error);
         if (isNetworkError(errMsg)) {
@@ -759,5 +723,39 @@ export const verifyNutritionAndAllergensWithGemini = async (
         };
     } catch (e: unknown) {
         throw handleGeminiError(e, 'nutrition verification');
+    }
+};
+
+export const extractPantryItemsFromImage = async (imageFile: File): Promise<string> => {
+    const ai = await getAIClient();
+    const model = "gemini-2.5-flash";
+    const fileToBase64 = (file: File) => new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve((reader.result as string).split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+    const base64 = await fileToBase64(imageFile);
+    const isEn = i18next.language?.startsWith('en');
+    const prompt = isEn
+        ? `Analyse the photo and identify all food items and ingredients. Give a natural, structured summary like: 'These are your 8 eggs, 2 zucchini, 1 pack of butter, ...'. Reply with a single sentence only.`
+        : `Analysiere das Foto und erkenne alle Lebensmittel/Zutaten. Gib eine möglichst natürliche, aber strukturierte Zusammenfassung wie: 'Das sind deine 8 Eier, 2 Zucchini, 1 Packung Butter, ...'. Antworte nur mit einem einzigen deutschen Satz.`;
+    try {
+        const response = await ai.models.generateContent({
+            model,
+            contents: [
+                { role: "user", parts: [
+                    { inlineData: { mimeType: imageFile.type, data: base64 } },
+                    { text: prompt }
+                ] }
+            ],
+            config: {
+                responseMimeType: "text/plain",
+                temperature: 0.2,
+            }
+        });
+        return response.text?.trim() || "";
+    } catch (e) {
+        throw handleGeminiError(e, 'vision');
     }
 };

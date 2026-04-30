@@ -566,10 +566,10 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack }) => {
                       <CookingPot size={18} /> {t('recipeDetail.actions.startCookMode')}
                     </button>
                     <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-zinc-800 text-zinc-200 font-bold py-2 px-4 rounded-md hover:bg-zinc-700 transition-colors border border-zinc-700">
-                        <CalendarPlus size={18} /> Planen
+                        <CalendarPlus size={18} /> {t('recipeDetail.actions.plan')}
                     </button>
                      <button onClick={handleAddMissingToShoppingList} className="flex items-center gap-2 bg-zinc-800 text-zinc-200 font-bold py-2 px-4 rounded-md hover:bg-zinc-700 transition-colors border border-zinc-700">
-                        <ShoppingCartIcon size={18} /> Einkaufen
+                        <ShoppingCartIcon size={18} /> {t('recipeDetail.actions.addMissingToShopping')}
                     </button>
                 </>
              )}

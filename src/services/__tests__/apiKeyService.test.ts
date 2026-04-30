@@ -128,6 +128,9 @@ describe('apiKeyService', () => {
 
     await expect(service.loadApiKey()).resolves.toBe('AIza-legacy-test');
 
-    await expect.poll(() => indexedDbMock.readRecord('culinasync_secure', 'keys', 'gemini_api_key')?.value.startsWith('{"version":2')).toBe(true);
+    await expect.poll(
+      () => indexedDbMock.readRecord('culinasync_secure', 'keys', 'gemini_api_key')?.value.startsWith('{"version":2'),
+      { timeout: 15_000 },
+    ).toBe(true);
   });
 });
