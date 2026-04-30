@@ -213,7 +213,8 @@
     },
     "completed": {
       "title": "All items completed!",
-      "description": "You can now move the purchased items to the pantry."
+      "description": "You can now move the purchased items to the pantry.",
+      "sectionTitle": "Completed ({{count}})"
     },
     "bulkAdd": {
       "title": "Paste list",
@@ -271,7 +272,8 @@
       "stateComplete": "complete",
       "stateIncomplete": "incomplete",
       "editItemAria": "Edit {{itemName}}",
-      "deleteItemAria": "Delete {{itemName}}"
+      "deleteItemAria": "Delete {{itemName}}",
+      "recipeRef": "for {{name}}"
     },
     "quickAdd": {
       "placeholder": "Quick add (e.g. 500g flour)",

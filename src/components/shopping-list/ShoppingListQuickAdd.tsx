@@ -136,8 +136,7 @@ export const ShoppingListQuickAdd = () => {
     if (isShoppingMode && completedItems.length === 0) return null;
 
     return (
-        // Adjusted bottom position for mobile to sit above BottomNav + safe area
-        <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] md:bottom-6 left-0 right-0 z-40 px-4 pointer-events-none transition-all duration-300">
+        <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-6 left-0 right-0 z-40 px-4 pointer-events-none transition-all duration-300">
             <div className="max-w-3xl mx-auto pointer-events-auto">
                 {completedItems.length > 0 ? (
                     <button 

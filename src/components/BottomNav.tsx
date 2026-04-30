@@ -20,7 +20,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentPage, setCurrentPage }) =>
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-zinc-950/85 backdrop-blur-xl border-t border-white/5 z-50 pb-safe transition-all duration-300">
+    <nav aria-label={t('nav.ariaLabel')} className="md:hidden fixed bottom-0 left-0 right-0 bg-zinc-950/85 backdrop-blur-xl border-t border-white/5 z-50 pb-safe">
       <div className="flex justify-around items-center h-16 px-1">
         {navItems.map((item) => {
             const isActive = currentPage === item.id;

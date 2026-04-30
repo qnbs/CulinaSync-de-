@@ -89,8 +89,8 @@ export const ShoppingListItemComponent = React.memo<{
                     
                     {recipeName && !item.isChecked && (
                         <div className="flex items-center gap-1.5 mt-1 text-xs text-[var(--color-accent-400)]/80">
-                            <ChefHat size={12}/> 
-                            <span className="truncate">für {recipeName}</span>
+                            <ChefHat size={12}/>
+                            <span className="truncate">{t('shoppingList.item.recipeRef', { name: recipeName })}</span>
                         </div>
                     )}
                 </div>

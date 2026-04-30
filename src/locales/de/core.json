@@ -4,7 +4,8 @@
     "pantry": "Vorrat",
     "recipes": "Rezepte",
     "mealPlanner": "Planer",
-    "shoppingList": "Einkauf"
+    "shoppingList": "Einkauf",
+    "ariaLabel": "Hauptnavigation"
   },
   "common": {
     "add": "Hinzufügen",
@@ -95,15 +96,17 @@
       "stopVoiceControl": "Sprachsteuerung stoppen",
       "settings": "Einstellungen",
       "help": "Hilfe"
-    }  },
+    }
+  },
   "gemini": {
     "error": {
-      "invalidApiKey": "Der API-Schl\u00fcssel ist ung\u00fcltig. Bitte \u00fcberpr\u00fcfe ihn unter Einstellungen \u2192 API-Schl\u00fcssel.",
-      "networkError": "Der KI-Dienst konnte nicht erreicht werden. Bitte pr\u00fcfe deine Netzwerkverbindung.",
+      "invalidApiKey": "Der API-Schlüssel ist ungültig. Bitte überprüfe ihn unter Einstellungen → API-Schlüssel.",
+      "networkError": "Der KI-Dienst konnte nicht erreicht werden. Bitte prüfe deine Netzwerkverbindung.",
       "rateLimited": "Zu viele Anfragen an den KI-Dienst. Bitte warte einen Moment.",
-      "invalidResponse": "Der KI-Dienst hat eine ung\u00fcltige Antwort gesendet. Bitte versuche es erneut.",
+      "invalidResponse": "Der KI-Dienst hat eine ungültige Antwort gesendet. Bitte versuche es erneut.",
       "unexpected": "Ein unerwarteter Fehler beim KI-Dienst ist aufgetreten.",
-      "noApiKey": "Kein API-Schl\u00fcssel konfiguriert. Bitte gib deinen Gemini-API-Schl\u00fcssel unter Einstellungen ein.",
-      "emptyResponse": "Die KI hat eine leere Antwort zur\u00fcckgegeben."
-    }  }
+      "noApiKey": "Kein API-Schlüssel konfiguriert. Bitte gib deinen Gemini-API-Schlüssel unter Einstellungen ein.",
+      "emptyResponse": "Die KI hat eine leere Antwort zurückgegeben."
+    }
+  }
 }

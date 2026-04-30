@@ -282,7 +282,7 @@ const App: React.FC = () => {
             onCommandPaletteToggle={() => dispatch(setCommandPaletteOpen(true))}
           />
         </div>
-        <main id="main-content" key={currentPage} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 page-fade-in pb-20 md:pb-8">
+        <main id="main-content" key={currentPage} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-8 page-fade-in">
           <Suspense fallback={<LoadingSpinner />}>
               {renderPage()}
           </Suspense>
@@ -295,7 +295,7 @@ const App: React.FC = () => {
         </div>
 
         {showInstallReminder && installPromptEvent && !isStandalone && (
-          <div className="fixed bottom-24 right-4 z-40 w-[min(92vw,24rem)] rounded-2xl border border-[var(--color-accent-500)]/30 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur">
+          <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-40 w-[min(92vw,24rem)] rounded-2xl border border-[var(--color-accent-500)]/30 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur">
             <h4 className="text-sm font-bold text-zinc-100">{t('app.installReminder.title')}</h4>
             <p className="mt-1 text-sm text-zinc-400">{t('app.installReminder.description')}</p>
             <div className="mt-4 flex gap-2">
@@ -313,7 +313,7 @@ const App: React.FC = () => {
         )}
 
         {showUpdateReadyNotice && (
-          <div className="fixed bottom-24 left-4 z-40 w-[min(92vw,24rem)] rounded-2xl border border-sky-400/30 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur">
+          <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-4 z-40 w-[min(92vw,24rem)] rounded-2xl border border-sky-400/30 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur">
             <h4 className="text-sm font-bold text-zinc-100">{t('app.pwaUpdate.title')}</h4>
             <p className="mt-1 text-sm text-zinc-400">{t('app.pwaUpdate.description')}</p>
             <div className="mt-4 flex gap-2">
@@ -339,7 +339,7 @@ const App: React.FC = () => {
           <VoiceControlUI isListening={isListening} transcript={interimTranscript} />
         </Suspense>
         
-        <div aria-live="assertive" className="fixed inset-0 flex items-end px-4 py-6 pointer-events-none sm:p-6 sm:items-start z-50">
+        <div aria-live="assertive" className="fixed inset-0 flex items-end px-4 pt-6 pb-[calc(5rem+env(safe-area-inset-bottom))] pointer-events-none sm:p-6 sm:items-start z-[60]">
             <div className="w-full flex flex-col items-center space-y-4 sm:items-end">
                 {toasts.map((toast) => (
                     <div key={toast.id} className="max-w-sm w-full rounded-lg pointer-events-auto overflow-hidden page-fade-in glass-hud ring-1 ring-black/20">

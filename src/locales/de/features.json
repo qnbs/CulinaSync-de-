@@ -213,7 +213,8 @@
     },
     "completed": {
       "title": "Alle Artikel erledigt!",
-      "description": "Du kannst die gekauften Artikel nun in den Vorrat verschieben."
+      "description": "Du kannst die gekauften Artikel nun in den Vorrat verschieben.",
+      "sectionTitle": "Erledigt ({{count}})"
     },
     "bulkAdd": {
       "title": "Liste einfuegen",
@@ -271,7 +272,8 @@
       "stateComplete": "erledigt",
       "stateIncomplete": "nicht erledigt",
       "editItemAria": "{{itemName}} bearbeiten",
-      "deleteItemAria": "{{itemName}} loeschen"
+      "deleteItemAria": "{{itemName}} loeschen",
+      "recipeRef": "für {{name}}"
     },
     "quickAdd": {
       "placeholder": "Schnell hinzufuegen (z.B. 500g Mehl)",

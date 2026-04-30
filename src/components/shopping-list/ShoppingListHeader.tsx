@@ -30,7 +30,7 @@ export const ShoppingListHeader = () => {
                 </p>
             </div>
 
-            <div className="flex items-center gap-6 w-full md:w-auto bg-zinc-900/40 border border-white/5 p-3 rounded-2xl backdrop-blur-sm">
+            <div className="flex items-center gap-3 sm:gap-6 w-full md:w-auto bg-zinc-900/40 border border-white/5 p-3 rounded-2xl backdrop-blur-sm">
                 {/* Progress Circle */}
                 <div className="relative w-16 h-16 flex-shrink-0">
                     <svg className="transform -rotate-90 w-16 h-16">
@@ -61,7 +61,7 @@ export const ShoppingListHeader = () => {
                     </div>
                 </div>
 
-                <div className="flex-grow flex flex-col gap-1 mr-2">
+                <div className="flex-grow flex flex-col gap-1 min-w-0 mr-2">
                     <div className="flex justify-between text-xs font-medium text-zinc-400 uppercase tracking-wider">
                         <span>{t('shoppingList.header.open')}</span>
                         <span className="text-white">{activeItems.length}</span>
@@ -72,10 +72,12 @@ export const ShoppingListHeader = () => {
                     </div>
                 </div>
 
-                <button 
+                <button
                     onClick={() => setShoppingMode(!isShoppingMode)}
                     className={`flex flex-col items-center justify-center w-16 h-16 rounded-xl border transition-all ${isShoppingMode ? 'bg-red-500/10 border-red-500/50 text-red-400 hover:bg-red-500/20' : 'bg-green-500/10 border-green-500/50 text-green-400 hover:bg-green-500/20'}`}
                     title={isShoppingMode ? t('shoppingList.header.stopShopping') : t('shoppingList.header.startShopping')}
+                    aria-label={isShoppingMode ? t('shoppingList.header.stopShopping') : t('shoppingList.header.startShopping')}
+                    aria-pressed={isShoppingMode}
                 >
                    {isShoppingMode ? <CheckCircle size={24}/> : <ShoppingBag size={24}/>}
                    <span className="text-[10px] font-bold mt-1">{isShoppingMode ? t('shoppingList.header.done') : t('shoppingList.header.start')}</span>

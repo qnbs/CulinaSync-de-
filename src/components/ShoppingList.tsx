@@ -60,7 +60,7 @@ const ShoppingListComponent: React.FC = () => {
     }
 
     return (
-        <div className={`space-y-8 pb-32 ${isShoppingMode ? 'max-w-3xl mx-auto' : ''}`}>
+        <div className={`space-y-8 pb-40 ${isShoppingMode ? 'max-w-3xl mx-auto' : ''}`}>
             <AiModal />
             <BulkAddModal />
             <ShoppingListConfirmationModal />
