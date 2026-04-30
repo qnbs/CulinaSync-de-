@@ -65,7 +65,7 @@
     "@types/react-dom": "^19.2.2",
     "@types/react-window": "^1.8.8",
     "@typescript/native-preview": "beta",
-    "@vitejs/plugin-react": "^4.2.1",
+    "@vitejs/plugin-react": "^6.0.1",
     "@vitest/coverage-v8": "^4.0.18",
     "autoprefixer": "^10.4.20",
     "eslint": "^10.2.1",
