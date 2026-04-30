@@ -1,10 +1,11 @@
 import { z } from 'zod';
+import i18next from 'i18next';
 
-export const apiKeyFormSchema = z.object({
+export const createApiKeyFormSchema = () => z.object({
   apiKey: z.string()
     .trim()
-    .min(1, 'Bitte gib einen API-Schlüssel ein.')
-    .regex(/^AIza[\w-]{20,}$/, 'Das sieht nicht nach einem gültigen Google API-Schlüssel aus.'),
+    .min(1, i18next.t('settings.apiKey.validation.required'))
+    .regex(/^AIza[\w-]{20,}$/, i18next.t('settings.apiKey.validation.invalid')),
 });
 
-export type ApiKeyFormValues = z.infer<typeof apiKeyFormSchema>;
+export type ApiKeyFormValues = { apiKey: string };

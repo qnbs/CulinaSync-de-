@@ -151,6 +151,10 @@
         "title": "Remove API key?",
         "description": "The stored API key will be removed and AI features will be disabled.",
         "action": "Remove"
+      },
+      "validation": {
+        "required": "Please enter an API key.",
+        "invalid": "This doesn't look like a valid Google API key."
       }
     },
     "speech": {
@@ -260,8 +264,26 @@
           "desc": "Wild, innovative fusion cuisine."
         }
       },
-      "dietarySuggestions": ["Vegetarian", "Vegan", "Gluten-free", "Lactose-free", "Nut-free", "Low carb", "Paleo", "Keto"],
-      "cuisineSuggestions": ["Italian", "Asian", "Indian", "Mexican", "German", "French", "Mediterranean", "Levantine"]
+      "dietarySuggestions": [
+        "Vegetarian",
+        "Vegan",
+        "Gluten-free",
+        "Lactose-free",
+        "Nut-free",
+        "Low carb",
+        "Paleo",
+        "Keto"
+      ],
+      "cuisineSuggestions": [
+        "Italian",
+        "Asian",
+        "Indian",
+        "Mexican",
+        "German",
+        "French",
+        "Mediterranean",
+        "Levantine"
+      ]
     },
     "policy": {
       "title": "Household & allergy policies",

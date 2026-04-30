@@ -5,7 +5,7 @@ import { Key, Eye, EyeOff, CheckCircle, Trash2, Shield, ExternalLink } from 'luc
 import { useTranslation } from 'react-i18next';
 import { useModalA11y } from '../../../hooks/useModalA11y';
 import { hasApiKey } from '../../../services/apiKeyService';
-import { apiKeyFormSchema, type ApiKeyFormValues } from '../../../features/settings/api-key/apiKeySchema';
+import { createApiKeyFormSchema, type ApiKeyFormValues } from '../../../features/settings/api-key/apiKeySchema';
 import { storeUserApiKey } from '../../../features/settings/api-key/commands/storeUserApiKey';
 import { removeUserApiKey } from '../../../features/settings/api-key/commands/removeUserApiKey';
 
@@ -81,7 +81,7 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [optimisticHasKey, setOptimisticHasKey] = useOptimistic<boolean, boolean>(hasKey, (_current: boolean, nextValue: boolean) => nextValue);
     const form = useForm<ApiKeyFormValues>({
-        resolver: zodResolver(apiKeyFormSchema),
+        resolver: zodResolver(createApiKeyFormSchema()),
         defaultValues: { apiKey: '' },
     });
 

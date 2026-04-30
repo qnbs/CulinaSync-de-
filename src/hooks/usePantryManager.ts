@@ -133,12 +133,12 @@ export const usePantryManager = () => {
     try {
         const { status, item } = await addOrUpdatePantryItem(itemToSave);
         const message = status === 'added'
-            ? `"${item.name.trim()}" hinzugefügt.`
-            : `"${item.name.trim()}" aktualisiert.`;
+            ? t('pantry.toast.itemAdded', { name: item.name.trim() })
+            : t('pantry.toast.itemUpdated', { name: item.name.trim() });
         addToast(message);
         setModalState(closedModalState);
     } catch (error) {
-        addToast('Speichern fehlgeschlagen.', 'error');
+        addToast(t('pantry.toast.saveFailed'), 'error');
         console.error(error);
     }
       }, [addToast, closedModalState, setModalState]);
@@ -153,11 +153,11 @@ export const usePantryManager = () => {
             category,
         });
         const message = status === 'added'
-            ? `"${item.name}" hinzugefügt (${item.quantity} ${item.unit}).`
-            : `"${item.name}" aktualisiert.`;
+            ? t('pantry.toast.quickAdded', { name: item.name, quantity: item.quantity, unit: item.unit })
+            : t('pantry.toast.itemUpdated', { name: item.name });
         addToast(message, 'success');
         } catch {
-          addToast('Fehler beim Hinzufügen.', 'error');
+          addToast(t('pantry.toast.addFailed'), 'error');
       }
   }, [addToast]);
   
@@ -199,14 +199,14 @@ export const usePantryManager = () => {
       await db.transaction('rw', db.pantry, async () => {
         await db.pantry.delete(actionToRun.item.id!);
       });
-      addToast(`"${actionToRun.item.name}" entfernt.`);
+      addToast(t('pantry.toast.itemRemoved', { name: actionToRun.item.name }));
       return;
     }
 
     await db.transaction('rw', db.pantry, async () => {
       await db.pantry.bulkDelete(actionToRun.itemIds);
     });
-    addToast(`${actionToRun.count} Artikel gelöscht.`);
+    addToast(t('pantry.toast.bulkDeleted', { count: actionToRun.count }));
     setIsSelectMode(false);
     setSelectedItems([]);
   }, [pendingAction, addToast]);
@@ -239,9 +239,9 @@ export const usePantryManager = () => {
     if (selectedItems.length > 0) {
         const count = await addPantryItemsToShoppingList(selectedItems);
         if (count > 0) {
-            addToast(`${count} Artikel zur Einkaufsliste hinzugefügt.`);
+            addToast(t('pantry.toast.addedToShoppingList', { count }));
         } else {
-            addToast("Alle ausgewählten Artikel sind bereits auf der Einkaufsliste.", "info");
+            addToast(t('pantry.toast.alreadyOnShoppingList'), "info");
         }
         setIsSelectMode(false); 
         setSelectedItems([]);
@@ -250,8 +250,8 @@ export const usePantryManager = () => {
   
   const handleAddToShoppingList = useCallback(async (item: PantryItem) => {
     const count = await addPantryItemsToShoppingList([item.id!]);
-    if (count > 0) addToast(`"${item.name}" zur Einkaufsliste hinzugefügt.`, 'success');
-    else addToast(`"${item.name}" ist bereits auf der Liste.`, 'info');
+    if (count > 0) addToast(t('pantry.toast.itemAddedToShoppingList', { name: item.name }), 'success');
+    else addToast(t('pantry.toast.itemAlreadyOnList', { name: item.name }), 'info');
   }, [addToast]);
 
   return {

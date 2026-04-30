@@ -122,7 +122,7 @@
   },
   "mealPlanner": {
     "mealTypes": {
-      "Fr\u00fchst\u00fcck": "Fr\u00fchst\u00fcck",
+      "Frühstück": "Frühstück",
       "Mittagessen": "Mittagessen",
       "Abendessen": "Abendessen"
     },
@@ -198,7 +198,7 @@
     "header": {
       "title": "Einkaufsliste",
       "titleShoppingMode": "Einkaufsmodus",
-      "subtitle": "Plane deinen n\u00e4chsten Einkauf.",
+      "subtitle": "Plane deinen nächsten Einkauf.",
       "subtitleShoppingMode": "Display bleibt an. Tippen zum Abhaken.",
       "open": "Offen",
       "inCart": "Im Wagen",
@@ -280,18 +280,18 @@
       "submitAria": "Artikel hinzufuegen",
       "scanBarcode": "Barcode per Kamera/Foto",
       "scanReceipt": "Rechnung per OCR scannen",
-      "doneMoveToPantry": "{{count}} erledigt \u2022 In Vorrat verschieben"
+      "doneMoveToPantry": "{{count}} erledigt • In Vorrat verschieben"
     }
   },
   "pantry": {
     "categories": {
-      "fruitsVegetables": "Obst & Gem\u00fcse",
+      "fruitsVegetables": "Obst & Gemüse",
       "dairy": "Milchprodukte & Eier",
       "meat": "Fleisch & Fisch",
-      "grainsLegumes": "Getreide & H\u00fclsenfr\u00fcchte",
-      "fatsOils": "Fette & \u00d6le",
+      "grainsLegumes": "Getreide & Hülsenfrüchte",
+      "fatsOils": "Fette & Öle",
       "bakery": "Backwaren",
-      "nutsSeeds": "N\u00fcsse & Samen"
+      "nutsSeeds": "Nüsse & Samen"
     },
     "confirm": {
       "removeItemTitle": "Artikel aus dem Vorrat entfernen?",
@@ -363,6 +363,19 @@
       "nutritionTitle": "Naehrwerte (pro 100g):",
       "nutritionSummary": "Kcal: {{kcal}} | Protein: {{protein}}g | Fett: {{fat}}g | Kohlenhydrate: {{carbs}}g",
       "allergensLabel": "Allergene"
+    },
+    "toast": {
+      "itemAdded": "\"{{name}}\" hinzugefügt.",
+      "itemUpdated": "\"{{name}}\" aktualisiert.",
+      "saveFailed": "Speichern fehlgeschlagen.",
+      "addFailed": "Fehler beim Hinzufügen.",
+      "quickAdded": "\"{{name}}\" hinzugefügt ({{quantity}} {{unit}}).",
+      "itemRemoved": "\"{{name}}\" entfernt.",
+      "bulkDeleted": "{{count}} Artikel gelöscht.",
+      "addedToShoppingList": "{{count}} Artikel zur Einkaufsliste hinzugefügt.",
+      "alreadyOnShoppingList": "Alle ausgewählten Artikel sind bereits auf der Einkaufsliste.",
+      "itemAddedToShoppingList": "\"{{name}}\" zur Einkaufsliste hinzugefügt.",
+      "itemAlreadyOnList": "\"{{name}}\" ist bereits auf der Liste."
     }
   },
   "recipeDetail": {
@@ -436,29 +449,18 @@
       }
     },
     "toolbar": {
-      "searchPlaceholder": "Rezepte suchen...",
-      "searchAria": "Rezepte durchsuchen",
-      "resetSearchAria": "Rezeptsuche leeren",
+      "searchPlaceholder": "Rezepte durchsuchen...",
       "pantryReady": "Kochbereit",
       "favorites": "Favoriten",
       "filters": "Filter",
+      "searchAria": "Rezepte durchsuchen",
+      "resetSearchAria": "Suche zuruecksetzen",
       "sortAria": "Sortierung waehlen",
-      "sortNewest": "Neueste",
-      "sortFavorites": "Favoriten",
-      "sortAz": "A-Z",
-      "sortZa": "Z-A",
-      "courseLabel": "Gang",
       "courseFilterAria": "Nach Gang filtern",
-      "cuisineLabel": "Kueche",
       "cuisineFilterAria": "Nach Kueche filtern",
-      "mainIngredientLabel": "Hauptzutat",
       "mainIngredientFilterAria": "Nach Hauptzutat filtern",
-      "difficultyLabel": "Schwierigkeit",
       "difficultyFilterAria": "Nach Schwierigkeit filtern",
-      "dietLabel": "Ernaehrung",
-      "dietFilterAria": "Nach Ernaehrung filtern",
-      "all": "Alle",
-      "resetAllFilters": "ALLE FILTER ZURUECKSETZEN"
+      "dietFilterAria": "Nach Ernaehrungsform filtern"
     },
     "bulkPlan": {
       "title": "Zum Plan hinzufuegen",
@@ -480,20 +482,6 @@
       "startAria": "Auswahlmodus starten",
       "startTitle": "Auswahlmodus starten",
       "endAria": "Auswahlmodus beenden"
-    },
-    "toolbar": {
-      "searchPlaceholder": "Rezepte durchsuchen...",
-      "pantryReady": "Kochbereit",
-      "favorites": "Favoriten",
-      "filters": "Filter",
-      "searchAria": "Rezepte durchsuchen",
-      "resetSearchAria": "Suche zuruecksetzen",
-      "sortAria": "Sortierung waehlen",
-      "courseFilterAria": "Nach Gang filtern",
-      "cuisineFilterAria": "Nach Kueche filtern",
-      "mainIngredientFilterAria": "Nach Hauptzutat filtern",
-      "difficultyFilterAria": "Nach Schwierigkeit filtern",
-      "dietFilterAria": "Nach Ernaehrungsform filtern"
     }
   },
   "recipeCard": {
@@ -532,15 +520,22 @@
   },
   "voiceControl": {
     "whisper": {
-      "listening": "H\u00f6re zu (lokal)\u2026",
-      "waitingForSpeech": "Warte auf Sprache\u2026"
+      "listening": "Höre zu (lokal)…",
+      "waitingForSpeech": "Warte auf Sprache…"
+    },
+    "errors": {
+      "browserNotSupported": "Dein Browser unterstützt keine Sprachsteuerung.",
+      "microphoneBlocked": "Mikrofonzugriff wurde verweigert. Bitte erlaube den Zugriff in den Browsereinstellungen.",
+      "audioCapture": "Problem mit dem Mikrofon. Bitte überprüfe deine Hardware.",
+      "generic": "Ein Fehler ist aufgetreten: {{error}}",
+      "startFailed": "Spracherkennung konnte nicht gestartet werden."
     }
   },
   "voiceCommands": {
     "navigatedTo": "Navigiere zu: {{page}}",
-    "addedToShoppingList": "\"{{name}}\" zur Einkaufsliste hinzugef\u00fcgt.",
-    "addedToPantry": "\"{{name}}\" zum Vorrat hinzugef\u00fcgt.",
-    "updatedInPantry": "Vorrat f\u00fcr \"{{name}}\" aktualisiert.",
+    "addedToShoppingList": "\"{{name}}\" zur Einkaufsliste hinzugefügt.",
+    "addedToPantry": "\"{{name}}\" zum Vorrat hinzugefügt.",
+    "updatedInPantry": "Vorrat für \"{{name}}\" aktualisiert.",
     "removedFromPantry": "\"{{name}}\" aus dem Vorrat entfernt.",
     "notFoundInPantry": "\"{{name}}\" nicht im Vorrat gefunden.",
     "commandNotRecognized": "Befehl nicht erkannt."

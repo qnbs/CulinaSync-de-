@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import i18next from 'i18next';
 
 interface SpeechRecognitionEvent extends Event {
   readonly resultIndex: number;
@@ -59,7 +60,7 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
   const [isListening, setIsListening] = useState(false);
   const [finalTranscript, setFinalTranscript] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
-  const [error, setError] = useState<string | null>(() => SpeechRecognition ? null : 'Dein Browser unterstützt keine Sprachsteuerung.');
+  const [error, setError] = useState<string | null>(() => SpeechRecognition ? null : i18next.t('voiceControl.errors.browserNotSupported'));
   const recognitionRef = useRef<ISpeechRecognition | null>(null);
 
   useEffect(() => {
@@ -98,14 +99,13 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error('Speech recognition error:', event.error);
       if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-        setError('Mikrofonzugriff wurde verweigert. Bitte erlaube den Zugriff in den Browsereinstellungen.');
+        setError(i18next.t('voiceControl.errors.microphoneBlocked'));
       } else if (event.error === 'no-speech') {
-        // This is a common occurrence, do nothing. The listening state will turn off.
+        // Common occurrence — listening state turns off automatically.
       } else if (event.error === 'audio-capture') {
-        setError('Problem mit dem Mikrofon. Bitte überprüfe deine Hardware.');
-      }
-      else {
-        setError(`Ein Fehler ist aufgetreten: ${event.error}`);
+        setError(i18next.t('voiceControl.errors.audioCapture'));
+      } else {
+        setError(i18next.t('voiceControl.errors.generic', { error: event.error }));
       }
       setIsListening(false);
     };
@@ -127,7 +127,7 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
         setIsListening(true);
       } catch (err) {
           console.error("Error starting speech recognition:", err);
-          setError("Spracherkennung konnte nicht gestartet werden.");
+          setError(i18next.t('voiceControl.errors.startFailed'));
           setIsListening(false);
       }
     }

@@ -151,6 +151,10 @@
         "title": "API-Schluessel entfernen?",
         "description": "Der gespeicherte API-Schluessel wird entfernt und KI-Funktionen werden deaktiviert.",
         "action": "Entfernen"
+      },
+      "validation": {
+        "required": "Bitte gib einen API-Schlüssel ein.",
+        "invalid": "Das sieht nicht nach einem gültigen Google API-Schlüssel aus."
       }
     },
     "actions": {
@@ -260,8 +264,26 @@
           "desc": "Wilde, innovative Fusion-Kueche."
         }
       },
-      "dietarySuggestions": ["Vegetarisch", "Vegan", "Glutenfrei", "Laktosefrei", "Nussfrei", "Wenig Kohlenhydrate", "Paleo", "Keto"],
-      "cuisineSuggestions": ["Italienisch", "Asiatisch", "Indisch", "Mexikanisch", "Deutsch", "Franz\u00f6sisch", "Mediterran", "Levantinisch"]
+      "dietarySuggestions": [
+        "Vegetarisch",
+        "Vegan",
+        "Glutenfrei",
+        "Laktosefrei",
+        "Nussfrei",
+        "Wenig Kohlenhydrate",
+        "Paleo",
+        "Keto"
+      ],
+      "cuisineSuggestions": [
+        "Italienisch",
+        "Asiatisch",
+        "Indisch",
+        "Mexikanisch",
+        "Deutsch",
+        "Französisch",
+        "Mediterran",
+        "Levantinisch"
+      ]
     },
     "policy": {
       "title": "Haushalts- & Allergie-Policies",

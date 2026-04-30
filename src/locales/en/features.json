@@ -122,7 +122,7 @@
   },
   "mealPlanner": {
     "mealTypes": {
-      "Fr\u00fchst\u00fcck": "Breakfast",
+      "Frühstück": "Breakfast",
       "Mittagessen": "Lunch",
       "Abendessen": "Dinner"
     },
@@ -363,6 +363,19 @@
       "nutritionTitle": "Nutrition (per 100g):",
       "nutritionSummary": "Kcal: {{kcal}} | Protein: {{protein}}g | Fat: {{fat}}g | Carbs: {{carbs}}g",
       "allergensLabel": "Allergens"
+    },
+    "toast": {
+      "itemAdded": "\"{{name}}\" added.",
+      "itemUpdated": "\"{{name}}\" updated.",
+      "saveFailed": "Failed to save.",
+      "addFailed": "Failed to add item.",
+      "quickAdded": "\"{{name}}\" added ({{quantity}} {{unit}}).",
+      "itemRemoved": "\"{{name}}\" removed.",
+      "bulkDeleted": "{{count}} items deleted.",
+      "addedToShoppingList": "{{count}} items added to shopping list.",
+      "alreadyOnShoppingList": "All selected items are already on the shopping list.",
+      "itemAddedToShoppingList": "\"{{name}}\" added to shopping list.",
+      "itemAlreadyOnList": "\"{{name}}\" is already on the list."
     }
   },
   "recipeDetail": {
@@ -437,28 +450,17 @@
     },
     "toolbar": {
       "searchPlaceholder": "Search recipes...",
-      "searchAria": "Search recipes",
-      "resetSearchAria": "Clear recipe search",
       "pantryReady": "Pantry-ready",
       "favorites": "Favorites",
       "filters": "Filters",
+      "searchAria": "Search recipes",
+      "resetSearchAria": "Reset search",
       "sortAria": "Choose sorting",
-      "sortNewest": "Newest",
-      "sortFavorites": "Favorites",
-      "sortAz": "A-Z",
-      "sortZa": "Z-A",
-      "courseLabel": "Course",
       "courseFilterAria": "Filter by course",
-      "cuisineLabel": "Cuisine",
       "cuisineFilterAria": "Filter by cuisine",
-      "mainIngredientLabel": "Main ingredient",
       "mainIngredientFilterAria": "Filter by main ingredient",
-      "difficultyLabel": "Difficulty",
       "difficultyFilterAria": "Filter by difficulty",
-      "dietLabel": "Diet",
-      "dietFilterAria": "Filter by diet",
-      "all": "All",
-      "resetAllFilters": "RESET ALL FILTERS"
+      "dietFilterAria": "Filter by diet"
     },
     "bulkPlan": {
       "title": "Add to plan",
@@ -480,20 +482,6 @@
       "startAria": "Start selection mode",
       "startTitle": "Start selection mode",
       "endAria": "End selection mode"
-    },
-    "toolbar": {
-      "searchPlaceholder": "Search recipes...",
-      "pantryReady": "Pantry-ready",
-      "favorites": "Favorites",
-      "filters": "Filters",
-      "searchAria": "Search recipes",
-      "resetSearchAria": "Reset search",
-      "sortAria": "Choose sorting",
-      "courseFilterAria": "Filter by course",
-      "cuisineFilterAria": "Filter by cuisine",
-      "mainIngredientFilterAria": "Filter by main ingredient",
-      "difficultyFilterAria": "Filter by difficulty",
-      "dietFilterAria": "Filter by diet"
     }
   },
   "recipeCard": {
@@ -532,8 +520,15 @@
   },
   "voiceControl": {
     "whisper": {
-      "listening": "Listening (local)\u2026",
-      "waitingForSpeech": "Waiting for speech\u2026"
+      "listening": "Listening (local)…",
+      "waitingForSpeech": "Waiting for speech…"
+    },
+    "errors": {
+      "browserNotSupported": "Your browser does not support voice control.",
+      "microphoneBlocked": "Microphone access was denied. Please allow access in your browser settings.",
+      "audioCapture": "Problem with the microphone. Please check your hardware.",
+      "generic": "An error occurred: {{error}}",
+      "startFailed": "Could not start speech recognition."
     }
   },
   "voiceCommands": {
