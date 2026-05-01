@@ -160,7 +160,8 @@
       "pantryUpdatedCount": "{{count}} pantry items updated.",
       "mealRemoved": "Meal removed.",
       "noteAdded": "Note added.",
-      "shoppingListUpdated": "Shopping list updated: +{{added}} item(s)."
+      "shoppingListUpdated": "Shopping list updated: +{{added}} item(s).",
+      "icsExportCreated": "Calendar export created."
     },
     "confirm": {
       "removeMeal": "Remove this meal from the plan?",
@@ -283,6 +284,15 @@
       "scanBarcode": "Scan barcode via camera/photo",
       "scanReceipt": "Scan receipt with OCR",
       "doneMoveToPantry": "{{count}} done • Move to pantry"
+    },
+    "toast": {
+      "noMissingIngredients": "No missing ingredients found in the meal plan.",
+      "generateFromPlanSuccess": "{{added}} new item(s) added, {{existing}} already on the list.",
+      "itemChecked": "\"{{name}}\" checked off.",
+      "itemNotFoundOrDone": "Item \"{{name}}\" not found on the list or already done.",
+      "quantityUpdated": "Quantity updated for \"{{name}}\".",
+      "aiItemsAdded": "{{added}} items added by AI, {{updated}} updated.",
+      "bulkItemsAdded": "{{added}} items added, {{updated}} updated."
     }
   },
   "pantry": {
@@ -385,6 +395,11 @@
     "generatingImage": "Generating image...",
     "generateImage": "Generate image",
     "adjustServings": "Adjust servings:",
+    "ingredients": "Ingredients",
+    "instructions": "Instructions",
+    "nutrition": "Nutrition",
+    "expertTips": "Expert tips",
+    "pantryAvailable": "{{amount}} {{unit}} available",
     "meta": {
       "totalTimeTitle": "Total time",
       "servingsTitle": "Servings",
@@ -483,7 +498,14 @@
     "selection": {
       "startAria": "Start selection mode",
       "startTitle": "Start selection mode",
-      "endAria": "End selection mode"
+      "endAria": "End selection mode",
+      "itemsSelected": "{{count}} selected"
+    },
+    "actions": {
+      "addToPlan": "Add to plan"
+    },
+    "toast": {
+      "bulkAddedToMealPlan": "{{count}} recipes added to plan."
     }
   },
   "recipeCard": {
@@ -541,5 +563,18 @@
     "removedFromPantry": "\"{{name}}\" removed from pantry.",
     "notFoundInPantry": "\"{{name}}\" not found in pantry.",
     "commandNotRecognized": "Command not recognized."
+  },
+  "aiChef": {
+    "subtitle": "Your personal star chef.",
+    "defaults": {
+      "simpleDish": "A simple dish without many ingredients",
+      "creativeDish": "A creative dish with {{ingredients}}"
+    },
+    "error": {
+      "emptyPrompt": "Please enter what you are in the mood for.",
+      "generationFailed": "Generation failed",
+      "apiKeyMissing": "Gemini API key missing",
+      "apiKeyMessage": "Please add your key under Settings → API Key. Without a key, AI features are disabled."
+    }
   }
 }

@@ -74,7 +74,7 @@
 
 | # | Maßnahme | Herkunft | Datei(en) | Aufwand | Status |
 |---|---|---|---|---|---|
-| 3.1 | `RecipeDetail.tsx` (~550 Zeilen) aufteilen: `RecipeNutritionPanel`, `RecipeActionBar`, `ExportDropdown`, `MealPlanModal` | M1 | `src/components/RecipeDetail.tsx` | Mittel (2–3 h) | 🔲 |
+| 3.1 | `RecipeDetail.tsx` (~550 Zeilen) aufteilen: `RecipeNutritionPanel`, `RecipeActionBar`, `ExportDropdown`, `MealPlanModal` | M1 | `src/components/RecipeDetail.tsx` | Mittel (2–3 h) | ✅ Komponenten-Split committed (src/components/recipe-detail/), Verdrahtung steht noch aus |
 | 3.2 | `CookModeView.tsx` (~380 Zeilen) aufteilen: `CookModeTimer`, `CookModeIngredients`, `CookModeFooter` | M2 | `src/components/CookModeView.tsx` | Mittel (2 h) | 🔲 |
 | 3.3 | `MealPlanner` auf Context-Pattern migrieren (analog zu `PantryManager`/`ShoppingList`) | M4 | `src/components/MealPlanner.tsx`, neuer Context | Hoch (6–8 h) | 🔲 |
 
@@ -107,10 +107,10 @@
 
 | # | Maßnahme | Herkunft | Bereich | Aufwand | Status |
 |---|---|---|---|---|---|
-| 5.1 | Repository-Layer testen: `db.ts`, `dbMigrations.ts` | T1 | `src/services/__tests__/` | Hoch (6–8 h) | 🔲 |
-| 5.2 | Store-Slices testen: `settingsSlice`, `uiSlice`, `shoppingListSlice` | T1 | `src/store/__tests__/` | Mittel (3–4 h) | 🔲 |
+| 5.1 | Repository-Layer testen: `db.ts`, `dbMigrations.ts` | T1 | `src/services/__tests__/` | Hoch (6–8 h) | ✅ dbMigrations.test.ts ✅; db.ts-Tests noch offen |
+| 5.2 | Store-Slices testen: `settingsSlice`, `uiSlice`, `shoppingListSlice` | T1 | `src/store/__tests__/` | Mittel (3–4 h) | ✅ |
 | 5.3 | Hooks testen: `useShoppingList`, `usePantryManager`, `useMealPlan` | T1 | `src/hooks/__tests__/` | Hoch (4–6 h) | 🔲 |
-| 5.4 | Services testen: `apiKeyService`, `voiceCommands`, `exportService` | T1 | `src/services/__tests__/` | Mittel (3–4 h) | 🔲 |
+| 5.4 | Services testen: `apiKeyService`, `voiceCommands`, `exportService` | T1 | `src/services/__tests__/` | Mittel (3–4 h) | ✅ apiKeyService ✅, exportService ✅; voiceCommands-Tests noch offen |
 | 5.5 | Component-Smoke-Tests für kritische Seiten (React Testing Library) | T1 | `src/components/__tests__/` | Hoch (4–6 h) | 🔲 |
 
 **Gesamtaufwand Milestone 5:** ~20–28 h
@@ -178,10 +178,10 @@ _Vorbedingung: M1 (DevContainer mit Rust), Tauri 2 stabil_
 
 | # | Maßnahme | Herkunft | Datei(en) | Aufwand | Status |
 |---|---|---|---|---|---|
-| 9.1 | `jsPDF` auf dynamischen Import umstellen (nur bei PDF-Export laden) | P1 | `src/services/exportService.ts` | Niedrig (1 h) | 🔲 |
-| 9.2 | `tesseract.js` auf dynamischen Import umstellen (OCR-Modul) | P1 | `src/services/` | Niedrig (1 h) | 🔲 |
+| 9.1 | `jsPDF` auf dynamischen Import umstellen (nur bei PDF-Export laden) | P1 | `src/services/exportService.ts` | Niedrig (1 h) | ✅ |
+| 9.2 | `tesseract.js` auf dynamischen Import umstellen (OCR-Modul) | P1 | `src/services/` | Niedrig (1 h) | ✅ |
 | 9.3 | `vendor-misc`-Chunk analysieren (886 KB) und ggf. weiter splitten | P2 | `vite.config.ts` `manualChunks` | Mittel (2–3 h) | 🔲 |
-| 9.4 | `vendor-faker`-Chunk (2.6 MB) prüfen — nur noch Dev-Fallback, niemals im initialen Bundle | P1 | Lazy-Import verifizieren | Niedrig (30 min) | 🔲 |
+| 9.4 | `vendor-faker`-Chunk (2.6 MB) prüfen — nur noch Dev-Fallback, niemals im initialen Bundle | P1 | Lazy-Import verifizieren | Niedrig (30 min) | ✅ |
 
 **Gesamtaufwand Milestone 9:** ~5–7 h
 

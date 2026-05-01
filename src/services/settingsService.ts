@@ -7,7 +7,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> => typeof va
 
 const parseJson = (value: string): unknown => JSON.parse(value);
 
-const mergeWithDefaults = (parsed: unknown): AppSettings => {
+export const mergeWithDefaults = (parsed: unknown): AppSettings => {
   const defaults = getDefaultSettings();
   const source = isRecord(parsed) ? parsed : {};
 
@@ -23,35 +23,33 @@ const mergeWithDefaults = (parsed: unknown): AppSettings => {
   };
 };
 
+// Reads the Redux Persist format (per-key JSON strings) and reconstructs
+// the full settings object.  Returns null if no persisted state exists.
 const loadPersistedSettings = (): AppSettings | null => {
-  const persistedSettings = window.localStorage.getItem(PERSISTED_SETTINGS_KEY);
+  const raw = window.localStorage.getItem(PERSISTED_SETTINGS_KEY);
+  if (!raw) return null;
 
-  if (!persistedSettings) {
-    return null;
-  }
+  const outer = parseJson(raw);
+  if (!isRecord(outer)) return null;
 
-  const parsedPersistedSettings = parseJson(persistedSettings);
-  if (!isRecord(parsedPersistedSettings)) {
-    return null;
-  }
-
-  const hydratedSettings = Object.fromEntries(
-    Object.entries(parsedPersistedSettings)
+  const hydrated = Object.fromEntries(
+    Object.entries(outer)
       .filter(([key]) => key !== '_persist')
       .map(([key, value]) => {
-        if (typeof value !== 'string') {
-          return [key, value];
-        }
-
-        try {
-          return [key, parseJson(value)];
-        } catch {
-          return [key, value];
-        }
+        if (typeof value !== 'string') return [key, value];
+        try { return [key, parseJson(value)]; }
+        catch { return [key, value]; }
       })
   );
+  return mergeWithDefaults(hydrated);
+};
 
-  return mergeWithDefaults(hydratedSettings);
+// Reads the legacy pre-Redux-Persist key used before v0.1.
+const loadLegacySettings = (): AppSettings | null => {
+  const raw = window.localStorage.getItem(SETTINGS_KEY);
+  if (!raw) return null;
+  try { return mergeWithDefaults(parseJson(raw)); }
+  catch { return null; }
 };
 
 export const getDefaultSettings = (): AppSettings => ({
@@ -91,19 +89,14 @@ export const getDefaultSettings = (): AppSettings => ({
   },
 });
 
+// Used by i18n.ts to detect the persisted language before the Redux store
+// is ready, and by tests to verify persistence priority.
+// Priority: Redux Persist key → legacy key → application defaults.
 export const loadSettings = (): AppSettings => {
   try {
-    const persistedSettings = loadPersistedSettings();
-    if (persistedSettings) {
-      return persistedSettings;
-    }
-
-    const storedSettings = window.localStorage.getItem(SETTINGS_KEY);
-    if (storedSettings) {
-      return mergeWithDefaults(parseJson(storedSettings));
-    }
+    return loadPersistedSettings() ?? loadLegacySettings() ?? getDefaultSettings();
   } catch (error) {
-    console.error("Failed to load settings from localStorage", error);
+    console.error('[CulinaSync] Failed to load settings from localStorage', error);
+    return getDefaultSettings();
   }
-  return getDefaultSettings();
 };

@@ -1,4 +1,5 @@
 import React, { useDeferredValue, useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { RecipeIdea, StructuredPrompt } from '../types';
 import RecipeDetail from './RecipeDetail';
@@ -16,6 +17,7 @@ const HISTORY_KEY = 'culinaSyncAiChefHistory';
 const MAX_HISTORY = 5;
 
 const AiChef: React.FC = () => {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { voiceAction, focusAction } = useAppSelector(state => state.ui);
 
@@ -84,7 +86,7 @@ const AiChef: React.FC = () => {
 
   const handleGenerateIdeas = async () => {
     if (!effectiveCraving.trim()) { 
-        dispatch(addToast({ message: 'Bitte gib ein, worauf du Appetit hast.', type: 'error' }));
+        dispatch(addToast({ message: t('aiChef.error.emptyPrompt'), type: 'error' }));
         return; 
     }
     if (initialPrompt) {

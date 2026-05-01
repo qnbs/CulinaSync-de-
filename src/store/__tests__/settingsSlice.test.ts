@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('../../services/settingsService', () => ({
-  loadSettings: () => ({
+vi.mock('../../services/settingsService', () => {
+  const mockSettings = {
     language: 'de',
     displayName: '',
     defaultServings: 4,
@@ -12,9 +12,13 @@ vi.mock('../../services/settingsService', () => ({
     shoppingList: { groupCheckedAtBottom: false, defaultSort: 'category', autoCategorize: true },
     speechSynthesis: { voice: null, rate: 1, pitch: 1 },
     appearance: { accentColor: 'emerald', highContrast: false, kitchenMode: false, largeText: false },
-  }),
-  saveSettings: vi.fn(),
-}));
+  };
+  return {
+    loadSettings: () => ({ ...mockSettings }),
+    getDefaultSettings: () => ({ ...mockSettings }),
+    saveSettings: vi.fn(),
+  };
+});
 
 import reducer, { setPantryGrouping, setPantrySort, updateSettings } from '../slices/settingsSlice';
 import type { AppSettings } from '../../types';

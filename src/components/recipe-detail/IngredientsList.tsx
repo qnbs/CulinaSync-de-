@@ -1,13 +1,14 @@
 import React from 'react';
-import type { IngredientGroup } from '../../types';
+import type { IngredientGroup, IngredientItem } from '../../types';
 import type { TFunction } from 'i18next';
-import { CheckCircle, AlertCircle } from 'lucide-react';
+import { CheckCircle, AlertCircle, ShoppingCartIcon } from 'lucide-react';
 import { scaleIngredientQuantity } from '../../services/utils';
 
 interface IngredientsListProps {
   ingredients: IngredientGroup[];
   scaleFactor: number;
   pantryMap: Map<string, number>;
+  onAddToShoppingList: (item: IngredientItem) => void;
   t: TFunction;
 }
 
@@ -15,6 +16,7 @@ export const IngredientsList: React.FC<IngredientsListProps> = ({
   ingredients,
   scaleFactor,
   pantryMap,
+  onAddToShoppingList,
   t
 }) => {
   return (
@@ -28,37 +30,59 @@ export const IngredientsList: React.FC<IngredientsListProps> = ({
                 {group.sectionTitle}
               </h4>
             )}
-            <div className="space-y-2">
+            <ul className="space-y-2">
               {group.items.map((item, index) => {
                 const scaledQuantityStr = scaleIngredientQuantity(item.quantity, scaleFactor);
                 const requiredQty = parseFloat(scaledQuantityStr.replace(',', '.')) || 0;
                 const pantryQty = pantryMap.get(item.name.toLowerCase()) || 0;
-                const isMatched = pantryQty >= requiredQty;
+
+                let status: 'have' | 'low' | 'missing' = 'missing';
+                if (pantryQty >= requiredQty) status = 'have';
+                else if (pantryQty > 0) status = 'low';
 
                 return (
-                  <div key={index} className="flex items-center gap-3 text-zinc-300">
-                    <div className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-zinc-800/50 text-[var(--color-accent-400)]">
-                      {isMatched ? (
-                        <CheckCircle size={16} />
-                      ) : (
-                        <AlertCircle size={16} />
+                  <li
+                    key={index}
+                    className="flex items-start text-zinc-300 group bg-zinc-900/30 p-2 rounded-lg hover:bg-zinc-900/80 transition-colors"
+                  >
+                    <div className="flex-grow flex items-center">
+                      {status === 'have' && (
+                        <span title={t('recipeDetail.ingredientStatus.haveTitle')} className="flex-shrink-0 mr-3">
+                          <CheckCircle size={16} className="text-emerald-500" />
+                        </span>
                       )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-medium">{item.name}</div>
-                      <div className="text-sm text-zinc-500">
-                        {scaledQuantityStr} {item.unit}
-                        {!isMatched && pantryQty > 0 && (
+                      {status === 'low' && (
+                        <span title={t('recipeDetail.ingredientStatus.lowTitle', { pantryQty, unit: item.unit })} className="flex-shrink-0 mr-3">
+                          <AlertCircle size={16} className="text-amber-500" />
+                        </span>
+                      )}
+                      {status === 'missing' && (
+                        <div className="w-4 h-4 rounded-full border-2 border-zinc-700 mr-3 flex-shrink-0" />
+                      )}
+                      <div className="flex-grow">
+                        <span className="font-medium text-zinc-100">{scaledQuantityStr} {item.unit}</span>{' '}
+                        <span className="text-zinc-400">{item.name}</span>
+                        {status === 'low' && pantryQty > 0 && (
                           <span className="ml-2 text-xs text-[var(--color-accent-400)]">
                             ({t('recipeDetail.pantryAvailable', { amount: pantryQty, unit: item.unit })})
                           </span>
                         )}
                       </div>
                     </div>
-                  </div>
+                    {status !== 'have' && (
+                      <button
+                        onClick={() => onAddToShoppingList(item)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-zinc-800 rounded text-zinc-400 hover:text-[var(--color-accent-400)]"
+                        title={t('recipeDetail.actions.addToShoppingListTitle')}
+                        aria-label={t('recipeDetail.actions.addToShoppingListTitle')}
+                      >
+                        <ShoppingCartIcon size={16} />
+                      </button>
+                    )}
+                  </li>
                 );
               })}
-            </div>
+            </ul>
           </div>
         ))}
       </div>

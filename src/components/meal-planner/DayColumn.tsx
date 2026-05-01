@@ -3,15 +3,16 @@ import { PlusCircle, MoreHorizontal, Trash2, CheckCircle2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useModalA11y } from '../../hooks/useModalA11y';
 import { MealPlanItem, Recipe } from '../../types';
+import { MEAL_TYPES, MealType } from '../MealPlanner';
 import PlannedMealCard from '../PlannedMealCard';
 
 interface DayColumnProps {
     date: Date;
     isToday: boolean;
-    meals: Record<'Frühstück' | 'Mittagessen' | 'Abendessen', MealPlanItem | undefined>;
+    meals: Record<MealType, MealPlanItem | undefined>;
     recipesById: Map<number, Recipe>;
-    onDrop: (e: React.DragEvent, date: string, mealType: string) => void;
-    onSlotClick: (date: string, mealType: string) => void;
+    onDrop: (e: React.DragEvent, date: string, mealType: MealType) => void;
+    onSlotClick: (date: string, mealType: MealType) => void;
     onMealAction: (action: string, payload: Recipe | MealPlanItem) => void;
     isPlacementMode?: boolean;
 }
@@ -87,7 +88,8 @@ const ClearDayConfirmationModal: React.FC<{
 };
 
 export const DayColumn: React.FC<DayColumnProps> = ({ date, isToday, meals, recipesById, onDrop, onSlotClick, onMealAction, isPlacementMode }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const locale = i18n.language;
     const getMealTypeLabel = (mt: string) => t(`mealPlanner.mealTypes.${mt}`, { defaultValue: mt });
     const dateString = date.toISOString().split('T')[0];
     const [dragOverType, setDragOverType] = useState<string | null>(null);
@@ -102,7 +104,7 @@ export const DayColumn: React.FC<DayColumnProps> = ({ date, isToday, meals, reci
         setDragOverType(null);
     };
 
-    const handleDropInternal = (e: React.DragEvent, mealType: string) => {
+    const handleDropInternal = (e: React.DragEvent, mealType: MealType) => {
         onDrop(e, dateString, mealType);
         setDragOverType(null);
     };
@@ -118,7 +120,7 @@ export const DayColumn: React.FC<DayColumnProps> = ({ date, isToday, meals, reci
         <div className={`flex flex-col h-full rounded-2xl border transition-all duration-300 ${isToday ? 'bg-zinc-900/60 border-[var(--color-accent-500)]/30 ring-1 ring-[var(--color-accent-500)]/20 shadow-[0_0_20px_rgba(0,0,0,0.3)]' : 'bg-zinc-900/30 border-zinc-800/50'}`}>
             {isClearDayModalOpen && (
                 <ClearDayConfirmationModal
-                    dateLabel={date.toLocaleDateString('de-DE')}
+                    dateLabel={date.toLocaleDateString(locale)}
                     onClose={() => setIsClearDayModalOpen(false)}
                     onConfirm={handleClearDay}
                 />
@@ -127,14 +129,14 @@ export const DayColumn: React.FC<DayColumnProps> = ({ date, isToday, meals, reci
             <div className={`flex items-center justify-between p-4 border-b ${isToday ? 'border-[var(--color-accent-500)]/20 bg-[var(--color-accent-500)]/5' : 'border-zinc-800/50'}`}>
                 <div>
                     <h3 className={`font-bold text-lg ${isToday ? 'text-[var(--color-accent-400)]' : 'text-zinc-200'}`}>
-                        {date.toLocaleDateString('de-DE', { weekday: 'long' })}
+                        {date.toLocaleDateString(locale, { weekday: 'long' })}
                     </h3>
                     <p className="text-xs text-zinc-500 font-medium">
-                        {date.toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })}
+                        {date.toLocaleDateString(locale, { day: 'numeric', month: 'long' })}
                     </p>
                 </div>
                 <div className="group relative">
-                    <button type="button" aria-label={t('mealPlanner.actions.dayActionsAria', { date: date.toLocaleDateString('de-DE') })} className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800">
+                    <button type="button" aria-label={t('mealPlanner.actions.dayActionsAria', { date: date.toLocaleDateString(locale) })} className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800">
                         <MoreHorizontal size={18}/>
                     </button>
                     <div className="absolute right-0 top-full mt-1 w-32 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto transition-opacity z-10 overflow-hidden">
@@ -147,7 +149,7 @@ export const DayColumn: React.FC<DayColumnProps> = ({ date, isToday, meals, reci
 
             {/* Slots */}
             <div className="flex flex-col p-2 gap-2 flex-grow">
-                {(['Frühstück', 'Mittagessen', 'Abendessen'] as const).map(mealType => {
+                {MEAL_TYPES.map(mealType => {
                     const meal = meals[mealType];
                     const recipe = meal?.recipeId ? recipesById.get(meal.recipeId) : undefined;
                     const isDragOver = dragOverType === mealType;

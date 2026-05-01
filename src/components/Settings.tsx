@@ -199,7 +199,7 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
             case 'apikey': return <ApiKeyPanel addToast={addToastWrapper} />;
             case 'data': return <DataPanel addToast={addToastWrapper} installPromptEvent={installPromptEvent} onInstallPWA={onInstallPWA} isStandalone={isStandalone} />;
             case 'speech': return (
-                <Suspense fallback={<div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 text-zinc-400">Audio-Modul wird geladen...</div>}>
+                <Suspense fallback={<div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 text-zinc-400">{t('settings.voicePanel.loading')}</div>}>
                     <VoicePanel settings={localSettings} onChange={handleChange} />
                 </Suspense>
             );
@@ -218,7 +218,7 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
                          {activeSection === 'appearance' && t('settings.sections.appearance')}
                          {activeSection === 'modules' && t('settings.sections.modules')}
                          {activeSection === 'ai' && t('settings.sections.ai')}
-                         {activeSection === 'policies' && 'Policies'}
+                         {activeSection === 'policies' && t('settings.sections.policies')}
                          {activeSection === 'apikey' && t('settings.sections.apiKey')}
                          {activeSection === 'speech' && t('settings.sections.speech')}
                          {activeSection === 'data' && t('settings.sections.data')}

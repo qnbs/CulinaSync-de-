@@ -221,7 +221,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
                         aria-label={t('commandPalette.ariaLabel')}
                         tabIndex={-1}
           >
-            <div className="flex items-center border-b border-zinc-700/50 p-1">
+            <div className="hidden md:flex items-center border-b border-zinc-700/50 p-1">
               <Search className="h-5 w-5 text-zinc-500 mx-3" />
               <input
                                 ref={inputRef}

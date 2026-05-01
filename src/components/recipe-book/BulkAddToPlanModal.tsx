@@ -12,7 +12,7 @@ interface BulkAddToPlanModalProps {
 }
 
 export const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, onClose, recipeIds, onSave }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
     const [mealType, setMealType] = useState<'Frühstück' | 'Mittagessen' | 'Abendessen'>('Abendessen');
     const [isSaving, setIsSaving] = useState(false);
@@ -100,7 +100,7 @@ export const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, 
                     </div>
                     
                     <div className="glass-card rounded-lg p-3 text-xs text-zinc-400">
-                        {t('recipeBook.bulkPlan.summaryPrefix')} <span className="text-zinc-200 font-medium">{new Date(startDate).toLocaleDateString('de-DE')}</span> {t('recipeBook.bulkPlan.summaryMiddle')} <span className="text-zinc-200 font-medium">{mealType}</span> {t('recipeBook.bulkPlan.summarySuffix')}
+                        {t('recipeBook.bulkPlan.summaryPrefix')} <span className="text-zinc-200 font-medium">{new Date(startDate + 'T12:00:00').toLocaleDateString(i18n.language)}</span> {t('recipeBook.bulkPlan.summaryMiddle')} <span className="text-zinc-200 font-medium">{mealType}</span> {t('recipeBook.bulkPlan.summarySuffix')}
                     </div>
                 </div>
 

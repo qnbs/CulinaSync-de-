@@ -6,10 +6,14 @@ import { registerSW } from 'virtual:pwa-register';
 import { store, persistor } from './src/store';
 import { addToast as addToastAction } from './src/store/slices/uiSlice';
 import './src/index.css';
-import './src/i18n';
+import i18n from './src/i18n';
 import App from './src/App';
 import { installGlobalErrorLogging, logAppError } from './src/services/errorLoggingService';
+import { migrateLegacySettings } from './src/services/settingsMigration';
 
+// Runs synchronously before the first render; Redux Persist rehydration is
+// async (Promise-based), so the migration localStorage write lands first.
+migrateLegacySettings();
 installGlobalErrorLogging();
 
 const emitPwaEvent = (eventName: string) => {
@@ -24,21 +28,19 @@ registerSW({
     }
 
     registration.addEventListener('updatefound', () => {
-      store.dispatch(addToastAction({ message: 'App-Update wird heruntergeladen.', type: 'info' }));
+      store.dispatch(addToastAction({ message: i18n.t('app.pwa.updateDownloading'), type: 'info' }));
       emitPwaEvent('culinasync:pwa-update-found');
     });
   },
   onNeedRefresh() {
-    store.dispatch(addToastAction({ message: 'Eine neue Version ist bereit. Bitte neu laden.', type: 'info' }));
+    store.dispatch(addToastAction({ message: i18n.t('app.pwa.updateReady'), type: 'info' }));
     emitPwaEvent('culinasync:pwa-update-ready');
   },
   onOfflineReady() {
-    store.dispatch(addToastAction({ message: 'Offline-Modus ist bereit.', type: 'info' }));
-    console.info('CulinaSync ist offline bereit.');
+    store.dispatch(addToastAction({ message: i18n.t('app.pwa.offlineReady'), type: 'info' }));
   },
   onRegisterError(error) {
     void logAppError(error, 'service-worker.register');
-    console.error('Service Worker Registrierung fehlgeschlagen:', error);
   },
 });
 

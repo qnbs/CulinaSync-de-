@@ -43,6 +43,11 @@
       "reload": "Reload",
       "later": "Later"
     },
+    "pwa": {
+      "updateDownloading": "App update is downloading.",
+      "updateReady": "A new version is ready. Please reload.",
+      "offlineReady": "Offline mode is ready."
+    },
     "commandSections": {
       "navigation": "Navigation",
       "pantry": "Pantry",
@@ -96,6 +101,20 @@
       "stopVoiceControl": "Disable voice control",
       "settings": "Settings",
       "help": "Help"
+    }
+  },
+  "commandPalette": {
+    "placeholder": "Search or enter a command...",
+    "ariaLabel": "Command Palette",
+    "noResults": "No results found",
+    "sections": {
+      "recipes": "Recipes",
+      "pantry": "Pantry",
+      "globalSearch": "Global Search"
+    },
+    "dynamicSearch": {
+      "recipes": "Search recipes for \"{{searchTerm}}\"",
+      "pantry": "Search pantry for \"{{searchTerm}}\""
     }
   },
   "gemini": {

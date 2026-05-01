@@ -50,9 +50,13 @@
       "appearance": "Design & Colors",
       "modules": "Module Configuration",
       "ai": "AI Chef Preferences",
+      "policies": "Policies",
       "apiKey": "API Key",
       "speech": "Voice Control & Audio",
       "data": "Data & Storage"
+    },
+    "voicePanel": {
+      "loading": "Loading audio module..."
     },
     "sidebar": {
       "appearance": {

@@ -4,13 +4,13 @@ Local-first Koch-, Vorrats-, Rezept- und Einkaufslisten-App auf Basis von React,
 
 [Live-Demo](https://qnbs.github.io/CulinaSync-de-/) | [Architektur](./docs/ARCHITECTURE.md) | [Entwicklung](./docs/DEVELOPMENT.md) | [Deployment](./docs/DEPLOYMENT.md) | [Testing](./docs/TESTING.md) | [Troubleshooting](./docs/TROUBLESHOOTING.md) | [Beitragen](./CONTRIBUTING.md) | [Security](./SECURITY.md)
 
-## Status 2026-04-22
+## Status 2026-05-01
 
 Der aktuelle Arbeitsstand ist in [docs/STATUS-2026-04-22.md](./docs/STATUS-2026-04-22.md) festgehalten. Fuer die letzte Session sind vor allem drei Punkte relevant:
 
-- Bestatigungsdialoge wurden im aktiven UI-Scope von nativen Browser-Confirms auf modalbasierte, a11y-konforme Dialoge umgestellt.
-- Die bisherigen monolithischen Locale-Dateien wurden in modulare Sprachsegmente fuer `core`, `settings` und `features` aufgeteilt.
-- Die Lokalisierung wurde ueber weitere Kernoberflaechen hinweg fortgesetzt; ein gezielter TypeScript-Check mit `pnpm exec tsc --noEmit` war zum Session-Ende gruen.
+- react-window v1 → v2 Migration abgeschlossen (Breaking-Change-Upgrade auf aktuelle Hauptversion).
+- RecipeDetail-Komponenten-Split (M3.1) in Arbeit: Teilkomponenten committed unter `src/components/recipe-detail/`, Verdrahtung steht noch aus.
+- CI/CD vollstaendig gruen: alle Workflows (CI, Deploy, CodeQL) laufen fehlerfrei durch.
 
 ## Ueberblick
 
@@ -31,7 +31,7 @@ Die Anwendung laeuft lokal, auf GitHub Pages und optional in nativen Wrappern. K
 ## Tech-Stack
 
 - React 19
-- TypeScript 5
+- TypeScript 6 / 7 Beta (tsgo)
 - Vite 8
 - Redux Toolkit
 - Dexie / IndexedDB

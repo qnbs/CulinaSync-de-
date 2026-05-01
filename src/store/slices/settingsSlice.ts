@@ -1,8 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AppSettings } from '../../types';
-import { loadSettings } from '../../services/settingsService';
+import { getDefaultSettings } from '../../services/settingsService';
 
-const initialState: AppSettings = loadSettings();
+// Redux Persist rehydrates the real persisted state via the REHYDRATE action.
+// The defaults here are only used for a brand-new install with no stored data.
+const initialState: AppSettings = getDefaultSettings();
 
 const settingsSlice = createSlice({
   name: 'settings',

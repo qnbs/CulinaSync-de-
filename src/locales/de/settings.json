@@ -50,9 +50,13 @@
       "appearance": "Design & Farben",
       "modules": "Modul Konfiguration",
       "ai": "KI-Chef Präferenzen",
+      "policies": "Policies",
       "apiKey": "API-Schlüssel",
       "speech": "Sprachsteuerung & Audio",
       "data": "Daten & Speicher"
+    },
+    "voicePanel": {
+      "loading": "Audio-Modul wird geladen..."
     },
     "sidebar": {
       "appearance": {

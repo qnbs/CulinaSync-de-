@@ -160,7 +160,8 @@
       "pantryUpdatedCount": "{{count}} Artikel im Vorrat aktualisiert.",
       "mealRemoved": "Mahlzeit entfernt.",
       "noteAdded": "Notiz hinzugefügt.",
-      "shoppingListUpdated": "Einkaufsliste aktualisiert: +{{added}} Artikel."
+      "shoppingListUpdated": "Einkaufsliste aktualisiert: +{{added}} Artikel.",
+      "icsExportCreated": "Kalender-Export erstellt."
     },
     "confirm": {
       "removeMeal": "Mahlzeit wirklich aus dem Plan entfernen?",
@@ -283,6 +284,15 @@
       "scanBarcode": "Barcode per Kamera/Foto",
       "scanReceipt": "Rechnung per OCR scannen",
       "doneMoveToPantry": "{{count}} erledigt • In Vorrat verschieben"
+    },
+    "toast": {
+      "noMissingIngredients": "Keine fehlenden Zutaten im Essensplan gefunden.",
+      "generateFromPlanSuccess": "{{added}} neue(r) Artikel hinzugefügt, {{existing}} bereits auf der Liste.",
+      "itemChecked": "\"{{name}}\" abgehakt.",
+      "itemNotFoundOrDone": "Artikel \"{{name}}\" nicht auf der Liste gefunden oder bereits erledigt.",
+      "quantityUpdated": "Menge für \"{{name}}\" aktualisiert.",
+      "aiItemsAdded": "{{added}} Artikel von KI hinzugefügt, {{updated}} aktualisiert.",
+      "bulkItemsAdded": "{{added}} Artikel hinzugefügt, {{updated}} aktualisiert."
     }
   },
   "pantry": {
@@ -385,6 +395,11 @@
     "generatingImage": "Generiere Bild...",
     "generateImage": "Bild generieren",
     "adjustServings": "Portionen anpassen:",
+    "ingredients": "Zutaten",
+    "instructions": "Zubereitung",
+    "nutrition": "Nährwerte",
+    "expertTips": "Expertentipps",
+    "pantryAvailable": "{{amount}} {{unit}} vorhanden",
     "meta": {
       "totalTimeTitle": "Gesamtzeit",
       "servingsTitle": "Portionen",
@@ -483,7 +498,14 @@
     "selection": {
       "startAria": "Auswahlmodus starten",
       "startTitle": "Auswahlmodus starten",
-      "endAria": "Auswahlmodus beenden"
+      "endAria": "Auswahlmodus beenden",
+      "itemsSelected": "{{count}} ausgewählt"
+    },
+    "actions": {
+      "addToPlan": "Zum Plan"
+    },
+    "toast": {
+      "bulkAddedToMealPlan": "{{count}} Rezepte zum Plan hinzugefügt."
     }
   },
   "recipeCard": {
@@ -541,5 +563,18 @@
     "removedFromPantry": "\"{{name}}\" aus dem Vorrat entfernt.",
     "notFoundInPantry": "\"{{name}}\" nicht im Vorrat gefunden.",
     "commandNotRecognized": "Befehl nicht erkannt."
+  },
+  "aiChef": {
+    "subtitle": "Dein persönlicher Sternekoch.",
+    "defaults": {
+      "simpleDish": "Ein einfaches Gericht ohne viele Zutaten",
+      "creativeDish": "Ein kreatives Gericht mit {{ingredients}}"
+    },
+    "error": {
+      "emptyPrompt": "Bitte gib ein, worauf du Appetit hast.",
+      "generationFailed": "Generierung fehlgeschlagen",
+      "apiKeyMissing": "Gemini API-Schlüssel fehlt",
+      "apiKeyMessage": "Bitte hinterlege deinen Schlüssel unter Einstellungen → API-Key. Ohne Schlüssel sind KI-Funktionen deaktiviert."
+    }
   }
 }

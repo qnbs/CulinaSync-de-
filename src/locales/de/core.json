@@ -43,6 +43,11 @@
       "reload": "Neu laden",
       "later": "Später"
     },
+    "pwa": {
+      "updateDownloading": "App-Update wird heruntergeladen.",
+      "updateReady": "Eine neue Version ist bereit. Bitte neu laden.",
+      "offlineReady": "Offline-Modus ist bereit."
+    },
     "commandSections": {
       "navigation": "Navigation",
       "pantry": "Vorratskammer",
@@ -96,6 +101,20 @@
       "stopVoiceControl": "Sprachsteuerung stoppen",
       "settings": "Einstellungen",
       "help": "Hilfe"
+    }
+  },
+  "commandPalette": {
+    "placeholder": "Suchen oder Befehl eingeben...",
+    "ariaLabel": "Befehlspalette",
+    "noResults": "Keine Ergebnisse",
+    "sections": {
+      "recipes": "Rezepte",
+      "pantry": "Vorrat",
+      "globalSearch": "Globale Suche"
+    },
+    "dynamicSearch": {
+      "recipes": "In Rezepten nach \"{{searchTerm}}\" suchen",
+      "pantry": "Im Vorrat nach \"{{searchTerm}}\" suchen"
     }
   },
   "gemini": {
