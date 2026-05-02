@@ -100,18 +100,18 @@
 **Aktueller Stand (Mai 2026, nach Vitest v8-Coverage-Lauf):**
 | Metrik | Aktuell | Ziel |
 |---|---|---|
-| Statements | ~37 % | ≥70 % |
-| Branches | ~26 % | ≥60 % |
-| Functions | ~29 % | ≥70 % |
-| Lines | ~39 % | ≥70 % |
+| Statements | ~42 % | ≥70 % |
+| Branches | ~28 % | ≥60 % |
+| Functions | ~34 % | ≥70 % |
+| Lines | ~44 % | ≥70 % |
 
 | # | Maßnahme | Herkunft | Bereich | Aufwand | Status |
 |---|---|---|---|---|---|
 | 5.1 | Repository-Layer testen: `db.ts`, `dbMigrations.ts` | T1 | `src/services/__tests__/` | Hoch (6–8 h) | ✅ `dbMigrations.test.ts`; ✅ `dataRepository.test.ts` (importData); `db.ts` nicht isoliert getestet (Import-Zyklen / Side-Effects) |
 | 5.2 | Store-Slices testen: `settingsSlice`, `uiSlice`, `shoppingListSlice` | T1 | `src/store/__tests__/` | Mittel (3–4 h) | ✅ |
-| 5.3 | Hooks testen: `useShoppingList`, `usePantryManager`, `useMealPlan` | T1 | `src/hooks/__tests__/` | Hoch (4–6 h) | 🟨 **`useMealPlannerScreen`**, **`useCookModeController`**, **`useMealPlan`**, **`useShoppingList`** (Gruppierung, Voice-Check, Clear-Pending); weiter offen: **`usePantryManager`** isoliert (Context nur mit Mock) |
-| 5.4 | Services testen: `apiKeyService`, `voiceCommands`, `exportService` | T1 | `src/services/__tests__/` | Mittel (3–4 h) | ✅ apiKeyService, exportService, **`voiceCommands.test.ts`** (`processCommand`) |
-| 5.5 | Component-Smoke-Tests für kritische Seiten (React Testing Library) | T1 | `src/components/**/__tests__/` | Hoch (4–6 h) | 🟨 Smoke: **`MealPlanner.smoke.test.tsx`**, **`CookModeView.smoke.test.tsx`**, **`RecipeDetailTabs.smoke.test.tsx`**; Context: **`MealPlannerContext.test.tsx`**, **`PantryManagerContext.test.tsx`** (Mock); weitere Seiten offen |
+| 5.3 | Hooks testen: `useShoppingList`, `usePantryManager`, `useMealPlan` | T1 | `src/hooks/__tests__/` | Hoch (4–6 h) | 🟨 **`useMealPlannerScreen`**, **`useCookModeController`**, **`useMealPlan`**, **`useShoppingList`**, **`usePantryManager`** (Stub/Mock); weiter: Edge-Cases und Integration |
+| 5.4 | Services testen: `apiKeyService`, `voiceCommands`, `exportService` | T1 | `src/services/__tests__/` | Mittel (3–4 h) | ✅ apiKeyService, exportService, **`voiceCommands.test.ts`** (`processCommand`); 🟨 **`mealPlanRepository.test.ts`**, **`pantryRepository.test.ts`** (Dexie gemockt) |
+| 5.5 | Component-Smoke-Tests für kritische Seiten (React Testing Library) | T1 | `src/components/**/__tests__/` | Hoch (4–6 h) | 🟨 Smoke: MealPlanner, CookModeView, RecipeDetailTabs, **`PantryManager.smoke.test.tsx`**, **`ShoppingList.smoke.test.tsx`** (`smokeHookStubs.ts`); Context: **`MealPlannerContext`**, **`PantryManagerContext`**, **`ShoppingListContext.test.tsx`**; **`DayColumn.test.tsx`** + **`dayColumnPantryStatus.test.ts`** |
 
 **Gesamtaufwand Milestone 5:** ~20–28 h
 
@@ -126,7 +126,7 @@
 | 6.1 | Mermaid-Architekturdiagramm (Datenfluss: UI → Redux → Dexie → Services) | Doku-Lücke | `docs/ARCHITECTURE.md` | Mittel (2 h) | ✅ |
 | 6.2 | JSDoc in `db.ts`, `geminiService.ts`, `apiKeyService.ts` | Doku-Lücke | `src/services/` | Mittel (2–3 h) | ✅ Modul-Köpfe `db.ts`, `geminiService.ts`; `apiKeyService` bereits ausführlich |
 | 6.3 | README-Status und Links gegen aktuellen Stand | Doku-Lücke | `README.md` | Niedrig (1 h) | ✅ Status 2026-05-01, Link `STATUS-2026-05-01.md`, KI-Key-Beschreibung |
-| 6.4 | Doku-Sync: ARCHITECTURE, PROJECT-STRUCTURE, DEPLOYMENT, TESTING, DEVELOPMENT, copilot-instructions, AUDIT, STATUS-2026-05-02 | Follow-up | `docs/*`, Root | Niedrig–Mittel | ✅ 2026-05-02 |
+| 6.4 | Doku-Sync: ARCHITECTURE, PROJECT-STRUCTURE, DEPLOYMENT, TESTING, DEVELOPMENT, copilot-instructions, AUDIT, STATUS-2026-05-02 | Follow-up | `docs/*`, Root | Niedrig–Mittel | ✅ 2026-05-02 (Nachziehen M5-Essensplan/Smoke/Repos) |
 
 ---
 

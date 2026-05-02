@@ -8,6 +8,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Hinzugefuegt
+- **Essensplan:** `meal-planner/dayColumnPantryStatus.ts` mit `getMealPlanSlotPantryStatus` (reiner Vorratsabgleich fuer Slots); zugehoerige Unit-Tests `meal-planner/__tests__/dayColumnPantryStatus.test.ts`; `DayColumn.tsx` verduennt, `DayColumn.test.tsx` ergänzt.
+- **Tests (M5 Fortsetzung):** `mealPlanRepository.test.ts`, `pantryRepository.test.ts`; `usePantryManager.test.tsx`; `ShoppingListContext.test.tsx`; Smoke `PantryManager.smoke.test.tsx`, `ShoppingList.smoke.test.tsx` mit `components/__tests__/smokeHookStubs.ts` (stabile Context-Stubs).
 - **Tests (M5):** `MealPlannerContext.test.tsx`; `useMealPlannerScreen.test.tsx`; `useCookModeController.test.tsx`; Smoke-Tests `MealPlanner.smoke.test.tsx`, `CookModeView.smoke.test.tsx`, `RecipeDetailTabs.smoke.test.tsx`; Hilfsfunktion `src/test/createTestStore.ts` (Redux-Teststore ohne Persist).
 - **MSW:** `geminiMsw.test.ts` validiert die gemockte Gemini-Models-Antwort zusaetzlich mit **Zod**.
 - **Tooling:** Script `check:all` in `package.json` (lint, `type-check`, test, build, bundle-budget, `npm audit --audit-level=high`); ESLint ignoriert generiertes `coverage/**`.
@@ -36,8 +38,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **Husky:** `.husky/pre-commit` nutzt `npm exec lint-staged`; `commit-msg` nutzt `npm exec -- commitlint --edit` (zwingt korrekte Argumentweitergabe), damit lokale Commits ohne globales **pnpm** funktionieren (z. B. Windows).
 
 ### Geaendert (Fortsetzung Mai 2026)
-- **README.md:** Status **2026-05-02**; M5-Zwischenstand (93 Tests, ~37 % Coverage, CI-Artefakt, `check:all`); Architektur-Hooks (MealPlanner), Node-22/CI-24, Settings-Migration, Gemini/Zod; API-Key WebCrypto (Legacy nur ohne `crypto.subtle`).
-- **Dokumentation:** `docs/TESTING.md`, `DEPLOYMENT.md`, `DEVELOPMENT.md`, `PROJECT-STRUCTURE.md`, `ARCHITECTURE.md`, `STATUS-2026-05-02.md`, `docs/README.md`, `TROUBLESHOOTING.md`; **ROADMAP** M5-Metriken und Status 🟨; **AUDIT** neuer Statusblock M5/CI; **CONTRIBUTING** / **copilot-instructions** um `check:all` und Testorte ergaenzt.
+- **README.md:** Status **2026-05-02**; M5-Zwischenstand (119 Tests, ~42 % Statements / ~44 % Lines, CI-Artefakt, `check:all`); Architektur-Hooks (MealPlanner, `dayColumnPantryStatus`), Node-22/CI-24, Settings-Migration, Gemini/Zod; API-Key WebCrypto (Legacy nur ohne `crypto.subtle`).
+- **Dokumentation:** erneuter Sync nach M5-Erweiterung — `AUDIT`, `ROADMAP` M5.3–5.5, `docs/STATUS-2026-05-02.md`, `TESTING`, `PROJECT-STRUCTURE`, `ARCHITECTURE`, `docs/README`, `SECURITY-AUDIT-2026.md` (Folgebewertung), `.github/copilot-instructions.md`; zuvor: `DEPLOYMENT`, `DEVELOPMENT`, `TROUBLESHOOTING`; **CONTRIBUTING** um `check:all` und Testorte ergaenzt.
 - **i18n:** Shopping-List-Toasts und Kategorie-Heuristik (`getCategoryForItem`) uebersetzungsfaehig; neue Keys `shoppingList.categories.*`, erweiterte Toasts; `RecipeBook` Bulk-Plan-Toast; Whisper-Fehler ueber `voice.*` in `core.json`.
 
 #### Archiv unter [Unreleased] — April 2026 (CodeQL, i18n Wave 2+3)

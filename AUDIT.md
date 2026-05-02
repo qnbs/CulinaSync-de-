@@ -5,14 +5,24 @@
 
 ---
 
+## Status-Update 2026-05-02 (M5-Fortsetzung: Essensplan-Helfer, Repositories, Smoke, Context-Tests)
+
+- **Refactor:** `DayColumn.tsx` delegiert Vorratsstatus fuer geplante Mahlzeiten an **`getMealPlanSlotPantryStatus`** in `meal-planner/dayColumnPantryStatus.ts` (pure Funktion, gut unit-testbar).
+- **Tests:** Vitest **119** gruene Tests in **34** Dateien; neu u. a. `dayColumnPantryStatus.test.ts`, `DayColumn.test.tsx`, `mealPlanRepository.test.ts`, `pantryRepository.test.ts`, `usePantryManager.test.tsx`, `ShoppingListContext.test.tsx`, Smoke **`PantryManager.smoke.test.tsx`** / **`ShoppingList.smoke.test.tsx`** mit gemeinsamen Stubs `components/__tests__/smokeHookStubs.ts`.
+- **Build-Fix (bereits auf main):** `PantryManagerContext.test.tsx` — Stub nutzt `pantryItems` / `setSearchTerm` passend zu `usePantryManager` (tsgo).
+- **Qualitaet:** Vollvalidierung vor Push: `npm run check:all` bzw. CI-Äquivalent `pnpm install --frozen-lockfile` + lint + `test:coverage` + build + `check:bundle-budget`.
+- **Dokumentation:** README, ROADMAP M5, CHANGELOG, STATUS-2026-05-02, TESTING, PROJECT-STRUCTURE, ARCHITECTURE, SECURITY-AUDIT (Re-Review-Hinweis), copilot-instructions — an diesen Stand angeglichen.
+
+---
+
 ## Status-Update 2026-05-02 (M5-Tests, `check:all`, CI-Coverage-Artefakt)
 
-- **Tests:** Vitest **93** grüne Tests; neu u. a. `MealPlannerContext`, `useMealPlannerScreen`, `useCookModeController`, Smoke-Tests **MealPlanner** / **CookModeView** / **RecipeDetailTabs**, Hilfsmodul `src/test/createTestStore.ts` (Redux ohne Persist, `combineReducers` + `tsgo`-taugliche Typen).
+- **Tests:** Vitest **119** grüne Tests (**34** Dateien); u. a. `MealPlannerContext`, `useMealPlannerScreen`, `useCookModeController`, Smoke **MealPlanner** / **CookModeView** / **RecipeDetailTabs** / **PantryManager** / **ShoppingList**, `createTestStore`, Repository-Suites **mealPlan** / **pantry**, **`dayColumnPantryStatus`**, **`usePantryManager`**, **`ShoppingListContext`**.
 - **MSW + Zod:** `geminiMsw.test.ts` prüft die Mock-Antwort der Models-Liste mit Zod-Schema.
 - **Qualität lokal:** `npm run check:all` = lint + `type-check` + test + build + `check:bundle-budget` + `npm audit --audit-level=high` (lokal geprüft: 0 Vulnerabilities).
 - **ESLint:** `coverage/**` in `eslint.config.js` ignoriert (vermeidet Fehler in generierten HTML/JS-Report-Dateien).
 - **CI (`validate.yml`):** `pnpm run test:coverage`; Upload **coverage-lcov** (`actions/upload-artifact@v4`, 14 Tage Retention); **Bundle-Budget** auf jedem Validate-Lauf (PR und Deploy).
-- **Coverage (v8):** ca. **37 %** Statements / **39 %** Lines — Ziel ≥70 % (M5) weiter offen; nächste Hebel: weitere Hooks, Repositories, Subkomponenten.
+- **Coverage (v8):** ca. **42 %** Statements / **44 %** Lines — Ziel ≥70 % (M5) weiter offen; nächste Hebel: große Seitenkomponenten, weitere Dexie-Pfade, Store-Slices.
 
 ---
 
@@ -20,7 +30,7 @@
 
 - **Kritischer Build-Fix:** `src/services/__tests__/utilsCategories.test.ts` — `vi.spyOn(i18next, 't').mockImplementation` war fuer `tsgo` nicht zuweisbar (TS2345); die Implementierung wird jetzt als `typeof i18next.t` assertiert. Ergebnis: `pnpm run build` / `npm run build` wieder gruen.
 - **Transitive Schwachstellen (Dev-Toolchain):** `serialize-javascript` (<=7.0.4) und `uuid` (<14) — behoben ueber **package.json** `overrides` und **pnpm.overrides** ohne Downgrade von vite-plugin-pwa oder Storybook. `pnpm-lock.yaml` an `package-lock.json` angeglichen (`pnpm import`).
-- **Validierung:** Lint, Vitest (**93** Tests; in CI inkl. Coverage), Build, Bundle-Budget lokal gruen; `npm audit` ohne Befunde; empfohlen: `npm run check:all`.
+- **Validierung:** Lint, Vitest (**119** Tests; in CI inkl. Coverage), Build, Bundle-Budget lokal gruen; `npm audit` ohne Befunde; empfohlen: `npm run check:all`.
 - **Settings / Persistenz:** Legacy-Key `culinaSyncSettings` wird nur noch per `migrateLegacySettings()` in das Redux-Persist-Format ueberfuehrt; `loadSettings()` liest **nicht** mehr direkt vom Legacy-Key. Reihenfolge: `store/index.ts` importiert zuerst `migrateLegacySettingsBeforePersist.ts`, danach Rehydration.
 - **Architektur:** MealPlanner nutzt `MealPlannerProvider` + `useMealPlannerContext` + `useMealPlannerScreen` (wie Pantry/ShoppingList); Kochmodus-Logik in `useCookModeController`.
 - **Sicherheit / Gemini:** Server-Antworten nach `JSON.parse` werden mit **Zod** (`parseAiJsonWithSchema`) validiert; Gemini-API `responseSchema` bleibt zusaetzlich aktiv.

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useModalA11y } from '../../hooks/useModalA11y';
 import { MealPlanItem, Recipe } from '../../types';
 import { MEAL_TYPES, type MealType } from './mealPlannerConstants';
+import { getMealPlanSlotPantryStatus } from './dayColumnPantryStatus';
 import PlannedMealCard from '../PlannedMealCard';
 
 interface DayColumnProps {
@@ -16,19 +17,6 @@ interface DayColumnProps {
     onMealAction: (action: string, payload: Recipe | MealPlanItem) => void;
     isPlacementMode?: boolean;
 }
-
-// Helper to calculate pantry status for a planned meal
-const getPantryStatus = (recipe: Recipe | undefined) => {
-    if (!recipe || typeof recipe.pantryMatchPercentage === 'undefined' || typeof recipe.ingredientCount === 'undefined') {
-        return { status: 'unknown', have: 0, total: 0 } as const;
-    }
-    const { pantryMatchPercentage, ingredientCount } = recipe;
-    const have = Math.round(ingredientCount * (pantryMatchPercentage / 100));
-    let status: 'ok' | 'partial' | 'missing' = 'missing';
-    if (pantryMatchPercentage === 100) status = 'ok';
-    else if (pantryMatchPercentage >= 70) status = 'partial';
-    return { status, have, total: ingredientCount };
-};
 
 const ClearDayConfirmationModal: React.FC<{
     dateLabel: string;
@@ -202,7 +190,7 @@ export const DayColumn: React.FC<DayColumnProps> = ({ date, isToday, meals, reci
                                     <PlannedMealCard 
                                         meal={meal} 
                                         recipe={recipe} 
-                                        pantryStatus={getPantryStatus(recipe)} 
+                                        pantryStatus={getMealPlanSlotPantryStatus(recipe)} 
                                         onAction={onMealAction} 
                                     />
                                 </>

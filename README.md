@@ -6,15 +6,15 @@ Local-first Koch-, Vorrats-, Rezept- und Einkaufslisten-App auf Basis von React,
 
 ## Status 2026-05-02
 
-Der aktuelle Arbeitsstand ist in **[docs/STATUS-2026-05-02.md](./docs/STATUS-2026-05-02.md)** dokumentiert (MealPlanner-Context, Settings-Legacy-Migration ohne Lese-Fallback, A11y-Sweep, Gemini-Antworten mit Zod, CI Node 24, vollstaendige Doku-Aktualisierung).  
+Der aktuelle Arbeitsstand ist in **[docs/STATUS-2026-05-02.md](./docs/STATUS-2026-05-02.md)** dokumentiert (MealPlanner-Context, Settings-Legacy-Migration ohne Lese-Fallback, A11y-Sweep, Gemini-Antworten mit Zod, CI Node 24, M5-Testausbau inkl. Essensplan-Helfer und Repository-Suites).  
 Vorgaenger: [STATUS-2026-05-01.md](./docs/STATUS-2026-05-01.md); aeltere Snapshots: [STATUS-2026-04-23.md](./docs/STATUS-2026-04-23.md), [STATUS-2026-04-22.md](./docs/STATUS-2026-04-22.md).
 
 Kurz:
 
-- **M3:** `recipe-detail/*`, `cook-mode/*`, `useCookModeController`; **MealPlanner** mit `MealPlannerProvider` / `useMealPlannerScreen` (M3.3 erledigt).
+- **M3:** `recipe-detail/*`, `cook-mode/*`, `useCookModeController`; **MealPlanner** mit `MealPlannerProvider` / `useMealPlannerScreen` (M3.3 erledigt); **DayColumn** nutzt `getMealPlanSlotPantryStatus` aus `meal-planner/dayColumnPantryStatus.ts`.
 - **M4:** Zod-Validierung in `geminiService.ts`; M4.3 Tauri-CSP siehe [DEPLOYMENT.md](./docs/DEPLOYMENT.md).
 - **Settings:** Migration von `culinaSyncSettings` nach `persist:settings` vor Store-Rehydration; `loadSettings()` nur Persist oder Defaults.
-- **M5 (fortgeschritten):** Vitest **93** Tests; Hooks/Context (`useMealPlannerScreen`, `useCookModeController`, `MealPlannerContext`), Smoke (`MealPlanner`, `CookModeView`, `RecipeDetailTabs`), `createTestStore`, MSW+Zod (`geminiMsw.test.ts`). Coverage v8 ca. **37 %** Statements / **39 %** Lines — Ziel ≥70 % weiterhin offen. CI laeuft `test:coverage`, laedt **coverage-lcov** als Artefakt und prueft Bundle-Budget auf jedem Validate-Lauf.
+- **M5 (fortgeschritten):** Vitest **119** Tests in **34** Dateien; zusaetzlich u. a. `usePantryManager`, `ShoppingListContext`, Smoke **PantryManager** / **ShoppingList**, Repository-Tests **mealPlan** / **pantry**, Unit-Tests fuer **dayColumnPantryStatus**. Coverage v8 ca. **42 %** Statements / **44 %** Lines — Ziel ≥70 % weiterhin offen. CI laeuft `test:coverage`, laedt **coverage-lcov** als Artefakt und prueft Bundle-Budget auf jedem Validate-Lauf.
 
 ## Ueberblick
 

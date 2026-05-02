@@ -16,8 +16,8 @@
 - Top-Level-Seiten wie `PantryManager.tsx`, `RecipeBook.tsx`, `MealPlanner.tsx`, `ShoppingList.tsx`, `Settings.tsx`
 - Feature-Unterordner fuer fachlich gebuendelte Teilkomponenten (z. B. `recipe-detail/`, `cook-mode/`, `shopping-list/`)
 - `cook-mode/`: Kochmodus-UI und `cookModeReducer`; Controller-Logik in `src/hooks/useCookModeController.ts`
-- `meal-planner/`: u. a. `mealPlannerConstants.ts` (`MEAL_TYPES` / `MealType`, entkoppelt von der Seitenkomponente)
-- `__tests__/` fuer komponentennahe und Smoke-Tests (u. a. `MealPlanner`, `CookModeView`, `RecipeDetailTabs`)
+- `meal-planner/`: u. a. `mealPlannerConstants.ts` (`MEAL_TYPES` / `MealType`), **`dayColumnPantryStatus.ts`** (`getMealPlanSlotPantryStatus` fuer Vorratsanzeige in `DayColumn` / `PlannedMealCard`)
+- `__tests__/` fuer komponentennahe und Smoke-Tests (u. a. MealPlanner, CookModeView, RecipeDetailTabs, PantryManager, ShoppingList)
 
 ### `src/hooks/`
 
@@ -39,7 +39,7 @@
 ### `src/contexts/`
 
 - Context-Provider fuer komplexere Features: Vorratsverwaltung, Einkaufsliste, **Essensplan** (`MealPlannerContext.tsx`)
-- **`__tests__/MealPlannerContext.test.tsx`**, **`PantryManagerContext.test.tsx`** — Provider-Kontrakt (Throw ohne Provider, Value mit gemocktem Hook)
+- **`MealPlannerContext.test.tsx`**, **`PantryManagerContext.test.tsx`**, **`ShoppingListContext.test.tsx`** — Provider-Kontrakt (Throw ohne Provider, Value mit gemocktem Hook)
 - Diese Provider tragen inzwischen auch zustandsgetriebene Confirm-/Modal-Flows fuer destructive Aktionen.
 
 ### `src/locales/`

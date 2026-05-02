@@ -4,7 +4,7 @@ Dieser Ordner sammelt die projektbezogene Fach- und Betriebsdokumentation fuer C
 
 ## Inhalte
 
-- [STATUS-2026-05-02.md](./STATUS-2026-05-02.md): **aktueller** Repo-Stand 2. Mai 2026 (MealPlanner-Context, Settings-Migration, A11y, Gemini/Zod, CI Node 24, **M5-Tests**, Coverage-Artefakt, `check:all`)
+- [STATUS-2026-05-02.md](./STATUS-2026-05-02.md): **aktueller** Repo-Stand 2. Mai 2026 (MealPlanner-Context, `dayColumnPantryStatus`, Settings-Migration, A11y, Gemini/Zod, CI Node 24, **M5-Tests** inkl. Repositories/Smoke, Coverage-Artefakt, `check:all`)
 - [STATUS-2026-05-01.md](./STATUS-2026-05-01.md): Repo-Stand 1. Mai 2026 (Roadmap-Follow-up, Tests, Tauri-CSP, erste Doku-Welle)
 - [STATUS-2026-04-23.md](./STATUS-2026-04-23.md): Snapshot nach TS7-Upgrade / i18n-Wellen
 - [STATUS-2026-04-22.md](./STATUS-2026-04-22.md): Session- und Arbeitsstand April 2026

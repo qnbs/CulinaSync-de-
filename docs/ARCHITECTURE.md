@@ -105,7 +105,7 @@ flowchart LR
 ## Wichtige aktuelle technische Punkte
 
 - **Settings:** `loadSettings()` liest nur `persist:settings` (Redux-Persist) oder Default-Werte. Alter Schluessel `culinaSyncSettings` wird einmalig durch `migrateLegacySettings()` migriert (vor Rehydration via `store/migrateLegacySettingsBeforePersist.ts`; erneuter Aufruf aus `loadSettings()` fuer Aufrufer ohne Store ist idempotent). Hilfsmodule: `settingsKeys.ts`, `settingsMerge.ts`, `settingsMigration.ts`.
-- **Essensplan:** gleiches Context-Muster wie Vorrat/Einkauf — `MealPlannerProvider`, Datenhook `useMealPlannerScreen`, Konstanten `meal-planner/mealPlannerConstants.ts`.
+- **Essensplan:** gleiches Context-Muster wie Vorrat/Einkauf — `MealPlannerProvider`, Datenhook `useMealPlannerScreen`, Konstanten `meal-planner/mealPlannerConstants.ts`; pro Slot wird der Vorratsabgleich fuer die Karte ueber **`getMealPlanSlotPantryStatus`** (`meal-planner/dayColumnPantryStatus.ts`) aus `recipe.pantryMatchPercentage` / `ingredientCount` abgeleitet (UI-Helfer, ohne eigene Dexie-Queries).
 - `@faker-js/faker` wird fuer Offline-Fallbacks nur dynamisch importiert (Production-Bundle).
 - Der i18n-Bestand ist modular (`core` / `settings` / `features`); neue UI-Texte dort pflegen.
 - **Desktop (Tauri):** CSP in `src-tauri/tauri.conf.json` an die Web-Variante angeglichen; Details siehe [DEPLOYMENT.md](./DEPLOYMENT.md#tauri-desktop-und-content-security-policy).

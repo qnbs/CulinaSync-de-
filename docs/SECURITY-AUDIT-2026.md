@@ -203,6 +203,12 @@ Empfehlung:
 - `src/services/__tests__/geminiService.test.ts`: Tests fuer invalides KI-JSON und sanitisierten Web-Import-Prompt
 - `src/services/__tests__/dbMigrations.test.ts`: Test fuer Retention alter Migrations-Backups in IndexedDB
 
+## Folgebewertung 2026-05-02 (keine neuen kritischen Befunde)
+
+- **Ausgeloest durch:** erweiterte Tests (Repositories mealPlan/pantry mit gemockter Dexie, Smoke PantryManager/ShoppingList, reiner Helper `getMealPlanSlotPantryStatus`).
+- **Bewertung:** Keine neue exponierte Oberflaeche fuer XSS, Storage oder Netzwerk; KI-Pfad weiterhin Zod-gestuetzt (`geminiService.ts`). Test-Doubles ersetzen keine Produktions-CSP oder API-Key-Logik.
+- **Empfehlung:** Bei zukuenftigen E2E- oder Integrationstests darauf achten, keine echten Secrets in Artefakte oder Logs zu schreiben.
+
 ## Recommended Next Steps
 
 1. Die CSP mittelfristig von Meta auf Header-Ebene verlagern und fuer Tauri separat scharfziehen.

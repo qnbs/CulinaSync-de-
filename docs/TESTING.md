@@ -9,10 +9,10 @@
 
 ## Relevante Testorte
 
-- `src/components/**/__tests__/` — u. a. `cook-mode/__tests__/cookModeReducer.test.ts`, `meal-planner/__tests__/mealPlannerConstants.test.ts`, **`components/__tests__/MealPlanner.smoke.test.tsx`**, **`CookModeView.smoke.test.tsx`**, **`recipe-detail/__tests__/RecipeDetailTabs.smoke.test.tsx`**
-- `src/contexts/__tests__/` — **`MealPlannerContext.test.tsx`**, **`PantryManagerContext.test.tsx`**
-- `src/hooks/__tests__/` — **`useMealPlannerScreen.test.tsx`**, **`useCookModeController.test.tsx`**, **`useMealPlan.test.tsx`**, **`useShoppingList.test.tsx`**
-- `src/services/__tests__/` — u. a. `voiceCommands.test.ts`, `dataRepository.test.ts`, `utilsCategories.test.ts`, `settingsService.test.ts`, `geminiService.test.ts`, **`geminiMsw.test.ts`** (HTTP-Mock + **Zod**)
+- `src/components/**/__tests__/` — u. a. `cook-mode/__tests__/cookModeReducer.test.ts`, `meal-planner/__tests__/mealPlannerConstants.test.ts`, `meal-planner/__tests__/dayColumnPantryStatus.test.ts`, `meal-planner/__tests__/DayColumn.test.tsx`, **`MealPlanner.smoke.test.tsx`**, **`CookModeView.smoke.test.tsx`**, **`PantryManager.smoke.test.tsx`**, **`ShoppingList.smoke.test.tsx`**, **`recipe-detail/__tests__/RecipeDetailTabs.smoke.test.tsx`**, gemeinsame Stubs **`smokeHookStubs.ts`**
+- `src/contexts/__tests__/` — **`MealPlannerContext.test.tsx`**, **`PantryManagerContext.test.tsx`**, **`ShoppingListContext.test.tsx`**
+- `src/hooks/__tests__/` — **`useMealPlannerScreen.test.tsx`**, **`useCookModeController.test.tsx`**, **`useMealPlan.test.tsx`**, **`useShoppingList.test.tsx`**, **`usePantryManager.test.tsx`**
+- `src/services/__tests__/` — u. a. `voiceCommands.test.ts`, `dataRepository.test.ts`, `mealPlanRepository.test.ts`, `pantryRepository.test.ts`, `utilsCategories.test.ts`, `settingsService.test.ts`, `geminiService.test.ts`, **`geminiMsw.test.ts`** (HTTP-Mock + **Zod**)
 - `src/store/__tests__/`
 - `src/test/` — `setupTests.ts`, MSW (`msw/server.ts`, `msw/handlers.ts`), **`createTestStore.ts`** (Redux-Teststore ohne Persist)
 
@@ -74,8 +74,8 @@ pnpm run check:bundle-budget
 
 ## Aktueller Validierungsstand 2026-05-02
 
-- **Vitest:** **93** Tests; neue Suites fuer MealPlanner-Context/Hooks, Kochmodus-Controller, drei Smoke-Oberflaechen; **`geminiMsw.test.ts`** validiert MSW-Responses mit Zod.
-- **Coverage (v8, Stand Mai 2026):** ca. **37 %** Statements / **39 %** Lines — Ziel ≥70 % laut [ROADMAP.md](../ROADMAP.md) M5 weiterhin offen.
+- **Vitest:** **119** Tests in **34** Dateien; ergänzend u. a. Pantry-/Shopping-Smoke, `ShoppingListContext`, `usePantryManager`, MealPlan-/Pantry-Repositories (gemockte Dexie), `dayColumnPantryStatus`, `DayColumn`; **`geminiMsw.test.ts`** validiert MSW-Responses mit Zod.
+- **Coverage (v8, Stand Mai 2026):** ca. **42 %** Statements / **44 %** Lines — Ziel ≥70 % laut [ROADMAP.md](../ROADMAP.md) M5 weiterhin offen.
 - **CI:** `.github/workflows/validate.yml` fuehrt **`pnpm run test:coverage`** aus und laedt das Verzeichnis **`coverage`** als Artefakt **coverage-lcov** (14 Tage); **Bundle-Budget** laeuft bei jedem Validate (PR + Deploy-Pfad).
 - Service- und Reducer-Tests wie oben; **Gemini-Integration** prueft u. a. gueltige JSON-Struktur (Zod); bei Typveraenderungen der KI-Antworten Tests und Schemas in `geminiService.ts` anpassen.
 - Aktueller Snapshot: [STATUS-2026-05-02.md](./STATUS-2026-05-02.md); Vorgaenger: [STATUS-2026-05-01.md](./STATUS-2026-05-01.md).
