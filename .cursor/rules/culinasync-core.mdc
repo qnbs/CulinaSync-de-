@@ -1,0 +1,14 @@
+---
+description: CulinaSync — Architektur, Datenfluss, KI, Sicherheit
+alwaysApply: true
+---
+
+# CulinaSync (Kern)
+
+- **Stack:** React 19, Vite 8, PWA, Redux (UI/Session), **Dexie/IndexedDB** als Source of Truth für Rezepte, Vorrat, Essensplan, Einkaufsliste.
+- **DB-Einstieg:** Nur über `src/services/db.ts` und Repository-Funktionen; keine direkten Dexie-Zugriffe in UI-Komponenten.
+- **Reaktive Listen:** `useLiveQuery` / bestehende Hooks (`useShoppingList`, `useMealPlan`); Muster in `copilot-instructions` und Code folgen.
+- **Gemini:** Ausschließlich `src/services/geminiService.ts`. API-Key **nie** per `process.env` / `VITE_*` — nur `apiKeyService.ts` und Nutzer-Einstellungen.
+- **Fehler:** `logAppError`, Listener-Middleware für Thunk-Toasts, `GlobalErrorBoundary` für Render-Fehler.
+- **Performance:** Seiten `React.lazy`; schwere Libs (Scanner, Export) nur dynamisch `import()`.
+- **Details & Workflows:** Bei Unklarheiten `.github/copilot-instructions.md` lesen — dort Terminal-, CI- und i18n-Konventionen.

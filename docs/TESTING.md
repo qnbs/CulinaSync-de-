@@ -9,8 +9,9 @@
 
 ## Relevante Testorte
 
-- `src/components/**/__tests__/`
-- `src/services/__tests__/`
+- `src/components/**/__tests__/` (u. a. `cook-mode/__tests__/cookModeReducer.test.ts`)
+- `src/services/__tests__/` (u. a. `voiceCommands.test.ts`, `dataRepository.test.ts`, `utilsCategories.test.ts`, `geminiService`, `exportService`, `dbMigrations`)
+- `src/store/__tests__/`
 - `src/test/`
 
 ## Befehle
@@ -58,8 +59,12 @@ pnpm run check:bundle-budget
 - Voice- und Navigationstrigger
 - Datenbanknahe Cross-Feature-Operationen
 
-## Aktueller Validierungsstand 2026-04-22
+## Aktueller Validierungsstand 2026-05-01
 
-- Die juengsten Accessibility- und i18n-Slices wurden mit gezielten Diagnostics und fokussierten ESLint-Laeufen geprueft.
-- Fuer den aktuellen Gesamtstand wurde `pnpm exec tsc --noEmit` erfolgreich ausgefuehrt.
-- Ein kompletter erneuter Durchlauf von `pnpm run lint`, `pnpm run test` und `pnpm run build` ist vor einem Release oder groesseren Merge weiterhin empfohlen.
+- Zusaetzliche Service- und Reducer-Tests (siehe [STATUS-2026-05-01.md](./STATUS-2026-05-01.md)); Coverage-Ziel ≥70 % laut [ROADMAP.md](../ROADMAP.md) Milestone 5 weiterhin offen.
+- `pnpm run lint` mit `--max-warnings 0`; `react-hooks/exhaustive-deps` ist bewusst **off** — bei lokaler Aktivierung auf `warn` alle Warnungen abbauen, bevor CI verschärft wird.
+- Vor Release weiterhin vollstaendig: `pnpm run lint`, `pnpm run test`, `pnpm run build`, bei Bundle-Aenderungen `pnpm run check:bundle-budget`.
+
+### Hinweis 2026-04-22 (historisch)
+
+- Accessibility- und i18n-Slices wurden mit gezielten Diagnostics und ESLint geprueft; Typcheck damals ueber `tsgo` / `tsc`.

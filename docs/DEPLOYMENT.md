@@ -40,6 +40,13 @@ Das Repository verwendet GitHub Actions fuer CI, Deploy und CodeQL.
 - Die Live-Demo liegt unter `https://qnbs.github.io/CulinaSync-de-/`.
 - SPA-Verhalten benoetigt weiterhin passende 404-Weiterleitung und korrekte Asset-Pfade.
 
+## Tauri Desktop und Content-Security-Policy
+
+- Die **Web/PWA-Variante** setzt eine konservative CSP im Meta-Tag in `index.html` (GitHub Pages, lokaler `vite preview`).
+- Für **Tauri** (`src-tauri/tauri.conf.json`) ist unter `tauri.security.csp` eine CSP-Zeichenkette hinterlegt, die der Web-Politik entspricht (`default-src 'self'`, `connect-src` für HTTPS APIs wie Gemini, `img-src` für `data:`/`blob:`/`https:`, `style-src` mit `'unsafe-inline'` für Tailwind).
+- Bei Bedarf kann die Policy für striktere Builds verschärft werden (z. B. nach Audit der erlaubten Connect-Ziele).
+- Milestone 4.3 (Roadmap): Vorbereitung für natives Hosting; vollständige Header-CSP auf dem jeweiligen Host bleibt deploymentspezifisch.
+
 ## Bekannte GitHub-Actions-Warnungen
 
 Trotz erfolgreicher Pipeline und gesetztem `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` melden einige GitHub-verwaltete Actions derzeit weiterhin Node-20-Depracation-Warnungen. Das betrifft zuletzt:
@@ -50,10 +57,10 @@ Trotz erfolgreicher Pipeline und gesetztem `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=t
 
 Diese Warnungen stammen aktuell von Upstream-Runtimes der GitHub-verwalteten Actions und sind nicht durch Projektcode allein entfernbar.
 
-## Aktueller Arbeitsstand 2026-04-22
+## Aktueller Arbeitsstand (Doku)
 
-- Der lokale Session-Stand wurde zuletzt bis zu gezielten Diagnostics, fokussierten Lint-Pruefungen auf den bearbeiteten Slices und einem erfolgreichen `pnpm exec tsc --noEmit` abgesichert.
-- Vor einem release-nahen Push auf `main` bleiben weiterhin die ueblichen Gates `pnpm run lint`, `pnpm run test`, `pnpm run build` und bei Bedarf `pnpm run check:bundle-budget` massgeblich.
+- Ausführlicher Snapshot: [STATUS-2026-05-01.md](./STATUS-2026-05-01.md) (Mai 2026); ältere Snapshots: [STATUS-2026-04-23.md](./STATUS-2026-04-23.md), [STATUS-2026-04-22.md](./STATUS-2026-04-22.md).
+- Vor einem release-nahen Push auf `main` bleiben die Gates `pnpm run lint`, `pnpm run test`, `pnpm run build` und bei Bedarf `pnpm run check:bundle-budget` massgeblich.
 
 ## Operative Checks nach einem produktionsrelevanten Fix
 

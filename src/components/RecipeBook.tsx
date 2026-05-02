@@ -196,7 +196,7 @@ const RecipeBook: React.FC = () => {
         onClose={() => setBulkModalOpen(false)}
         recipeIds={selectedIds}
         onSave={(count) => {
-            addToast(`${count} Rezepte zum Plan hinzugefügt.`);
+            addToast(t('recipeBook.toast.bulkAddedToPlan', { count }));
             setBulkModalOpen(false);
             handleToggleSelectMode();
         }}

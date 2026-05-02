@@ -6,11 +6,14 @@ Local-first Koch-, Vorrats-, Rezept- und Einkaufslisten-App auf Basis von React,
 
 ## Status 2026-05-01
 
-Der aktuelle Arbeitsstand ist in [docs/STATUS-2026-04-22.md](./docs/STATUS-2026-04-22.md) festgehalten. Fuer die letzte Session sind vor allem drei Punkte relevant:
+Der aktuelle Arbeitsstand ist in **[docs/STATUS-2026-05-01.md](./docs/STATUS-2026-05-01.md)** dokumentiert (i18n-Erweiterungen, CookMode-/RecipeDetail-Splits, neue Tests, Tauri-CSP, Mermaid-Architekturdiagramm, JSDoc-Köpfe).  
+Weitere historische Snapshots: [STATUS-2026-04-23.md](./docs/STATUS-2026-04-23.md), [STATUS-2026-04-22.md](./docs/STATUS-2026-04-22.md).
 
-- react-window v1 → v2 Migration abgeschlossen (Breaking-Change-Upgrade auf aktuelle Hauptversion).
-- RecipeDetail-Komponenten-Split (M3.1) in Arbeit: Teilkomponenten committed unter `src/components/recipe-detail/`, Verdrahtung steht noch aus.
-- CI/CD vollstaendig gruen: alle Workflows (CI, Deploy, CodeQL) laufen fehlerfrei durch.
+Kurz:
+
+- **M3:** `recipe-detail/*` und `cook-mode/*` strukturieren die grossen Ansichten; MealPlanner-Context (M3.3) bleibt roadmap-offen.
+- **M4.3:** CSP fuer den Tauri-Webview in `src-tauri/tauri.conf.json`; Details in [DEPLOYMENT.md](./docs/DEPLOYMENT.md).
+- **Tests:** u. a. `voiceCommands`, `dataRepository`, `cookModeReducer`, `utilsCategories` — Coverage-Ziel ≥70 % weiterhin offen (M5).
 
 ## Ueberblick
 
@@ -85,7 +88,7 @@ pnpm run preview
 - Gemini-Aufrufe leben ausschliesslich in `src/services/geminiService.ts`.
 - Der API-Key wird durch den Nutzer ueber die Einstellungen hinterlegt.
 - Der Key wird nicht ueber `process.env`, `VITE_*`, `localStorage` oder den Build verteilt.
-- Die Speicherung erfolgt obfuskiert in IndexedDB ueber `src/services/apiKeyService.ts`.
+- Die Speicherung erfolgt **verschlüsselt (WebCrypto)** in IndexedDB ueber `src/services/apiKeyService.ts`, mit Legacy-Fallback nur ohne `crypto.subtle`.
 
 ## Deployment
 
@@ -110,7 +113,8 @@ Die aktuelle Pages-URL ist auf den Repo-Namen ausgerichtet. `vite.config.ts` set
 ## Dokumentation
 
 - [docs/README.md](./docs/README.md): Dokumentationsindex
-- [docs/STATUS-2026-04-22.md](./docs/STATUS-2026-04-22.md): vollstaendiger Session- und Arbeitsstand vom 2026-04-22
+- [docs/STATUS-2026-05-01.md](./docs/STATUS-2026-05-01.md): Session- und Repo-Stand Mai 2026 (Audit-Follow-up)
+- [docs/STATUS-2026-04-22.md](./docs/STATUS-2026-04-22.md): Session- und Arbeitsstand 2026-04-22
 - [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md): System- und Datenarchitektur
 - [docs/PROJECT-STRUCTURE.md](./docs/PROJECT-STRUCTURE.md): Repo- und Ordnerstruktur
 - [docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md): Setup, lokale Entwicklung und Konventionen

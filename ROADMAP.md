@@ -1,6 +1,6 @@
 # CulinaSync — Roadmap
 
-> **Stand:** 23. April 2026 · Basis: vollständiges Code-, Architektur- und Security-Audit vom 14.–22. April 2026  
+> **Stand:** 1. Mai 2026 · Basis: vollständiges Code-, Architektur- und Security-Audit (14.–22. April 2026) + Follow-up-Session Mai 2026  
 > **Format:** Milestones geordnet nach Priorität. Jedes Item mit Herkunft (AUDIT-Referenz), Aufwandsschätzung und Status.
 
 ---
@@ -74,8 +74,8 @@
 
 | # | Maßnahme | Herkunft | Datei(en) | Aufwand | Status |
 |---|---|---|---|---|---|
-| 3.1 | `RecipeDetail.tsx` (~550 Zeilen) aufteilen: `RecipeNutritionPanel`, `RecipeActionBar`, `ExportDropdown`, `MealPlanModal` | M1 | `src/components/RecipeDetail.tsx` | Mittel (2–3 h) | ✅ Komponenten-Split committed (src/components/recipe-detail/), Verdrahtung steht noch aus |
-| 3.2 | `CookModeView.tsx` (~380 Zeilen) aufteilen: `CookModeTimer`, `CookModeIngredients`, `CookModeFooter` | M2 | `src/components/CookModeView.tsx` | Mittel (2 h) | 🔲 |
+| 3.1 | `RecipeDetail.tsx` aufteilen: Header/Metadata/ActionBar/Nutrition/Tabs/Modals | M1 | `src/components/recipe-detail/` | Mittel (2–3 h) | ✅ inkl. `RecipePlanExportBar`, `RecipeDetailTabs`, `RecipeExpertTipsSection` |
+| 3.2 | `CookModeView.tsx` aufteilen: Timer-/Zutaten-/Footer-Module | M2 | `src/components/cook-mode/`, `CookModeView.tsx` | Mittel (2 h) | ✅ `CookModeHeader`, `CookModeIngredientTimerGrid`, `CookModeFooter`, `cookModeReducer` |
 | 3.3 | `MealPlanner` auf Context-Pattern migrieren (analog zu `PantryManager`/`ShoppingList`) | M4 | `src/components/MealPlanner.tsx`, neuer Context | Hoch (6–8 h) | 🔲 |
 
 ---
@@ -88,7 +88,7 @@
 |---|---|---|---|---|---|
 | 4.1 | Alle Gemini-Responses mit Zod oder manuellen Type-Guards validieren (post-`JSON.parse`) | S5 | `src/services/geminiService.ts` | Mittel (2–3 h) | ✅ via `parseAiJson()` + 6 Custom-Validators (`isRecipe`, `isShoppingListResponse`, etc.) |
 | 4.2 | API-Key-Kommentare korrigieren: "obfuskiert" statt "verschlüsselt" | S1 | `src/services/apiKeyService.ts` | Niedrig (15 min) | ✅ JSDoc korrekt: "encrypted via WebCrypto / falls back to legacy obfuscation" |
-| 4.3 | CSP auf Header-Ebene für Tauri / künftiges Hosting vorbereiten | S4 | `src-tauri/tauri.conf.json`, Deployment-Doku | Mittel (1–2 h) | 🔲 |
+| 4.3 | CSP für Tauri-Webview (und Doku-Align mit `index.html`) | S4 | `src-tauri/tauri.conf.json`, `docs/DEPLOYMENT.md` | Mittel (1–2 h) | ✅ CSP-String gesetzt; Header-CSP am Hosting weiterhin optional |
 | 4.4 | CodeQL Alert #7 beheben: schlechten HTML-Regex in `sanitizeWebContentForPrompt` durch DOMPurify ersetzen | CodeQL #7 | `src/services/geminiService.ts` | Niedrig (30 min) | ✅ |
 
 ---
@@ -107,10 +107,10 @@
 
 | # | Maßnahme | Herkunft | Bereich | Aufwand | Status |
 |---|---|---|---|---|---|
-| 5.1 | Repository-Layer testen: `db.ts`, `dbMigrations.ts` | T1 | `src/services/__tests__/` | Hoch (6–8 h) | ✅ dbMigrations.test.ts ✅; db.ts-Tests noch offen |
+| 5.1 | Repository-Layer testen: `db.ts`, `dbMigrations.ts` | T1 | `src/services/__tests__/` | Hoch (6–8 h) | ✅ `dbMigrations.test.ts`; ✅ `dataRepository.test.ts` (importData); `db.ts` nicht isoliert getestet (Import-Zyklen / Side-Effects) |
 | 5.2 | Store-Slices testen: `settingsSlice`, `uiSlice`, `shoppingListSlice` | T1 | `src/store/__tests__/` | Mittel (3–4 h) | ✅ |
-| 5.3 | Hooks testen: `useShoppingList`, `usePantryManager`, `useMealPlan` | T1 | `src/hooks/__tests__/` | Hoch (4–6 h) | 🔲 |
-| 5.4 | Services testen: `apiKeyService`, `voiceCommands`, `exportService` | T1 | `src/services/__tests__/` | Mittel (3–4 h) | ✅ apiKeyService ✅, exportService ✅; voiceCommands-Tests noch offen |
+| 5.3 | Hooks testen: `useShoppingList`, `usePantryManager`, `useMealPlan` | T1 | `src/hooks/__tests__/` | Hoch (4–6 h) | 🔲 Voice-/Parsing-Logik teilweise über `voiceCommands.test.ts` abgedeckt |
+| 5.4 | Services testen: `apiKeyService`, `voiceCommands`, `exportService` | T1 | `src/services/__tests__/` | Mittel (3–4 h) | ✅ apiKeyService, exportService, **`voiceCommands.test.ts`** (`processCommand`) |
 | 5.5 | Component-Smoke-Tests für kritische Seiten (React Testing Library) | T1 | `src/components/__tests__/` | Hoch (4–6 h) | 🔲 |
 
 **Gesamtaufwand Milestone 5:** ~20–28 h
@@ -123,9 +123,9 @@
 
 | # | Maßnahme | Herkunft | Datei(en) | Aufwand | Status |
 |---|---|---|---|---|---|
-| 6.1 | Mermaid-Architekturdiagramm (Datenfluss: UI → Redux → Dexie → Services) | Doku-Lücke | `docs/ARCHITECTURE.md` oder `README.md` | Mittel (2 h) | 🔲 |
-| 6.2 | JSDoc in `db.ts`, `geminiService.ts`, `apiKeyService.ts` | Doku-Lücke | `src/services/` | Mittel (2–3 h) | 🔲 |
-| 6.3 | README.md `[x]`-Einträge gegen tatsächlichen Stand abgleichen | Doku-Lücke | `README.md` | Niedrig (1 h) | 🔲 |
+| 6.1 | Mermaid-Architekturdiagramm (Datenfluss: UI → Redux → Dexie → Services) | Doku-Lücke | `docs/ARCHITECTURE.md` | Mittel (2 h) | ✅ |
+| 6.2 | JSDoc in `db.ts`, `geminiService.ts`, `apiKeyService.ts` | Doku-Lücke | `src/services/` | Mittel (2–3 h) | ✅ Modul-Köpfe `db.ts`, `geminiService.ts`; `apiKeyService` bereits ausführlich |
+| 6.3 | README-Status und Links gegen aktuellen Stand | Doku-Lücke | `README.md` | Niedrig (1 h) | ✅ Status 2026-05-01, Link `STATUS-2026-05-01.md`, KI-Key-Beschreibung |
 
 ---
 
@@ -206,5 +206,6 @@ _Vorbedingung: M1 (DevContainer mit Rust), Tauri 2 stabil_
 
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.2 | 2026-05-01 | M3.1/M3.2 erledigt; M4.3 CSP Tauri; M5/6 Fortschritt (Tests, Mermaid, JSDoc, README); Verweis `docs/STATUS-2026-05-01.md` |
 | 1.1 | 2026-04-23 | M0.1 (K1+K2 geschlossen) hinzugefügt; M1 um 1.3–1.6 erweitert (Husky, Reusable CI, Templates, VS Code); M8–M10 (Tauri, Bundle, Sync) angehängt |
 | 1.0 | 2026-04-23 | Initiale Roadmap auf Basis des vollständigen Audits; M0 abgeschlossen |

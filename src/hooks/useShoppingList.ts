@@ -75,10 +75,10 @@ export const useShoppingList = () => {
       const resultAction = await dispatch(generateFromPlanAsync());
       if (generateFromPlanAsync.fulfilled.match(resultAction)) {
           const { added, existing } = resultAction.payload;
-          if(added === 0 && existing === 0) addToast("Keine fehlenden Zutaten im Essensplan gefunden.", "info");
-          else addToast(`${added} neue(r) Artikel hinzugefügt, ${existing} bereits auf der Liste.`, 'success');
+          if (added === 0 && existing === 0) addToast(t('shoppingList.toast.noMissingIngredients'), 'info');
+          else addToast(t('shoppingList.toast.generateFromPlanSuccess', { added, existing }), 'success');
       }
-  }, [dispatch, addToast]);
+  }, [dispatch, addToast, t]);
 
   const effectivePendingAction = useMemo<PendingShoppingListAction | null>(() => {
     if (pendingAction) {
@@ -115,13 +115,13 @@ export const useShoppingList = () => {
         );
         if (itemToToggle) {
             handleToggle(itemToToggle);
-            addToast(`"${itemToToggle.name}" abgehakt.`);
+            addToast(t('shoppingList.toast.itemChecked', { name: itemToToggle.name }));
         } else {
-            addToast(`Artikel "${triggerCheckItem.split('#')[0]}" nicht auf der Liste gefunden oder bereits erledigt.`, 'info');
+            addToast(t('shoppingList.toast.itemNotFoundOrDone', { name: triggerCheckItem.split('#')[0] }), 'info');
         }
         dispatch(setVoiceAction(null));
     }
-  }, [triggerCheckItem, shoppingList, handleToggle, addToast, dispatch]);
+  }, [triggerCheckItem, shoppingList, handleToggle, addToast, dispatch, t]);
 
 
   const handleQuickAdd = useCallback(async (e: FormEvent) => {
@@ -130,27 +130,27 @@ export const useShoppingList = () => {
       const resultAction = await dispatch(addItemAsync(quickAddItem));
       if (addItemAsync.fulfilled.match(resultAction)) {
         if(resultAction.payload.status === 'updated') {
-            addToast(`Menge für "${resultAction.payload.name}" aktualisiert.`);
+            addToast(t('shoppingList.toast.quantityUpdated', { name: resultAction.payload.name }));
         }
       }
       setQuickAddItem('');
-  }, [quickAddItem, dispatch, addToast]);
+  }, [quickAddItem, dispatch, addToast, t]);
 
   const handleAiAdd = useCallback(async (items: Omit<ShoppingListItem, 'id' | 'isChecked' | 'sortOrder' | 'category'>[]) => {
       const resultAction = await dispatch(addItemsAsync(items));
       if(addItemsAsync.fulfilled.match(resultAction)){
           const { added, updated } = resultAction.payload;
-          addToast(`${added} Artikel von KI hinzugefügt, ${updated} aktualisiert.`, 'success');
+          addToast(t('shoppingList.toast.aiItemsAdded', { added, updated }), 'success');
       }
-  }, [dispatch, addToast]);
+  }, [dispatch, addToast, t]);
 
   const handleBulkAdd = useCallback(async (items: Omit<ShoppingListItem, 'id'|'isChecked'|'sortOrder'|'category'>[]) => {
     const resultAction = await dispatch(addItemsAsync(items));
       if(addItemsAsync.fulfilled.match(resultAction)){
           const { added, updated } = resultAction.payload;
-          addToast(`${added} Artikel hinzugefügt, ${updated} aktualisiert.`, 'success');
+          addToast(t('shoppingList.toast.bulkItemsAdded', { added, updated }), 'success');
       }
-  }, [dispatch, addToast]);
+  }, [dispatch, addToast, t]);
   
 
   const handleRenameCategory = useCallback(async () => {
@@ -159,9 +159,9 @@ export const useShoppingList = () => {
         return;
     }
     await dispatch(renameCategoryAsync(shoppingListState.editingCategory));
-    addToast(`Kategorie umbenannt in "${shoppingListState.editingCategory.newName.trim()}".`);
+    addToast(t('shoppingList.toast.categoryRenamed', { name: shoppingListState.editingCategory.newName.trim() }));
     dispatch(setEditingCategory(null));
-  }, [shoppingListState.editingCategory, dispatch, addToast]);
+  }, [shoppingListState.editingCategory, dispatch, addToast, t]);
 
   const handleToggleCategoryCollapse = useCallback((category: string) => {
     dispatch(toggleCategoryCollapse(category));
@@ -225,11 +225,11 @@ export const useShoppingList = () => {
   const completedItems = useMemo(() => shoppingList?.filter(item => item.isChecked) || [], [shoppingList]);
 
   const groupedList = useMemo(() => activeItems.reduce((acc, item) => {
-    const category = item.category || 'Sonstiges';
+    const category = item.category || t('shoppingList.categories.misc');
     if (!acc[category]) acc[category] = [];
     acc[category].push(item);
     return acc;
-  }, {} as Record<string, ShoppingListItem[]>), [activeItems]);
+  }, {} as Record<string, ShoppingListItem[]>), [activeItems, t]);
 
   const handleMoveToPantry = useCallback(async () => {
       if (completedItems.length > 0) {
@@ -249,7 +249,7 @@ export const useShoppingList = () => {
       const result = await dispatch(clearListAsync());
       dispatch(setFocusAction(null));
       if (clearListAsync.fulfilled.match(result) && result.payload > 0) {
-        addToast('Liste geleert.');
+        addToast(t('shoppingList.toast.listCleared'));
       }
       return;
     }
@@ -275,13 +275,13 @@ export const useShoppingList = () => {
     if (actionToRun.type === 'moveToPantry') {
       const resultAction = await dispatch(moveToPantryAsync());
       if(moveToPantryAsync.fulfilled.match(resultAction) && resultAction.payload > 0) {
-        addToast(`${resultAction.payload} Artikel in den Vorrat verschoben.`, 'success');
+        addToast(t('shoppingList.toast.moveToPantrySuccess', { count: resultAction.payload }), 'success');
       }
       return;
     }
 
     dispatch(deleteItemAsync(actionToRun.id));
-  }, [effectivePendingAction, dispatch, addToast, shoppingList]);
+  }, [effectivePendingAction, dispatch, addToast, shoppingList, t]);
 
   const cancelPendingAction = useCallback(() => {
     setPendingAction(null);

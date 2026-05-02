@@ -1,5 +1,7 @@
 # Entwicklung
 
+Aktueller Ueberblick ueber erledigte Milestones, Tests und CSP: **[STATUS-2026-05-01.md](./STATUS-2026-05-01.md)**.
+
 ## Voraussetzungen
 
 - Node.js 22+

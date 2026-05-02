@@ -1,3 +1,11 @@
+/**
+ * Datenbank-Einstieg für CulinaSync: Dexie-Instanz, Lifecycle-Hooks und Re-Export aller Repository-APIs.
+ *
+ * **Importieren Sie immer aus diesem Modul** (`@/services/db` oder `./services/db`), nicht direkt aus `dbInstance.ts`,
+ * damit Seed-Population, Migration und Pantry-Matching-Hooks einmalig geladen werden.
+ *
+ * @module services/db
+ */
 import { db } from './dbInstance';
 import { ensureMigrationBackup, LATEST_DB_VERSION, PRIMARY_DATA_STORES, PRIMARY_DB_NAME } from './dbMigrations';
 import { debouncedUpdateAllPantryMatches, updatePantryMatches } from './pantryMatcherService';

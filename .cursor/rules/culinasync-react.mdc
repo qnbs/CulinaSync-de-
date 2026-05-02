@@ -1,0 +1,13 @@
+---
+description: CulinaSync — React, A11y, Modals, i18n in Komponenten
+globs: "**/*.{tsx,jsx}"
+alwaysApply: false
+---
+
+# UI & React
+
+- **Modals:** Immer `useModalA11y` (Fokus-Trap, Escape, Scroll-Lock), `role="dialog"`, `aria-modal`.
+- **Interaktion:** Aktionen mit `<button>`, echte Links nur mit `href`. Icon-Buttons mit `aria-label`.
+- **Navigation:** `aria-current="page"` wie im bestehenden Header/BottomNav.
+- **i18n:** Sichtbare Strings und `aria-label` über `t()` / Locale-Dateien unter `src/locales/{de,en}/` — Keys in `core`, `settings`, `features` konsistent halten.
+- **Neue Features mit komplexem lokalen State:** Context-Muster wie `PantryManager` / `ShoppingList` prüfen.

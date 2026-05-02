@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import i18next from 'i18next';
 import { WhisperResult } from '../services/whisperService';
 import { getAppServices } from '../services/serviceRegistry';
 
@@ -37,13 +38,13 @@ export const useWhisperRecognition = (): WhisperRecognitionHook => {
           const result: WhisperResult = await getAppServices().whisper.transcribeWithWhisper(audioBlob);
           setTranscript(result.text);
         } catch (error) {
-          setError(error instanceof Error ? error.message : 'Transkription fehlgeschlagen');
+          setError(error instanceof Error ? error.message : i18next.t('voice.whisperTranscriptionFailed'));
         }
       };
       mediaRecorder.start();
       setIsListening(true);
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Audioaufnahme nicht möglich');
+      setError(error instanceof Error ? error.message : i18next.t('voice.whisperAudioUnavailable'));
     }
   };
 

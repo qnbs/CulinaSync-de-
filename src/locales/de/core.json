@@ -117,6 +117,10 @@
       "pantry": "Im Vorrat nach \"{{searchTerm}}\" suchen"
     }
   },
+  "voice": {
+    "whisperTranscriptionFailed": "Transkription fehlgeschlagen",
+    "whisperAudioUnavailable": "Audioaufnahme nicht möglich"
+  },
   "gemini": {
     "error": {
       "invalidApiKey": "Der API-Schlüssel ist ungültig. Bitte überprüfe ihn unter Einstellungen → API-Schlüssel.",

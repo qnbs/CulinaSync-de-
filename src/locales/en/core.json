@@ -117,6 +117,10 @@
       "pantry": "Search pantry for \"{{searchTerm}}\""
     }
   },
+  "voice": {
+    "whisperTranscriptionFailed": "Transcription failed",
+    "whisperAudioUnavailable": "Audio recording unavailable"
+  },
   "gemini": {
     "error": {
       "invalidApiKey": "The API key is invalid. Please check it under Settings → API Key.",

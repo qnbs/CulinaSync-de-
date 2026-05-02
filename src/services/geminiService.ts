@@ -1,3 +1,9 @@
+/**
+ * Zentrale Gemini-/Google-GenAI-Integration: Rezeptgenerierung, Bilder, Nährwert-Checks, Web-Import-Sanitizing.
+ * API-Schlüssel nur über `loadApiKey` aus `apiKeyService`; nie Env/Build. JSON-Antworten über Validators (`parseAiJson` / Guards).
+ *
+ * @module services/geminiService
+ */
 import type { GoogleGenAI } from "@google/genai";
 import DOMPurify from 'dompurify';
 import { retry } from './retryUtils';

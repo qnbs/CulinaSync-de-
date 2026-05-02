@@ -5,6 +5,31 @@
 
 ---
 
+## Status-Update 2026-05-02 (Build, Supply Chain)
+
+- **Kritischer Build-Fix:** `src/services/__tests__/utilsCategories.test.ts` — `vi.spyOn(i18next, 't').mockImplementation` war fuer `tsgo` nicht zuweisbar (TS2345); die Implementierung wird jetzt als `typeof i18next.t` assertiert. Ergebnis: `pnpm run build` / `npm run build` wieder gruen.
+- **Transitive Schwachstellen (Dev-Toolchain):** `serialize-javascript` (<=7.0.4) und `uuid` (<14) — behoben ueber **package.json** `overrides` und **pnpm.overrides** ohne Downgrade von vite-plugin-pwa oder Storybook. `pnpm-lock.yaml` an `package-lock.json` angeglichen (`pnpm import`).
+- **Validierung:** Lint, Vitest (66 Tests), Build, Bundle-Budget lokal gruen; `npm audit` ohne Befunde.
+
+---
+
+## Status-Update 2026-05-01 (Cursor IDE)
+
+- **Projektregeln für den Agent:** `.cursor/rules/culinasync-core.mdc` (immer aktiv) und `culinasync-react.mdc` (bei `*.tsx`) — komprimierte Ableitung aus `.github/copilot-instructions.md` für konsistente Antworten in Cursor.
+- **Hinweis:** `AUDIT.md`-Abschnitte zu ESLint `@typescript-eslint/no-explicit-any` sind veraltet; in `eslint.config.js` steht die Regel auf `error` (nicht `off`). `react-hooks/exhaustive-deps` bleibt weiterhin `off` (vgl. H1).
+- **CI-Stand:** CodeQL nutzt nur noch `javascript`; `validate.yml` ist wiederverwendbar; Deploy ruft denselben Validate-Workflow auf — bei Push auf `main` laufen dennoch **zwei** Validate-Läufe parallel (`ci.yml` + `deploy.yml`), falls gewünscht später mit `workflow_run` oder Skip entkoppeln.
+
+---
+
+## Status-Update 2026-05-01 (Roadmap, Tests, Security-Doku)
+
+- **Roadmap:** `ROADMAP.md` v1.2 — M3.1/M3.2 (RecipeDetail / CookMode-Splits) als erledigt markiert; M4.3 CSP fuer Tauri (`src-tauri/tauri.conf.json`) + Abschnitt in `docs/DEPLOYMENT.md`; M6.1–6.3 (Mermaid in `ARCHITECTURE.md`, JSDoc `db.ts`/`geminiService.ts`, README-Status) fortgeschrieben; offen u. a. **M3.3** (MealPlanner Context), **M5** Coverage-Ziel, **M7** TS7 GA.
+- **Tests:** `voiceCommands.test.ts`, `dataRepository.test.ts`, `cookModeReducer.test.ts`, `utilsCategories.test.ts` ergänzt; ESLint `prefer-const` im Reducer-Test bereinigt.
+- **i18n (Fortsetzung):** Einkaufsliste-Toasts, `getCategoryForItem` ueber Locale-Keys, Whisper/Core-Strings, `RecipeBook` Bulk-Plan-Toast — siehe `docs/STATUS-2026-05-01.md`.
+- **Doku:** Neuer Snapshot `docs/STATUS-2026-05-01.md`; `ARCHITECTURE.md`, `DEPLOYMENT.md`, `README.md`, `CHANGELOG.md` [Unreleased] aktualisiert.
+
+---
+
 ## Status-Update 2026-04-23 (Nachtrag: M0.1 + M1 abgeschlossen)
 
 Milestone 0.1 (kritische Audit-Reste) und Milestone 1 (DevInfra) vollstaendig umgesetzt:
@@ -783,8 +808,8 @@ Siehe K1. Nach `devDependencies` verschoben und im Runtime-Pfad dynamisiert.
 - [x] S2: Statisches Salt in syncService
 - [x] S3: Web-Content-Sanitization
 - [x] I1 Welle 1: i18n für CookMode, Onboarding, WhatsNewModal, ErrorBoundary (~60 Strings)
-- [ ] CI1: DevContainer einrichten
-- [ ] CI2: Dependabot konfigurieren
+- [x] CI1: DevContainer einrichten (`.devcontainer/devcontainer.json`)
+- [x] CI2: Dependabot konfigurieren (`.github/dependabot.yml`)
 
 ### Sprint 3 (Qualität, 5-10 Tage)
 - [ ] H1/H2: ESLint-Regeln auf `warn` + schrittweiser Cleanup

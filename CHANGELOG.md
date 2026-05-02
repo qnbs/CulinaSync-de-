@@ -7,7 +7,23 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben
+- **Build (tsgo):** `utilsCategories.test.ts` — Mock von `i18next.t` per Assertion auf `typeof i18next.t` typisiert; der Produktions-Build schlug mit TS2345 fehl (Mehrfachueberladungen von `TFunction`).
+- **Supply Chain:** `npm audit` meldete u. a. verwundbare transitive Versionen von `serialize-javascript` (Workbox/vite-plugin-pwa) und `uuid` (Storybook). Root-`overrides` plus ergänzte `pnpm.overrides` heben auf **serialize-javascript ^7.0.5** und **uuid ^14.0.0**; `pnpm-lock.yaml` wurde per `pnpm import` aus dem aktualisierten `package-lock.json` synchronisiert.
+- **Husky:** `.husky/pre-commit` nutzt `npm exec lint-staged`; `commit-msg` nutzt `npm exec -- commitlint --edit` (zwingt korrekte Argumentweitergabe), damit lokale Commits ohne globales **pnpm** funktionieren (z. B. Windows).
+
 ### Hinzugefuegt
+- **Dokumentation:** `docs/STATUS-2026-05-01.md` (vollstaendiger Snapshot Mai 2026); `docs/ARCHITECTURE.md` um **Mermaid-Diagramm** (UI ↔ Redux ↔ Dexie ↔ Gemini); `docs/DEPLOYMENT.md` Abschnitt **Tauri Desktop und CSP**; Roadmap `ROADMAP.md` auf **v1.2** (Stand 2026-05-01).
+- **Tauri:** Content-Security-Policy in `src-tauri/tauri.conf.json` gesetzt (nicht mehr `null`), an Web-CSP aus `index.html` angelehnt.
+- **Tests:** `src/services/__tests__/voiceCommands.test.ts` (`processCommand`); ergänzend bestehende Suites fuer `dataRepository`, `cookModeReducer`, `utilsCategories`.
+- **JSDoc:** Modul-Köpfe fuer `src/services/db.ts` und `src/services/geminiService.ts`.
+
+### Geaendert
+- **README.md:** Statusblock auf Mai-2026-Stand; API-Key-Hinweis auf **WebCrypto-Verschluesselung** (mit Legacy-Fallback) praezisiert; Verweise auf `STATUS-2026-05-01.md`.
+- **i18n:** Shopping-List-Toasts und Kategorie-Heuristik (`getCategoryForItem`) uebersetzungsfaehig; neue Keys `shoppingList.categories.*`, erweiterte Toasts; `RecipeBook` Bulk-Plan-Toast; Whisper-Fehler ueber `voice.*` in `core.json`.
+
+#### Archiv unter [Unreleased] — April 2026 (CodeQL, i18n Wave 2+3)
+
 - CodeQL Alert #7 behoben: `sanitizeWebContentForPrompt` in `geminiService.ts` nutzt jetzt DOMPurify statt fehleranfaelliger HTML-Regex (schlechter Regex liess `</script foo>` als validen End-Tag passieren)
 - Vollstaendige i18n-Completion Wave 2+3: alle verbleibenden ~65 hartcodierten deutschen Strings auf Locale-Keys migriert
   - `ShoppingListHeader.tsx`, `RecipeBookHeader.tsx`, `VoiceControlWhisperUI.tsx`, `ShoppingListQuickAdd.tsx`: `useTranslation` nachgezogen, alle Texte auf i18n-Keys

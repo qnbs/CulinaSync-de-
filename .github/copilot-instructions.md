@@ -56,7 +56,7 @@
 - **Testverzeichnisse:** `src/test/`, `src/components/**/__tests__/`, `src/services/__tests__/`.
 - **Benennung:** `*.test.ts` / `*.test.tsx` für Testdateien.
 - **Konfiguration:** `vitest.config.ts` im Root.
-- **Coverage:** Aktuell ~35 % (nur `geminiService` getestet). Neue Features sollten Tests mitbringen.
+- **Coverage:** Historisch ~35 %; es gibt jetzt zusaetzliche Suites (`geminiService`, `exportService`, `apiKeyService`, `dbMigrations`, `dataRepository`, `voiceCommands`, Reducer/Utils). Ziel laut Roadmap M5: ≥70 %. Neue Features sollten Tests mitbringen.
 - **Ausfuehrung:** `pnpm run test` oder `pnpm run test:coverage`.
 - Vor `pnpm run build` immer zuerst Diagnostics fuer die geaenderten Dateien pruefen (`get_errors` bzw. Problems-Panel).
 - Wenn TypeScript-relevante Dateien betroffen sind, vor dem Full-Build mindestens einen Typecheck fuer den geaenderten Slice oder `pnpm exec tsc --noEmit` ausfuehren.

@@ -46,6 +46,35 @@ CulinaSync ist eine local-first PWA. Persistente Domaindaten werden im Browser g
 4. Hooks lesen ueber `useLiveQuery` und aktualisieren die UI reaktiv.
 5. Redux bleibt fuer Shell-, Fokus-, Modal- und Prozesszustand reserviert.
 
+### Diagramm (Ueberblick)
+
+```mermaid
+flowchart LR
+  subgraph UI["UI"]
+    P["Seiten / Komponenten"]
+    H["Hooks useLiveQuery"]
+  end
+  subgraph State["Redux"]
+    U["uiSlice, shoppingListSlice, …"]
+    S["settingsSlice + Persist"]
+  end
+  subgraph Data["IndexedDB / Dexie"]
+    D["db.ts → Repositories"]
+    T["pantry, recipes, mealPlan, shoppingList"]
+  end
+  subgraph Ext["Extern"]
+    G["geminiService → Gemini API"]
+  end
+  P --> H
+  P --> U
+  U --> P
+  S --> P
+  P --> D
+  D --> T
+  H --> T
+  U --> G
+```
+
 ## Interaktionsmuster
 
 - Irreversible oder destructive Aktionen laufen nicht mehr ueber native Browser-Dialoge.
@@ -70,5 +99,6 @@ CulinaSync ist eine local-first PWA. Persistente Domaindaten werden im Browser g
 ## Wichtige aktuelle technische Punkte
 
 - `settingsService.ts` laedt bevorzugt den Redux-Persist-Bestand und faellt nur fuer Legacy-Daten noch auf den alten Schluessel zurueck.
-- `@faker-js/faker` wird fuer Offline-Fallbacks genutzt und sollte langfristig ueber dynamischen Import oder einen kleineren lokalen Fallback ersetzt werden.
-- Der i18n-Bestand ist seit 2026-04-22 modularisiert; weitere Rest-Hartcodierungen sollten als nachgelagerter Sweep auf den neuen Locale-Domains aufsetzen.
+- `@faker-js/faker` wird fuer Offline-Fallbacks nur dynamisch importiert (Production-Bundle).
+- Der i18n-Bestand ist modular (`core` / `settings` / `features`); neue UI-Texte dort pflegen.
+- **Desktop (Tauri):** CSP in `src-tauri/tauri.conf.json` an die Web-Variante angeglichen; Details siehe [DEPLOYMENT.md](./DEPLOYMENT.md#tauri-desktop-und-content-security-policy).

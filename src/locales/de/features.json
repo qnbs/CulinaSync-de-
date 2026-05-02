@@ -285,6 +285,17 @@
       "scanReceipt": "Rechnung per OCR scannen",
       "doneMoveToPantry": "{{count}} erledigt • In Vorrat verschieben"
     },
+    "categories": {
+      "misc": "Sonstiges",
+      "dairy": "Milchprodukte & Eier",
+      "produce": "Obst & Gemüse",
+      "meat": "Fleisch & Fisch",
+      "bakery": "Backwaren",
+      "dryGoods": "Trockenwaren & Nudeln",
+      "oils": "Öle & Essige",
+      "canned": "Konserven & Gläser",
+      "spices": "Gewürze & Saucen"
+    },
     "toast": {
       "noMissingIngredients": "Keine fehlenden Zutaten im Essensplan gefunden.",
       "generateFromPlanSuccess": "{{added}} neue(r) Artikel hinzugefügt, {{existing}} bereits auf der Liste.",
@@ -292,7 +303,10 @@
       "itemNotFoundOrDone": "Artikel \"{{name}}\" nicht auf der Liste gefunden oder bereits erledigt.",
       "quantityUpdated": "Menge für \"{{name}}\" aktualisiert.",
       "aiItemsAdded": "{{added}} Artikel von KI hinzugefügt, {{updated}} aktualisiert.",
-      "bulkItemsAdded": "{{added}} Artikel hinzugefügt, {{updated}} aktualisiert."
+      "bulkItemsAdded": "{{added}} Artikel hinzugefügt, {{updated}} aktualisiert.",
+      "listCleared": "Liste geleert.",
+      "moveToPantrySuccess": "{{count}} Artikel in den Vorrat verschoben.",
+      "categoryRenamed": "Kategorie umbenannt in \"{{name}}\"."
     }
   },
   "pantry": {
@@ -488,6 +502,9 @@
       "summaryMiddle": "als aufeinanderfolgende",
       "summarySuffix": "geplant.",
       "plan": "Planen"
+    },
+    "toast": {
+      "bulkAddedToPlan": "{{count}} Rezepte zum Plan hinzugefügt."
     },
     "empty": {
       "title": "Keine Rezepte gefunden",

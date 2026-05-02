@@ -14,7 +14,8 @@
 ### `src/components/`
 
 - Top-Level-Seiten wie `PantryManager.tsx`, `RecipeBook.tsx`, `MealPlanner.tsx`, `ShoppingList.tsx`, `Settings.tsx`
-- Feature-Unterordner fuer fachlich gebuendelte Teilkomponenten
+- Feature-Unterordner fuer fachlich gebuendelte Teilkomponenten (z. B. `recipe-detail/`, `cook-mode/`, `shopping-list/`)
+- `cook-mode/`: Kochmodus-UI und `cookModeReducer` (aus `CookModeView.tsx` eingebunden)
 - `__tests__/` fuer komponentennahe Tests
 
 ### `src/hooks/`

@@ -285,6 +285,17 @@
       "scanReceipt": "Scan receipt with OCR",
       "doneMoveToPantry": "{{count}} done • Move to pantry"
     },
+    "categories": {
+      "misc": "Miscellaneous",
+      "dairy": "Dairy & eggs",
+      "produce": "Fruit & vegetables",
+      "meat": "Meat & fish",
+      "bakery": "Bakery",
+      "dryGoods": "Dry goods & pasta",
+      "oils": "Oils & vinegars",
+      "canned": "Canned & jars",
+      "spices": "Spices & sauces"
+    },
     "toast": {
       "noMissingIngredients": "No missing ingredients found in the meal plan.",
       "generateFromPlanSuccess": "{{added}} new item(s) added, {{existing}} already on the list.",
@@ -292,7 +303,10 @@
       "itemNotFoundOrDone": "Item \"{{name}}\" not found on the list or already done.",
       "quantityUpdated": "Quantity updated for \"{{name}}\".",
       "aiItemsAdded": "{{added}} items added by AI, {{updated}} updated.",
-      "bulkItemsAdded": "{{added}} items added, {{updated}} updated."
+      "bulkItemsAdded": "{{added}} items added, {{updated}} updated.",
+      "listCleared": "List cleared.",
+      "moveToPantrySuccess": "{{count}} item(s) moved to pantry.",
+      "categoryRenamed": "Category renamed to \"{{name}}\"."
     }
   },
   "pantry": {
@@ -488,6 +502,9 @@
       "summaryMiddle": "as consecutive",
       "summarySuffix": ".",
       "plan": "Plan"
+    },
+    "toast": {
+      "bulkAddedToPlan": "{{count}} recipe(s) added to the meal plan."
     },
     "empty": {
       "title": "No recipes found",
