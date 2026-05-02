@@ -3,8 +3,8 @@ import { render, screen } from '@testing-library/react';
 import { PantryManagerProvider, usePantryManagerContext } from '../PantryManagerContext';
 
 const stub = {
-  items: [] as { id?: number; name: string }[],
-  setSearchQuery: vi.fn(),
+  pantryItems: [] as { id?: number; name: string }[],
+  setSearchTerm: vi.fn(),
 };
 
 vi.mock('../../hooks/usePantryManager', () => ({
@@ -13,7 +13,7 @@ vi.mock('../../hooks/usePantryManager', () => ({
 
 function Consumer() {
   const ctx = usePantryManagerContext();
-  return <span data-testid="items-count">{ctx.items.length}</span>;
+  return <span data-testid="items-count">{(ctx.pantryItems ?? []).length}</span>;
 }
 
 describe('PantryManagerContext', () => {
