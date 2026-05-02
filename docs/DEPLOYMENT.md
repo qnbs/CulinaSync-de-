@@ -16,15 +16,18 @@ Das Repository verwendet GitHub Actions fuer CI, Deploy und CodeQL.
 - pnpm 10 einrichten
 - **Node.js 24** einrichten (`actions/setup-node`, siehe `validate.yml` / `ci.yml`)
 - `pnpm install --frozen-lockfile`
-- Lint, Tests, Build
-- PR-bezogen zusaetzlich i18n-Changed-Lines-Check
+- Lint
+- **`pnpm run test:coverage`** (Vitest inkl. v8-Coverage)
+- Upload Artefakt **`coverage-lcov`** (`actions/upload-artifact@v4`, Ordner `coverage/`, Retention 14 Tage)
+- Build (`tsgo && vite build`)
+- **`pnpm run check:bundle-budget`** (jedes Validate, nicht nur Deploy)
+- PR-bezogen zusaetzlich i18n-Changed-Lines-Check (`ci.yml` Job `i18n-check`)
 
 ### Deploy
 
-- identischer pnpm-/Node-Setup
-- Lint, Tests, Build
-- Bundle-Budget-Check
-- Upload des `dist/`-Artifacts
+- identischer pnpm-/Node-Setup wie Validate (wiederverwendbarer Workflow `validate.yml` mit `upload-pages-artifact: true`)
+- Lint, Tests **mit Coverage**, Build, Bundle-Budget
+- Upload des `dist/`-Artifacts fuer Pages
 - Deployment nach GitHub Pages
 
 ### CodeQL
@@ -60,7 +63,7 @@ Diese Warnungen stammen aktuell von Upstream-Runtimes der GitHub-verwalteten Act
 ## Aktueller Arbeitsstand (Doku)
 
 - Ausführlicher Snapshot: [STATUS-2026-05-02.md](./STATUS-2026-05-02.md); davor [STATUS-2026-05-01.md](./STATUS-2026-05-01.md); ältere: [STATUS-2026-04-23.md](./STATUS-2026-04-23.md), [STATUS-2026-04-22.md](./STATUS-2026-04-22.md).
-- Vor einem release-nahen Push auf `main` bleiben die Gates `pnpm run lint`, `pnpm run test`, `pnpm run build` und bei Bedarf `pnpm run check:bundle-budget` massgeblich.
+- Vor einem release-nahen Push auf `main` empfohlen: **`pnpm run check:all`** oder mindestens `pnpm run lint`, `pnpm run test`, `pnpm run build`; Bundle-Budget ist in CI ohnehin Teil von Validate.
 
 ## Operative Checks nach einem produktionsrelevanten Fix
 

@@ -36,7 +36,13 @@ pnpm run test
 pnpm run build
 ```
 
-Wenn die Aenderung Deploy-, Bundle- oder i18n-relevant ist, pruefe zusaetzlich:
+Empfohlen (entspricht dem ueblichen Release-Gate inkl. Audit):
+
+```bash
+pnpm run check:all
+```
+
+Wenn die Aenderung Deploy-, Bundle- oder i18n-relevant ist, pruefe zusaetzlich (Teile davon sind in `check:all` enthalten):
 
 ```bash
 pnpm run check:bundle-budget

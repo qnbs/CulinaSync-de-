@@ -17,7 +17,7 @@
 - Feature-Unterordner fuer fachlich gebuendelte Teilkomponenten (z. B. `recipe-detail/`, `cook-mode/`, `shopping-list/`)
 - `cook-mode/`: Kochmodus-UI und `cookModeReducer`; Controller-Logik in `src/hooks/useCookModeController.ts`
 - `meal-planner/`: u. a. `mealPlannerConstants.ts` (`MEAL_TYPES` / `MealType`, entkoppelt von der Seitenkomponente)
-- `__tests__/` fuer komponentennahe Tests
+- `__tests__/` fuer komponentennahe und Smoke-Tests (u. a. `MealPlanner`, `CookModeView`, `RecipeDetailTabs`)
 
 ### `src/hooks/`
 
@@ -39,6 +39,7 @@
 ### `src/contexts/`
 
 - Context-Provider fuer komplexere Features: Vorratsverwaltung, Einkaufsliste, **Essensplan** (`MealPlannerContext.tsx`)
+- **`__tests__/MealPlannerContext.test.tsx`** absichert Provider-Kontrakt (Throw ohne Provider, Value mit Provider)
 - Diese Provider tragen inzwischen auch zustandsgetriebene Confirm-/Modal-Flows fuer destructive Aktionen.
 
 ### `src/locales/`
@@ -50,7 +51,8 @@
 
 ### `src/test/`
 
-- testbezogene Utilities, MSW-Setup und weitere Testunterstuetzung
+- testbezogene Utilities, MSW-Setup, Vitest-`setupTests.ts`
+- **`createTestStore.ts`:** schlanker Redux-Store fuer Hook-/Integrations-Tests (ohne Redux-Persist, `combineReducers` + Defaults aus `getDefaultSettings()`)
 
 ## Infrastrukturordner
 

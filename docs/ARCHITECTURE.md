@@ -89,6 +89,12 @@ flowchart LR
 - Settings-Aenderungen sind auf eine erlaubte Mutator-Map in `src/components/Settings.tsx` begrenzt.
 - Exporte verwenden erlaubte MIME-Typen und bereinigte Dateinamen.
 
+## Tests (Kurz)
+
+- Vitest + Testing Library + MSW; Setup unter `src/test/setupTests.ts`.
+- Redux-in-Tests ohne Persist: Hilfsfunktion **`src/test/createTestStore.ts`** (Combine der drei Root-Reducer mit Default-Settings).
+- Essensplan-/Kochmodus: dedizierte Hook- und Context-Tests sowie leichtgewichtige Smoke-Renderings kritischer Oberflaechen (siehe [TESTING.md](./TESTING.md)).
+
 ## Hauptgrenzen im Code
 
 - Komponenten sollten keine Dexie-Tabellen direkt mutieren.

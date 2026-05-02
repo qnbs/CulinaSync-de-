@@ -73,11 +73,22 @@ Pruefen:
 
 - `pnpm install --frozen-lockfile`
 - `pnpm run lint`
-- `pnpm run test`
+- `pnpm run test` bzw. `pnpm run test:coverage` (wie in CI)
 - `pnpm run build`
 - `pnpm run check:bundle-budget`
+- lokal alles in einem Rutsch: **`pnpm run check:all`**
 
 Wenn nur Node-20-Depracation-Warnungen auf GitHub erscheinen, aber der Lauf gruen ist, handelt es sich wahrscheinlich um die bekannten Upstream-Warnungen der GitHub-verwalteten Pages-Actions.
+
+## Vitest haengt, ist sehr langsam oder bricht mit Timeout ab
+
+- Unter **Windows** kann jsdom + viele Worker laenger brauchen; optional: `npx vitest run --pool=forks --maxWorkers=2`.
+- **`vitest run --coverage`** ist deutlich langsamer als ohne Coverage; bei Timeout-Fehlern in RTL-Tests Timeout pro Test erhoehen (siehe [TESTING.md](./TESTING.md)).
+- Nach Coverage-Laefen **`coverage/`** erzeugt — nicht committen (`.gitignore`); ESLint ignoriert den Ordner automatisch.
+
+### Artefakt „coverage-lcov“ in GitHub Actions
+
+- CI laedt den Ordner **`coverage`** hoch — bei Upload-Fehlern pruefen, ob `pnpm run test:coverage` lokal gruen ist und ob genug Speicher auf dem Runner vorhanden ist.
 
 ## KI-Funktionen arbeiten nicht
 

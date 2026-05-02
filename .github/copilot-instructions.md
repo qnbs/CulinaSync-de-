@@ -53,11 +53,11 @@
 
 ## Testing
 - **Framework:** Vitest + MSW (Mock Service Worker) fuer Service- und UI-nahe Tests.
-- **Testverzeichnisse:** `src/test/`, `src/components/**/__tests__/`, `src/services/__tests__/`.
+- **Testverzeichnisse:** `src/test/` (inkl. `createTestStore.ts`, MSW), `src/components/**/__tests__/`, `src/contexts/__tests__/`, `src/hooks/__tests__/`, `src/services/__tests__/`, `src/store/__tests__/`.
 - **Benennung:** `*.test.ts` / `*.test.tsx` für Testdateien.
-- **Konfiguration:** `vitest.config.ts` im Root.
-- **Coverage:** Historisch ~35 %; es gibt jetzt zusaetzliche Suites (`geminiService`, `exportService`, `apiKeyService`, `dbMigrations`, `dataRepository`, `voiceCommands`, Reducer/Utils). Ziel laut Roadmap M5: ≥70 %. Neue Features sollten Tests mitbringen.
-- **Ausfuehrung:** `pnpm run test` oder `pnpm run test:coverage`.
+- **Konfiguration:** `vitest.config.ts` im Root; ESLint ignoriert `coverage/**`.
+- **Coverage:** Stand Mai 2026 ca. **37 %** Statements (v8); Ziel M5: ≥70 %. Neu u. a.: `MealPlannerContext`, `useMealPlannerScreen`, `useCookModeController`, Smoke-Tests MealPlanner/CookMode/RecipeDetailTabs, `geminiMsw.test.ts` (Zod). CI laeuft `test:coverage` und laedt `coverage` als Artefakt.
+- **Ausfuehrung:** `pnpm run test`, `pnpm run test:coverage`, lokal vollstaendig `pnpm run check:all` (inkl. audit high).
 - Vor `pnpm run build` immer zuerst Diagnostics fuer die geaenderten Dateien pruefen (`get_errors` bzw. Problems-Panel).
 - Typecheck im Alltag: `pnpm run type-check` (**tsgo**). `tsc` wird von ESLint/Vitest als API genutzt — nicht den Full-Build mit purem `tsc` verwechseln (`pnpm run build` = `tsgo && vite build`).
 - Der Full-Build ist der Integrations-Check am Ende und soll nicht der erste Schritt sein, in dem neue Typefehler entdeckt werden.

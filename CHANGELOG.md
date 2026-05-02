@@ -8,6 +8,10 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Hinzugefuegt
+- **Tests (M5):** `MealPlannerContext.test.tsx`; `useMealPlannerScreen.test.tsx`; `useCookModeController.test.tsx`; Smoke-Tests `MealPlanner.smoke.test.tsx`, `CookModeView.smoke.test.tsx`, `RecipeDetailTabs.smoke.test.tsx`; Hilfsfunktion `src/test/createTestStore.ts` (Redux-Teststore ohne Persist).
+- **MSW:** `geminiMsw.test.ts` validiert die gemockte Gemini-Models-Antwort zusaetzlich mit **Zod**.
+- **Tooling:** Script `check:all` in `package.json` (lint, `type-check`, test, build, bundle-budget, `npm audit --audit-level=high`); ESLint ignoriert generiertes `coverage/**`.
+- **CI:** `validate.yml` — `pnpm run test:coverage` statt reiner Testlauf; Upload-Artefakt **coverage-lcov** (14 Tage); **Bundle-Budget** auf jedem Validate-Lauf (nicht nur Deploy).
 - **Architektur:** `MealPlannerProvider` / `useMealPlannerContext` (`src/contexts/MealPlannerContext.tsx`) und Hook `useMealPlannerScreen` — Essensplan analog zu Pantry/Einkaufsliste; Konstanten `MEAL_TYPES` in `meal-planner/mealPlannerConstants.ts`.
 - **Kochmodus:** `useCookModeController` (`src/hooks/useCookModeController.ts`) kapselt Timer-, Sprach- und Wake-Lock-Logik; `CookModeView` bleibt schlank.
 - **Settings-Migration:** synchrones Bootstrap `src/store/migrateLegacySettingsBeforePersist.ts` (Import als erste Zeile in `store/index.ts`), damit Legacy-`culinaSyncSettings` vor Redux-Persist-Rehydration nach `persist:settings` migriert wird.
@@ -31,7 +35,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **Husky:** `.husky/pre-commit` nutzt `npm exec lint-staged`; `commit-msg` nutzt `npm exec -- commitlint --edit` (zwingt korrekte Argumentweitergabe), damit lokale Commits ohne globales **pnpm** funktionieren (z. B. Windows).
 
 ### Geaendert (Fortsetzung Mai 2026)
-- **README.md:** Status auf **2026-05-02** (`STATUS-2026-05-02.md`); Architektur-Hooks (MealPlanner), Node-22/CI-24, Settings-Migration, Gemini/Zod; API-Key-Hinweis WebCrypto (Legacy nur ohne `crypto.subtle`).
+- **README.md:** Status **2026-05-02**; M5-Zwischenstand (83 Tests, ~37 % Coverage, CI-Artefakt, `check:all`); Architektur-Hooks (MealPlanner), Node-22/CI-24, Settings-Migration, Gemini/Zod; API-Key WebCrypto (Legacy nur ohne `crypto.subtle`).
+- **Dokumentation:** `docs/TESTING.md`, `DEPLOYMENT.md`, `DEVELOPMENT.md`, `PROJECT-STRUCTURE.md`, `ARCHITECTURE.md`, `STATUS-2026-05-02.md`, `docs/README.md`, `TROUBLESHOOTING.md`; **ROADMAP** M5-Metriken und Status 🟨; **AUDIT** neuer Statusblock M5/CI; **CONTRIBUTING** / **copilot-instructions** um `check:all` und Testorte ergaenzt.
 - **i18n:** Shopping-List-Toasts und Kategorie-Heuristik (`getCategoryForItem`) uebersetzungsfaehig; neue Keys `shoppingList.categories.*`, erweiterte Toasts; `RecipeBook` Bulk-Plan-Toast; Whisper-Fehler ueber `voice.*` in `core.json`.
 
 #### Archiv unter [Unreleased] — April 2026 (CodeQL, i18n Wave 2+3)

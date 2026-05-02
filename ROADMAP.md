@@ -1,6 +1,6 @@
 # CulinaSync — Roadmap
 
-> **Stand:** 2. Mai 2026 · Basis: vollständiges Code-, Architektur- und Security-Audit (14.–22. April 2026) + Follow-up-Sessions Mai 2026  
+> **Stand:** 2. Mai 2026 (aktualisiert: M5-Testausbau + CI-Coverage) · Basis: vollständiges Code-, Architektur- und Security-Audit (14.–22. April 2026) + Follow-up-Sessions Mai 2026  
 > **Format:** Milestones geordnet nach Priorität. Jedes Item mit Herkunft (AUDIT-Referenz), Aufwandsschätzung und Status.
 
 ---
@@ -97,21 +97,21 @@
 
 **Ziel:** Test-Coverage von ~35 % auf ≥70 % erhöhen.
 
-**Aktueller Stand (April 2026):**
+**Aktueller Stand (Mai 2026, nach Vitest v8-Coverage-Lauf):**
 | Metrik | Aktuell | Ziel |
 |---|---|---|
-| Statements | 34.7 % | ≥70 % |
-| Branches | 26.8 % | ≥60 % |
-| Functions | 31.6 % | ≥70 % |
-| Lines | 35.6 % | ≥70 % |
+| Statements | ~37 % | ≥70 % |
+| Branches | ~26 % | ≥60 % |
+| Functions | ~29 % | ≥70 % |
+| Lines | ~39 % | ≥70 % |
 
 | # | Maßnahme | Herkunft | Bereich | Aufwand | Status |
 |---|---|---|---|---|---|
 | 5.1 | Repository-Layer testen: `db.ts`, `dbMigrations.ts` | T1 | `src/services/__tests__/` | Hoch (6–8 h) | ✅ `dbMigrations.test.ts`; ✅ `dataRepository.test.ts` (importData); `db.ts` nicht isoliert getestet (Import-Zyklen / Side-Effects) |
 | 5.2 | Store-Slices testen: `settingsSlice`, `uiSlice`, `shoppingListSlice` | T1 | `src/store/__tests__/` | Mittel (3–4 h) | ✅ |
-| 5.3 | Hooks testen: `useShoppingList`, `usePantryManager`, `useMealPlan` | T1 | `src/hooks/__tests__/` | Hoch (4–6 h) | 🔲 Voice-/Parsing-Logik teilweise über `voiceCommands.test.ts` abgedeckt |
+| 5.3 | Hooks testen: `useShoppingList`, `usePantryManager`, `useMealPlan` | T1 | `src/hooks/__tests__/` | Hoch (4–6 h) | 🟨 **`useMealPlannerScreen.test.tsx`**, **`useCookModeController.test.tsx`**; weiter offen: `useShoppingList`, `usePantryManager`, `useMealPlan` isoliert |
 | 5.4 | Services testen: `apiKeyService`, `voiceCommands`, `exportService` | T1 | `src/services/__tests__/` | Mittel (3–4 h) | ✅ apiKeyService, exportService, **`voiceCommands.test.ts`** (`processCommand`) |
-| 5.5 | Component-Smoke-Tests für kritische Seiten (React Testing Library) | T1 | `src/components/__tests__/` | Hoch (4–6 h) | 🔲 |
+| 5.5 | Component-Smoke-Tests für kritische Seiten (React Testing Library) | T1 | `src/components/**/__tests__/` | Hoch (4–6 h) | 🟨 Smoke: **`MealPlanner.smoke.test.tsx`**, **`CookModeView.smoke.test.tsx`**, **`RecipeDetailTabs.smoke.test.tsx`**; Context: **`MealPlannerContext.test.tsx`**; weitere Seiten offen |
 
 **Gesamtaufwand Milestone 5:** ~20–28 h
 

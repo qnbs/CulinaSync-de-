@@ -32,6 +32,7 @@ pnpm run test:coverage
 pnpm run analyze:bundle
 pnpm run check:bundle-budget
 pnpm run preview
+pnpm run check:all       # lint + type-check + test + build + budget + npm audit (high)
 ```
 
 ## TypeScript-Binaries
@@ -82,7 +83,7 @@ Fuer den taeglichen Workflow gilt:
 3. Bei Codeaenderungen einen fokussierten ESLint- oder Testlauf fuer den betroffenen Slice ausfuehren.
 4. Erst danach den groesseren Integrationslauf mit `pnpm run lint`, `pnpm run test` oder `pnpm run build` starten.
 
-Empfohlen vor Push: `pnpm run lint`, `pnpm run test`, `pnpm run type-check` (`tsgo`), bei Bundle-Aenderungen `pnpm run check:bundle-budget`, Release-naehe `pnpm run build`.
+Empfohlen vor Push: **`pnpm run check:all`** (buendelt lint, `type-check`, test, build, budget, audit) — oder stufenweise die Einzelschritte aus [TESTING.md](./TESTING.md).
 
 ## Commit-Konventionen (Conventional Commits)
 
