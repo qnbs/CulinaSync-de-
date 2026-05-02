@@ -109,9 +109,9 @@
 |---|---|---|---|---|---|
 | 5.1 | Repository-Layer testen: `db.ts`, `dbMigrations.ts` | T1 | `src/services/__tests__/` | Hoch (6–8 h) | ✅ `dbMigrations.test.ts`; ✅ `dataRepository.test.ts` (importData); `db.ts` nicht isoliert getestet (Import-Zyklen / Side-Effects) |
 | 5.2 | Store-Slices testen: `settingsSlice`, `uiSlice`, `shoppingListSlice` | T1 | `src/store/__tests__/` | Mittel (3–4 h) | ✅ |
-| 5.3 | Hooks testen: `useShoppingList`, `usePantryManager`, `useMealPlan` | T1 | `src/hooks/__tests__/` | Hoch (4–6 h) | 🟨 **`useMealPlannerScreen.test.tsx`**, **`useCookModeController.test.tsx`**; weiter offen: `useShoppingList`, `usePantryManager`, `useMealPlan` isoliert |
+| 5.3 | Hooks testen: `useShoppingList`, `usePantryManager`, `useMealPlan` | T1 | `src/hooks/__tests__/` | Hoch (4–6 h) | 🟨 **`useMealPlannerScreen`**, **`useCookModeController`**, **`useMealPlan`**, **`useShoppingList`** (Gruppierung, Voice-Check, Clear-Pending); weiter offen: **`usePantryManager`** isoliert (Context nur mit Mock) |
 | 5.4 | Services testen: `apiKeyService`, `voiceCommands`, `exportService` | T1 | `src/services/__tests__/` | Mittel (3–4 h) | ✅ apiKeyService, exportService, **`voiceCommands.test.ts`** (`processCommand`) |
-| 5.5 | Component-Smoke-Tests für kritische Seiten (React Testing Library) | T1 | `src/components/**/__tests__/` | Hoch (4–6 h) | 🟨 Smoke: **`MealPlanner.smoke.test.tsx`**, **`CookModeView.smoke.test.tsx`**, **`RecipeDetailTabs.smoke.test.tsx`**; Context: **`MealPlannerContext.test.tsx`**; weitere Seiten offen |
+| 5.5 | Component-Smoke-Tests für kritische Seiten (React Testing Library) | T1 | `src/components/**/__tests__/` | Hoch (4–6 h) | 🟨 Smoke: **`MealPlanner.smoke.test.tsx`**, **`CookModeView.smoke.test.tsx`**, **`RecipeDetailTabs.smoke.test.tsx`**; Context: **`MealPlannerContext.test.tsx`**, **`PantryManagerContext.test.tsx`** (Mock); weitere Seiten offen |
 
 **Gesamtaufwand Milestone 5:** ~20–28 h
 

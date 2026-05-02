@@ -14,7 +14,7 @@ Kurz:
 - **M3:** `recipe-detail/*`, `cook-mode/*`, `useCookModeController`; **MealPlanner** mit `MealPlannerProvider` / `useMealPlannerScreen` (M3.3 erledigt).
 - **M4:** Zod-Validierung in `geminiService.ts`; M4.3 Tauri-CSP siehe [DEPLOYMENT.md](./docs/DEPLOYMENT.md).
 - **Settings:** Migration von `culinaSyncSettings` nach `persist:settings` vor Store-Rehydration; `loadSettings()` nur Persist oder Defaults.
-- **M5 (fortgeschritten):** Vitest **83** Tests; Hooks/Context (`useMealPlannerScreen`, `useCookModeController`, `MealPlannerContext`), Smoke (`MealPlanner`, `CookModeView`, `RecipeDetailTabs`), `createTestStore`, MSW+Zod (`geminiMsw.test.ts`). Coverage v8 ca. **37 %** Statements / **39 %** Lines — Ziel ≥70 % weiterhin offen. CI laeuft `test:coverage`, laedt **coverage-lcov** als Artefakt und prueft Bundle-Budget auf jedem Validate-Lauf.
+- **M5 (fortgeschritten):** Vitest **93** Tests; Hooks/Context (`useMealPlannerScreen`, `useCookModeController`, `MealPlannerContext`), Smoke (`MealPlanner`, `CookModeView`, `RecipeDetailTabs`), `createTestStore`, MSW+Zod (`geminiMsw.test.ts`). Coverage v8 ca. **37 %** Statements / **39 %** Lines — Ziel ≥70 % weiterhin offen. CI laeuft `test:coverage`, laedt **coverage-lcov** als Artefakt und prueft Bundle-Budget auf jedem Validate-Lauf.
 
 ## Ueberblick
 

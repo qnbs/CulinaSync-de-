@@ -39,7 +39,7 @@
 ### `src/contexts/`
 
 - Context-Provider fuer komplexere Features: Vorratsverwaltung, Einkaufsliste, **Essensplan** (`MealPlannerContext.tsx`)
-- **`__tests__/MealPlannerContext.test.tsx`** absichert Provider-Kontrakt (Throw ohne Provider, Value mit Provider)
+- **`__tests__/MealPlannerContext.test.tsx`**, **`PantryManagerContext.test.tsx`** — Provider-Kontrakt (Throw ohne Provider, Value mit gemocktem Hook)
 - Diese Provider tragen inzwischen auch zustandsgetriebene Confirm-/Modal-Flows fuer destructive Aktionen.
 
 ### `src/locales/`
