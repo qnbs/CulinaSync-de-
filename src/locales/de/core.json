@@ -88,6 +88,8 @@
     }
   },
   "header": {
+    "barAria": "App-Kopfzeile",
+    "primaryNavAria": "Hauptbereiche",
     "nav": {
       "pantry": "Vorratskammer",
       "chef": "KI-Chef",

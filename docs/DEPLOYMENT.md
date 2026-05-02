@@ -14,7 +14,7 @@ Das Repository verwendet GitHub Actions fuer CI, Deploy und CodeQL.
 
 - Checkout
 - pnpm 10 einrichten
-- Node.js 22 einrichten
+- **Node.js 24** einrichten (`actions/setup-node`, siehe `validate.yml` / `ci.yml`)
 - `pnpm install --frozen-lockfile`
 - Lint, Tests, Build
 - PR-bezogen zusaetzlich i18n-Changed-Lines-Check
@@ -59,7 +59,7 @@ Diese Warnungen stammen aktuell von Upstream-Runtimes der GitHub-verwalteten Act
 
 ## Aktueller Arbeitsstand (Doku)
 
-- Ausführlicher Snapshot: [STATUS-2026-05-01.md](./STATUS-2026-05-01.md) (Mai 2026); ältere Snapshots: [STATUS-2026-04-23.md](./STATUS-2026-04-23.md), [STATUS-2026-04-22.md](./STATUS-2026-04-22.md).
+- Ausführlicher Snapshot: [STATUS-2026-05-02.md](./STATUS-2026-05-02.md); davor [STATUS-2026-05-01.md](./STATUS-2026-05-01.md); ältere: [STATUS-2026-04-23.md](./STATUS-2026-04-23.md), [STATUS-2026-04-22.md](./STATUS-2026-04-22.md).
 - Vor einem release-nahen Push auf `main` bleiben die Gates `pnpm run lint`, `pnpm run test`, `pnpm run build` und bei Bedarf `pnpm run check:bundle-budget` massgeblich.
 
 ## Operative Checks nach einem produktionsrelevanten Fix

@@ -1,14 +1,9 @@
-// Central meal types for i18n
-export const MEAL_TYPES = ['Frühstück', 'Mittagessen', 'Abendessen'] as const;
-export type MealType = typeof MEAL_TYPES[number];
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLiveQuery } from 'dexie-react-hooks';
 import { addRecipeToMealPlan, markMealAsCooked, removeRecipeFromMealPlan } from '../services/repositories/mealPlanRepository';
 import { Recipe, MealPlanItem } from '../types';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { useAppDispatch } from '../store/hooks';
 import { addToast as addToastAction } from '../store/slices/uiSlice';
-import { useMealPlan } from '../hooks/useMealPlan';
 import RecipeDetail from './RecipeDetail';
 import CookModeView from './CookModeView';
 import { MealPlannerHeader } from './meal-planner/MealPlannerHeader';
@@ -18,7 +13,8 @@ import { Save, FileText, X } from 'lucide-react';
 import { useModalA11y } from '../hooks/useModalA11y';
 import { exportMealPlanWeekToIcs } from '../services/exportService';
 import { buildAutoPlanSuggestionsFromExpiring, getSoonExpiringPantryNames } from '../services/mealPlannerSmartService';
-import { db } from '../services/dbInstance';
+import { MEAL_TYPES, type MealType } from './meal-planner/mealPlannerConstants';
+import { MealPlannerProvider, useMealPlannerContext } from '../contexts/MealPlannerContext';
 
 const AddMealNoteModal: React.FC<{
     date: string;
@@ -46,7 +42,7 @@ const AddMealNoteModal: React.FC<{
         <div className="fixed inset-0 flex items-center justify-center z-50 page-fade-in glass-overlay" onClick={onClose}>
             <div ref={modalRef} className="rounded-2xl p-6 w-full max-w-sm scale-100 glass-modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="meal-note-title" tabIndex={-1}>
                 <div className="flex items-center gap-3 mb-4 text-[var(--color-accent-400)]">
-                    <FileText size={24}/> 
+                    <FileText size={24}/>
                     <h3 id="meal-note-title" className="text-lg font-bold text-zinc-100">{t('mealPlanner.addNote.title')}</h3>
                 </div>
                 <p className="text-xs text-zinc-400 mb-4">
@@ -106,120 +102,121 @@ const RemoveMealConfirmationModal: React.FC<{
     );
 };
 
-const MealPlanner: React.FC = () => {
+const MealPlannerInner: React.FC = () => {
     const { t, i18n } = useTranslation();
-  const dispatch = useAppDispatch();
-  const settings = useAppSelector((state) => state.settings);
-  const [currentDate, setCurrentDate] = useState(new Date());
+    const dispatch = useAppDispatch();
+    const {
+        currentDate,
+        setCurrentDate,
+        pantryItems,
+        recipes,
+        recipesById,
+        week,
+        mealsByDate,
+    } = useMealPlannerContext();
 
-  const { recipes, recipesById, week, mealsByDate } = useMealPlan(currentDate, settings.weekStart === 'Monday');
-    const pantryItemsResult = useLiveQuery(() => db.pantry.toArray(), []);
-    const pantryItems = useMemo(() => pantryItemsResult ?? [], [pantryItemsResult]);
-  
-  const [selectedRecipeForDetail, setSelectedRecipeForDetail] = useState<Recipe | null>(null);
-  const [noteModalState, setNoteModalState] = useState<{isOpen: boolean; date: string; mealType: MealType} | null>(null);
+    const [selectedRecipeForDetail, setSelectedRecipeForDetail] = useState<Recipe | null>(null);
+    const [noteModalState, setNoteModalState] = useState<{ isOpen: boolean; date: string; mealType: MealType } | null>(null);
     const [mealToRemove, setMealToRemove] = useState<MealPlanItem | null>(null);
-  const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isCookMode, setIsCookMode] = useState(false);
-  const [recipeForCookMode, setRecipeForCookMode] = useState<Recipe | null>(null);
-
-  // New State for "Tap to Place" interaction (Mobile support)
-  const [pendingRecipeId, setPendingRecipeId] = useState<number | null>(null);
+    const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [isCookMode, setIsCookMode] = useState(false);
+    const [recipeForCookMode, setRecipeForCookMode] = useState<Recipe | null>(null);
+    const [pendingRecipeId, setPendingRecipeId] = useState<number | null>(null);
 
     const addToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success') => {
-    dispatch(addToastAction({ message, type }));
+        dispatch(addToastAction({ message, type }));
     }, [dispatch]);
-  
-  const locale = i18n.language;
-  const weekString = `${week[0].toLocaleDateString(locale, { day: '2-digit', month: '2-digit' })} - ${week[6].toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: '2-digit' })}`;
-  
-  const handleDragStart = (e: React.DragEvent, recipe: Recipe) => {
-    e.dataTransfer.setData('recipeId', recipe.id!.toString());
-    e.dataTransfer.effectAllowed = 'copy';
-  };
 
-  // Handles both Drag&Drop (desktop) and Tap-to-Place (mobile)
-  const handleAddRecipeToSlot = async (date: string, mealType: MealType, recipeId: number) => {
-      await addRecipeToMealPlan({ date, mealType, recipeId });
-      if (pendingRecipeId) {
-          setPendingRecipeId(null); // Clear pending state after placement
-          addToast(t('mealPlanner.toast.recipePlanned'));
-      }
-  };
+    const locale = i18n.language;
+    const weekString = `${week[0].toLocaleDateString(locale, { day: '2-digit', month: '2-digit' })} - ${week[6].toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: '2-digit' })}`;
+
+    const handleDragStart = (e: React.DragEvent, recipe: Recipe) => {
+        e.dataTransfer.setData('recipeId', recipe.id!.toString());
+        e.dataTransfer.effectAllowed = 'copy';
+    };
+
+    const handleAddRecipeToSlot = async (date: string, mealType: MealType, recipeId: number) => {
+        await addRecipeToMealPlan({ date, mealType, recipeId });
+        if (pendingRecipeId) {
+            setPendingRecipeId(null);
+            addToast(t('mealPlanner.toast.recipePlanned'));
+        }
+    };
 
     const handleDrop = async (e: React.DragEvent, date: string, mealType: MealType) => {
-    e.preventDefault();
-    const recipeIdStr = e.dataTransfer.getData('recipeId');
-    if (recipeIdStr) {
-        const recipeId = parseInt(recipeIdStr, 10);
-        await handleAddRecipeToSlot(date, mealType, recipeId);
-    }
-  };
-  
-  // Handler for tapping a recipe in the sidebar (starts selection mode)
-  const handleSelectRecipeForPlacement = (recipe: Recipe) => {
-      setPendingRecipeId(prev => prev === recipe.id ? null : recipe.id!);
-      if (pendingRecipeId !== recipe.id) {
-          addToast(t('mealPlanner.toast.selectDayForRecipe'), 'info');
-      }
-  };
+        e.preventDefault();
+        const recipeIdStr = e.dataTransfer.getData('recipeId');
+        if (recipeIdStr) {
+            const recipeId = parseInt(recipeIdStr, 10);
+            await handleAddRecipeToSlot(date, mealType, recipeId);
+        }
+    };
 
-  // Handler for tapping a slot when a recipe is selected
-  const handleSlotClick = (date: string, mealType: MealType) => {
-      if (pendingRecipeId) {
-          handleAddRecipeToSlot(date, mealType, pendingRecipeId);
-      } else {
-          // Normal behavior: Add Note
-           setNoteModalState({ isOpen: true, date: date, mealType: mealType });
-      }
-  };
-  
-  const handleMealAction = useCallback(async (action: string, payload: Recipe | MealPlanItem) => {
-    switch (action) {
-        case 'view': setSelectedRecipeForDetail(payload as Recipe); break;
-        case 'cook':
-            setRecipeForCookMode(payload as Recipe);
-            setIsCookMode(true);
-            break;
-        case 'cooked': {
-            const { success, changes } = await markMealAsCooked((payload as MealPlanItem).id!);
-            if (success) {
-                let message = t('mealPlanner.toast.markedCooked');
-                if(changes?.updated.length || changes.deleted.length) {
-                    message += ` ${t('mealPlanner.toast.pantryUpdatedCount', { count: [...changes.updated, ...changes.deleted].length })}`;
-                }
-                addToast(message);
+    const handleSelectRecipeForPlacement = (recipe: Recipe) => {
+        setPendingRecipeId((prev) => {
+            const next = prev === recipe.id ? null : recipe.id!;
+            if (prev !== recipe.id) {
+                addToast(t('mealPlanner.toast.selectDayForRecipe'), 'info');
             }
-            break;
+            return next;
+        });
+    };
+
+    const handleSlotClick = (date: string, mealType: MealType) => {
+        if (pendingRecipeId) {
+            void handleAddRecipeToSlot(date, mealType, pendingRecipeId);
+        } else {
+            setNoteModalState({ isOpen: true, date, mealType });
         }
-        case 'remove': {
-            setMealToRemove(payload as MealPlanItem);
-            break;
+    };
+
+    const handleMealAction = useCallback(async (action: string, payload: Recipe | MealPlanItem) => {
+        switch (action) {
+            case 'view':
+                setSelectedRecipeForDetail(payload as Recipe);
+                break;
+            case 'cook':
+                setRecipeForCookMode(payload as Recipe);
+                setIsCookMode(true);
+                break;
+            case 'cooked': {
+                const { success, changes } = await markMealAsCooked((payload as MealPlanItem).id!);
+                if (success) {
+                    let message = t('mealPlanner.toast.markedCooked');
+                    if (changes?.updated.length || changes?.deleted.length) {
+                        message += ` ${t('mealPlanner.toast.pantryUpdatedCount', { count: [...changes.updated, ...changes.deleted].length })}`;
+                    }
+                    addToast(message);
+                }
+                break;
+            }
+            case 'remove':
+                setMealToRemove(payload as MealPlanItem);
+                break;
         }
-    }
     }, [addToast, t]);
 
-  const handleConfirmRemoveMeal = useCallback(async () => {
-    if (!mealToRemove?.id) {
-        setMealToRemove(null);
-        return;
-    }
+    const handleConfirmRemoveMeal = useCallback(async () => {
+        if (!mealToRemove?.id) {
+            setMealToRemove(null);
+            return;
+        }
 
-    await removeRecipeFromMealPlan(mealToRemove.id);
-    addToast(t('mealPlanner.toast.mealRemoved'));
-    setMealToRemove(null);
-  }, [addToast, mealToRemove, t]);
-  
+        await removeRecipeFromMealPlan(mealToRemove.id);
+        addToast(t('mealPlanner.toast.mealRemoved'));
+        setMealToRemove(null);
+    }, [addToast, mealToRemove, t]);
+
     const handleSaveNote = useCallback(async (note: string, date: string, mealType: MealType) => {
         await addRecipeToMealPlan({ date, mealType, note });
         addToast(t('mealPlanner.toast.noteAdded'));
         setNoteModalState(null);
     }, [addToast, t]);
 
-  const isToday = (date: Date) => {
-      const today = new Date();
-      return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
-  };
+    const isToday = (date: Date) => {
+        const today = new Date();
+        return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
+    };
 
     const handleExportIcs = useCallback(() => {
         exportMealPlanWeekToIcs(week, mealsByDate, recipesById);
@@ -251,91 +248,100 @@ const MealPlanner: React.FC = () => {
         addToast(t('mealPlanner.actions.autoPlanApplied', { count: suggestions.length }), 'success');
     }, [recipes, pantryItems, week, mealsByDate, addToast, t]);
 
-  if (selectedRecipeForDetail) {
-    return <RecipeDetail recipe={selectedRecipeForDetail} onBack={() => setSelectedRecipeForDetail(null)} />;
-  }
-  
-  const pendingRecipe = pendingRecipeId ? recipesById.get(pendingRecipeId) : null;
+    if (selectedRecipeForDetail) {
+        return <RecipeDetail recipe={selectedRecipeForDetail} onBack={() => setSelectedRecipeForDetail(null)} />;
+    }
 
-  return (
-    <div className="flex flex-col lg:flex-row gap-6 h-full min-h-[calc(100vh-140px)] relative pb-24 md:pb-8">
-         {isCookMode && recipeForCookMode && <CookModeView recipe={recipeForCookMode} onExit={() => setIsCookMode(false)} />}
+    const pendingRecipe = pendingRecipeId ? recipesById.get(pendingRecipeId) : null;
+
+    return (
+        <div className="flex flex-col lg:flex-row gap-6 h-full min-h-[calc(100vh-140px)] relative pb-24 md:pb-8">
+            {isCookMode && recipeForCookMode && <CookModeView recipe={recipeForCookMode} onExit={() => setIsCookMode(false)} />}
             {mealToRemove && (
                 <RemoveMealConfirmationModal
-                     onClose={() => setMealToRemove(null)}
-                     onConfirm={handleConfirmRemoveMeal}
+                    onClose={() => setMealToRemove(null)}
+                    onConfirm={handleConfirmRemoveMeal}
                 />
             )}
-         
-         {noteModalState?.isOpen && (
-            <AddMealNoteModal
-                date={noteModalState.date}
-                mealType={noteModalState.mealType}
-                onClose={() => setNoteModalState(null)}
-                onSave={(note) => handleSaveNote(note, noteModalState.date, noteModalState.mealType)}
-            />
-        )}
-        
-        {/* Placement Mode Indicator Overlay */}
-        {pendingRecipe && (
-            <div className="fixed top-20 left-1/2 -translate-x-1/2 z-40 bg-[var(--color-accent-500)] text-zinc-900 px-6 py-3 rounded-full shadow-xl font-bold flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
-                <span>{t('mealPlanner.overlay.selectDayFor', { recipeTitle: pendingRecipe.recipeTitle })}</span>
-                <button onClick={() => setPendingRecipeId(null)} className="bg-black/20 p-1 rounded-full hover:bg-black/30">
-                    <X size={16}/>
-                </button>
-            </div>
-        )}
 
-        <div className="flex-grow flex flex-col min-w-0">
-            <MealPlannerHeader 
-                currentDate={currentDate} 
-                setCurrentDate={setCurrentDate} 
-                weekString={weekString} 
-                mealsByDate={mealsByDate}
-                recipesById={recipesById}
-                weekDates={week}
-                onExportIcs={handleExportIcs}
-                onAutoPlanExpiring={handleAutoPlanExpiring}
-            />
-       
-            {/* Kanban Board Scroll Container with Snap */}
-            <div className="flex-grow overflow-x-auto pb-4 -mx-4 px-4 lg:mx-0 lg:px-0 snap-x-mandatory scroll-smooth no-scrollbar">
-                <div className="flex gap-4 min-w-max lg:min-w-0">
-                  {week.map(date => {
-                      const dateString = date.toISOString().split('T')[0];
-                                    const meals = Object.fromEntries(
-                                        MEAL_TYPES.map(type => [type, mealsByDate[`${dateString}-${type}`]])
-                                    ) as Record<MealType, MealPlanItem | undefined>;
+            {noteModalState?.isOpen && (
+                <AddMealNoteModal
+                    date={noteModalState.date}
+                    mealType={noteModalState.mealType}
+                    onClose={() => setNoteModalState(null)}
+                    onSave={(note) => void handleSaveNote(note, noteModalState.date, noteModalState.mealType)}
+                />
+            )}
 
-                      return (
-                          <div key={dateString} className="snap-center w-[85vw] sm:w-[300px] lg:w-auto lg:flex-1">
-                              <DayColumn 
-                                date={date}
-                                isToday={isToday(date)}
-                                meals={meals}
-                                recipesById={recipesById}
-                                onDrop={handleDrop}
-                                onSlotClick={handleSlotClick}
-                                onMealAction={handleMealAction}
-                                isPlacementMode={!!pendingRecipeId}
-                              />
-                          </div>
-                      );
-                  })}
+            {pendingRecipe && (
+                <div className="fixed top-20 left-1/2 -translate-x-1/2 z-40 bg-[var(--color-accent-500)] text-zinc-900 px-6 py-3 rounded-full shadow-xl font-bold flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
+                    <span>{t('mealPlanner.overlay.selectDayFor', { recipeTitle: pendingRecipe.recipeTitle })}</span>
+                    <button
+                        type="button"
+                        onClick={() => setPendingRecipeId(null)}
+                        className="bg-black/20 p-1 rounded-full hover:bg-black/30"
+                        aria-label={t('mealPlanner.overlay.dismissPlacement')}
+                    >
+                        <X size={16} aria-hidden="true"/>
+                    </button>
+                </div>
+            )}
+
+            <div className="flex-grow flex flex-col min-w-0">
+                <MealPlannerHeader
+                    currentDate={currentDate}
+                    setCurrentDate={setCurrentDate}
+                    weekString={weekString}
+                    mealsByDate={mealsByDate}
+                    recipesById={recipesById}
+                    weekDates={week}
+                    onExportIcs={handleExportIcs}
+                    onAutoPlanExpiring={() => void handleAutoPlanExpiring()}
+                />
+
+                <div className="flex-grow overflow-x-auto pb-4 -mx-4 px-4 lg:mx-0 lg:px-0 snap-x-mandatory scroll-smooth no-scrollbar">
+                    <div className="flex gap-4 min-w-max lg:min-w-0">
+                        {week.map((date) => {
+                            const dateString = date.toISOString().split('T')[0];
+                            const meals = Object.fromEntries(
+                                MEAL_TYPES.map((type) => [type, mealsByDate[`${dateString}-${type}`]]),
+                            ) as Record<MealType, MealPlanItem | undefined>;
+
+                            return (
+                                <div key={dateString} className="snap-center w-[85vw] sm:w-[300px] lg:w-auto lg:flex-1">
+                                    <DayColumn
+                                        date={date}
+                                        isToday={isToday(date)}
+                                        meals={meals}
+                                        recipesById={recipesById}
+                                        onDrop={handleDrop}
+                                        onSlotClick={handleSlotClick}
+                                        onMealAction={handleMealAction}
+                                        isPlacementMode={!!pendingRecipeId}
+                                    />
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
+
+            <PlannerSidebar
+                recipes={recipes || []}
+                onDragStart={handleDragStart}
+                onSelectRecipe={handleSelectRecipeForPlacement}
+                selectedRecipeId={pendingRecipeId}
+                isCollapsed={isSidebarCollapsed}
+                onToggle={() => setSidebarCollapsed((prev) => !prev)}
+            />
         </div>
-        
-        <PlannerSidebar
-          recipes={recipes || []}
-          onDragStart={handleDragStart}
-          onSelectRecipe={handleSelectRecipeForPlacement}
-          selectedRecipeId={pendingRecipeId}
-          isCollapsed={isSidebarCollapsed}
-          onToggle={() => setSidebarCollapsed(prev => !prev)}
-        />
-    </div>
-  );
+    );
 };
+
+const MealPlanner: React.FC = () => (
+    <MealPlannerProvider>
+        <MealPlannerInner />
+    </MealPlannerProvider>
+);
 
 export default MealPlanner;

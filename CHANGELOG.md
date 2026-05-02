@@ -7,19 +7,31 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefuegt
+- **Architektur:** `MealPlannerProvider` / `useMealPlannerContext` (`src/contexts/MealPlannerContext.tsx`) und Hook `useMealPlannerScreen` — Essensplan analog zu Pantry/Einkaufsliste; Konstanten `MEAL_TYPES` in `meal-planner/mealPlannerConstants.ts`.
+- **Kochmodus:** `useCookModeController` (`src/hooks/useCookModeController.ts`) kapselt Timer-, Sprach- und Wake-Lock-Logik; `CookModeView` bleibt schlank.
+- **Settings-Migration:** synchrones Bootstrap `src/store/migrateLegacySettingsBeforePersist.ts` (Import als erste Zeile in `store/index.ts`), damit Legacy-`culinaSyncSettings` vor Redux-Persist-Rehydration nach `persist:settings` migriert wird.
+- **Services:** `settingsKeys.ts`, `settingsMerge.ts` — Zyklusfreie Aufteilung fuer `settingsMigration` / `settingsService`.
+- **Sicherheit / KI:** Zod-Schemas in `geminiService.ts` (`parseAiJsonWithSchema`) fuer Rezeptideen, volles Rezept, Einkaufsliste und Naehrwert-Verifikation (ersetzt die frueheren manuellen Type-Guards).
+- **Barrierefreiheit:** u. a. Header (aria-labels, Sprach-Toggle `aria-pressed`), `RecipeDetailTabs` als Tablist/Tabpanels, CookMode (Icon-Buttons, Zutaten `aria-pressed`, dekorative Schrittzahl `aria-hidden`), VoiceControl-Overlays als `role="status"` / `aria-live`, Install- und PWA-Update-Banner als Dialoge mit Beschriftung, MealPlanner-Placement-Dismiss, neue i18n-Keys in `core.json` / `features.json`.
+- **CI:** `node-version: 24` in `.github/workflows/ci.yml` und `validate.yml` (i18n-Job und reusable Validate).
+- **DevContainer:** Basis-Image auf `mcr.microsoft.com/devcontainers/typescript-node:24-bookworm` angehoben (Align mit CI).
+- **Tests:** `settingsMerge.test.ts`, `mealPlannerConstants.test.ts` fuer Merge-Logik und Essensplan-Konstanten.
+- **Dokumentation:** `docs/STATUS-2026-05-01.md`, `docs/STATUS-2026-05-02.md`; erweiterte `ARCHITECTURE.md`, `PROJECT-STRUCTURE.md`, `DEPLOYMENT.md`, `TESTING.md`, `DEVELOPMENT.md`, `docs/README.md`, `AUDIT.md`, `ROADMAP.md` v1.3; `.github/copilot-instructions.md` (Gemini/Zod, Settings, MealPlanner-Context).
+- **Aus Sprint 2026-05-01 (bereits im Repo):** Tauri-CSP in `tauri.conf.json`; Tests `voiceCommands`, `dataRepository`, `cookModeReducer`, `utilsCategories`; JSDoc-Modulköpfe `db.ts` / `geminiService.ts`; Mermaid-Diagramm und Tauri-Abschnitt in der Fachdoku; Roadmap v1.2-Vorbereitung.
+
+### Geaendert
+- **Settings:** `loadSettings()` laedt nur noch Redux-Persist (`persist:settings`) oder Defaults; kein direktes Auslesen des Legacy-Keys mehr — Migration erfolgt ueber `migrateLegacySettings()` (Store-Bootstrap + Aufruf aus `loadSettings`).
+- **`index.tsx`:** redundanter direkter Aufruf von `migrateLegacySettings` entfernt (Bootstrap im Store).
+- **Einkaufsliste (KI):** Nach Zod-Parse werden `category` (Fallback `''`) und `sortOrder` gesetzt, damit der Typ zu `Omit<ShoppingListItem, 'id' | 'isChecked'>[]` passt.
+
 ### Behoben
 - **Build (tsgo):** `utilsCategories.test.ts` — Mock von `i18next.t` per Assertion auf `typeof i18next.t` typisiert; der Produktions-Build schlug mit TS2345 fehl (Mehrfachueberladungen von `TFunction`).
 - **Supply Chain:** `npm audit` meldete u. a. verwundbare transitive Versionen von `serialize-javascript` (Workbox/vite-plugin-pwa) und `uuid` (Storybook). Root-`overrides` plus ergänzte `pnpm.overrides` heben auf **serialize-javascript ^7.0.5** und **uuid ^14.0.0**; `pnpm-lock.yaml` wurde per `pnpm import` aus dem aktualisierten `package-lock.json` synchronisiert.
 - **Husky:** `.husky/pre-commit` nutzt `npm exec lint-staged`; `commit-msg` nutzt `npm exec -- commitlint --edit` (zwingt korrekte Argumentweitergabe), damit lokale Commits ohne globales **pnpm** funktionieren (z. B. Windows).
 
-### Hinzugefuegt
-- **Dokumentation:** `docs/STATUS-2026-05-01.md` (vollstaendiger Snapshot Mai 2026); `docs/ARCHITECTURE.md` um **Mermaid-Diagramm** (UI ↔ Redux ↔ Dexie ↔ Gemini); `docs/DEPLOYMENT.md` Abschnitt **Tauri Desktop und CSP**; Roadmap `ROADMAP.md` auf **v1.2** (Stand 2026-05-01).
-- **Tauri:** Content-Security-Policy in `src-tauri/tauri.conf.json` gesetzt (nicht mehr `null`), an Web-CSP aus `index.html` angelehnt.
-- **Tests:** `src/services/__tests__/voiceCommands.test.ts` (`processCommand`); ergänzend bestehende Suites fuer `dataRepository`, `cookModeReducer`, `utilsCategories`.
-- **JSDoc:** Modul-Köpfe fuer `src/services/db.ts` und `src/services/geminiService.ts`.
-
-### Geaendert
-- **README.md:** Statusblock auf Mai-2026-Stand; API-Key-Hinweis auf **WebCrypto-Verschluesselung** (mit Legacy-Fallback) praezisiert; Verweise auf `STATUS-2026-05-01.md`.
+### Geaendert (Fortsetzung Mai 2026)
+- **README.md:** Status auf **2026-05-02** (`STATUS-2026-05-02.md`); Architektur-Hooks (MealPlanner), Node-22/CI-24, Settings-Migration, Gemini/Zod; API-Key-Hinweis WebCrypto (Legacy nur ohne `crypto.subtle`).
 - **i18n:** Shopping-List-Toasts und Kategorie-Heuristik (`getCategoryForItem`) uebersetzungsfaehig; neue Keys `shoppingList.categories.*`, erweiterte Toasts; `RecipeBook` Bulk-Plan-Toast; Whisper-Fehler ueber `voice.*` in `core.json`.
 
 #### Archiv unter [Unreleased] — April 2026 (CodeQL, i18n Wave 2+3)

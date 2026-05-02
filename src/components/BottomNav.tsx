@@ -26,6 +26,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentPage, setCurrentPage }) =>
             const isActive = currentPage === item.id;
             return (
               <button
+                type="button"
                 key={item.id}
                 onClick={() => setCurrentPage(item.id as Page)}
                 className="group flex flex-col items-center justify-center space-y-1 w-full h-full relative"
@@ -37,7 +38,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentPage, setCurrentPage }) =>
                 )}
                 
                 <div className={`transition-all duration-300 p-1.5 rounded-xl ${isActive ? 'text-[var(--color-accent-400)] bg-[var(--color-accent-500)]/10 -translate-y-1' : 'text-zinc-400 group-active:scale-95'}`}>
-                    <item.icon className={`h-6 w-6 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}`} />
+                    <item.icon className={`h-6 w-6 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}`} aria-hidden="true" />
                 </div>
                 <span className={`text-[10px] font-medium transition-colors duration-300 ${
                   isActive ? 'text-[var(--color-accent-100)]' : 'text-zinc-400'

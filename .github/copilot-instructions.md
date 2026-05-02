@@ -21,7 +21,7 @@
 ## Komponenten-Architektur
 - Top-Level-Seiten liegen in `src/components/` (z. B. `PantryManager.tsx`, `RecipeBook.tsx`, `MealPlanner.tsx`).
 - Feature-Subkomponenten liegen in Feature-Ordnern (z. B. `src/components/pantry/`, `src/components/shopping-list/`).
-- `PantryManager` und `ShoppingList` nutzen das **Context-Provider-Pattern** (`src/contexts/`). Neue Features mit komplexem State sollten diesem Muster folgen.
+- `PantryManager`, `ShoppingList` und **`MealPlanner`** nutzen das **Context-Provider-Pattern** (`src/contexts/`): `PantryManagerContext`, `ShoppingListContext`, `MealPlannerContext` mit Hooks `usePantryManagerContext`, `useShoppingListContext`, `useMealPlannerContext`. Datenaggregation fuer den Plan: `useMealPlannerScreen.ts`.
 - Modals sollten in eigene Dateien extrahiert werden (nicht inline definieren).
 - Alle Modals müssen `useModalA11y` Hook verwenden (Fokus-Trap, Escape-Close, Body-Scroll-Lock).
 
@@ -35,7 +35,7 @@
 - **API-Key wird NICHT im Build eingebettet.** Nutzer geben ihren Key über UI ein (Einstellungen → API-Schlüssel).
 - Key-Speicherung erfolgt lokal verschlüsselt in IndexedDB via `src/services/apiKeyService.ts` – niemals localStorage oder env-Variablen.
 - Der `GoogleGenAI`-Client wird dynamisch per `getAIClient()` aus dem gespeicherten Key erstellt und gecacht.
-- Antworten werden über JSON-Schema (`responseSchema`) erzwungen; beibehalten statt freiem Textparsing.
+- Antworten werden über JSON-Schema (`responseSchema`) von der API erzwungen; **zusätzlich** nach `JSON.parse` mit **Zod** validiert (`parseAiJsonWithSchema` in `geminiService.ts`).
 - Fehler werden auf nutzerfreundliche deutsche Meldungen gemappt (`handleGeminiError`).
 - Beim Erweitern von KI-Features: bestehende Struktur `generate*` + typed Rückgaben + rejectWithValue in Slices befolgen.
 - Offline-Fallback nutzt `@faker-js/faker` für Demo-Daten bereits nur noch per dynamischem `import()`.
@@ -49,7 +49,7 @@
 - Locale-Dateien sind pro Sprache in `src/locales/{de,en}/core.json`, `settings.json` und `features.json` aufgeteilt und werden über `index.ts` aggregiert.
 - Sprach-/App-Defaults kommen aus `loadSettings()` (`src/services/settingsService.ts`) und sind tief gemerged.
 - Redux Persist speichert nur den `settings`-Slice (`src/store/index.ts`), nicht die Dexie-Tabellen.
-- `settingsService.ts` lädt bevorzugt Redux-Persist-Daten und hält nur noch einen Legacy-Fallback für ältere lokale Settings-Daten.
+- Legacy-`culinaSyncSettings` wird per `migrateLegacySettings()` in `persist:settings` migriert (Bootstrap `store/migrateLegacySettingsBeforePersist.ts`). `loadSettings()` liest nur Persist oder Defaults — **kein** direktes Lesen des Legacy-Keys. Hilfen: `settingsKeys.ts`, `settingsMerge.ts`.
 
 ## Testing
 - **Framework:** Vitest + MSW (Mock Service Worker) fuer Service- und UI-nahe Tests.
@@ -59,7 +59,7 @@
 - **Coverage:** Historisch ~35 %; es gibt jetzt zusaetzliche Suites (`geminiService`, `exportService`, `apiKeyService`, `dbMigrations`, `dataRepository`, `voiceCommands`, Reducer/Utils). Ziel laut Roadmap M5: ≥70 %. Neue Features sollten Tests mitbringen.
 - **Ausfuehrung:** `pnpm run test` oder `pnpm run test:coverage`.
 - Vor `pnpm run build` immer zuerst Diagnostics fuer die geaenderten Dateien pruefen (`get_errors` bzw. Problems-Panel).
-- Wenn TypeScript-relevante Dateien betroffen sind, vor dem Full-Build mindestens einen Typecheck fuer den geaenderten Slice oder `pnpm exec tsc --noEmit` ausfuehren.
+- Typecheck im Alltag: `pnpm run type-check` (**tsgo**). `tsc` wird von ESLint/Vitest als API genutzt — nicht den Full-Build mit purem `tsc` verwechseln (`pnpm run build` = `tsgo && vite build`).
 - Der Full-Build ist der Integrations-Check am Ende und soll nicht der erste Schritt sein, in dem neue Typefehler entdeckt werden.
 - Vor Commit oder Push immer mindestens fuer den geaenderten Slice ausfuehren: Diagnostics (`get_errors`), relevante Tests, Typecheck bei TS-Aenderungen und `pnpm run lint`.
 - Falls spaeter ein dedizierter Formatter wie Prettier konfiguriert wird, soll er vor Commit/Push ebenfalls fuer den geaenderten Slice laufen. Aktuell ist kein Prettier-Setup im Repo vorhanden, daher nichts erzwingen, was nicht existiert.
@@ -82,17 +82,18 @@
 - Interaktive Elemente: `<button>` für Aktionen, `<a>` nur für echte Links. Kein `<a onClick>` ohne `href`.
 - `aria-label` für Icon-only Buttons.
 - `aria-expanded` für Accordions und Dropdowns.
+- Icon-only-Buttons: `aria-label` (und wo passend `aria-pressed`); Recipe-Detail-Tabs: `role="tablist"` / `tab` / `tabpanel`; globale Banner mit `role="dialog"` wenn modal wirken; Voice-Feedback-Bubbles: `role="status"` / `aria-live`.
 
 ## Workflows
 - Dev: `pnpm run dev`
-- Build: `pnpm run build` (tsc + vite build)
+- Build: `pnpm run build` (**tsgo** + vite build)
 - Lint: `pnpm run lint`
 - Test: `pnpm run test`
 - Preview: `pnpm run preview`
 - Reihenfolge fuer Agent-Aenderungen: lokales Lesen/Suchen, kleine Edits, fokussierte Tests/Diagnostics, Typecheck/Lint fuer den geaenderten Slice, erst danach Full-Build.
 - Vor Commit/Push dieselbe Reihenfolge einhalten; Committen oder Pushen ohne vorherige lokale Validierung ist nur im echten Notfall zulaessig und muss dann im Verlauf explizit benannt werden.
 - Deploy: Automatisch via GitHub Actions bei Push auf `main` (`.github/workflows/deploy.yml`)
-- CI: Lint + TypeScript-Check + Tests + Bundle-Budget bei PRs und Push auf `main` (`.github/workflows/ci.yml`)
+- CI: Lint + Tests + Build über `validate.yml`; PR-i18n-Job und Validate nutzen **Node.js 24** (`setup-node`); Env `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` gesetzt
 - Security: CodeQL-Analyse bei PRs und Push auf `main` (`.github/workflows/codeql.yml`)
 - `base` in `vite.config.ts` wird dynamisch gesetzt: `/CulinaSync-de-/` in CI, `/` lokal.
 - GitHub-verwaltete Pages-Actions koennen trotz Node-24-Opt-in aktuell noch Node-20-Depracation-Warnungen emittieren. Das ist derzeit ein Upstream-Thema.

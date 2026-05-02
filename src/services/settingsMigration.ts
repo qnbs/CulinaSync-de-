@@ -1,6 +1,6 @@
-import { SETTINGS_KEY, PERSISTED_SETTINGS_KEY, mergeWithDefaults } from './settingsService';
+import { SETTINGS_KEY, PERSISTED_SETTINGS_KEY } from './settingsKeys';
+import { mergeWithDefaults } from './settingsMerge';
 
-// Prevents re-running within the same browser session.
 const MIGRATION_DONE_FLAG = 'culina_migration_v1_done';
 
 /**
@@ -15,7 +15,6 @@ export const migrateLegacySettings = (): void => {
   try {
     if (sessionStorage.getItem(MIGRATION_DONE_FLAG)) return;
 
-    // If Redux Persist already has a stored state, no migration is needed.
     if (window.localStorage.getItem(PERSISTED_SETTINGS_KEY)) {
       sessionStorage.setItem(MIGRATION_DONE_FLAG, '1');
       return;
@@ -27,11 +26,9 @@ export const migrateLegacySettings = (): void => {
       return;
     }
 
-     
     const parsed = JSON.parse(legacyRaw);
     const migrated = mergeWithDefaults(parsed);
 
-    // Redux Persist serialises each top-level key as an inner JSON string.
     const payload: Record<string, string> = {
       _persist: JSON.stringify({ version: 1, rehydrated: true }),
     };
@@ -48,8 +45,6 @@ export const migrateLegacySettings = (): void => {
       console.info('[CulinaSync] Legacy settings migrated to Redux Persist.');
     }
   } catch (error) {
-    // Migration failure must never crash the app – the store will fall back to
-    // defaults and Redux Persist will create a fresh entry on next save.
     console.error('[CulinaSync] Settings migration failed:', error);
   }
 };

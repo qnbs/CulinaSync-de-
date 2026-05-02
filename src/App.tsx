@@ -295,17 +295,23 @@ const App: React.FC = () => {
         </div>
 
         {showInstallReminder && installPromptEvent && !isStandalone && (
-          <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-40 w-[min(92vw,24rem)] rounded-2xl border border-[var(--color-accent-500)]/30 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur">
-            <h4 className="text-sm font-bold text-zinc-100">{t('app.installReminder.title')}</h4>
-            <p className="mt-1 text-sm text-zinc-400">{t('app.installReminder.description')}</p>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="install-reminder-title"
+            aria-describedby="install-reminder-desc"
+            className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-40 w-[min(92vw,24rem)] rounded-2xl border border-[var(--color-accent-500)]/30 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur"
+          >
+            <h4 id="install-reminder-title" className="text-sm font-bold text-zinc-100">{t('app.installReminder.title')}</h4>
+            <p id="install-reminder-desc" className="mt-1 text-sm text-zinc-400">{t('app.installReminder.description')}</p>
             <div className="mt-4 flex gap-2">
-              <button onClick={handleInstallPWA} className="flex-1 rounded-lg bg-[var(--color-accent-500)] px-3 py-2 text-sm font-bold text-zinc-900">
+              <button type="button" onClick={handleInstallPWA} className="flex-1 rounded-lg bg-[var(--color-accent-500)] px-3 py-2 text-sm font-bold text-zinc-900">
                 {t('app.installReminder.install')}
               </button>
-              <button onClick={handleInstallRemindLater} className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-semibold text-zinc-300">
+              <button type="button" onClick={handleInstallRemindLater} className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-semibold text-zinc-300">
                 {t('app.installReminder.later')}
               </button>
-              <button onClick={handleInstallDismiss} className="rounded-lg border border-zinc-800 px-3 py-2 text-sm font-semibold text-zinc-500">
+              <button type="button" onClick={handleInstallDismiss} className="rounded-lg border border-zinc-800 px-3 py-2 text-sm font-semibold text-zinc-500">
                 {t('app.installReminder.dismiss')}
               </button>
             </div>
@@ -313,14 +319,20 @@ const App: React.FC = () => {
         )}
 
         {showUpdateReadyNotice && (
-          <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-4 z-40 w-[min(92vw,24rem)] rounded-2xl border border-sky-400/30 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur">
-            <h4 className="text-sm font-bold text-zinc-100">{t('app.pwaUpdate.title')}</h4>
-            <p className="mt-1 text-sm text-zinc-400">{t('app.pwaUpdate.description')}</p>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pwa-update-title"
+            aria-describedby="pwa-update-desc"
+            className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-4 z-40 w-[min(92vw,24rem)] rounded-2xl border border-sky-400/30 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur"
+          >
+            <h4 id="pwa-update-title" className="text-sm font-bold text-zinc-100">{t('app.pwaUpdate.title')}</h4>
+            <p id="pwa-update-desc" className="mt-1 text-sm text-zinc-400">{t('app.pwaUpdate.description')}</p>
             <div className="mt-4 flex gap-2">
-              <button onClick={handleReloadForUpdate} className="flex-1 rounded-lg bg-sky-400 px-3 py-2 text-sm font-bold text-zinc-950">
+              <button type="button" onClick={handleReloadForUpdate} className="flex-1 rounded-lg bg-sky-400 px-3 py-2 text-sm font-bold text-zinc-950">
                 {t('app.pwaUpdate.reload')}
               </button>
-              <button onClick={() => setShowUpdateReadyNotice(false)} className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-semibold text-zinc-300">
+              <button type="button" onClick={() => setShowUpdateReadyNotice(false)} className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-semibold text-zinc-300">
                 {t('app.pwaUpdate.later')}
               </button>
             </div>
@@ -354,7 +366,7 @@ const App: React.FC = () => {
                                     <p className="text-sm font-medium text-zinc-100">{toast.message}</p>
                                 </div>
                                 <div className="ml-4 flex-shrink-0 flex">
-                                    <button onClick={() => removeToast(toast.id)} className="bg-transparent rounded-md inline-flex text-zinc-400 hover:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-accent-500)] focus:ring-offset-zinc-800">
+                                    <button type="button" onClick={() => removeToast(toast.id)} aria-label={t('app.close')} className="bg-transparent rounded-md inline-flex text-zinc-400 hover:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-accent-500)] focus:ring-offset-zinc-800">
                                       <span className="sr-only">{t('app.close')}</span>
                                         <X className="h-5 w-5" />
                                     </button>

@@ -40,11 +40,19 @@ export const RecipeDetailTabs: React.FC<Props> = ({
   t,
 }) => (
   <div className="mt-2">
-    <div className="flex border-b border-zinc-700 mb-4">
+    <div
+      role="tablist"
+      aria-label={t('recipeDetail.tabsListAria')}
+      className="flex border-b border-zinc-700 mb-4"
+    >
       {TABS.map((tab) => (
         <button
           key={tab}
           type="button"
+          role="tab"
+          id={`recipe-detail-tab-${tab}`}
+          aria-selected={activeTab === tab}
+          aria-controls={`recipe-detail-panel-${tab}`}
           onClick={() => onTabChange(tab)}
           className={`flex-1 px-4 py-3 text-center font-medium text-sm ${activeTab === tab ? 'border-b-2 border-[var(--color-accent-500)] text-[var(--color-accent-400)]' : 'text-zinc-400 hover:text-zinc-200'}`}
         >
@@ -53,7 +61,12 @@ export const RecipeDetailTabs: React.FC<Props> = ({
       ))}
     </div>
 
-    {activeTab === 'ingredients' && (
+    <div
+      id="recipe-detail-panel-ingredients"
+      role="tabpanel"
+      aria-labelledby="recipe-detail-tab-ingredients"
+      hidden={activeTab !== 'ingredients'}
+    >
       <IngredientsList
         ingredients={currentRecipe.ingredients}
         scaleFactor={scaleFactor}
@@ -61,9 +74,23 @@ export const RecipeDetailTabs: React.FC<Props> = ({
         onAddToShoppingList={onAddSingleToShoppingList}
         t={t}
       />
-    )}
-    {activeTab === 'instructions' && <InstructionsSection recipe={currentRecipe} t={t} />}
-    {activeTab === 'nutrition' && (
+    </div>
+
+    <div
+      id="recipe-detail-panel-instructions"
+      role="tabpanel"
+      aria-labelledby="recipe-detail-tab-instructions"
+      hidden={activeTab !== 'instructions'}
+    >
+      <InstructionsSection recipe={currentRecipe} t={t} />
+    </div>
+
+    <div
+      id="recipe-detail-panel-nutrition"
+      role="tabpanel"
+      aria-labelledby="recipe-detail-tab-nutrition"
+      hidden={activeTab !== 'nutrition'}
+    >
       <NutritionPanel
         report={nutritionReport}
         isNutritionLoading={isNutritionLoading}
@@ -72,6 +99,6 @@ export const RecipeDetailTabs: React.FC<Props> = ({
         handleGeminiNutritionCheck={handleGeminiNutritionCheck}
         t={t}
       />
-    )}
+    </div>
   </div>
 );

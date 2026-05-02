@@ -5,11 +5,17 @@
 
 ---
 
-## Status-Update 2026-05-02 (Build, Supply Chain)
+## Status-Update 2026-05-02 (Build, Supply Chain, Architektur, A11y, KI-Doku)
 
 - **Kritischer Build-Fix:** `src/services/__tests__/utilsCategories.test.ts` — `vi.spyOn(i18next, 't').mockImplementation` war fuer `tsgo` nicht zuweisbar (TS2345); die Implementierung wird jetzt als `typeof i18next.t` assertiert. Ergebnis: `pnpm run build` / `npm run build` wieder gruen.
 - **Transitive Schwachstellen (Dev-Toolchain):** `serialize-javascript` (<=7.0.4) und `uuid` (<14) — behoben ueber **package.json** `overrides` und **pnpm.overrides** ohne Downgrade von vite-plugin-pwa oder Storybook. `pnpm-lock.yaml` an `package-lock.json` angeglichen (`pnpm import`).
 - **Validierung:** Lint, Vitest (66 Tests), Build, Bundle-Budget lokal gruen; `npm audit` ohne Befunde.
+- **Settings / Persistenz:** Legacy-Key `culinaSyncSettings` wird nur noch per `migrateLegacySettings()` in das Redux-Persist-Format ueberfuehrt; `loadSettings()` liest **nicht** mehr direkt vom Legacy-Key. Reihenfolge: `store/index.ts` importiert zuerst `migrateLegacySettingsBeforePersist.ts`, danach Rehydration.
+- **Architektur:** MealPlanner nutzt `MealPlannerProvider` + `useMealPlannerContext` + `useMealPlannerScreen` (wie Pantry/ShoppingList); Kochmodus-Logik in `useCookModeController`.
+- **Sicherheit / Gemini:** Server-Antworten nach `JSON.parse` werden mit **Zod** (`parseAiJsonWithSchema`) validiert; Gemini-API `responseSchema` bleibt zusaetzlich aktiv.
+- **Barrierefreiheit:** breiter Sweep (Header, Rezept-Tabs, CookMode, Voice-Overlays, PWA-/Install-Dialoge in `App.tsx`, MealPlanner-Placement); neue Uebersetzungskeys fuer ARIA-Beschriftungen.
+- **CI:** Projekt-Workflows `ci.yml` / `validate.yml` nutzen **Node.js 24** fuer Setup-Steps (zusaetzlich zu `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`).
+- **Dokumentation:** `README`, `ROADMAP` v1.3, `CHANGELOG`, `docs/ARCHITECTURE`, `PROJECT-STRUCTURE`, `DEVELOPMENT`, `DEPLOYMENT`, `TESTING`, `docs/README`, `TROUBLESHOOTING` (Settings-Hinweis), `STATUS-2026-05-02.md`, `.github/copilot-instructions.md` — vollstaendig auf den obigen Stand gebracht.
 
 ---
 
@@ -37,7 +43,7 @@ Milestone 0.1 (kritische Audit-Reste) und Milestone 1 (DevInfra) vollstaendig um
 - **K1 geschlossen:** `@faker-js/faker` ist seit Sprint 2 in `devDependencies`; nur noch dynamisch geladen.
 - **K2 geschlossen:** `saveSettings()` aus `settingsService.ts` entfernt (dead code ohne Callers; Settings-Persistenz laeuft vollstaendig ueber Redux Persist).
 - **Bundle-Budget:** Eingehalten (total 187 KB / 250 KB, script 140 KB / 155 KB).
-- **DevContainer:** `.devcontainer/devcontainer.json` mit Node 22, pnpm 10 und Rust/Cargo fuer kuenftige Tauri-Builds (M8) eingerichtet.
+- **DevContainer:** `.devcontainer/devcontainer.json` mit Node **24** (`typescript-node:24-bookworm`), pnpm 10 und Rust/Cargo fuer kuenftige Tauri-Builds (M8).
 - **Dependabot:** `.github/dependabot.yml` fuer woeichentliche npm- und github-actions-Updates aktiviert.
 - **Husky + lint-staged + commitlint:** Pre-commit-Gates und Conventional-Commits-Enforcement eingerichtet.
 - **CI-Reusable Workflow:** `validate.yml` extrahiert; `ci.yml` und `deploy.yml` nutzen ihn jetzt ohne Duplikation.
@@ -77,7 +83,7 @@ Seit dem urspruenglichen Audit wurden mehrere kritische Betriebs- und Sicherheit
 - Native `window.confirm()`-Dialoge wurden in den aktiven Kern-Features durch modalbasierte, a11y-konforme Dialogfluesse ersetzt.
 - Die Lokalisierung wurde in modulare Sprachdomänen fuer `core`, `settings` und `features` aufgeteilt und ueber weitere Kernoberflaechen hinweg fortgesetzt.
 
-Noch offen ist vor allem strukturelle Nacharbeit, nicht der unmittelbare Produktionsbetrieb. Das betrifft insbesondere den verbleibenden Legacy-Fallback fuer alte Settings-Daten, weitere i18n-Restsweeps und andere im Audit genannte mittel- bis langfristige Architekturthemen.
+Historisch offen: strukturelle Nacharbeit und i18n-/Architektur-Themen. **Update 2026-05-02:** Legacy-Settings werden migriert statt parallel ausgelesen; weiterhin i18n-/A11y-Verbesserungen sind ein laufendes Thema (siehe Roadmap M5/M7).
 
 ---
 

@@ -157,7 +157,7 @@ Fix:
 
 - Fremder Web-Content wird jetzt vor dem Prompt auf HTML-, Script- und instruktionaehnliche Zeilen reduziert.
 - Der Import-Prompt markiert den Inhalt explizit als untrusted data und kapselt ihn zwischen klaren Daten-Grenzen.
-- JSON-Antworten fuer Rezeptideen, Rezepte, Einkaufslisten und Nahrwert-Verifikation laufen jetzt durch explizite Runtime-Validatoren statt durch blindes Strukturvertrauen.
+- JSON-Antworten fuer Rezeptideen, Rezepte, Einkaufslisten und Naehrwert-Verifikation laufen nach `JSON.parse` durch **Zod** (`parseAiJsonWithSchema` in `geminiService.ts`) — zusätzlich zur API-seitigen `responseSchema`-Erzwingung.
 
 Verifikation:
 

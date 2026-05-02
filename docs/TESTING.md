@@ -9,8 +9,8 @@
 
 ## Relevante Testorte
 
-- `src/components/**/__tests__/` (u. a. `cook-mode/__tests__/cookModeReducer.test.ts`)
-- `src/services/__tests__/` (u. a. `voiceCommands.test.ts`, `dataRepository.test.ts`, `utilsCategories.test.ts`, `geminiService`, `exportService`, `dbMigrations`)
+- `src/components/**/__tests__/` (u. a. `cook-mode/__tests__/cookModeReducer.test.ts`, `meal-planner/__tests__/mealPlannerConstants.test.ts`)
+- `src/services/__tests__/` (u. a. `voiceCommands.test.ts`, `dataRepository.test.ts`, `utilsCategories.test.ts`, `settingsService.test.ts` inkl. Legacy-Migrations-Erwartung, `geminiService.test.ts` — Zod-/Struktur-Faelle, `exportService`, `dbMigrations`)
 - `src/store/__tests__/`
 - `src/test/`
 
@@ -20,6 +20,8 @@
 pnpm run test
 pnpm run test:coverage
 ```
+
+Ohne globales pnpm (z. B. Windows): `npm run test` / `npx pnpm@10 run test`.
 
 ## Erwartete Mindestvalidierung
 
@@ -59,9 +61,11 @@ pnpm run check:bundle-budget
 - Voice- und Navigationstrigger
 - Datenbanknahe Cross-Feature-Operationen
 
-## Aktueller Validierungsstand 2026-05-01
+## Aktueller Validierungsstand 2026-05-02
 
-- Zusaetzliche Service- und Reducer-Tests (siehe [STATUS-2026-05-01.md](./STATUS-2026-05-01.md)); Coverage-Ziel ≥70 % laut [ROADMAP.md](../ROADMAP.md) Milestone 5 weiterhin offen.
+- Service- und Reducer-Tests wie oben; **Gemini-Integration** prueft u. a. gueltige JSON-Struktur (Zod); bei Typveraenderungen der KI-Antworten Tests und Schemas in `geminiService.ts` anpassen.
+- Coverage-Ziel ≥70 % laut [ROADMAP.md](../ROADMAP.md) Milestone 5 weiterhin offen.
+- Aktueller Snapshot: [STATUS-2026-05-02.md](./STATUS-2026-05-02.md); Vorgaenger: [STATUS-2026-05-01.md](./STATUS-2026-05-01.md).
 - `pnpm run lint` mit `--max-warnings 0`; `react-hooks/exhaustive-deps` ist bewusst **off** — bei lokaler Aktivierung auf `warn` alle Warnungen abbauen, bevor CI verschärft wird.
 - Vor Release weiterhin vollstaendig: `pnpm run lint`, `pnpm run test`, `pnpm run build`, bei Bundle-Aenderungen `pnpm run check:bundle-budget`.
 

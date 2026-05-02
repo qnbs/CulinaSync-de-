@@ -173,7 +173,8 @@
     },
     "overlay": {
       "selectDayFor": "Wähle einen Tag für \"{{recipeTitle}}\"",
-      "insertHere": "Hier einfuegen"
+      "insertHere": "Hier einfuegen",
+      "dismissPlacement": "Rezeptplatzierung abbrechen"
     },
     "actions": {
       "exportIcs": "Kalender exportieren (ICS)",
@@ -405,6 +406,7 @@
     }
   },
   "recipeDetail": {
+    "tabsListAria": "Rezeptbereiche",
     "back": "Zurück zur Übersicht",
     "generatingImage": "Generiere Bild...",
     "generateImage": "Bild generieren",
@@ -546,6 +548,8 @@
     "next": "Weiter",
     "finish": "Fertig",
     "timerExpired": "Timer abgelaufen.",
+    "ingredientUncheckedAria": "{{name}} als vorbereitet markieren",
+    "ingredientCheckedAria": "{{name}} als vorbereitet markiert; tippen zum Zurücknehmen",
     "actions": {
       "previousStepAria": "Vorheriger Schritt",
       "nextStepAria": "Naechster Schritt",
@@ -560,7 +564,10 @@
     }
   },
   "voiceControl": {
+    "listening": "Höre zu…",
+    "statusRegionAria": "Sprachsteuerung aktiv",
     "whisper": {
+      "statusRegionAria": "Status Sprachtranskription",
       "listening": "Höre zu (lokal)…",
       "waitingForSpeech": "Warte auf Sprache…"
     },

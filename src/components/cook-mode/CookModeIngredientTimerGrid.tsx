@@ -39,6 +39,7 @@ export const CookModeIngredientTimerGrid: React.FC<Props> = ({
 }) => (
   <div className="relative z-10 flex-grow flex flex-col justify-center items-center px-4 md:px-16 lg:px-24 pb-20">
     <div
+      aria-hidden="true"
       className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[15rem] md:text-[35rem] font-bold text-white/[0.03] select-none pointer-events-none transition-opacity duration-1000 ${isUiVisible ? 'opacity-100' : 'opacity-40'}`}
     >
       {currentStep + 1}
@@ -79,10 +80,12 @@ export const CookModeIngredientTimerGrid: React.FC<Props> = ({
                   key={item}
                   type="button"
                   onClick={() => onToggleIngredient(item)}
+                  aria-pressed={checked}
+                  aria-label={checked ? t('cookMode.ingredientCheckedAria', { name: item }) : t('cookMode.ingredientUncheckedAria', { name: item })}
                   className={`w-full flex items-center justify-between rounded-xl px-3 py-2 border text-sm transition-colors ${checked ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-200' : 'bg-zinc-900/60 border-white/5 text-zinc-300'}`}
                 >
                   <span>{item}</span>
-                  {checked && <CircleCheck size={16} />}
+                  {checked && <CircleCheck size={16} aria-hidden="true" />}
                 </button>
               );
             })}

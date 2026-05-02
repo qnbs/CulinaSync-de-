@@ -88,6 +88,8 @@
     }
   },
   "header": {
+    "barAria": "App header",
+    "primaryNavAria": "Primary pages",
     "nav": {
       "pantry": "Pantry",
       "chef": "AI Chef",

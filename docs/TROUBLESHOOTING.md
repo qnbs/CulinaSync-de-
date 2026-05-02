@@ -28,12 +28,14 @@ Massnahmen:
 
 ## Settings verhalten sich unerwartet
 
-Der regulaere Schreibpfad laeuft ueber Redux Persist. `settingsService.ts` haelt nur noch einen Legacy-Fallback fuer aeltere lokale Daten. Bei inkonsistentem Verhalten:
+Der Schreibpfad laeuft ueber Redux Persist (`persist:settings`). **Alter** Schluessel `culinaSyncSettings` sollte beim App-Start automatisch migriert und entfernt werden (`migrateLegacySettings`, Side-Effect beim Laden von `store/index.ts`). `loadSettings()` fuer i18n liest **nur** Persist oder Defaults — nicht mehr parallel den Legacy-Key.
 
-- Browser-Storage pruefen
-- `persist:settings` und eventuelle Legacy-Daten unter `culinaSyncSettings` vergleichen
+Bei inkonsistentem Verhalten:
+
+- Browser-Storage pruefen (`persist:settings`, verwaistes `culinaSyncSettings`)
+- SessionStorage-Flag `culina_migration_v1_done` nur fuer Debugging; bei Bedarf Session neu starten
 - Settings-Rehydrierung und Slice-Werte vergleichen
-- nach Persistenz-Aenderungen Load-Fallback und Rehydrierung bewusst validieren
+- nach Persistenz-Aenderungen Migration und Erstlauf erneut testen
 
 ## Uebersetzungen fehlen oder rohe i18n-Keys erscheinen
 

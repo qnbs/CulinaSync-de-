@@ -3,7 +3,7 @@ import { PlusCircle, MoreHorizontal, Trash2, CheckCircle2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useModalA11y } from '../../hooks/useModalA11y';
 import { MealPlanItem, Recipe } from '../../types';
-import { MEAL_TYPES, MealType } from '../MealPlanner';
+import { MEAL_TYPES, type MealType } from './mealPlannerConstants';
 import PlannedMealCard from '../PlannedMealCard';
 
 interface DayColumnProps {

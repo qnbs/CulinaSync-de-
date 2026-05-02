@@ -15,9 +15,15 @@ const VoiceControlUI: React.FC<VoiceControlUIProps> = ({ isListening, transcript
   }
 
   return (
-    <div className="fixed bottom-20 md:bottom-5 right-5 z-50 flex items-center justify-center p-4 rounded-lg glass-hud page-fade-in gpu">
+    <div
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      aria-label={t('voiceControl.statusRegionAria')}
+      className="fixed bottom-20 md:bottom-5 right-5 z-50 flex items-center justify-center p-4 rounded-lg glass-hud page-fade-in gpu"
+    >
       <div className="flex items-center gap-4">
-        <Mic className="text-red-500 animate-pulse" size={24} />
+        <Mic className="text-red-500 animate-pulse" size={24} aria-hidden="true" />
         <p className="text-lg text-zinc-300 italic">{transcript || t('voiceControl.listening')}</p>
       </div>
     </div>

@@ -1,6 +1,6 @@
 /**
  * Zentrale Gemini-/Google-GenAI-Integration: Rezeptgenerierung, Bilder, Nährwert-Checks, Web-Import-Sanitizing.
- * API-Schlüssel nur über `loadApiKey` aus `apiKeyService`; nie Env/Build. JSON-Antworten über Validators (`parseAiJson` / Guards).
+ * API-Schlüssel nur über `loadApiKey` aus `apiKeyService`; nie Env/Build. JSON-Antworten werden mit Zod (`parseAiJsonWithSchema`) validiert.
  *
  * @module services/geminiService
  */
@@ -11,6 +11,7 @@ import { AppSettings, PantryItem, Recipe, StructuredPrompt, ShoppingListItem, Re
 import { loadApiKey } from "./apiKeyService";
 import { logAppError } from './errorLoggingService';
 import i18next from 'i18next';
+import { z } from 'zod';
 
 // --- Dynamic AI Client (loaded from secure IndexedDB, never from env/build) ---
 let _aiClient: GoogleGenAI | null = null;
@@ -44,13 +45,91 @@ const getFakerModule = async () => {
     return _fakerModulePromise;
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
+const recipeIdeaSchema = z.object({
+  recipeTitle: z.string(),
+  shortDescription: z.string(),
+});
 
-const isString = (value: unknown): value is string => typeof value === 'string';
+const recipeIdeasResponseSchema = z.object({
+  ideas: z.array(recipeIdeaSchema).min(1),
+});
 
-const isFiniteNumber = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value);
+const ingredientItemSchema = z.object({
+  quantity: z.string(),
+  unit: z.string(),
+  name: z.string(),
+});
 
-const isStringArray = (value: unknown): value is string[] => Array.isArray(value) && value.every(isString);
+const ingredientGroupSchema = z.object({
+  sectionTitle: z.string(),
+  items: z.array(ingredientItemSchema),
+});
+
+const nutritionPerServingSchema = z.object({
+  calories: z.string(),
+  protein: z.string(),
+  fat: z.string(),
+  carbs: z.string(),
+});
+
+const tagsSchema = z.object({
+  course: z.array(z.string()),
+  cuisine: z.array(z.string()),
+  occasion: z.array(z.string()),
+  mainIngredient: z.array(z.string()),
+  prepMethod: z.array(z.string()),
+  diet: z.array(z.string()),
+});
+
+const expertTipSchema = z.object({
+  title: z.string(),
+  content: z.string(),
+});
+
+const recipeAiSchema = z.object({
+  recipeTitle: z.string(),
+  shortDescription: z.string(),
+  prepTime: z.string(),
+  cookTime: z.string(),
+  totalTime: z.string(),
+  servings: z.string(),
+  difficulty: z.string(),
+  ingredients: z.array(ingredientGroupSchema),
+  instructions: z.array(z.string()),
+  nutritionPerServing: nutritionPerServingSchema,
+  tags: tagsSchema,
+  expertTips: z.array(expertTipSchema),
+});
+
+const shoppingListGenerationSchema = z.object({
+  items: z.array(
+    z.object({
+      name: z.string(),
+      quantity: z.number().finite(),
+      unit: z.string(),
+      category: z.string().optional(),
+    }),
+  ),
+});
+
+const geminiNutritionVerificationSchema = z.object({
+  summary: z.string(),
+  warnings: z.array(z.string()),
+});
+
+const parseAiJsonWithSchema = <T>(jsonText: string, schema: z.ZodType<T>): T => {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(jsonText);
+  } catch {
+    throw new Error('invalid JSON');
+  }
+  const result = schema.safeParse(parsed);
+  if (!result.success) {
+    throw new Error('invalid structure');
+  }
+  return result.data;
+};
 
 const sanitizeWebContentForPrompt = (webContent: string): string => {
     // Use DOMPurify to strip all HTML safely — regex-based stripping misses edge cases
@@ -68,118 +147,6 @@ const sanitizeWebContentForPrompt = (webContent: string): string => {
         .map((line) => (PROMPT_INJECTION_PATTERN.test(line) ? '[filtered instruction-like content removed]' : line));
 
     return normalizedLines.join('\n').slice(0, MAX_WEB_CONTENT_CHARS);
-};
-
-const parseAiJson = <T>(jsonText: string, validator: (value: unknown) => value is T): T => {
-    let parsed: unknown;
-
-    try {
-        parsed = JSON.parse(jsonText);
-    } catch {
-        throw new Error('invalid JSON');
-    }
-
-    if (!validator(parsed)) {
-        throw new Error('invalid structure');
-    }
-
-    return parsed;
-};
-
-const isRecipeIdea = (value: unknown): value is RecipeIdea => {
-    if (!isRecord(value)) {
-        return false;
-    }
-
-    return isString(value.recipeTitle) && isString(value.shortDescription);
-};
-
-const isRecipeIdeasResponse = (value: unknown): value is { ideas: RecipeIdea[] } => {
-    if (!isRecord(value)) {
-        return false;
-    }
-
-    return Array.isArray(value.ideas) && value.ideas.every(isRecipeIdea);
-};
-
-const isShoppingListResponse = (value: unknown): value is { items: Omit<ShoppingListItem, 'id' | 'isChecked'>[] } => {
-    if (!isRecord(value) || !Array.isArray(value.items)) {
-        return false;
-    }
-
-    return value.items.every((item) => isRecord(item)
-        && isString(item.name)
-        && isFiniteNumber(item.quantity)
-        && isString(item.unit)
-        && (!('category' in item) || item.category === undefined || isString(item.category)));
-};
-
-const isIngredientItem = (value: unknown): boolean => {
-    if (!isRecord(value)) {
-        return false;
-    }
-
-    return isString(value.quantity) && isString(value.unit) && isString(value.name);
-};
-
-const isIngredientGroup = (value: unknown): boolean => {
-    if (!isRecord(value) || !Array.isArray(value.items)) {
-        return false;
-    }
-
-    return isString(value.sectionTitle) && value.items.every(isIngredientItem);
-};
-
-const isNutrition = (value: unknown): boolean => {
-    if (!isRecord(value)) {
-        return false;
-    }
-
-    return isString(value.calories) && isString(value.protein) && isString(value.fat) && isString(value.carbs);
-};
-
-const isTags = (value: unknown): boolean => {
-    if (!isRecord(value)) {
-        return false;
-    }
-
-    return isStringArray(value.course)
-        && isStringArray(value.cuisine)
-        && isStringArray(value.occasion)
-        && isStringArray(value.mainIngredient)
-        && isStringArray(value.prepMethod)
-        && isStringArray(value.diet);
-};
-
-const isExpertTip = (value: unknown): boolean => isRecord(value) && isString(value.title) && isString(value.content);
-
-const isRecipe = (value: unknown): value is Recipe => {
-    if (!isRecord(value)) {
-        return false;
-    }
-
-    return isString(value.recipeTitle)
-        && isString(value.shortDescription)
-        && isString(value.prepTime)
-        && isString(value.cookTime)
-        && isString(value.totalTime)
-        && isString(value.servings)
-        && isString(value.difficulty)
-        && Array.isArray(value.ingredients)
-        && value.ingredients.every(isIngredientGroup)
-        && isStringArray(value.instructions)
-        && isNutrition(value.nutritionPerServing)
-        && isTags(value.tags)
-        && Array.isArray(value.expertTips)
-        && value.expertTips.every(isExpertTip);
-};
-
-const isGeminiNutritionVerification = (value: unknown): value is GeminiNutritionVerification => {
-    if (!isRecord(value)) {
-        return false;
-    }
-
-    return isString(value.summary) && isStringArray(value.warnings);
 };
 
 const simpleHash = (str: string): string => {
@@ -420,7 +387,7 @@ export const generateRecipeIdeas = async (
         }), 3, 800);
         const jsonText = response.text?.trim();
         if (!jsonText) throw new Error(i18next.t('gemini.error.emptyResponse'));
-        const parsedData = parseAiJson(jsonText, isRecipeIdeasResponse);
+        const parsedData = parseAiJsonWithSchema(jsonText, recipeIdeasResponseSchema);
         if (parsedData.ideas.length > 0) {
             return parsedData.ideas;
         } else {
@@ -479,7 +446,7 @@ export const generateRecipe = async (
         if (!jsonText) {
                 throw new Error(i18next.t('gemini.error.emptyResponse'));
         }
-        const recipeData = parseAiJson(jsonText, isRecipe);
+        const recipeData = parseAiJsonWithSchema(jsonText, recipeAiSchema);
         if (recipeData.ingredients.length > 0 && recipeData.instructions.length > 0) {
             return recipeData;
         } else {
@@ -573,8 +540,14 @@ export const generateShoppingList = async (
         if (!jsonText) {
             throw new Error(i18next.t('gemini.error.emptyResponse'));
         }
-        const parsedData = parseAiJson(jsonText, isShoppingListResponse);
-        return parsedData.items;
+        const parsedData = parseAiJsonWithSchema(jsonText, shoppingListGenerationSchema);
+        return parsedData.items.map((item, index) => ({
+            name: item.name,
+            quantity: item.quantity,
+            unit: item.unit,
+            category: item.category ?? '',
+            sortOrder: index,
+        }));
     } catch (error) {
         const errMsg = (error as Error)?.message || String(error);
         if (isNetworkError(errMsg)) {
@@ -656,7 +629,7 @@ export const extractRecipeFromWebContent = async (
             throw new Error(i18next.t('gemini.error.emptyResponse'));
         }
 
-        const parsed = parseAiJson(jsonText, isRecipe);
+        const parsed = parseAiJsonWithSchema(jsonText, recipeAiSchema);
         if (!parsed.recipeTitle || parsed.ingredients.length === 0 || parsed.instructions.length === 0) {
             throw new Error(i18next.t('gemini.error.invalidResponse'));
         }
@@ -722,10 +695,10 @@ export const verifyNutritionAndAllergensWithGemini = async (
             throw new Error(i18next.t('gemini.error.emptyResponse'));
         }
 
-        const parsed = parseAiJson(jsonText, isGeminiNutritionVerification);
+        const parsed = parseAiJsonWithSchema(jsonText, geminiNutritionVerificationSchema);
         return {
             summary: parsed.summary || 'No summary available.',
-            warnings: Array.isArray(parsed.warnings) ? parsed.warnings : [],
+            warnings: parsed.warnings,
         };
     } catch (e: unknown) {
         throw handleGeminiError(e, 'nutrition verification');

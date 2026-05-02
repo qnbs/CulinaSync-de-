@@ -36,41 +36,48 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, isListenin
       {/* Subtle Gradient Line at Bottom */}
       <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
       
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8" aria-label={t('header.barAria')}>
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-4">
             <div className="relative">
                <div className="absolute inset-0 bg-[var(--color-accent-500)]/20 blur-xl rounded-full"></div>
-               <ChefHat className="relative h-8 w-8 text-[var(--color-accent-400)] drop-shadow-md" />
+               <ChefHat className="relative h-8 w-8 text-[var(--color-accent-400)] drop-shadow-md" aria-hidden="true" />
             </div>
             <h1 className="text-xl font-bold text-zinc-100 tracking-tight">CulinaSync</h1>
           </div>
           <div className="flex items-center space-x-1 sm:space-x-2">
              <button
+                type="button"
                 onClick={onCommandPaletteToggle}
                 title={t('header.actions.openCommandPalette')}
+                aria-label={t('header.actions.openCommandPalette')}
                 className="glass-button flex items-center justify-center p-2 rounded-lg text-zinc-400 hover:text-zinc-100"
               >
-                <TerminalSquare className="h-5 w-5" />
+                <TerminalSquare className="h-5 w-5" aria-hidden="true" />
               </button>
             {hasRecognitionSupport && (
               <button
+                type="button"
                 onClick={handleMicClick}
                 title={isListening ? t('header.actions.stopVoiceControl') : t('header.actions.startVoiceControl')}
+                aria-label={isListening ? t('header.actions.stopVoiceControl') : t('header.actions.startVoiceControl')}
+                aria-pressed={isListening}
                 className={`glass-button flex items-center justify-center p-2 rounded-lg transition-all duration-300 ${
                     isListening ? 'bg-red-500/20 !border-red-500/50 text-red-400 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.3)]' : 'text-zinc-400 hover:text-zinc-100'
                 }`}
               >
-                <Mic className="h-5 w-5" />
+                <Mic className="h-5 w-5" aria-hidden="true" />
               </button>
             )}
              {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-1 p-1 bg-white/5 rounded-lg border border-white/5">
+            <nav className="hidden md:flex items-center space-x-1 p-1 bg-white/5 rounded-lg border border-white/5" aria-label={t('header.primaryNavAria')}>
               {navItems.map((item) => (
                   <button
+                    type="button"
                     key={item.id}
                     onClick={() => setCurrentPage(item.id as Page)}
                     title={item.label}
+                    aria-label={item.label}
                     className={`flex items-center space-x-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
                       currentPage === item.id
                         ? 'bg-[var(--color-accent-500)] text-zinc-900 shadow-[0_0_10px_rgba(var(--color-accent-glow),0.4)]'
@@ -78,36 +85,40 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, isListenin
                     }`}
                     aria-current={currentPage === item.id ? 'page' : undefined}
                   >
-                    <item.icon className="h-4 w-4" />
+                    <item.icon className="h-4 w-4" aria-hidden="true" />
                     <span className="hidden lg:inline">{item.label}</span>
                   </button>
               ))}
-            </div>
+            </nav>
             {/* Mobile Settings/Help */}
             <div className="flex items-center space-x-1 border-l border-white/10 pl-2 ml-1">
                  <button
+                    type="button"
                     key="settings"
                     onClick={() => setCurrentPage('settings')}
                     title={t('header.actions.settings')}
+                    aria-label={t('header.actions.settings')}
                     className={`glass-button flex items-center p-2 rounded-lg text-sm font-medium ${
                       currentPage === 'settings'
                         ? 'text-[var(--color-accent-400)] border-[var(--color-accent-500)]/30'
                         : 'text-zinc-400 hover:text-zinc-100'
                     }`}
                   >
-                    <Settings className="h-5 w-5" />
+                    <Settings className="h-5 w-5" aria-hidden="true" />
                   </button>
                    <button
+                    type="button"
                     key="help"
                     onClick={() => setCurrentPage('help')}
                     title={t('header.actions.help')}
+                    aria-label={t('header.actions.help')}
                     className={`glass-button flex items-center p-2 rounded-lg text-sm font-medium ${
                       currentPage === 'help'
                         ? 'text-[var(--color-accent-400)] border-[var(--color-accent-500)]/30'
                         : 'text-zinc-400 hover:text-zinc-100'
                     }`}
                   >
-                    <HelpCircle className="h-5 w-5" />
+                    <HelpCircle className="h-5 w-5" aria-hidden="true" />
                   </button>
             </div>
           </div>

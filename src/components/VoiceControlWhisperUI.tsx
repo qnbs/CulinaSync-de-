@@ -15,9 +15,15 @@ const VoiceControlWhisperUI: React.FC<VoiceControlWhisperUIProps> = ({ isListeni
   }
 
   return (
-    <div className="fixed bottom-20 md:bottom-5 right-5 z-50 flex items-center justify-center p-4 rounded-lg glass-hud page-fade-in gpu">
+    <div
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      aria-label={t('voiceControl.whisper.statusRegionAria')}
+      className="fixed bottom-20 md:bottom-5 right-5 z-50 flex items-center justify-center p-4 rounded-lg glass-hud page-fade-in gpu"
+    >
       <div className="flex items-center gap-4">
-        <Mic className={isListening ? 'text-red-500 animate-pulse' : 'text-zinc-400'} size={24} />
+        <Mic className={isListening ? 'text-red-500 animate-pulse' : 'text-zinc-400'} size={24} aria-hidden="true" />
         <p className="text-lg text-zinc-300 italic">
           {error ? <span className="text-red-400">{error}</span> : transcript || (isListening ? t('voiceControl.whisper.listening') : t('voiceControl.whisper.waitingForSpeech'))}
         </p>

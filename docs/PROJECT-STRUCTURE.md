@@ -15,27 +15,30 @@
 
 - Top-Level-Seiten wie `PantryManager.tsx`, `RecipeBook.tsx`, `MealPlanner.tsx`, `ShoppingList.tsx`, `Settings.tsx`
 - Feature-Unterordner fuer fachlich gebuendelte Teilkomponenten (z. B. `recipe-detail/`, `cook-mode/`, `shopping-list/`)
-- `cook-mode/`: Kochmodus-UI und `cookModeReducer` (aus `CookModeView.tsx` eingebunden)
+- `cook-mode/`: Kochmodus-UI und `cookModeReducer`; Controller-Logik in `src/hooks/useCookModeController.ts`
+- `meal-planner/`: u. a. `mealPlannerConstants.ts` (`MEAL_TYPES` / `MealType`, entkoppelt von der Seitenkomponente)
 - `__tests__/` fuer komponentennahe Tests
 
 ### `src/hooks/`
 
 - UI- und Feature-Hooks
-- Enthalten unter anderem `useMealPlan`, `useShoppingList`, `useModalA11y`, Sprach- und Fenster-Hooks
+- Enthalten unter anderem `useMealPlan`, `useMealPlannerScreen`, `useShoppingList`, `useCookModeController`, `useModalA11y`, Sprach- und Fenster-Hooks
 
 ### `src/services/`
 
 - Business- und Integrationslogik
 - Datenbank, KI, Export, Fehlerlogging, Voice-Processing, Scanner, Sync und Utilities
+- Settings: `settingsService.ts` (Laden aus Persist), `settingsMigration.ts`, `settingsMerge.ts`, `settingsKeys.ts`
 
 ### `src/store/`
 
 - Redux-Konfiguration, Listener-Middleware und Slices
 - Persistenzadapter fuer Redux
+- `migrateLegacySettingsBeforePersist.ts`: wird als **erster** Side-Effect beim Laden von `store/index.ts` ausgefuehrt (Legacy-Settings → Persist)
 
 ### `src/contexts/`
 
-- Context-Provider fuer komplexere Features wie Vorratsverwaltung und Einkaufsliste
+- Context-Provider fuer komplexere Features: Vorratsverwaltung, Einkaufsliste, **Essensplan** (`MealPlannerContext.tsx`)
 - Diese Provider tragen inzwischen auch zustandsgetriebene Confirm-/Modal-Flows fuer destructive Aktionen.
 
 ### `src/locales/`

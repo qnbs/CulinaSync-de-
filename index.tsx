@@ -9,11 +9,6 @@ import './src/index.css';
 import i18n from './src/i18n';
 import App from './src/App';
 import { installGlobalErrorLogging, logAppError } from './src/services/errorLoggingService';
-import { migrateLegacySettings } from './src/services/settingsMigration';
-
-// Runs synchronously before the first render; Redux Persist rehydration is
-// async (Promise-based), so the migration localStorage write lands first.
-migrateLegacySettings();
 installGlobalErrorLogging();
 
 const emitPwaEvent = (eventName: string) => {

@@ -1,11 +1,11 @@
 # Entwicklung
 
-Aktueller Ueberblick ueber erledigte Milestones, Tests und CSP: **[STATUS-2026-05-01.md](./STATUS-2026-05-01.md)**.
+Aktueller Ueberblick: **[STATUS-2026-05-02.md](./STATUS-2026-05-02.md)** (Vorgaenger: [STATUS-2026-05-01.md](./STATUS-2026-05-01.md)).
 
 ## Voraussetzungen
 
-- Node.js 22+
-- pnpm 10+
+- Node.js 22+ (lokal); **GitHub Actions** nutzen fuer Setup-Jobs **Node.js 24** (`validate.yml`, `ci.yml`).
+- pnpm 10+ **oder** npm mit `npx pnpm@10` / `npm run …` wo dokumentiert
 
 ## Installation
 
@@ -82,7 +82,7 @@ Fuer den taeglichen Workflow gilt:
 3. Bei Codeaenderungen einen fokussierten ESLint- oder Testlauf fuer den betroffenen Slice ausfuehren.
 4. Erst danach den groesseren Integrationslauf mit `pnpm run lint`, `pnpm run test` oder `pnpm run build` starten.
 
-Stand 2026-04-22: Die Accessibility-/i18n-Nacharbeiten wurden bis zu gezielten Diagnostics, fokussierten ESLint-Laeufen und einem erfolgreichen `pnpm exec tsc --noEmit` validiert. Ein kompletter Lint-/Test-/Build-Gesamtlauf fuer den gesamten unstaged Arbeitsstand steht weiterhin als Abschluss-Check aus.
+Empfohlen vor Push: `pnpm run lint`, `pnpm run test`, `pnpm run type-check` (`tsgo`), bei Bundle-Aenderungen `pnpm run check:bundle-budget`, Release-naehe `pnpm run build`.
 
 ## Commit-Konventionen (Conventional Commits)
 

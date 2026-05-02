@@ -49,38 +49,49 @@ export const CookModeHeader: React.FC<Props> = ({
           onClick={onTimerToggle}
           className="text-zinc-200"
           title={timerRunning ? t('cookMode.actions.pauseTimerTitle') : t('cookMode.actions.startTimerTitle')}
+          aria-label={timerRunning ? t('cookMode.actions.pauseTimerTitle') : t('cookMode.actions.startTimerTitle')}
         >
-          {timerRunning ? <Pause size={20} /> : <Play size={20} />}
+          {timerRunning ? <Pause size={20} aria-hidden="true" /> : <Play size={20} aria-hidden="true" />}
         </button>
-        <span className="font-mono text-lg tracking-wider min-w-16 text-center">{formatTimer(timerSeconds)}</span>
-        <button type="button" onClick={onResetTimer} className="text-zinc-400 hover:text-zinc-100" title={t('cookMode.actions.resetTimerTitle')}>
-          <TimerReset size={18} />
+        <span className="font-mono text-lg tracking-wider min-w-16 text-center" aria-live="polite">{formatTimer(timerSeconds)}</span>
+        <button
+          type="button"
+          onClick={onResetTimer}
+          className="text-zinc-400 hover:text-zinc-100"
+          title={t('cookMode.actions.resetTimerTitle')}
+          aria-label={t('cookMode.actions.resetTimerTitle')}
+        >
+          <TimerReset size={18} aria-hidden="true" />
         </button>
       </div>
       <button
         type="button"
         onClick={onRepeatStep}
         title={t('cookMode.actions.repeatStepTitle')}
+        aria-label={t('cookMode.actions.repeatStepTitle')}
         className="glass-button p-3 rounded-full text-zinc-300 active:text-white disabled:opacity-30 touch-manipulation"
         disabled={!isSpeechEnabled || isSpeaking}
       >
-        <RefreshCw size={24} className={isSpeaking ? 'animate-spin' : ''} />
+        <RefreshCw size={24} className={isSpeaking ? 'animate-spin' : ''} aria-hidden="true" />
       </button>
       <button
         type="button"
         onClick={onToggleSpeech}
         title={isSpeechEnabled ? t('cookMode.actions.disableSpeechTitle') : t('cookMode.actions.enableSpeechTitle')}
+        aria-label={isSpeechEnabled ? t('cookMode.actions.disableSpeechTitle') : t('cookMode.actions.enableSpeechTitle')}
+        aria-pressed={isSpeechEnabled}
         className={`p-3 rounded-full backdrop-blur-md transition-all border border-white/10 touch-manipulation ${isSpeechEnabled ? 'bg-[var(--color-accent-500)] text-zinc-900 shadow-[0_0_20px_rgba(var(--color-accent-glow),0.4)]' : 'glass-button text-zinc-300 active:text-white'}`}
       >
-        {isSpeechEnabled ? <Volume2 size={24} /> : <VolumeX size={24} />}
+        {isSpeechEnabled ? <Volume2 size={24} aria-hidden="true" /> : <VolumeX size={24} aria-hidden="true" />}
       </button>
       <button
         type="button"
         onClick={onExit}
         className="glass-button p-3 rounded-full text-red-400 active:bg-red-500/20 active:text-red-300 border-red-500/20 touch-manipulation"
         title={t('cookMode.actions.exitTitle')}
+        aria-label={t('cookMode.actions.exitTitle')}
       >
-        <XIcon size={24} />
+        <XIcon size={24} aria-hidden="true" />
       </button>
     </div>
   </header>

@@ -8,7 +8,7 @@ CulinaSync ist eine local-first PWA. Persistente Domaindaten werden im Browser g
 
 ### UI-Schicht
 
-- `index.tsx` initialisiert i18n, Redux Provider und Persist Gate.
+- `index.tsx` initialisiert Redux Store (der beim Laden synchron ein Settings-Legacy-Migrationsmodul ausfuehrt), danach i18n, Provider und Persist Gate.
 - `src/App.tsx` verwaltet Seitenwechsel, globale Bedienelemente, Lazy Loading und Shell-Zustand.
 - `src/components/` enthaelt Seitenkomponenten sowie Feature-Unterordner.
 
@@ -27,7 +27,7 @@ CulinaSync ist eine local-first PWA. Persistente Domaindaten werden im Browser g
 ### Services und Integrationen
 
 - `src/services/db.ts` ist der API-Einstieg fuer Datenbank- und Repository-Zugriffe.
-- `src/services/geminiService.ts` kapselt die KI-Integration.
+- `src/services/geminiService.ts` kapselt die KI-Integration; strukturierte JSON-Antworten werden nach dem Parsen zusaetzlich mit **Zod** (`parseAiJsonWithSchema`) validiert (Rezept, Ideen, Einkaufsliste, Naehrwert-Check).
 - `src/services/exportService.ts` kapselt alle Export-Sinks.
 - `src/services/voiceCommands.ts` uebersetzt Sprachkommandos in App-Aktionen.
 
@@ -98,7 +98,8 @@ flowchart LR
 
 ## Wichtige aktuelle technische Punkte
 
-- `settingsService.ts` laedt bevorzugt den Redux-Persist-Bestand und faellt nur fuer Legacy-Daten noch auf den alten Schluessel zurueck.
+- **Settings:** `loadSettings()` liest nur `persist:settings` (Redux-Persist) oder Default-Werte. Alter Schluessel `culinaSyncSettings` wird einmalig durch `migrateLegacySettings()` migriert (vor Rehydration via `store/migrateLegacySettingsBeforePersist.ts`; erneuter Aufruf aus `loadSettings()` fuer Aufrufer ohne Store ist idempotent). Hilfsmodule: `settingsKeys.ts`, `settingsMerge.ts`, `settingsMigration.ts`.
+- **Essensplan:** gleiches Context-Muster wie Vorrat/Einkauf — `MealPlannerProvider`, Datenhook `useMealPlannerScreen`, Konstanten `meal-planner/mealPlannerConstants.ts`.
 - `@faker-js/faker` wird fuer Offline-Fallbacks nur dynamisch importiert (Production-Bundle).
 - Der i18n-Bestand ist modular (`core` / `settings` / `features`); neue UI-Texte dort pflegen.
 - **Desktop (Tauri):** CSP in `src-tauri/tauri.conf.json` an die Web-Variante angeglichen; Details siehe [DEPLOYMENT.md](./DEPLOYMENT.md#tauri-desktop-und-content-security-policy).

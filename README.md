@@ -4,16 +4,17 @@ Local-first Koch-, Vorrats-, Rezept- und Einkaufslisten-App auf Basis von React,
 
 [Live-Demo](https://qnbs.github.io/CulinaSync-de-/) | [Architektur](./docs/ARCHITECTURE.md) | [Entwicklung](./docs/DEVELOPMENT.md) | [Deployment](./docs/DEPLOYMENT.md) | [Testing](./docs/TESTING.md) | [Troubleshooting](./docs/TROUBLESHOOTING.md) | [Beitragen](./CONTRIBUTING.md) | [Security](./SECURITY.md)
 
-## Status 2026-05-01
+## Status 2026-05-02
 
-Der aktuelle Arbeitsstand ist in **[docs/STATUS-2026-05-01.md](./docs/STATUS-2026-05-01.md)** dokumentiert (i18n-Erweiterungen, CookMode-/RecipeDetail-Splits, neue Tests, Tauri-CSP, Mermaid-Architekturdiagramm, JSDoc-Köpfe).  
-Weitere historische Snapshots: [STATUS-2026-04-23.md](./docs/STATUS-2026-04-23.md), [STATUS-2026-04-22.md](./docs/STATUS-2026-04-22.md).
+Der aktuelle Arbeitsstand ist in **[docs/STATUS-2026-05-02.md](./docs/STATUS-2026-05-02.md)** dokumentiert (MealPlanner-Context, Settings-Legacy-Migration ohne Lese-Fallback, A11y-Sweep, Gemini-Antworten mit Zod, CI Node 24, vollstaendige Doku-Aktualisierung).  
+Vorgaenger: [STATUS-2026-05-01.md](./docs/STATUS-2026-05-01.md); aeltere Snapshots: [STATUS-2026-04-23.md](./docs/STATUS-2026-04-23.md), [STATUS-2026-04-22.md](./docs/STATUS-2026-04-22.md).
 
 Kurz:
 
-- **M3:** `recipe-detail/*` und `cook-mode/*` strukturieren die grossen Ansichten; MealPlanner-Context (M3.3) bleibt roadmap-offen.
-- **M4.3:** CSP fuer den Tauri-Webview in `src-tauri/tauri.conf.json`; Details in [DEPLOYMENT.md](./docs/DEPLOYMENT.md).
-- **Tests:** u. a. `voiceCommands`, `dataRepository`, `cookModeReducer`, `utilsCategories` — Coverage-Ziel ≥70 % weiterhin offen (M5).
+- **M3:** `recipe-detail/*`, `cook-mode/*`, `useCookModeController`; **MealPlanner** mit `MealPlannerProvider` / `useMealPlannerScreen` (M3.3 erledigt).
+- **M4:** Zod-Validierung in `geminiService.ts`; M4.3 Tauri-CSP siehe [DEPLOYMENT.md](./docs/DEPLOYMENT.md).
+- **Settings:** Migration von `culinaSyncSettings` nach `persist:settings` vor Store-Rehydration; `loadSettings()` nur Persist oder Defaults.
+- **Tests / Qualitaet:** u. a. `voiceCommands`, `dataRepository`, `cookModeReducer`, `utilsCategories`, `geminiService`, `settingsService` — Coverage-Ziel ≥70 % weiterhin offen (M5).
 
 ## Ueberblick
 
@@ -40,15 +41,16 @@ Die Anwendung laeuft lokal, auf GitHub Pages und optional in nativen Wrappern. K
 - Dexie / IndexedDB
 - Vitest + MSW
 - GitHub Actions + GitHub Pages
-- pnpm 10
+- pnpm 10 (alternativ npm fuer Scripts; siehe [docs/TESTING.md](./docs/TESTING.md))
+- Zod (Runtime-Validierung von Gemini-JSON)
 
 ## Architektur in Kurzform
 
-- `index.tsx` initialisiert i18n, Redux Provider und Persist Gate.
+- `index.tsx` laedt zuerst den Redux-Store (damit synchron Settings-Legacy-Migration laeuft), dann i18n, Provider und Persist Gate.
 - `src/App.tsx` orchestriert Navigation, Lazy Loading, Command Palette, Voice-Trigger und globale Modals.
 - `src/store/` enthaelt Redux-Slices fuer UI-/Session-Zustand und Persist-Konfiguration.
 - `src/services/db.ts` ist der Einstiegspunkt fuer Datenbank- und Repository-Zugriffe.
-- `src/hooks/useMealPlan.ts` und `src/hooks/useShoppingList.ts` lesen reaktive Daten aus Dexie via `useLiveQuery`.
+- `src/hooks/useMealPlan.ts` und `src/hooks/useShoppingList.ts` lesen reaktive Daten aus Dexie via `useLiveQuery`; der Essensplan nutzt `useMealPlannerScreen.ts` im `MealPlannerProvider` (Plan + Pantry).
 - `src/components/` enthaelt Seiten sowie Feature-Unterordner fuer spezifische Teiloberflaechen.
 
 Mehr Details stehen in [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) und [docs/PROJECT-STRUCTURE.md](./docs/PROJECT-STRUCTURE.md).
@@ -57,8 +59,8 @@ Mehr Details stehen in [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) und [docs/
 
 ### Voraussetzungen
 
-- Node.js 22 oder neuer
-- pnpm 10 oder neuer
+- Node.js 22 oder neuer (lokal); CI verwendet Node **24** fuer Setup-Schritte
+- pnpm 10 oder neuer (alternativ: `npm run …` / `npx pnpm@10` wie in [docs/TESTING.md](./docs/TESTING.md))
 
 ### Installation
 
@@ -85,7 +87,7 @@ pnpm run preview
 
 ## KI und API-Key
 
-- Gemini-Aufrufe leben ausschliesslich in `src/services/geminiService.ts`.
+- Gemini-Aufrufe leben ausschliesslich in `src/services/geminiService.ts`; strukturierte JSON-Nutzlasten werden nach dem Parsen mit **Zod** validiert.
 - Der API-Key wird durch den Nutzer ueber die Einstellungen hinterlegt.
 - Der Key wird nicht ueber `process.env`, `VITE_*`, `localStorage` oder den Build verteilt.
 - Die Speicherung erfolgt **verschlüsselt (WebCrypto)** in IndexedDB ueber `src/services/apiKeyService.ts`, mit Legacy-Fallback nur ohne `crypto.subtle`.
@@ -113,7 +115,8 @@ Die aktuelle Pages-URL ist auf den Repo-Namen ausgerichtet. `vite.config.ts` set
 ## Dokumentation
 
 - [docs/README.md](./docs/README.md): Dokumentationsindex
-- [docs/STATUS-2026-05-01.md](./docs/STATUS-2026-05-01.md): Session- und Repo-Stand Mai 2026 (Audit-Follow-up)
+- [docs/STATUS-2026-05-02.md](./docs/STATUS-2026-05-02.md): aktueller Repo-Stand (Mai 2026)
+- [docs/STATUS-2026-05-01.md](./docs/STATUS-2026-05-01.md): vorheriger Mai-Snapshot (Audit-Follow-up)
 - [docs/STATUS-2026-04-22.md](./docs/STATUS-2026-04-22.md): Session- und Arbeitsstand 2026-04-22
 - [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md): System- und Datenarchitektur
 - [docs/PROJECT-STRUCTURE.md](./docs/PROJECT-STRUCTURE.md): Repo- und Ordnerstruktur
@@ -128,7 +131,7 @@ Die aktuelle Pages-URL ist auf den Repo-Namen ausgerichtet. `vite.config.ts` set
 ## Bekannte technische Punkte
 
 - Die GitHub-Actions-Laufe sind gruen, aber GitHub-eigene Actions wie `actions/configure-pages`, `actions/upload-pages-artifact` und `actions/deploy-pages` melden derzeit weiterhin Node-20-Depracation-Warnungen, obwohl sie ueber `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` bereits auf Node 24 erzwungen werden. Das ist aktuell ein Upstream-Thema der GitHub-verwalteten Actions.
-- Settings werden bevorzugt ueber Redux Persist geladen; `settingsService.ts` behaelt nur noch einen Legacy-Fallback fuer alte lokale Daten bei. Bei kuenftigen Persistenz-Aenderungen sollte dieser Rueckwaertskompatibilitaetspfad bewusst mitgepflegt oder gezielt entfernt werden.
+- Alte lokale Daten unter `culinaSyncSettings` werden beim Start in das Redux-Persist-Format migriert (`migrateLegacySettings`); `loadSettings()` liest **nur** `persist:settings` oder Defaults — kein paralleles Lesen des Legacy-Keys mehr.
 
 ## Lizenz
 

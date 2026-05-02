@@ -1,6 +1,6 @@
 # CulinaSync — Roadmap
 
-> **Stand:** 1. Mai 2026 · Basis: vollständiges Code-, Architektur- und Security-Audit (14.–22. April 2026) + Follow-up-Session Mai 2026  
+> **Stand:** 2. Mai 2026 · Basis: vollständiges Code-, Architektur- und Security-Audit (14.–22. April 2026) + Follow-up-Sessions Mai 2026  
 > **Format:** Milestones geordnet nach Priorität. Jedes Item mit Herkunft (AUDIT-Referenz), Aufwandsschätzung und Status.
 
 ---
@@ -43,7 +43,7 @@
 
 | # | Maßnahme | Herkunft | Datei(en) | Aufwand | Status |
 |---|---|---|---|---|---|
-| 1.1 | DevContainer einrichten (Node 22, pnpm 10, Rust/Cargo, VS Code Extensions) | CI1 | `.devcontainer/devcontainer.json` | Niedrig (30 min) | ✅ |
+| 1.1 | DevContainer einrichten (Node **24**, pnpm 10, Rust/Cargo, VS Code Extensions) | CI1 | `.devcontainer/devcontainer.json` | Niedrig (30 min) | ✅ Image `typescript-node:24-bookworm` |
 | 1.2 | Dependabot konfigurieren (npm + github-actions, weekly) | CI2 | `.github/dependabot.yml` | Niedrig (10 min) | ✅ |
 | 1.3 | CI-Duplizierung auflösen: gemeinsamen Reusable Workflow `validate.yml` extrahieren | CI5 | `.github/workflows/validate.yml`, `ci.yml`, `deploy.yml` | Mittel (1 h) | ✅ |
 | 1.4 | GitHub Issue- und PR-Templates anlegen | CI6 | `.github/ISSUE_TEMPLATE/`, `PULL_REQUEST_TEMPLATE.md` | Niedrig (1 h) | ✅ |
@@ -62,7 +62,7 @@
 |---|---|---|---|---|---|---|
 | 2.1 | Feature-Subkomponenten: `ShoppingListHeader`, `RecipeBookHeader`, `VoiceControlWhisperUI`, `ShoppingListQuickAdd`, `Onboarding` Tour-Steps, `AiChefPanel` Suggestions-Arrays | I1 Welle 2 | diverse `src/components/*/` | ~25 | Mittel (2–3 h) | ✅ |
 | 2.2 | Services und Prompts: `geminiService` (Language-Aware Prompts + Error-Messages), `voiceCommands` (Toast i18n + EN-Keywords), `exportService` (MealType-Label), `DayColumn`/`MealPlanner` (MealType Display), `foodDatabase` (Kategorie-Lookup) | I1 Welle 3 | `src/services/`, `src/components/` | ~40 | Hoch (4–6 h) | ✅ |
-| 2.3 | Verbleibende hartcodierte Strings lokalisieren: `aria-label`-Werte + `RecipeDetail` "Planen"/"Einkaufen"-Buttons | A7 | `src/components/` | — | Niedrig (1 h) | ✅ "Planen"/"Einkaufen" in RecipeDetail.tsx lokalisiert; verbleibende aria-labels in hooks/services noch offen |
+| 2.3 | Verbleibende hartcodierte Strings lokalisieren: `aria-label`-Werte + `RecipeDetail` "Planen"/"Einkaufen"-Buttons | A7 | `src/components/` | — | Niedrig (1 h) | ✅ inkl. breitem A11y-Sweep (Header, Tabs, CookMode, Voice-Overlays, App-Dialoge, MealPlanner); neue Keys `header.*`, `recipeDetail.tabsListAria`, `voiceControl.*`, `cookMode.ingredient*Aria`, `mealPlanner.overlay.dismissPlacement` |
 
 **Hinweis:** Gemini-Prompts können ggf. auf Deutsch bleiben, wenn der KI-Kontext deutsch sein soll — Einzelfallentscheidung bei 2.2.
 
@@ -75,8 +75,8 @@
 | # | Maßnahme | Herkunft | Datei(en) | Aufwand | Status |
 |---|---|---|---|---|---|
 | 3.1 | `RecipeDetail.tsx` aufteilen: Header/Metadata/ActionBar/Nutrition/Tabs/Modals | M1 | `src/components/recipe-detail/` | Mittel (2–3 h) | ✅ inkl. `RecipePlanExportBar`, `RecipeDetailTabs`, `RecipeExpertTipsSection` |
-| 3.2 | `CookModeView.tsx` aufteilen: Timer-/Zutaten-/Footer-Module | M2 | `src/components/cook-mode/`, `CookModeView.tsx` | Mittel (2 h) | ✅ `CookModeHeader`, `CookModeIngredientTimerGrid`, `CookModeFooter`, `cookModeReducer` |
-| 3.3 | `MealPlanner` auf Context-Pattern migrieren (analog zu `PantryManager`/`ShoppingList`) | M4 | `src/components/MealPlanner.tsx`, neuer Context | Hoch (6–8 h) | 🔲 |
+| 3.2 | `CookModeView.tsx` aufteilen: Timer-/Zutaten-/Footer-Module | M2 | `src/components/cook-mode/`, `CookModeView.tsx`, `src/hooks/useCookModeController.ts` | Mittel (2 h) | ✅ UI-Module + Reducer; Logik im Hook `useCookModeController` |
+| 3.3 | `MealPlanner` auf Context-Pattern migrieren (analog zu `PantryManager`/`ShoppingList`) | M4 | `MealPlanner.tsx`, `contexts/MealPlannerContext.tsx`, `hooks/useMealPlannerScreen.ts`, `meal-planner/mealPlannerConstants.ts` | Hoch (6–8 h) | ✅ |
 
 ---
 
@@ -86,7 +86,7 @@
 
 | # | Maßnahme | Herkunft | Datei(en) | Aufwand | Status |
 |---|---|---|---|---|---|
-| 4.1 | Alle Gemini-Responses mit Zod oder manuellen Type-Guards validieren (post-`JSON.parse`) | S5 | `src/services/geminiService.ts` | Mittel (2–3 h) | ✅ via `parseAiJson()` + 6 Custom-Validators (`isRecipe`, `isShoppingListResponse`, etc.) |
+| 4.1 | Alle Gemini-Responses mit Zod oder manuellen Type-Guards validieren (post-`JSON.parse`) | S5 | `src/services/geminiService.ts` | Mittel (2–3 h) | ✅ Zod (`parseAiJsonWithSchema`): Rezeptideen, Rezept, Einkaufsliste, Nährwert-Verifikation; API-`responseSchema` unverändert |
 | 4.2 | API-Key-Kommentare korrigieren: "obfuskiert" statt "verschlüsselt" | S1 | `src/services/apiKeyService.ts` | Niedrig (15 min) | ✅ JSDoc korrekt: "encrypted via WebCrypto / falls back to legacy obfuscation" |
 | 4.3 | CSP für Tauri-Webview (und Doku-Align mit `index.html`) | S4 | `src-tauri/tauri.conf.json`, `docs/DEPLOYMENT.md` | Mittel (1–2 h) | ✅ CSP-String gesetzt; Header-CSP am Hosting weiterhin optional |
 | 4.4 | CodeQL Alert #7 beheben: schlechten HTML-Regex in `sanitizeWebContentForPrompt` durch DOMPurify ersetzen | CodeQL #7 | `src/services/geminiService.ts` | Niedrig (30 min) | ✅ |
@@ -126,6 +126,7 @@
 | 6.1 | Mermaid-Architekturdiagramm (Datenfluss: UI → Redux → Dexie → Services) | Doku-Lücke | `docs/ARCHITECTURE.md` | Mittel (2 h) | ✅ |
 | 6.2 | JSDoc in `db.ts`, `geminiService.ts`, `apiKeyService.ts` | Doku-Lücke | `src/services/` | Mittel (2–3 h) | ✅ Modul-Köpfe `db.ts`, `geminiService.ts`; `apiKeyService` bereits ausführlich |
 | 6.3 | README-Status und Links gegen aktuellen Stand | Doku-Lücke | `README.md` | Niedrig (1 h) | ✅ Status 2026-05-01, Link `STATUS-2026-05-01.md`, KI-Key-Beschreibung |
+| 6.4 | Doku-Sync: ARCHITECTURE, PROJECT-STRUCTURE, DEPLOYMENT, TESTING, DEVELOPMENT, copilot-instructions, AUDIT, STATUS-2026-05-02 | Follow-up | `docs/*`, Root | Niedrig–Mittel | ✅ 2026-05-02 |
 
 ---
 
@@ -151,7 +152,7 @@ _Vorbedingung: TS 7.0 Stable Release (voraussichtlich Q3 2026)_
 |---|---|---|
 | `api-key` Kommentar "Secure API Key Management" ist irreführend (XOR-Obfuskation, kein echter Crypto) | S1 | Bei Milestone 4.2 beheben |
 | `react-hooks/exhaustive-deps: 'off'` — stale-closure-Risiko in diversen Hooks | H1/H2 | Nach Milestone 3 schrittweise auf `warn` heben und Hooks bereinigen |
-| Settings Legacy-Fallback (`culinaSyncSettings` in localStorage) | K2 | Kann nach ~3 Monaten Laufzeit entfernt werden (SETTINGS_KEY bleibt als Lese-Fallback) |
+| ~~Settings Legacy-Fallback~~ | K2 | **Erledigt:** Migration nach `persist:settings` via `migrateLegacySettings`; direktes Auslesen von `culinaSyncSettings` in `loadSettings()` entfernt (`settingsKeys` / `settingsMerge`) |
 
 ---
 
@@ -206,6 +207,7 @@ _Vorbedingung: M1 (DevContainer mit Rust), Tauri 2 stabil_
 
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.3 | 2026-05-02 | M3.3 MealPlanner-Context; M4.1 Zod in `geminiService`; Legacy-Settings-Migration ohne Runtime-Fallback in `loadSettings`; A11y-Sweep; CI Node 24 in validate/ci; M6.4 Doku-Sync; `docs/STATUS-2026-05-02.md` |
 | 1.2 | 2026-05-01 | M3.1/M3.2 erledigt; M4.3 CSP Tauri; M5/6 Fortschritt (Tests, Mermaid, JSDoc, README); Verweis `docs/STATUS-2026-05-01.md` |
 | 1.1 | 2026-04-23 | M0.1 (K1+K2 geschlossen) hinzugefügt; M1 um 1.3–1.6 erweitert (Husky, Reusable CI, Templates, VS Code); M8–M10 (Tauri, Bundle, Sync) angehängt |
 | 1.0 | 2026-04-23 | Initiale Roadmap auf Basis des vollständigen Audits; M0 abgeschlossen |

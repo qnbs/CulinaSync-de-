@@ -5,6 +5,7 @@ import { PERSISTED_SETTINGS_KEY, SETTINGS_KEY, getDefaultSettings, loadSettings 
 describe('settingsService persistence loading', () => {
   beforeEach(() => {
     window.localStorage.clear();
+    window.sessionStorage.clear();
   });
 
   it('prefers redux-persist settings over the legacy settings key', () => {
@@ -26,7 +27,7 @@ describe('settingsService persistence loading', () => {
     expect(settings.appearance.highContrast).toBe(true);
   });
 
-  it('falls back to legacy settings and merges defaults for missing nested fields', () => {
+  it('migrates legacy-only settings into Redux Persist and merges defaults', () => {
     window.localStorage.setItem(SETTINGS_KEY, JSON.stringify({
       language: 'en',
       shoppingList: { autoCategorize: false },
@@ -39,5 +40,7 @@ describe('settingsService persistence loading', () => {
     expect(settings.shoppingList.autoCategorize).toBe(false);
     expect(settings.shoppingList.defaultSort).toBe(defaults.shoppingList.defaultSort);
     expect(settings.appearance.accentColor).toBe(defaults.appearance.accentColor);
+    expect(window.localStorage.getItem(SETTINGS_KEY)).toBeNull();
+    expect(window.localStorage.getItem(PERSISTED_SETTINGS_KEY)).toBeTruthy();
   });
 });
