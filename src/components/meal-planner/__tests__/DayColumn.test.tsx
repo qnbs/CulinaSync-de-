@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nextProvider } from 'react-i18next';
@@ -14,6 +14,10 @@ const emptyMeals = (): Record<MealType, MealPlanItem | undefined> => ({
 });
 
 describe('DayColumn', () => {
+  beforeAll(async () => {
+    await i18n.changeLanguage('de');
+  });
+
   it('ruft onSlotClick beim Klick auf leeren Slot (Notiz-Plus)', async () => {
     const user = userEvent.setup();
     const onSlotClick = vi.fn();

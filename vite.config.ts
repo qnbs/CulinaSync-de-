@@ -20,6 +20,8 @@ const chunkGroups: Array<[string, string[]]> = [
   ['vendor-tour', ['react-joyride']],
   ['vendor-faker', ['@faker-js/faker']],
   ['vendor-workbox', ['workbox-window', 'workbox-core', 'workbox-routing', 'workbox-strategies', 'workbox-precaching', 'workbox-expiration', 'workbox-cacheable-response']],
+  // QNBS-v3: Export-/PDF-Pfad aus vendor-misc lösen (M9.3) — Lazy-Importe bleiben on-demand
+  ['vendor-export', ['jspdf', 'html2canvas', 'papaparse']],
 ];
 
 // GitHub Pages subpath: set automatically in CI via GITHUB_ACTIONS env
@@ -50,6 +52,7 @@ export default defineConfig({
           '**/vendor-tour-*.js',
           '**/vendor-faker-*.js',
           '**/vendor-workbox-*.js',
+          '**/vendor-export-*.js',
           '**/vendor-misc-*.js',
         ],
         runtimeCaching: [
@@ -68,7 +71,7 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /\/assets\/(vendor-scanner-|vendor-tour-|vendor-faker-|vendor-workbox-|vendor-misc-).*\.js$/,
+            urlPattern: /\/assets\/(vendor-scanner-|vendor-tour-|vendor-faker-|vendor-workbox-|vendor-export-|vendor-misc-).*\.js$/,
             handler: 'CacheFirst',
             options: {
               cacheName: 'heavy-vendor-cache',
@@ -158,7 +161,7 @@ export default defineConfig({
       // Prevent heavy optional chunks from being preloaded on every page load.
       // They are loaded on demand via dynamic import() and cached by the SW.
       resolveDependencies: (_filename, deps) => {
-        const deferredChunks = ['vendor-faker', 'vendor-scanner', 'vendor-tour', 'vendor-workbox', 'vendor-misc'];
+        const deferredChunks = ['vendor-faker', 'vendor-scanner', 'vendor-tour', 'vendor-workbox', 'vendor-export', 'vendor-misc'];
         return deps.filter(dep => !deferredChunks.some(chunk => dep.includes(`/${chunk}-`)));
       },
     },

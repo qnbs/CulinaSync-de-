@@ -1,0 +1,24 @@
+---
+description: Keep tests honest | edits to tests or covered code | deterministic isolated Vitest specs
+globs: src/**/*.test.ts,src/**/*.test.tsx
+alwaysApply: false
+---
+
+# Testing (Vitest / Testing Library)
+
+- **Determinismus:** Keine von Netzwerk-, Zufalls- oder Echtzeit abhängigen Assertions ohne Mock/Fake-Zeit (`vi.useFakeTimers` nach Bedarf). Feste Fixtures oder `@faker-js/faker` mit festem Seed nur dort, wo das Team es bereits tut.
+- **Verbote:** **Niemals** fehlschlagende Tests auskommentieren oder löschen, „nur damit CI grün wird“. Ursache beheben oder Test präzisieren.
+- **Isolation:** MSW (`src/test/msw`) oder `vi.mock` für externe APIs; Redux/Provider wie in Nachbartests aufsetzen; keine Abhängigkeit von Ausführungsreihenfolge ganzer Suite.
+- **Lesbarkeit:** `describe`/`it` klar benennen; Arrange-Act-Assert; async mit `await`/userEvent korrekt.
+
+<example>
+it('shows error when gemini fails', async () => {
+  server.use(http.post('/mock', () => HttpResponse.error()));
+  render(<Ui />);
+  await expect(screen.findByRole('alert')).resolves.toBeInTheDocument();
+});
+</example>
+
+<example type="invalid">
+// it.skip('broken', () => { ... }) // dauerhaft überspringen um Build zu erzwingen
+</example>

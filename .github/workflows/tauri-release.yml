@@ -1,0 +1,25 @@
+# M8: Vorbereitung — vollstaendiger Tauri-Build wenn Cargo-Workspace ergaenzt ist
+name: Tauri prep (config + web build)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Web build (dist fuer Tauri distDir)
+        run: npm run build
+
+      - name: Tauri config vorhanden
+        run: test -f src-tauri/tauri.conf.json && test -f src-tauri/main.rs

@@ -1,0 +1,21 @@
+---
+description: Align React UI work | TSX under components/features | a11y,i18n,props naming
+globs: src/components/**/*.tsx,src/features/**/*.tsx
+alwaysApply: false
+---
+
+# UI-Komponenten (React / Vite SPA)
+
+- **Framework:** Keine Server Components — alles Client-Bundle. Lazy-Load für Seiten und schwere Dialoge wie etabliert in `App.tsx`.
+- **Props:** Explizite TypeScript-Interfaces/`type` alias; booleans als `is*/has*/show*`; Callbacks als `onVerbNoun`; keine unnötigen `any`.
+- **Accessibility:** Fokus-Fallen vermeiden; interaktive Elemente keyboard-tauglich; `aria-*` und Labels konsistent mit bestehenden Hooks (z. B. `useModalA11y`).
+- **i18n:** Keine neuen nutzerseitigen Strings hardcoded — Keys in `src/locales/de|en` spiegeln; Scanner-Skripte (`i18n:scan`) respektieren.
+- **Styling:** Tailwind-Klassen; Print-Stile nur über bestehende Patterns (`src/styles/print.css` etc.). Vor DOM-Manipulation lieber deklaratives React.
+
+<example>
+<button type="button" aria-expanded={open} onClick={onToggle}>{t('features.planner.open')}</button>
+</example>
+
+<example type="invalid">
+<button onClick={() => alert('Fehler')}>Drück mich</button> // hardcoded DE + alert
+</example>

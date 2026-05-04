@@ -1,0 +1,26 @@
+---
+alwaysApply: false
+---
+
+# PRD, Bewusstseins-Stream & MCP-Bereitschaft
+
+## Product Requirements & Architektur-Gates
+
+- Vor **größeren architektonischen Umbauten** oder neuen Domänen-Schnitten das verbindliche Produkt-/Architektur-Hintergrunddokument konsultieren — sobald vorhanden z. B. `instructions.md`, `PRD.md`, sonst `README.md`, `docs/ARCHITECTURE.md`, `ROADMAP.md`.
+- Kleine Bugfixes und lokale UI-Anpassungen können ohne PRD erfolgen, sofern sie gegen keine dokumentierte Grenze verstoßen.
+
+## Consciousness Stream (.notes)
+
+- Kontextuelle Erinnerungen, Workshop-Beschlüsse und **„was wir nächstes Mal wissen wollen“** gehören nach `.notes/meeting_notes.md` (kurze, datierte Einträge). Der Agent soll dort nachlesen, wenn der Nutzer darauf verweist, und bei wichtigen Sessions ermutigen, Stichpunkte anzulegen.
+
+## Model Context Protocol (Platzhalter)
+
+Für dieses Repo sinnvolle MCP-Aktivierung (nach Bedarf des Teams, nicht Pflicht):
+
+| Bereich | Beispiel-MCP / Rolle |
+|--------|----------------------|
+| Qualität | Semgrep / Snyk (Policy-, Secret-, Dependency-Scans) |
+| Repo / Issues | GitHub-MCP (Issues, PR-Kontext) |
+| Observability | optional Sentry/Datadog, wenn Cloud-Anbindung besteht |
+
+Konkrete Server-Auswahl bleibt bei der lokalen Cursor-Konfiguration; Regeln hier dokumentieren nur die **Erwartung**: bei MCP-Zugriff Schemas lesen, keine Tools blind aufrufen.

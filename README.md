@@ -4,17 +4,17 @@ Local-first Koch-, Vorrats-, Rezept- und Einkaufslisten-App auf Basis von React,
 
 [Live-Demo](https://qnbs.github.io/CulinaSync-de-/) | [Architektur](./docs/ARCHITECTURE.md) | [Entwicklung](./docs/DEVELOPMENT.md) | [Deployment](./docs/DEPLOYMENT.md) | [Testing](./docs/TESTING.md) | [Troubleshooting](./docs/TROUBLESHOOTING.md) | [Beitragen](./CONTRIBUTING.md) | [Security](./SECURITY.md)
 
-## Status 2026-05-02
+## Status 2026-05-04
 
-Der aktuelle Arbeitsstand ist in **[docs/STATUS-2026-05-02.md](./docs/STATUS-2026-05-02.md)** dokumentiert (MealPlanner-Context, Settings-Legacy-Migration ohne Lese-Fallback, A11y-Sweep, Gemini-Antworten mit Zod, CI Node 24, M5-Testausbau inkl. Essensplan-Helfer und Repository-Suites).  
-Vorgaenger: [STATUS-2026-05-01.md](./docs/STATUS-2026-05-01.md); aeltere Snapshots: [STATUS-2026-04-23.md](./docs/STATUS-2026-04-23.md), [STATUS-2026-04-22.md](./docs/STATUS-2026-04-22.md).
+Der aktuelle Arbeitsstand ist in **[docs/STATUS-2026-05-04.md](./docs/STATUS-2026-05-04.md)** dokumentiert (M5-Testausbau, Coverage-Zwischenstand, Vitest-Infra, Bundle-Chunk `vendor-export`, Tauri-Prep, Live-Demo-QA-Checkliste).  
+Vorgaenger: [STATUS-2026-05-02.md](./docs/STATUS-2026-05-02.md), [STATUS-2026-05-01.md](./docs/STATUS-2026-05-01.md); aeltere Snapshots: [STATUS-2026-04-23.md](./docs/STATUS-2026-04-23.md), [STATUS-2026-04-22.md](./docs/STATUS-2026-04-22.md).
 
 Kurz:
 
 - **M3:** `recipe-detail/*`, `cook-mode/*`, `useCookModeController`; **MealPlanner** mit `MealPlannerProvider` / `useMealPlannerScreen` (M3.3 erledigt); **DayColumn** nutzt `getMealPlanSlotPantryStatus` aus `meal-planner/dayColumnPantryStatus.ts`.
 - **M4:** Zod-Validierung in `geminiService.ts`; M4.3 Tauri-CSP siehe [DEPLOYMENT.md](./docs/DEPLOYMENT.md).
 - **Settings:** Migration von `culinaSyncSettings` nach `persist:settings` vor Store-Rehydration; `loadSettings()` nur Persist oder Defaults.
-- **M5 (fortgeschritten):** Vitest **119** Tests in **34** Dateien; zusaetzlich u. a. `usePantryManager`, `ShoppingListContext`, Smoke **PantryManager** / **ShoppingList**, Repository-Tests **mealPlan** / **pantry**, Unit-Tests fuer **dayColumnPantryStatus**. Coverage v8 ca. **42 %** Statements / **44 %** Lines — Ziel ≥70 % weiterhin offen. CI laeuft `test:coverage`, laedt **coverage-lcov** als Artefakt und prueft Bundle-Budget auf jedem Validate-Lauf.
+- **M5 (fortgeschritten):** Vitest **222** Tests in **59** Dateien; u. a. App-/Hook-/Service-Suites, Einkaufsliste (**`BulkAddModal`**, **`AiModal`**), **`PantryList`**, `useRecipeDetail`, `voiceCommands` inkl. `executeVoiceAction`, `fake-indexeddb` fuer Dexie in jsdom. Coverage v8 ca. **59 %** Statements / **61 %** Lines — Ziel ≥70 % weiterhin offen; **Coverage-Thresholds** in `vitest.config.ts` (Regressionsschutz, Snapshot 2026-05-04). CI laeuft `test:coverage`, laedt **coverage-lcov** als Artefakt und prueft Bundle-Budget auf jedem Validate-Lauf. Manuelle Demo: [docs/LIVE-DEMO-QA.md](./docs/LIVE-DEMO-QA.md).
 
 ## Ueberblick
 
@@ -115,8 +115,13 @@ Die aktuelle Pages-URL ist auf den Repo-Namen ausgerichtet. `vite.config.ts` set
 
 ## Dokumentation
 
+- [instructions.md](./instructions.md): zentraler Einstieg fuer Menschen und Agenten (Gates, Checks)
+- [PRD.md](./PRD.md): Product Requirements (Scope, FR/NFR, Erfolgsmetriken)
+- [.notes/meeting_notes.md](./.notes/meeting_notes.md): Consciousness Stream — Kurzprotokoll und Kontext
 - [docs/README.md](./docs/README.md): Dokumentationsindex
-- [docs/STATUS-2026-05-02.md](./docs/STATUS-2026-05-02.md): aktueller Repo-Stand (Mai 2026)
+- [docs/STATUS-2026-05-04.md](./docs/STATUS-2026-05-04.md): aktueller Repo-Stand (Mai 2026)
+- [docs/LIVE-DEMO-QA.md](./docs/LIVE-DEMO-QA.md): GitHub-Pages Smoke-Checkliste
+- [docs/STATUS-2026-05-02.md](./docs/STATUS-2026-05-02.md): vorheriger Mai-Snapshot
 - [docs/STATUS-2026-05-01.md](./docs/STATUS-2026-05-01.md): vorheriger Mai-Snapshot (Audit-Follow-up)
 - [docs/STATUS-2026-04-22.md](./docs/STATUS-2026-04-22.md): Session- und Arbeitsstand 2026-04-22
 - [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md): System- und Datenarchitektur
@@ -128,6 +133,12 @@ Die aktuelle Pages-URL ist auf den Repo-Namen ausgerichtet. `vite.config.ts` set
 - [CONTRIBUTING.md](./CONTRIBUTING.md): Beitragsregeln
 - [SECURITY.md](./SECURITY.md): Security-Prozess und Hinweise
 - [SUPPORT.md](./SUPPORT.md): Support- und Meldewege
+
+## Desktop (Tauri, Vorbereitung)
+
+- **Konfiguration:** `src-tauri/tauri.conf.json` — Fenster, CSP, **`identifier`** `io.github.qnbs.culinasync`.
+- **CI:** Workflow [`.github/workflows/tauri-release.yml`](./.github/workflows/tauri-release.yml) (`workflow_dispatch`) prueft Web-Build und vorhandene Tauri-Dateien. Vollstaendige **native** Artefakte folgen mit Cargo-Workspace (siehe [ROADMAP.md](./ROADMAP.md) M8).
+- **Deployment-Hinweise:** [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) (CSP / Hosting).
 
 ## Bekannte technische Punkte
 

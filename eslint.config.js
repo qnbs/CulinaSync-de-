@@ -44,8 +44,8 @@ export default tseslint.config(
       'react/display-name': 'off',
       'react/prop-types': 'off',
       'react-refresh/only-export-components': 'off',
-      // Staged migration: turn on 'warn' locally (`pnpm exec eslint .`) and reduce warnings before enforcing in CI.
-      'react-hooks/exhaustive-deps': 'off',
+      // Staged migration: warn in CI; Reduktion in Follow-up-PRs (H1)
+      'react-hooks/exhaustive-deps': 'warn',
       '@typescript-eslint/no-explicit-any': 'error',
     },
   },

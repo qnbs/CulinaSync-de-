@@ -1,0 +1,20 @@
+---
+description: Enforce secrets handling | any code or config change | no leaked credentials or wrong Gemini paths
+globs: *.*
+alwaysApply: false
+---
+
+# Core Security & Betrieb (CulinaSync)
+
+- **Secrets:** Keine API-Keys, Tokens oder Passwörter ins Repo oder in Client-Bundles hardcoden. Keine sensiblen Werte über `import.meta.env` / `VITE_*` für Gemini konstruieren — Projektstandard: Nutzer-Konfiguration und `apiKeyService.ts`. Für lokale Dev-Secrets nur dokumentierte Mechanismen (z. B. `.env` **nicht** committen; siehe `.gitignore` / `SECURITY.md`).
+- **Gemini:** Ausschließlich `src/services/geminiService.ts` als API-Fassade; strukturierte Antworten wie im Code mit Zod absichern (`parseAiJsonWithSchema`-Muster).
+- **Fehler & Logging:** Domänen- und Integrationsfehler über etablierte Hilfen (`logAppError`, siehe `src/services/errorLoggingService.ts`); UI-Renderfehler nicht verschlucken — `GlobalErrorBoundary`-Kompatibilität beachten.
+- **Datenintegrität:** Schreibzugriffe auf IndexedDB nur über den dokumentierten DB-Einstieg (`src/services/db.ts`, Repositories). Keine direkten Dexie-Tabellen in Komponenten öffnen.
+
+<example>
+// Neuen Aufruf der Gemini-API nur in geminiService.ts kapseln; UI ruft Thunks/Hooks auf.
+</example>
+
+<example type="invalid">
+const key = import.meta.env.VITE_GEMINI_KEY; // verboten für dieses Projekt
+</example>

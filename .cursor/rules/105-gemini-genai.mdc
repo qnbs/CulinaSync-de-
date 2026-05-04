@@ -1,0 +1,20 @@
+---
+description: Isolate Gemini calls | changes to AI services | single facade,validated outputs
+globs: src/services/geminiService.ts,src/services/apiKeyService.ts,src/features/ai-chef/**/*.ts
+alwaysApply: false
+---
+
+# Gemini / @google/genai Integration
+
+- **Facade:** Alle Modellaufrufe und strukturierten JSON-Pipelines laufen über `geminiService.ts`. Features unter `src/features/ai-chef/**` orchestrieren Anwendungsfälle, rufen aber keine Roh-Client-API außerhalb der Facade auf.
+- **Schlüssel:** Schlüsselbeschaffung und -speicherung nur über `apiKeyService.ts` und Einstellungen — nie Build-Zeit-Env für Nutzerschlüssel.
+- **Validierung:** KI-JSON mit Zod-Schemas parsen; bei Parse-Fehlern nutzerfreundliche Fehler + Logging, keine stillen Fallbacks mit fabulierten Daten.
+- **Performance:** Schwere Nebenläufe (Bilder, große Payloads) nicht blockierend in Render-Pfaden starten; bestehende Worker-/Service-Muster nutzen.
+
+<example>
+// Neuer Befehl: Funktion in geminiService exportieren, von feature/commands aufrufen.
+</example>
+
+<example type="invalid">
+import { GoogleGenAI } from '@google/genai'; const ai = new GoogleGenAI({ apiKey: hardcoded }); // in Feature-Datei
+</example>

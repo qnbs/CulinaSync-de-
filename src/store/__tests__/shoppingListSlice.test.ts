@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import reducer, {
   collapseAll,
   expandAll,
+  generateFromPlanAsync,
+  renameCategoryAsync,
   setAiModalOpen,
   setBulkAddModalOpen,
   setEditingCategory,
@@ -115,6 +117,34 @@ describe('shoppingListSlice', () => {
       const state = { ...initialState, collapsedCategories: ['X', 'Y'] };
       const result = reducer(state, expandAll());
       expect(result.collapsedCategories).toHaveLength(0);
+    });
+
+    it('renameCategoryAsync.fulfilled ersetzt alten Kategorienamen in collapsedCategories', () => {
+      const state = { ...initialState, collapsedCategories: ['Alt'] };
+      const next = reducer(state, {
+        type: renameCategoryAsync.fulfilled.type,
+        payload: { oldName: 'Alt', newName: 'Neu' },
+      });
+      expect(next.collapsedCategories).toContain('Neu');
+      expect(next.collapsedCategories).not.toContain('Alt');
+    });
+  });
+
+  describe('generateFromPlanAsync lifecycle', () => {
+    it('setzt isGenerating während pending und fulfilled', () => {
+      const pending = reducer(undefined, { type: generateFromPlanAsync.pending.type });
+      expect(pending.isGenerating).toBe(true);
+      const done = reducer(pending, {
+        type: generateFromPlanAsync.fulfilled.type,
+        payload: { added: 1, existing: 0 },
+      });
+      expect(done.isGenerating).toBe(false);
+    });
+
+    it('setzt isGenerating bei rejected zurück', () => {
+      const pending = reducer(undefined, { type: generateFromPlanAsync.pending.type });
+      const failed = reducer(pending, { type: generateFromPlanAsync.rejected.type, error: {} });
+      expect(failed.isGenerating).toBe(false);
     });
   });
 });

@@ -1,0 +1,20 @@
+---
+description: Keep Dexie boundaries | edits under db layer | repositories only,no UI coupling
+globs: src/services/db.ts,src/services/repositories/**/*.ts,src/services/**/*Repository*.ts
+alwaysApply: false
+---
+
+# Dexie / IndexedDB Integration
+
+- **Single entry:** Schema, Tabellen und öffentliche DB-Hilfen nur in `src/services/db.ts` bzw. dokumentierten Erweiterungen pflegen — keine parallele „zweite Dexie-Instanz“ in Features.
+- **Repositories:** Lese-/Schreiblogik in `src/services/repositories/**` bündeln; Signaturen stabil halten und Indexierung bei neuen Filtern mitdenken.
+- **Reactivity:** UI nutzt `useLiveQuery` / bestehende Hooks; Repositories liefern reine Datenoperationen ohne React-Imports.
+- **Migrationen:** Bestehende Migrations-/Versions-Patterns in `db.ts` und angrenzenden Services respektieren; Breaking Changes nur mit klarem Upgrade-Pfad und Doku.
+
+<example>
+// Neue Shopping-Listen-Methode: shoppingListRepository.ts + Aufruf aus Thunk/Hook, nicht aus einer TSX-Datei mit db.table(...).
+</example>
+
+<example type="invalid">
+import { db } from '@/services/db'; db.mealPlan.put(x); // direkt in einer Komponentendatei
+</example>

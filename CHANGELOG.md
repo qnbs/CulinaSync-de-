@@ -8,6 +8,10 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Hinzugefuegt
+- **Tests / M5 (Fortsetzung 2026-05-04):** `shopping-list/__tests__/BulkAddModal.test.tsx`, `shopping-list/__tests__/AiModal.test.tsx`, `pantry/__tests__/PantryList.test.tsx`; erweiterter **`App.smoke.test.tsx`** (Meal-Planner-Route, Toast, Footer-Version, **`vi.mock('./services/db')`**). Zusaetzlich u. a. `fake-indexeddb`, App-/RecipeCard-/GlobalErrorBoundary-Smoke, `useRecipeDetail`, `mealPlannerSmartService`, `retryUtils`, `utils`, Hook-Tests Debounce/WindowSize/SpeechSynthesis/WakeLock/ModalA11y, erweiterte `voiceCommands` (`executeVoiceAction`). Vitest-**Coverage-Thresholds** an v8-Snapshot (Lines 60, Statements 58, Branches 45, Functions 51); `__APP_VERSION__` in Tests; Worker-Pool `maxWorkers: 1`.
+- **Bundle M9.3:** Vite-Chunk `vendor-export` (jspdf, html2canvas, papaparse); PWA-`globIgnores` / Runtime-Cache / Preload-Deferral aktualisiert.
+- **ESLint:** `react-hooks/exhaustive-deps` auf `warn`; Abhaengigkeiten in `usePantryManager` ergaenzt.
+- **Tauri M8 (Prep):** `identifier` in `tauri.conf.json`; Workflow `tauri-release.yml` (Web-Build + Config-Check); Doku `docs/LIVE-DEMO-QA.md`, `docs/STATUS-2026-05-04.md`.
 - **Essensplan:** `meal-planner/dayColumnPantryStatus.ts` mit `getMealPlanSlotPantryStatus` (reiner Vorratsabgleich fuer Slots); zugehoerige Unit-Tests `meal-planner/__tests__/dayColumnPantryStatus.test.ts`; `DayColumn.tsx` verduennt, `DayColumn.test.tsx` ergänzt.
 - **Tests (M5 Fortsetzung):** `mealPlanRepository.test.ts`, `pantryRepository.test.ts`; `usePantryManager.test.tsx`; `ShoppingListContext.test.tsx`; Smoke `PantryManager.smoke.test.tsx`, `ShoppingList.smoke.test.tsx` mit `components/__tests__/smokeHookStubs.ts` (stabile Context-Stubs).
 - **Tests (M5):** `MealPlannerContext.test.tsx`; `useMealPlannerScreen.test.tsx`; `useCookModeController.test.tsx`; Smoke-Tests `MealPlanner.smoke.test.tsx`, `CookModeView.smoke.test.tsx`, `RecipeDetailTabs.smoke.test.tsx`; Hilfsfunktion `src/test/createTestStore.ts` (Redux-Teststore ohne Persist).
@@ -33,13 +37,14 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **Einkaufsliste (KI):** Nach Zod-Parse werden `category` (Fallback `''`) und `sortOrder` gesetzt, damit der Typ zu `Omit<ShoppingListItem, 'id' | 'isChecked'>[]` passt.
 
 ### Behoben
+- **Typecheck (tsgo):** `setAppServices` nutzt **`AppServicesOverrides`** mit **`Partial<AiGateway>`** u. a., damit Test-Mocks nicht das komplette Gateway spiegeln muessen. Shopping-List-Tests: keine doppelten Objektschluessel (`ShoppingListItemComponent`, `ShoppingListQuickAdd`); **`RecipeDetail.smoke.test.tsx`**: `t`-Stub fuer `i18next`-Ueberladungen.
 - **Build (tsgo):** `utilsCategories.test.ts` — Mock von `i18next.t` per Assertion auf `typeof i18next.t` typisiert; der Produktions-Build schlug mit TS2345 fehl (Mehrfachueberladungen von `TFunction`).
 - **Supply Chain:** `npm audit` meldete u. a. verwundbare transitive Versionen von `serialize-javascript` (Workbox/vite-plugin-pwa) und `uuid` (Storybook). Root-`overrides` plus ergänzte `pnpm.overrides` heben auf **serialize-javascript ^7.0.5** und **uuid ^14.0.0**; `pnpm-lock.yaml` wurde per `pnpm import` aus dem aktualisierten `package-lock.json` synchronisiert.
 - **Husky:** `.husky/pre-commit` nutzt `npm exec lint-staged`; `commit-msg` nutzt `npm exec -- commitlint --edit` (zwingt korrekte Argumentweitergabe), damit lokale Commits ohne globales **pnpm** funktionieren (z. B. Windows).
 
 ### Geaendert (Fortsetzung Mai 2026)
-- **README.md:** Status **2026-05-02**; M5-Zwischenstand (119 Tests, ~42 % Statements / ~44 % Lines, CI-Artefakt, `check:all`); Architektur-Hooks (MealPlanner, `dayColumnPantryStatus`), Node-22/CI-24, Settings-Migration, Gemini/Zod; API-Key WebCrypto (Legacy nur ohne `crypto.subtle`).
-- **Dokumentation:** erneuter Sync nach M5-Erweiterung — `AUDIT`, `ROADMAP` M5.3–5.5, `docs/STATUS-2026-05-02.md`, `TESTING`, `PROJECT-STRUCTURE`, `ARCHITECTURE`, `docs/README`, `SECURITY-AUDIT-2026.md` (Folgebewertung), `.github/copilot-instructions.md`; zuvor: `DEPLOYMENT`, `DEVELOPMENT`, `TROUBLESHOOTING`; **CONTRIBUTING** um `check:all` und Testorte ergaenzt.
+- **Dokumentation 2026-05-04:** README (222 Tests / 59 Dateien, Coverage-Snapshot), `docs/STATUS-2026-05-04`, `docs/TESTING`, `docs/README` (INDEX → STATUS-2026-05-04), ROADMAP M5-Metriktabelle, AUDIT Status-Block, `instructions.md` Stand, `vitest.config.ts` Thresholds.
+- **Dokumentation (2026-05-02 Session):** erneuter Sync nach M5-Erweiterung — `AUDIT`, `ROADMAP` M5.3–5.5, `docs/STATUS-2026-05-02.md`, `TESTING`, `PROJECT-STRUCTURE`, `ARCHITECTURE`, `docs/README`, `SECURITY-AUDIT-2026.md` (Folgebewertung), `.github/copilot-instructions.md`; zuvor: `DEPLOYMENT`, `DEVELOPMENT`, `TROUBLESHOOTING`; **CONTRIBUTING** um `check:all` und Testorte ergaenzt.
 - **i18n:** Shopping-List-Toasts und Kategorie-Heuristik (`getCategoryForItem`) uebersetzungsfaehig; neue Keys `shoppingList.categories.*`, erweiterte Toasts; `RecipeBook` Bulk-Plan-Toast; Whisper-Fehler ueber `voice.*` in `core.json`.
 
 #### Archiv unter [Unreleased] — April 2026 (CodeQL, i18n Wave 2+3)

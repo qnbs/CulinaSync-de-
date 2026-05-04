@@ -1,6 +1,6 @@
 # CulinaSync — Roadmap
 
-> **Stand:** 2. Mai 2026 (aktualisiert: M5-Testausbau + CI-Coverage) · Basis: vollständiges Code-, Architektur- und Security-Audit (14.–22. April 2026) + Follow-up-Sessions Mai 2026  
+> **Stand:** 4. Mai 2026 (M5-Testausbau, Vitest-Thresholds, Doku-Sync) · Basis: vollständiges Code-, Architektur- und Security-Audit (14.–22. April 2026) + Follow-up-Sessions Mai 2026  
 > **Format:** Milestones geordnet nach Priorität. Jedes Item mit Herkunft (AUDIT-Referenz), Aufwandsschätzung und Status.
 
 ---
@@ -97,13 +97,13 @@
 
 **Ziel:** Test-Coverage von ~35 % auf ≥70 % erhöhen.
 
-**Aktueller Stand (Mai 2026, nach Vitest v8-Coverage-Lauf):**
+**Aktueller Stand (Mai 2026, Vitest v8-Coverage, Snapshot 2026-05-04):**
 | Metrik | Aktuell | Ziel |
 |---|---|---|
-| Statements | ~42 % | ≥70 % |
-| Branches | ~28 % | ≥60 % |
-| Functions | ~34 % | ≥70 % |
-| Lines | ~44 % | ≥70 % |
+| Statements | ~59 % | ≥70 % |
+| Branches | ~46 % | ≥60 % |
+| Functions | ~52 % | ≥70 % |
+| Lines | ~61 % | ≥70 % |
 
 | # | Maßnahme | Herkunft | Bereich | Aufwand | Status |
 |---|---|---|---|---|---|
@@ -111,7 +111,7 @@
 | 5.2 | Store-Slices testen: `settingsSlice`, `uiSlice`, `shoppingListSlice` | T1 | `src/store/__tests__/` | Mittel (3–4 h) | ✅ |
 | 5.3 | Hooks testen: `useShoppingList`, `usePantryManager`, `useMealPlan` | T1 | `src/hooks/__tests__/` | Hoch (4–6 h) | 🟨 **`useMealPlannerScreen`**, **`useCookModeController`**, **`useMealPlan`**, **`useShoppingList`**, **`usePantryManager`** (Stub/Mock); weiter: Edge-Cases und Integration |
 | 5.4 | Services testen: `apiKeyService`, `voiceCommands`, `exportService` | T1 | `src/services/__tests__/` | Mittel (3–4 h) | ✅ apiKeyService, exportService, **`voiceCommands.test.ts`** (`processCommand`); 🟨 **`mealPlanRepository.test.ts`**, **`pantryRepository.test.ts`** (Dexie gemockt) |
-| 5.5 | Component-Smoke-Tests für kritische Seiten (React Testing Library) | T1 | `src/components/**/__tests__/` | Hoch (4–6 h) | 🟨 Smoke: MealPlanner, CookModeView, RecipeDetailTabs, **`PantryManager.smoke.test.tsx`**, **`ShoppingList.smoke.test.tsx`** (`smokeHookStubs.ts`); Context: **`MealPlannerContext`**, **`PantryManagerContext`**, **`ShoppingListContext.test.tsx`**; **`DayColumn.test.tsx`** + **`dayColumnPantryStatus.test.ts`** |
+| 5.5 | Component-Smoke-Tests für kritische Seiten (React Testing Library) | T1 | `src/components/**/__tests__/` | Hoch (4–6 h) | 🟨 Smoke: **`App.smoke.test.tsx`**, MealPlanner, CookModeView, RecipeDetailTabs, **`PantryManager.smoke.test.tsx`**, **`ShoppingList.smoke.test.tsx`** (`smokeHookStubs.ts`); Modale **`BulkAddModal`**, **`AiModal`**; **`PantryList.test.tsx`**; Context: **`MealPlannerContext`**, **`PantryManagerContext`**, **`ShoppingListContext.test.tsx`**; **`DayColumn.test.tsx`** + **`dayColumnPantryStatus.test.ts`** |
 
 **Gesamtaufwand Milestone 5:** ~20–28 h
 
@@ -181,7 +181,7 @@ _Vorbedingung: M1 (DevContainer mit Rust), Tauri 2 stabil_
 |---|---|---|---|---|---|
 | 9.1 | `jsPDF` auf dynamischen Import umstellen (nur bei PDF-Export laden) | P1 | `src/services/exportService.ts` | Niedrig (1 h) | ✅ |
 | 9.2 | `tesseract.js` auf dynamischen Import umstellen (OCR-Modul) | P1 | `src/services/` | Niedrig (1 h) | ✅ |
-| 9.3 | `vendor-misc`-Chunk analysieren (886 KB) und ggf. weiter splitten | P2 | `vite.config.ts` `manualChunks` | Mittel (2–3 h) | 🔲 |
+| 9.3 | `vendor-misc`-Chunk analysieren (886 KB) und ggf. weiter splitten | P2 | `vite.config.ts` `manualChunks` | Mittel (2–3 h) | 🟨 `vendor-export` (jspdf/html2canvas/papaparse) ausgelagert; Rest beobachten |
 | 9.4 | `vendor-faker`-Chunk (2.6 MB) prüfen — nur noch Dev-Fallback, niemals im initialen Bundle | P1 | Lazy-Import verifizieren | Niedrig (30 min) | ✅ |
 
 **Gesamtaufwand Milestone 9:** ~5–7 h

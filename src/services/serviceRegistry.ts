@@ -87,7 +87,15 @@ let activeServices: AppServices = defaultServices;
 
 export const getAppServices = (): AppServices => activeServices;
 
-export const setAppServices = (overrides: Partial<AppServices>) => {
+// QNBS-v3: Typ fuer partielle Mocks (Tests) — Laufzeit merged ohnehin pro Gateway; volles AiGateway war fälschlich nötig.
+/** Nur Teil-Gateways ueberschreiben; Merge erfolgt pro Gateway per Spread (Tests/Mocks). */
+export type AppServicesOverrides = {
+  ai?: Partial<AiGateway>;
+  scanner?: Partial<ScannerGateway>;
+  whisper?: Partial<WhisperGateway>;
+};
+
+export const setAppServices = (overrides: AppServicesOverrides) => {
   activeServices = {
     ...activeServices,
     ...overrides,

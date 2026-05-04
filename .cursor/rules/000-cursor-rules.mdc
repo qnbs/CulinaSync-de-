@@ -1,0 +1,33 @@
+---
+description: ALWAYS use when asked to CREATE A RULE or UPDATE A RULE or when taught a lesson to RETAIN AS NEW RULE
+globs:
+alwaysApply: false
+---
+
+# Meta-Regeln für Cursor-Rules (.mdc)
+
+## Pflichtverhalten
+
+- Wenn der Nutzer dich anweist, eine Regel zu erstellen, oder du aus einer Korrektur eine dauerhafte Leitplanke ableitest, **musst** du eine `.mdc`-Datei unter `.cursor/rules/` **anlegen oder anpassen** (keine rein mündliche „Merksätze“ ohne Datei).
+- **Nomenklatur:** dreistellige Präfixe, Kebab-Case-Dateinamen: `001–099` Core/Sicherheit, `100–199` Integrationen/APIs, `200–299` Architektur/Patterns, `300–399` UI/Styling, `800–899` Workflows/Testing.
+- **Frontmatter `description`:** ATO (Action, Trigger, Outcome), **maximal 120 Zeichen**, Englisch oder Deutsch wie im übrigen Repo.
+- **`globs`:** nach Kommas **keine Leerzeichen**; **keine Anführungszeichen** um die Liste.
+
+<example>
+---
+description: Run checks when editing services | TS edits under src/services | consistent DB/Gemini boundaries
+globs: src/services/**/*.ts,src/services/**/*.tsx
+alwaysApply: false
+---
+</example>
+
+<example type="invalid">
+---
+description: This description is intentionally far too long because it rambles on without ATO structure and exceeds the maximum allowed length for maintainer sanity and token budget
+globs: src/**/*.ts, src/**/*.tsx
+---
+</example>
+
+- **Token-Footprint:** keine Regel **länger als 200 Zeilen**. Statt Code zu duplizieren: Verweise auf kanonische Dateien (z. B. „Siehe `src/services/db.ts`“, „Siehe `.github/copilot-instructions.md`“).
+- **Veranschaulichung:** wo sinnvoll jeweils ein `<example>` und ein `<example type="invalid">` Block nutzen.
+- **Editor:** Regeldateien mit dem normalen Texteditor bearbeiten (nicht experimentelle Rich-MDC-Editoren), um bekannte MDC-Editor-Glitches zu vermeiden.

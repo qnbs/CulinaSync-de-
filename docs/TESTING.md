@@ -9,7 +9,7 @@
 
 ## Relevante Testorte
 
-- `src/components/**/__tests__/` — u. a. `cook-mode/__tests__/cookModeReducer.test.ts`, `meal-planner/__tests__/mealPlannerConstants.test.ts`, `meal-planner/__tests__/dayColumnPantryStatus.test.ts`, `meal-planner/__tests__/DayColumn.test.tsx`, **`MealPlanner.smoke.test.tsx`**, **`CookModeView.smoke.test.tsx`**, **`PantryManager.smoke.test.tsx`**, **`ShoppingList.smoke.test.tsx`**, **`recipe-detail/__tests__/RecipeDetailTabs.smoke.test.tsx`**, gemeinsame Stubs **`smokeHookStubs.ts`**
+- `src/components/**/__tests__/` — u. a. `cook-mode/__tests__/cookModeReducer.test.ts`, `meal-planner/__tests__/mealPlannerConstants.test.ts`, `meal-planner/__tests__/dayColumnPantryStatus.test.ts`, `meal-planner/__tests__/DayColumn.test.tsx`, **`MealPlanner.smoke.test.tsx`**, **`CookModeView.smoke.test.tsx`**, **`PantryManager.smoke.test.tsx`**, **`ShoppingList.smoke.test.tsx`**, **`recipe-detail/__tests__/RecipeDetailTabs.smoke.test.tsx`**, **`App.smoke.test.tsx`**, Root **`RecipeCard.test.tsx`**, **`GlobalErrorBoundary.test.tsx`**, **`shopping-list/__tests__/BulkAddModal.test.tsx`**, **`shopping-list/__tests__/AiModal.test.tsx`**, **`pantry/__tests__/PantryList.test.tsx`**, gemeinsame Stubs **`smokeHookStubs.ts`**
 - `src/contexts/__tests__/` — **`MealPlannerContext.test.tsx`**, **`PantryManagerContext.test.tsx`**, **`ShoppingListContext.test.tsx`**
 - `src/hooks/__tests__/` — **`useMealPlannerScreen.test.tsx`**, **`useCookModeController.test.tsx`**, **`useMealPlan.test.tsx`**, **`useShoppingList.test.tsx`**, **`usePantryManager.test.tsx`**
 - `src/services/__tests__/` — u. a. `voiceCommands.test.ts`, `dataRepository.test.ts`, `mealPlanRepository.test.ts`, `pantryRepository.test.ts`, `utilsCategories.test.ts`, `settingsService.test.ts`, `geminiService.test.ts`, **`geminiMsw.test.ts`** (HTTP-Mock + **Zod**)
@@ -72,14 +72,14 @@ pnpm run check:bundle-budget
 - Voice- und Navigationstrigger
 - Datenbanknahe Cross-Feature-Operationen
 
-## Aktueller Validierungsstand 2026-05-02
+## Aktueller Validierungsstand 2026-05-04
 
-- **Vitest:** **119** Tests in **34** Dateien; ergänzend u. a. Pantry-/Shopping-Smoke, `ShoppingListContext`, `usePantryManager`, MealPlan-/Pantry-Repositories (gemockte Dexie), `dayColumnPantryStatus`, `DayColumn`; **`geminiMsw.test.ts`** validiert MSW-Responses mit Zod.
-- **Coverage (v8, Stand Mai 2026):** ca. **42 %** Statements / **44 %** Lines — Ziel ≥70 % laut [ROADMAP.md](../ROADMAP.md) M5 weiterhin offen.
+- **Vitest:** **222** Tests in **59** Dateien; ergänzend u. a. `BulkAddModal` / `AiModal` (Einkaufsliste), `PantryList`, erweiterter **`App.smoke.test.tsx`** (u. a. `services/db`-Mock), Pantry-/Shopping-Smoke, Context- und Repository-Suites, `dayColumnPantryStatus`, `DayColumn`; **`geminiMsw.test.ts`** validiert MSW-Responses mit Zod.
+- **Coverage (v8):** ca. **59 %** Statements / **61 %** Lines / **46 %** Branches / **52 %** Functions — Ziel ≥70 % laut [ROADMAP.md](../ROADMAP.md) M5 weiterhin offen; **`vitest.config.ts`** definiert **Mindest-Thresholds** (Regressionsschutz).
 - **CI:** `.github/workflows/validate.yml` fuehrt **`pnpm run test:coverage`** aus und laedt das Verzeichnis **`coverage`** als Artefakt **coverage-lcov** (14 Tage); **Bundle-Budget** laeuft bei jedem Validate (PR + Deploy-Pfad).
 - Service- und Reducer-Tests wie oben; **Gemini-Integration** prueft u. a. gueltige JSON-Struktur (Zod); bei Typveraenderungen der KI-Antworten Tests und Schemas in `geminiService.ts` anpassen.
-- Aktueller Snapshot: [STATUS-2026-05-02.md](./STATUS-2026-05-02.md); Vorgaenger: [STATUS-2026-05-01.md](./STATUS-2026-05-01.md).
-- `pnpm run lint` mit `--max-warnings 0`; generiertes **`coverage/**`** ist ESLint-ignoriert; `react-hooks/exhaustive-deps` ist bewusst **off** — bei lokaler Aktivierung auf `warn` alle Warnungen abbauen, bevor CI verschärft wird.
+- Aktueller Snapshot: [STATUS-2026-05-04.md](./STATUS-2026-05-04.md); Vorgaenger: [STATUS-2026-05-02.md](./STATUS-2026-05-02.md).
+- `pnpm run lint` mit `--max-warnings 0`; generiertes **`coverage/**`** ist ESLint-ignoriert; `react-hooks/exhaustive-deps` ist auf **`warn`** — Warnungen im geaenderten Code abbauen, bevor auf `error` verschärft wird.
 - Vor Release empfohlen: **`pnpm run check:all`** oder mindestens lint, test, build und bei Bundle-Aenderungen `pnpm run check:bundle-budget`.
 
 ### Vitest unter Windows / mit Coverage

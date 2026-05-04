@@ -141,7 +141,7 @@ export const usePantryManager = () => {
         addToast(t('pantry.toast.saveFailed'), 'error');
         console.error(error);
     }
-      }, [addToast, closedModalState, setModalState]);
+      }, [addToast, closedModalState, setModalState, t]);
 
   // New Quick Add Function
   const handleQuickAdd = useCallback(async (input: string) => {
@@ -159,7 +159,7 @@ export const usePantryManager = () => {
         } catch {
           addToast(t('pantry.toast.addFailed'), 'error');
       }
-  }, [addToast]);
+  }, [addToast, t]);
   
   const adjustQuantity = useCallback(async (item: PantryItem, amount: number) => {
     const newQuantity = item.quantity + amount;
@@ -209,7 +209,7 @@ export const usePantryManager = () => {
     addToast(t('pantry.toast.bulkDeleted', { count: actionToRun.count }));
     setIsSelectMode(false);
     setSelectedItems([]);
-  }, [pendingAction, addToast]);
+  }, [pendingAction, addToast, t]);
 
   const cancelPendingAction = useCallback(() => {
     setPendingAction(null);
@@ -246,13 +246,13 @@ export const usePantryManager = () => {
         setIsSelectMode(false); 
         setSelectedItems([]);
     }
-  }, [selectedItems, addToast]);
+  }, [selectedItems, addToast, t]);
   
   const handleAddToShoppingList = useCallback(async (item: PantryItem) => {
     const count = await addPantryItemsToShoppingList([item.id!]);
     if (count > 0) addToast(t('pantry.toast.itemAddedToShoppingList', { name: item.name }), 'success');
     else addToast(t('pantry.toast.itemAlreadyOnList', { name: item.name }), 'info');
-  }, [addToast]);
+  }, [addToast, t]);
 
   return {
     searchTerm: effectiveSearchTerm, setSearchTerm: handleSearchTermChange, sortOrder, setSortOrder, isGrouped, setIsGrouped,

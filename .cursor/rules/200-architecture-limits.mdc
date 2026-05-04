@@ -1,0 +1,20 @@
+---
+description: Apply KISS/DRY and size limits | any substantial new code | smaller modules and helpers
+globs: *.*
+alwaysApply: false
+---
+
+# Architektur: KISS, DRY, Dateigröße
+
+- **KISS / DRY:** Vor Duplikaten warnen: wiederkehrende Logik in Hilfsfunktionen, Hooks oder Services auslagern. Sonderfälle dokumentieren, statt sie dreimal zu kopieren.
+- **Dateigröße:** Ziel **200–700 Zeilen** pro Datei. Unter ~200 ist unkritisch; **über ~700** soll der Agent aktiv splitten (Unterkomponenten, Hook-Extraktion, `utils`-Modul im gleichen Feature) — nicht alles in eine „Gott-Datei“.
+- **Schichten:** UI ↔ Hooks/Redux ↔ Services/Repositories einhalten; keine Kreisabhängigkeiten zwischen Features einführen.
+- **Komplexität:** Tiefe Verschachtelung und lange switch-Ketten in kleinere Funktionen zerlegen; Namen und Ordnerstruktur aus `docs/PROJECT-STRUCTURE.md` als Orientierung.
+
+<example>
+// Große Page-Komponente: Presentation in Subkomponenten unter components/feature-name/, Logik in useFeatureScreen.ts.
+</example>
+
+<example type="invalid">
+// Eine 1200-Zeilen-TSX mit Formular, Liste, Modals und Datenbankzugriff — weiter wachsen lassen.
+</example>

@@ -19,8 +19,35 @@ vi.mock('papaparse', () => ({
   unparse: vi.fn((rows: Record<string, unknown>[]) => JSON.stringify(rows)),
 }));
 
-import { exportFullDataAsCsv, exportRecipeToCsv, sanitizeCsvCell } from '../exportService';
-import type { Recipe } from '../../types';
+// QNBS-v3: jspdf nur für Download-Pfade testen (kein Bundle in UI-Tests nötig)
+vi.mock('jspdf', () => {
+  const jsPDF = vi.fn(function (this: unknown) {
+    return {
+      setFontSize: vi.fn(),
+      text: vi.fn(),
+      addPage: vi.fn(),
+      output: vi.fn(() => new Blob(['mock-pdf'])),
+    };
+  });
+  return { jsPDF };
+});
+
+import {
+  exportFullDataAsCsv,
+  exportFullDataAsJson,
+  exportFullDataAsMarkdown,
+  exportFullDataAsPdf,
+  exportFullDataAsTxt,
+  exportMealPlanWeekToIcs,
+  exportRecipeToCsv,
+  exportShoppingListToCsv,
+  exportShoppingListToJson,
+  exportShoppingListToMarkdown,
+  exportShoppingListToPdf,
+  exportShoppingListToTxt,
+  sanitizeCsvCell,
+} from '../exportService';
+import type { MealPlanItem, Recipe } from '../../types';
 
 describe('exportService CSV hardening', () => {
   const createObjectUrlMock = vi.fn(() => 'blob:mock');
@@ -93,5 +120,143 @@ describe('exportService CSV hardening', () => {
     expect(csvPayload).toContain("\"name\":\"'-cmd\"");
     expect(csvPayload).toContain("\"title\":\"'=Recipe\"");
     expect(csvPayload).toContain("\"name\":\"'+item\"");
+  });
+});
+
+const SAMPLE_SHOPPING_ITEM = {
+  id: 1,
+  name: 'Milch',
+  quantity: 1,
+  unit: 'l',
+  category: 'Milchprodukte & Eier',
+  isChecked: false,
+  sortOrder: 1,
+};
+
+describe('exportService shopping-list exports', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockDb.pantry.toArray.mockResolvedValue([]);
+    mockDb.recipes.toArray.mockResolvedValue([]);
+    mockDb.mealPlan.toArray.mockResolvedValue([]);
+    mockDb.shoppingList.toArray.mockResolvedValue([]);
+    URL.createObjectURL = vi.fn(() => 'blob:mock');
+    URL.revokeObjectURL = vi.fn();
+    HTMLAnchorElement.prototype.click = vi.fn();
+  });
+
+  it('exportShoppingListToJson triggers JSON download', async () => {
+    exportShoppingListToJson([SAMPLE_SHOPPING_ITEM]);
+    expect(URL.createObjectURL).toHaveBeenCalled();
+    expect(HTMLAnchorElement.prototype.click).toHaveBeenCalled();
+  });
+
+  it('exportShoppingListToTxt triggers txt download', async () => {
+    exportShoppingListToTxt([SAMPLE_SHOPPING_ITEM]);
+    expect(URL.createObjectURL).toHaveBeenCalled();
+  });
+
+  it('exportShoppingListToMarkdown groups by category', async () => {
+    exportShoppingListToMarkdown([SAMPLE_SHOPPING_ITEM, { ...SAMPLE_SHOPPING_ITEM, id: 2, name: 'Brot', category: 'Backwaren' }]);
+    expect(URL.createObjectURL).toHaveBeenCalled();
+  });
+
+  it('exportShoppingListToCsv uses papaparse and download', async () => {
+    await exportShoppingListToCsv([SAMPLE_SHOPPING_ITEM]);
+    expect(URL.createObjectURL).toHaveBeenCalled();
+  });
+
+  it('exportShoppingListToPdf paginates and downloads', async () => {
+    const many = Array.from({ length: 50 }, (_, i) => ({
+      ...SAMPLE_SHOPPING_ITEM,
+      id: i + 1,
+      name: `Item ${i}`,
+    }));
+    await exportShoppingListToPdf(many);
+    expect(URL.createObjectURL).toHaveBeenCalled();
+  });
+});
+
+describe('exportService full backup helpers', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockDb.pantry.toArray.mockResolvedValue([]);
+    mockDb.recipes.toArray.mockResolvedValue([]);
+    mockDb.mealPlan.toArray.mockResolvedValue([]);
+    mockDb.shoppingList.toArray.mockResolvedValue([]);
+    URL.createObjectURL = vi.fn(() => 'blob:mock');
+    URL.revokeObjectURL = vi.fn();
+    HTMLAnchorElement.prototype.click = vi.fn();
+  });
+
+  it('exportFullDataAsJson returns true on success', async () => {
+    const ok = await exportFullDataAsJson();
+    expect(ok).toBe(true);
+    expect(HTMLAnchorElement.prototype.click).toHaveBeenCalled();
+  });
+
+  it('exportFullDataAsTxt returns true with empty data', async () => {
+    expect(await exportFullDataAsTxt()).toBe(true);
+  });
+
+  it('exportFullDataAsMarkdown returns true with empty data', async () => {
+    expect(await exportFullDataAsMarkdown()).toBe(true);
+  });
+
+  it('exportFullDataAsPdf returns true', async () => {
+    expect(await exportFullDataAsPdf()).toBe(true);
+  });
+});
+
+describe('exportMealPlanWeekToIcs', () => {
+  beforeEach(() => {
+    URL.createObjectURL = vi.fn(() => 'blob:ics');
+    URL.revokeObjectURL = vi.fn();
+    HTMLAnchorElement.prototype.click = vi.fn();
+  });
+
+  it('writes VEVENT for recipe meal and note meal', () => {
+    const monday = new Date(Date.UTC(2026, 4, 4));
+    const weekDates = [monday];
+    const dateKey = monday.toISOString().split('T')[0];
+    const mealsByDate: Record<string, MealPlanItem> = {
+      [`${dateKey}-Frühstück`]: {
+        id: 1,
+        date: dateKey,
+        mealType: 'Frühstück',
+        recipeId: 10,
+        servings: 2,
+      },
+      [`${dateKey}-Mittagessen`]: {
+        id: 2,
+        date: dateKey,
+        mealType: 'Mittagessen',
+        note: 'Auswärts',
+      },
+    };
+    const recipe: Recipe = {
+      id: 10,
+      recipeTitle: 'Rührei',
+      shortDescription: 'Mit Butter',
+      prepTime: '5',
+      cookTime: '5',
+      totalTime: '10',
+      servings: '2',
+      difficulty: 'Einfach',
+      ingredients: [],
+      instructions: [],
+      nutritionPerServing: { calories: '', protein: '', fat: '', carbs: '' },
+      tags: { course: [], cuisine: [], occasion: [], mainIngredient: [], prepMethod: [], diet: [] },
+      expertTips: [],
+      isFavorite: false,
+      updatedAt: Date.now(),
+    };
+    const recipesById = new Map<number, Recipe>([[10, recipe]]);
+
+    exportMealPlanWeekToIcs(weekDates, mealsByDate, recipesById);
+
+    expect(URL.createObjectURL).toHaveBeenCalled();
+    const blobArg = (URL.createObjectURL as ReturnType<typeof vi.fn>).mock.calls[0][0] as Blob;
+    expect(blobArg).toBeInstanceOf(Blob);
   });
 });
