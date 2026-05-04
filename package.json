@@ -82,7 +82,7 @@
     "jsdom": "^28.1.0",
     "lint-staged": "^16.4.0",
     "msw": "^2.12.10",
-    "postcss": "^8.4.47",
+    "postcss": "^8.5.14",
     "rollup-plugin-visualizer": "^5.14.0",
     "sharp": "^0.34.3",
     "storybook": "8.6.18",
