@@ -12,6 +12,39 @@ updates:
       prefix: "chore(deps)"
     labels:
       - "dependencies"
+    groups:
+      testing:
+        patterns:
+          - "vitest*"
+          - "@vitest/*"
+          - "@testing-library/*"
+          - "msw"
+          - "jsdom"
+          - "fake-indexeddb"
+      linting:
+        patterns:
+          - "eslint*"
+          - "@eslint/*"
+          - "typescript-eslint"
+          - "eslint-plugin-*"
+      build-tools:
+        patterns:
+          - "vite*"
+          - "@vitejs/*"
+          - "rollup*"
+          - "postcss"
+          - "autoprefixer"
+          - "tailwindcss"
+      storybook:
+        patterns:
+          - "storybook"
+          - "@storybook/*"
+          - "@chromatic-com/*"
+      typescript:
+        patterns:
+          - "typescript"
+          - "@typescript/*"
+          - "@types/*"
 
   # GitHub Actions
   - package-ecosystem: "github-actions"

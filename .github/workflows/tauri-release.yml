@@ -1,25 +1,34 @@
 # M8: Vorbereitung — vollstaendiger Tauri-Build wenn Cargo-Workspace ergaenzt ist
 name: Tauri prep (config + web build)
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   workflow_dispatch:
 
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: npm
+          cache: 'pnpm'
 
       - name: Install
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Web build (dist fuer Tauri distDir)
-        run: npm run build
+        run: pnpm run build
 
       - name: Tauri config vorhanden
         run: test -f src-tauri/tauri.conf.json && test -f src-tauri/main.rs
