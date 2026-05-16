@@ -7,6 +7,13 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.2.1] — 2026-05-16
+
+### Geaendert
+
+- **Dependencies:** zod 4.4.3, lucide-react 1.x, i18next 26.x, react-joyride 3.x (Onboarding-Migration), Build-Tools (Vite 8.0.13, Tailwind CSS 4.3, vite-plugin-pwa 1.3, rollup-plugin-visualizer 7).
+- **CI:** `actions/upload-artifact` v7 in `validate.yml`.
+
 ## [0.2.0] — 2026-05-16
 
 ### Hinzugefuegt
@@ -210,6 +217,7 @@ Die folgenden Eintraege dokumentieren die Arbeit zwischen **v0.1.0** und **v0.2.
 - CI-Pipeline mit Lint, TypeScript-Check, Tests und Bundle-Budget
 - CodeQL Security Analysis
 
-[Unreleased]: https://github.com/qnbs/CulinaSync-de-/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/qnbs/CulinaSync-de-/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/qnbs/CulinaSync-de-/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/qnbs/CulinaSync-de-/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/qnbs/CulinaSync-de-/releases/tag/v0.1.0
