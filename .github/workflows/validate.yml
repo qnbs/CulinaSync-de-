@@ -59,6 +59,9 @@ jobs:
       - name: Check bundle budget
         run: pnpm run check:bundle-budget
 
+      - name: Dependency audit (high+)
+        run: pnpm audit --audit-level=high
+
       # QNBS-v3: Ein kurzer Smoke gegen `vite preview` (gebautes dist) — kein Dev-Server, keine schweren E2E-Suites
       - name: Install Playwright Chromium (retry)
         shell: bash

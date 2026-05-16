@@ -2,38 +2,39 @@
 
 ## Projekt-Orientierung
 - CulinaSync ist eine React 19 + Vite 8 PWA mit **Local-First** Datenhaltung in IndexedDB via Dexie.
-- Die App ist feature-orientiert aufgebaut (`src/components/*`, `src/hooks/*`, `src/services/*`, `src/store/*`).
-- `src/App.tsx` ist der Shell-Orchestrator: Navigation, lazy-loaded Seiten, Command Palette, Voice-Trigger, Toasts.
-- **Root-Level-Dateien:** `index.tsx` (App-Entry) liegt im Root, nicht in `src/`. Es wird in `tsconfig.json` via `include` eingebunden.
+- **Monorepo:** Turborepo + pnpm; Web-App in `apps/web/`, Shared-Packages in `packages/ai-core`, `packages/ui`.
+- Die App ist feature-orientiert aufgebaut (`apps/web/src/components/*`, `apps/web/src/hooks/*`, `apps/web/src/services/*`, `apps/web/src/store/*`).
+- `apps/web/src/App.tsx` ist der Shell-Orchestrator: Navigation, lazy-loaded Seiten, Command Palette, Voice-Trigger, Toasts.
+- **App-Entry:** `apps/web/index.tsx` (nicht Repo-Root). Build/Test-Konfiguration: `apps/web/vite.config.ts`, `apps/web/vitest.config.ts`, `apps/web/tsconfig.json`.
 
 ## State- & Datenarchitektur (wichtig)
 - Nutze Redux primär für **UI-/Session-Zustand** (z. B. `uiSlice`, `shoppingListSlice`, `aiChefSlice`).
 - Nutze Dexie als **Source of Truth** für Domänendaten (`pantry`, `recipes`, `mealPlan`, `shoppingList`).
-- Lies persistente Listen reaktiv über `useLiveQuery` (siehe `src/hooks/useShoppingList.ts`, `src/hooks/useMealPlan.ts`).
-- Schreibe Domänendaten über Repository-Funktionen aus `src/services/db.ts` (re-export), nicht direkt in Komponenten.
+- Lies persistente Listen reaktiv über `useLiveQuery` (siehe `apps/web/src/hooks/useShoppingList.ts`, `apps/web/src/hooks/useMealPlan.ts`).
+- Schreibe Domänendaten über Repository-Funktionen aus `apps/web/src/services/db.ts` (re-export), nicht direkt in Komponenten.
 
 ## Service-Grenzen & Datenfluss
-- `src/services/db.ts` enthält Initialisierungs-Side-Effects (populate, hooks, seed-sync) und muss als API-Einstiegspunkt genutzt werden.
-- Pantry-Änderungen triggern Match-Recalculation über Dexie-Hooks + Debounce (`src/services/pantryMatcherService.ts`).
+- `apps/web/src/services/db.ts` enthält Initialisierungs-Side-Effects (populate, hooks, seed-sync) und muss als API-Einstiegspunkt genutzt werden.
+- Pantry-Änderungen triggern Match-Recalculation über Dexie-Hooks + Debounce (`apps/web/src/services/pantryMatcherService.ts`).
 - Cross-Feature-Operationen laufen transaktional in Repositories (z. B. `deleteRecipe` aktualisiert `recipes`, `mealPlan`, `shoppingList`).
-- Fehler-Toasting für async Redux-Aktionen ist zentral im Listener-Middleware verdrahtet (`src/store/listenerMiddleware.ts`).
+- Fehler-Toasting für async Redux-Aktionen ist zentral im Listener-Middleware verdrahtet (`apps/web/src/store/listenerMiddleware.ts`).
 
 ## Komponenten-Architektur
-- Top-Level-Seiten liegen in `src/components/` (z. B. `PantryManager.tsx`, `RecipeBook.tsx`, `MealPlanner.tsx`).
-- Feature-Subkomponenten liegen in Feature-Ordnern (z. B. `src/components/pantry/`, `src/components/shopping-list/`).
-- `PantryManager`, `ShoppingList` und **`MealPlanner`** nutzen das **Context-Provider-Pattern** (`src/contexts/`): `PantryManagerContext`, `ShoppingListContext`, `MealPlannerContext` mit Hooks `usePantryManagerContext`, `useShoppingListContext`, `useMealPlannerContext`. Datenaggregation fuer den Plan: `useMealPlannerScreen.ts`.
+- Top-Level-Seiten liegen in `apps/web/src/components/` (z. B. `PantryManager.tsx`, `RecipeBook.tsx`, `MealPlanner.tsx`).
+- Feature-Subkomponenten liegen in Feature-Ordnern (z. B. `apps/web/src/components/pantry/`, `apps/web/src/components/shopping-list/`).
+- `PantryManager`, `ShoppingList` und **`MealPlanner`** nutzen das **Context-Provider-Pattern** (`apps/web/src/contexts/`): `PantryManagerContext`, `ShoppingListContext`, `MealPlannerContext` mit Hooks `usePantryManagerContext`, `useShoppingListContext`, `useMealPlannerContext`. Datenaggregation fuer den Plan: `useMealPlannerScreen.ts`.
 - Modals sollten in eigene Dateien extrahiert werden (nicht inline definieren).
 - Alle Modals müssen `useModalA11y` Hook verwenden (Fokus-Trap, Escape-Close, Body-Scroll-Lock).
 
 ## UI-Interaktionsmuster
-- Navigation mit optionalem Fokus erfolgt über `setCurrentPage({ page, focusTarget })` und `focusAction` (`src/store/slices/uiSlice.ts`).
-- Sprachkommandos werden in `processCommand` geparst und via `executeVoiceAction` ausgeführt (`src/services/voiceCommands.ts`).
+- Navigation mit optionalem Fokus erfolgt über `setCurrentPage({ page, focusTarget })` und `focusAction` (`apps/web/src/store/slices/uiSlice.ts`).
+- Sprachkommandos werden in `processCommand` geparst und via `executeVoiceAction` ausgeführt (`apps/web/src/services/voiceCommands.ts`).
 - Für kontextsensitive Folgeaktionen wird `voiceAction` im UI-State gesetzt und in Hooks verarbeitet (z. B. `useShoppingList`).
 
 ## KI-Integration (Gemini)
-- Gemini-Aufrufe liegen ausschließlich in `src/services/geminiService.ts`.
+- Gemini-Aufrufe liegen ausschließlich in `apps/web/src/services/geminiService.ts`.
 - **API-Key wird NICHT im Build eingebettet.** Nutzer geben ihren Key über UI ein (Einstellungen → API-Schlüssel).
-- Key-Speicherung erfolgt lokal verschlüsselt in IndexedDB via `src/services/apiKeyService.ts` – niemals localStorage oder env-Variablen.
+- Key-Speicherung erfolgt lokal verschlüsselt in IndexedDB via `apps/web/src/services/apiKeyService.ts` – niemals localStorage oder env-Variablen.
 - Der `GoogleGenAI`-Client wird dynamisch per `getAIClient()` aus dem gespeicherten Key erstellt und gecacht.
 - Antworten werden über JSON-Schema (`responseSchema`) von der API erzwungen; **zusätzlich** nach `JSON.parse` mit **Zod** validiert (`parseAiJsonWithSchema` in `geminiService.ts`).
 - Fehler werden auf nutzerfreundliche deutsche Meldungen gemappt (`handleGeminiError`).
@@ -41,19 +42,19 @@
 - Offline-Fallback nutzt `@faker-js/faker` für Demo-Daten bereits nur noch per dynamischem `import()`.
 
 ## Path-Alias
-- `@/*` mappt auf `src/*` (konfiguriert in `tsconfig.json` und `vite.config.ts`).
+- `@/*` mappt auf `apps/web/src/*` (konfiguriert in `tsconfig.json` und `vite.config.ts`).
 - Verwende `@/services/db` statt relativer Pfade wie `../../services/db`.
 
 ## i18n, Settings, Persistenz
-- i18n wird einmalig in `index.tsx` über `import './src/i18n'` initialisiert.
-- Locale-Dateien sind pro Sprache in `src/locales/{de,en}/core.json`, `settings.json` und `features.json` aufgeteilt und werden über `index.ts` aggregiert.
-- Sprach-/App-Defaults kommen aus `loadSettings()` (`src/services/settingsService.ts`) und sind tief gemerged.
-- Redux Persist speichert nur den `settings`-Slice (`src/store/index.ts`), nicht die Dexie-Tabellen.
+- i18n wird einmalig in `index.tsx` über `import './apps/web/src/i18n'` initialisiert.
+- Locale-Dateien sind pro Sprache in `apps/web/src/locales/{de,en}/core.json`, `settings.json` und `features.json` aufgeteilt und werden über `index.ts` aggregiert.
+- Sprach-/App-Defaults kommen aus `loadSettings()` (`apps/web/src/services/settingsService.ts`) und sind tief gemerged.
+- Redux Persist speichert nur den `settings`-Slice (`apps/web/src/store/index.ts`), nicht die Dexie-Tabellen.
 - Legacy-`culinaSyncSettings` wird per `migrateLegacySettings()` in `persist:settings` migriert (Bootstrap `store/migrateLegacySettingsBeforePersist.ts`). `loadSettings()` liest nur Persist oder Defaults — **kein** direktes Lesen des Legacy-Keys. Hilfen: `settingsKeys.ts`, `settingsMerge.ts`.
 
 ## Testing
 - **Framework:** Vitest + MSW (Mock Service Worker) fuer Service- und UI-nahe Tests.
-- **Testverzeichnisse:** `src/test/` (inkl. `createTestStore.ts`, MSW), `src/components/**/__tests__/`, `src/contexts/__tests__/`, `src/hooks/__tests__/`, `src/services/__tests__/`, `src/store/__tests__/`.
+- **Testverzeichnisse:** `apps/web/src/test/` (inkl. `createTestStore.ts`, MSW), `apps/web/src/components/**/__tests__/`, `apps/web/src/contexts/__tests__/`, `apps/web/src/hooks/__tests__/`, `apps/web/src/services/__tests__/`, `apps/web/src/store/__tests__/`.
 - **Benennung:** `*.test.ts` / `*.test.tsx` für Testdateien.
 - **Konfiguration:** `vitest.config.ts` im Root; ESLint ignoriert `coverage/**`.
 - **Coverage:** Stand Mai 2026 ca. **59 %** Statements / **61 %** Lines (v8); Ziel M5: ≥70 %. **222** Tests / **59** Dateien; Mindest-Thresholds in `vitest.config.ts` (Regressionsschutz). U. a.: Einkaufslisten-/Pantry-Modale, `App.smoke`, Context-/Hook-/Repository-Suites, `geminiMsw.test.ts` (Zod). **CI** (`validate.yml`): `lint` → **`type-check`** → `test:coverage` → `build` → `check:bundle-budget`; Artefakt **coverage-lcov**.
@@ -65,13 +66,13 @@
 - Falls spaeter ein dedizierter Formatter wie Prettier konfiguriert wird, soll er vor Commit/Push ebenfalls fuer den geaenderten Slice laufen. Aktuell ist kein Prettier-Setup im Repo vorhanden, daher nichts erzwingen, was nicht existiert.
 
 ## Error-Handling
-- Zentrale Fehler-Logging-Funktion: `logAppError()` aus `src/services/errorLoggingService.ts`.
+- Zentrale Fehler-Logging-Funktion: `logAppError()` aus `apps/web/src/services/errorLoggingService.ts`.
 - Async-Thunk-Fehler werden via `listenerMiddleware` automatisch als Toast angezeigt.
 - `GlobalErrorBoundary` fängt ungefangene React-Fehler ab.
 - Feature-spezifische Error Boundaries sind empfohlen für isolierte Fehlerbehandlung.
 
 ## Performance-Patterns
-- Alle Seiten-Komponenten werden via `React.lazy()` geladen (`src/App.tsx`).
+- Alle Seiten-Komponenten werden via `React.lazy()` geladen (`apps/web/src/App.tsx`).
 - `manualChunks` in `vite.config.ts` splittet: `react-vendor`, `redux-vendor`, `dexie-vendor`, `react-window`.
 - Schwere Dependencies (`tesseract.js`, `@ericblade/quagga2`, Export-Libs) sollten immer via dynamischem `import()` geladen werden.
 - `vite-plugin-compression` generiert Brotli fuer statische Assets.
@@ -114,8 +115,8 @@
 - Beispiel für die gewünschte Nutzung eines einzelnen Terminals: `cd frontend && pnpm run dev`.
 
 ## Projekt-spezifische Konventionen
-- Bevorzuge deutsche UX-Texte; Änderungen in Übersetzungen in `src/locales/de/` und `src/locales/en/` synchron halten und in die passende Domain-Datei (`core`, `settings`, `features`) einsortieren.
+- Bevorzuge deutsche UX-Texte; Änderungen in Übersetzungen in `apps/web/src/locales/de/` und `apps/web/src/locales/en/` synchron halten und in die passende Domain-Datei (`core`, `settings`, `features`) einsortieren.
 - Behalte bestehende Namensmuster bei: Async-Thunks mit Suffix `Async`, UI-Hooks kapseln Handler/Toasts, Services enthalten Geschäftslogik.
-- Verwende bestehende Utility-Pfade (`src/services/utils.ts`, Export-Services) statt duplizierter Parsing-/Export-Logik.
+- Verwende bestehende Utility-Pfade (`apps/web/src/services/utils.ts`, Export-Services) statt duplizierter Parsing-/Export-Logik.
 - **Niemals** API-Keys über `process.env` oder `VITE_`-Variablen einbetten – immer `apiKeyService.ts` nutzen.
 - Alle Dokumentationsänderungen in `CHANGELOG.md` nach [keepachangelog](https://keepachangelog.com/de/1.1.0/) Format eintragen.

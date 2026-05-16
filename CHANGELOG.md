@@ -8,6 +8,11 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Geaendert
+
+- **Monorepo (Follow-up):** Post-Migration Housekeeping — `pnpm.overrides` fuer Audit-Highs (protobufjs, babel-systemjs, fast-uri); CI **`pnpm audit --audit-level=high`** in `validate.yml`; `lighthouserc.json` → `apps/web/dist`; Turbo-`dist/` fuer `@domain/ui`.
+- **Doku/Agenten:** Pfade auf `apps/web/src/` in README, copilot-instructions, Cursor-Rules, `docs/PROJECT-STRUCTURE.md` (neu), DEVELOPMENT, TESTING, DEPLOYMENT, `instructions.md`; Snapshot `docs/STATUS-2026-05-16.md`; AUDIT-Status-Block 2026-05-16.
+
+### Geaendert (vorherige Unreleased-Eintraege)
 - **CI:** `.github/workflows/validate.yml` — nach **Lint** zusätzlich **`pnpm run type-check`** (**tsgo**), entspricht dem Kernpfad von `check:all` (ohne `npm audit`). **`tauri-release.yml`**: pnpm 10, frozen lockfile, **checkout/setup-node/pnpm v6**, Node **24**, **`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`**.
 - **Doku/Kanon:** `.github/copilot-instructions.md`, `README`, `CONTRIBUTING`, `docs/DEPLOYMENT`, `docs/DEVELOPMENT`, `docs/TESTING`, `instructions.md`, `AUDIT`; **Cursor** `.cursor/index.mdc`, `800-testing-standards.mdc`, `105-gemini-genai.mdc` (Globs Ai-Chef).
 

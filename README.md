@@ -4,9 +4,10 @@ Local-first Koch-, Vorrats-, Rezept- und Einkaufslisten-App auf Basis von React,
 
 [Live-Demo](https://qnbs.github.io/CulinaSync-de-/) | [Architektur](./docs/ARCHITECTURE.md) | [Entwicklung](./docs/DEVELOPMENT.md) | [Deployment](./docs/DEPLOYMENT.md) | [Testing](./docs/TESTING.md) | [Troubleshooting](./docs/TROUBLESHOOTING.md) | [Beitragen](./CONTRIBUTING.md) | [Security](./SECURITY.md)
 
-## Status 2026-05-04
+## Status 2026-05-16
 
-Der aktuelle Arbeitsstand ist in **[docs/STATUS-2026-05-04.md](./docs/STATUS-2026-05-04.md)** dokumentiert (M5-Testausbau, Coverage-Zwischenstand, Vitest-Infra, Bundle-Chunk `vendor-export`, Tauri-Prep, Live-Demo-QA-Checkliste).  
+Der aktuelle Arbeitsstand ist in **[docs/STATUS-2026-05-16.md](./docs/STATUS-2026-05-16.md)** dokumentiert (Monorepo-Migration, Supply-Chain-Audit, Doku-Sync).  
+Vorgänger: [STATUS-2026-05-04.md](./docs/STATUS-2026-05-04.md), (M5-Testausbau, Coverage-Zwischenstand, Vitest-Infra, Bundle-Chunk `vendor-export`, Tauri-Prep, Live-Demo-QA-Checkliste).  
 Vorgaenger: [STATUS-2026-05-02.md](./docs/STATUS-2026-05-02.md), [STATUS-2026-05-01.md](./docs/STATUS-2026-05-01.md); aeltere Snapshots: [STATUS-2026-04-23.md](./docs/STATUS-2026-04-23.md), [STATUS-2026-04-22.md](./docs/STATUS-2026-04-22.md).
 
 Kurz:
@@ -46,12 +47,12 @@ Die Anwendung laeuft lokal, auf GitHub Pages und optional in nativen Wrappern. K
 
 ## Architektur in Kurzform
 
-- `index.tsx` laedt zuerst den Redux-Store (damit synchron Settings-Legacy-Migration laeuft), dann i18n, Provider und Persist Gate.
-- `src/App.tsx` orchestriert Navigation, Lazy Loading, Command Palette, Voice-Trigger und globale Modals.
-- `src/store/` enthaelt Redux-Slices fuer UI-/Session-Zustand und Persist-Konfiguration.
-- `src/services/db.ts` ist der Einstiegspunkt fuer Datenbank- und Repository-Zugriffe.
-- `src/hooks/useMealPlan.ts` und `src/hooks/useShoppingList.ts` lesen reaktive Daten aus Dexie via `useLiveQuery`; der Essensplan nutzt `useMealPlannerScreen.ts` im `MealPlannerProvider` (Plan + Pantry).
-- `src/components/` enthaelt Seiten sowie Feature-Unterordner fuer spezifische Teiloberflaechen.
+- **Monorepo:** `apps/web/` (PWA), `packages/ai-core`, `packages/ui`; Orchestrierung via Turbo/pnpm.
+- `apps/web/index.tsx` laedt zuerst den Redux-Store (Legacy-Settings-Migration), dann i18n, Provider und Persist Gate.
+- `apps/web/src/App.tsx` orchestriert Navigation, Lazy Loading, Command Palette, Voice-Trigger und globale Modals.
+- `apps/web/src/store/` — Redux-Slices und Persist-Konfiguration.
+- `apps/web/src/services/db.ts` — Einstiegspunkt fuer DB und Repositories.
+- Hooks wie `useMealPlan`, `useShoppingList`, `useMealPlannerScreen` lesen reaktiv aus Dexie (`useLiveQuery`).
 
 Mehr Details stehen in [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) und [docs/PROJECT-STRUCTURE.md](./docs/PROJECT-STRUCTURE.md).
 
@@ -59,7 +60,7 @@ Mehr Details stehen in [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) und [docs/
 
 ### Voraussetzungen
 
-- Node.js 22 oder neuer (lokal); CI verwendet Node **24** fuer Setup-Schritte
+- Node.js **24** (`.node-version`, CI, DevContainer); lokal mindestens 22 mit Engine-Warnung
 - pnpm 10 oder neuer (alternativ: `npm run …` / `npx pnpm@10` wie in [docs/TESTING.md](./docs/TESTING.md))
 
 ### Installation
@@ -88,16 +89,16 @@ pnpm run check:all   # lint + type-check + test + build + bundle-budget + npm au
 
 ## KI und API-Key
 
-- Gemini-Aufrufe leben ausschliesslich in `src/services/geminiService.ts`; strukturierte JSON-Nutzlasten werden nach dem Parsen mit **Zod** validiert.
+- Gemini-Aufrufe leben ausschliesslich in `apps/web/src/services/geminiService.ts`; strukturierte JSON-Nutzlasten werden nach dem Parsen mit **Zod** validiert.
 - Der API-Key wird durch den Nutzer ueber die Einstellungen hinterlegt.
 - Der Key wird nicht ueber `process.env`, `VITE_*`, `localStorage` oder den Build verteilt.
-- Die Speicherung erfolgt **verschlüsselt (WebCrypto)** in IndexedDB ueber `src/services/apiKeyService.ts`, mit Legacy-Fallback nur ohne `crypto.subtle`.
+- Die Speicherung erfolgt **verschlüsselt (WebCrypto)** in IndexedDB ueber `apps/web/src/services/apiKeyService.ts`, mit Legacy-Fallback nur ohne `crypto.subtle`.
 
 ## Deployment
 
 Das Repo deployt automatisch auf GitHub Pages, wenn `main` aktualisiert wird.
 
-- CI: `.github/workflows/ci.yml` (ruft den wiederverwendbaren Workflow **`.github/workflows/validate.yml`** auf: lint → **type-check** → test:coverage → build → bundle-budget)
+- CI: `.github/workflows/ci.yml` → **`validate.yml`**: lint → type-check → test:coverage → build → bundle-budget → **pnpm audit (high)** → Playwright-Smoke
 - Deploy: `.github/workflows/deploy.yml`
 - CodeQL: `.github/workflows/codeql.yml`
 

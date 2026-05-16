@@ -1,72 +1,87 @@
 # Projektstruktur
 
-## Root
+> **Stand:** 2026-05-16 — pnpm/Turborepo-Monorepo (`apps/web`, `packages/*`)
 
-- `index.tsx`: App-Entry mit i18n-, Redux- und Persist-Initialisierung
-- `package.json`: Scripts, Abhaengigkeiten, pnpm-Regeln und Overrides
-- `vite.config.ts`: Build-, Chunking- und Pages-Basis-Konfiguration
-- `vitest.config.ts`: Testkonfiguration
-- `budget.json`: Bundle-Budget fuer den Deploy-Gate
-- `CHANGELOG.md`: nennenswerte Aenderungen nach Keep a Changelog
+## Root (Monorepo)
 
-## Wichtige Quellordner
+- `package.json`: Workspace-Root, Turbo-Scripts, pnpm-Overrides, `check:all`
+- `pnpm-workspace.yaml`: `apps/*`, `packages/*`
+- `turbo.json`: Task-Orchestrierung (build, lint, test, …)
+- `eslint.config.js`: ESLint für `apps/web` und `packages/ai-core`
+- `scripts/`: Bundle-Budget (`check-bundle-budget.mjs`), i18n-Scans
+- `CHANGELOG.md`, `ROADMAP.md`, `AUDIT.md`
+- `.node-version`: Node **24** (CI/DevContainer)
 
-### `src/components/`
+## `apps/web/` — React PWA
 
-- Top-Level-Seiten wie `PantryManager.tsx`, `RecipeBook.tsx`, `MealPlanner.tsx`, `ShoppingList.tsx`, `Settings.tsx`
-- Feature-Unterordner fuer fachlich gebuendelte Teilkomponenten (z. B. `recipe-detail/`, `cook-mode/`, `shopping-list/`)
-- `cook-mode/`: Kochmodus-UI und `cookModeReducer`; Controller-Logik in `src/hooks/useCookModeController.ts`
-- `meal-planner/`: u. a. `mealPlannerConstants.ts` (`MEAL_TYPES` / `MealType`), **`dayColumnPantryStatus.ts`** (`getMealPlanSlotPantryStatus` fuer Vorratsanzeige in `DayColumn` / `PlannedMealCard`)
-- `__tests__/` fuer komponentennahe und Smoke-Tests (u. a. MealPlanner, CookModeView, RecipeDetailTabs, PantryManager, ShoppingList)
+- `index.tsx`: App-Entry (Store-Bootstrap, i18n, Provider, Persist Gate)
+- `index.html`, `vite.config.ts`, `vitest.config.ts`, `tsconfig.json`, `budget.json`
+- `package.json`: App-Abhängigkeiten und Scripts (`dev`, `build`, `test`, …)
+- `public/`: statische Assets (PWA, Logos, `404.html`)
+- `.storybook/`: Storybook-Konfiguration
+- `e2e/`: Playwright-Smoke gegen `vite preview`
 
-### `src/hooks/`
+### `apps/web/src/components/`
 
-- UI- und Feature-Hooks
-- Enthalten unter anderem `useMealPlan`, `useMealPlannerScreen`, `useShoppingList`, `useCookModeController`, `useModalA11y`, Sprach- und Fenster-Hooks
+- Top-Level-Seiten: `PantryManager.tsx`, `RecipeBook.tsx`, `MealPlanner.tsx`, `ShoppingList.tsx`, `Settings.tsx`
+- Feature-Unterordner: `recipe-detail/`, `cook-mode/`, `shopping-list/`, `meal-planner/`, …
+- `__tests__/`: Smoke- und Komponententests
 
-### `src/services/`
+### `apps/web/src/hooks/`
 
-- Business- und Integrationslogik
-- Datenbank, KI, Export, Fehlerlogging, Voice-Processing, Scanner, Sync und Utilities
-- Settings: `settingsService.ts` (Laden aus Persist), `settingsMigration.ts`, `settingsMerge.ts`, `settingsKeys.ts`
+- Domain-Hooks: `useMealPlan`, `useMealPlannerScreen`, `useShoppingList`, `usePantryManager`, `useCookModeController`, …
 
-### `src/store/`
+### `apps/web/src/services/`
 
-- Redux-Konfiguration, Listener-Middleware und Slices
-- Persistenzadapter fuer Redux
-- `migrateLegacySettingsBeforePersist.ts`: wird als **erster** Side-Effect beim Laden von `store/index.ts` ausgefuehrt (Legacy-Settings → Persist)
+- DB-Einstieg: `db.ts`, Repositories unter `repositories/`
+- KI: `geminiService.ts` (einzige Gemini-Fassade)
+- Keys: `apiKeyService.ts`
+- Export, Voice, Scanner, Sync, Settings-Hilfen
 
-### `src/contexts/`
+### `apps/web/src/store/`
 
-- Context-Provider fuer komplexere Features: Vorratsverwaltung, Einkaufsliste, **Essensplan** (`MealPlannerContext.tsx`)
-- **`MealPlannerContext.test.tsx`**, **`PantryManagerContext.test.tsx`**, **`ShoppingListContext.test.tsx`** — Provider-Kontrakt (Throw ohne Provider, Value mit gemocktem Hook)
-- Diese Provider tragen inzwischen auch zustandsgetriebene Confirm-/Modal-Flows fuer destructive Aktionen.
+- Redux: `index.ts`, Slices, `listenerMiddleware.ts`
+- Persist: `persistStorage.ts`, `indexedPersistStorage.ts`, `migrateLegacySettingsBeforePersist.ts`
+- Dexie-State-Hilfen: `stateDexie.ts` (nur wo dokumentiert)
 
-### `src/locales/`
+### `apps/web/src/contexts/`
 
-- Deutsche und englische Uebersetzungen
-- Je Sprache Aufteilung in `core.json`, `settings.json` und `features.json`
-- Aggregation ueber `src/locales/de/index.ts` und `src/locales/en/index.ts`
-- Neue Sprachschluessel sollen in den vorhandenen Domains erweitert werden, nicht in neue Monolith-Dateien
+- `MealPlannerContext`, `PantryManagerContext`, `ShoppingListContext`
 
-### `src/test/`
+### `apps/web/src/locales/`
 
-- testbezogene Utilities, MSW-Setup, Vitest-`setupTests.ts`
-- **`createTestStore.ts`:** schlanker Redux-Store fuer Hook-/Integrations-Tests (ohne Redux-Persist, `combineReducers` + Defaults aus `getDefaultSettings()`)
+- `de/` und `en/`: `core.json`, `settings.json`, `features.json` + `index.ts`
 
-## Infrastrukturordner
+### `apps/web/src/test/`
 
-- `.github/workflows/`: CI (**`ci.yml`** ruft **`validate.yml`** auf: lint, type-check, test:coverage, build, bundle-budget), Deploy, CodeQL, optional Tauri-Prep
-- `public/`: statische Assets fuer Pages/PWA
-- `scripts/`: Bundle-Budget, i18n-Checks und Asset-Utilities
-- `src-tauri/`: nativer Wrapper fuer Tauri
+- `setupTests.ts`, MSW (`msw/`), `createTestStore.ts`
 
-## Orientierung fuer neue Aenderungen
+## `packages/`
 
-- UI-only Zustand: `src/store/`
-- Persistente Domaindaten: `src/services/db.ts` plus Repositories
-- Neue Seite: `src/components/`
-- Neue Modalkomponente: eigener Komponentenfile plus `useModalA11y`
-- Neue Confirm-Logik fuer irreversible Aktionen: pending state im Hook/Container, nicht direkt `window.confirm()` in Komponenten
-- Neue Uebersetzungen: `src/locales/{de,en}/` in der passenden Domain-Datei erweitern
-- Neue Doku: Root-Datei fuer Maintainer-/Community-Themen, `docs/` fuer Fach- und Betriebsdokumentation
+### `packages/ai-core/` (`@domain/ai-core`)
+
+- Shared AI-Hilfen: `sanitizeForPrompt`, `workerBus`, optionale ML-Imports
+- Wird von `apps/web` per `workspace:*` eingebunden
+
+### `packages/ui/` (`@domain/ui`)
+
+- Design-Tokens: `tokens.css`, `tailwind-preset.cjs`
+- Build erzeugt leeres `dist/` für Turbo-Cache-Kompatibilität
+
+## Weitere Root-Ordner
+
+- `src-tauri/`: Tauri-Desktop-Wrapper (`tauri.conf.json` → `apps/web/dist`)
+- `.github/workflows/`: `validate.yml` (lint → type-check → test:coverage → build → budget → **audit** → Playwright), `ci.yml`, `deploy.yml`, CodeQL
+- `docs/`: Fach- und Betriebsdokumentation
+- `lighthouserc.json`: Lighthouse CI gegen `apps/web/dist` (manuell / optional)
+
+## Orientierung für neue Änderungen
+
+| Was | Wo |
+|-----|-----|
+| UI-only Zustand | `apps/web/src/store/` |
+| Persistente Domaindaten | `apps/web/src/services/db.ts` + Repositories |
+| Neue Seite | `apps/web/src/components/` |
+| Gemini / API-Key | `geminiService.ts` / `apiKeyService.ts` nur in `apps/web` |
+| Übersetzungen | `apps/web/src/locales/{de,en}/` |
+| Workspace-Befehle | Root: `pnpm run dev` → Turbo filter `web` |
