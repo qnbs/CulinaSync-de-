@@ -7,6 +7,10 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geaendert
+- **CI:** `.github/workflows/validate.yml` — nach **Lint** zusätzlich **`pnpm run type-check`** (**tsgo**), entspricht dem Kernpfad von `check:all` (ohne `npm audit`). **`tauri-release.yml`**: pnpm 10, frozen lockfile, **checkout/setup-node/pnpm v6**, Node **24**, **`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`**.
+- **Doku/Kanon:** `.github/copilot-instructions.md`, `README`, `CONTRIBUTING`, `docs/DEPLOYMENT`, `docs/DEVELOPMENT`, `docs/TESTING`, `instructions.md`, `AUDIT`; **Cursor** `.cursor/index.mdc`, `800-testing-standards.mdc`, `105-gemini-genai.mdc` (Globs Ai-Chef).
+
 ### Hinzugefuegt
 - **Tests / M5 (Fortsetzung 2026-05-04):** `shopping-list/__tests__/BulkAddModal.test.tsx`, `shopping-list/__tests__/AiModal.test.tsx`, `pantry/__tests__/PantryList.test.tsx`; erweiterter **`App.smoke.test.tsx`** (Meal-Planner-Route, Toast, Footer-Version, **`vi.mock('./services/db')`**). Zusaetzlich u. a. `fake-indexeddb`, App-/RecipeCard-/GlobalErrorBoundary-Smoke, `useRecipeDetail`, `mealPlannerSmartService`, `retryUtils`, `utils`, Hook-Tests Debounce/WindowSize/SpeechSynthesis/WakeLock/ModalA11y, erweiterte `voiceCommands` (`executeVoiceAction`). Vitest-**Coverage-Thresholds** an v8-Snapshot (Lines 60, Statements 58, Branches 45, Functions 51); `__APP_VERSION__` in Tests; Worker-Pool `maxWorkers: 1`.
 - **Bundle M9.3:** Vite-Chunk `vendor-export` (jspdf, html2canvas, papaparse); PWA-`globIgnores` / Runtime-Cache / Preload-Deferral aktualisiert.

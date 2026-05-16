@@ -97,7 +97,7 @@ pnpm run check:all   # lint + type-check + test + build + bundle-budget + npm au
 
 Das Repo deployt automatisch auf GitHub Pages, wenn `main` aktualisiert wird.
 
-- CI: `.github/workflows/ci.yml`
+- CI: `.github/workflows/ci.yml` (ruft den wiederverwendbaren Workflow **`.github/workflows/validate.yml`** auf: lint → **type-check** → test:coverage → build → bundle-budget)
 - Deploy: `.github/workflows/deploy.yml`
 - CodeQL: `.github/workflows/codeql.yml`
 

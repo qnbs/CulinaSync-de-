@@ -73,6 +73,7 @@ Pruefen:
 
 - `pnpm install --frozen-lockfile`
 - `pnpm run lint`
+- `pnpm run type-check` (wie in **`validate.yml`** nach dem Lint-Step)
 - `pnpm run test` bzw. `pnpm run test:coverage` (wie in CI)
 - `pnpm run build`
 - `pnpm run check:bundle-budget`

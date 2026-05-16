@@ -9,6 +9,6 @@
   },
   "eslint.run": "onSave",
   "i18n-ally.localesPaths": [
-    "src/locales"
+    "apps/web/src/locales"
   ]
 }

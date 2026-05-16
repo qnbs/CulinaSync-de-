@@ -9,7 +9,7 @@
   },
   "onCreateCommand": "npm install -g pnpm@10",
   "postCreateCommand": "pnpm install",
-  "postStartCommand": "pnpm exec tsgo --version",
+  "postStartCommand": "pnpm --filter web exec tsgo --version",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -24,7 +24,7 @@
       "settings": {
         "editor.formatOnSave": false,
         "eslint.run": "onSave",
-        "i18n-ally.localesPaths": ["src/locales"]
+        "i18n-ally.localesPaths": ["apps/web/src/locales"]
       }
     }
   },

@@ -1,0 +1,74 @@
+import { createSlice, PayloadAction, nanoid } from '@reduxjs/toolkit';
+import { Page } from '../../types';
+
+interface Toast {
+  id: string;
+  message: string;
+  type: 'success' | 'error' | 'info';
+}
+
+interface UiState {
+  currentPage: Page;
+  toasts: Toast[];
+  focusAction: string | null;
+  initialSelectedId: number | null;
+  voiceAction: { type: string; payload: string } | null;
+}
+
+const initialState: UiState = {
+  currentPage: 'pantry',
+  toasts: [],
+  focusAction: null,
+  initialSelectedId: null,
+  voiceAction: null,
+};
+
+const uiSlice = createSlice({
+  name: 'ui',
+  initialState,
+  reducers: {
+    setCurrentPage: (state, action: PayloadAction<{ page: Page; focusTarget?: string }>) => {
+      state.currentPage = action.payload.page;
+      state.initialSelectedId = null;
+      if (action.payload.focusTarget) {
+        state.focusAction = action.payload.focusTarget;
+      }
+    },
+    navigateToItem: (state, action: PayloadAction<{ page: 'recipes' | 'pantry'; id: number }>) => {
+        state.initialSelectedId = action.payload.id;
+        state.currentPage = action.payload.page;
+    },
+    addToast: {
+        reducer: (state, action: PayloadAction<Toast>) => {
+            state.toasts.push(action.payload);
+        },
+        prepare: (payload: { message: string, type?: 'success' | 'error' | 'info'}) => {
+            return { payload: { id: nanoid(), type: payload.type || 'success', message: payload.message } }
+        }
+    },
+    removeToast: (state, action: PayloadAction<string>) => {
+      state.toasts = state.toasts.filter((toast) => toast.id !== action.payload);
+    },
+    setFocusAction: (state, action: PayloadAction<string | null>) => {
+        state.focusAction = action.payload;
+    },
+    setVoiceAction: (state, action: PayloadAction<{type: string, payload: string} | null>) => {
+        state.voiceAction = action.payload;
+    },
+    clearInitialSelectedId: (state) => {
+        state.initialSelectedId = null;
+    }
+  },
+});
+
+export const { 
+    setCurrentPage, 
+    navigateToItem, 
+    addToast, 
+    removeToast, 
+    setFocusAction,
+    setVoiceAction,
+    clearInitialSelectedId
+} = uiSlice.actions;
+
+export default uiSlice.reducer;

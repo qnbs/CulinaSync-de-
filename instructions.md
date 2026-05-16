@@ -56,7 +56,7 @@ Implementierung → Diagnostics / ESLint für geänderten Bereich → gezielte T
 | Integration | `pnpm run build` |
 | Vollpaket | `pnpm run check:all` |
 
-CI-Orientierung: **Node 24** in Workflows; nach Push Workflows beobachten bis grün (siehe Copilot-Instructions).
+CI-Orientierung: **Node 24** in Workflows; **validate.yml** führt u. a. **type-check** und **test:coverage** aus (siehe `.github/copilot-instructions.md`). Nach Push Workflows beobachten bis grün.
 
 ---
 
@@ -64,7 +64,7 @@ CI-Orientierung: **Node 24** in Workflows; nach Push Workflows beobachten bis gr
 
 - Framework: **Vitest**, **MSW**, **Testing Library**; Muster unter `src/**/*.test.ts(x)`.
 - **Verboten:** Fehlgeschlagene Tests dauerhaft auskommentieren oder löschen, um CI zu „grün zu tricksen“.
-- Coverage-Ziel laut Roadmap: **≥70 %** Statements/Lines (aktuell ~42 %/44 % — siehe `ROADMAP.md` M5).
+- Coverage-Ziel laut Roadmap: **≥70 %** Statements/Lines (Snapshot Mai 2026 ca. **59 %/61 %**; Thresholds in `vitest.config.ts` — siehe `ROADMAP.md` M5).
 
 ---
 

@@ -7,10 +7,15 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'node_modules/**', 'coverage/**'],
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/coverage/**',
+      'packages/**/dist/**',
+    ],
   },
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ['apps/web/**/*.{ts,tsx}', 'packages/ai-core/**/*.ts'],
     extends: [
       js.configs.recommended,
       react.configs.flat.recommended,

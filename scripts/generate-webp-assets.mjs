@@ -3,7 +3,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 
 const rootDir = process.cwd();
-const publicDir = path.join(rootDir, 'public');
+const publicDir = path.join(rootDir, 'apps', 'web', 'public');
 const supportedExtensions = new Set(['.png', '.jpg', '.jpeg']);
 
 const walk = async (dirPath) => {

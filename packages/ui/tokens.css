@@ -1,0 +1,11 @@
+/**
+ * Shared design tokens — imported once from apps/web/src/index.css
+ */
+:root {
+  --color-accent-300: #fcd34d;
+  --color-accent-400: #fbbf24;
+  --color-accent-500: #f59e0b;
+  --color-accent-glow: 251, 191, 36;
+  --color-accent-glow-soft: rgba(251, 191, 36, 0.2);
+  --color-accent-400-semi: rgba(251, 191, 36, 0.8);
+}

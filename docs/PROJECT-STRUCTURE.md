@@ -56,7 +56,7 @@
 
 ## Infrastrukturordner
 
-- `.github/workflows/`: CI, Deploy und CodeQL
+- `.github/workflows/`: CI (**`ci.yml`** ruft **`validate.yml`** auf: lint, type-check, test:coverage, build, bundle-budget), Deploy, CodeQL, optional Tauri-Prep
 - `public/`: statische Assets fuer Pages/PWA
 - `scripts/`: Bundle-Budget, i18n-Checks und Asset-Utilities
 - `src-tauri/`: nativer Wrapper fuer Tauri

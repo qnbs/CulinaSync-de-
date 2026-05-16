@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, statSync, writeFileSync, mkdirSync } from 'n
 import { join } from 'node:path';
 
 const ROOT = process.cwd();
-const SRC_DIR = join(ROOT, 'src');
+const SRC_DIR = join(ROOT, 'apps', 'web', 'src');
 const REPORT_DIR = join(ROOT, 'reports');
 const REPORT_FILE = join(REPORT_DIR, 'i18n-hardcoded-report.md');
 

@@ -1,6 +1,6 @@
 ---
 description: Isolate Gemini calls | changes to AI services | single facade,validated outputs
-globs: src/services/geminiService.ts,src/services/apiKeyService.ts,src/features/ai-chef/**/*.ts
+globs: src/services/geminiService.ts,src/services/apiKeyService.ts,src/features/ai-chef/**/*.ts,src/features/ai-chef/**/*.tsx,src/components/ai-chef/**/*.tsx
 alwaysApply: false
 ---
 

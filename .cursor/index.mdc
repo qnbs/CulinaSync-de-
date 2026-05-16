@@ -11,7 +11,7 @@ alwaysApply: true
 
 **Architektur:** SPA ohne Next.js. Eintritt `index.tsx` → `App.tsx`; schwere Routen per `React.lazy`. Persistenz: nur über `src/services/db.ts` und Repositories unter `src/services/repositories/**` — keine Dexie-Zugriffe in UI. Lesen reaktiv via `useLiveQuery` / Domain-Hooks. KI ausschließlich über `src/services/geminiService.ts`; Schlüssel nur Nutzer/API-Key-Service, nie `VITE_*`/Build-Env. Fehler: `logAppError`, `GlobalErrorBoundary`, Thunk-Toasts.
 
-**Tests/Qualität:** Vitest 4, jsdom, MSW, Testing Library; `npm run check:all` (Lint, tsgo, Test, Build, Budget, Audit). ESLint flat config; Husky/commitlint.
+**Tests/Qualität:** Vitest 4, jsdom, MSW, Testing Library; `npm run check:all` (Lint, tsgo, Test, Build, Budget, Audit). GitHub **validate.yml**: Lint → **type-check** → test:coverage → Build → Bundle-Budget (wie Kernpfad von `check:all`, ohne `npm audit`). ESLint flat config; Husky/commitlint.
 
 **Kanondoku:** `README.md`, `docs/ARCHITECTURE.md`, `.github/copilot-instructions.md`. Modulare Cursor-Regeln: `.cursor/rules/*.mdc` (Nomenklatur `000–899`); Legacy-Hinweis: `.cursorrules` durch `.mdc` ergänzt, nicht alleinige Quelle.
 

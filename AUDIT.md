@@ -10,8 +10,9 @@
 - **Tests:** Vitest **222** Tests (**59** Dateien); Coverage ca. **59 %** Stmts / **61 %** Lines / **46 %** Branches / **52 %** Funcs — **≥70 %** (ROADMAP M5) weiterhin offen; Vitest **thresholds** (Lines 60, Statements 58, Branches 45, Functions 51); `fake-indexeddb` + Test-Shims; u. a. `App.smoke` + `services/db`-Mock, **`BulkAddModal`** / **`AiModal`**, **`PantryList`**, `useRecipeDetail`, `voiceCommands.executeVoiceAction`, Service-Utils.
 - **Bundle:** Chunk **`vendor-export`** (jspdf, html2canvas, papaparse), PWA-Anpassungen — M9.3 teilweise.
 - **ESLint:** `react-hooks/exhaustive-deps` auf **warn**; `usePantryManager` Dependencies bereinigt.
-- **Tauri:** `package.identifier`; Workflow **tauri-release** (Prep); README-Abschnitt Desktop.
+- **Tauri:** `package.identifier`; README-Abschnitt Desktop; Workflow **tauri-release** (Prep) mit pnpm, Node 24, Actions v6.
 - **Doku:** `docs/STATUS-2026-05-04.md`, `docs/LIVE-DEMO-QA.md`; README/ROADMAP/CHANGELOG aktualisiert.
+- **CI:** **`validate.yml`** nach **Lint** mit **`pnpm run type-check` (tsgo)** erweitert (Kernpfad wie `check:all`, ohne `npm audit`).
 
 ---
 

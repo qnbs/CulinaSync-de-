@@ -10,6 +10,7 @@ alwaysApply: false
 - **Verbote:** **Niemals** fehlschlagende Tests auskommentieren oder löschen, „nur damit CI grün wird“. Ursache beheben oder Test präzisieren.
 - **Isolation:** MSW (`src/test/msw`) oder `vi.mock` für externe APIs; Redux/Provider wie in Nachbartests aufsetzen; keine Abhängigkeit von Ausführungsreihenfolge ganzer Suite.
 - **Lesbarkeit:** `describe`/`it` klar benennen; Arrange-Act-Assert; async mit `await`/userEvent korrekt.
+- **Coverage-Gates:** `vitest.config.ts` definiert globale **thresholds** (v8); neue Suites sollten Rückschläge vermeiden — bei gezieltem Absenken nur mit Absprache/CHANGELOG.
 
 <example>
 it('shows error when gemini fails', async () => {

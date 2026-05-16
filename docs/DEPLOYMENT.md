@@ -17,6 +17,7 @@ Das Repository verwendet GitHub Actions fuer CI, Deploy und CodeQL.
 - **Node.js 24** einrichten (`actions/setup-node`, siehe `validate.yml` / `ci.yml`)
 - `pnpm install --frozen-lockfile`
 - Lint
+- **`pnpm run type-check`** (**tsgo**, wie lokal in `check:all`)
 - **`pnpm run test:coverage`** (Vitest inkl. v8-Coverage)
 - Upload Artefakt **`coverage-lcov`** (`actions/upload-artifact@v4`, Ordner `coverage/`, Retention 14 Tage)
 - Build (`tsgo && vite build`)
@@ -26,7 +27,7 @@ Das Repository verwendet GitHub Actions fuer CI, Deploy und CodeQL.
 ### Deploy
 
 - identischer pnpm-/Node-Setup wie Validate (wiederverwendbarer Workflow `validate.yml` mit `upload-pages-artifact: true`)
-- Lint, Tests **mit Coverage**, Build, Bundle-Budget
+- Lint, **Typecheck**, Tests **mit Coverage**, Build, Bundle-Budget
 - Upload des `dist/`-Artifacts fuer Pages
 - Deployment nach GitHub Pages
 
@@ -37,8 +38,9 @@ Das Repository verwendet GitHub Actions fuer CI, Deploy und CodeQL.
 
 ## Pages-spezifische Fakten
 
-- `vite.config.ts` setzt `base` in Actions auf `/CulinaSync-de-/`.
-- Das Web-App-Manifest wird zur Build-Zeit durch `vite-plugin-pwa` aus `vite.config.ts` erzeugt; es gibt bewusst kein zweites statisches `public/manifest.json` mehr.
+- `apps/web/vite.config.ts` setzt `base` in Actions auf `/CulinaSync-de-/`.
+- Das Web-App-Manifest wird zur Build-Zeit durch `vite-plugin-pwa` aus der App-Vite-Konfiguration erzeugt; der Service Worker nutzt **`injectManifest`** mit `apps/web/src/sw.ts` (Navigation **Network-first**, schwere Assets zur Laufzeit **Cache-first** wie zuvor über Runtime-Routes).
+- Es gibt bewusst kein zweites statisches `public/manifest.json` mehr.
 - Die Locale-Ressourcen werden zur Build-Zeit aus `src/locales/{de,en}/index.ts` aggregiert; es gibt keine separaten Runtime-Fetches fuer Sprachdateien.
 - Die Live-Demo liegt unter `https://qnbs.github.io/CulinaSync-de-/`.
 - SPA-Verhalten benoetigt weiterhin passende 404-Weiterleitung und korrekte Asset-Pfade.

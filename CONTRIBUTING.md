@@ -32,6 +32,7 @@ pnpm run dev
 
 ```bash
 pnpm run lint
+pnpm run type-check
 pnpm run test
 pnpm run build
 ```

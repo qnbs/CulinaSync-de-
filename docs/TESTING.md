@@ -76,7 +76,7 @@ pnpm run check:bundle-budget
 
 - **Vitest:** **222** Tests in **59** Dateien; ergänzend u. a. `BulkAddModal` / `AiModal` (Einkaufsliste), `PantryList`, erweiterter **`App.smoke.test.tsx`** (u. a. `services/db`-Mock), Pantry-/Shopping-Smoke, Context- und Repository-Suites, `dayColumnPantryStatus`, `DayColumn`; **`geminiMsw.test.ts`** validiert MSW-Responses mit Zod.
 - **Coverage (v8):** ca. **59 %** Statements / **61 %** Lines / **46 %** Branches / **52 %** Functions — Ziel ≥70 % laut [ROADMAP.md](../ROADMAP.md) M5 weiterhin offen; **`vitest.config.ts`** definiert **Mindest-Thresholds** (Regressionsschutz).
-- **CI:** `.github/workflows/validate.yml` fuehrt **`pnpm run test:coverage`** aus und laedt das Verzeichnis **`coverage`** als Artefakt **coverage-lcov** (14 Tage); **Bundle-Budget** laeuft bei jedem Validate (PR + Deploy-Pfad).
+- **CI:** `.github/workflows/validate.yml` — **`pnpm run lint`**, **`pnpm run type-check`**, **`pnpm run test:coverage`**, **`pnpm run build`**, **`pnpm run check:bundle-budget`**; Upload **`coverage`** als Artefakt **coverage-lcov** (14 Tage). PRs zusaetzlich **i18n-check** (`ci.yml`).
 - Service- und Reducer-Tests wie oben; **Gemini-Integration** prueft u. a. gueltige JSON-Struktur (Zod); bei Typveraenderungen der KI-Antworten Tests und Schemas in `geminiService.ts` anpassen.
 - Aktueller Snapshot: [STATUS-2026-05-04.md](./STATUS-2026-05-04.md); Vorgaenger: [STATUS-2026-05-02.md](./STATUS-2026-05-02.md).
 - `pnpm run lint` mit `--max-warnings 0`; generiertes **`coverage/**`** ist ESLint-ignoriert; `react-hooks/exhaustive-deps` ist auf **`warn`** — Warnungen im geaenderten Code abbauen, bevor auf `error` verschärft wird.
