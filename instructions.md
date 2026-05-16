@@ -1,6 +1,6 @@
 # CulinaSync — Entwicklungs- und Agenten-Anweisungen
 
-**Version:** 1.0 · **Stand:** 2026-05-04  
+**Version:** 1.1 · **Stand:** 2026-05-16  
 **Zweck:** Diese Datei ist der **primäre Einstieg** für Menschen und KI-Agenten. Sie verbindet Produktvorgaben (`PRD.md`), Architektur (`docs/`) und tägliche Arbeitsregeln — ohne `.github/copilot-instructions.md` zu ersetzen (diese bleiben die detaillierte technische Referenz).
 
 ---
@@ -16,7 +16,7 @@
 | P2 | **`docs/PROJECT-STRUCTURE.md`** | Ordnerzugehörigkeit neuer Dateien |
 | P2 | **`ROADMAP.md`** | Meilensteine, Audit-Referenzen, grobe Aufwände |
 | P2 | **`SECURITY.md`** | Meldewege, Schlüssel-/Export-Konventionen |
-| P3 | **`docs/STATUS-*.md`** | Zeitlich begrenzte Snapshots (ersetzen keine PRD) |
+| P3 | **`docs/STATUS-*.md`** | Zeitlich begrenzte Snapshots (aktuell: `STATUS-2026-05-16.md`) |
 
 **Regel für Agenten:** Vor **architektonisch wirksamen** Änderungen (neue Domänen-Schicht, neue Persistenz, Breaking UX) mindestens **`PRD.md`** (Scope + NFR) und **`docs/ARCHITECTURE.md`** lesen. Bei reinen Bugfixes oder lokaler UI-Anpassung genügen technische Regeln + betroffene Dateien.
 
@@ -30,13 +30,14 @@ Local-first, installierbare **PWA** für Vorrat, Rezepte, Essensplan und Einkauf
 
 ## 3. Nicht verhandelbare technische Grenzen
 
-1. **Dexie/IndexedDB:** Schreiben nur über **`src/services/db.ts`** und Repositories — keine direkten Tabellenzugriffe aus Komponenten.
-2. **Gemini:** Nur **`src/services/geminiService.ts`**; strukturierte Antworten nach **`JSON.parse`** mit **Zod** absichern (`parseAiJsonWithSchema`-Muster).
-3. **API-Key:** Niemals `VITE_*`, `process.env` oder Build-Embed für Nutzerschlüssel — nur **`apiKeyService.ts`** und Einstellungen.
-4. **Redux:** Primär UI/Session; nur **`settings`** persistiert; Domaindaten nicht duplizieren.
-5. **i18n:** Nutzersichtbare Strings in **`src/locales/de/`** und **`src/locales/en/`** synchron (`core`, `settings`, `features`).
-6. **A11y:** Modals mit **`useModalA11y`**; siehe Copilot-Instructions für Tabs/Banner/Icons.
-7. **Fehler:** **`logAppError`**, Listener-Middleware für Thunks, **`GlobalErrorBoundary`** für Renderfehler.
+1. **Monorepo:** App unter **`apps/web/`**; Shared Code in **`packages/*`**; Root-Befehle via Turbo (`pnpm run dev`, `check:all`).
+2. **Dexie/IndexedDB:** Schreiben nur über **`apps/web/src/services/db.ts`** und Repositories — keine direkten Tabellenzugriffe aus Komponenten.
+3. **Gemini:** Nur **`apps/web/src/services/geminiService.ts`**; strukturierte Antworten nach **`JSON.parse`** mit **Zod** absichern (`parseAiJsonWithSchema`-Muster).
+4. **API-Key:** Niemals `VITE_*`, `process.env` oder Build-Embed für Nutzerschlüssel — nur **`apiKeyService.ts`** und Einstellungen.
+5. **Redux:** Primär UI/Session; nur **`settings`** persistiert; Domaindaten nicht duplizieren.
+6. **i18n:** Nutzersichtbare Strings in **`apps/web/src/locales/de/`** und **`apps/web/src/locales/en/`** synchron (`core`, `settings`, `features`).
+7. **A11y:** Modals mit **`useModalA11y`**; siehe Copilot-Instructions für Tabs/Banner/Icons.
+8. **Fehler:** **`logAppError`**, Listener-Middleware für Thunks, **`GlobalErrorBoundary`** für Renderfehler.
 
 ---
 
@@ -62,9 +63,9 @@ CI-Orientierung: **Node 24** in Workflows; **validate.yml** führt u. a. **type-
 
 ## 5. Tests und Qualität
 
-- Framework: **Vitest**, **MSW**, **Testing Library**; Muster unter `src/**/*.test.ts(x)`.
+- Framework: **Vitest**, **MSW**, **Testing Library**; Muster unter `apps/web/src/**/*.test.ts(x)`.
 - **Verboten:** Fehlgeschlagene Tests dauerhaft auskommentieren oder löschen, um CI zu „grün zu tricksen“.
-- Coverage-Ziel laut Roadmap: **≥70 %** Statements/Lines (Snapshot Mai 2026 ca. **59 %/61 %**; Thresholds in `vitest.config.ts` — siehe `ROADMAP.md` M5).
+- Coverage-Ziel laut Roadmap: **≥70 %** Statements/Lines (Snapshot Mai 2026 ca. **59 %/61 %**; Thresholds in `apps/web/vitest.config.ts` — siehe `ROADMAP.md` M5).
 
 ---
 

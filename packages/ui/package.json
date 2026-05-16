@@ -9,7 +9,7 @@
     "./tokens.css": "./tokens.css"
   },
   "scripts": {
-    "build": "node -e \"process.exit(0)\"",
+    "build": "node -e \"require('node:fs').mkdirSync('dist',{recursive:true})\"",
     "lint": "node -e \"process.exit(0)\"",
     "type-check": "node -e \"process.exit(0)\"",
     "test": "node -e \"process.exit(0)\"",

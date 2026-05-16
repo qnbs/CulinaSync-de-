@@ -7,7 +7,33 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-05-16
+
+### Hinzugefuegt
+
+- **Monorepo:** Turborepo + pnpm-Workspace — App unter `apps/web/`, Shared Packages `@domain/ai-core` und `@domain/ui`.
+- **CI:** `pnpm audit --audit-level=high` in `validate.yml`; Coverage-Artefakt; Playwright-Smoke; type-check (tsgo) im Validate-Pfad.
+- **Doku:** `docs/PROJECT-STRUCTURE.md`, `docs/STATUS-2026-05-16.md`; Pfade und Agenten-Regeln auf Monorepo synchronisiert.
+
 ### Geaendert
+
+- Root-Scripts delegieren via Turbo (`pnpm run dev`, `check:all`); `lighthouserc.json` → `apps/web/dist`.
+- `pnpm.overrides` fuer Supply-Chain (protobufjs, babel-systemjs, fast-uri) — Audit High/Critical **0**.
+
+### Behoben
+
+- **CI type-check:** `turbo.json` — `type-check` haengt von `^build` ab (`@domain/ai-core`/`@domain/ui` vor `web#type-check`; behebt TS2307 in frischen CI-Laeufen).
+
+### Archiv — Entwicklung seit v0.1.0 (Auszug)
+
+Die folgenden Eintraege dokumentieren die Arbeit zwischen **v0.1.0** und **v0.2.0** (noch unter dem frueheren `[Unreleased]`-Block gefuehrt).
+
+### Geaendert
+
+- **Monorepo (Follow-up):** Post-Migration Housekeeping — `pnpm.overrides` fuer Audit-Highs (protobufjs, babel-systemjs, fast-uri); CI **`pnpm audit --audit-level=high`** in `validate.yml`; `lighthouserc.json` → `apps/web/dist`; Turbo-`dist/` fuer `@domain/ui`.
+- **Doku/Agenten:** Pfade auf `apps/web/src/` in README, copilot-instructions, Cursor-Rules, `docs/PROJECT-STRUCTURE.md` (neu), DEVELOPMENT, TESTING, DEPLOYMENT, `instructions.md`; Snapshot `docs/STATUS-2026-05-16.md`; AUDIT-Status-Block 2026-05-16.
+
+### Geaendert (vorherige Unreleased-Eintraege)
 - **CI:** `.github/workflows/validate.yml` — nach **Lint** zusätzlich **`pnpm run type-check`** (**tsgo**), entspricht dem Kernpfad von `check:all` (ohne `npm audit`). **`tauri-release.yml`**: pnpm 10, frozen lockfile, **checkout/setup-node/pnpm v6**, Node **24**, **`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`**.
 - **Doku/Kanon:** `.github/copilot-instructions.md`, `README`, `CONTRIBUTING`, `docs/DEPLOYMENT`, `docs/DEVELOPMENT`, `docs/TESTING`, `instructions.md`, `AUDIT`; **Cursor** `.cursor/index.mdc`, `800-testing-standards.mdc`, `105-gemini-genai.mdc` (Globs Ai-Chef).
 
@@ -184,5 +210,6 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - CI-Pipeline mit Lint, TypeScript-Check, Tests und Bundle-Budget
 - CodeQL Security Analysis
 
-[Unreleased]: https://github.com/qnbs/CulinaSync-de-/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/qnbs/CulinaSync-de-/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/qnbs/CulinaSync-de-/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/qnbs/CulinaSync-de-/releases/tag/v0.1.0
