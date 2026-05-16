@@ -6,11 +6,11 @@ Datum: 2026-04-22
 
 Geprueft wurden insbesondere diese Bereiche:
 
-- `src/services/db.ts`, `src/services/dbInstance.ts`, `src/services/dbMigrations.ts`
-- `src/services/apiKeyService.ts`
+- `apps/web/src/services/db.ts`, `apps/web/src/services/dbInstance.ts`, `apps/web/src/services/dbMigrations.ts`
+- `apps/web/src/services/apiKeyService.ts`
 - DOM-Rendering von nutzer- oder KI-generierten Texten in React-Komponenten
-- `src/services/exportService.ts`
-- angrenzend aufgefallen: `src/services/healthConnectService.ts`, `src/services/settingsService.ts`
+- `apps/web/src/services/exportService.ts`
+- angrenzend aufgefallen: `apps/web/src/services/healthConnectService.ts`, `apps/web/src/services/settingsService.ts`
 
 ## Executive Summary
 

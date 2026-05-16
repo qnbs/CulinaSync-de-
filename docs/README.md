@@ -1,25 +1,37 @@
 # Dokumentationsindex
 
-Dieser Ordner sammelt die projektbezogene Fach- und Betriebsdokumentation fuer CulinaSync.
+Dieser Ordner sammelt die projektbezogene Fach- und Betriebsdokumentation für CulinaSync.
+
+## Aktueller Stand
+
+**[STATUS-2026-05-16.md](./STATUS-2026-05-16.md)** — Monorepo-Migration, Supply-Chain-Audit, Doku-Sync, CI-Audit-Gate.
 
 ## Inhalte
 
-- [STATUS-2026-05-04.md](./STATUS-2026-05-04.md): **aktueller** Repo-Stand 4. Mai 2026 (**222** Vitest-Tests, Coverage-Snapshot, Einkaufslisten-/Pantry-Tests, erweiterter App-Smoke, Thresholds, Bundle/PWA, Tauri-Prep, Live-Demo-QA)
-- [STATUS-2026-05-02.md](./STATUS-2026-05-02.md): Repo-Stand 2. Mai 2026 (MealPlanner-Context, `dayColumnPantryStatus`, M5-Zwischenstand)
-- [STATUS-2026-05-01.md](./STATUS-2026-05-01.md): Repo-Stand 1. Mai 2026 (Roadmap-Follow-up, Tests, Tauri-CSP, erste Doku-Welle)
-- [STATUS-2026-04-23.md](./STATUS-2026-04-23.md): Snapshot nach TS7-Upgrade / i18n-Wellen
-- [STATUS-2026-04-22.md](./STATUS-2026-04-22.md): Session- und Arbeitsstand April 2026
-- [ARCHITECTURE.md](./ARCHITECTURE.md): Architektur, Datenfluss, Persistenz und Hauptabstraktionen
-- [PROJECT-STRUCTURE.md](./PROJECT-STRUCTURE.md): Repo-Struktur und Verantwortung der wichtigsten Ordner
-- [DEVELOPMENT.md](./DEVELOPMENT.md): lokales Setup, Befehle, Konventionen und Arbeitsablaeufe
-- [TESTING.md](./TESTING.md): Teststrategie, Befehle und erwartete Absicherung
-- [DEPLOYMENT.md](./DEPLOYMENT.md): CI/CD, GitHub Pages, Bundle-Budget und Betriebsdetails
-- [TROUBLESHOOTING.md](./TROUBLESHOOTING.md): haeufige Fehlerbilder und konkrete Gegenmassnahmen
+| Dokument | Inhalt |
+|----------|--------|
+| [STATUS-2026-05-16.md](./STATUS-2026-05-16.md) | **aktuell** — Monorepo, Audit, CI |
+| [STATUS-2026-05-04.md](./STATUS-2026-05-04.md) | M5-Tests, Coverage, Tauri-Prep |
+| [STATUS-2026-05-02.md](./STATUS-2026-05-02.md) | MealPlanner-Context, Repositories |
+| [STATUS-2026-05-01.md](./STATUS-2026-05-01.md) | Roadmap-Follow-up, CSP |
+| [STATUS-2026-04-23.md](./STATUS-2026-04-23.md) | TS7 / DevInfra |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | Schichten, Datenfluss, Monorepo |
+| [PROJECT-STRUCTURE.md](./PROJECT-STRUCTURE.md) | Repo-Layout |
+| [DEVELOPMENT.md](./DEVELOPMENT.md) | Setup, Befehle, Konventionen |
+| [TESTING.md](./TESTING.md) | Vitest, CI, `check:all` |
+| [DEPLOYMENT.md](./DEPLOYMENT.md) | CI/CD, Pages, Lighthouse |
+| [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) | Fehlerbilder |
+| [SECURITY-AUDIT-2026.md](./SECURITY-AUDIT-2026.md) | Security-Review |
+| [LIVE-DEMO-QA.md](./LIVE-DEMO-QA.md) | Manuelle Demo-Checkliste |
 
 ## Einstieg je nach Aufgabe
 
-- Aktueller Repo-Stand oder Session-Handoff: [STATUS-2026-05-04.md](./STATUS-2026-05-04.md) · älter: [STATUS-2026-05-02.md](./STATUS-2026-05-02.md), [STATUS-2026-05-01.md](./STATUS-2026-05-01.md)
-- Neue Features: [DEVELOPMENT.md](./DEVELOPMENT.md) und [ARCHITECTURE.md](./ARCHITECTURE.md)
-- Produktionsproblem: [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) und [DEPLOYMENT.md](./DEPLOYMENT.md)
-- Refactor oder Querschnittsaenderung: [PROJECT-STRUCTURE.md](./PROJECT-STRUCTURE.md)
-- Tests ergaenzen: [TESTING.md](./TESTING.md)
+- **Handoff / Stand:** [STATUS-2026-05-16.md](./STATUS-2026-05-16.md)
+- **Neues Feature:** [DEVELOPMENT.md](./DEVELOPMENT.md), [ARCHITECTURE.md](./ARCHITECTURE.md), Root-[`PRD.md`](../PRD.md)
+- **Produktion / Deploy:** [DEPLOYMENT.md](./DEPLOYMENT.md), [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
+- **Tests:** [TESTING.md](./TESTING.md)
+- **Agenten-Kanon (technisch):** [`.github/copilot-instructions.md`](../.github/copilot-instructions.md), [`instructions.md`](../instructions.md)
+
+## Pfad-Konvention (seit Monorepo)
+
+Anwendungscode liegt unter **`apps/web/src/`** (nicht mehr Repo-Root-`src/`). Shared Packages: **`packages/ai-core`**, **`packages/ui`**.

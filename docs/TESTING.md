@@ -9,12 +9,12 @@
 
 ## Relevante Testorte
 
-- `src/components/**/__tests__/` — u. a. `cook-mode/__tests__/cookModeReducer.test.ts`, `meal-planner/__tests__/mealPlannerConstants.test.ts`, `meal-planner/__tests__/dayColumnPantryStatus.test.ts`, `meal-planner/__tests__/DayColumn.test.tsx`, **`MealPlanner.smoke.test.tsx`**, **`CookModeView.smoke.test.tsx`**, **`PantryManager.smoke.test.tsx`**, **`ShoppingList.smoke.test.tsx`**, **`recipe-detail/__tests__/RecipeDetailTabs.smoke.test.tsx`**, **`App.smoke.test.tsx`**, Root **`RecipeCard.test.tsx`**, **`GlobalErrorBoundary.test.tsx`**, **`shopping-list/__tests__/BulkAddModal.test.tsx`**, **`shopping-list/__tests__/AiModal.test.tsx`**, **`pantry/__tests__/PantryList.test.tsx`**, gemeinsame Stubs **`smokeHookStubs.ts`**
-- `src/contexts/__tests__/` — **`MealPlannerContext.test.tsx`**, **`PantryManagerContext.test.tsx`**, **`ShoppingListContext.test.tsx`**
-- `src/hooks/__tests__/` — **`useMealPlannerScreen.test.tsx`**, **`useCookModeController.test.tsx`**, **`useMealPlan.test.tsx`**, **`useShoppingList.test.tsx`**, **`usePantryManager.test.tsx`**
-- `src/services/__tests__/` — u. a. `voiceCommands.test.ts`, `dataRepository.test.ts`, `mealPlanRepository.test.ts`, `pantryRepository.test.ts`, `utilsCategories.test.ts`, `settingsService.test.ts`, `geminiService.test.ts`, **`geminiMsw.test.ts`** (HTTP-Mock + **Zod**)
-- `src/store/__tests__/`
-- `src/test/` — `setupTests.ts`, MSW (`msw/server.ts`, `msw/handlers.ts`), **`createTestStore.ts`** (Redux-Teststore ohne Persist)
+- `apps/web/src/components/**/__tests__/` — u. a. `cook-mode/__tests__/cookModeReducer.test.ts`, `meal-planner/__tests__/mealPlannerConstants.test.ts`, `meal-planner/__tests__/dayColumnPantryStatus.test.ts`, `meal-planner/__tests__/DayColumn.test.tsx`, **`MealPlanner.smoke.test.tsx`**, **`CookModeView.smoke.test.tsx`**, **`PantryManager.smoke.test.tsx`**, **`ShoppingList.smoke.test.tsx`**, **`recipe-detail/__tests__/RecipeDetailTabs.smoke.test.tsx`**, **`App.smoke.test.tsx`**, Root **`RecipeCard.test.tsx`**, **`GlobalErrorBoundary.test.tsx`**, **`shopping-list/__tests__/BulkAddModal.test.tsx`**, **`shopping-list/__tests__/AiModal.test.tsx`**, **`pantry/__tests__/PantryList.test.tsx`**, gemeinsame Stubs **`smokeHookStubs.ts`**
+- `apps/web/src/contexts/__tests__/` — **`MealPlannerContext.test.tsx`**, **`PantryManagerContext.test.tsx`**, **`ShoppingListContext.test.tsx`**
+- `apps/web/src/hooks/__tests__/` — **`useMealPlannerScreen.test.tsx`**, **`useCookModeController.test.tsx`**, **`useMealPlan.test.tsx`**, **`useShoppingList.test.tsx`**, **`usePantryManager.test.tsx`**
+- `apps/web/src/services/__tests__/` — u. a. `voiceCommands.test.ts`, `dataRepository.test.ts`, `mealPlanRepository.test.ts`, `pantryRepository.test.ts`, `utilsCategories.test.ts`, `settingsService.test.ts`, `geminiService.test.ts`, **`geminiMsw.test.ts`** (HTTP-Mock + **Zod**)
+- `apps/web/src/store/__tests__/`
+- `apps/web/src/test/` — `setupTests.ts`, MSW (`msw/server.ts`, `msw/handlers.ts`), **`createTestStore.ts`** (Redux-Teststore ohne Persist)
 
 ## Befehle
 
@@ -75,8 +75,8 @@ pnpm run check:bundle-budget
 ## Aktueller Validierungsstand 2026-05-04
 
 - **Vitest:** **222** Tests in **59** Dateien; ergänzend u. a. `BulkAddModal` / `AiModal` (Einkaufsliste), `PantryList`, erweiterter **`App.smoke.test.tsx`** (u. a. `services/db`-Mock), Pantry-/Shopping-Smoke, Context- und Repository-Suites, `dayColumnPantryStatus`, `DayColumn`; **`geminiMsw.test.ts`** validiert MSW-Responses mit Zod.
-- **Coverage (v8):** ca. **59 %** Statements / **61 %** Lines / **46 %** Branches / **52 %** Functions — Ziel ≥70 % laut [ROADMAP.md](../ROADMAP.md) M5 weiterhin offen; **`vitest.config.ts`** definiert **Mindest-Thresholds** (Regressionsschutz).
-- **CI:** `.github/workflows/validate.yml` — **`pnpm run lint`**, **`pnpm run type-check`**, **`pnpm run test:coverage`**, **`pnpm run build`**, **`pnpm run check:bundle-budget`**; Upload **`coverage`** als Artefakt **coverage-lcov** (14 Tage). PRs zusaetzlich **i18n-check** (`ci.yml`).
+- **Coverage (v8):** ca. **59 %** Statements / **61 %** Lines / **46 %** Branches / **52 %** Functions — Ziel ≥70 % laut [ROADMAP.md](../ROADMAP.md) M5 weiterhin offen; **`apps/web/vitest.config.ts`** definiert **Mindest-Thresholds** (Regressionsschutz).
+- **CI:** `.github/workflows/validate.yml` — lint → type-check → test:coverage → build → bundle-budget → **`pnpm audit --audit-level=high`** → Playwright-Smoke; Artefakt **coverage-lcov** (14 Tage). PRs zusaetzlich **i18n-check** (`ci.yml`).
 - Service- und Reducer-Tests wie oben; **Gemini-Integration** prueft u. a. gueltige JSON-Struktur (Zod); bei Typveraenderungen der KI-Antworten Tests und Schemas in `geminiService.ts` anpassen.
 - Aktueller Snapshot: [STATUS-2026-05-04.md](./STATUS-2026-05-04.md); Vorgaenger: [STATUS-2026-05-02.md](./STATUS-2026-05-02.md).
 - `pnpm run lint` mit `--max-warnings 0`; generiertes **`coverage/**`** ist ESLint-ignoriert; `react-hooks/exhaustive-deps` ist auf **`warn`** — Warnungen im geaenderten Code abbauen, bevor auf `error` verschärft wird.

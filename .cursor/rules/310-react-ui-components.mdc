@@ -9,8 +9,8 @@ alwaysApply: false
 - **Framework:** Keine Server Components — alles Client-Bundle. Lazy-Load für Seiten und schwere Dialoge wie etabliert in `App.tsx`.
 - **Props:** Explizite TypeScript-Interfaces/`type` alias; booleans als `is*/has*/show*`; Callbacks als `onVerbNoun`; keine unnötigen `any`.
 - **Accessibility:** Fokus-Fallen vermeiden; interaktive Elemente keyboard-tauglich; `aria-*` und Labels konsistent mit bestehenden Hooks (z. B. `useModalA11y`).
-- **i18n:** Keine neuen nutzerseitigen Strings hardcoded — Keys in `src/locales/de|en` spiegeln; Scanner-Skripte (`i18n:scan`) respektieren.
-- **Styling:** Tailwind-Klassen; Print-Stile nur über bestehende Patterns (`src/styles/print.css` etc.). Vor DOM-Manipulation lieber deklaratives React.
+- **i18n:** Keine neuen nutzerseitigen Strings hardcoded — Keys in `apps/web/src/locales/de|en` spiegeln; Scanner-Skripte (`pnpm run i18n:scan`) respektieren.
+- **Styling:** Tailwind-Klassen; Print-Stile nur über bestehende Patterns (`apps/web/src/styles/print.css` etc.). Vor DOM-Manipulation lieber deklaratives React.
 
 <example>
 <button type="button" aria-expanded={open} onClick={onToggle}>{t('features.planner.open')}</button>

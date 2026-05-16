@@ -53,7 +53,7 @@ pnpm run i18n:scan
 ## Architekturregeln
 
 - Redux fuer UI-/Session-State, Dexie fuer persistente Domaindaten.
-- Persistente Daten ueber `src/services/db.ts` und Repositories schreiben, nicht direkt aus Komponenten.
+- Persistente Daten ueber `apps/web/src/services/db.ts` und Repositories schreiben, nicht direkt aus Komponenten.
 - Neue Modals in eigene Dateien auslagern und mit `useModalA11y` absichern.
 - Keine neuen freien Objektpfad-Schreibweisen fuer Settings oder aehnliche Datenstrukturen einfuehren.
 - Keine API-Keys oder Build-Secrets ueber `process.env` oder `VITE_*` in die App einbetten.
