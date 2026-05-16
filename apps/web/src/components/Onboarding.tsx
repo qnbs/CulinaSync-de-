@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Joyride, { CallBackProps, STATUS, Step } from 'react-joyride';
+import { Joyride, STATUS, type EventData, type Step } from 'react-joyride';
 import { ChefHat, FlaskConical, Sparkles, PlayCircle, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useModalA11y } from '../hooks/useModalA11y';
@@ -13,7 +13,6 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
             target: '[data-tour="header"]',
             content: t('onboarding.tour.step1'),
             placement: 'bottom',
-            disableBeacon: true,
         },
         {
             target: '#main-content',
@@ -40,7 +39,7 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
         initialFocusRef: startButtonRef,
     });
 
-    const handleTourCallback = (data: CallBackProps) => {
+    const handleTourEvent = (data: EventData) => {
         const finished = data.status === STATUS.FINISHED || data.status === STATUS.SKIPPED;
         if (finished) {
             onComplete();
@@ -70,18 +69,17 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
             <Joyride
                 run={runTour}
                 steps={tourSteps}
-                callback={handleTourCallback}
+                onEvent={handleTourEvent}
                 continuous
-                showProgress
-                showSkipButton
-                disableScrolling
-                styles={{
-                    options: {
-                        zIndex: 120,
-                        backgroundColor: '#101014',
-                        textColor: '#e4e4e7',
-                        primaryColor: '#f59e0b',
-                    },
+                options={{
+                    skipBeacon: true,
+                    showProgress: true,
+                    skipScroll: true,
+                    zIndex: 120,
+                    backgroundColor: '#101014',
+                    textColor: '#e4e4e7',
+                    primaryColor: '#f59e0b',
+                    buttons: ['back', 'skip', 'primary'],
                 }}
                 locale={{
                     back: 'Zurueck',
