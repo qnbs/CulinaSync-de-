@@ -1,8 +1,6 @@
 @import '@domain/ui/tokens.css';
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@config '../tailwind.config.cjs';
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }
