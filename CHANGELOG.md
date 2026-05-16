@@ -7,9 +7,26 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-05-16
+
+### Hinzugefuegt
+
+- **Monorepo:** Turborepo + pnpm-Workspace — App unter `apps/web/`, Shared Packages `@domain/ai-core` und `@domain/ui`.
+- **CI:** `pnpm audit --audit-level=high` in `validate.yml`; Coverage-Artefakt; Playwright-Smoke; type-check (tsgo) im Validate-Pfad.
+- **Doku:** `docs/PROJECT-STRUCTURE.md`, `docs/STATUS-2026-05-16.md`; Pfade und Agenten-Regeln auf Monorepo synchronisiert.
+
+### Geaendert
+
+- Root-Scripts delegieren via Turbo (`pnpm run dev`, `check:all`); `lighthouserc.json` → `apps/web/dist`.
+- `pnpm.overrides` fuer Supply-Chain (protobufjs, babel-systemjs, fast-uri) — Audit High/Critical **0**.
+
 ### Behoben
 
-- **CI type-check:** `turbo.json` — `type-check` haengt von `^build` ab, damit `@domain/ai-core`/`@domain/ui` `dist/*.d.ts` vor `web#type-check` (tsgo) existieren (behebt TS2307 in frischen CI-Laeufen).
+- **CI type-check:** `turbo.json` — `type-check` haengt von `^build` ab (`@domain/ai-core`/`@domain/ui` vor `web#type-check`; behebt TS2307 in frischen CI-Laeufen).
+
+### Archiv — Entwicklung seit v0.1.0 (Auszug)
+
+Die folgenden Eintraege dokumentieren die Arbeit zwischen **v0.1.0** und **v0.2.0** (noch unter dem frueheren `[Unreleased]`-Block gefuehrt).
 
 ### Geaendert
 
@@ -193,5 +210,6 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - CI-Pipeline mit Lint, TypeScript-Check, Tests und Bundle-Budget
 - CodeQL Security Analysis
 
-[Unreleased]: https://github.com/qnbs/CulinaSync-de-/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/qnbs/CulinaSync-de-/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/qnbs/CulinaSync-de-/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/qnbs/CulinaSync-de-/releases/tag/v0.1.0
