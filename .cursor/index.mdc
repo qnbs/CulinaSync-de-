@@ -11,7 +11,7 @@ alwaysApply: true
 
 **Architektur:** pnpm/Turborepo-Monorepo; SPA in `apps/web/` (Eintritt `apps/web/index.tsx` → `App.tsx`). Persistenz: nur über `apps/web/src/services/db.ts` und Repositories — keine Dexie-Zugriffe in UI. KI nur `apps/web/src/services/geminiService.ts`; API-Key nie `VITE_*`. Fehler: `logAppError`, `GlobalErrorBoundary`, Thunk-Toasts.
 
-**Tests/Qualität:** Vitest 4, jsdom, MSW, Testing Library; `npm run check:all` (Lint, tsgo, Test, Build, Budget, Audit). GitHub **validate.yml**: Lint → **type-check** → test:coverage → Build → Bundle-Budget (wie Kernpfad von `check:all`, ohne `npm audit`). ESLint flat config; Husky/commitlint.
+**Tests/Qualität:** Vitest 4, jsdom, MSW, Testing Library; `pnpm run check:all` (Lint, tsgo, Test, Build, Budget, Audit). GitHub **validate.yml**: Lint → **type-check** → test:coverage → Build → Bundle-Budget → audit (high) → Playwright. ESLint flat config; Husky/commitlint.
 
 **Kanondoku:** `README.md`, `docs/ARCHITECTURE.md`, `.github/copilot-instructions.md`. Modulare Cursor-Regeln: `.cursor/rules/*.mdc` (Nomenklatur `000–899`); Legacy-Hinweis: `.cursorrules` durch `.mdc` ergänzt, nicht alleinige Quelle.
 

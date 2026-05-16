@@ -42,11 +42,11 @@
 - Offline-Fallback nutzt `@faker-js/faker` für Demo-Daten bereits nur noch per dynamischem `import()`.
 
 ## Path-Alias
-- `@/*` mappt auf `apps/web/src/*` (konfiguriert in `tsconfig.json` und `vite.config.ts`).
+- `@/*` mappt auf `apps/web/src/*` (konfiguriert in `apps/web/tsconfig.json` und `apps/web/vite.config.ts`).
 - Verwende `@/services/db` statt relativer Pfade wie `../../services/db`.
 
 ## i18n, Settings, Persistenz
-- i18n wird einmalig in `index.tsx` über `import './apps/web/src/i18n'` initialisiert.
+- i18n wird einmalig in `apps/web/index.tsx` über `import './src/i18n'` initialisiert.
 - Locale-Dateien sind pro Sprache in `apps/web/src/locales/{de,en}/core.json`, `settings.json` und `features.json` aufgeteilt und werden über `index.ts` aggregiert.
 - Sprach-/App-Defaults kommen aus `loadSettings()` (`apps/web/src/services/settingsService.ts`) und sind tief gemerged.
 - Redux Persist speichert nur den `settings`-Slice (`apps/web/src/store/index.ts`), nicht die Dexie-Tabellen.
@@ -56,8 +56,8 @@
 - **Framework:** Vitest + MSW (Mock Service Worker) fuer Service- und UI-nahe Tests.
 - **Testverzeichnisse:** `apps/web/src/test/` (inkl. `createTestStore.ts`, MSW), `apps/web/src/components/**/__tests__/`, `apps/web/src/contexts/__tests__/`, `apps/web/src/hooks/__tests__/`, `apps/web/src/services/__tests__/`, `apps/web/src/store/__tests__/`.
 - **Benennung:** `*.test.ts` / `*.test.tsx` für Testdateien.
-- **Konfiguration:** `vitest.config.ts` im Root; ESLint ignoriert `coverage/**`.
-- **Coverage:** Stand Mai 2026 ca. **59 %** Statements / **61 %** Lines (v8); Ziel M5: ≥70 %. **222** Tests / **59** Dateien; Mindest-Thresholds in `vitest.config.ts` (Regressionsschutz). U. a.: Einkaufslisten-/Pantry-Modale, `App.smoke`, Context-/Hook-/Repository-Suites, `geminiMsw.test.ts` (Zod). **CI** (`validate.yml`): `lint` → **`type-check`** → `test:coverage` → `build` → `check:bundle-budget`; Artefakt **coverage-lcov**.
+- **Konfiguration:** `apps/web/vitest.config.ts`; ESLint ignoriert `coverage/**`.
+- **Coverage:** Stand Mai 2026 ca. **59 %** Statements / **61 %** Lines (v8); Ziel M5: ≥70 %. **218** Tests / **58** Dateien; Mindest-Thresholds in `apps/web/vitest.config.ts`. **CI** (`validate.yml`): lint → type-check → test:coverage → build → bundle-budget → **audit (high)** → Playwright; Artefakt **coverage-lcov** (`apps/web/coverage`).
 - **Ausfuehrung:** `pnpm run test`, `pnpm run test:coverage`, lokal vollstaendig `pnpm run check:all` (inkl. audit high).
 - Vor `pnpm run build` immer zuerst Diagnostics fuer die geaenderten Dateien pruefen (`get_errors` bzw. Problems-Panel).
 - Typecheck im Alltag: `pnpm run type-check` (**tsgo**). `tsc` wird von ESLint/Vitest als API genutzt — nicht den Full-Build mit purem `tsc` verwechseln (`pnpm run build` = `tsgo && vite build`).
@@ -73,7 +73,7 @@
 
 ## Performance-Patterns
 - Alle Seiten-Komponenten werden via `React.lazy()` geladen (`apps/web/src/App.tsx`).
-- `manualChunks` in `vite.config.ts` splittet: `react-vendor`, `redux-vendor`, `dexie-vendor`, `react-window`.
+- `manualChunks` in `apps/web/vite.config.ts` splittet Vendor-Chunks (u. a. react, redux, dexie, export).
 - Schwere Dependencies (`tesseract.js`, `@ericblade/quagga2`, Export-Libs) sollten immer via dynamischem `import()` geladen werden.
 - `vite-plugin-compression` generiert Brotli fuer statische Assets.
 
@@ -96,7 +96,7 @@
 - Deploy: Automatisch via GitHub Actions bei Push auf `main` (`.github/workflows/deploy.yml`)
 - CI: Lint + Tests + Build über `validate.yml`; PR-i18n-Job und Validate nutzen **Node.js 24** (`setup-node`); Env `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` gesetzt
 - Security: CodeQL-Analyse bei PRs und Push auf `main` (`.github/workflows/codeql.yml`)
-- `base` in `vite.config.ts` wird dynamisch gesetzt: `/CulinaSync-de-/` in CI, `/` lokal.
+- `base` in `apps/web/vite.config.ts` wird dynamisch gesetzt: `/CulinaSync-de-/` in CI, `/` lokal.
 - GitHub-verwaltete Pages-Actions koennen trotz Node-24-Opt-in aktuell noch Node-20-Depracation-Warnungen emittieren. Das ist derzeit ein Upstream-Thema.
 - Nach JEDEM Push muss der zugehörige CI-/Deploy-Lauf aktiv beobachtet werden, bis CI, CodeQL und Deploy erfolgreich abgeschlossen bzw. nachvollziehbar grün sind.
 - Wenn nach einem Push ein relevanter Workflow fehlschlägt, ist der Vorgang nicht abgeschlossen: Fehlerursachen muessen vollständig analysiert, lokal behoben, erneut validiert, committed, gepusht und wieder beobachtet werden.

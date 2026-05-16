@@ -5,9 +5,10 @@
 
 ---
 
-## Status-Update 2026-05-16 (Monorepo, Re-Audit, Supply-Chain, Housekeeping)
+## Status-Update 2026-05-16 (Monorepo, Re-Audit, Supply-Chain, Housekeeping, CI-Fix)
 
 - **Struktur:** Turborepo/pnpm — Web-App unter `apps/web/`, Packages `@domain/ai-core`, `@domain/ui`; Root-Scripts delegieren via Turbo (`pnpm run dev`, `check:all`).
+- **CI-Fix:** `turbo.json` — `type-check.dependsOn: ["^build"]` (Workspace-Packages muessen vor Web-tsgo gebaut sein; sonst TS2307 `@domain/ai-core`).
 - **Supply-Chain:** `pnpm audit --audit-level=high` nach Overrides (**protobufjs**, **@babel/plugin-transform-modules-systemjs**, **fast-uri**) → **0** High/Critical (vorher 19 Findings lokal).
 - **CI:** `validate.yml` — zusätzlich **`pnpm audit --audit-level=high`**; Coverage-Artefakt `apps/web/coverage`; Playwright-Smoke unverändert.
 - **Qualität:** lint, type-check, test (~218), build, bundle-budget grün; Vitest `singleFork` + `fileParallelism: false` in `apps/web/vitest.config.ts` (Windows-Stabilität).

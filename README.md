@@ -84,7 +84,7 @@ pnpm run build
 pnpm run test:coverage
 pnpm run check:bundle-budget
 pnpm run preview
-pnpm run check:all   # lint + type-check + test + build + bundle-budget + npm audit (high)
+pnpm run check:all   # lint + type-check + test + build + bundle-budget + pnpm audit (high)
 ```
 
 ## KI und API-Key
