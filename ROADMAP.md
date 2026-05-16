@@ -1,6 +1,6 @@
 # CulinaSync — Roadmap
 
-> **Stand:** 4. Mai 2026 (M5-Testausbau, Vitest-Thresholds, Doku-Sync) · Basis: vollständiges Code-, Architektur- und Security-Audit (14.–22. April 2026) + Follow-up-Sessions Mai 2026  
+> **Stand:** 16. Mai 2026 (Monorepo-Migration + Re-Audit/Housekeeping) · Basis: vollständiges Code-, Architektur- und Security-Audit (14.–22. April 2026) + Follow-up-Sessions Mai 2026  
 > **Format:** Milestones geordnet nach Priorität. Jedes Item mit Herkunft (AUDIT-Referenz), Aufwandsschätzung und Status.
 
 ---
@@ -127,6 +127,7 @@
 | 6.2 | JSDoc in `db.ts`, `geminiService.ts`, `apiKeyService.ts` | Doku-Lücke | `src/services/` | Mittel (2–3 h) | ✅ Modul-Köpfe `db.ts`, `geminiService.ts`; `apiKeyService` bereits ausführlich |
 | 6.3 | README-Status und Links gegen aktuellen Stand | Doku-Lücke | `README.md` | Niedrig (1 h) | ✅ Status 2026-05-01, Link `STATUS-2026-05-01.md`, KI-Key-Beschreibung |
 | 6.4 | Doku-Sync: ARCHITECTURE, PROJECT-STRUCTURE, DEPLOYMENT, TESTING, DEVELOPMENT, copilot-instructions, AUDIT, STATUS-2026-05-02 | Follow-up | `docs/*`, Root | Niedrig–Mittel | ✅ 2026-05-02 (Nachziehen M5-Essensplan/Smoke/Repos) |
+| 6.5 | Monorepo-Pfad-Sync nach `apps/web/` + STATUS-2026-05-16 + CI-Audit-Gate | Housekeeping 2026-05-16 | `docs/*`, `.github/`, `.cursor/` | Niedrig | ✅ |
 
 ---
 

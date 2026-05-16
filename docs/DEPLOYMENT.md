@@ -19,16 +19,19 @@ Das Repository verwendet GitHub Actions fuer CI, Deploy und CodeQL.
 - Lint
 - **`pnpm run type-check`** (**tsgo**, wie lokal in `check:all`)
 - **`pnpm run test:coverage`** (Vitest inkl. v8-Coverage)
-- Upload Artefakt **`coverage-lcov`** (`actions/upload-artifact@v4`, Ordner `coverage/`, Retention 14 Tage)
-- Build (`tsgo && vite build`)
+- Upload Artefakt **`coverage-lcov`** (`actions/upload-artifact@v4`, Ordner `apps/web/coverage/`, Retention 14 Tage)
+- Build (`turbo run build` → `apps/web/dist`)
 - **`pnpm run check:bundle-budget`** (jedes Validate, nicht nur Deploy)
+- **`pnpm audit --audit-level=high`** (Supply-Chain-Gate)
+- Playwright-Smoke gegen `vite preview` (`pnpm run test:e2e`)
 - PR-bezogen zusaetzlich i18n-Changed-Lines-Check (`ci.yml` Job `i18n-check`)
 
 ### Deploy
 
 - identischer pnpm-/Node-Setup wie Validate (wiederverwendbarer Workflow `validate.yml` mit `upload-pages-artifact: true`)
 - Lint, **Typecheck**, Tests **mit Coverage**, Build, Bundle-Budget
-- Upload des `dist/`-Artifacts fuer Pages
+- Upload des **`apps/web/dist`**-Artifacts fuer Pages
+- Optional lokal: **Lighthouse CI** mit `lighthouserc.json` (`staticDistDir: ./apps/web/dist`) nach `pnpm run build`
 - Deployment nach GitHub Pages
 
 ### CodeQL

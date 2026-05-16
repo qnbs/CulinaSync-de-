@@ -7,7 +7,7 @@ Sicherheitsrelevante Meldungen sind besonders willkommen fuer:
 - Datenpersistenz und IndexedDB-/Dexie-Zugriffe
 - API-Key-Handhabung und KI-Integrationen
 - Export-, Import- und Dateidownload-Pfade
-- GitHub Actions, Deployment und Build-Pipeline (CI nutzt u. a. `test:coverage`, Bundle-Budget; lokal: `npm run check:all` inkl. `npm audit --audit-level=high`)
+- GitHub Actions, Deployment und Build-Pipeline (CI: `validate.yml` mit lint, type-check, test:coverage, build, bundle-budget, `pnpm audit --audit-level=high`; lokal: `pnpm run check:all`)
 - XSS-, Injection-, Prototype-Pollution- und Deserialisierungsrisiken
 
 ## Bitte nicht oeffentlich posten

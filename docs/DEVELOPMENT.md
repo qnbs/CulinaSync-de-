@@ -60,7 +60,7 @@ Fuer den taeglichen Workflow gilt:
 ## i18n- und Modal-Konventionen
 
 - Sprachtexte liegen nicht mehr in einzelnen grossen `translation.json`-Dateien, sondern je Sprache in `core.json`, `settings.json` und `features.json`.
-- Neue Keys immer parallel in `src/locales/de/` und `src/locales/en/` pflegen.
+- Neue Keys immer parallel in `apps/web/src/locales/de/` und `apps/web/src/locales/en/` pflegen.
 - Irreversible Aktionen nicht mit `window.confirm()` absichern.
 - Stattdessen eigene Modal-Komponenten mit `useModalA11y` verwenden und die Aktion ueber expliziten Pending-State im Hook oder Container steuern.
 

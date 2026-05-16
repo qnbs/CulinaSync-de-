@@ -5,6 +5,18 @@
 
 ---
 
+## Status-Update 2026-05-16 (Monorepo, Re-Audit, Supply-Chain, Housekeeping, CI-Fix)
+
+- **Struktur:** Turborepo/pnpm — Web-App unter `apps/web/`, Packages `@domain/ai-core`, `@domain/ui`; Root-Scripts delegieren via Turbo (`pnpm run dev`, `check:all`).
+- **CI-Fix:** `turbo.json` — `type-check.dependsOn: ["^build"]` (Workspace-Packages muessen vor Web-tsgo gebaut sein; sonst TS2307 `@domain/ai-core`).
+- **Supply-Chain:** `pnpm audit --audit-level=high` nach Overrides (**protobufjs**, **@babel/plugin-transform-modules-systemjs**, **fast-uri**) → **0** High/Critical (vorher 19 Findings lokal).
+- **CI:** `validate.yml` — zusätzlich **`pnpm audit --audit-level=high`**; Coverage-Artefakt `apps/web/coverage`; Playwright-Smoke unverändert.
+- **Qualität:** lint, type-check, test (~218), build, bundle-budget grün; Vitest `singleFork` + `fileParallelism: false` in `apps/web/vitest.config.ts` (Windows-Stabilität).
+- **Doku/Agenten:** `docs/PROJECT-STRUCTURE.md` neu geschrieben; Pfade in README, copilot-instructions, Cursor-Rules, DEVELOPMENT/TESTING/DEPLOYMENT/instructions auf `apps/web/src/` synchronisiert; Snapshot [`docs/STATUS-2026-05-16.md`](docs/STATUS-2026-05-16.md).
+- **Offen:** M5 Coverage ≥70 %; M8 Tauri-Release; i18n-Scan-Report weiterhin mit vielen historischen Kandidaten (kein Regressionstest in CI).
+
+---
+
 ## Status-Update 2026-05-04 (M5 weiter, Vitest-Thresholds, Infra, M9.3, ESLint, Tauri-Prep)
 
 - **Tests:** Vitest **222** Tests (**59** Dateien); Coverage ca. **59 %** Stmts / **61 %** Lines / **46 %** Branches / **52 %** Funcs — **≥70 %** (ROADMAP M5) weiterhin offen; Vitest **thresholds** (Lines 60, Statements 58, Branches 45, Functions 51); `fake-indexeddb` + Test-Shims; u. a. `App.smoke` + `services/db`-Mock, **`BulkAddModal`** / **`AiModal`**, **`PantryList`**, `useRecipeDetail`, `voiceCommands.executeVoiceAction`, Service-Utils.
