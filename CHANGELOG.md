@@ -7,6 +7,10 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben
+
+- **CI type-check:** `turbo.json` — `type-check` haengt von `^build` ab, damit `@domain/ai-core`/`@domain/ui` `dist/*.d.ts` vor `web#type-check` (tsgo) existieren (behebt TS2307 in frischen CI-Laeufen).
+
 ### Geaendert
 
 - **Monorepo (Follow-up):** Post-Migration Housekeeping — `pnpm.overrides` fuer Audit-Highs (protobufjs, babel-systemjs, fast-uri); CI **`pnpm audit --audit-level=high`** in `validate.yml`; `lighthouserc.json` → `apps/web/dist`; Turbo-`dist/` fuer `@domain/ui`.

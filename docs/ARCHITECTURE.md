@@ -1,56 +1,66 @@
 # Architektur
 
+> **Stand:** 2026-05-16 — Monorepo (`apps/web`, `packages/*`)
+
 ## Zielbild
 
-CulinaSync ist eine local-first PWA. Persistente Domaindaten werden im Browser gespeichert und reaktiv gelesen. Netzwerk- oder KI-Funktionen sind Zusatzfaehigkeiten, nicht die Grundlage der Kernbedienung.
+CulinaSync ist eine local-first PWA. Persistente Domaindaten werden im Browser gespeichert und reaktiv gelesen. Netzwerk- oder KI-Funktionen sind Zusatzfähigkeiten, nicht die Grundlage der Kernbedienung.
 
-## Schichten
+## Monorepo-Überblick
+
+| Paket | Pfad | Rolle |
+|-------|------|--------|
+| **web** | `apps/web/` | React 19 + Vite 8 PWA (UI, Dexie, Redux, Gemini) |
+| **@domain/ai-core** | `packages/ai-core/` | Shared AI-Hilfen (Prompt-Sanitisierung, Worker-Bus, optionale ML-Imports) |
+| **@domain/ui** | `packages/ui/` | Design-Tokens und Tailwind-Preset |
+| **Tauri** | `src-tauri/` | Desktop-Wrapper (dist aus `apps/web`) |
+
+Orchestrierung: **pnpm workspaces** + **Turborepo** (`turbo.json`). Root-Scripts delegieren an `apps/web` (z. B. `pnpm run dev` → `turbo run dev --filter=web`).
+
+## Schichten (Web-App)
 
 ### UI-Schicht
 
-- `index.tsx` initialisiert Redux Store (der beim Laden synchron ein Settings-Legacy-Migrationsmodul ausfuehrt), danach i18n, Provider und Persist Gate.
-- `src/App.tsx` verwaltet Seitenwechsel, globale Bedienelemente, Lazy Loading und Shell-Zustand.
-- `src/components/` enthaelt Seitenkomponenten sowie Feature-Unterordner.
+- `apps/web/index.tsx` initialisiert Redux Store (Legacy-Settings-Migration), i18n, Provider und Persist Gate.
+- `apps/web/src/App.tsx` verwaltet Seitenwechsel, globale Bedienelemente, Lazy Loading und Shell-Zustand.
+- `apps/web/src/components/` enthält Seitenkomponenten sowie Feature-Unterordner.
 
 ### UI-/Session-State
 
-- Redux Toolkit liegt unter `src/store/`.
-- Redux dient primaer fuer UI- und Session-Zustand wie Navigation, Fokusziele, Voice-Aktionen oder Slice-spezifische Async-Aktionen.
-- Persistiert wird nur der `settings`-Slice.
+- Redux Toolkit unter `apps/web/src/store/`.
+- Redux dient primär für UI- und Session-Zustand (Navigation, Fokus, Voice, Slice-Async).
+- Persistiert wird nur der `settings`-Slice (`indexedPersistStorage` / Dexie-Hilfen wo dokumentiert).
 
 ### Persistente Domaindaten
 
-- Dexie und IndexedDB bilden die Source of Truth fuer `pantry`, `recipes`, `mealPlan` und `shoppingList`.
-- Reaktive Lesepfade nutzen `useLiveQuery`, vor allem in den domainnahen Hooks.
-- Schreibpfade laufen ueber Repositories und Services, nicht direkt aus Komponenten.
+- Dexie/IndexedDB = Source of Truth für `pantry`, `recipes`, `mealPlan`, `shoppingList`.
+- Lesen: `useLiveQuery` in domainnahen Hooks.
+- Schreiben: Repositories und Services — **nicht** direkt aus Komponenten.
 
 ### Services und Integrationen
 
-- `src/services/db.ts` ist der API-Einstieg fuer Datenbank- und Repository-Zugriffe.
-- `src/services/geminiService.ts` kapselt die KI-Integration; strukturierte JSON-Antworten werden nach dem Parsen zusaetzlich mit **Zod** (`parseAiJsonWithSchema`) validiert (Rezept, Ideen, Einkaufsliste, Naehrwert-Check).
-- `src/services/exportService.ts` kapselt alle Export-Sinks.
-- `src/services/voiceCommands.ts` uebersetzt Sprachkommandos in App-Aktionen.
+- `apps/web/src/services/db.ts` — DB-Einstieg und Repositories.
+- `apps/web/src/services/geminiService.ts` — einzige Gemini-Fassade; Zod nach `JSON.parse`.
+- `packages/ai-core` — von `geminiService` genutzte Shared-Utilities (Build vor Web-Typecheck in CI).
+- `apps/web/src/services/exportService.ts`, `voiceCommands.ts`, …
 
 ### Lokalisierung
 
-- `src/i18n.ts` initialisiert die Sprachressourcen ueber aggregierte Sprachmodule.
-- Die Sprachdateien sind je Sprache in `core.json`, `settings.json` und `features.json` getrennt.
-- `src/locales/de/index.ts` und `src/locales/en/index.ts` aggregieren diese Domain-Dateien fuer i18next.
-- Neue Texte sollen in beiden Sprachen synchron in der passenden Domain gepflegt werden, statt wieder grosse Sammeldateien aufzubauen.
+- `apps/web/src/i18n.ts` und `apps/web/src/locales/{de,en}/` (`core`, `settings`, `features`).
 
 ## Datenfluss
 
-1. UI triggert einen Handler in Komponente, Hook oder Slice.
-2. Persistente Operationen gehen ueber Repository-/Service-Funktionen.
-3. Dexie speichert die Daten in IndexedDB.
-4. Hooks lesen ueber `useLiveQuery` und aktualisieren die UI reaktiv.
-5. Redux bleibt fuer Shell-, Fokus-, Modal- und Prozesszustand reserviert.
+1. UI triggert Handler in Komponente, Hook oder Slice.
+2. Persistente Operationen über Repository-/Service-Funktionen.
+3. Dexie → IndexedDB.
+4. Hooks lesen via `useLiveQuery` und aktualisieren die UI.
+5. Redux für Shell-, Fokus-, Modal- und Prozesszustand.
 
-### Diagramm (Ueberblick)
+### Diagramm (Überblick)
 
 ```mermaid
 flowchart LR
-  subgraph UI["UI"]
+  subgraph UI["apps/web UI"]
     P["Seiten / Komponenten"]
     H["Hooks useLiveQuery"]
   end
@@ -62,6 +72,9 @@ flowchart LR
     D["db.ts → Repositories"]
     T["pantry, recipes, mealPlan, shoppingList"]
   end
+  subgraph Pkg["packages"]
+    AC["@domain/ai-core"]
+  end
   subgraph Ext["Extern"]
     G["geminiService → Gemini API"]
   end
@@ -72,40 +85,29 @@ flowchart LR
   P --> D
   D --> T
   H --> T
+  G --> AC
   U --> G
 ```
 
 ## Interaktionsmuster
 
-- Irreversible oder destructive Aktionen laufen nicht mehr ueber native Browser-Dialoge.
-- Bestaetigungen werden ueber eigene Modal-Komponenten mit `useModalA11y` umgesetzt.
-- Domain-Hooks oder Feature-Container halten dazu einen `pendingAction`-aehnlichen Zustand und exponieren bestaetigte sowie abgebrochene Pfade explizit.
-- Dieses Muster ist insbesondere in Pantry, Shopping List, Meal Planner, Recipe Detail und API-Key-Verwaltung bereits etabliert.
+- Destructive Aktionen über modale Flows (kein `window.confirm` in Kernfeatures).
+- Essensplan: `MealPlannerProvider` + `useMealPlannerScreen` (analog Pantry/Einkauf).
+- Kochmodus: `useCookModeController` + `cook-mode/*`.
+- Voice: `processCommand` → `executeVoiceAction`.
 
-## Persistenz und Sicherheit
+## CI/CD (Kurz)
 
-- Redux Persist verwendet einen expliziten Browser-Storage-Adapter in `src/store/persistStorage.ts`.
-- Dadurch wird eine fragile Default-Interop aus `redux-persist/lib/storage` vermieden.
-- Settings-Aenderungen sind auf eine erlaubte Mutator-Map in `src/components/Settings.tsx` begrenzt.
-- Exporte verwenden erlaubte MIME-Typen und bereinigte Dateinamen.
+Wiederverwendbarer Workflow [`.github/workflows/validate.yml`](../.github/workflows/validate.yml):
 
-## Tests (Kurz)
+`install` → `lint` → `type-check` (tsgo; **abhängig von `^build` für Workspace-Packages**) → `test:coverage` → `build` → `bundle-budget` → `pnpm audit --audit-level=high` → Playwright-Smoke → optional Pages-Artefakt.
 
-- Vitest + Testing Library + MSW; Setup unter `src/test/setupTests.ts`.
-- Redux-in-Tests ohne Persist: Hilfsfunktion **`src/test/createTestStore.ts`** (Combine der drei Root-Reducer mit Default-Settings).
-- Essensplan-/Kochmodus: dedizierte Hook- und Context-Tests sowie leichtgewichtige Smoke-Renderings kritischer Oberflaechen (siehe [TESTING.md](./TESTING.md)).
+Lokal: `pnpm run check:all` (gleicher Kern + Audit).
 
-## Hauptgrenzen im Code
+## Weiterführend
 
-- Komponenten sollten keine Dexie-Tabellen direkt mutieren.
-- KI-Aufrufe gehoeren nicht in Komponenten.
-- Modals gehoeren in eigene Dateien.
-- Schwere Bibliotheken sollen bevorzugt dynamisch geladen werden.
-
-## Wichtige aktuelle technische Punkte
-
-- **Settings:** `loadSettings()` liest nur `persist:settings` (Redux-Persist) oder Default-Werte. Alter Schluessel `culinaSyncSettings` wird einmalig durch `migrateLegacySettings()` migriert (vor Rehydration via `store/migrateLegacySettingsBeforePersist.ts`; erneuter Aufruf aus `loadSettings()` fuer Aufrufer ohne Store ist idempotent). Hilfsmodule: `settingsKeys.ts`, `settingsMerge.ts`, `settingsMigration.ts`.
-- **Essensplan:** gleiches Context-Muster wie Vorrat/Einkauf — `MealPlannerProvider`, Datenhook `useMealPlannerScreen`, Konstanten `meal-planner/mealPlannerConstants.ts`; pro Slot wird der Vorratsabgleich fuer die Karte ueber **`getMealPlanSlotPantryStatus`** (`meal-planner/dayColumnPantryStatus.ts`) aus `recipe.pantryMatchPercentage` / `ingredientCount` abgeleitet (UI-Helfer, ohne eigene Dexie-Queries).
-- `@faker-js/faker` wird fuer Offline-Fallbacks nur dynamisch importiert (Production-Bundle).
-- Der i18n-Bestand ist modular (`core` / `settings` / `features`); neue UI-Texte dort pflegen.
-- **Desktop (Tauri):** CSP in `src-tauri/tauri.conf.json` an die Web-Variante angeglichen; Details siehe [DEPLOYMENT.md](./DEPLOYMENT.md#tauri-desktop-und-content-security-policy).
+- [PROJECT-STRUCTURE.md](./PROJECT-STRUCTURE.md) — Ordner und Verantwortlichkeiten
+- [DEVELOPMENT.md](./DEVELOPMENT.md) — Setup und Befehle
+- [TESTING.md](./TESTING.md) — Tests und Coverage
+- [DEPLOYMENT.md](./DEPLOYMENT.md) — Pages, Tauri-Prep
+- [STATUS-2026-05-16.md](./STATUS-2026-05-16.md) — aktueller Snapshot
