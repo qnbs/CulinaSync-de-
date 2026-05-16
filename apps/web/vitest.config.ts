@@ -17,9 +17,7 @@ export default defineConfig({
     hookTimeout: 60_000,
     teardownTimeout: 60_000,
     pool: 'forks',
-    poolOptions: {
-      forks: { singleFork: true },
-    },
+    forks: { singleFork: true },
     maxWorkers: 1,
     fileParallelism: false,
     reporters: isCi ? (['default', 'github-actions'] as const) : (['default'] as const),

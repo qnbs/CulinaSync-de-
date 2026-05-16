@@ -6,8 +6,8 @@ alwaysApply: false
 
 # Dexie / IndexedDB Integration
 
-- **Single entry:** Schema, Tabellen und öffentliche DB-Hilfen nur in `src/services/db.ts` bzw. dokumentierten Erweiterungen pflegen — keine parallele „zweite Dexie-Instanz“ in Features.
-- **Repositories:** Lese-/Schreiblogik in `src/services/repositories/**` bündeln; Signaturen stabil halten und Indexierung bei neuen Filtern mitdenken.
+- **Single entry:** Schema, Tabellen und öffentliche DB-Hilfen nur in `apps/web/src/services/db.ts` bzw. dokumentierten Erweiterungen pflegen — keine parallele „zweite Dexie-Instanz“ in Features.
+- **Repositories:** Lese-/Schreiblogik in `apps/web/src/services/repositories/**` bündeln; Signaturen stabil halten und Indexierung bei neuen Filtern mitdenken.
 - **Reactivity:** UI nutzt `useLiveQuery` / bestehende Hooks; Repositories liefern reine Datenoperationen ohne React-Imports.
 - **Migrationen:** Bestehende Migrations-/Versions-Patterns in `db.ts` und angrenzenden Services respektieren; Breaking Changes nur mit klarem Upgrade-Pfad und Doku.
 

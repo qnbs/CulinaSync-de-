@@ -1,6 +1,6 @@
 ---
 description: Keep tests honest | edits to tests or covered code | deterministic isolated Vitest specs
-globs: src/**/*.test.ts,src/**/*.test.tsx
+globs: apps/web/src/**/*.test.ts,apps/web/src/**/*.test.tsx,packages/**/*.test.ts
 alwaysApply: false
 ---
 
@@ -8,9 +8,9 @@ alwaysApply: false
 
 - **Determinismus:** Keine von Netzwerk-, Zufalls- oder Echtzeit abhängigen Assertions ohne Mock/Fake-Zeit (`vi.useFakeTimers` nach Bedarf). Feste Fixtures oder `@faker-js/faker` mit festem Seed nur dort, wo das Team es bereits tut.
 - **Verbote:** **Niemals** fehlschlagende Tests auskommentieren oder löschen, „nur damit CI grün wird“. Ursache beheben oder Test präzisieren.
-- **Isolation:** MSW (`src/test/msw`) oder `vi.mock` für externe APIs; Redux/Provider wie in Nachbartests aufsetzen; keine Abhängigkeit von Ausführungsreihenfolge ganzer Suite.
+- **Isolation:** MSW (`apps/web/src/test/msw`) oder `vi.mock` für externe APIs; Redux/Provider wie in Nachbartests aufsetzen; keine Abhängigkeit von Ausführungsreihenfolge ganzer Suite.
 - **Lesbarkeit:** `describe`/`it` klar benennen; Arrange-Act-Assert; async mit `await`/userEvent korrekt.
-- **Coverage-Gates:** `vitest.config.ts` definiert globale **thresholds** (v8); neue Suites sollten Rückschläge vermeiden — bei gezieltem Absenken nur mit Absprache/CHANGELOG.
+- **Coverage-Gates:** `apps/web/vitest.config.ts` definiert globale **thresholds** (v8); neue Suites sollten Rückschläge vermeiden — bei gezieltem Absenken nur mit Absprache/CHANGELOG.
 
 <example>
 it('shows error when gemini fails', async () => {

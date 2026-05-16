@@ -47,7 +47,7 @@ jobs:
         run: pnpm run test:coverage
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-lcov
           path: apps/web/coverage
@@ -58,6 +58,9 @@ jobs:
 
       - name: Check bundle budget
         run: pnpm run check:bundle-budget
+
+      - name: Dependency audit (high+)
+        run: pnpm audit --audit-level=high
 
       # QNBS-v3: Ein kurzer Smoke gegen `vite preview` (gebautes dist) — kein Dev-Server, keine schweren E2E-Suites
       - name: Install Playwright Chromium (retry)
@@ -84,7 +87,7 @@ jobs:
 
       - name: Upload Playwright report (on failure)
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report
           path: |
