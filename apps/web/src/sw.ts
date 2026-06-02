@@ -1,8 +1,8 @@
 /// <reference lib="webworker" />
 import { clientsClaim } from 'workbox-core';
-import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching';
+import { cleanupOutdatedCaches, createHandlerBoundToURL, precacheAndRoute } from 'workbox-precaching';
 import { NavigationRoute, registerRoute } from 'workbox-routing';
-import { CacheFirst, NetworkFirst, StaleWhileRevalidate } from 'workbox-strategies';
+import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
 
 declare let self: ServiceWorkerGlobalScope & {
@@ -15,13 +15,17 @@ cleanupOutdatedCaches();
 
 precacheAndRoute(self.__WB_MANIFEST);
 
+// QNBS-v3: SPA-Navigation aus Precache (index.html), nicht nur NetworkFirst — stabiler Offline-Start
+const precachedIndex =
+  self.__WB_MANIFEST.map((entry) => (typeof entry === 'string' ? entry : entry.url)).find((url) =>
+    url.endsWith('index.html'),
+  ) ?? '/index.html';
+const navigationHandler = createHandlerBoundToURL(precachedIndex);
+
 registerRoute(
-  new NavigationRoute(
-    new NetworkFirst({
-      cacheName: 'nav-pages',
-      networkTimeoutSeconds: 5,
-    }),
-  ),
+  new NavigationRoute(navigationHandler, {
+    denylist: [/^\/_/, /\/[^/?]+\.[^/]+$/],
+  }),
 );
 
 registerRoute(

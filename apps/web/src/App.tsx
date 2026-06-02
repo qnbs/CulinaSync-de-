@@ -13,6 +13,9 @@ import { WhatsNewModal } from './components/WhatsNewModal';
 import { GlobalErrorBoundary } from './components/GlobalErrorBoundary';
 import OfflineStatusBar from './components/OfflineStatusBar';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
+import { useModalA11y } from './hooks/useModalA11y';
+import { getPageFromLocationSearch } from './utils/pwaLaunchParams';
+import { logAppError } from './services/errorLoggingService';
 
 const APP_VERSION = __APP_VERSION__;
 
@@ -63,6 +66,8 @@ const App: React.FC = () => {
   const [showUpdateReadyNotice, setShowUpdateReadyNotice] = useState(false);
   const isOnline = useOnlineStatus();
   const wasOnlineRef = useRef(isOnline);
+  const installDialogRef = useRef<HTMLDivElement>(null);
+  const updateDialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     void import('./services/db');
@@ -132,21 +137,26 @@ const App: React.FC = () => {
 
   const handleInstallPWA = async () => {
     if (!installPromptEvent) {
-        addToast(t('app.install.unavailable'), 'info');
-        return;
+      addToast(t('app.install.unavailable'), 'info');
+      return;
     }
-    installPromptEvent.prompt();
-    const { outcome } = await installPromptEvent.userChoice;
-    if (outcome === 'accepted') {
-      addToast(t('app.install.success'), 'success');
-      window.localStorage.removeItem('culinaSyncInstallRemindAfter');
-      window.localStorage.removeItem('culinaSyncInstallDismissed');
-      setShowInstallReminder(false);
-    } else {
-      window.localStorage.setItem('culinaSyncInstallRemindAfter', String(Date.now() + 3 * 24 * 60 * 60 * 1000));
-      setShowInstallReminder(false);
+    try {
+      installPromptEvent.prompt();
+      const { outcome } = await installPromptEvent.userChoice;
+      if (outcome === 'accepted') {
+        addToast(t('app.install.success'), 'success');
+        window.localStorage.removeItem('culinaSyncInstallRemindAfter');
+        window.localStorage.removeItem('culinaSyncInstallDismissed');
+        setShowInstallReminder(false);
+      } else {
+        window.localStorage.setItem('culinaSyncInstallRemindAfter', String(Date.now() + 3 * 24 * 60 * 60 * 1000));
+        setShowInstallReminder(false);
+      }
+      setInstallPromptEvent(null);
+    } catch (error) {
+      void logAppError(error, 'app.pwa.install');
+      addToast(t('app.install.unavailable'), 'error');
     }
-    setInstallPromptEvent(null);
   };
 
   const handleInstallRemindLater = () => {
@@ -158,6 +168,27 @@ const App: React.FC = () => {
     window.localStorage.setItem('culinaSyncInstallDismissed', 'true');
     setShowInstallReminder(false);
   };
+
+  const showInstallDialog = showInstallReminder && !!installPromptEvent && !isStandalone;
+
+  useModalA11y({
+    isOpen: showInstallDialog,
+    onClose: handleInstallRemindLater,
+    containerRef: installDialogRef,
+  });
+
+  useModalA11y({
+    isOpen: showUpdateReadyNotice,
+    onClose: () => setShowUpdateReadyNotice(false),
+    containerRef: updateDialogRef,
+  });
+
+  useEffect(() => {
+    const launchPage = getPageFromLocationSearch(window.location.search);
+    if (launchPage) {
+      dispatch(setCurrentPage({ page: launchPage }));
+    }
+  }, [dispatch]);
 
   const handleReloadForUpdate = () => {
     setShowUpdateReadyNotice(false);
@@ -314,12 +345,14 @@ const App: React.FC = () => {
           </Suspense>
         </div>
 
-        {showInstallReminder && installPromptEvent && !isStandalone && (
+        {showInstallDialog && (
           <div
+            ref={installDialogRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="install-reminder-title"
             aria-describedby="install-reminder-desc"
+            tabIndex={-1}
             className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-40 w-[min(92vw,24rem)] rounded-2xl border border-[var(--color-accent-500)]/30 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur"
           >
             <h4 id="install-reminder-title" className="text-sm font-bold text-zinc-100">{t('app.installReminder.title')}</h4>
@@ -340,10 +373,12 @@ const App: React.FC = () => {
 
         {showUpdateReadyNotice && (
           <div
+            ref={updateDialogRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="pwa-update-title"
             aria-describedby="pwa-update-desc"
+            tabIndex={-1}
             className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-4 z-40 w-[min(92vw,24rem)] rounded-2xl border border-sky-400/30 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur"
           >
             <h4 id="pwa-update-title" className="text-sm font-bold text-zinc-100">{t('app.pwaUpdate.title')}</h4>
@@ -371,10 +406,15 @@ const App: React.FC = () => {
           <VoiceControlUI isListening={isListening} transcript={interimTranscript} />
         </Suspense>
         
-        <div aria-live="assertive" className="fixed inset-0 flex items-end px-4 pt-6 pb-[calc(5rem+env(safe-area-inset-bottom))] pointer-events-none sm:p-6 sm:items-start z-[60]">
+        <div className="fixed inset-0 flex items-end px-4 pt-6 pb-[calc(5rem+env(safe-area-inset-bottom))] pointer-events-none sm:p-6 sm:items-start z-[60]">
             <div className="w-full flex flex-col items-center space-y-4 sm:items-end">
                 {toasts.map((toast) => (
-                    <div key={toast.id} className="max-w-sm w-full rounded-lg pointer-events-auto overflow-hidden page-fade-in glass-hud ring-1 ring-black/20">
+                    <div
+                      key={toast.id}
+                      role="status"
+                      aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
+                      className="max-w-sm w-full rounded-lg pointer-events-auto overflow-hidden page-fade-in glass-hud ring-1 ring-black/20"
+                    >
                         <div className="p-4">
                             <div className="flex items-start">
                                 <div className="flex-shrink-0">

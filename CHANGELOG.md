@@ -7,6 +7,13 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geaendert
+
+- **PWA-Härtung:** Service Worker nutzt precached `index.html` für Navigation; Manifest-Shortcuts `?page=…` werden beim Start ausgewertet; `useOnlineStatus` synchronisiert nach Tab-Fokus und bfcache.
+- **A11y:** Install-/Update-Dialoge mit `useModalA11y`; Offline-Banner mit `aria-labelledby`/`describedby`; Toasts mit `assertive` nur bei Fehlern.
+- **Offline-KI:** `geminiService` nutzt i18n-`aiOffline`-Fallback statt Faker; gemeinsames Modul `aiOfflineFallback.ts`.
+- **Fehlerlogging:** PWA-Install, DB-Reset und Vollbackup-Exporte loggen über `logAppError`.
+
 ## [0.2.2] — 2026-06-02
 
 ### Hinzugefuegt

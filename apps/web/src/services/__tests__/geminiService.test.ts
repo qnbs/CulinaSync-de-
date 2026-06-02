@@ -26,7 +26,7 @@ vi.mock('i18next', () => ({
       'gemini.error.invalidResponse': 'Invalid AI response.',
       'gemini.error.unexpected': 'Unexpected error.',
       'gemini.error.emptyResponse': 'Empty AI response.',
-    }),
+    } as Record<string, string>),
     language: 'en',
   },
 }));
@@ -45,15 +45,6 @@ vi.mock('@google/genai', () => ({
     ARRAY: 'array',
     STRING: 'string',
     NUMBER: 'number',
-  },
-}));
-
-vi.mock('@faker-js/faker', () => ({
-  fakerDE: {
-    lorem: {
-      words: () => 'offline dish',
-      sentence: () => 'Offline description.',
-    },
   },
 }));
 
@@ -256,13 +247,14 @@ describe('geminiService', () => {
     ).rejects.toThrow(/Invalid AI response|Unexpected/i);
   });
 
-  it('generateRecipeIdeas returns offline faker ideas on network error', async () => {
+  it('generateRecipeIdeas returns localized offline ideas on network error', async () => {
     mockLoadApiKey.mockResolvedValueOnce('AIzaValidLookingKey');
     mockGenerateContent.mockRejectedValue(new Error('Failed to fetch'));
 
     const ideas = await generateRecipeIdeas(structuredPrompt, [], aiPrefs);
     expect(ideas).toHaveLength(3);
-    expect(ideas[0].recipeTitle).toContain('Offline');
+    expect(ideas[0].recipeTitle.length).toBeGreaterThan(0);
+    expect(ideas[0].shortDescription).toContain('offline');
   });
 
   it('generateShoppingList returns offline fallback on network error', async () => {

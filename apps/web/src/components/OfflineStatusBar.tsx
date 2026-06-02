@@ -17,13 +17,20 @@ const OfflineStatusBar: React.FC<OfflineStatusBarProps> = ({ isOnline }) => {
     <div
       role="status"
       aria-live="polite"
+      aria-labelledby="offline-status-banner"
+      aria-describedby="offline-status-ai-hint"
       className="border-b border-amber-500/30 bg-amber-950/90 px-4 py-2 text-center text-sm text-amber-100 backdrop-blur-sm"
     >
-      <p className="mx-auto flex max-w-3xl items-center justify-center gap-2 font-medium">
+      <p
+        id="offline-status-banner"
+        className="mx-auto flex max-w-3xl items-center justify-center gap-2 font-medium"
+      >
         <WifiOff className="h-4 w-4 shrink-0 text-amber-300" aria-hidden="true" />
         <span>{t('app.offline.banner')}</span>
       </p>
-      <p className="mx-auto mt-0.5 max-w-3xl text-xs text-amber-200/80">{t('app.offline.aiLimited')}</p>
+      <p id="offline-status-ai-hint" className="mx-auto mt-0.5 max-w-3xl text-xs text-amber-200/80">
+        {t('app.offline.aiLimited')}
+      </p>
     </div>
   );
 };
