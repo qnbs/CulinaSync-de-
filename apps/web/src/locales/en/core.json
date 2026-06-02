@@ -48,6 +48,11 @@
       "updateReady": "A new version is ready. Please reload.",
       "offlineReady": "Offline mode is ready."
     },
+    "offline": {
+      "banner": "You are offline — pantry, recipes, meal plan, and shopping list still work locally.",
+      "aiLimited": "AI features and web recipe import are unavailable while offline.",
+      "backOnline": "Back online — AI and web import are available again."
+    },
     "commandSections": {
       "navigation": "Navigation",
       "pantry": "Pantry",

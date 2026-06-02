@@ -2,7 +2,7 @@
 import { clientsClaim } from 'workbox-core';
 import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching';
 import { NavigationRoute, registerRoute } from 'workbox-routing';
-import { CacheFirst, NetworkFirst } from 'workbox-strategies';
+import { CacheFirst, NetworkFirst, StaleWhileRevalidate } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
 
 declare let self: ServiceWorkerGlobalScope & {
@@ -49,6 +49,52 @@ registerRoute(
       new ExpirationPlugin({
         maxEntries: 24,
         maxAgeSeconds: 60 * 60 * 24 * 30,
+      }),
+    ],
+  }),
+);
+
+// QNBS-v3: Lazy-Route-Chunks nach erstem Besuch offline nutzbar (PWA P1)
+registerRoute(
+  ({ request, url }) =>
+    request.destination === 'script' &&
+    url.pathname.includes('/assets/') &&
+    url.pathname.endsWith('.js') &&
+    !/\/assets\/(jspdf\.es\.min-|html2canvas\.esm-|papaparse\.min-|index\.es-|vendor-scanner-|vendor-tour-|vendor-faker-|vendor-workbox-|vendor-export-|vendor-misc-)/.test(
+      url.pathname,
+    ),
+  new StaleWhileRevalidate({
+    cacheName: 'app-route-chunks',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 48,
+        maxAgeSeconds: 60 * 60 * 24 * 30,
+      }),
+    ],
+  }),
+);
+
+registerRoute(
+  ({ request }) => request.destination === 'image',
+  new CacheFirst({
+    cacheName: 'static-images',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 64,
+        maxAgeSeconds: 60 * 60 * 24 * 30,
+      }),
+    ],
+  }),
+);
+
+registerRoute(
+  ({ request }) => request.destination === 'font',
+  new CacheFirst({
+    cacheName: 'static-fonts',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 16,
+        maxAgeSeconds: 60 * 60 * 24 * 365,
       }),
     ],
   }),
