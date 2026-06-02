@@ -265,6 +265,8 @@ describe('useRecipeDetail', () => {
       ui: {
         currentPage: 'recipes',
         toasts: [],
+        focusAction: null,
+        initialSelectedId: null,
         voiceAction: { type: 'START_COOK_MODE', payload: '' },
       },
     });
