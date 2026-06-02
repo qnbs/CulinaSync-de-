@@ -18,6 +18,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **Tests (M5):** Erweiterte Suites — Repositories, `pantryMatcherService`, `syncService`, `retryUtils`, `aiService`, `errorLoggingService`, `recipeImportService`, `smartInputService`, `nutritionAllergyService`, `nutritionWorkerService`, `criticalDomainFlow.integration`, erweiterte `geminiService`/`voiceCommands`-Cases.
 - **Tests (M5 Sprint):** Vitest-Coverage-Thresholds auf **70/70/63/55** (Statements/Lines PRD-Ziel erreicht; Functions/Branches Follow-up).
 - **Tests (M5 Follow-up):** `geminiService`-Erweiterung, `communityShareService`, `snapshotVaultService`, `settingsMigration`, `aiCloudApi`, Matcher/Smart-Planner/Health-Export; Thresholds **72/73/65/57**.
+- **Tests (M5 UI-Smoke):** Header, PlannedMealCard, MealPlannerHeader, RecipeDetail-Subkomponenten, `useRecipeDetail`-Erweiterung; Thresholds **75/76/68/60** (Branches-Ziel erreicht).
 
 ### Geaendert
 

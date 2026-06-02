@@ -100,10 +100,10 @@
 **Aktueller Stand (Juni 2026, Vitest v8-Coverage, Snapshot 2026-06-02, M5-Sprint):**
 | Metrik | Aktuell | Ziel |
 |---|---|---|
-| Statements | **~72,8 %** | ≥70 % |
-| Branches | ~58 % | ≥60 % |
-| Functions | ~65 % | ≥70 % |
-| Lines | **~74,2 %** | ≥70 % |
+| Statements | **~75,5 %** | ≥70 % |
+| Branches | **~61 %** | ≥60 % |
+| Functions | ~68 % | ≥70 % |
+| Lines | **~77 %** | ≥70 % |
 
 | # | Maßnahme | Herkunft | Bereich | Aufwand | Status |
 |---|---|---|---|---|---|

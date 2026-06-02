@@ -26,12 +26,12 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
       reportsDirectory: './coverage',
-      // QNBS-v3: M5 Follow-up (Snapshot 2026-06-02): ~72,8 % stmts / ~74,2 % lines / ~65 % funcs / ~58 % branches
+      // QNBS-v3: M5 UI-Smoke (Snapshot 2026-06-02): ~75,5 % stmts / ~77 % lines / ~68 % funcs / ~61 % branches
       thresholds: {
-        lines: 73,
-        statements: 72,
-        functions: 65,
-        branches: 57,
+        lines: 76,
+        statements: 75,
+        functions: 68,
+        branches: 60,
       },
     },
   },
