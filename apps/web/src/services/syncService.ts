@@ -1,5 +1,9 @@
 import { importData } from './repositories/dataRepository';
+import { mergeBackupWithConflictResolution } from './backupMergeService';
+import { logAppError } from './errorLoggingService';
 import type { FullBackupData } from '../types';
+
+export type SyncRestoreMode = 'replace' | 'merge';
 
 const LEGACY_SALT = new TextEncoder().encode('culinasync-salt');
 const BACKUP_FORMAT_HEADER = new Uint8Array([67, 83, 66, 50]);
@@ -100,13 +104,50 @@ export async function downloadEncryptedBackup(url: string, token?: string): Prom
 
 // --- High-level Sync-API ---
 export async function syncUpload(password: string, url: string, token?: string) {
-  const data = await (await import('./exportService')).getFullData();
-  const encrypted = await encryptBackup(data, password);
-  await uploadEncryptedBackup(url, encrypted, token);
+  try {
+    const data = await (await import('./exportService')).getFullData();
+    const encrypted = await encryptBackup(data, password);
+    await uploadEncryptedBackup(url, encrypted, token);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('culinaSyncLastSyncAt', String(Date.now()));
+    }
+  } catch (error) {
+    void logAppError(error, 'sync.upload');
+    throw error;
+  }
 }
 
-export async function syncDownload(password: string, url: string, token?: string) {
-  const encrypted = await downloadEncryptedBackup(url, token);
-  const data = await decryptBackup(encrypted, password);
-  await importData(data);
+export async function syncDownload(
+  password: string,
+  url: string,
+  token?: string,
+  mode: SyncRestoreMode = 'replace',
+) {
+  try {
+    const encrypted = await downloadEncryptedBackup(url, token);
+    const data = await decryptBackup(encrypted, password);
+    if (mode === 'merge') {
+      await mergeBackupWithConflictResolution(data);
+    } else {
+      await importData(data);
+    }
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('culinaSyncLastSyncAt', String(Date.now()));
+    }
+  } catch (error) {
+    void logAppError(error, 'sync.download');
+    throw error;
+  }
 }
+
+export const getLastSyncTimestamp = (): number | null => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  const raw = window.localStorage.getItem('culinaSyncLastSyncAt');
+  if (!raw) {
+    return null;
+  }
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : null;
+};

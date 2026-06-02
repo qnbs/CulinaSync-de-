@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { syncUpload, syncDownload } from '../../../services/syncService';
+import { getLastSyncTimestamp, syncUpload, syncDownload } from '../../../services/syncService';
 import { db } from '../../../services/dbInstance';
 import { importData } from '../../../services/repositories/dataRepository';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Download, Upload, Trash2, AlertTriangle, HardDrive, Lock } from 'lucide-react';
+import { Download, Upload, Trash2, AlertTriangle, HardDrive, Lock, QrCode } from 'lucide-react';
+import { DeviceSyncModal } from '../DeviceSyncModal';
 import Dexie from 'dexie';
 import { BeforeInstallPromptEvent, FullBackupData } from '../../../types';
 import { updateSettings } from '../../../store/slices/settingsSlice';
@@ -164,6 +165,8 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
     const [syncLoading, setSyncLoading] = useState(false);
     const [vaultPassphrase, setVaultPassphrase] = useState('');
     const [vaultBusy, setVaultBusy] = useState(false);
+    const [deviceSyncOpen, setDeviceSyncOpen] = useState(false);
+    const [lastSyncAt, setLastSyncAt] = useState<number | null>(() => getLastSyncTimestamp());
     const vaultFileInputRef = useRef<HTMLInputElement>(null);
 
     const handleSyncUpload = async () => {
@@ -171,6 +174,7 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
         setSyncLoading(true);
         try {
             await syncUpload(syncPassword, syncUrl, syncToken || undefined);
+            setLastSyncAt(getLastSyncTimestamp());
             setSyncStatus(t('settings.data.sync.uploadSuccess'));
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
@@ -224,14 +228,20 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
         })();
     };
 
-    const handleSyncDownload = async () => {
+    const handleSyncDownload = async (mode: 'replace' | 'merge' = 'replace') => {
         setSyncStatus(null);
         setSyncLoading(true);
         try {
-            await syncDownload(syncPassword, syncUrl, syncToken || undefined);
-            setSyncStatus(t('settings.data.sync.restoreSuccess'));
-            addToast(t('settings.backup.restoreSuccess'), 'success');
-            setTimeout(() => window.location.reload(), 1500);
+            await syncDownload(syncPassword, syncUrl, syncToken || undefined, mode);
+            setLastSyncAt(getLastSyncTimestamp());
+            if (mode === 'replace') {
+                setSyncStatus(t('settings.data.sync.restoreSuccess'));
+                addToast(t('settings.backup.restoreSuccess'), 'success');
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                setSyncStatus(t('settings.data.sync.mergeSuccess'));
+                addToast(t('settings.data.sync.mergeSuccess'), 'success');
+            }
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
             setSyncStatus(`${t('settings.data.sync.restoreError')} ${message}`);
@@ -243,6 +253,21 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
     return (
         <div className="space-y-8 page-fade-in">
             {isResetModalOpen && <ResetConfirmationModal onClose={() => setResetModalOpen(false)} onConfirm={handleResetData} />}
+            <DeviceSyncModal
+                isOpen={deviceSyncOpen}
+                onClose={() => setDeviceSyncOpen(false)}
+                addToast={addToast}
+                onMerged={(result) => {
+                    setSyncStatus(
+                        t('settings.data.vault.mergeReport', {
+                            pantry: result.skippedOlderPantry,
+                            recipes: result.skippedOlderRecipes,
+                            plan: result.mergedMealPlan,
+                            shopping: result.mergedShopping,
+                        }),
+                    );
+                }}
+            />
             <input type="file" ref={fileInputRef} onChange={handleImportData} className="hidden" accept="application/json" />
             <input
                 type="file"
@@ -360,6 +385,20 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
                 <p className="text-xs text-zinc-500">{t('settings.data.vault.helper')}</p>
             </section>
             
+            <section className="bg-zinc-900/30 border border-zinc-800 rounded-2xl p-6 mt-8">
+                <h3 className="text-lg font-bold text-zinc-100 mb-4 flex items-center gap-2">
+                    <QrCode className="text-[var(--color-accent-400)]"/> {t('settings.data.deviceSync.sectionTitle')}
+                </h3>
+                <p className="text-sm text-zinc-400 mb-4">{t('settings.data.deviceSync.sectionHint')}</p>
+                <button
+                    type="button"
+                    onClick={() => setDeviceSyncOpen(true)}
+                    className="px-4 py-2 rounded-xl border border-zinc-600 text-zinc-200 font-semibold hover:bg-zinc-800"
+                >
+                    {t('settings.data.deviceSync.openAction')}
+                </button>
+            </section>
+
             {/* Verschlüsselter Cloud-Sync */}
             <section className="bg-zinc-900/30 border border-zinc-800 rounded-2xl p-6 mt-8">
                 <h3 className="text-lg font-bold text-zinc-100 mb-4 flex items-center gap-2">
@@ -391,22 +430,37 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
                         autoComplete="off"
                     />
                 </div>
-                <div className="flex gap-4 mb-2">
+                <div className="flex flex-wrap gap-3 mb-2">
                     <button
-                        onClick={handleSyncUpload}
+                        type="button"
+                        onClick={() => void handleSyncUpload()}
                         disabled={syncLoading || !syncUrl || !syncPassword}
                         className="px-4 py-2 rounded-xl bg-accent-500 text-zinc-900 font-bold hover:bg-accent-400 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed transition-all"
                     >
                         {syncLoading ? t('settings.data.sync.uploading') : t('settings.data.sync.upload')}
                     </button>
                     <button
-                        onClick={handleSyncDownload}
+                        type="button"
+                        onClick={() => void handleSyncDownload('replace')}
                         disabled={syncLoading || !syncUrl || !syncPassword}
                         className="px-4 py-2 rounded-xl bg-accent-500 text-zinc-900 font-bold hover:bg-accent-400 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed transition-all"
                     >
                         {syncLoading ? t('settings.data.sync.restoring') : t('settings.data.sync.restore')}
                     </button>
+                    <button
+                        type="button"
+                        onClick={() => void handleSyncDownload('merge')}
+                        disabled={syncLoading || !syncUrl || !syncPassword}
+                        className="px-4 py-2 rounded-xl border border-zinc-600 text-zinc-200 font-semibold hover:bg-zinc-800 disabled:opacity-50"
+                    >
+                        {t('settings.data.sync.mergeRestore')}
+                    </button>
                 </div>
+                {lastSyncAt && (
+                    <p className="text-xs text-zinc-500 mb-2" role="status">
+                        {t('settings.data.sync.lastSync', { date: new Date(lastSyncAt).toLocaleString() })}
+                    </p>
+                )}
                 {syncStatus && <div className="text-sm mt-2 text-zinc-400">{syncStatus}</div>}
                 <div className="text-xs text-zinc-500 mt-2">{t('settings.data.sync.helper')}</div>
             </section>

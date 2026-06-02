@@ -12,7 +12,7 @@ Vorgänger: [STATUS-2026-05-16.md](./docs/STATUS-2026-05-16.md), [STATUS-2026-05
 Kurz:
 
 - **M3–M4:** Architektur-Cleanup und Security-Hardening (Zod/Gemini, MealPlanner-Context, Tauri-CSP) — siehe [ROADMAP.md](./ROADMAP.md).
-- **M5:** **abgeschlossen** — Vitest **374** Tests in **90** Dateien; Coverage v8 ca. **78 %** stmts / **79 %** lines / **72,5 %** funcs / **63 %** branches (PRD ≥70/≥70/≥70/≥60). Thresholds in `apps/web/vitest.config.ts`: **77/79/72/62**.
+- **M5:** **abgeschlossen** — Vitest **378** Tests in **92** Dateien; Coverage v8 ca. **78 %** stmts / **79 %** lines / **72,5 %** funcs / **63 %** branches (PRD ≥70/≥70/≥70/≥60). Thresholds in `apps/web/vitest.config.ts`: **77/79/72/62**.
 - **Release 0.2.2:** PWA Offline, i18n-Gate (Baseline 0), M5-Coverage, Vitest 4.1.8 — siehe [CHANGELOG.md](./CHANGELOG.md).
 - **CI:** `validate.yml` (lint, type-check, coverage, build, audit); PRs `pnpm run i18n:check`; E2E in `e2e-smoke.yml`. Demo: [docs/LIVE-DEMO-QA.md](./docs/LIVE-DEMO-QA.md).
 - **Nächste Schwerpunkte:** TS 7 GA (M7), Tauri (M8), E2E-Ausbau — [STATUS-2026-06-02.md](./docs/STATUS-2026-06-02.md).

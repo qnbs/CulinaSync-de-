@@ -57,7 +57,7 @@
 - **Testverzeichnisse:** `apps/web/src/test/` (inkl. `createTestStore.ts`, MSW), `apps/web/src/components/**/__tests__/`, `apps/web/src/contexts/__tests__/`, `apps/web/src/hooks/__tests__/`, `apps/web/src/services/__tests__/`, `apps/web/src/store/__tests__/`.
 - **Benennung:** `*.test.ts` / `*.test.tsx` für Testdateien.
 - **Konfiguration:** `apps/web/vitest.config.ts`; ESLint ignoriert `coverage/**`.
-- **Coverage (M5 ✅, Juni 2026):** ca. **78 %** stmts / **79 %** lines / **72,5 %** funcs / **63 %** branches (v8); Thresholds **77/79/72/62** in `apps/web/vitest.config.ts`. **374** Tests / **90** Dateien. **CI:** `validate.yml` (lint → type-check → test:coverage → build → audit); Playwright in `e2e-smoke.yml` (Container, PR/Push `apps/web/**`); Artefakt **coverage-lcov** (`apps/web/coverage`). Status: `docs/STATUS-2026-06-02.md`.
+- **Coverage (M5 ✅, Juni 2026):** ca. **78 %** stmts / **79 %** lines / **72,5 %** funcs / **63 %** branches (v8); Thresholds **77/79/72/62** in `apps/web/vitest.config.ts`. **378** Tests / **92** Dateien. **CI:** `validate.yml` (lint → type-check → test:coverage → build → audit); Playwright in `e2e-smoke.yml` (Container, PR/Push `apps/web/**`); Artefakt **coverage-lcov** (`apps/web/coverage`). Status: `docs/STATUS-2026-06-02.md`.
 - **Ausfuehrung:** `pnpm run test`, `pnpm run test:coverage`, lokal vollstaendig `pnpm run check:all` (inkl. audit high).
 - Vor `pnpm run build` immer zuerst Diagnostics fuer die geaenderten Dateien pruefen (`get_errors` bzw. Problems-Panel).
 - Typecheck im Alltag: `pnpm run type-check` (**tsgo**). `tsc` wird von ESLint/Vitest als API genutzt — nicht den Full-Build mit purem `tsc` verwechseln (`pnpm run build` = `tsgo && vite build`).

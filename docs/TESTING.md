@@ -84,7 +84,7 @@ pnpm run check:bundle-budget
 
 ## Aktueller Validierungsstand 2026-06-02 (M5 abgeschlossen)
 
-- **Vitest:** **374** Tests in **90** Dateien (`pnpm run test`); M5-Suites u. a. Repositories, `geminiService`, UI-Smoke, `MealPlanModal`, PWA (`useOnlineStatus`, `OfflineStatusBar`), Deeplink (`deepLinking`, `useDeepLinkNavigation`).
+- **Vitest:** **378** Tests in **92** Dateien (`pnpm run test`); M5-Suites u. a. Repositories, `geminiService`, UI-Smoke, `MealPlanModal`, PWA (`useOnlineStatus`, `OfflineStatusBar`), Deeplink (`deepLinking`, `useDeepLinkNavigation`).
 - **Coverage (v8):** ca. **78 %** Statements / **79 %** Lines / **63 %** Branches / **72,5 %** Functions — PRD-Ziel (≥70/≥70/≥70/≥60) **erreicht**; **`apps/web/vitest.config.ts`** Thresholds **77 / 79 / 72 / 62**.
 - **CI:** `.github/workflows/validate.yml` — lint → type-check → test:coverage → build → bundle-budget → **`pnpm audit --audit-level=high`**. Playwright-Smoke in **`e2e-smoke.yml`** (Container-Image; bei PR/Push auf `apps/web/**`, wöchentlich, `workflow_dispatch` — nicht im schlanken PR-`validate`). Artefakt **coverage-lcov** (14 Tage). PRs: **`i18n:check`** in `ci.yml`.
 - **i18n lokal:** `pnpm run i18n:check` vor PR; Vollscan `pnpm run i18n:scan` (Report unter `reports/`, gitignored); nach bereinigten Hardcoded-Strings `pnpm run i18n:baseline:update`.
