@@ -7,6 +7,10 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geaendert
+
+- **Dependencies:** eslint 10.4, typescript-eslint 8.59.4, `@hookform/resolvers` 5.2.2, `react-i18next` 17.0.8 (Dependabot PRs #21, #23, #24 auf main integriert).
+
 ### Hinzugefuegt
 
 - **Audit Juni 2026:** `docs/AUDIT-REPORT-2026-06.md`, `docs/STATUS-2026-06-02.md` — Re-Baseline nach Master-Audit-Sprint.
