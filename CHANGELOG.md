@@ -15,6 +15,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Geaendert
 
+- **Tooling:** `pnpm.overrides` für `vitest` / `@vitest/utils` auf **4.1.8** (entspricht `apps/web` und STATUS; PR-#31-Review).
 - **Dependencies:** eslint **10.4.1**, typescript-eslint **8.60.1** (PR #30); vitest/jsdom/msw **4.1.8** / **29** / **2.14** (PR #20); Storybook **10** (#22); `@hookform/resolvers` 5.2.2, `react-i18next` 17.0.8 (Dependabot-Inhalte).
 - **CI:** E2E-Smoke in `.github/workflows/e2e-smoke.yml` (Playwright-Container, wöchentlich + manuell); validate auf PRs ohne doppelten `main`-Lauf.
 
