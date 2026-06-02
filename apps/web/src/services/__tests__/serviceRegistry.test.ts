@@ -1,6 +1,39 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getAppServices, resetAppServices, setAppServices } from '../serviceRegistry';
 
+const registryMocks = vi.hoisted(() => ({
+  generateRecipeIdeas: vi.fn(async () => []),
+  generateRecipe: vi.fn(async () => ({ recipeTitle: 'x' })),
+  generateShoppingList: vi.fn(async () => []),
+  generateRecipeImage: vi.fn(async () => 'data:image/png;base64,x'),
+  extractPantryItemsFromImage: vi.fn(async () => 'tomate'),
+  scanBarcodeFromImage: vi.fn(async () => '4012345'),
+  recognizeTextFromImage: vi.fn(async () => 'ocr-text'),
+  transcribeWithWhisper: vi.fn(async () => ({ text: 'hallo', language: 'de' })),
+  initWhisper: vi.fn(async () => undefined),
+}));
+
+vi.mock('../aiService', () => ({
+  generateRecipeIdeas: registryMocks.generateRecipeIdeas,
+  generateRecipe: registryMocks.generateRecipe,
+  generateShoppingList: registryMocks.generateShoppingList,
+}));
+
+vi.mock('../geminiService', () => ({
+  generateRecipeImage: registryMocks.generateRecipeImage,
+  extractPantryItemsFromImage: registryMocks.extractPantryItemsFromImage,
+}));
+
+vi.mock('../scannerService', () => ({
+  scanBarcodeFromImage: registryMocks.scanBarcodeFromImage,
+  recognizeTextFromImage: registryMocks.recognizeTextFromImage,
+}));
+
+vi.mock('../whisperService', () => ({
+  transcribeWithWhisper: registryMocks.transcribeWithWhisper,
+  initWhisper: registryMocks.initWhisper,
+}));
+
 describe('serviceRegistry', () => {
   beforeEach(() => {
     resetAppServices();
@@ -44,5 +77,33 @@ describe('serviceRegistry', () => {
     await expect(s.scanner.scanBarcodeFromImage(new File([], 'x'))).resolves.toBe('123');
     await expect(s.whisper.transcribeWithWhisper(new Blob())).resolves.toMatchObject({ text: 'hi' });
     expect(typeof s.scanner.recognizeTextFromImage).toBe('function');
+  });
+
+  it('Default-Gateways delegieren an aiService, geminiService, scanner und whisper', async () => {
+    resetAppServices();
+    const s = getAppServices();
+    const file = new File([], 'scan.jpg');
+
+    await s.ai.generateRecipeIdeas({} as never, [], {} as never);
+    await s.ai.generateRecipe({} as never, [], {} as never, {} as never);
+    await s.ai.generateShoppingList('prompt', [], []);
+    await s.ai.generateRecipeImage('Titel');
+    await s.ai.extractPantryItemsFromImage(file);
+
+    await s.scanner.scanBarcodeFromImage(file);
+    await s.scanner.recognizeTextFromImage(file, 'deu');
+
+    await s.whisper.transcribeWithWhisper(new Blob());
+    await s.whisper.initWhisper('/models/whisper');
+
+    expect(registryMocks.generateRecipeIdeas).toHaveBeenCalled();
+    expect(registryMocks.generateRecipe).toHaveBeenCalled();
+    expect(registryMocks.generateShoppingList).toHaveBeenCalled();
+    expect(registryMocks.generateRecipeImage).toHaveBeenCalledWith('Titel');
+    expect(registryMocks.extractPantryItemsFromImage).toHaveBeenCalledWith(file);
+    expect(registryMocks.scanBarcodeFromImage).toHaveBeenCalledWith(file);
+    expect(registryMocks.recognizeTextFromImage).toHaveBeenCalledWith(file, 'deu');
+    expect(registryMocks.transcribeWithWhisper).toHaveBeenCalled();
+    expect(registryMocks.initWhisper).toHaveBeenCalledWith('/models/whisper');
   });
 });

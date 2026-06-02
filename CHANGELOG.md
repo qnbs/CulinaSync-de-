@@ -19,6 +19,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **Tests (M5 Sprint):** Vitest-Coverage-Thresholds auf **70/70/63/55** (Statements/Lines PRD-Ziel erreicht; Functions/Branches Follow-up).
 - **Tests (M5 Follow-up):** `geminiService`-Erweiterung, `communityShareService`, `snapshotVaultService`, `settingsMigration`, `aiCloudApi`, Matcher/Smart-Planner/Health-Export; Thresholds **72/73/65/57**.
 - **Tests (M5 UI-Smoke):** Header, PlannedMealCard, MealPlannerHeader, RecipeDetail-Subkomponenten, `useRecipeDetail`-Erweiterung; Thresholds **75/76/68/60** (Branches-Ziel erreicht).
+- **Tests (M5 Functions≥70):** `MealPlanModal`, erweiterte `RecipeDetail`/`RecipeActionBar`/`ShoppingListActive`-Smokes, `serviceRegistry`-Default-Gateways, `useShoppingList` Export/Drag; Thresholds **77/79/72/62** (M5 vollständig: alle vier Metriken im PRD-Zielkorridor).
 
 ### Geaendert
 

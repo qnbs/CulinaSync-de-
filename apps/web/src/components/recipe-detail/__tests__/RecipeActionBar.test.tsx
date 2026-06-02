@@ -83,4 +83,35 @@ describe('RecipeActionBar', () => {
     await user.click(screen.getByRole('button', { name: /recipeDetail.actions.cookMode/i }));
     expect(handlers.handleStartCookMode).toHaveBeenCalled();
   });
+
+  it('loest Loeschen und weitere Export-Formate aus', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <I18nextProvider i18n={i18n}>
+        <RecipeActionBar
+          recipe={savedRecipe}
+          isSaved
+          isCookModeActive={false}
+          t={i18n.t}
+          {...handlers}
+        />
+      </I18nextProvider>,
+    );
+
+    await user.click(screen.getByRole('button', { name: /recipeDetail.actions.delete/i }));
+    expect(handlers.handleDelete).toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: /recipeDetail.actions.exportCsv/i }));
+    expect(handlers.handleExport).toHaveBeenCalledWith('csv');
+
+    await user.click(screen.getByRole('button', { name: /recipeDetail.actions.exportJson/i }));
+    expect(handlers.handleExport).toHaveBeenCalledWith('json');
+
+    await user.click(screen.getByRole('button', { name: /recipeDetail.actions.exportMd/i }));
+    expect(handlers.handleExport).toHaveBeenCalledWith('md');
+
+    await user.click(screen.getByRole('button', { name: /recipeDetail.actions.exportTxt/i }));
+    expect(handlers.handleExport).toHaveBeenCalledWith('txt');
+  });
 });
