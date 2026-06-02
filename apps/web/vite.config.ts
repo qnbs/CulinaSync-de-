@@ -9,6 +9,7 @@ import pkg from './package.json';
 const chunkGroups: Array<[string, string[]]> = [
   ['vendor-react', ['react', 'react-dom']],
   ['vendor-redux', ['@reduxjs/toolkit', 'react-redux', 'redux-persist']],
+  ['vendor-zustand', ['zustand']],
   ['vendor-dexie', ['dexie', 'dexie-react-hooks']],
   ['vendor-windowing', ['react-window']],
   ['vendor-i18n', ['i18next', 'react-i18next', 'i18next-browser-languagedetector', 'i18next-http-backend']],
@@ -134,7 +135,15 @@ export default defineConfig({
       // Prevent heavy optional chunks from being preloaded on every page load.
       // They are loaded on demand via dynamic import() and cached by the SW.
       resolveDependencies: (_filename, deps) => {
-        const deferredChunks = ['vendor-faker', 'vendor-scanner', 'vendor-tour', 'vendor-workbox', 'vendor-export', 'vendor-misc'];
+        const deferredChunks = [
+          'vendor-faker',
+          'vendor-scanner',
+          'vendor-tour',
+          'vendor-workbox',
+          'vendor-export',
+          'vendor-zustand',
+          'vendor-misc',
+        ];
         return deps.filter(dep => !deferredChunks.some(chunk => dep.includes(`/${chunk}-`)));
       },
     },

@@ -371,7 +371,28 @@
         "uploadError": "Fehler beim Hochladen:",
         "restoreSuccess": "Backup erfolgreich wiederhergestellt!",
         "restoreError": "Fehler beim Wiederherstellen:",
-        "helper": "Alle Daten werden vor dem Upload lokal verschluesselt. Das Passwort verlaesst niemals dein Geraet."
+        "mergeRestore": "Zusammenfuehren (Konflikte)",
+        "mergeSuccess": "Cloud-Backup zusammengefuehrt (neuere Eintraege behalten).",
+        "lastSync": "Letzter erfolgreicher Sync: {{date}}",
+        "helper": "Alle Daten werden vor dem Upload lokal verschluesselt. Das Passwort verlaesst niemals dein Geraet. WebDAV/Nextcloud: Ziel-URL als `.csb`-Datei anlegen."
+      },
+      "deviceSync": {
+        "sectionTitle": "Geraete-Transfer (QR)",
+        "sectionHint": "Vorrat und Rezepte (max. 40 je) als QR oder Textcode — fuer schnellen Transfer zwischen Geraeten im selben Netz.",
+        "title": "QR-Geraetesync",
+        "description": "Scanne den Code auf dem anderen Geraet oder fuege den Textcode ein. Aeltere Eintraege werden nicht ueberschrieben.",
+        "generateQr": "QR-Code erzeugen",
+        "qrPlaceholder": "Noch kein Code",
+        "qrAlt": "CulinaSync Geraete-Transfer QR-Code",
+        "qrTooLarge": "Datenmenge zu gross fuer QR — nutze Textcode oder Vault-Datei.",
+        "generateError": "QR konnte nicht erzeugt werden.",
+        "importLabel": "Code vom anderen Geraet",
+        "importPlaceholder": "culinasync-device-sync:v1:…",
+        "importAction": "Daten zusammenfuehren",
+        "importEmpty": "Bitte einen Transfer-Code einfuegen.",
+        "importSuccess": "Geraetedaten wurden zusammengefuehrt.",
+        "importError": "Ungueltiger oder beschaedigter Transfer-Code.",
+        "openAction": "QR-Sync oeffnen"
       },
       "reset": {
         "title": "Daten unwiderruflich loeschen?",

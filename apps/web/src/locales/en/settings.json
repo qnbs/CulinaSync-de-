@@ -371,7 +371,28 @@
         "uploadError": "Error while uploading:",
         "restoreSuccess": "Backup restored successfully!",
         "restoreError": "Error while restoring:",
-        "helper": "All data is encrypted locally before upload. The password never leaves your device."
+        "mergeRestore": "Merge (conflicts)",
+        "mergeSuccess": "Cloud backup merged (newer entries kept).",
+        "lastSync": "Last successful sync: {{date}}",
+        "helper": "All data is encrypted locally before upload. The password never leaves your device. WebDAV/NextCloud: use a `.csb` file target URL."
+      },
+      "deviceSync": {
+        "sectionTitle": "Device transfer (QR)",
+        "sectionHint": "Pantry and recipes (max. 40 each) as QR or text code — for quick transfer between devices on the same network.",
+        "title": "QR device sync",
+        "description": "Scan the code on the other device or paste the text code. Older entries are not overwritten.",
+        "generateQr": "Generate QR code",
+        "qrPlaceholder": "No code yet",
+        "qrAlt": "CulinaSync device transfer QR code",
+        "qrTooLarge": "Payload too large for QR — use text code or vault file.",
+        "generateError": "Could not generate QR code.",
+        "importLabel": "Code from other device",
+        "importPlaceholder": "culinasync-device-sync:v1:…",
+        "importAction": "Merge data",
+        "importEmpty": "Please paste a transfer code.",
+        "importSuccess": "Device data merged successfully.",
+        "importError": "Invalid or corrupted transfer code.",
+        "openAction": "Open QR sync"
       },
       "reset": {
         "title": "Delete data permanently?",

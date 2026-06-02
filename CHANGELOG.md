@@ -13,6 +13,11 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **E2E:** Playwright `baseURL` mit GitHub-Pages-Pfad `/CulinaSync-de-/` in CI.
 - **Deeplinks:** `culinasync://`-Events werden in der App verarbeitet (`useDeepLinkNavigation`).
 - **E2E-CI:** `e2e-smoke.yml` läuft bei Push/PR auf `apps/web/**` (Playwright-Container **v1.59.1**); Doku in `TESTING.md`.
+- **M9.3:** `vendor-zustand`-Chunk; `redux-persist` in `vendor-redux`.
+- **M10:** `backupMergeService`, QR-Gerätesync (`deviceSyncService`, `DeviceSyncModal`), Cloud-Sync Merge + letzter Sync-Zeitstempel.
+- **M7/M8-Doku:** `docs/M7-TYPESCRIPT-7-GA-PREP.md`, `docs/M8-TAURI-DESKTOP.md`; Tauri-Version 0.2.2.
+- **E2E:** `navigation-offline.spec.ts` (Desktop-/Mobile-Navigation, Offline-Banner `#offline-status-banner`).
+- **Tests:** **378** Vitest-Tests / **92** Dateien (`backupMergeService`, `deviceSyncService`).
 - **PWA-Härtung (#37):** precached `index.html` für Navigation; Manifest-Shortcuts `?page=…`; `useOnlineStatus` nach Tab-Fokus/bfcache.
 - **A11y (#37):** Install-/Update-Dialoge mit `useModalA11y`; Offline-Banner ARIA; Toasts `assertive` nur bei Fehlern.
 - **Offline-KI (#37):** `aiOfflineFallback.ts`; `geminiService` ohne Faker; `logAppError` für Install/Reset/Export.

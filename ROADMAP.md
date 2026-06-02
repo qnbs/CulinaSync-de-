@@ -112,7 +112,7 @@
 | 5.3 | Hooks testen: `useShoppingList`, `usePantryManager`, `useMealPlan` | T1 | `src/hooks/__tests__/` | Hoch (4–6 h) | 🟨 **`useMealPlannerScreen`**, **`useCookModeController`**, **`useMealPlan`**, **`useShoppingList`**, **`usePantryManager`** (Stub/Mock); weiter: Edge-Cases und Integration |
 | 5.4 | Services testen: `apiKeyService`, `voiceCommands`, `exportService` | T1 | `src/services/__tests__/` | Mittel (3–4 h) | ✅ apiKeyService, exportService, **`voiceCommands.test.ts`** (`processCommand`); 🟨 **`mealPlanRepository.test.ts`**, **`pantryRepository.test.ts`** (Dexie gemockt) |
 | 5.5 | Component-Smoke-Tests für kritische Seiten (React Testing Library) | T1 | `src/components/**/__tests__/` | Hoch (4–6 h) | ✅ inkl. Header, PlannedMealCard, MealPlannerHeader, RecipeDetail-Subkomponenten, ShoppingListActive |
-| 5.6 | Functions/Branches ≥70 % / ≥60 % (Follow-up PR #29) | T1 | Tests + `vitest.config.ts` | Mittel | ✅ Thresholds **77/79/72/62**; **362** Tests / **85** Dateien |
+| 5.6 | Functions/Branches ≥70 % / ≥60 % (Follow-up PR #29) | T1 | Tests + `vitest.config.ts` | Mittel | ✅ Thresholds **77/79/72/62**; **378** Tests / **92** Dateien |
 
 **Gesamtaufwand Milestone 5:** ~20–28 h (abgeschlossen)
 
@@ -143,7 +143,7 @@ _Vorbedingung: TS 7.0 Stable Release (voraussichtlich Q3 2026)_
 
 | # | Maßnahme | Datei(en) | Aufwand | Status |
 |---|---|---|---|---|
-| 7.1 | `@typescript/native-preview` entfernen, `typescript` auf ^7.0.0 upgraden | `package.json` | Niedrig | 🔲 |
+| 7.1 | `@typescript/native-preview` entfernen, `typescript` auf ^7.0.0 upgraden | `package.json` | Niedrig | 🟨 Vorbereitung: `docs/M7-TYPESCRIPT-7-GA-PREP.md` |
 | 7.2 | `noUncheckedSideEffectImports: true` aktivieren | `tsconfig.json` | Niedrig | 🔲 |
 | 7.3 | `stableTypeOrdering: true` aktivieren | `tsconfig.json` | Niedrig | 🔲 |
 | 7.4 | Alle deprecated tsconfig-Flags prüfen und entfernen | `tsconfig.json` | Niedrig | 🔲 |
@@ -169,8 +169,8 @@ _Vorbedingung: M1 (DevContainer mit Rust), Tauri 2 stabil_
 
 | # | Maßnahme | Datei(en) | Aufwand | Status |
 |---|---|---|---|---|
-| 8.1 | `tauri.conf.json` für Release konfigurieren (Bundle-Identifier, Icons, Fenster-Einstellungen) | `src-tauri/tauri.conf.json` | Niedrig | 🔲 |
-| 8.2 | GitHub Actions Release-Workflow für Tauri-Builds (matrix: windows, macos, linux) | `.github/workflows/tauri-release.yml` | Mittel (3–4 h) | 🔲 |
+| 8.1 | `tauri.conf.json` für Release konfigurieren (Bundle-Identifier, Icons, Fenster-Einstellungen) | `src-tauri/tauri.conf.json` | Niedrig | ✅ Version/CSP/Identifier; `docs/M8-TAURI-DESKTOP.md` |
+| 8.2 | GitHub Actions Release-Workflow für Tauri-Builds (matrix: windows, macos, linux) | `.github/workflows/tauri-release.yml` | Mittel (3–4 h) | 🟨 Prep-Workflow; native Matrix folgt mit Cargo |
 | 8.3 | Plattformspezifische CSP und native Dialoge in `src-tauri/main.rs` | `src-tauri/main.rs` | Mittel (2 h) | 🔲 |
 | 8.4 | README.md um Desktop-Download-Sektion und Installationsanleitung ergänzen | `README.md` | Niedrig (1 h) | 🔲 |
 
@@ -186,7 +186,7 @@ _Vorbedingung: M1 (DevContainer mit Rust), Tauri 2 stabil_
 |---|---|---|---|---|---|
 | 9.1 | `jsPDF` auf dynamischen Import umstellen (nur bei PDF-Export laden) | P1 | `src/services/exportService.ts` | Niedrig (1 h) | ✅ |
 | 9.2 | `tesseract.js` auf dynamischen Import umstellen (OCR-Modul) | P1 | `src/services/` | Niedrig (1 h) | ✅ |
-| 9.3 | `vendor-misc`-Chunk analysieren (886 KB) und ggf. weiter splitten | P2 | `vite.config.ts` `manualChunks` | Mittel (2–3 h) | 🟨 `vendor-export` (jspdf/html2canvas/papaparse) ausgelagert; Rest beobachten |
+| 9.3 | `vendor-misc`-Chunk analysieren (886 KB) und ggf. weiter splitten | P2 | `vite.config.ts` `manualChunks` | Mittel (2–3 h) | ✅ `vendor-zustand`, `redux-persist` in `vendor-redux`; misc ~215 KB |
 | 9.4 | `vendor-faker`-Chunk (2.6 MB) prüfen — nur noch Dev-Fallback, niemals im initialen Bundle | P1 | Lazy-Import verifizieren | Niedrig (30 min) | ✅ |
 
 **Gesamtaufwand Milestone 9:** ~5–7 h
@@ -199,10 +199,10 @@ _Vorbedingung: M1 (DevContainer mit Rust), Tauri 2 stabil_
 
 | # | Maßnahme | Datei(en) | Aufwand | Status |
 |---|---|---|---|---|
-| 10.1 | QR-Code-Export/Import für Pantry + Rezepte (lokaler Sync über LAN) | `src/services/` | Hoch (6–8 h) | 🔲 |
-| 10.2 | WebDAV-Sync-Adapter (Nextcloud, ownCloud) als optionaler Provider | `src/services/syncService.ts` | Hoch (8–12 h) | 🔲 |
-| 10.3 | Sync-Status-UI im Settings-Panel | `src/components/Settings.tsx` | Mittel (3–4 h) | 🔲 |
-| 10.4 | Konflikt-Resolution-Strategie (Last-Write-Wins mit Timestamp) | `src/services/` | Mittel (3–4 h) | 🔲 |
+| 10.1 | QR-Code-Export/Import für Pantry + Rezepte (lokaler Sync über LAN) | `src/services/` | Hoch (6–8 h) | ✅ `deviceSyncService` + `DeviceSyncModal` |
+| 10.2 | WebDAV-Sync-Adapter (Nextcloud, ownCloud) als optionaler Provider | `src/services/syncService.ts` | Hoch (8–12 h) | 🟨 Generischer PUT/GET; Doku-Hinweis WebDAV `.csb` |
+| 10.3 | Sync-Status-UI im Settings-Panel | `src/components/Settings.tsx` | Mittel (3–4 h) | ✅ Letzter Sync, Merge-Restore, QR-Sektion |
+| 10.4 | Konflikt-Resolution-Strategie (Last-Write-Wins mit Timestamp) | `src/services/` | Mittel (3–4 h) | ✅ `backupMergeService` (Vault, QR, Cloud-Merge) |
 
 **Gesamtaufwand Milestone 10:** ~20–28 h
 

@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "CulinaSync",
-    "version": "1.0.0",
+    "version": "0.2.2",
     "identifier": "io.github.qnbs.culinasync"
   },
   "tauri": {
