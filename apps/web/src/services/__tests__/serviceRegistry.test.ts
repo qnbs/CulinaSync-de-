@@ -32,4 +32,17 @@ describe('serviceRegistry', () => {
     const s = getAppServices();
     expect(s.ai.generateRecipeIdeas).not.toBeNull();
   });
+
+  it('setAppServices merged scanner- und whisper-Overrides', async () => {
+    const scan = vi.fn(async () => '123');
+    const transcribe = vi.fn(async () => ({ text: 'hi' }));
+    setAppServices({
+      scanner: { scanBarcodeFromImage: scan },
+      whisper: { transcribeWithWhisper: transcribe },
+    });
+    const s = getAppServices();
+    await expect(s.scanner.scanBarcodeFromImage(new File([], 'x'))).resolves.toBe('123');
+    await expect(s.whisper.transcribeWithWhisper(new Blob())).resolves.toMatchObject({ text: 'hi' });
+    expect(typeof s.scanner.recognizeTextFromImage).toBe('function');
+  });
 });

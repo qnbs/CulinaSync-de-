@@ -1,6 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { exportNutritionToHealthCsv } from '../healthConnectService';
+import { exportNutritionToHealthCsv, exportNutritionToHealthJson } from '../healthConnectService';
+
+const nutrition = {
+  calories: 420,
+  protein: 12,
+  fat: 8,
+  carbs: 64,
+  allergens: ['Gluten'],
+  matchedIngredients: 3,
+  totalIngredients: 4,
+};
 
 describe('healthConnectService CSV hardening', () => {
   const createObjectUrlMock = vi.fn(() => 'blob:health');
@@ -62,5 +72,33 @@ describe('healthConnectService CSV hardening', () => {
     const csvPayload = await createdBlobs[0].text();
     expect(csvPayload).toContain('"DietaryEnergyConsumed","2026-04-22T10:00:00.000Z","2026-04-22T10:00:00.000Z","510","kcal","\'@Breakfast"');
     expect(csvPayload).toContain('"DietaryCarbohydrates","2026-04-22T10:00:00.000Z","2026-04-22T10:00:00.000Z","41","g","\'@Breakfast"');
+  });
+
+  it('writes samsung exports im Google-Format', async () => {
+    exportNutritionToHealthCsv({
+      type: 'samsung',
+      date: '2026-04-22',
+      nutrition,
+      mealName: 'Mittag',
+    });
+
+    const csvPayload = await createdBlobs[0].text();
+    expect(csvPayload).toContain('Date,Calories,Protein,Fat,Carbs,Meal');
+    expect(csvPayload).toContain('"2026-04-22","420","12","8","64","Mittag"');
+  });
+
+  it('exportNutritionToHealthJson schreibt strukturiertes JSON', async () => {
+    exportNutritionToHealthJson({
+      type: 'google',
+      date: '2026-04-22',
+      nutrition,
+      mealName: 'Abend',
+    });
+
+    expect(createdBlobs).toHaveLength(1);
+    const jsonPayload = await createdBlobs[0].text();
+    const parsed = JSON.parse(jsonPayload) as { type: string; allergens: string[] };
+    expect(parsed.type).toBe('google');
+    expect(parsed.allergens).toContain('Gluten');
   });
 });
