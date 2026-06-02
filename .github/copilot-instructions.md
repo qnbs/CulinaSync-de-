@@ -95,6 +95,7 @@
 - Vor Commit/Push dieselbe Reihenfolge einhalten; Committen oder Pushen ohne vorherige lokale Validierung ist nur im echten Notfall zulaessig und muss dann im Verlauf explizit benannt werden.
 - Deploy: Automatisch via GitHub Actions bei Push auf `main` (`.github/workflows/deploy.yml`)
 - CI: Lint + Tests + Build über `validate.yml`; PR-i18n-Job und Validate nutzen **Node.js 24** (`setup-node`); Env `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` gesetzt
+- **i18n-Gate (PR):** `pnpm run i18n:check` (de/en-Key-Parität + Production-Baseline); `pnpm run i18n:check:changed -- origin/main` für neue Hardcoded-Strings; `pnpm run i18n:scan` → `reports/` (gitignored); Baseline senken: `pnpm run i18n:baseline:update`
 - Security: CodeQL-Analyse bei PRs und Push auf `main` (`.github/workflows/codeql.yml`)
 - `base` in `apps/web/vite.config.ts` wird dynamisch gesetzt: `/CulinaSync-de-/` in CI, `/` lokal.
 - GitHub-verwaltete Pages-Actions koennen trotz Node-24-Opt-in aktuell noch Node-20-Depracation-Warnungen emittieren. Das ist derzeit ein Upstream-Thema.

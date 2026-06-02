@@ -56,22 +56,22 @@ export const ModulesPanel: React.FC<ModulesPanelProps> = ({ settings, onChange }
             </section>
 
             <section className="space-y-4">
-                 <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-wider mb-4">Funktionen</h3>
+                 <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-wider mb-4">{t('settings.modules.featuresTitle')}</h3>
                  
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                      <div>
-                        <label className="block text-sm font-bold text-zinc-300 mb-2">Wochenstart</label>
+                        <label className="block text-sm font-bold text-zinc-300 mb-2">{t('settings.weekStart')}</label>
                         <select 
                             value={settings.weekStart} 
                             onChange={e => onChange('weekStart', e.target.value)}
                             className="w-full bg-zinc-900/50 border border-zinc-700 rounded-xl p-3 outline-none"
                         >
-                            <option value="Monday">Montag</option>
-                            <option value="Sunday">Sonntag</option>
+                            <option value="Monday">{t('settings.monday')}</option>
+                            <option value="Sunday">{t('settings.sunday')}</option>
                         </select>
                      </div>
                      <div>
-                        <label className="block text-sm font-bold text-zinc-300 mb-2">Standard-Portionen</label>
+                        <label className="block text-sm font-bold text-zinc-300 mb-2">{t('settings.defaultServings')}</label>
                         <input 
                             type="number" 
                             min="1" 
@@ -83,16 +83,16 @@ export const ModulesPanel: React.FC<ModulesPanelProps> = ({ settings, onChange }
                  </div>
 
                  <Toggle 
-                    label="Automatische Kategorisierung" 
-                    desc="Einkaufsartikel automatisch sortieren"
+                    label={t('settings.modules.autoCategorizeLabel')} 
+                    desc={t('settings.modules.autoCategorizeDesc')}
                     checked={settings.shoppingList.autoCategorize} 
                     onToggle={() => onChange('shoppingList.autoCategorize', !settings.shoppingList.autoCategorize)} 
                  />
                  
                  <div className="p-4 glass-card rounded-xl">
                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-bold text-zinc-200">Ablaufwarnung</span>
-                        <span className="font-mono text-[var(--color-accent-400)]">{settings.pantry.expiryWarningDays} Tage</span>
+                        <span className="font-bold text-zinc-200">{t('settings.modules.expiryWarning')}</span>
+                        <span className="font-mono text-[var(--color-accent-400)]">{t('settings.modules.expiryDays', { count: settings.pantry.expiryWarningDays })}</span>
                      </div>
                      <input 
                         type="range" min="1" max="14" 

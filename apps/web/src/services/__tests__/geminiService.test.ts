@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import translationEN from '../../locales/en';
+import { createI18nTestT } from '../../test/i18nTestUtils';
 
 const { mockGenerateContent, mockGenerateImages, mockLoadApiKey } = vi.hoisted(() => ({
   mockGenerateContent: vi.fn(),
@@ -16,18 +18,15 @@ vi.mock('../retryUtils', () => ({
 
 vi.mock('i18next', () => ({
   default: {
-    t: (key: string) => {
-      const map: Record<string, string> = {
-        'gemini.error.noApiKey': 'No API key configured.',
-        'gemini.error.invalidApiKey': 'Invalid API key.',
-        'gemini.error.networkError': 'Network error.',
-        'gemini.error.rateLimited': 'Rate limit reached.',
-        'gemini.error.invalidResponse': 'Invalid AI response.',
-        'gemini.error.unexpected': 'Unexpected error.',
-        'gemini.error.emptyResponse': 'Empty AI response.',
-      };
-      return map[key] ?? key;
-    },
+    t: createI18nTestT(translationEN, {
+      'gemini.error.noApiKey': 'No API key configured.',
+      'gemini.error.invalidApiKey': 'Invalid API key.',
+      'gemini.error.networkError': 'Network error.',
+      'gemini.error.rateLimited': 'Rate limit reached.',
+      'gemini.error.invalidResponse': 'Invalid AI response.',
+      'gemini.error.unexpected': 'Unexpected error.',
+      'gemini.error.emptyResponse': 'Empty AI response.',
+    }),
     language: 'en',
   },
 }));
@@ -271,7 +270,7 @@ describe('geminiService', () => {
     mockGenerateContent.mockRejectedValueOnce(new Error('Failed to fetch'));
 
     const items = await generateShoppingList('Grillparty', [], []);
-    expect(items.some((i) => i.name === 'Brot')).toBe(true);
+    expect(items.some((i) => i.name === 'Bread')).toBe(true);
   });
 
   it('maps rate limit errors to user-friendly message', async () => {

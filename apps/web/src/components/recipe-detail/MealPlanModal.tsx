@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useModalA11y } from '../../hooks/useModalA11y';
 import { addRecipeToMealPlan } from '../../services/repositories/mealPlanRepository';
+import { DEFAULT_MEAL_TYPE, MEAL_TYPES, type MealType } from '../../constants/mealTypes';
 
 interface MealPlanModalProps {
   recipeId: number;
@@ -12,7 +13,7 @@ interface MealPlanModalProps {
 export const MealPlanModal: React.FC<MealPlanModalProps> = ({recipeId, onClose, onSave}) => {
   const { t } = useTranslation();
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-    const [mealType, setMealType] = useState<'Frühstück' | 'Mittagessen' | 'Abendessen'>('Abendessen');
+    const [mealType, setMealType] = useState<MealType>(DEFAULT_MEAL_TYPE);
   const modalRef = React.useRef<HTMLDivElement>(null);
   const dateInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -40,10 +41,10 @@ export const MealPlanModal: React.FC<MealPlanModalProps> = ({recipeId, onClose, 
                     </div>
                     <div>
                 <label htmlFor="mealType" className="block text-sm font-medium text-zinc-400 mb-1">{t('recipeDetail.modal.mealType')}</label>
-              <select id="mealType" value={mealType} onChange={e => setMealType(e.target.value as 'Frühstück' | 'Mittagessen' | 'Abendessen')} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:outline-none">
-                  <option value="Frühstück">{t('recipeDetail.mealType.breakfast')}</option>
-                  <option value="Mittagessen">{t('recipeDetail.mealType.lunch')}</option>
-                  <option value="Abendessen">{t('recipeDetail.mealType.dinner')}</option>
+              <select id="mealType" value={mealType} onChange={e => setMealType(e.target.value as MealType)} className="w-full bg-zinc-700 border-zinc-600 rounded-md p-2 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:outline-none">
+                  {MEAL_TYPES.map((type) => (
+                    <option key={type} value={type}>{t(`mealPlanner.mealTypes.${type}`, { defaultValue: type })}</option>
+                  ))}
                         </select>
                     </div>
                     <div className="flex justify-end gap-3 pt-4">

@@ -13,6 +13,7 @@ import { loadApiKey } from "./apiKeyService";
 import { logAppError } from './errorLoggingService';
 import i18next from 'i18next';
 import { z } from 'zod';
+import { buildRecipeIdeasSchema, buildRecipeSchema, buildShoppingListSchema } from './geminiSchemas';
 
 // --- Dynamic AI Client (loaded from secure IndexedDB, never from env/build) ---
 let _aiClient: GoogleGenAI | null = null;
@@ -179,119 +180,8 @@ export const invalidateAIClient = () => {
   _lastKeyHash = null;
 };
 
-const recipeSchema = {
-    type: SchemaType.OBJECT,
-    properties: {
-        recipeTitle: { type: SchemaType.STRING, description: "Ein kreativer und ansprechender Titel für das Rezept auf Deutsch." },
-        shortDescription: { type: SchemaType.STRING, description: "Eine kurze, verlockende Beschreibung des Gerichts auf Deutsch." },
-        prepTime: { type: SchemaType.STRING, description: "Vorbereitungszeit als Text, z.B. '15 Min.'" },
-        cookTime: { type: SchemaType.STRING, description: "Kochzeit als Text, z.B. '30 Min.'" },
-        totalTime: { type: SchemaType.STRING, description: "Gesamtzeit als Text, z.B. '45 Min.'" },
-        servings: { type: SchemaType.STRING, description: "Anzahl der Portionen, z.B. '4 Personen'" },
-        difficulty: { type: SchemaType.STRING, description: "Schwierigkeitsgrad, z.B. 'Einfach', 'Mittel', 'Schwer'" },
-        ingredients: {
-            type: SchemaType.ARRAY,
-            items: {
-                type: SchemaType.OBJECT,
-                properties: {
-                    sectionTitle: { type: SchemaType.STRING, description: "Titel für eine Zutatengruppe, z.B. 'Für den Teig'." },
-                    items: {
-                        type: SchemaType.ARRAY,
-                        items: {
-                            type: SchemaType.OBJECT,
-                            properties: {
-                                quantity: { type: SchemaType.STRING },
-                                unit: { type: SchemaType.STRING },
-                                name: { type: SchemaType.STRING }
-                            },
-                        }
-                    }
-                }
-            }
-        },
-        instructions: {
-            type: SchemaType.ARRAY,
-            items: { type: SchemaType.STRING },
-            description: "Schritt-für-Schritt-Anleitung zur Zubereitung des Gerichts."
-        },
-        nutritionPerServing: {
-            type: SchemaType.OBJECT,
-            properties: {
-                calories: { type: SchemaType.STRING },
-                protein: { type: SchemaType.STRING },
-                fat: { type: SchemaType.STRING },
-                carbs: { type: SchemaType.STRING }
-            }
-        },
-        tags: {
-            type: SchemaType.OBJECT,
-            properties: {
-                course: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-                cuisine: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-                occasion: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-                mainIngredient: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-                prepMethod: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-                diet: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-            }
-        },
-        expertTips: {
-            type: SchemaType.ARRAY,
-            items: {
-                type: SchemaType.OBJECT,
-                properties: {
-                    title: { type: SchemaType.STRING },
-                    content: { type: SchemaType.STRING }
-                }
-            }
-        }
-    },
-    propertyOrdering: [
-        "recipeTitle", "shortDescription", "prepTime", "cookTime", "totalTime",
-        "servings", "difficulty", "ingredients", "instructions",
-        "nutritionPerServing", "tags", "expertTips"
-    ],
-    required: ["recipeTitle", "shortDescription", "totalTime", "servings", "difficulty", "ingredients", "instructions"]
-};
-
-const recipeIdeasSchema = {
-    type: SchemaType.OBJECT,
-    properties: {
-        ideas: {
-            type: SchemaType.ARRAY,
-            description: "Eine Liste von 3 unterschiedlichen, kreativen Rezeptideen.",
-            items: {
-                type: SchemaType.OBJECT,
-                properties: {
-                    recipeTitle: { type: SchemaType.STRING, description: "Ein kreativer und ansprechender Titel für die Rezeptidee auf Deutsch." },
-                    shortDescription: { type: SchemaType.STRING, description: "Eine kurze, verlockende Beschreibung des Gerichts in einem Satz auf Deutsch." }
-                },
-                required: ["recipeTitle", "shortDescription"]
-            }
-        }
-    },
-    required: ["ideas"]
-};
-
-const shoppingListSchema = {
-    type: SchemaType.OBJECT,
-    properties: {
-        items: {
-            type: SchemaType.ARRAY,
-            description: "Eine Liste von Einkaufsartikeln.",
-            items: {
-                type: SchemaType.OBJECT,
-                properties: {
-                    name: { type: SchemaType.STRING, description: "Der Name des Artikels." },
-                    quantity: { type: SchemaType.NUMBER, description: "Die Menge des Artikels." },
-                    unit: { type: SchemaType.STRING, description: "Die Einheit der Menge (z.B. 'kg', 'Liter', 'Stück')." },
-                    category: { type: SchemaType.STRING, description: "Eine empfohlene Kategorie für den Supermarkt (z.B. 'Obst & Gemüse', 'Milchprodukte')." }
-                },
-                required: ["name", "quantity", "unit"]
-            }
-        }
-    },
-    required: ["items"]
-};
+const geminiPrompt = (key: string) => i18next.t(`gemini.prompt.${key}`);
+const geminiSystem = (key: string) => i18next.t(`gemini.system.${key}`);
 
 const isNetworkError = (errMsg: string): boolean =>
     errMsg.includes('FETCH_ERROR') || errMsg.includes('NetworkError') || errMsg.includes('Failed to fetch') || errMsg.includes('network');
@@ -324,42 +214,39 @@ const constructBasePrompt = (
     pantryItems: PantryItem[],
     aiPreferences: AppSettings['aiPreferences']
 ): string => {
-  const lang = i18next.language?.startsWith('en') ? 'en' : 'de';
-  const isEn = lang === 'en';
   const pantryList = sanitizeForPrompt(
-    pantryItems.map(item => `${item.quantity} ${item.unit} ${item.name}`).join(', ') || (isEn ? 'empty' : 'leer'),
+    pantryItems.map(item => `${item.quantity} ${item.unit} ${item.name}`).join(', ')
+      || geminiPrompt('pantryEmpty'),
   );
   const userPromptParts: string[] = [];
-  userPromptParts.push(isEn
-    ? `A user wants to cook something. Here are the specifications:`
-    : `Ein Nutzer möchte etwas kochen. Hier sind die Spezifikationen:`);
-  userPromptParts.push(`- ${isEn ? 'Main request' : 'Hauptwunsch'}: "${sanitizeForPrompt(prompt.craving)}"`);
+  userPromptParts.push(geminiPrompt('userIntro'));
+  userPromptParts.push(`- ${geminiPrompt('mainRequest')}: "${sanitizeForPrompt(prompt.craving)}"`);
 
   if (prompt.includeIngredients.length > 0) {
-      userPromptParts.push(`- ${isEn ? 'Must include' : 'Muss folgende Zutaten enthalten'}: ${sanitizeForPrompt(prompt.includeIngredients.join(', '))}`);
+      userPromptParts.push(`- ${geminiPrompt('mustInclude')}: ${sanitizeForPrompt(prompt.includeIngredients.join(', '))}`);
   }
   if (prompt.excludeIngredients.length > 0) {
-      userPromptParts.push(`- ${isEn ? 'Must NOT include' : 'Darf folgende Zutaten NICHT enthalten'}: ${sanitizeForPrompt(prompt.excludeIngredients.join(', '))}`);
+      userPromptParts.push(`- ${geminiPrompt('mustExclude')}: ${sanitizeForPrompt(prompt.excludeIngredients.join(', '))}`);
   }
   if (prompt.modifiers.length > 0) {
-      userPromptParts.push(`- ${isEn ? 'Desired properties' : 'Gewünschte Eigenschaften des Gerichts'}: ${sanitizeForPrompt(prompt.modifiers.join(', '))}`);
+      userPromptParts.push(`- ${geminiPrompt('modifiers')}: ${sanitizeForPrompt(prompt.modifiers.join(', '))}`);
   }
 
-  userPromptParts.push(`\n**${isEn ? 'Global user settings that MUST ALWAYS be respected' : 'Globale Nutzereinstellungen, die IMMER zu beachten sind'}:**`);
+  userPromptParts.push(`\n**${geminiPrompt('globalSettings')}:**`);
   if (aiPreferences.dietaryRestrictions.length > 0) {
-    userPromptParts.push(`- ${isEn ? 'Required dietary restrictions' : 'Zwingend erforderliche Ernährungsbeschränkungen'}: ${sanitizeForPrompt(aiPreferences.dietaryRestrictions.join(', '))}.`);
+    userPromptParts.push(`- ${geminiPrompt('dietaryRestrictions')}: ${sanitizeForPrompt(aiPreferences.dietaryRestrictions.join(', '))}.`);
   }
   if (aiPreferences.preferredCuisines.length > 0) {
-    userPromptParts.push(`- ${isEn ? 'Preferred cuisines' : 'Bevorzugte Küchen'}: ${sanitizeForPrompt(aiPreferences.preferredCuisines.join(', '))}.`);
+    userPromptParts.push(`- ${geminiPrompt('preferredCuisines')}: ${sanitizeForPrompt(aiPreferences.preferredCuisines.join(', '))}.`);
   }
   if (aiPreferences.customInstruction) {
-    userPromptParts.push(`- ${isEn ? "User's general instruction" : 'Generelle Anweisung des Nutzers'}: "${sanitizeForPrompt(aiPreferences.customInstruction)}".`);
+    userPromptParts.push(`- ${geminiPrompt('customInstruction')}: "${sanitizeForPrompt(aiPreferences.customInstruction)}".`);
   }
-  
-  userPromptParts.push(`\n**${isEn ? 'Available pantry ingredients' : 'Verfügbare Zutaten in der Vorratskammer'}:**`);
+
+  userPromptParts.push(`\n**${geminiPrompt('pantryHeader')}:**`);
   userPromptParts.push(pantryList);
-  
-  userPromptParts.push(`\n${isEn ? 'Please create a suitable, creative response based on ALL this information.' : 'Bitte erstelle basierend auf ALL diesen Informationen eine passende, kreative Antwort.'}`);
+
+  userPromptParts.push(`\n${geminiPrompt('closing')}`);
 
   return userPromptParts.join('\n');
 }
@@ -372,10 +259,7 @@ export const generateRecipeIdeas = async (
     try {
         const ai = await getAIClient();
         const model = "gemini-2.5-flash";
-        const isEn = i18next.language?.startsWith('en');
-        const systemInstruction = isEn
-            ? `You are Culina, a world-class chef. Develop 3 creative, diverse recipe ideas in English. Use your "Thinking Process" to ensure the ideas precisely match the pantry items and restrictions.`
-            : `Du bist Culina, ein Weltklasse-Koch. Entwickle 3 kreative, unterschiedliche Rezeptideen auf Deutsch. Nutze deinen "Thinking Process", um sicherzustellen, dass die Ideen exakt zu den Vorräten und Einschränkungen passen.`;
+        const systemInstruction = geminiSystem('ideas');
         const fullPrompt = constructBasePrompt(prompt, pantryItems, aiPreferences);
         const response = await retry(() => ai.models.generateContent({
             model,
@@ -383,7 +267,7 @@ export const generateRecipeIdeas = async (
             config: { 
                 systemInstruction, 
                 responseMimeType: 'application/json', 
-                responseSchema: recipeIdeasSchema,
+                responseSchema: buildRecipeIdeasSchema(),
                 thinkingConfig: { thinkingBudget: 2048 },
                 temperature: aiPreferences.creativityLevel ?? 0.7,
             }
@@ -420,27 +304,18 @@ export const generateRecipe = async (
     try {
         const ai = await getAIClient();
         const model = "gemini-2.5-flash";
-        const isEn = i18next.language?.startsWith('en');
         let fullPrompt = constructBasePrompt(prompt, pantryItems, aiPreferences);
-        if (isEn) {
-            fullPrompt += `\n\n**Specific requirement:**\nNow create the COMPLETE and detailed recipe for the following idea you previously suggested. Stay close to the title and description of the idea.`;
-            fullPrompt += `\n- Title: "${chosenIdea.recipeTitle}"`;
-            fullPrompt += `\n- Description: "${chosenIdea.shortDescription}"`;
-        } else {
-            fullPrompt += `\n\n**Spezifische Anforderung:**\nErstelle nun das VOLLSTÄNDIGE und detaillierte Rezept für die folgende, zuvor von dir vorgeschlagene Idee. Halte dich eng an Titel und Beschreibung der Idee.`;
-            fullPrompt += `\n- Titel: "${chosenIdea.recipeTitle}"`;
-            fullPrompt += `\n- Beschreibung: "${chosenIdea.shortDescription}"`;
-        }
-        const systemInstruction = isEn
-            ? `You are Culina, a world-class chef. Create a precise recipe in English. Use your "Thinking Process" to logically structure the cooking steps and ensure no ingredient is missing from the instructions.`
-            : `Du bist Culina, ein Weltklasse-Koch. Erstelle ein präzises, deutsches Rezept. Nutze deinen "Thinking Process", um die Kochschritte logisch zu strukturieren und sicherzustellen, dass keine Zutat in der Anleitung vergessen wird.`;
+        fullPrompt += `\n\n**${geminiPrompt('specificRequirement')}:**\n${geminiPrompt('fullRecipe')}`;
+        fullPrompt += `\n- ${geminiPrompt('titleLabel')}: "${chosenIdea.recipeTitle}"`;
+        fullPrompt += `\n- ${geminiPrompt('descriptionLabel')}: "${chosenIdea.shortDescription}"`;
+        const systemInstruction = geminiSystem('recipe');
         const response = await ai.models.generateContent({
                 model: model,
                 contents: fullPrompt,
                 config: {
                         systemInstruction,
                         responseMimeType: 'application/json',
-                        responseSchema: recipeSchema,
+                        responseSchema: buildRecipeSchema(),
                         thinkingConfig: { thinkingBudget: 4096 },
                         temperature: aiPreferences.creativityLevel ?? 0.7,
                 }
@@ -459,8 +334,9 @@ export const generateRecipe = async (
         const errMsg = (error as Error)?.message || String(error);
         if (isNetworkError(errMsg)) {
             // Offline-Fallback: Dummy-Rezept generieren
+            const fb = (key: string) => i18next.t(`aiOffline.geminiFallback.${key}`);
             const fallbackRecipe: Recipe = {
-                recipeTitle: chosenIdea.recipeTitle + ' (Offline)',
+                recipeTitle: chosenIdea.recipeTitle + i18next.t('aiOffline.recipeSuffix'),
                 shortDescription: chosenIdea.shortDescription,
                 prepTime: '10 Min.',
                 cookTime: '20 Min.',
@@ -469,7 +345,7 @@ export const generateRecipe = async (
                 difficulty: 'Einfach',
                 ingredients: [
                     {
-                        sectionTitle: '',
+                        sectionTitle: fb('sectionTitle'),
                         items: pantryItems.slice(0, 5).map(item => ({
                             quantity: item.quantity.toString(),
                             unit: item.unit,
@@ -478,13 +354,13 @@ export const generateRecipe = async (
                     }
                 ],
                 instructions: [
-                    'Alle Zutaten vorbereiten.',
-                    'Zutaten vermengen und kochen.',
-                    'Servieren und genießen.'
+                    fb('instructions.prep'),
+                    fb('instructions.cook'),
+                    fb('instructions.serve'),
                 ],
                 nutritionPerServing: { calories: '350', protein: '10g', fat: '12g', carbs: '40g' },
                 tags: { course: ['Hauptgericht'], cuisine: ['International'], occasion: [], mainIngredient: [], prepMethod: [], diet: [] },
-                expertTips: [{ title: 'Offline-Tipp', content: 'Dieses Rezept wurde ohne KI generiert.' }]
+                expertTips: [{ title: fb('expertTipTitle'), content: fb('expertTipContent') }]
             };
             return fallbackRecipe;
         }
@@ -501,42 +377,28 @@ export const generateShoppingList = async (
     try {
         const ai = await getAIClient();
         const model = "gemini-2.5-flash";
-        const isEn = i18next.language?.startsWith('en');
-        const pantryList = pantryItems.map(item => item.name).join(', ') || (isEn ? 'none' : 'keine');
-        const currentShoppingList = currentListItems.map(item => item.name).join(', ') || (isEn ? 'none' : 'keine');
-        const fullPrompt = isEn ? `
-            You are a shopping assistant for the CulinaSync app.
-            The user has made the following request for a shopping list: "${prompt}".
-
-            CONTEXT:
-            1.  **Pantry:** The following items are already in the pantry: ${pantryList}.
-            2.  **Shopping List:** The following items are already on the shopping list: ${currentShoppingList}.
-
-            Your task is to create a comprehensive shopping list in English that matches the user's request.
-            CONSIDER the pantry AND the existing shopping list. Do NOT add items that are already in either place, unless it is very likely that more of them will be needed (e.g. milk, eggs).
-            
-            Respond ONLY with a single, valid JSON object matching the provided schema.
-            Do not add any other text, markdown formatting or explanations before or after the JSON object.
-        ` : `
-            Du bist ein Einkaufs-Assistent für die App CulinaSync.
-            Der Benutzer hat folgende Anfrage für eine Einkaufsliste gestellt: "${prompt}".
-
-            KONTEXT:
-            1.  **Vorrat:** Folgende Artikel sind bereits im Vorrat vorhanden: ${pantryList}.
-            2.  **Einkaufsliste:** Folgende Artikel stehen bereits auf der Einkaufsliste: ${currentShoppingList}.
-
-            Deine Aufgabe ist es, eine umfassende Einkaufsliste auf Deutsch zu erstellen, die zur Anfrage des Benutzers passt.
-            BERÜCKSICHTIGE den Vorrat UND die bereits existierende Einkaufsliste. Füge Artikel, die bereits an einem der beiden Orte vorhanden sind, NICHT zur Liste hinzu, es sei denn, es ist sehr wahrscheinlich, dass mehr davon benötigt wird (z.B. Milch, Eier).
-            
-            Antworte NUR mit einem einzigen, gültigen JSON-Objekt, das dem bereitgestellten Schema entspricht.
-            Füge keinen anderen Text, keine Markdown-Formatierung oder Erklärungen vor oder nach dem JSON-Objekt hinzu.
-        `;
+        const pantryList = pantryItems.map(item => item.name).join(', ') || geminiPrompt('none');
+        const currentShoppingList = currentListItems.map(item => item.name).join(', ') || geminiPrompt('none');
+        const fullPrompt = [
+            geminiPrompt('shoppingAssistant'),
+            `${geminiPrompt('shoppingRequest')}: "${prompt}".`,
+            '',
+            `${geminiPrompt('shoppingContext')}:`,
+            `1.  **${geminiPrompt('shoppingPantry')}:** ${geminiPrompt('shoppingPantryItems')}: ${pantryList}.`,
+            `2.  **${geminiPrompt('shoppingList')}:** ${geminiPrompt('shoppingListItems')}: ${currentShoppingList}.`,
+            '',
+            geminiPrompt('shoppingTask'),
+            geminiPrompt('shoppingRules'),
+            '',
+            geminiPrompt('shoppingJsonOnly'),
+            geminiPrompt('shoppingNoExtra'),
+        ].join('\n');
         const response = await ai.models.generateContent({
             model: model,
             contents: fullPrompt,
             config: {
                 responseMimeType: 'application/json',
-                responseSchema: shoppingListSchema,
+                responseSchema: buildShoppingListSchema(),
             }
         });
         const jsonText = response.text?.trim();
@@ -556,9 +418,27 @@ export const generateShoppingList = async (
         if (isNetworkError(errMsg)) {
             // Offline-Fallback: Dummy-Einkaufsliste
             const fallbackItems = [
-                { name: 'Brot', quantity: 1, unit: 'Stück', category: 'Backwaren', sortOrder: 0 },
-                { name: 'Milch', quantity: 1, unit: 'Liter', category: 'Milchprodukte', sortOrder: 0 },
-                { name: 'Äpfel', quantity: 6, unit: 'Stück', category: 'Obst & Gemüse', sortOrder: 0 }
+                {
+                    name: i18next.t('aiOffline.geminiFallback.shoppingItems.bread'),
+                    quantity: 1,
+                    unit: i18next.t('pantryUnits.piece'),
+                    category: i18next.t('aiOffline.geminiFallback.categories.bakery'),
+                    sortOrder: 0,
+                },
+                {
+                    name: i18next.t('aiOffline.geminiFallback.shoppingItems.milk'),
+                    quantity: 1,
+                    unit: i18next.t('pantryUnits.liter'),
+                    category: i18next.t('aiOffline.geminiFallback.categories.dairy'),
+                    sortOrder: 0,
+                },
+                {
+                    name: i18next.t('aiOffline.geminiFallback.shoppingItems.apples'),
+                    quantity: 6,
+                    unit: i18next.t('pantryUnits.piece'),
+                    category: i18next.t('shoppingList.categories.produce'),
+                    sortOrder: 0,
+                },
             ];
             return fallbackItems;
         }
@@ -583,7 +463,7 @@ export const generateRecipeImage = async (recipeTitle: string): Promise<string> 
         });
         
         const base64ImageBytes = response.generatedImages?.[0]?.image?.imageBytes;
-        if (!base64ImageBytes) throw new Error("Kein Bild generiert.");
+        if (!base64ImageBytes) throw new Error(i18next.t('gemini.prompt.noImageGenerated'));
         return `data:image/jpeg;base64,${base64ImageBytes}`;
 
     } catch (e: unknown) {
@@ -621,7 +501,7 @@ export const extractRecipeFromWebContent = async (
             config: {
                 systemInstruction,
                 responseMimeType: 'application/json',
-                responseSchema: recipeSchema,
+                responseSchema: buildRecipeSchema(),
                 thinkingConfig: { thinkingBudget: 2048 },
                 temperature: 0.3,
             },
@@ -718,10 +598,7 @@ export const extractPantryItemsFromImage = async (imageFile: File): Promise<stri
         reader.readAsDataURL(file);
     });
     const base64 = await fileToBase64(imageFile);
-    const isEn = i18next.language?.startsWith('en');
-    const prompt = isEn
-        ? `Analyse the photo and identify all food items and ingredients. Give a natural, structured summary like: 'These are your 8 eggs, 2 zucchini, 1 pack of butter, ...'. Reply with a single sentence only.`
-        : `Analysiere das Foto und erkenne alle Lebensmittel/Zutaten. Gib eine möglichst natürliche, aber strukturierte Zusammenfassung wie: 'Das sind deine 8 Eier, 2 Zucchini, 1 Packung Butter, ...'. Antworte nur mit einem einzigen deutschen Satz.`;
+    const prompt = geminiPrompt('vision');
     try {
         const response = await ai.models.generateContent({
             model,

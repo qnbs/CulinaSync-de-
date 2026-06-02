@@ -24,7 +24,12 @@
     "chromatic": "pnpm --filter web run chromatic",
     "check:all": "pnpm run lint && pnpm run type-check && pnpm run test && pnpm run build && pnpm run check:bundle-budget && pnpm audit --audit-level=high",
     "i18n:scan": "node scripts/scan-i18n-hardcoded.mjs",
+    "i18n:scan:all": "node scripts/scan-i18n-hardcoded.mjs --include-tests",
+    "i18n:check": "node scripts/check-i18n-locale-keys.mjs && node scripts/check-i18n-baseline.mjs",
+    "i18n:check:keys": "node scripts/check-i18n-locale-keys.mjs",
+    "i18n:check:baseline": "node scripts/check-i18n-baseline.mjs",
     "i18n:check:changed": "node scripts/check-i18n-hardcoded-changed.mjs",
+    "i18n:baseline:update": "node scripts/update-i18n-baseline.mjs",
     "preview": "pnpm --filter web run preview",
     "predeploy": "pnpm --filter web run predeploy",
     "prepare": "husky"

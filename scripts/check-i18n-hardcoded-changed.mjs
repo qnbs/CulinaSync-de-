@@ -1,30 +1,12 @@
 import { execSync } from 'node:child_process';
+import { formatFinding, scanLine, shouldScanFile } from './lib/i18n-scan-shared.mjs';
 
 const baseRef = process.argv[2] || 'HEAD~1';
 const diffRange = `${baseRef}...HEAD`;
 
-const germanHints = [
-  'Bitte', 'Einstellungen', 'Speichern', 'Abbrechen', 'Fehler', 'Erfolgreich',
-  'Hinzufuegen', 'Loeschen', 'Vorrat', 'Einkauf', 'Rezept', 'Schluessel', 'Sprache',
-];
-
-const stringLiteralRegex = /(["'`])((?:\\.|(?!\1)[^\\]){3,})\1/g;
-
-const hasGermanHint = (value) => {
-  if (/[aeiou]?[aeiou]?[aeiou]?\b/.test(value) === false) return false;
-  if (/[äöüÄÖÜß]/.test(value)) return true;
-  return germanHints.some((hint) => value.includes(hint));
-};
-
-const ignoreLiteral = (value) => {
-  if (value.startsWith('http')) return true;
-  if (value.includes('className')) return true;
-  if (value.includes('--')) return true;
-  if (value.length < 5) return true;
-  return false;
-};
-
+/** @param {string} rawDiff} */
 const parseDiff = (rawDiff) => {
+  /** @type {import('./lib/i18n-scan-shared.mjs').I18nFinding[]} */
   const findings = [];
   let currentFile = '';
   let currentLine = 0;
@@ -45,24 +27,12 @@ const parseDiff = (rawDiff) => {
     }
 
     if (!currentFile || currentFile === '/dev/null') continue;
+    if (!shouldScanFile(currentFile, { includeTests: false })) continue;
 
     if (line.startsWith('+') && !line.startsWith('+++')) {
       currentLine += 1;
       const codeLine = line.slice(1);
-
-      if (codeLine.includes('t(') || codeLine.includes('useTranslation(')) continue;
-
-      for (const match of codeLine.matchAll(stringLiteralRegex)) {
-        const literal = match[2].trim();
-        if (ignoreLiteral(literal)) continue;
-        if (!hasGermanHint(literal)) continue;
-
-        findings.push({
-          file: currentFile,
-          line: currentLine,
-          text: literal.slice(0, 120),
-        });
-      }
+      findings.push(...scanLine(codeLine, currentLine, currentFile));
       continue;
     }
 
@@ -78,7 +48,7 @@ let rawDiff = '';
 try {
   rawDiff = execSync(
     `git diff --unified=0 --diff-filter=AM -- ${diffRange} -- '*.ts' '*.tsx'`,
-    { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }
+    { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
   );
 } catch (error) {
   const stderr = error?.stderr?.toString?.() || '';
@@ -96,8 +66,8 @@ if (findings.length === 0) {
 
 console.error(`[i18n-check] Found ${findings.length} potential hardcoded German string(s) in added lines:`);
 for (const finding of findings) {
-  console.error(`- ${finding.file}:${finding.line} -> "${finding.text}"`);
+  console.error(formatFinding(finding));
 }
 
-console.error('[i18n-check] Please move new UI strings to i18n translation keys.');
+console.error('[i18n-check] Please move new UI strings to i18n translation keys (de + en).');
 process.exit(1);

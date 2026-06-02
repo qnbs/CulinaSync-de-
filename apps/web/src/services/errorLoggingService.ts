@@ -1,3 +1,4 @@
+import i18next from 'i18next';
 import { db } from './dbInstance';
 import type { AppLogEntry } from '../types';
 
@@ -27,7 +28,7 @@ const normalizeError = (error: unknown): { message: string; stack?: string } => 
     return { message: error };
   }
 
-  return { message: 'Unbekannter Fehler' };
+  return { message: i18next.t('common.unknownError') };
 };
 
 const trimLogStore = async () => {
@@ -68,7 +69,7 @@ export const logAppError = async (
     });
   } catch (loggingError) {
     if (import.meta.env.DEV) {
-      console.error('Fehler beim Persistieren des App-Logs:', loggingError);
+      console.error(i18next.t('common.logPersistFailed'), loggingError);
     }
   }
 };

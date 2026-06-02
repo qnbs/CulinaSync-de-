@@ -72,9 +72,11 @@ export const scaleIngredientQuantity = (originalQuantity: string, scaleFactor: n
 
 export const parseShoppingItemString = (input: string): { name: string; quantity: number; unit: string } => {
     const text = input.trim();
-    if (!text) return { name: '', quantity: 1, unit: 'Stk.' };
+    if (!text) return { name: '', quantity: 1, unit: i18next.t('pantryUnits.pieceAbbr') };
 
-    const units = ['g', 'kg', 'mg', 'l', 'ml', 'cl', 'stk', 'stück', 'stueck', 'bund', 'pck', 'packung', 'dose', 'dosen', 'fl', 'flasche', 'flaschen', 'zehe', 'zehen', 'el', 'tl', 'prise'];
+    const pieceUnit = i18next.t('pantryUnits.piece').toLowerCase();
+    const pieceAbbr = i18next.t('pantryUnits.pieceAbbr').toLowerCase();
+    const units = ['g', 'kg', 'mg', 'l', 'ml', 'cl', 'stk', pieceUnit, pieceAbbr, 'stueck', 'bund', 'pck', 'packung', 'dose', 'dosen', 'fl', 'flasche', 'flaschen', 'zehe', 'zehen', 'el', 'tl', 'prise'];
     const unitRegexPart = units.join('|');
     // Handles integers, decimals (with . or ,), and fractions (e.g., 1/2)
     const quantityRegexPart = '(\\d+\\/\\d+|\\d+[\\.,]?\\d*)';
@@ -97,7 +99,7 @@ export const parseShoppingItemString = (input: string): { name: string; quantity
     if (match) {
         return {
             quantity: parseQuantity(match[1]),
-            unit: match[2] || 'Stk.',
+            unit: match[2] || i18next.t('pantryUnits.pieceAbbr'),
             name: match[3].trim()
         };
     }
@@ -108,7 +110,7 @@ export const parseShoppingItemString = (input: string): { name: string; quantity
         return {
             name: match[1].trim(),
             quantity: parseQuantity(match[2]),
-            unit: match[3] || 'Stk.'
+            unit: match[3] || i18next.t('pantryUnits.pieceAbbr')
         };
     }
 
@@ -116,6 +118,6 @@ export const parseShoppingItemString = (input: string): { name: string; quantity
     return {
         name: text,
         quantity: 1,
-        unit: 'Stk.'
+        unit: i18next.t('pantryUnits.pieceAbbr')
     };
 };

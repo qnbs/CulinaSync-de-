@@ -1,3 +1,7 @@
+import type { MealType } from './constants/mealTypes';
+
+export type { MealType };
+
 export interface PantryItem {
   id?: number;
   name: string;
@@ -68,7 +72,7 @@ export interface Recipe {
 export interface MealPlanItem {
   id?: number;
   date: string; // YYYY-MM-DD
-  mealType: 'Frühstück' | 'Mittagessen' | 'Abendessen';
+  mealType: MealType;
   recipeId?: number; // Optional: A meal can be a note instead of a recipe
   note?: string; // For entries like "Eating Out" or "Leftovers"
   servings?: number; // To override the default recipe servings for this specific meal

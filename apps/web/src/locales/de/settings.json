@@ -215,7 +215,8 @@
       "start": "Start",
       "modeTitle": "Sprachmodus",
       "browserMode": "Browser SpeechRecognition",
-      "whisperMode": "Whisper.cpp (lokal, privacy-first)"
+      "whisperMode": "Whisper.cpp (lokal, privacy-first)",
+      "testPhrase": "Hallo! Ich bin dein persönlicher Küchenassistent."
     },
     "aiChef": {
       "title": "KI-Kreativitaet",
@@ -289,8 +290,30 @@
         "Levantinisch"
       ]
     },
+    "modules": {
+      "featuresTitle": "Funktionen",
+      "autoCategorizeLabel": "Automatische Kategorisierung",
+      "autoCategorizeDesc": "Einkaufsartikel automatisch sortieren",
+      "expiryWarning": "Ablaufwarnung",
+      "expiryDays": "{{count}} Tage"
+    },
     "policy": {
       "title": "Haushalts- & Allergie-Policies",
+      "allergenSuggestions": {
+        "milk": "Milch",
+        "egg": "Ei",
+        "peanut": "Erdnuss",
+        "treeNut": "Schalenfrüchte",
+        "soy": "Soja",
+        "gluten": "Gluten",
+        "fish": "Fisch",
+        "shellfish": "Krebstiere",
+        "celery": "Sellerie",
+        "mustard": "Senf",
+        "sesame": "Sesam",
+        "lupine": "Lupine",
+        "mollusc": "Weichtiere"
+      },
       "avoidAllergensLabel": "Zu meidende Allergene",
       "avoidAllergensPlaceholder": "z.B. Milch, Erdnuss...",
       "blacklistLabel": "Zutaten-Blacklist",

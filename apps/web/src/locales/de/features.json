@@ -599,6 +599,132 @@
       "generationFailed": "Generierung fehlgeschlagen",
       "apiKeyMissing": "Gemini API-Schlüssel fehlt",
       "apiKeyMessage": "Bitte hinterlege deinen Schlüssel unter Einstellungen → API-Key. Ohne Schlüssel sind KI-Funktionen deaktiviert."
+    },
+    "modifiers": {
+      "quick": "Schnell (< 30 Min)",
+      "healthy": "Gesund",
+      "lowCarb": "Low Carb",
+      "vegetarian": "Vegetarisch",
+      "guests": "Für Gäste",
+      "budget": "Budget-freundlich"
+    }
+  },
+  "foodDatabase": {
+    "items": {
+      "apple": { "name": "Apfel" },
+      "banana": { "name": "Banane" },
+      "egg": { "name": "Ei" },
+      "milk": { "name": "Milch" },
+      "bread": { "name": "Brot" },
+      "butter": { "name": "Butter" },
+      "cheese": { "name": "Käse" },
+      "chicken_breast": { "name": "Hähnchenbrust" },
+      "salmon": { "name": "Lachs" },
+      "rice": { "name": "Reis" },
+      "pasta": { "name": "Pasta" },
+      "tomato": { "name": "Tomate" },
+      "potato": { "name": "Kartoffel" },
+      "almond": { "name": "Mandel" },
+      "hazelnut": { "name": "Haselnuss" },
+      "soy": { "name": "Soja" },
+      "wheat": { "name": "Weizen" },
+      "peanut": { "name": "Erdnuss" },
+      "shrimp": { "name": "Garnele" }
+    },
+    "allergens": {
+      "egg": "Ei",
+      "milk": "Milch",
+      "treeNut": "Schalenfrüchte",
+      "soy": "Soja",
+      "gluten": "Gluten",
+      "peanut": "Erdnuss",
+      "shellfish": "Krebstiere"
+    }
+  },
+  "pantryUnits": {
+    "piece": "Stück",
+    "gram": "g",
+    "kilogram": "kg",
+    "milliliter": "ml",
+    "liter": "l",
+    "teaspoon": "TL",
+    "tablespoon": "EL",
+    "can": "Dose",
+    "bunch": "Bund",
+    "clove": "Zehen",
+    "bottle": "Flasche",
+    "package": "Packung",
+    "pieceAbbr": "Stk."
+  },
+  "export": {
+    "shoppingListTitle": "Einkaufsliste",
+    "recipesSection": "Rezepte ({{count}})",
+    "shoppingSection": "Einkaufsliste ({{count}})",
+    "mealNoteFallback": "Mahlzeit-Notiz",
+    "csvCheckedYes": "Ja",
+    "csvCheckedNo": "Nein"
+  },
+  "aiOffline": {
+    "recipeTemplates": {
+      "skillet": "Pfannengericht",
+      "sheetPan": "Ofenblech",
+      "bowl": "Schnelle Bowl",
+      "pasta": "Cremige Pasta",
+      "soup": "Herzhafte Suppe"
+    },
+    "shoppingCatalog": {
+      "breakfast": ["Brot", "Butter", "Milch", "Eier", "Marmelade"],
+      "grill": ["Baguette", "Tomaten", "Mozzarella", "Bratwurst", "Senf"],
+      "baking": ["Mehl", "Zucker", "Butter", "Eier", "Backpulver"],
+      "pasta": ["Spaghetti", "Parmesan", "Tomaten", "Knoblauch", "Basilikum"],
+      "lasagne": ["Lasagneplatten", "Passata", "Hackfleisch", "Mozzarella", "Zwiebeln"],
+      "salad": ["Gurke", "Tomaten", "Salat", "Olivenöl", "Zitronen"]
+    },
+    "defaultCuisine": "Alltagsküche",
+    "defaultPantryTopic": "Vorratsküche",
+    "ideaDescription": "Lokaler Offline-Vorschlag mit Fokus auf {{pantry}} und {{cuisine}}.",
+    "pantryFallback": "deinen Vorrat",
+    "recipeSuffix": " (Offline-Modus)",
+    "recipeShortDescription": "{{description}} Das Rezept wurde lokal ohne Cloud-KI erzeugt.",
+    "sectionMain": "Hauptzutaten",
+    "sectionSeasoning": "Abstimmung",
+    "fallbackIngredients": {
+      "pasta": "Pasta",
+      "tomatoCan": "Tomaten",
+      "onion": "Zwiebel"
+    },
+    "instructions": {
+      "prep": "Alle Zutaten vorbereiten und grob sortieren.",
+      "cook": "Aromatische Zutaten zuerst anschwitzen, danach die Hauptzutaten zugeben.",
+      "bind": "Mit etwas Flüssigkeit oder Fett binden und abschmecken.",
+      "serve": "Kurz ruhen lassen und direkt servieren."
+    },
+    "tags": {
+      "mainCourse": "Hauptgericht",
+      "international": "International",
+      "everyday": "Alltag",
+      "skillet": "Pfanne"
+    },
+    "expertTipTitle": "Offline-Hinweis",
+    "expertTipContent": "Dieses Rezept basiert auf lokalen Regeln und ist als stabiler Fallback gedacht.",
+    "geminiFallback": {
+      "sectionTitle": "",
+      "instructions": {
+        "prep": "Alle Zutaten vorbereiten.",
+        "cook": "Zutaten vermengen und kochen.",
+        "serve": "Servieren und genießen."
+      },
+      "expertTipTitle": "Offline-Tipp",
+      "expertTipContent": "Dieses Rezept wurde ohne KI generiert.",
+      "shoppingItems": {
+        "bread": "Brot",
+        "milk": "Milch",
+        "apples": "Äpfel"
+      },
+      "categories": {
+        "bakery": "Backwaren",
+        "dairy": "Milchprodukte"
+      }
     }
   }
 }

@@ -3,6 +3,7 @@ import { LoaderCircle, CalendarPlus, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useModalA11y } from '../../hooks/useModalA11y';
 import { addRecipeToMealPlan } from '../../services/repositories/mealPlanRepository';
+import { DEFAULT_MEAL_TYPE, MEAL_TYPES, type MealType } from '../../constants/mealTypes';
 
 interface BulkAddToPlanModalProps {
     isOpen: boolean;
@@ -14,7 +15,7 @@ interface BulkAddToPlanModalProps {
 export const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, onClose, recipeIds, onSave }) => {
     const { t, i18n } = useTranslation();
     const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
-    const [mealType, setMealType] = useState<'Frühstück' | 'Mittagessen' | 'Abendessen'>('Abendessen');
+    const [mealType, setMealType] = useState<MealType>(DEFAULT_MEAL_TYPE);
     const [isSaving, setIsSaving] = useState(false);
     const modalRef = useRef<HTMLDivElement>(null);
     const startDateRef = useRef<HTMLInputElement>(null);
@@ -86,12 +87,12 @@ export const BulkAddToPlanModal: React.FC<BulkAddToPlanModalProps> = ({ isOpen, 
                             <select 
                                 id="mealType" 
                                 value={mealType} 
-                                onChange={e => setMealType(e.target.value as 'Frühstück' | 'Mittagessen' | 'Abendessen')} 
+                                onChange={e => setMealType(e.target.value as MealType)} 
                                 className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl p-3 text-zinc-200 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none appearance-none transition-all"
                             >
-                                <option>Frühstück</option>
-                                <option>Mittagessen</option>
-                                <option>Abendessen</option>
+                                {MEAL_TYPES.map((type) => (
+                                  <option key={type} value={type}>{t(`mealPlanner.mealTypes.${type}`, { defaultValue: type })}</option>
+                                ))}
                             </select>
                             <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>

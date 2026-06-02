@@ -1,3 +1,4 @@
+import i18next from 'i18next';
 import { parseShoppingItemString } from './utils';
 
 type ParsedItem = { name: string; quantity: number; unit: string };
@@ -40,7 +41,7 @@ const parseReceiptLine = (line: string): ParsedItem | null => {
   return {
     name: parsed.name,
     quantity,
-    unit: parsed.unit || 'Stk.',
+    unit: parsed.unit || i18next.t('pantryUnits.pieceAbbr'),
   };
 };
 

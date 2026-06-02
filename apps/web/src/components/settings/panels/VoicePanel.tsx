@@ -23,7 +23,7 @@ export const VoicePanel: React.FC<VoicePanelProps> = ({ settings, onChange }) =>
         if (isSpeaking) {
             cancel();
         } else {
-            speak('Hallo! Ich bin dein persönlicher Küchenassistent.');
+            speak(t('settings.speech.testPhrase'));
         }
     };
 

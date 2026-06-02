@@ -15,7 +15,9 @@
     "cancel": "Abbrechen",
     "search": "Suchen...",
     "loading": "Wird geladen...",
-    "error": "Ein Fehler ist aufgetreten"
+    "error": "Ein Fehler ist aufgetreten",
+    "unknownError": "Unbekannter Fehler",
+    "logPersistFailed": "Fehler beim Persistieren des App-Logs:"
   },
   "app": {
     "loading": "Inhalt wird geladen",

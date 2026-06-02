@@ -6,6 +6,7 @@ import { usePantryManagerContext } from '../../contexts/PantryManagerContext';
 import PantryListItem from '../PantryListItem';
 import { PantryItem } from '../../types';
 import { useWindowSize } from '../../hooks/useWindowSize';
+import { resolvePantryCategoryLabel } from '../../utils/categoryLabels';
 
 const EmptyState: React.FC<{ totalItemCount: number }> = ({ totalItemCount }) => {
     const { t } = useTranslation();
@@ -75,17 +76,7 @@ const getPantryRowHeight = (_index: number, { rows }: PantryRowData) => {
 
 export const PantryList = () => {
     const { t } = useTranslation();
-    const CATEGORY_KEY_MAP: Record<string, string> = {
-        'Obst & Gemüse': 'fruitsVegetables',
-        'Milchprodukte & Eier': 'dairy',
-        'Backwaren': 'bakery',
-        'Fette & Öle': 'fatsOils',
-        'Fleisch & Fisch': 'meat',
-        'Getreide & Hülsenfrüchte': 'grainsLegumes',
-        'Nüsse & Samen': 'nutsSeeds',
-    };
-    const getCategoryLabel = (category: string) =>
-        t(`pantry.categories.${CATEGORY_KEY_MAP[category] ?? ''}`, { defaultValue: category });
+    const getCategoryLabel = (category: string) => resolvePantryCategoryLabel(category, t);
     const {
         groupedItems,
         filteredItems,

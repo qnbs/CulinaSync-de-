@@ -5,11 +5,17 @@ import { Save } from 'lucide-react';
 import { getCategoryForItem } from '../../services/utils';
 import { useModalA11y } from '../../hooks/useModalA11y';
 import { useTranslation } from 'react-i18next';
+import {
+  findFoodEntryByName,
+  formatFoodAllergens,
+  getFoodDisplayName,
+  pantryCategoryLabelForFood,
+} from '../../utils/foodDatabaseLabels';
 
-const DEFAULT_UNITS = ["Stück", "g", "kg", "ml", "l", "TL", "EL", "Dose", "Bund", "Zehen", "Flasche", "Packung"];
+const UNIT_KEYS = ['piece', 'gram', 'kilogram', 'milliliter', 'liter', 'teaspoon', 'tablespoon', 'can', 'bunch', 'clove', 'bottle', 'package'] as const;
 
-const createInitialFormData = (item?: PantryItem | null): Partial<PantryItem> => (
-    item ? { ...item } : { name: '', quantity: 1, unit: 'Stück', category: '', expiryDate: '', minQuantity: undefined, notes: '' }
+const createInitialFormData = (item: PantryItem | null | undefined, defaultUnit: string): Partial<PantryItem> => (
+    item ? { ...item } : { name: '', quantity: 1, unit: defaultUnit, category: '', expiryDate: '', minQuantity: undefined, notes: '' }
 );
 
 export const PantryItemModal: React.FC<{
@@ -19,9 +25,14 @@ export const PantryItemModal: React.FC<{
     pantryItems: PantryItem[];
 }> = ({ item, onClose, onSave, pantryItems }) => {
     const { t } = useTranslation();
-    const [formData, setFormData] = useState<Partial<PantryItem>>(() => createInitialFormData(item));
+    const defaultUnit = t('pantryUnits.piece');
+    const [formData, setFormData] = useState<Partial<PantryItem>>(() => createInitialFormData(item, defaultUnit));
     const nameInputRef = useRef<HTMLInputElement>(null);
     const modalRef = useRef<HTMLDivElement>(null);
+    const unitOptions = useMemo(
+      () => UNIT_KEYS.map((key) => ({ key, label: t(`pantryUnits.${key}`) })),
+      [t],
+    );
 
     useModalA11y({
         isOpen: true,
@@ -36,16 +47,17 @@ export const PantryItemModal: React.FC<{
         setFormData(prev => ({...prev, [field]: value}));
     };
     
-    // FoodDB-Autocomplete & Info
     const [foodMatch, setFoodMatch] = useState<FoodEntry | null>(null);
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const name = e.target.value;
         const category = getCategoryForItem(name);
-        setFormData(prev => ({ ...prev, name, category: prev.category || category }));
-        // Suche nach passendem FoodEntry (exakt oder fuzzy)
-        const match = foodDatabase.find(f => f.name.toLowerCase() === name.trim().toLowerCase())
-            || foodDatabase.find(f => name && f.name.toLowerCase().startsWith(name.trim().toLowerCase()));
+        const match = findFoodEntryByName(name, t);
         setFoodMatch(match || null);
+        setFormData((prev) => ({
+          ...prev,
+          name,
+          category: prev.category || category || (match ? pantryCategoryLabelForFood(match, t) : ''),
+        }));
     };
 
     const handleSave = (e: React.FormEvent) => {
@@ -81,7 +93,9 @@ export const PantryItemModal: React.FC<{
                                list="food-autocomplete-list"
                            />
                            <datalist id="food-autocomplete-list">
-                               {foodDatabase.map(f => <option key={f.id} value={f.name} />)}
+                               {foodDatabase.map(f => (
+                                 <option key={f.id} value={getFoodDisplayName(f.id, t)} />
+                               ))}
                            </datalist>
                         </div>
                         <div>
@@ -98,7 +112,7 @@ export const PantryItemModal: React.FC<{
                         <div>
                             <label htmlFor="itemUnit" className="block text-sm font-medium text-zinc-400 mb-1">{t('pantry.modal.unitLabel')}</label>
                             <input id="itemUnit" type="text" value={formData.unit || ''} onChange={e => handleChange('unit', e.target.value)} className="w-full bg-zinc-700 rounded p-2 focus:ring-2 focus:ring-[var(--color-accent-500)]" required list="units-list"/>
-                            <datalist id="units-list">{DEFAULT_UNITS.map(u => <option key={u} value={u}/>)}</datalist>
+                            <datalist id="units-list">{unitOptions.map(u => <option key={u.key} value={u.label}/>)}</datalist>
                         </div>
                         <div className="col-span-2">
                            <label htmlFor="itemExpiry" className="block text-sm font-medium text-zinc-400 mb-1">{t('pantry.modal.expiryDateLabel')}</label>
@@ -118,8 +132,8 @@ export const PantryItemModal: React.FC<{
                         <div className="bg-zinc-800 rounded-lg p-3 mb-2 text-xs text-zinc-300">
                             <div className="font-bold text-sm mb-1">{t('pantry.modal.nutritionTitle')}</div>
                             <div>{t('pantry.modal.nutritionSummary', { kcal: foodMatch.kcal, protein: foodMatch.protein, fat: foodMatch.fat, carbs: foodMatch.carbs })}</div>
-                            {foodMatch.allergens?.length ? (
-                                <div className="mt-1 text-red-400">{t('pantry.modal.allergensLabel')}: {foodMatch.allergens.join(', ')}</div>
+                            {foodMatch.allergenCodes?.length ? (
+                                <div className="mt-1 text-red-400">{t('pantry.modal.allergensLabel')}: {formatFoodAllergens(foodMatch.allergenCodes, t)}</div>
                             ) : null}
                         </div>
                     )}

@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "productionMax": 0,
+  "description": "Max hardcoded German UI candidates in apps/web/src (excluding __tests__ and locales). Lower after i18n cleanups via pnpm run i18n:baseline:update."
+}

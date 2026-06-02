@@ -5,6 +5,7 @@ import { useAppDispatch } from '../../store/hooks';
 import { addToast } from '../../store/slices/uiSlice';
 import { generateFromPlanAsync } from '../../store/slices/shoppingListSlice';
 import { useTranslation } from 'react-i18next';
+import { MEAL_TYPES } from '../../constants/mealTypes';
 
 interface MealPlannerHeaderProps {
     currentDate: Date;
@@ -36,7 +37,7 @@ export const MealPlannerHeader: React.FC<MealPlannerHeaderProps> = ({ setCurrent
 
         weekDates.forEach(date => {
             const dateStr = date.toISOString().split('T')[0];
-            (['Frühstück', 'Mittagessen', 'Abendessen'] as const).forEach(type => {
+            MEAL_TYPES.forEach(type => {
                 const meal = mealsByDate[`${dateStr}-${type}`];
                 if (meal && meal.recipeId) {
                     const recipe = recipesById.get(meal.recipeId);
