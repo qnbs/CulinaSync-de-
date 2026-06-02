@@ -27,4 +27,23 @@ describe('useOnlineStatus', () => {
     });
     expect(result.current).toBe(true);
   });
+
+  it('synchronisiert den Status nach visibilitychange und bfcache-pageshow', () => {
+    vi.stubGlobal('navigator', { onLine: true });
+    const { result } = renderHook(() => useOnlineStatus());
+
+    vi.stubGlobal('navigator', { onLine: false });
+    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' });
+
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    expect(result.current).toBe(false);
+
+    vi.stubGlobal('navigator', { onLine: true });
+    act(() => {
+      window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
+    });
+    expect(result.current).toBe(true);
+  });
 });

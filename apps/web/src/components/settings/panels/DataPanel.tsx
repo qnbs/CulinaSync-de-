@@ -11,6 +11,7 @@ import { useAppDispatch } from '../../../store/hooks';
 import { useModalA11y } from '../../../hooks/useModalA11y';
 import { useTranslation } from 'react-i18next';
 import { downloadEncryptedVault, mergeEncryptedVaultFile } from '../../../services/snapshotVaultService';
+import { logAppError } from '../../../services/errorLoggingService';
 
 const ResetConfirmationModal: React.FC<{
     onClose: () => void;
@@ -95,10 +96,8 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
             addToast(t('settings.data.toast.restarting'), 'info');
             setTimeout(() => window.location.reload(), 1500);
         }).catch((err: unknown) => {
+            void logAppError(err, 'settings.data.reset');
             addToast(t('settings.data.toast.resetError'), 'error');
-            if (import.meta.env.DEV) {
-                console.error(err);
-            }
         });
     };
 

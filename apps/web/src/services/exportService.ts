@@ -1,6 +1,7 @@
 import { Recipe, ShoppingListItem, MealPlanItem } from '../types';
 import { db } from './db';
 import { loadSettings } from './settingsService';
+import { logAppError } from './errorLoggingService';
 import i18next from 'i18next';
 import { MEAL_TYPES } from '../constants/mealTypes';
 
@@ -327,7 +328,7 @@ export const exportFullDataAsJson = async (): Promise<boolean> => {
         downloadFile('culinasync_backup.json', JSON.stringify(data, null, 2), 'application/json;charset=utf-8');
         return true;
     } catch (e) {
-        console.error("JSON export failed", e);
+        void logAppError(e, 'export.full.json');
         return false;
     }
 };
@@ -344,7 +345,10 @@ export const exportFullDataAsTxt = async (): Promise<boolean> => {
 
         downloadFile('culinasync_backup.txt', text, 'text/plain;charset=utf-8');
         return true;
-    } catch { return false; }
+    } catch (e) {
+        void logAppError(e, 'export.full.txt');
+        return false;
+    }
 };
 export const exportFullDataAsMarkdown = async (): Promise<boolean> => {
     try {
@@ -358,7 +362,10 @@ export const exportFullDataAsMarkdown = async (): Promise<boolean> => {
 
         downloadFile('culinasync_backup.md', md, 'text/markdown;charset=utf-8');
         return true;
-    } catch { return false; }
+    } catch (e) {
+        void logAppError(e, 'export.full.markdown');
+        return false;
+    }
 };
 
 export const exportFullDataAsCsv = async (): Promise<boolean> => {
@@ -372,7 +379,10 @@ export const exportFullDataAsCsv = async (): Promise<boolean> => {
         const combined = `=== PANTRY ===\n${pantryCsv}\n\n=== RECIPES ===\n${recipesCsv}\n\n=== SHOPPING LIST ===\n${shoppingCsv}`;
         downloadFile('culinasync_backup.csv', combined, 'text/csv;charset=utf-8');
         return true;
-    } catch { return false; }
+    } catch (e) {
+        void logAppError(e, 'export.full.csv');
+        return false;
+    }
 };
 
 export const exportFullDataAsPdf = async (): Promise<boolean> => {
@@ -407,8 +417,8 @@ export const exportFullDataAsPdf = async (): Promise<boolean> => {
 
         downloadFile('culinasync_backup_summary.pdf', doc.output('blob'), 'application/pdf');
         return true;
-    } catch(e) {
-        console.error("PDF export failed", e);
+    } catch (e) {
+        void logAppError(e, 'export.full.pdf');
         return false;
     }
 };

@@ -11,6 +11,7 @@ import { retry } from './retryUtils';
 import { AppSettings, PantryItem, Recipe, StructuredPrompt, ShoppingListItem, RecipeIdea } from "../types";
 import { loadApiKey } from "./apiKeyService";
 import { logAppError } from './errorLoggingService';
+import { buildLocalRecipeIdeas } from './aiOfflineFallback';
 import i18next from 'i18next';
 import { z } from 'zod';
 import { buildRecipeIdeasSchema, buildRecipeSchema, buildShoppingListSchema } from './geminiSchemas';
@@ -19,7 +20,6 @@ import { buildRecipeIdeasSchema, buildRecipeSchema, buildShoppingListSchema } fr
 let _aiClient: GoogleGenAI | null = null;
 let _lastKeyHash: string | null = null;
 let _genAiModulePromise: Promise<typeof import('@google/genai')> | null = null;
-let _fakerModulePromise: Promise<typeof import('@faker-js/faker')> | null = null;
 
 const SchemaType = {
     OBJECT: 'object',
@@ -37,14 +37,6 @@ const getGenAIModule = async () => {
     }
 
     return _genAiModulePromise;
-};
-
-const getFakerModule = async () => {
-    if (!_fakerModulePromise) {
-        _fakerModulePromise = import('@faker-js/faker');
-    }
-
-    return _fakerModulePromise;
 };
 
 const recipeIdeaSchema = z.object({
@@ -283,13 +275,7 @@ export const generateRecipeIdeas = async (
     } catch (e: unknown) {
         const errMsg = (e as Error)?.message || String(e);
         if (isNetworkError(errMsg)) {
-            // Offline-Fallback: Generiere Dummy-Ideen lokal
-            const { fakerDE: faker } = await getFakerModule();
-            const fallbackIdeas: RecipeIdea[] = Array.from({ length: 3 }).map(() => ({
-                recipeTitle: faker.lorem.words(3) + ' (Offline)',
-                shortDescription: faker.lorem.sentence(),
-            }));
-            return fallbackIdeas;
+            return buildLocalRecipeIdeas(prompt, pantryItems, aiPreferences);
         }
         throw handleGeminiError(e, 'ideas');
     }
