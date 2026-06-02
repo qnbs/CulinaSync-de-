@@ -10,7 +10,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ### Hinzugefuegt
 
 - **Audit Juni 2026:** `docs/AUDIT-REPORT-2026-06.md`, `docs/STATUS-2026-06-02.md` — Re-Baseline nach Master-Audit-Sprint.
-- **Tests:** Repository-Suites fuer `shoppingListRepository` und `recipeRepository` (M5).
+- **Tests (M5):** Erweiterte Suites — `shoppingListRepository`, `recipeRepository`, `pantryMatcherService`, `mealPlanRepository`, `pantryRepository`, `syncService`, `retryUtils`; Vitest-Coverage-Thresholds auf 64/65/58/49.
 
 ### Geaendert
 

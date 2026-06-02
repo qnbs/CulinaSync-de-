@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { decryptBackup, encryptBackup } from '../syncService';
 import type { FullBackupData } from '../../types';
@@ -69,5 +69,35 @@ describe('syncService backup encryption', () => {
     const legacyBackup = await createLegacyBackup(sampleBackup, 'legacy-password');
 
     await expect(decryptBackup(legacyBackup, 'legacy-password')).resolves.toEqual(sampleBackup);
+  });
+
+  it('lehnt falsches Passwort beim neuen Format ab', async () => {
+    const encrypted = await encryptBackup(sampleBackup, 'correct');
+    await expect(decryptBackup(encrypted, 'wrong')).rejects.toThrow();
+  });
+});
+
+describe('syncService cloud transfer', () => {
+  it('uploadEncryptedBackup sendet PUT mit Blob', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+    vi.stubGlobal('fetch', fetchMock);
+    const { uploadEncryptedBackup } = await import('../syncService');
+    const payload = new Uint8Array([1, 2, 3]);
+    await uploadEncryptedBackup('https://example.com/backup', payload, 'token-1');
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://example.com/backup',
+      expect.objectContaining({
+        method: 'PUT',
+        headers: expect.objectContaining({ Authorization: 'Bearer token-1' }),
+      }),
+    );
+    vi.unstubAllGlobals();
+  });
+
+  it('downloadEncryptedBackup wirft bei HTTP-Fehler', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
+    const { downloadEncryptedBackup } = await import('../syncService');
+    await expect(downloadEncryptedBackup('https://example.com/x')).rejects.toThrow('Download fehlgeschlagen');
+    vi.unstubAllGlobals();
   });
 });

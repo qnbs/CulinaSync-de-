@@ -97,6 +97,15 @@ describe('recipeRepository', () => {
     );
   });
 
+  it('updateRecipeImage setzt imageUrl und updatedAt', async () => {
+    const { updateRecipeImage } = await import('../repositories/recipeRepository');
+    await updateRecipeImage(7, 'data:image/png;base64,abc');
+    expect(recipesUpdate).toHaveBeenCalledWith(
+      7,
+      expect.objectContaining({ imageUrl: 'data:image/png;base64,abc', updatedAt: expect.any(Number) }),
+    );
+  });
+
   it('setRecipeFavorite aktualisiert Flag', async () => {
     const { setRecipeFavorite } = await import('../repositories/recipeRepository');
     await setRecipeFavorite(7, true);
@@ -127,7 +136,7 @@ describe('recipeRepository', () => {
       recipeTitle: 'Salat',
       ingredients: [
         {
-          title: 'Haupt',
+          sectionTitle: 'Haupt',
           items: [{ name: 'Gurke', quantity: '2', unit: 'Stk' }],
         },
       ],

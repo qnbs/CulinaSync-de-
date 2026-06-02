@@ -36,7 +36,9 @@ vi.mock('../dbInstance', () => ({
           return { equalsIgnoreCase: vi.fn(() => ({ and: vi.fn(() => ({ first: equalsIgnoreCaseFirst })) })) };
         }
         if (field === 'category') {
-          return { equals: vi.fn(() => ({ last: categoryLast })) };
+          return {
+            equals: vi.fn(() => ({ last: categoryLast, modify: shoppingListModify })),
+          };
         }
         if (field === 'isChecked') {
           return { equals: isCheckedEquals };
@@ -151,6 +153,61 @@ describe('shoppingListRepository', () => {
     expect(moved).toBe(1);
     expect(pantryAdd).toHaveBeenCalled();
     expect(shoppingListDelete).toHaveBeenCalledWith(9);
+  });
+
+  it('updateShoppingListItem aktualisiert bei gesetzter id', async () => {
+    const { updateShoppingListItem } = await import('../repositories/shoppingListRepository');
+    await updateShoppingListItem({
+      id: 4,
+      name: 'Milch',
+      quantity: 2,
+      unit: 'l',
+      isChecked: false,
+      category: 'Milchprodukte',
+      sortOrder: 100,
+    });
+    expect(shoppingListUpdate).toHaveBeenCalledWith(4, expect.objectContaining({ name: 'Milch' }));
+  });
+
+  it('renameShoppingListCategory benennt Kategorie um', async () => {
+    const { renameShoppingListCategory } = await import('../repositories/shoppingListRepository');
+    await renameShoppingListCategory('Alt', 'Neu');
+    expect(shoppingListModify).toHaveBeenCalled();
+  });
+
+  it('generateListFromMealPlan fuegt fehlende Zutaten hinzu', async () => {
+    const upcomingMeals = [
+      { date: '2026-06-02', recipeId: 1, isCooked: false, mealType: 'Mittagessen' as const },
+    ];
+    const mealPlanBetween = vi.fn(() => ({
+      filter: vi.fn(() => ({ toArray: vi.fn().mockResolvedValue(upcomingMeals) })),
+    }));
+    const { db } = await import('../dbInstance');
+    vi.mocked(db.mealPlan.where).mockReturnValue({
+      between: mealPlanBetween,
+    } as unknown as ReturnType<typeof db.mealPlan.where>);
+
+    vi.mocked(db.recipes.where).mockReturnValue({
+      anyOf: vi.fn(() => ({
+        toArray: vi.fn().mockResolvedValue([
+          {
+            id: 1,
+            servings: '2',
+            ingredients: [
+              {
+                sectionTitle: 'Haupt',
+                items: [{ name: 'Pasta', quantity: '200', unit: 'g' }],
+              },
+            ],
+          },
+        ]),
+      })),
+    } as unknown as ReturnType<typeof db.recipes.where>);
+
+    const { generateListFromMealPlan } = await import('../repositories/shoppingListRepository');
+    const out = await generateListFromMealPlan();
+    expect(out.added).toBe(1);
+    expect(shoppingListAdd).toHaveBeenCalled();
   });
 
   it('batchAddShoppingListItems zaehlt added und updated', async () => {

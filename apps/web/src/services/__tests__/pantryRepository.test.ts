@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const pantryFirst = vi.fn();
 const pantryUpdate = vi.fn();
 const pantryAdd = vi.fn().mockResolvedValue(55);
+const pantryDelete = vi.fn().mockResolvedValue(1);
+const shoppingListToArray = vi.fn().mockResolvedValue([]);
 const whereMock = vi.fn(() => ({
   equalsIgnoreCase: vi.fn(() => ({ first: pantryFirst })),
 }));
@@ -11,13 +13,23 @@ vi.mock('../retryUtils', () => ({
   retry: async <T>(fn: () => Promise<T>) => fn(),
 }));
 
+vi.mock('../repositories/shoppingListRepository', () => ({
+  addShoppingListItem: vi.fn().mockResolvedValue({ status: 'added', item: { id: 1 } }),
+}));
+
 vi.mock('../dbInstance', () => ({
   db: {
-    transaction: vi.fn((_mode: string, _tables: unknown, fn: () => Promise<unknown>) => fn()),
+    transaction: vi.fn((_mode: string, ...args: unknown[]) => {
+      const fn = args[args.length - 1];
+      return typeof fn === 'function' ? (fn as () => Promise<unknown>)() : Promise.resolve();
+    }),
     pantry: {
       where: whereMock,
       update: pantryUpdate,
       add: pantryAdd,
+    },
+    shoppingList: {
+      toArray: shoppingListToArray,
     },
   },
 }));
@@ -56,5 +68,48 @@ describe('pantryRepository addOrUpdatePantryItem', () => {
     expect(out.status).toBe('added');
     expect(pantryAdd).toHaveBeenCalled();
     expect(out.item.id).toBe(55);
+  });
+});
+
+describe('pantryRepository weitere Operationen', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('removeItemFromPantry gibt true zurueck wenn geloescht', async () => {
+    whereMock.mockReturnValue({
+      equalsIgnoreCase: vi.fn(() => ({ delete: pantryDelete })),
+    } as unknown as ReturnType<typeof whereMock>);
+    const { removeItemFromPantry } = await import('../repositories/pantryRepository');
+    const ok = await removeItemFromPantry('Mehl');
+    expect(ok).toBe(true);
+    expect(pantryDelete).toHaveBeenCalled();
+  });
+
+  it('removeItemFromPantry gibt false wenn nichts geloescht', async () => {
+    pantryDelete.mockResolvedValueOnce(0);
+    whereMock.mockReturnValue({
+      equalsIgnoreCase: vi.fn(() => ({ delete: pantryDelete })),
+    } as unknown as ReturnType<typeof whereMock>);
+    const { removeItemFromPantry } = await import('../repositories/pantryRepository');
+    expect(await removeItemFromPantry('Unbekannt')).toBe(false);
+  });
+
+  it('addPantryItemsToShoppingList zaehlt neue Eintraege', async () => {
+    const pantryItems = [
+      { id: 3, name: 'Butter', quantity: 1, unit: 'Stk', category: 'Milch', createdAt: 1, updatedAt: 1 },
+    ];
+    whereMock.mockImplementation(((field: string) => {
+      if (field === 'id') {
+        return {
+          anyOf: vi.fn(() => ({ toArray: vi.fn().mockResolvedValue(pantryItems) })),
+        };
+      }
+      return { equalsIgnoreCase: vi.fn(() => ({ first: pantryFirst })) };
+    }) as typeof whereMock);
+    shoppingListToArray.mockResolvedValueOnce([]);
+    const { addPantryItemsToShoppingList } = await import('../repositories/pantryRepository');
+    const count = await addPantryItemsToShoppingList([3]);
+    expect(count).toBe(1);
   });
 });
