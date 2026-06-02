@@ -97,13 +97,13 @@
 
 **Ziel:** Test-Coverage von ~35 % auf ≥70 % erhöhen.
 
-**Aktueller Stand (Juni 2026, Vitest v8-Coverage, Snapshot 2026-06-02, Sprint 2):**
+**Aktueller Stand (Juni 2026, Vitest v8-Coverage, Snapshot 2026-06-02, M5-Sprint):**
 | Metrik | Aktuell | Ziel |
 |---|---|---|
-| Statements | ~65 % | ≥70 % |
-| Branches | ~49 % | ≥60 % |
-| Functions | ~58 % | ≥70 % |
-| Lines | ~66 % | ≥70 % |
+| Statements | **~70,5 %** | ≥70 % |
+| Branches | ~55 % | ≥60 % |
+| Functions | ~64 % | ≥70 % |
+| Lines | **~71,8 %** | ≥70 % |
 
 | # | Maßnahme | Herkunft | Bereich | Aufwand | Status |
 |---|---|---|---|---|---|

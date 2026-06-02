@@ -93,4 +93,37 @@ describe('processCommand', () => {
   it('returns UNKNOWN for nonsense', () => {
     expect(processCommand('xyzzy plugh', 'recipes').type).toBe('UNKNOWN');
   });
+
+  it('parses pantry add and remove', () => {
+    const add = processCommand('füge 2 kg reis zum vorrat hinzu', 'pantry');
+    expect(add.type).toBe('ADD_PANTRY_ITEM');
+    const remove = processCommand('entferne milch aus dem vorrat', 'pantry');
+    expect(remove.type).toBe('REMOVE_PANTRY_ITEM');
+  });
+
+  it('parses timer and ingredient check in cook mode', () => {
+    expect(processCommand('timer starte 5 minuten', 'recipes').type).toBe('START_COOK_TIMER');
+    expect(processCommand('zutat tomaten abhaken', 'recipes').type).toBe('CHECK_COOK_INGREDIENT');
+  });
+});
+
+describe('executeVoiceAction pantry flows', () => {
+  it('ADD_PANTRY_ITEM und REMOVE_PANTRY_ITEM rufen Services auf', async () => {
+    const services: VoiceCommandServices = {
+      navigate: vi.fn(),
+      addToast: vi.fn(),
+      addShoppingListItem: vi.fn(),
+      addOrUpdatePantryItem: vi.fn().mockResolvedValue({ status: 'added', item: { id: 1 } }),
+      removeItemFromPantry: vi.fn().mockResolvedValue(true),
+      dispatch: vi.fn(),
+    };
+    executeVoiceAction(
+      { type: 'ADD_PANTRY_ITEM', payload: { name: 'Reis', quantity: 2, unit: 'kg' } },
+      services,
+      'pantry',
+    );
+    await waitFor(() => expect(services.addOrUpdatePantryItem).toHaveBeenCalled());
+    executeVoiceAction({ type: 'REMOVE_PANTRY_ITEM', payload: 'Milch' }, services, 'pantry');
+    await waitFor(() => expect(services.removeItemFromPantry).toHaveBeenCalledWith('Milch'));
+  });
 });
