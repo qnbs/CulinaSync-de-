@@ -235,4 +235,85 @@ describe('useShoppingList', () => {
 
     expect(renameShoppingListCategory).toHaveBeenCalledWith('Kühlung', 'NeuKühl');
   });
+
+  it('confirmPendingAction: export pdf/json/md/txt', async () => {
+    const { result } = renderHook(() => useShoppingList(), { wrapper });
+
+    for (const format of ['pdf', 'json', 'md', 'txt'] as const) {
+      await act(async () => {
+        await result.current.handleExport(format);
+      });
+      await act(async () => {
+        await result.current.confirmPendingAction();
+      });
+    }
+
+    expect(slTest.exportShoppingListToPdf).toHaveBeenCalled();
+    expect(slTest.exportShoppingListToJson).toHaveBeenCalled();
+    expect(slTest.exportShoppingListToMarkdown).toHaveBeenCalled();
+    expect(slTest.exportShoppingListToTxt).toHaveBeenCalled();
+  });
+
+  it('Drag-and-Drop setzt Drop-Ziel und sortiert um', async () => {
+    const { result } = renderHook(() => useShoppingList(), { wrapper });
+    const milk = slTest.mockItems[0];
+    const misc = slTest.mockItems[2];
+
+    act(() => {
+      result.current.handleDragStart(
+        { dataTransfer: { effectAllowed: '', setData: vi.fn() } } as unknown as React.DragEvent,
+        milk,
+      );
+    });
+
+    act(() => {
+      result.current.handleDragOver(
+        { preventDefault: vi.fn() } as unknown as React.DragEvent,
+        misc,
+      );
+    });
+
+    expect(result.current.dropTargetInfo).toEqual({ itemId: misc.id, category: misc.category });
+
+    await act(async () => {
+      await result.current.handleDrop(
+        { preventDefault: vi.fn() } as unknown as React.DragEvent,
+        misc,
+      );
+    });
+
+    act(() => {
+      result.current.onDragEnd();
+    });
+    expect(result.current.draggedItem).toBeNull();
+    expect(result.current.dropTargetInfo).toBeNull();
+  });
+
+  it('klappt Kategorien ein und aus', () => {
+    const { result } = renderHook(() => useShoppingList(), { wrapper });
+
+    act(() => {
+      result.current.handleToggleCategoryCollapse('Kühlung');
+      result.current.collapseAll();
+      result.current.expandAll();
+    });
+
+    expect(store.getState().shoppingList.collapsedCategories).toEqual([]);
+  });
+
+  it('handleQuickAdd leert Eingabe nach Hinzufuegen', async () => {
+    const { result } = renderHook(() => useShoppingList(), { wrapper });
+
+    act(() => {
+      result.current.setQuickAddItem('Eier');
+    });
+
+    await act(async () => {
+      await result.current.handleQuickAdd({
+        preventDefault: vi.fn(),
+      } as unknown as React.FormEvent);
+    });
+
+    expect(result.current.quickAddItem).toBe('');
+  });
 });

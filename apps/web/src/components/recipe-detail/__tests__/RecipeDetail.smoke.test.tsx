@@ -140,4 +140,72 @@ describe('RecipeDetail (Smoke)', () => {
 
     expect(mockUseRecipeDetail).toHaveBeenCalledWith(baseRecipe, onBack);
   });
+
+  it('zeigt MealPlan-Modal und Expertentipps', async () => {
+    const user = userEvent.setup();
+    const setIsModalOpen = vi.fn();
+    const recipeWithTips = {
+      ...baseRecipe,
+      expertTips: [{ title: 'Backen', content: 'Tipp: langsam backen' }],
+    };
+    mockUseRecipeDetail.mockImplementation(() => ({
+      ...buildHookReturn(recipeWithTips),
+      isModalOpen: true,
+      setIsModalOpen,
+    }));
+
+    render(
+      <I18nextProvider i18n={i18n}>
+        <RecipeDetail recipe={recipeWithTips} onBack={vi.fn()} />
+      </I18nextProvider>,
+    );
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText(/Tipp: langsam backen/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /Abbrechen/i }));
+    expect(setIsModalOpen).toHaveBeenCalledWith(false);
+  });
+
+  it('bestaetigt Export-Aktion und wechselt Tabs', async () => {
+    const user = userEvent.setup();
+    const setPendingAction = vi.fn();
+    const handleConfirmPendingAction = vi.fn();
+    mockUseRecipeDetail.mockImplementation(() => ({
+      ...buildHookReturn(baseRecipe),
+      pendingAction: { type: 'export' as const, format: 'pdf' as const },
+      setPendingAction,
+      handleConfirmPendingAction,
+    }));
+
+    render(
+      <I18nextProvider i18n={i18n}>
+        <RecipeDetail recipe={baseRecipe} onBack={vi.fn()} />
+      </I18nextProvider>,
+    );
+
+    await user.click(screen.getByRole('button', { name: /Exportieren|exportAction/i }));
+    expect(handleConfirmPendingAction).toHaveBeenCalled();
+
+    await user.click(screen.getByRole('tab', { name: /Zubereitung|Instructions/i }));
+    expect(screen.getByRole('tab', { name: /Zubereitung|Instructions/i })).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('oeffnet Mahlzeitenplanung ueber Plan-Export-Leiste', async () => {
+    const user = userEvent.setup();
+    const setIsModalOpen = vi.fn();
+    mockUseRecipeDetail.mockImplementation(() => ({
+      ...buildHookReturn(baseRecipe),
+      setIsModalOpen,
+    }));
+
+    render(
+      <I18nextProvider i18n={i18n}>
+        <RecipeDetail recipe={baseRecipe} onBack={vi.fn()} />
+      </I18nextProvider>,
+    );
+
+    await user.click(screen.getByRole('button', { name: /Planen/i }));
+    expect(setIsModalOpen).toHaveBeenCalledWith(true);
+  });
 });

@@ -58,8 +58,10 @@ vi.mock('@/services/exportService', () => ({
 }));
 
 const smartPlannerMocks = vi.hoisted(() => ({
-  getSoonExpiringPantryNames: vi.fn(() => []),
-  buildAutoPlanSuggestionsFromExpiring: vi.fn(() => []),
+  getSoonExpiringPantryNames: vi.fn((): Set<string> => new Set()),
+  buildAutoPlanSuggestionsFromExpiring: vi.fn(
+    (): { date: string; mealType: 'Frühstück' | 'Mittagessen' | 'Abendessen'; recipeId: number }[] => [],
+  ),
 }));
 
 vi.mock('@/services/mealPlannerSmartService', () => smartPlannerMocks);
