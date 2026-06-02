@@ -5,14 +5,13 @@
 
 ---
 
-## Status-Update 2026-06-02 (Juni Re-Audit, Phase 0 + P0-Beginn)
+## Status-Update 2026-06-02 (M5 abgeschlossen + Docs-Nachzug)
 
-- **Baseline:** lint, type-check, test:coverage, build, bundle-budget grün; Coverage **~61 %** stmts / **~47 %** branches (M5 ≥70 % weiter offen).
-- **Audit:** [`docs/AUDIT-REPORT-2026-06.md`](docs/AUDIT-REPORT-2026-06.md), [`docs/STATUS-2026-06-02.md`](docs/STATUS-2026-06-02.md).
-- **CI:** `ci.yml` — validate nur bei **pull_request** (kein Doppel-Validate mit `deploy.yml` auf `main`).
-- **Supply-Chain:** Vitest **4.1.0** (Override + apps/web) — kritisches Audit-Finding behoben.
-- **Tests:** `shoppingListRepository.test.ts`, `recipeRepository.test.ts` ergänzt.
-- **Offen:** M5 Coverage-Ziel, M7 TS7 GA, M8 Tauri, PWA-Offline-UX (P1).
+- **Baseline:** lint, type-check, test:coverage, build, bundle-budget grün; Coverage **~78 %** stmts / **~79 %** lines / **~72,5 %** funcs / **~63 %** branches — **M5 PRD-Ziel erreicht**.
+- **Tests:** **362** in **85** Dateien; Thresholds **77/79/72/62** in `apps/web/vitest.config.ts`.
+- **Audit:** [`docs/AUDIT-REPORT-2026-06.md`](docs/AUDIT-REPORT-2026-06.md) (Phase-0 Snapshot); aktueller Stand [`docs/STATUS-2026-06-02.md`](docs/STATUS-2026-06-02.md).
+- **CI:** validate PR-only in `ci.yml`; E2E in `e2e-smoke.yml`; Storybook 10, vitest **4.1.8**, eslint **10.4.1** auf `main`.
+- **Offen (priorisiert):** i18n-Gate, PWA-Offline-UX (P1), M7 TS7 GA, M8 Tauri, M10 Sync — siehe STATUS „Nächste Schritte“.
 
 ---
 

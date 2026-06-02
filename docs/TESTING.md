@@ -72,12 +72,13 @@ pnpm run check:bundle-budget
 - Voice- und Navigationstrigger
 - Datenbanknahe Cross-Feature-Operationen
 
-## Aktueller Validierungsstand 2026-05-04
+## Aktueller Validierungsstand 2026-06-02 (M5 abgeschlossen)
 
-- **Vitest:** **222** Tests in **59** Dateien; ergänzend u. a. `BulkAddModal` / `AiModal` (Einkaufsliste), `PantryList`, erweiterter **`App.smoke.test.tsx`** (u. a. `services/db`-Mock), Pantry-/Shopping-Smoke, Context- und Repository-Suites, `dayColumnPantryStatus`, `DayColumn`; **`geminiMsw.test.ts`** validiert MSW-Responses mit Zod.
-- **Coverage (v8):** ca. **59 %** Statements / **61 %** Lines / **46 %** Branches / **52 %** Functions — Ziel ≥70 % laut [ROADMAP.md](../ROADMAP.md) M5 weiterhin offen; **`apps/web/vitest.config.ts`** definiert **Mindest-Thresholds** (Regressionsschutz).
-- **CI:** `.github/workflows/validate.yml` — lint → type-check → test:coverage → build → bundle-budget → **`pnpm audit --audit-level=high`** → Playwright-Smoke; Artefakt **coverage-lcov** (14 Tage). PRs zusaetzlich **i18n-check** (`ci.yml`).
-- Service- und Reducer-Tests wie oben; **Gemini-Integration** prueft u. a. gueltige JSON-Struktur (Zod); bei Typveraenderungen der KI-Antworten Tests und Schemas in `geminiService.ts` anpassen.
+- **Vitest:** **362** Tests in **85** Dateien (`pnpm run test`); M5-Suites u. a. Repositories, `geminiService`, UI-Smoke (Header, MealPlanner, RecipeDetail), `MealPlanModal`, `serviceRegistry`, erweiterte `useShoppingList`/`useRecipeDetail`.
+- **Coverage (v8):** ca. **78 %** Statements / **79 %** Lines / **63 %** Branches / **72,5 %** Functions — PRD-Ziel (≥70/≥70/≥70/≥60) **erreicht**; **`apps/web/vitest.config.ts`** Thresholds **77 / 79 / 72 / 62**.
+- **CI:** `.github/workflows/validate.yml` — lint → type-check → test:coverage → build → bundle-budget → **`pnpm audit --audit-level=high`**. Playwright-Smoke in **`e2e-smoke.yml`** (nicht auf jedem PR-Validate). Artefakt **coverage-lcov** (14 Tage). PRs: **i18n-check** (`ci.yml`).
+- **Gemini:** Integrationstests + Zod (`geminiMsw.test.ts`, `geminiService.test.ts`); Schema-Änderungen in `geminiService.ts` mit Tests mitziehen.
+- **Wartung:** `db.ts` nicht isoliert testbar (Import-Side-Effects) — Cross-Feature- und Repository-Tests bevorzugen.
 - Aktueller Snapshot: [STATUS-2026-05-04.md](./STATUS-2026-05-04.md); Vorgaenger: [STATUS-2026-05-02.md](./STATUS-2026-05-02.md).
 - `pnpm run lint` mit `--max-warnings 0`; generiertes **`coverage/**`** ist ESLint-ignoriert; `react-hooks/exhaustive-deps` ist auf **`warn`** — Warnungen im geaenderten Code abbauen, bevor auf `error` verschärft wird.
 - Vor Release empfohlen: **`pnpm run check:all`** oder mindestens lint, test, build und bei Bundle-Aenderungen `pnpm run check:bundle-budget`.

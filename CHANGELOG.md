@@ -9,10 +9,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Geaendert
 
-- **Dependencies:** eslint **10.4.1**, typescript-eslint **8.60.1** (ersetzt geschlossenes Dependabot PR #21; Lockfile auf `main` nach Storybook #22).
-
-- **Dependencies:** eslint 10.4, typescript-eslint 8.59.4, `@hookform/resolvers` 5.2.2, `react-i18next` 17.0.8 (Dependabot PRs #21, #23, #24 auf main integriert).
-- **CI:** E2E-Smoke aus PR- und Deploy-Validate ausgelagert nach `.github/workflows/e2e-smoke.yml` (Playwright-Docker-Image, wöchentlich + manuell).
+- **Dependencies:** eslint **10.4.1**, typescript-eslint **8.60.1** (PR #30); vitest/jsdom/msw **4.1.8** / **29** / **2.14** (PR #20); Storybook **10** (#22); `@hookform/resolvers` 5.2.2, `react-i18next` 17.0.8 (Dependabot-Inhalte).
+- **CI:** E2E-Smoke in `.github/workflows/e2e-smoke.yml` (Playwright-Container, wöchentlich + manuell); validate auf PRs ohne doppelten `main`-Lauf.
 
 ### Hinzugefuegt
 
@@ -31,7 +29,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Dokumentation
 
-- `AUDIT.md` — Verweis auf Juni-2026-Report; Coverage-/CI-Stand aktualisiert.
+- **Post-M5 Doku-Sync:** `docs/STATUS-2026-06-02.md`, `README.md`, `docs/README.md`, `docs/TESTING.md`, `ROADMAP.md` (M5 ✅), `AUDIT.md`, `docs/AUDIT-REPORT-2026-06.md` (M5-Nachzug), `.github/copilot-instructions.md` — Coverage/Tests/PR-Stand vereinheitlicht.
 
 ## [0.2.1] — 2026-05-16
 
