@@ -7,37 +7,28 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.2.2] — 2026-06-02
+
 ### Hinzugefuegt
 
 - **PWA Offline-UX (P1):** `useOnlineStatus`, `OfflineStatusBar` unter dem Header, Reconnect-Toast; Workbox-Runtime-Cache fuer Route-Chunks, Bilder und Fonts (`sw.ts`).
-- **i18n-Gate (P1):** Gemeinsames Scan-Modul (`scripts/lib/i18n-scan-shared.mjs`); CI prüft `de`/`en`-Key-Parität, Production-Baseline (`scripts/i18n-hardcoded-baseline.json`, **0** Kandidaten) und geänderte Zeilen ohne `__tests__`.
-- **i18n-Cleanup:** Production-Hardcoded-Strings vollständig migriert (Baseline **0**) — `foodDatabase` mit Keys + `foodDatabase.items.*`, Gemini-Prompts in `locales/*/gemini.json`, Offline-Fallbacks in `aiOffline.*`, Kategorien über `resolvePantryCategoryLabel`, Mahlzeiten-IDs zentral in `constants/mealTypes.ts`; Vitest initialisiert `i18next` in `setupTests.ts` plus `i18nTestUtils` für Service-Mocks.
+- **i18n-Gate (P1):** Gemeinsames Scan-Modul (`scripts/lib/i18n-scan-shared.mjs`); CI prüft `de`/`en`-Key-Parität, Production-Baseline (**0** Kandidaten) und geänderte Zeilen ohne `__tests__`.
+- **i18n-Cleanup:** Production-Hardcoded-Strings vollständig migriert — `foodDatabase` + `foodDatabase.items.*`, Gemini in `locales/*/gemini.json`, Offline-Fallbacks in `aiOffline.*`, `resolvePantryCategoryLabel`, `constants/mealTypes.ts`; Vitest-`i18next` in `setupTests.ts` + `i18nTestUtils`.
+- **M5 Testing (abgeschlossen):** **364** Tests / **86** Dateien; Coverage v8 ca. **78/79/72,5/63 %**; Thresholds **77/79/72/62** (PRD erreicht). Suites u. a. Repositories, `geminiService`, UI-Smoke, `MealPlanModal`, `criticalDomainFlow.integration`.
+- **Audit Juni 2026:** `docs/AUDIT-REPORT-2026-06.md`, `docs/STATUS-2026-06-02.md`.
+- **CI:** E2E-Smoke in `.github/workflows/e2e-smoke.yml` (Playwright-Container, wöchentlich + `workflow_dispatch`).
 
 ### Geaendert
 
-- **Tooling:** `pnpm.overrides` für `vitest` / `@vitest/utils` auf **4.1.8** (entspricht `apps/web` und STATUS; PR-#31-Review).
-- **Dependencies:** eslint **10.4.1**, typescript-eslint **8.60.1** (PR #30); vitest/jsdom/msw **4.1.8** / **29** / **2.14** (PR #20); Storybook **10** (#22); `@hookform/resolvers` 5.2.2, `react-i18next` 17.0.8 (Dependabot-Inhalte).
-- **CI:** E2E-Smoke in `.github/workflows/e2e-smoke.yml` (Playwright-Container, wöchentlich + manuell); validate auf PRs ohne doppelten `main`-Lauf.
-
-### Hinzugefuegt
-
-- **Audit Juni 2026:** `docs/AUDIT-REPORT-2026-06.md`, `docs/STATUS-2026-06-02.md` — Re-Baseline nach Master-Audit-Sprint.
-- **Tests (M5):** Erweiterte Suites — Repositories, `pantryMatcherService`, `syncService`, `retryUtils`, `aiService`, `errorLoggingService`, `recipeImportService`, `smartInputService`, `nutritionAllergyService`, `nutritionWorkerService`, `criticalDomainFlow.integration`, erweiterte `geminiService`/`voiceCommands`-Cases.
-- **Tests (M5 Sprint):** Vitest-Coverage-Thresholds auf **70/70/63/55** (Statements/Lines PRD-Ziel erreicht; Functions/Branches Follow-up).
-- **Tests (M5 Follow-up):** `geminiService`-Erweiterung, `communityShareService`, `snapshotVaultService`, `settingsMigration`, `aiCloudApi`, Matcher/Smart-Planner/Health-Export; Thresholds **72/73/65/57**.
-- **Tests (M5 UI-Smoke):** Header, PlannedMealCard, MealPlannerHeader, RecipeDetail-Subkomponenten, `useRecipeDetail`-Erweiterung; Thresholds **75/76/68/60** (Branches-Ziel erreicht).
-- **Tests (M5 Functions≥70):** `MealPlanModal`, erweiterte `RecipeDetail`/`RecipeActionBar`/`ShoppingListActive`-Smokes, `serviceRegistry`-Default-Gateways, `useShoppingList` Export/Drag; Thresholds **77/79/72/62** (M5 vollständig: alle vier Metriken im PRD-Zielkorridor).
-
-### Geaendert
-
-- **CI:** `ci.yml` — Validate nur bei PRs ohne Playwright-Smoke (CDN-Timeout auf Runnern); Deploy auf `main` mit vollem Smoke via `microsoft/playwright-github-action`.
-- **CI:** `ci.yml` — kein doppelter Validate-Lauf mit Deploy auf `main`.
-- **Supply-Chain:** Vitest auf **>=4.1.0** (pnpm overrides + `apps/web`) — behebt kritisches Audit-Finding.
+- **Dependencies:** eslint **10.4.1**, typescript-eslint **8.60.1** (#30); vitest/jsdom/msw **4.1.8** / **29** / **2.14** (#20); Storybook **10** (#22); `@hookform/resolvers` 5.2.2, `react-i18next` 17.0.8.
+- **Tooling:** `pnpm.overrides` `vitest` / `@vitest/utils` **4.1.8** (Doku ↔ Lockfile, #34).
+- **CI:** PR-Validate ohne doppelten `main`-Lauf; Deploy: validate + GitHub Pages; PRs `pnpm run i18n:check`.
+- **Supply-Chain:** Vitest **>=4.1.0** (Override) — kritisches Audit-Finding behoben.
 
 ### Dokumentation
 
 - **Post-Merge Doku-Sync:** `STATUS`, `README`, `TESTING` — **364** Tests, PR #31–#34 im Merge-Stand, P1 (PWA/i18n) als erledigt markiert.
-- **Post-M5 Doku-Sync:** `docs/STATUS-2026-06-02.md`, `README.md`, `docs/README.md`, `docs/TESTING.md`, `ROADMAP.md` (M5 ✅), `AUDIT.md`, `docs/AUDIT-REPORT-2026-06.md` (M5-Nachzug), `.github/copilot-instructions.md` — Coverage/Tests/PR-Stand vereinheitlicht.
+- **Post-M5 Doku-Sync:** `docs/README.md`, `ROADMAP.md` (M5 ✅), `AUDIT.md`, `docs/AUDIT-REPORT-2026-06.md`, `.github/copilot-instructions.md`.
 
 ## [0.2.1] — 2026-05-16
 
@@ -249,7 +240,8 @@ Die folgenden Eintraege dokumentieren die Arbeit zwischen **v0.1.0** und **v0.2.
 - CI-Pipeline mit Lint, TypeScript-Check, Tests und Bundle-Budget
 - CodeQL Security Analysis
 
-[Unreleased]: https://github.com/qnbs/CulinaSync-de-/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/qnbs/CulinaSync-de-/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/qnbs/CulinaSync-de-/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/qnbs/CulinaSync-de-/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/qnbs/CulinaSync-de-/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/qnbs/CulinaSync-de-/releases/tag/v0.1.0
