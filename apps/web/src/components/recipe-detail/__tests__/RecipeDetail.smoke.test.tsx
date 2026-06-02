@@ -111,6 +111,23 @@ describe('RecipeDetail (Smoke)', () => {
     expect(onBack).toHaveBeenCalledTimes(1);
   });
 
+  it('zeigt Bestaetigungsdialog bei pendingAction', () => {
+    mockUseRecipeDetail.mockImplementation(() => ({
+      ...buildHookReturn(baseRecipe),
+      pendingAction: { type: 'delete' as const },
+    }));
+    const onBack = vi.fn();
+
+    render(
+      <I18nextProvider i18n={i18n}>
+        <RecipeDetail recipe={baseRecipe} onBack={onBack} />
+      </I18nextProvider>,
+    );
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText(/Rezept loeschen/i)).toBeInTheDocument();
+  });
+
   it('useRecipeDetail erhaelt Rezept und Callback', () => {
     mockUseRecipeDetail.mockImplementation(() => buildHookReturn(baseRecipe));
     const onBack = vi.fn();

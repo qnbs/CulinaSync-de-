@@ -57,10 +57,12 @@ vi.mock('@/services/exportService', () => ({
   exportMealPlanWeekToIcs: vi.fn(),
 }));
 
-vi.mock('@/services/mealPlannerSmartService', () => ({
+const smartPlannerMocks = vi.hoisted(() => ({
   getSoonExpiringPantryNames: vi.fn(() => []),
   buildAutoPlanSuggestionsFromExpiring: vi.fn(() => []),
 }));
+
+vi.mock('@/services/mealPlannerSmartService', () => smartPlannerMocks);
 
 vi.mock('@/services/repositories/mealPlanRepository', () => ({
   addRecipeToMealPlan: vi.fn().mockResolvedValue(undefined),
@@ -104,6 +106,25 @@ describe('MealPlanner (Smoke)', () => {
     );
   });
 
+  it('Auto-Vorschlag mit Treffern zeigt Erfolgs-Toast', async () => {
+    smartPlannerMocks.getSoonExpiringPantryNames.mockReturnValueOnce(new Set(['tomate']));
+    smartPlannerMocks.buildAutoPlanSuggestionsFromExpiring.mockReturnValueOnce([
+      { date: '2026-05-04', mealType: 'Abendessen' as const, recipeId: 1 },
+    ]);
+
+    const user = userEvent.setup();
+    render(
+      <Provider store={store}>
+        <I18nextProvider i18n={i18n}>
+          <MealPlanner />
+        </I18nextProvider>
+      </Provider>,
+    );
+
+    await user.click(screen.getByRole('button', { name: /Auto-Vorschlag/i }));
+    expect(store.getState().ui.toasts[0]?.message).toMatch(/Vorschlag|hinzugefügt|geplant/i);
+  });
+
   it('Auto-Vorschlag ohne Treffer zeigt Info-Toast', async () => {
     const user = userEvent.setup();
 
@@ -119,6 +140,26 @@ describe('MealPlanner (Smoke)', () => {
     await user.click(autoBtn);
 
     expect(store.getState().ui.toasts[0]?.message).toMatch(/Keine passenden Vorschläge/i);
+  });
+
+  it('Wochennavigation ruft setCurrentDate auf', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <Provider store={store}>
+        <I18nextProvider i18n={i18n}>
+          <MealPlanner />
+        </I18nextProvider>
+      </Provider>,
+    );
+
+    const prev = screen.getByRole('button', { name: /Vorherige Woche/i });
+    await user.click(prev);
+    expect(plannerTest.ctx.setCurrentDate).toHaveBeenCalled();
+
+    const next = screen.getByRole('button', { name: /Naechste Woche/i });
+    await user.click(next);
+    expect(plannerTest.ctx.setCurrentDate).toHaveBeenCalledTimes(2);
   });
 
   it('Sidebar listet Rezept', () => {
