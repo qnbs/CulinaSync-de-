@@ -9,10 +9,12 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Geaendert
 
-- **PWA-Härtung:** Service Worker nutzt precached `index.html` für Navigation; Manifest-Shortcuts `?page=…` werden beim Start ausgewertet; `useOnlineStatus` synchronisiert nach Tab-Fokus und bfcache.
-- **A11y:** Install-/Update-Dialoge mit `useModalA11y`; Offline-Banner mit `aria-labelledby`/`describedby`; Toasts mit `assertive` nur bei Fehlern.
-- **Offline-KI:** `geminiService` nutzt i18n-`aiOffline`-Fallback statt Faker; gemeinsames Modul `aiOfflineFallback.ts`.
-- **Fehlerlogging:** PWA-Install, DB-Reset und Vollbackup-Exporte loggen über `logAppError`.
+- **CI/Deploy:** Service Worker — nur ein `self.__WB_MANIFEST`-Vorkommen (Workbox-Build); Index-Pfad via `__PWA_INDEX_PATH__`.
+- **E2E:** Playwright `baseURL` mit GitHub-Pages-Pfad `/CulinaSync-de-/` in CI.
+- **Deeplinks:** `culinasync://`-Events werden in der App verarbeitet (`useDeepLinkNavigation`).
+- **PWA-Härtung (#37):** precached `index.html` für Navigation; Manifest-Shortcuts `?page=…`; `useOnlineStatus` nach Tab-Fokus/bfcache.
+- **A11y (#37):** Install-/Update-Dialoge mit `useModalA11y`; Offline-Banner ARIA; Toasts `assertive` nur bei Fehlern.
+- **Offline-KI (#37):** `aiOfflineFallback.ts`; `geminiService` ohne Faker; `logAppError` für Install/Reset/Export.
 
 ## [0.2.2] — 2026-06-02
 

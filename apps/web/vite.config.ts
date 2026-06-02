@@ -27,11 +27,13 @@ const chunkGroups: Array<[string, string[]]> = [
 // GitHub Pages subpath: set automatically in CI via GITHUB_ACTIONS env
 const REPO_NAME = 'CulinaSync-de-';
 const base = process.env.GITHUB_ACTIONS ? `/${REPO_NAME}/` : '/';
+const pwaIndexPath = `${base}index.html`.replace(/\/{2,}/g, '/');
 
 export default defineConfig({
   base,
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
+    __PWA_INDEX_PATH__: JSON.stringify(pwaIndexPath),
   },
   plugins: [
     react(),

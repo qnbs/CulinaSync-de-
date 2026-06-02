@@ -5,6 +5,8 @@ import { NavigationRoute, registerRoute } from 'workbox-routing';
 import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
 
+declare const __PWA_INDEX_PATH__: string;
+
 declare let self: ServiceWorkerGlobalScope & {
   __WB_MANIFEST: Array<{ url: string; revision: string | null }>;
 };
@@ -15,12 +17,8 @@ cleanupOutdatedCaches();
 
 precacheAndRoute(self.__WB_MANIFEST);
 
-// QNBS-v3: SPA-Navigation aus Precache (index.html), nicht nur NetworkFirst — stabiler Offline-Start
-const precachedIndex =
-  self.__WB_MANIFEST.map((entry) => (typeof entry === 'string' ? entry : entry.url)).find((url) =>
-    url.endsWith('index.html'),
-  ) ?? '/index.html';
-const navigationHandler = createHandlerBoundToURL(precachedIndex);
+// QNBS-v3: SPA-Navigation aus Precache (index.html); Index-Pfad via Vite define — nur ein __WB_MANIFEST-Match
+const navigationHandler = createHandlerBoundToURL(__PWA_INDEX_PATH__);
 
 registerRoute(
   new NavigationRoute(navigationHandler, {

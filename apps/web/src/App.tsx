@@ -16,6 +16,7 @@ import { useOnlineStatus } from './hooks/useOnlineStatus';
 import { useModalA11y } from './hooks/useModalA11y';
 import { getPageFromLocationSearch } from './utils/pwaLaunchParams';
 import { logAppError } from './services/errorLoggingService';
+import { useDeepLinkNavigation } from './hooks/useDeepLinkNavigation';
 
 const APP_VERSION = __APP_VERSION__;
 
@@ -65,6 +66,7 @@ const App: React.FC = () => {
   const [showInstallReminder, setShowInstallReminder] = useState(false);
   const [showUpdateReadyNotice, setShowUpdateReadyNotice] = useState(false);
   const isOnline = useOnlineStatus();
+  useDeepLinkNavigation();
   const wasOnlineRef = useRef(isOnline);
   const installDialogRef = useRef<HTMLDivElement>(null);
   const updateDialogRef = useRef<HTMLDivElement>(null);
