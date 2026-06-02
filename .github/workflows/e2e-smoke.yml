@@ -1,0 +1,60 @@
+# =============================================================================
+# CulinaSync – E2E Smoke (Playwright + vite preview)
+# =============================================================================
+# Separater Lauf mit Playwright-Docker-Image (Browser vorinstalliert).
+# Haupt-CI/Deploy überspringen E2E wegen instabilem Chromium-Download auf GHA-Runnern.
+# =============================================================================
+
+name: E2E Smoke
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 5 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container:
+      image: mcr.microsoft.com/playwright:v1.52.0-noble
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+      - name: E2E smoke (Playwright + preview)
+        run: pnpm run test:e2e
+        env:
+          CI: true
+
+      - name: Upload Playwright report (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          retention-days: 7

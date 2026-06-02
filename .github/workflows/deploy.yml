@@ -33,6 +33,8 @@ jobs:
     uses: ./.github/workflows/validate.yml
     with:
       upload-pages-artifact: true
+      # QNBS-v3: Chromium-CDN-Download auf ubuntu-latest >45min — Smoke via workflow_dispatch (e2e-smoke.yml)
+      run-e2e-smoke: false
 
   deploy:
     # Deploy uploaded artifact to github-pages environment.
