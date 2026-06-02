@@ -22,7 +22,17 @@
 pnpm run test
 pnpm run test:coverage
 pnpm run check:all
+pnpm run test:e2e   # Playwright (lokal: vorher `pnpm exec playwright install chromium`)
 ```
+
+**E2E lokal (wie CI / GitHub Pages):**
+
+```bash
+CI=true GITHUB_ACTIONS=true pnpm run build
+cd apps/web && CI=true pnpm exec playwright test
+```
+
+**E2E in GitHub Actions:** Workflow [`.github/workflows/e2e-smoke.yml`](../.github/workflows/e2e-smoke.yml) — Playwright-Docker-Image, bei Push/PR auf `apps/web/**` und wöchentlich; manuell unter **Actions → E2E Smoke → Run workflow**.
 
 Ohne globales pnpm (z. B. Windows): `npm run test`, `npm run check:all` oder `npx pnpm@10 run test`.
 
@@ -74,9 +84,9 @@ pnpm run check:bundle-budget
 
 ## Aktueller Validierungsstand 2026-06-02 (M5 abgeschlossen)
 
-- **Vitest:** **364** Tests in **86** Dateien (`pnpm run test`); M5-Suites u. a. Repositories, `geminiService`, UI-Smoke (Header, MealPlanner, RecipeDetail), `MealPlanModal`, `serviceRegistry`, erweiterte `useShoppingList`/`useRecipeDetail`; PWA: `useOnlineStatus.test.ts`.
+- **Vitest:** **374** Tests in **90** Dateien (`pnpm run test`); M5-Suites u. a. Repositories, `geminiService`, UI-Smoke, `MealPlanModal`, PWA (`useOnlineStatus`, `OfflineStatusBar`), Deeplink (`deepLinking`, `useDeepLinkNavigation`).
 - **Coverage (v8):** ca. **78 %** Statements / **79 %** Lines / **63 %** Branches / **72,5 %** Functions — PRD-Ziel (≥70/≥70/≥70/≥60) **erreicht**; **`apps/web/vitest.config.ts`** Thresholds **77 / 79 / 72 / 62**.
-- **CI:** `.github/workflows/validate.yml` — lint → type-check → test:coverage → build → bundle-budget → **`pnpm audit --audit-level=high`**. Playwright-Smoke in **`e2e-smoke.yml`** (nicht auf jedem PR-Validate). Artefakt **coverage-lcov** (14 Tage). PRs: **`i18n:check`** in `ci.yml` (Key-Parität, Production-Baseline, geänderte Zeilen).
+- **CI:** `.github/workflows/validate.yml` — lint → type-check → test:coverage → build → bundle-budget → **`pnpm audit --audit-level=high`**. Playwright-Smoke in **`e2e-smoke.yml`** (Container-Image; bei PR/Push auf `apps/web/**`, wöchentlich, `workflow_dispatch` — nicht im schlanken PR-`validate`). Artefakt **coverage-lcov** (14 Tage). PRs: **`i18n:check`** in `ci.yml`.
 - **i18n lokal:** `pnpm run i18n:check` vor PR; Vollscan `pnpm run i18n:scan` (Report unter `reports/`, gitignored); nach bereinigten Hardcoded-Strings `pnpm run i18n:baseline:update`.
 - **Gemini:** Integrationstests + Zod (`geminiMsw.test.ts`, `geminiService.test.ts`); Schema-Änderungen in `geminiService.ts` mit Tests mitziehen.
 - **Wartung:** `db.ts` nicht isoliert testbar (Import-Side-Effects) — Cross-Feature- und Repository-Tests bevorzugen.

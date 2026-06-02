@@ -14,9 +14,27 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 5 * * 1'
+  # QNBS-v3: Nach Merge auf main + relevante PRs — Playwright-Container, kein Chromium-Download auf ubuntu-latest
+  push:
+    branches: [main]
+    paths:
+      - 'apps/web/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/e2e-smoke.yml'
+  pull_request:
+    paths:
+      - 'apps/web/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/e2e-smoke.yml'
 
 permissions:
   contents: read
+
+concurrency:
+  group: e2e-smoke-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   smoke:
@@ -43,11 +61,15 @@ jobs:
 
       - name: Build
         run: pnpm run build
+        env:
+          CI: true
+          GITHUB_ACTIONS: true
 
       - name: E2E smoke (Playwright + preview)
         run: pnpm run test:e2e
         env:
           CI: true
+          GITHUB_ACTIONS: true
 
       - name: Upload Playwright report (on failure)
         if: failure()
