@@ -9,6 +9,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Geaendert
 
+- **Dependencies:** eslint **10.4.1**, typescript-eslint **8.60.1** (ersetzt geschlossenes Dependabot PR #21; Lockfile auf `main` nach Storybook #22).
+
 - **Dependencies:** eslint 10.4, typescript-eslint 8.59.4, `@hookform/resolvers` 5.2.2, `react-i18next` 17.0.8 (Dependabot PRs #21, #23, #24 auf main integriert).
 - **CI:** E2E-Smoke aus PR- und Deploy-Validate ausgelagert nach `.github/workflows/e2e-smoke.yml` (Playwright-Docker-Image, wöchentlich + manuell).
 
