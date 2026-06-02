@@ -47,6 +47,7 @@ vi.mock('@google/genai', () => ({
 
 import {
   extractRecipeFromWebContent,
+  generateRecipeIdeas,
   generateShoppingList,
   invalidateAIClient,
 } from '../geminiService';
@@ -107,6 +108,31 @@ describe('geminiService', () => {
     await expect(
       generateShoppingList('Pasta fuer 2', [], [])
     ).rejects.toThrow(/Invalid AI response/i);
+  });
+
+  it('returns parsed recipe ideas on valid AI JSON response', async () => {
+    mockLoadApiKey.mockResolvedValueOnce('AIzaValidLookingKey');
+    mockGenerateContent.mockResolvedValueOnce({
+      text: JSON.stringify({
+        ideas: [
+          { recipeTitle: 'Linsencurry', shortDescription: 'Wuerzig und schnell' },
+        ],
+      }),
+    });
+
+    const ideas = await generateRecipeIdeas(
+      { craving: 'Curry', includeIngredients: [], excludeIngredients: [], modifiers: [] },
+      [],
+      {
+        dietaryRestrictions: [],
+        preferredCuisines: [],
+        customInstruction: '',
+        creativityLevel: 0.5,
+      },
+    );
+
+    expect(ideas).toHaveLength(1);
+    expect(ideas[0].recipeTitle).toBe('Linsencurry');
   });
 
   it('sanitizes web content before recipe extraction prompts reach Gemini', async () => {

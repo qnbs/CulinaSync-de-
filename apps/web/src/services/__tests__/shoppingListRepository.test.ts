@@ -135,6 +135,14 @@ describe('shoppingListRepository', () => {
     expect(shoppingListUpdate).not.toHaveBeenCalled();
   });
 
+  it('clearShoppingList gibt 0 zurueck ohne clear bei leerer Liste', async () => {
+    shoppingListCount.mockResolvedValueOnce(0);
+    const { clearShoppingList } = await import('../repositories/shoppingListRepository');
+    const removed = await clearShoppingList();
+    expect(removed).toBe(0);
+    expect(shoppingListClear).not.toHaveBeenCalled();
+  });
+
   it('clearShoppingList leert Tabelle wenn count > 0', async () => {
     const { clearShoppingList } = await import('../repositories/shoppingListRepository');
     const removed = await clearShoppingList();

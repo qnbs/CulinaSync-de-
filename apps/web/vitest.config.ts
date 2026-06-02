@@ -26,12 +26,12 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
       reportsDirectory: './coverage',
-      // QNBS-v3: M5 — Regressionsschutz (Snapshot 2026-06-02: ~65 % stmts / ~66 % lines / ~49 % branches / ~58 % funcs); ROADMAP-Ziel ≥70 % weiter offen
+      // QNBS-v3: M5 — PRD-Ziel ≥70 % Statements/Lines (Snapshot 2026-06-02 Sprint: ~70,5 % / ~71,8 %); Functions/Branches Follow-up
       thresholds: {
-        lines: 65,
-        statements: 64,
-        functions: 58,
-        branches: 49,
+        lines: 70,
+        statements: 70,
+        functions: 63,
+        branches: 55,
       },
     },
   },
