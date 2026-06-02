@@ -7,6 +7,21 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefuegt
+
+- **Audit Juni 2026:** `docs/AUDIT-REPORT-2026-06.md`, `docs/STATUS-2026-06-02.md` — Re-Baseline nach Master-Audit-Sprint.
+- **Tests (M5):** Erweiterte Suites — `shoppingListRepository`, `recipeRepository`, `pantryMatcherService`, `mealPlanRepository`, `pantryRepository`, `syncService`, `retryUtils`; Vitest-Coverage-Thresholds auf 64/65/58/49.
+
+### Geaendert
+
+- **CI:** `ci.yml` — Validate nur bei PRs ohne Playwright-Smoke (CDN-Timeout auf Runnern); Deploy auf `main` mit vollem Smoke via `microsoft/playwright-github-action`.
+- **CI:** `ci.yml` — kein doppelter Validate-Lauf mit Deploy auf `main`.
+- **Supply-Chain:** Vitest auf **>=4.1.0** (pnpm overrides + `apps/web`) — behebt kritisches Audit-Finding.
+
+### Dokumentation
+
+- `AUDIT.md` — Verweis auf Juni-2026-Report; Coverage-/CI-Stand aktualisiert.
+
 ## [0.2.1] — 2026-05-16
 
 ### Geaendert
