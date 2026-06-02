@@ -6,7 +6,21 @@
 
 ---
 
-## Executive Summary
+## Nachzug M5-Abschluss (gleicher Tag, nach PR #20–#30)
+
+> Dieser Abschnitt **ersetzt** die Executive-Summary unten für den **aktuellen `main`-Stand**. Die übrigen Kapitel dokumentieren den Phase-0-Snapshot zu Beginn des Juni-Sprints.
+
+| Thema | Phase-0 (unten) | Ist-Stand nach M5 |
+|--------|-----------------|-------------------|
+| M5 Coverage | offen (~61 % stmts) | **✅ ~78/79/72,5/63 %** (Thresholds 77/79/72/62) |
+| Tests | 221 / 59 Dateien | **362 / 85** |
+| Vitest CVE | kritisch | **4.1.8** auf `main` |
+| CI-Doppel-Validate | offen | **✅** PR-only validate |
+| Nächste Hebel | M5 | i18n, PWA-Offline, M7–M10 — [`STATUS-2026-06-02.md`](STATUS-2026-06-02.md) |
+
+---
+
+## Executive Summary (Phase-0-Snapshot — historisch)
 
 CulinaSync-de- bleibt ein **produktionsreifes, privacy-first Local-First PWA** mit vorbildlicher Architektur, Dokumentation und CI. Es gibt **keine kritischen Sicherheits- oder Betriebsblocker**. Der größte strukturelle Hebel ist weiterhin **Test-Coverage (M5)**: aktuell ~**61 %** Statements / ~**47 %** Branches gegenüber ROADMAP-Ziel **≥70 % / ≥60 %**.
 

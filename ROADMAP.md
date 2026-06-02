@@ -1,6 +1,6 @@
 # CulinaSync — Roadmap
 
-> **Stand:** 2. Juni 2026 (Juni Re-Audit + P0-Beginn) · Basis: vollständiges Code-, Architektur- und Security-Audit (14.–22. April 2026) + Follow-up-Sessions Mai/Juni 2026  
+> **Stand:** 2. Juni 2026 (M5 abgeschlossen, Docs-Nachzug) · Basis: vollständiges Code-, Architektur- und Security-Audit (14.–22. April 2026) + Follow-up-Sessions Mai/Juni 2026  
 > **Format:** Milestones geordnet nach Priorität. Jedes Item mit Herkunft (AUDIT-Referenz), Aufwandsschätzung und Status.
 
 ---
@@ -93,11 +93,11 @@
 
 ---
 
-## Milestone 5 — Testing
+## Milestone 5 — Testing · ✅ Abgeschlossen (Juni 2026)
 
-**Ziel:** Test-Coverage von ~35 % auf ≥70 % erhöhen.
+**Ziel:** Test-Coverage von ~35 % auf ≥70 % erhöhen — **erreicht** (alle vier Metriken im PRD-Korridor).
 
-**Aktueller Stand (Juni 2026, Vitest v8-Coverage, Snapshot 2026-06-02, M5-Sprint):**
+**Aktueller Stand (Juni 2026, Vitest v8-Coverage, Snapshot nach PR #29):**
 | Metrik | Aktuell | Ziel |
 |---|---|---|
 | Statements | **~78 %** | ≥70 % |
@@ -111,9 +111,12 @@
 | 5.2 | Store-Slices testen: `settingsSlice`, `uiSlice`, `shoppingListSlice` | T1 | `src/store/__tests__/` | Mittel (3–4 h) | ✅ |
 | 5.3 | Hooks testen: `useShoppingList`, `usePantryManager`, `useMealPlan` | T1 | `src/hooks/__tests__/` | Hoch (4–6 h) | 🟨 **`useMealPlannerScreen`**, **`useCookModeController`**, **`useMealPlan`**, **`useShoppingList`**, **`usePantryManager`** (Stub/Mock); weiter: Edge-Cases und Integration |
 | 5.4 | Services testen: `apiKeyService`, `voiceCommands`, `exportService` | T1 | `src/services/__tests__/` | Mittel (3–4 h) | ✅ apiKeyService, exportService, **`voiceCommands.test.ts`** (`processCommand`); 🟨 **`mealPlanRepository.test.ts`**, **`pantryRepository.test.ts`** (Dexie gemockt) |
-| 5.5 | Component-Smoke-Tests für kritische Seiten (React Testing Library) | T1 | `src/components/**/__tests__/` | Hoch (4–6 h) | 🟨 Smoke: **`App.smoke.test.tsx`**, MealPlanner, CookModeView, RecipeDetailTabs, **`PantryManager.smoke.test.tsx`**, **`ShoppingList.smoke.test.tsx`** (`smokeHookStubs.ts`); Modale **`BulkAddModal`**, **`AiModal`**; **`PantryList.test.tsx`**; Context: **`MealPlannerContext`**, **`PantryManagerContext`**, **`ShoppingListContext.test.tsx`**; **`DayColumn.test.tsx`** + **`dayColumnPantryStatus.test.ts`** |
+| 5.5 | Component-Smoke-Tests für kritische Seiten (React Testing Library) | T1 | `src/components/**/__tests__/` | Hoch (4–6 h) | ✅ inkl. Header, PlannedMealCard, MealPlannerHeader, RecipeDetail-Subkomponenten, ShoppingListActive |
+| 5.6 | Functions/Branches ≥70 % / ≥60 % (Follow-up PR #29) | T1 | Tests + `vitest.config.ts` | Mittel | ✅ Thresholds **77/79/72/62**; **362** Tests / **85** Dateien |
 
-**Gesamtaufwand Milestone 5:** ~20–28 h
+**Gesamtaufwand Milestone 5:** ~20–28 h (abgeschlossen)
+
+**Wartung (post-M5):** Coverage >75 % halten; optional `db.ts`-Isolation; E2E/Playwright ausbauen; keine neuen Threshold-Senkungen ohne CHANGELOG.
 
 ---
 
@@ -128,6 +131,7 @@
 | 6.3 | README-Status und Links gegen aktuellen Stand | Doku-Lücke | `README.md` | Niedrig (1 h) | ✅ Status 2026-05-01, Link `STATUS-2026-05-01.md`, KI-Key-Beschreibung |
 | 6.4 | Doku-Sync: ARCHITECTURE, PROJECT-STRUCTURE, DEPLOYMENT, TESTING, DEVELOPMENT, copilot-instructions, AUDIT, STATUS-2026-05-02 | Follow-up | `docs/*`, Root | Niedrig–Mittel | ✅ 2026-05-02 (Nachziehen M5-Essensplan/Smoke/Repos) |
 | 6.5 | Monorepo-Pfad-Sync nach `apps/web/` + STATUS-2026-05-16 + CI-Audit-Gate | Housekeeping 2026-05-16 | `docs/*`, `.github/`, `.cursor/` | Niedrig | ✅ |
+| 6.6 | Post-M5 Doku-Sync: STATUS-2026-06-02, README, TESTING, AUDIT, copilot-instructions | Nach M5 | `docs/*`, Root, `.github/` | Niedrig | ✅ |
 
 ---
 
@@ -208,6 +212,7 @@ _Vorbedingung: M1 (DevContainer mit Rust), Tauri 2 stabil_
 
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.4 | 2026-06-02 | **M5 abgeschlossen** (~78/79/72,5/63 % Coverage); PR #20/#29/#30; Docs-Nachzug STATUS/README/TESTING; M6.6 |
 | 1.3 | 2026-05-02 | M3.3 MealPlanner-Context; M4.1 Zod in `geminiService`; Legacy-Settings-Migration ohne Runtime-Fallback in `loadSettings`; A11y-Sweep; CI Node 24 in validate/ci; M6.4 Doku-Sync; `docs/STATUS-2026-05-02.md` |
 | 1.2 | 2026-05-01 | M3.1/M3.2 erledigt; M4.3 CSP Tauri; M5/6 Fortschritt (Tests, Mermaid, JSDoc, README); Verweis `docs/STATUS-2026-05-01.md` |
 | 1.1 | 2026-04-23 | M0.1 (K1+K2 geschlossen) hinzugefügt; M1 um 1.3–1.6 erweitert (Husky, Reusable CI, Templates, VS Code); M8–M10 (Tauri, Bundle, Sync) angehängt |
