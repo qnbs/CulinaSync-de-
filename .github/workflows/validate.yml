@@ -24,7 +24,7 @@ env:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - name: Checkout
@@ -67,12 +67,28 @@ jobs:
       - name: Dependency audit (high+)
         run: pnpm audit --audit-level=high
 
-      # QNBS-v3: PR-CI überspringt E2E (CDN-Download >40min auf Runnern); Deploy auf main führt Smoke aus
-      - name: Setup Playwright
+      # QNBS-v3: PR-CI überspringt E2E; Deploy nutzt Cache + chromium-only (ohne deprecated Action)
+      - name: Cache Playwright browsers
         if: inputs.run-e2e-smoke
-        uses: microsoft/playwright-github-action@v1
+        uses: actions/cache@v4
         with:
-          browsers: chromium
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright Chromium (retry)
+        if: inputs.run-e2e-smoke
+        shell: bash
+        run: |
+          for attempt in 1 2 3; do
+            echo "Playwright install attempt ${attempt}/3"
+            if pnpm exec playwright install chromium; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              sleep 10
+            fi
+          done
+          exit 1
 
       - name: E2E smoke (Playwright + preview)
         if: inputs.run-e2e-smoke
