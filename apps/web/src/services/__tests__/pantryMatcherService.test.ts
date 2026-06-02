@@ -113,6 +113,44 @@ describe('pantryMatcherService', () => {
     ]);
   });
 
+  it('updatePantryMatches zaehlt nach-geschmack-Zutaten als vorhanden', async () => {
+    recipesToArray.mockResolvedValueOnce([
+      sampleRecipe({
+        ingredients: [
+          {
+            sectionTitle: 'Haupt',
+            items: [
+              { name: 'Salz nach Geschmack', quantity: '0', unit: '' },
+              { name: 'Pfeffer', quantity: '1', unit: 'Prise' },
+            ],
+          },
+        ],
+      }),
+    ]);
+    pantryToArray.mockResolvedValueOnce([]);
+    const { updatePantryMatches } = await import('../pantryMatcherService');
+    await updatePantryMatches();
+    expect(bulkUpdate).toHaveBeenCalledWith([
+      expect.objectContaining({
+        changes: expect.objectContaining({ pantryMatchPercentage: 50 }),
+      }),
+    ]);
+  });
+
+  it('updatePantryMatches filtert nach recipeIds', async () => {
+    recipesAnyOfToArray.mockResolvedValueOnce([sampleRecipe({ id: 5 })]);
+    const { updatePantryMatches } = await import('../pantryMatcherService');
+    await updatePantryMatches([5]);
+    expect(bulkUpdate).toHaveBeenCalled();
+  });
+
+  it('updatePantryMatches beendet frueh wenn keine Rezepte', async () => {
+    recipesAnyOfToArray.mockResolvedValueOnce([]);
+    const { updatePantryMatches } = await import('../pantryMatcherService');
+    await updatePantryMatches([99]);
+    expect(bulkUpdate).not.toHaveBeenCalled();
+  });
+
   it('debouncedUpdateAllPantryMatches plant updatePantryMatches verzoegert', async () => {
     vi.useFakeTimers();
     recipesToArray.mockResolvedValue([]);

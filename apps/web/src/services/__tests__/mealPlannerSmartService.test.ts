@@ -52,6 +52,23 @@ describe('mealPlannerSmartService', () => {
       ];
       expect(getSoonExpiringPantryNames(items).size).toBe(0);
     });
+
+    it('ignoriert bereits abgelaufene Artikel', () => {
+      const past = new Date();
+      past.setDate(past.getDate() - 2);
+      const items: PantryItem[] = [
+        {
+          id: 1,
+          name: 'Joghurt',
+          quantity: 1,
+          unit: 'Becher',
+          expiryDate: past.toISOString().split('T')[0],
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        },
+      ];
+      expect(getSoonExpiringPantryNames(items, 4).size).toBe(0);
+    });
   });
 
   describe('buildAutoPlanSuggestionsFromExpiring', () => {
@@ -99,6 +116,31 @@ describe('mealPlannerSmartService', () => {
       const week = [monday];
 
       expect(buildAutoPlanSuggestionsFromExpiring(week, mealsByDate, recipes, expiring)).toEqual([]);
+    });
+
+    it('bevorzugt Rezepte mit Favoriten- und Match-Score', () => {
+      const recipes = [
+        baseRecipe({
+          id: 1,
+          isFavorite: false,
+          pantryMatchPercentage: 20,
+          ingredients: [{ sectionTitle: '', items: [{ quantity: '1', unit: '', name: 'Tomate' }] }],
+        }),
+        baseRecipe({
+          id: 2,
+          isFavorite: true,
+          pantryMatchPercentage: 80,
+          ingredients: [{ sectionTitle: '', items: [{ quantity: '1', unit: '', name: 'Tomate' }] }],
+        }),
+      ];
+      const tuesday = new Date(Date.UTC(2026, 4, 5, 12, 0, 0));
+      const suggestions = buildAutoPlanSuggestionsFromExpiring(
+        [monday, tuesday],
+        {},
+        recipes,
+        new Set(['tomate']),
+      );
+      expect(suggestions[0]?.recipeId).toBe(2);
     });
   });
 });

@@ -36,4 +36,38 @@ describe('cookModeReducer', () => {
     expect(s.timerSeconds).toBe(120);
     expect(s.timerRunning).toBe(false);
   });
+
+  it('START_TIMER uses custom seconds when provided', () => {
+    const s = cookModeReducer(initialCookModeState, { type: 'START_TIMER', seconds: 90 });
+    expect(s.timerSeconds).toBe(90);
+    expect(s.timerRunning).toBe(true);
+  });
+
+  it('PAUSE_TIMER stops running without changing seconds', () => {
+    const s = cookModeReducer(
+      { ...initialCookModeState, timerRunning: true, timerSeconds: 42 },
+      { type: 'PAUSE_TIMER' },
+    );
+    expect(s.timerRunning).toBe(false);
+    expect(s.timerSeconds).toBe(42);
+  });
+
+  it('ADD_TIMER_SECONDS increments timer', () => {
+    const s = cookModeReducer(initialCookModeState, { type: 'ADD_TIMER_SECONDS', seconds: 30 });
+    expect(s.timerSeconds).toBe(210);
+  });
+
+  it('TICK_TIMER decrements above 1', () => {
+    const s = cookModeReducer({ ...initialCookModeState, timerSeconds: 5, timerRunning: true }, { type: 'TICK_TIMER' });
+    expect(s.timerSeconds).toBe(4);
+    expect(s.timerRunning).toBe(true);
+  });
+
+  it('CHECK_INGREDIENT and UNCHECK_INGREDIENT are idempotent', () => {
+    let s = cookModeReducer(initialCookModeState, { type: 'CHECK_INGREDIENT', ingredient: 'Salz' });
+    s = cookModeReducer(s, { type: 'CHECK_INGREDIENT', ingredient: 'Salz' });
+    expect(s.checkedIngredients).toEqual(['Salz']);
+    s = cookModeReducer(s, { type: 'UNCHECK_INGREDIENT', ingredient: 'Salz' });
+    expect(s.checkedIngredients).toEqual([]);
+  });
 });

@@ -50,4 +50,24 @@ describe('utils (services)', () => {
     expect(b.name.toLowerCase()).toContain('mehl');
     expect(b.quantity).toBeCloseTo(0.5);
   });
+
+  it('getCategoryForItem mappt weitere Lebensmittel-Gruppen', () => {
+    expect(getCategoryForItem('Lachsfilet')).toContain('shoppingList.categories.meat');
+    expect(getCategoryForItem('Vollkornbrot')).toContain('shoppingList.categories.bakery');
+    expect(getCategoryForItem('Olivenöl extra')).toContain('shoppingList.categories.oils');
+    expect(getCategoryForItem('Passata')).toContain('shoppingList.categories.canned');
+    expect(getCategoryForItem('Currypulver')).toContain('shoppingList.categories.spices');
+    expect(getCategoryForItem('Basilikum frisch')).toContain('shoppingList.categories.produce');
+  });
+
+  it('scaleIngredientQuantity behandelt leere Menge und Faktor 1', () => {
+    expect(scaleIngredientQuantity('', 2)).toBe('');
+    expect(scaleIngredientQuantity('3', 1)).toBe('3');
+    expect(scaleIngredientQuantity('1/4', 4)).toBe('1');
+    expect(scaleIngredientQuantity('0.25', 4)).toBe('1');
+  });
+
+  it('parseShoppingItemString liefert Defaults bei leerem Input', () => {
+    expect(parseShoppingItemString('   ')).toEqual({ name: '', quantity: 1, unit: 'Stk.' });
+  });
 });

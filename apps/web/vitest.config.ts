@@ -26,12 +26,12 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
       reportsDirectory: './coverage',
-      // QNBS-v3: M5 — PRD-Ziel ≥70 % Statements/Lines (Snapshot 2026-06-02 Sprint: ~70,5 % / ~71,8 %); Functions/Branches Follow-up
+      // QNBS-v3: M5 Follow-up (Snapshot 2026-06-02): ~72,8 % stmts / ~74,2 % lines / ~65 % funcs / ~58 % branches
       thresholds: {
-        lines: 70,
-        statements: 70,
-        functions: 63,
-        branches: 55,
+        lines: 73,
+        statements: 72,
+        functions: 65,
+        branches: 57,
       },
     },
   },
