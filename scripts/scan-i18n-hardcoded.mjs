@@ -1,78 +1,37 @@
 import { readdirSync, readFileSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { formatFinding, scanContent, shouldScanFile } from './lib/i18n-scan-shared.mjs';
 
 const ROOT = process.cwd();
 const SRC_DIR = join(ROOT, 'apps', 'web', 'src');
 const REPORT_DIR = join(ROOT, 'reports');
 const REPORT_FILE = join(REPORT_DIR, 'i18n-hardcoded-report.md');
 
-const FILE_EXTENSIONS = new Set(['.ts', '.tsx']);
-const EXCLUDE_PATH_PARTS = new Set(['/locales/', '/data/recipes/']);
+const includeTests = process.argv.includes('--include-tests');
 
-const germanHints = [
-  'Bitte', 'Einstellungen', 'Speichern', 'Abbrechen', 'Fehler', 'Erfolgreich',
-  'Hinzufuegen', 'Loeschen', 'Vorrat', 'Einkauf', 'Rezept', 'Schluessel', 'Sprache',
-];
-
-const stringLiteralRegex = /(["'`])((?:\\.|(?!\1)[^\\]){3,})\1/g;
-
-const files = [];
-const findings = [];
-
-const walk = (dir) => {
+const walk = (dir, collector) => {
   for (const entry of readdirSync(dir)) {
     const filePath = join(dir, entry);
-    const stat = statSync(filePath);
-    if (stat.isDirectory()) {
-      walk(filePath);
+    if (statSync(filePath).isDirectory()) {
+      walk(filePath, collector);
       continue;
     }
-
-    const ext = filePath.slice(filePath.lastIndexOf('.'));
-    if (!FILE_EXTENSIONS.has(ext)) continue;
-
-    const normalized = filePath.replaceAll('\\\\', '/');
-    if ([...EXCLUDE_PATH_PARTS].some((part) => normalized.includes(part))) continue;
-
-    files.push(filePath);
+    collector.push(filePath);
   }
 };
 
-const hasGermanHint = (value) => {
-  if (/[aeiou]?[aeiou]?[aeiou]?\b/.test(value) === false) return false;
-  if (/[äöüÄÖÜß]/.test(value)) return true;
-  return germanHints.some((hint) => value.includes(hint));
-};
+/** @type {string[]} */
+const files = [];
+walk(SRC_DIR, files);
 
-const ignoreLiteral = (value) => {
-  if (value.startsWith('http')) return true;
-  if (value.includes('className')) return true;
-  if (value.includes('--')) return true;
-  if (value.length < 5) return true;
-  return false;
-};
-
-walk(SRC_DIR);
+/** @type {import('./lib/i18n-scan-shared.mjs').I18nFinding[]} */
+const findings = [];
 
 for (const file of files) {
-  const content = readFileSync(file, 'utf8');
-  const lines = content.split('\n');
+  const relative = file.replace(`${ROOT}/`, '').replaceAll('\\', '/');
+  if (!shouldScanFile(relative, { includeTests })) continue;
 
-  lines.forEach((line, index) => {
-    if (line.includes('t(') || line.includes('useTranslation(')) return;
-
-    for (const match of line.matchAll(stringLiteralRegex)) {
-      const literal = match[2].trim();
-      if (ignoreLiteral(literal)) continue;
-      if (!hasGermanHint(literal)) continue;
-
-      findings.push({
-        file: file.replace(`${ROOT}/`, ''),
-        line: index + 1,
-        text: literal.slice(0, 120),
-      });
-    }
-  });
+  findings.push(...scanContent(readFileSync(file, 'utf8'), relative));
 }
 
 mkdirSync(REPORT_DIR, { recursive: true });
@@ -80,7 +39,8 @@ mkdirSync(REPORT_DIR, { recursive: true });
 const reportLines = [
   '# i18n Hardcoded String Scan',
   '',
-  `- Scanned files: ${files.length}`,
+  `- Scanned scope: apps/web/src${includeTests ? ' (incl. __tests__)' : ' (production only)'}`,
+  `- Scanned files: ${files.filter((f) => shouldScanFile(f.replace(`${ROOT}/`, '').replaceAll('\\', '/'), { includeTests })).length}`,
   `- Potential hardcoded strings: ${findings.length}`,
   '',
   '## Findings',

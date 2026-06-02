@@ -51,5 +51,11 @@ jobs:
       - name: Fetch PR base branch
         run: git fetch --no-tags --prune --depth=1 origin ${{ github.base_ref }}
 
+      - name: i18n locale key parity
+        run: pnpm run i18n:check:keys
+
+      - name: i18n production baseline
+        run: pnpm run i18n:check:baseline
+
       - name: i18n changed-lines check
         run: pnpm run i18n:check:changed -- origin/${{ github.base_ref }}

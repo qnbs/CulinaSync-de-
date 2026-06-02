@@ -10,6 +10,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ### Hinzugefuegt
 
 - **PWA Offline-UX (P1):** `useOnlineStatus`, `OfflineStatusBar` unter dem Header, Reconnect-Toast; Workbox-Runtime-Cache fuer Route-Chunks, Bilder und Fonts (`sw.ts`).
+- **i18n-Gate (P1):** Gemeinsames Scan-Modul (`scripts/lib/i18n-scan-shared.mjs`); CI prüft `de`/`en`-Key-Parität, Production-Baseline (`scripts/i18n-hardcoded-baseline.json`) und geänderte Zeilen ohne `__tests__`.
 
 ### Geaendert
 
