@@ -19,7 +19,8 @@ env:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # QNBS-v3: Playwright-Chromium-Download kann auf GitHub-Runnern >20 min dauern; 25 min war zu knapp (Cancel)
+    timeout-minutes: 40
 
     steps:
       - name: Checkout
@@ -61,6 +62,13 @@ jobs:
 
       - name: Dependency audit (high+)
         run: pnpm audit --audit-level=high
+
+      # QNBS-v3: Browser-Cache beschleunigt Folge-Läufe und reduziert Timeout-Risiko beim Chromium-Download
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
 
       # QNBS-v3: Ein kurzer Smoke gegen `vite preview` (gebautes dist) — kein Dev-Server, keine schweren E2E-Suites
       - name: Install Playwright Chromium (retry)

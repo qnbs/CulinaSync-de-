@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { decryptBackup, encryptBackup } from '../syncService';
 import type { FullBackupData } from '../../types';
@@ -78,6 +78,10 @@ describe('syncService backup encryption', () => {
 });
 
 describe('syncService cloud transfer', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it('uploadEncryptedBackup sendet PUT mit Blob', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true });
     vi.stubGlobal('fetch', fetchMock);
@@ -91,13 +95,11 @@ describe('syncService cloud transfer', () => {
         headers: expect.objectContaining({ Authorization: 'Bearer token-1' }),
       }),
     );
-    vi.unstubAllGlobals();
   });
 
   it('downloadEncryptedBackup wirft bei HTTP-Fehler', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
     const { downloadEncryptedBackup } = await import('../syncService');
     await expect(downloadEncryptedBackup('https://example.com/x')).rejects.toThrow('Download fehlgeschlagen');
-    vi.unstubAllGlobals();
   });
 });

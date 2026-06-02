@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Recipe } from '../../types';
 
 const pantryToArray = vi.fn();
@@ -61,6 +61,10 @@ describe('pantryMatcherService', () => {
     ]);
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('updatePantryMatches berechnet Prozent und ruft bulkUpdate auf', async () => {
     recipesToArray.mockResolvedValueOnce([sampleRecipe()]);
     const { updatePantryMatches } = await import('../pantryMatcherService');
@@ -117,6 +121,5 @@ describe('pantryMatcherService', () => {
     expect(bulkUpdate).not.toHaveBeenCalled();
     await vi.advanceTimersByTimeAsync(1500);
     expect(recipesToArray).toHaveBeenCalled();
-    vi.useRealTimers();
   });
 });
