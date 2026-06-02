@@ -7,6 +7,10 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefuegt
+
+- **PWA Offline-UX (P1):** `useOnlineStatus`, `OfflineStatusBar` unter dem Header, Reconnect-Toast; Workbox-Runtime-Cache fuer Route-Chunks, Bilder und Fonts (`sw.ts`).
+
 ### Geaendert
 
 - **Dependencies:** eslint **10.4.1**, typescript-eslint **8.60.1** (ersetzt geschlossenes Dependabot PR #21; Lockfile auf `main` nach Storybook #22).

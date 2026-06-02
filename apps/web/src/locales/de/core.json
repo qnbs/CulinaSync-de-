@@ -48,6 +48,11 @@
       "updateReady": "Eine neue Version ist bereit. Bitte neu laden.",
       "offlineReady": "Offline-Modus ist bereit."
     },
+    "offline": {
+      "banner": "Du bist offline — Vorrat, Rezepte, Plan und Einkaufsliste funktionieren weiter lokal.",
+      "aiLimited": "KI-Funktionen und Rezept-Import aus dem Web sind offline nicht verfügbar.",
+      "backOnline": "Wieder online — KI und Web-Import stehen wieder zur Verfügung."
+    },
     "commandSections": {
       "navigation": "Navigation",
       "pantry": "Vorratskammer",

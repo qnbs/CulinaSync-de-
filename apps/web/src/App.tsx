@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import Header from './components/Header';
 import { type Command } from './components/CommandPalette';
@@ -11,6 +11,8 @@ import { setCurrentPage, addToast as addToastAction, removeToast as removeToastA
 import { useTransientUiStore } from './store/transientUiStore';
 import { WhatsNewModal } from './components/WhatsNewModal';
 import { GlobalErrorBoundary } from './components/GlobalErrorBoundary';
+import OfflineStatusBar from './components/OfflineStatusBar';
+import { useOnlineStatus } from './hooks/useOnlineStatus';
 
 const APP_VERSION = __APP_VERSION__;
 
@@ -59,6 +61,8 @@ const App: React.FC = () => {
   });
   const [showInstallReminder, setShowInstallReminder] = useState(false);
   const [showUpdateReadyNotice, setShowUpdateReadyNotice] = useState(false);
+  const isOnline = useOnlineStatus();
+  const wasOnlineRef = useRef(isOnline);
 
   useEffect(() => {
     void import('./services/db');
@@ -175,6 +179,17 @@ const App: React.FC = () => {
         addToast(speechError, 'error');
     }
   }, [speechError, addToast]);
+
+  useEffect(() => {
+    if (wasOnlineRef.current && !isOnline) {
+      wasOnlineRef.current = false;
+      return;
+    }
+    if (!wasOnlineRef.current && isOnline) {
+      addToast(t('app.offline.backOnline'), 'success');
+    }
+    wasOnlineRef.current = isOnline;
+  }, [isOnline, addToast, t]);
   
   
   const navigate = useCallback((page: Page, focusTarget?: string) => {
@@ -285,6 +300,7 @@ const App: React.FC = () => {
             hasRecognitionSupport={hasRecognitionSupport}
             onCommandPaletteToggle={() => setCommandPaletteOpen(true)}
           />
+          <OfflineStatusBar isOnline={isOnline} />
         </div>
         <main id="main-content" key={currentPage} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-8 page-fade-in">
           <Suspense fallback={<LoadingSpinner />}>
