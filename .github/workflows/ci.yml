@@ -20,6 +20,8 @@ concurrency:
 
 jobs:
   validate:
+    # QNBS-v3: Deploy auf main führt bereits validate.yml aus — kein paralleler Doppel-Lauf (CI-Minuten, Konsistenz)
+    if: github.event_name == 'pull_request'
     uses: ./.github/workflows/validate.yml
 
   i18n-check:

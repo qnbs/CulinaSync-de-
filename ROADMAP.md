@@ -1,6 +1,6 @@
 # CulinaSync — Roadmap
 
-> **Stand:** 16. Mai 2026 (Monorepo-Migration + Re-Audit/Housekeeping) · Basis: vollständiges Code-, Architektur- und Security-Audit (14.–22. April 2026) + Follow-up-Sessions Mai 2026  
+> **Stand:** 2. Juni 2026 (Juni Re-Audit + P0-Beginn) · Basis: vollständiges Code-, Architektur- und Security-Audit (14.–22. April 2026) + Follow-up-Sessions Mai/Juni 2026  
 > **Format:** Milestones geordnet nach Priorität. Jedes Item mit Herkunft (AUDIT-Referenz), Aufwandsschätzung und Status.
 
 ---
@@ -97,13 +97,13 @@
 
 **Ziel:** Test-Coverage von ~35 % auf ≥70 % erhöhen.
 
-**Aktueller Stand (Mai 2026, Vitest v8-Coverage, Snapshot 2026-05-04):**
+**Aktueller Stand (Juni 2026, Vitest v8-Coverage, Snapshot 2026-06-02):**
 | Metrik | Aktuell | Ziel |
 |---|---|---|
-| Statements | ~59 % | ≥70 % |
-| Branches | ~46 % | ≥60 % |
-| Functions | ~52 % | ≥70 % |
-| Lines | ~61 % | ≥70 % |
+| Statements | ~61 % | ≥70 % |
+| Branches | ~47 % | ≥60 % |
+| Functions | ~54 % | ≥70 % |
+| Lines | ~62 % | ≥70 % |
 
 | # | Maßnahme | Herkunft | Bereich | Aufwand | Status |
 |---|---|---|---|---|---|

@@ -7,6 +7,20 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefuegt
+
+- **Audit Juni 2026:** `docs/AUDIT-REPORT-2026-06.md`, `docs/STATUS-2026-06-02.md` — Re-Baseline nach Master-Audit-Sprint.
+- **Tests:** Repository-Suites fuer `shoppingListRepository` und `recipeRepository` (M5).
+
+### Geaendert
+
+- **CI:** `ci.yml` — voller Validate-Lauf nur noch bei Pull Requests; Push auf `main` nutzt Deploy-Workflow (kein doppelter Validate mehr).
+- **Supply-Chain:** Vitest auf **>=4.1.0** (pnpm overrides + `apps/web`) — behebt kritisches Audit-Finding.
+
+### Dokumentation
+
+- `AUDIT.md` — Verweis auf Juni-2026-Report; Coverage-/CI-Stand aktualisiert.
+
 ## [0.2.1] — 2026-05-16
 
 ### Geaendert
