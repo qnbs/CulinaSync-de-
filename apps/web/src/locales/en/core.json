@@ -15,7 +15,9 @@
     "cancel": "Cancel",
     "search": "Search...",
     "loading": "Loading...",
-    "error": "An error occurred"
+    "error": "An error occurred",
+    "unknownError": "Unknown error",
+    "logPersistFailed": "Failed to persist app log:"
   },
   "app": {
     "loading": "Loading content",

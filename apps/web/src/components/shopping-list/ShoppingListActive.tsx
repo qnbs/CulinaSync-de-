@@ -3,20 +3,11 @@ import { ShoppingListItemComponent } from './ShoppingListItemComponent';
 import { ChevronDown, GripVertical } from 'lucide-react';
 import { ShoppingListItem } from '../../types';
 import { useTranslation } from 'react-i18next';
+import { resolvePantryCategoryLabel } from '../../utils/categoryLabels';
 
 export const ShoppingListActive = () => {
     const { t } = useTranslation();
-    const CATEGORY_KEY_MAP: Record<string, string> = {
-        'Obst & Gemüse': 'fruitsVegetables',
-        'Milchprodukte & Eier': 'dairy',
-        'Backwaren': 'bakery',
-        'Fette & Öle': 'fatsOils',
-        'Fleisch & Fisch': 'meat',
-        'Getreide & Hülsenfrüchte': 'grainsLegumes',
-        'Nüsse & Samen': 'nutsSeeds',
-    };
-    const getCategoryLabel = (category: string) =>
-        t(`pantry.categories.${CATEGORY_KEY_MAP[category] ?? ''}`, { defaultValue: category });
+    const getCategoryLabel = (category: string) => resolvePantryCategoryLabel(category, t);
     const {
         groupedList,
         collapsedCategories,

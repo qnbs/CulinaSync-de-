@@ -1,0 +1,59 @@
+{
+  "gemini": {
+    "schema": {
+      "recipeTitle": "Ein kreativer und ansprechender Titel für das Rezept auf Deutsch.",
+      "shortDescription": "Eine kurze, verlockende Beschreibung des Gerichts auf Deutsch.",
+      "prepTime": "Vorbereitungszeit als Text, z.B. '15 Min.'",
+      "cookTime": "Kochzeit als Text, z.B. '30 Min.'",
+      "totalTime": "Gesamtzeit als Text, z.B. '45 Min.'",
+      "servings": "Anzahl der Portionen, z.B. '4 Personen'",
+      "difficulty": "Schwierigkeitsgrad, z.B. 'Einfach', 'Mittel', 'Schwer'",
+      "sectionTitle": "Titel für eine Zutatengruppe, z.B. 'Für den Teig'.",
+      "instructions": "Schritt-für-Schritt-Anleitung zur Zubereitung des Gerichts.",
+      "ideasList": "Eine Liste von 3 unterschiedlichen, kreativen Rezeptideen.",
+      "ideaTitle": "Ein kreativer und ansprechender Titel für die Rezeptidee auf Deutsch.",
+      "ideaShortDescription": "Eine kurze, verlockende Beschreibung des Gerichts in einem Satz auf Deutsch.",
+      "shoppingItemsList": "Eine Liste von Einkaufsartikeln.",
+      "itemName": "Der Name des Artikels.",
+      "itemQuantity": "Die Menge des Artikels.",
+      "itemUnit": "Die Einheit der Menge (z.B. 'kg', 'Liter', 'Stück').",
+      "itemCategory": "Eine empfohlene Kategorie für den Supermarkt (z.B. 'Obst & Gemüse', 'Milchprodukte')."
+    },
+    "prompt": {
+      "userIntro": "Ein Nutzer möchte etwas kochen. Hier sind die Spezifikationen:",
+      "mainRequest": "Hauptwunsch",
+      "mustInclude": "Muss folgende Zutaten enthalten",
+      "mustExclude": "Darf folgende Zutaten NICHT enthalten",
+      "modifiers": "Gewünschte Eigenschaften des Gerichts",
+      "globalSettings": "Globale Nutzereinstellungen, die IMMER zu beachten sind",
+      "dietaryRestrictions": "Zwingend erforderliche Ernährungsbeschränkungen",
+      "preferredCuisines": "Bevorzugte Küchen",
+      "customInstruction": "Generelle Anweisung des Nutzers",
+      "pantryHeader": "Verfügbare Zutaten in der Vorratskammer",
+      "pantryEmpty": "leer",
+      "closing": "Bitte erstelle basierend auf ALL diesen Informationen eine passende, kreative Antwort.",
+      "specificRequirement": "Spezifische Anforderung",
+      "fullRecipe": "Erstelle nun das VOLLSTÄNDIGE und detaillierte Rezept für die folgende, zuvor von dir vorgeschlagene Idee. Halte dich eng an Titel und Beschreibung der Idee.",
+      "titleLabel": "Titel",
+      "descriptionLabel": "Beschreibung",
+      "shoppingAssistant": "Du bist ein Einkaufs-Assistent für die App CulinaSync.",
+      "shoppingRequest": "Der Benutzer hat folgende Anfrage für eine Einkaufsliste gestellt",
+      "shoppingContext": "KONTEXT",
+      "shoppingPantry": "Vorrat",
+      "shoppingList": "Einkaufsliste",
+      "shoppingPantryItems": "Folgende Artikel sind bereits im Vorrat vorhanden",
+      "shoppingListItems": "Folgende Artikel stehen bereits auf der Einkaufsliste",
+      "shoppingTask": "Deine Aufgabe ist es, eine umfassende Einkaufsliste auf Deutsch zu erstellen, die zur Anfrage des Benutzers passt.",
+      "shoppingRules": "BERÜCKSICHTIGE den Vorrat UND die bereits existierende Einkaufsliste. Füge Artikel, die bereits an einem der beiden Orte vorhanden sind, NICHT zur Liste hinzu, es sei denn, es ist sehr wahrscheinlich, dass mehr davon benötigt wird (z.B. Milch, Eier).",
+      "shoppingJsonOnly": "Antworte NUR mit einem einzigen, gültigen JSON-Objekt, das dem bereitgestellten Schema entspricht.",
+      "shoppingNoExtra": "Füge keinen anderen Text, keine Markdown-Formatierung oder Erklärungen vor oder nach dem JSON-Objekt hinzu.",
+      "none": "keine",
+      "vision": "Analysiere das Foto und erkenne alle Lebensmittel/Zutaten. Gib eine möglichst natürliche, aber strukturierte Zusammenfassung wie: 'Das sind deine 8 Eier, 2 Zucchini, 1 Packung Butter, ...'. Antworte nur mit einem einzigen deutschen Satz.",
+      "noImageGenerated": "Kein Bild generiert."
+    },
+    "system": {
+      "ideas": "Du bist Culina, ein Weltklasse-Koch. Entwickle 3 kreative, unterschiedliche Rezeptideen auf Deutsch. Nutze deinen \"Thinking Process\", um sicherzustellen, dass die Ideen exakt zu den Vorräten und Einschränkungen passen.",
+      "recipe": "Du bist Culina, ein Weltklasse-Koch. Erstelle ein präzises, deutsches Rezept. Nutze deinen \"Thinking Process\", um die Kochschritte logisch zu strukturieren und sicherzustellen, dass keine Zutat in der Anleitung vergessen wird."
+    }
+  }
+}

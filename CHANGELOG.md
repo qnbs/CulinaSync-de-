@@ -10,7 +10,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ### Hinzugefuegt
 
 - **PWA Offline-UX (P1):** `useOnlineStatus`, `OfflineStatusBar` unter dem Header, Reconnect-Toast; Workbox-Runtime-Cache fuer Route-Chunks, Bilder und Fonts (`sw.ts`).
-- **i18n-Gate (P1):** Gemeinsames Scan-Modul (`scripts/lib/i18n-scan-shared.mjs`); CI prüft `de`/`en`-Key-Parität, Production-Baseline (`scripts/i18n-hardcoded-baseline.json`) und geänderte Zeilen ohne `__tests__`.
+- **i18n-Gate (P1):** Gemeinsames Scan-Modul (`scripts/lib/i18n-scan-shared.mjs`); CI prüft `de`/`en`-Key-Parität, Production-Baseline (`scripts/i18n-hardcoded-baseline.json`, **0** Kandidaten) und geänderte Zeilen ohne `__tests__`.
+- **i18n-Cleanup:** Production-Hardcoded-Strings vollständig migriert (Baseline **0**) — `foodDatabase` mit Keys + `foodDatabase.items.*`, Gemini-Prompts in `locales/*/gemini.json`, Offline-Fallbacks in `aiOffline.*`, Kategorien über `resolvePantryCategoryLabel`, Mahlzeiten-IDs zentral in `constants/mealTypes.ts`; Vitest initialisiert `i18next` in `setupTests.ts` plus `i18nTestUtils` für Service-Mocks.
 
 ### Geaendert
 

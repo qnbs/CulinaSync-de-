@@ -172,7 +172,8 @@
       "start": "Start",
       "modeTitle": "Speech mode",
       "browserMode": "Browser SpeechRecognition",
-      "whisperMode": "Whisper.cpp (local, privacy-first)"
+      "whisperMode": "Whisper.cpp (local, privacy-first)",
+      "testPhrase": "Hello! I am your personal kitchen assistant."
     },
     "actions": {
       "discard": "Discard"
@@ -289,8 +290,30 @@
         "Levantine"
       ]
     },
+    "modules": {
+      "featuresTitle": "Features",
+      "autoCategorizeLabel": "Automatic categorization",
+      "autoCategorizeDesc": "Sort shopping items automatically",
+      "expiryWarning": "Expiry warning",
+      "expiryDays": "{{count}} days"
+    },
     "policy": {
       "title": "Household & allergy policies",
+      "allergenSuggestions": {
+        "milk": "Milk",
+        "egg": "Egg",
+        "peanut": "Peanut",
+        "treeNut": "Tree nuts",
+        "soy": "Soy",
+        "gluten": "Gluten",
+        "fish": "Fish",
+        "shellfish": "Shellfish",
+        "celery": "Celery",
+        "mustard": "Mustard",
+        "sesame": "Sesame",
+        "lupine": "Lupine",
+        "mollusc": "Molluscs"
+      },
       "avoidAllergensLabel": "Allergens to avoid",
       "avoidAllergensPlaceholder": "e.g. milk, peanut...",
       "blacklistLabel": "Ingredient blacklist",

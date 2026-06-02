@@ -1,3 +1,4 @@
+import i18next from 'i18next';
 import type { AppSettings, PantryItem, Recipe, RecipeIdea, ShoppingListItem, StructuredPrompt } from '../types';
 import { getCategoryForItem } from './utils';
 import {
@@ -6,24 +7,17 @@ import {
   generateShoppingList as generateShoppingListWithGemini,
 } from './geminiService';
 
-const recipeIdeaTemplates = [
-  'Pfannengericht',
-  'Ofenblech',
-  'Schnelle Bowl',
-  'Cremige Pasta',
-  'Herzhafte Suppe',
-];
+const normalizeToken = (value: string) => value.toLowerCase().replace(/ae/g, 'a').replace(/oe/g, 'o').replace(/ue/g, 'u').replace(/\u00df/g, 'ss');
 
-const shoppingIntentCatalog: Record<string, string[]> = {
-  fruhstuck: ['Brot', 'Butter', 'Milch', 'Eier', 'Marmelade'],
-  grill: ['Baguette', 'Tomaten', 'Mozzarella', 'Bratwurst', 'Senf'],
-  kuchen: ['Mehl', 'Zucker', 'Butter', 'Eier', 'Backpulver'],
-  pasta: ['Spaghetti', 'Parmesan', 'Tomaten', 'Knoblauch', 'Basilikum'],
-  lasagne: ['Lasagneplatten', 'Passata', 'Hackfleisch', 'Mozzarella', 'Zwiebeln'],
-  salat: ['Gurke', 'Tomaten', 'Salat', 'Olivenoel', 'Zitronen'],
+const getRecipeTemplateLabels = (): string[] => {
+  const templates = i18next.t('aiOffline.recipeTemplates', { returnObjects: true });
+  return typeof templates === 'object' && templates !== null ? Object.values(templates as Record<string, string>) : [];
 };
 
-const normalizeToken = (value: string) => value.toLowerCase().replace(/ae/g, 'a').replace(/oe/g, 'o').replace(/ue/g, 'u').replace(/ß/g, 'ss');
+const getShoppingIntentCatalog = (): Record<string, string[]> => {
+  const catalog = i18next.t('aiOffline.shoppingCatalog', { returnObjects: true });
+  return typeof catalog === 'object' && catalog !== null ? (catalog as Record<string, string[]>) : {};
+};
 
 const getPantryHighlights = (pantryItems: PantryItem[], limit = 5) => pantryItems
   .slice()
@@ -66,14 +60,15 @@ const buildLocalRecipeIdeas = (
 ): RecipeIdea[] => {
   const pantryHighlights = getPantryHighlights(pantryItems, 3).map((item) => item.name);
   const keywords = getPromptKeywords(prompt);
-  const cuisine = aiPreferences.preferredCuisines[0] ?? 'Alltagskueche';
-  const baseTopic = keywords[0] ?? pantryHighlights[0] ?? 'Vorratskueche';
+  const cuisine = aiPreferences.preferredCuisines[0] ?? i18next.t('aiOffline.defaultCuisine');
+  const baseTopic = keywords[0] ?? pantryHighlights[0] ?? i18next.t('aiOffline.defaultPantryTopic');
+  const templates = getRecipeTemplateLabels();
 
-  return recipeIdeaTemplates.slice(0, 3).map((template, index) => {
-    const pantryPart = pantryHighlights[index] ?? pantryHighlights[0] ?? 'Saisonzutaten';
+  return templates.slice(0, 3).map((template, index) => {
+    const pantryPart = pantryHighlights[index] ?? pantryHighlights[0] ?? i18next.t('aiOffline.defaultPantryTopic');
     return {
       recipeTitle: `${baseTopic} ${template} mit ${pantryPart}`,
-      shortDescription: `Lokaler Offline-Vorschlag mit Fokus auf ${pantryPart} und ${cuisine}.`,
+      shortDescription: i18next.t('aiOffline.ideaDescription', { pantry: pantryPart, cuisine }),
     };
   });
 };
@@ -91,16 +86,16 @@ const buildLocalRecipe = (
         name: item.name,
       }))
     : [
-        { quantity: '250', unit: 'g', name: 'Pasta' },
-        { quantity: '1', unit: 'Dose', name: 'Tomaten' },
-        { quantity: '1', unit: 'Stk', name: 'Zwiebel' },
+        { quantity: '250', unit: 'g', name: i18next.t('aiOffline.fallbackIngredients.pasta') },
+        { quantity: '1', unit: i18next.t('pantryUnits.can'), name: i18next.t('aiOffline.fallbackIngredients.tomatoCan') },
+        { quantity: '1', unit: i18next.t('pantryUnits.pieceAbbr'), name: i18next.t('aiOffline.fallbackIngredients.onion') },
       ];
 
-  const promptFocus = prompt.includeIngredients[0] ?? (prompt.craving || 'deinen Vorrat');
+  const promptFocus = prompt.includeIngredients[0] ?? i18next.t('aiOffline.pantryFallback');
 
   return {
-    recipeTitle: `${chosenIdea.recipeTitle} (Offline-Modus)`,
-    shortDescription: `${chosenIdea.shortDescription} Das Rezept wurde lokal ohne Cloud-KI erzeugt.`,
+    recipeTitle: `${chosenIdea.recipeTitle}${i18next.t('aiOffline.recipeSuffix')}`,
+    shortDescription: i18next.t('aiOffline.recipeShortDescription', { description: chosenIdea.shortDescription }),
     prepTime: '15 Min.',
     cookTime: '25 Min.',
     totalTime: '40 Min.',
@@ -108,23 +103,23 @@ const buildLocalRecipe = (
     difficulty: 'Einfach',
     ingredients: [
       {
-        sectionTitle: 'Hauptzutaten',
+        sectionTitle: i18next.t('aiOffline.sectionMain'),
         items: ingredientItems,
       },
       {
-        sectionTitle: 'Abstimmung',
+        sectionTitle: i18next.t('aiOffline.sectionSeasoning'),
         items: [
-          { quantity: '1', unit: 'Prise', name: 'Salz' },
-          { quantity: '1', unit: 'Prise', name: 'Pfeffer' },
+          { quantity: '1', unit: i18next.t('pantryUnits.pieceAbbr'), name: 'Salz' },
+          { quantity: '1', unit: i18next.t('pantryUnits.pieceAbbr'), name: 'Pfeffer' },
           { quantity: '1', unit: 'EL', name: promptFocus },
         ],
       },
     ],
     instructions: [
-      'Alle Zutaten vorbereiten und grob sortieren.',
-      'Aromatische Zutaten zuerst anschwitzen, danach die Hauptzutaten zugeben.',
-      'Mit etwas Fluessigkeit oder Fett binden und abschmecken.',
-      'Kurz ruhen lassen und direkt servieren.',
+      i18next.t('aiOffline.instructions.prep'),
+      i18next.t('aiOffline.instructions.cook'),
+      i18next.t('aiOffline.instructions.bind'),
+      i18next.t('aiOffline.instructions.serve'),
     ],
     nutritionPerServing: {
       calories: '420 kcal',
@@ -133,17 +128,17 @@ const buildLocalRecipe = (
       carbs: '48 g',
     },
     tags: {
-      course: ['Hauptgericht'],
-      cuisine: ['International'],
-      occasion: ['Alltag'],
+      course: [i18next.t('aiOffline.tags.mainCourse')],
+      cuisine: [i18next.t('aiOffline.tags.international')],
+      occasion: [i18next.t('aiOffline.tags.everyday')],
       mainIngredient: pantryHighlights.map((item) => item.name),
-      prepMethod: ['Pfanne'],
+      prepMethod: [i18next.t('aiOffline.tags.skillet')],
       diet: [],
     },
     expertTips: [
       {
-        title: 'Offline-Hinweis',
-        content: 'Dieses Rezept basiert auf lokalen Regeln und ist als stabiler Fallback gedacht.',
+        title: i18next.t('aiOffline.expertTipTitle'),
+        content: i18next.t('aiOffline.expertTipContent'),
       },
     ],
   };
@@ -157,6 +152,7 @@ const buildLocalShoppingList = (
   const normalizedPrompt = normalizeToken(prompt);
   const pantryNames = new Set(pantryItems.map((item) => normalizeToken(item.name)));
   const currentNames = new Set(currentListItems.map((item) => normalizeToken(item.name)));
+  const shoppingIntentCatalog = getShoppingIntentCatalog();
   const keywordMatches = Object.entries(shoppingIntentCatalog)
     .filter(([keyword]) => normalizedPrompt.includes(keyword))
     .flatMap(([, items]) => items);
@@ -168,7 +164,8 @@ const buildLocalShoppingList = (
     .filter((name) => name.length > 0)
     .slice(0, 10);
 
-  const fallbackItems = uniqueItems.length > 0 ? uniqueItems : ['Brot', 'Milch', 'Tomaten'];
+  const defaultFallback = (shoppingIntentCatalog.breakfast ?? []).slice(0, 3);
+  const fallbackItems = uniqueItems.length > 0 ? uniqueItems : defaultFallback;
 
   return fallbackItems
     .filter((name) => {
@@ -178,7 +175,7 @@ const buildLocalShoppingList = (
     .map((name) => ({
       name,
       quantity: 1,
-      unit: 'Stk',
+      unit: i18next.t('pantryUnits.pieceAbbr'),
       recipeId: undefined,
       category: getCategoryForItem(name),
       sortOrder: 0,

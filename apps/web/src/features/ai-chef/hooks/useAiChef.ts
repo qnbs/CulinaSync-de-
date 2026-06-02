@@ -1,4 +1,5 @@
 import { useActionState, useMemo, useOptimistic, useState } from 'react';
+import i18next from 'i18next';
 import { useAppSelector } from '../../../store/hooks';
 import { logAppError } from '../../../services/errorLoggingService';
 import type { Recipe, RecipeIdea, StructuredPrompt } from '../../../types';
@@ -31,7 +32,8 @@ const initialRecipeState: RecipeActionState = {
 
 const getPromptKey = (prompt: StructuredPrompt) => JSON.stringify(prompt);
 
-const toErrorMessage = (error: unknown) => error instanceof Error ? error.message : 'Unbekannter Fehler';
+const toErrorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : i18next.t('common.unknownError');
 
 export const useAiChef = (prompt: StructuredPrompt) => {
   const aiPreferences = useAppSelector((state) => state.settings.aiPreferences);

@@ -37,7 +37,7 @@ const parseQuantityToGrams = (quantity: string, unit: string): number => {
   if (unitLower === 'ml') return value;
   if (unitLower === 'l') return value * 1000;
   if (unitLower === 'cl') return value * 10;
-  if (unitLower.includes('stk') || unitLower.includes('stueck') || unitLower.includes('stück')) return value * 80;
+  if (unitLower.includes('stk') || unitLower.includes('stueck') || unitLower.includes('\u00fcck')) return value * 80;
 
   return value;
 };

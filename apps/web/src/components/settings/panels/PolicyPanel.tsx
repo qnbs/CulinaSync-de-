@@ -3,7 +3,7 @@ import { AppSettings } from '../../../types';
 import TagInput from '../../TagInput';
 import { useTranslation } from 'react-i18next';
 
-const ALLERGEN_SUGGESTIONS = ['Milch', 'Ei', 'Erdnuss', 'Schalenfrüchte', 'Soja', 'Gluten', 'Fisch', 'Krebstiere', 'Sellerie', 'Senf', 'Sesam', 'Lupine', 'Weichtiere'];
+const ALLERGEN_SUGGESTION_KEYS = ['milk', 'egg', 'peanut', 'treeNut', 'soy', 'gluten', 'fish', 'shellfish', 'celery', 'mustard', 'sesame', 'lupine', 'mollusc'] as const;
 
 interface PolicyPanelProps {
   settings: AppSettings;
@@ -24,7 +24,7 @@ export const PolicyPanel: React.FC<PolicyPanelProps> = ({ settings, onChange }) 
             tags={policies.avoidAllergens || []}
             setTags={tags => onChange('policies.avoidAllergens', tags)}
             placeholder={t('settings.policy.avoidAllergensPlaceholder')}
-            suggestions={ALLERGEN_SUGGESTIONS}
+            suggestions={ALLERGEN_SUGGESTION_KEYS.map((key) => t(`settings.policy.allergenSuggestions.${key}`))}
           />
         </div>
         <div className="mb-6">

@@ -68,6 +68,6 @@ describe('utils (services)', () => {
   });
 
   it('parseShoppingItemString liefert Defaults bei leerem Input', () => {
-    expect(parseShoppingItemString('   ')).toEqual({ name: '', quantity: 1, unit: 'Stk.' });
+    expect(parseShoppingItemString('   ')).toEqual({ name: '', quantity: 1, unit: 'pantryUnits.pieceAbbr' });
   });
 });

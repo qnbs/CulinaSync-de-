@@ -23,7 +23,7 @@ interface ChefInputProps {
     isLoading: boolean;
 }
 
-const MODIFIER_OPTIONS = ['Schnell (< 30 Min)', 'Gesund', 'Low Carb', 'Vegetarisch', 'Für Gäste', 'Budget-freundlich'];
+const MODIFIER_KEYS = ['quick', 'healthy', 'lowCarb', 'vegetarian', 'guests', 'budget'] as const;
 
 export const ChefInput: React.FC<ChefInputProps> = ({
     craving, setCraving,
@@ -140,15 +140,19 @@ export const ChefInput: React.FC<ChefInputProps> = ({
                         <BrainCircuit size={14}/> {t('settings.aiChef.input.contextTitle')}
                     </h3>
                     <div className="flex flex-wrap gap-2">
-                        {MODIFIER_OPTIONS.map(mod => (
+                        {MODIFIER_KEYS.map((modKey) => {
+                            const label = t(`aiChef.modifiers.${modKey}`);
+                            return (
                             <button 
-                                key={mod}
-                                onClick={() => toggleModifier(mod)}
-                                className={`text-sm px-4 py-2 rounded-xl border transition-all duration-200 ${modifiers.includes(mod) ? 'bg-[var(--color-accent-500)] text-zinc-900 border-[var(--color-accent-500)] font-bold shadow-[0_0_10px_rgba(var(--color-accent-glow),0.4)]' : 'bg-zinc-800/30 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-zinc-200 hover:border-white/10'}`}
+                                key={modKey}
+                                type="button"
+                                onClick={() => toggleModifier(label)}
+                                className={`text-sm px-4 py-2 rounded-xl border transition-all duration-200 ${modifiers.includes(label) ? 'bg-[var(--color-accent-500)] text-zinc-900 border-[var(--color-accent-500)] font-bold shadow-[0_0_10px_rgba(var(--color-accent-glow),0.4)]' : 'bg-zinc-800/30 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-zinc-200 hover:border-white/10'}`}
                             >
-                                {mod}
+                                {label}
                             </button>
-                        ))}
+                            );
+                        })}
                     </div>
                 </section>
             </div>

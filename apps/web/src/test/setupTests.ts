@@ -34,10 +34,22 @@ if ((globalThis as unknown as { SpeechSynthesisUtterance?: unknown }).SpeechSynt
     }
   };
 }
+import i18next from 'i18next';
 import { afterAll, afterEach, beforeAll } from 'vitest';
+import translationDE from '../locales/de';
 import { server } from './msw/server';
 
-beforeAll(() => {
+beforeAll(async () => {
+  if (!i18next.isInitialized) {
+    await i18next.init({
+      lng: 'de',
+      fallbackLng: 'de',
+      resources: {
+        de: { translation: translationDE },
+      },
+      interpolation: { escapeValue: false },
+    });
+  }
   server.listen({ onUnhandledRequest: 'error' });
 });
 

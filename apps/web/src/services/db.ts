@@ -17,6 +17,7 @@ import {
 import { debouncedUpdateAllPantryMatches, updatePantryMatches } from './pantryMatcherService';
 import { syncSeedRecipes } from './repositories/recipeRepository';
 import { logAppError } from './errorLoggingService';
+import i18n from '../i18n';
 
 // --- Initialization Logic ---
 const populateDB = async () => {
@@ -26,11 +27,11 @@ const populateDB = async () => {
         const now = Date.now();
         await db.transaction('rw', db.pantry, db.recipes, async () => {
             await db.pantry.bulkPut([
-                { name: 'Tomatenmark', quantity: 1, unit: 'Dose', category: 'Konserven', createdAt: now - 200000, updatedAt: now - 200000, expiryDate: new Date(2025, 1, 1).toISOString().split('T')[0] },
-                { name: 'Knoblauch', quantity: 3, unit: 'Zehen', category: 'Frischeprodukte', createdAt: now - 100000, updatedAt: now - 100000 },
-                { name: 'Zwiebel', quantity: 1, unit: 'Stück', category: 'Frischeprodukte', createdAt: now, updatedAt: now, minQuantity: 2 },
-                { name: 'Spaghetti', quantity: 500, unit: 'g', category: 'Trockenwaren', createdAt: now - 300000, updatedAt: now - 300000 },
-                { name: 'Olivenöl', quantity: 250, unit: 'ml', category: 'Öle & Essige', createdAt: now - 400000, updatedAt: now - 400000, minQuantity: 100 },
+                { name: 'Tomatenmark', quantity: 1, unit: i18n.t('pantryUnits.can'), category: i18n.t('shoppingList.categories.canned'), createdAt: now - 200000, updatedAt: now - 200000, expiryDate: new Date(2025, 1, 1).toISOString().split('T')[0] },
+                { name: 'Knoblauch', quantity: 3, unit: i18n.t('pantryUnits.clove'), category: i18n.t('shoppingList.categories.produce'), createdAt: now - 100000, updatedAt: now - 100000 },
+                { name: 'Zwiebel', quantity: 1, unit: i18n.t('pantryUnits.piece'), category: i18n.t('shoppingList.categories.produce'), createdAt: now, updatedAt: now, minQuantity: 2 },
+                { name: 'Spaghetti', quantity: 500, unit: i18n.t('pantryUnits.gram'), category: i18n.t('shoppingList.categories.dryGoods'), createdAt: now - 300000, updatedAt: now - 300000 },
+                { name: 'Olivenöl', quantity: 250, unit: i18n.t('pantryUnits.milliliter'), category: i18n.t('shoppingList.categories.oils'), createdAt: now - 400000, updatedAt: now - 400000, minQuantity: 100 },
             ]);
 
             if (seedRecipes.length > 0) {

@@ -1,0 +1,59 @@
+{
+  "gemini": {
+    "schema": {
+      "recipeTitle": "A creative, appealing recipe title in English.",
+      "shortDescription": "A short, enticing dish description in English.",
+      "prepTime": "Prep time as text, e.g. '15 min'",
+      "cookTime": "Cook time as text, e.g. '30 min'",
+      "totalTime": "Total time as text, e.g. '45 min'",
+      "servings": "Number of servings, e.g. '4 servings'",
+      "difficulty": "Difficulty level, e.g. 'Easy', 'Medium', 'Hard'",
+      "sectionTitle": "Title for an ingredient group, e.g. 'For the dough'.",
+      "instructions": "Step-by-step cooking instructions.",
+      "ideasList": "A list of 3 distinct, creative recipe ideas.",
+      "ideaTitle": "A creative, appealing title for the recipe idea in English.",
+      "ideaShortDescription": "A short, enticing one-sentence dish description in English.",
+      "shoppingItemsList": "A list of shopping items.",
+      "itemName": "The item name.",
+      "itemQuantity": "The item quantity.",
+      "itemUnit": "The quantity unit (e.g. kg, liter, piece).",
+      "itemCategory": "A recommended supermarket category (e.g. produce, dairy)."
+    },
+    "prompt": {
+      "userIntro": "A user wants to cook something. Here are the specifications:",
+      "mainRequest": "Main request",
+      "mustInclude": "Must include",
+      "mustExclude": "Must NOT include",
+      "modifiers": "Desired dish properties",
+      "globalSettings": "Global user settings that MUST ALWAYS be respected",
+      "dietaryRestrictions": "Required dietary restrictions",
+      "preferredCuisines": "Preferred cuisines",
+      "customInstruction": "User's general instruction",
+      "pantryHeader": "Available pantry ingredients",
+      "pantryEmpty": "empty",
+      "closing": "Please create a suitable, creative response based on ALL this information.",
+      "specificRequirement": "Specific requirement",
+      "fullRecipe": "Now create the COMPLETE and detailed recipe for the following idea you previously suggested. Stay close to the title and description of the idea.",
+      "titleLabel": "Title",
+      "descriptionLabel": "Description",
+      "shoppingAssistant": "You are a shopping assistant for the CulinaSync app.",
+      "shoppingRequest": "The user has made the following request for a shopping list",
+      "shoppingContext": "CONTEXT",
+      "shoppingPantry": "Pantry",
+      "shoppingList": "Shopping list",
+      "shoppingPantryItems": "The following items are already in the pantry",
+      "shoppingListItems": "The following items are already on the shopping list",
+      "shoppingTask": "Your task is to create a comprehensive shopping list in English that matches the user's request.",
+      "shoppingRules": "CONSIDER the pantry AND the existing shopping list. Do NOT add items that are already in either place, unless it is very likely that more of them will be needed (e.g. milk, eggs).",
+      "shoppingJsonOnly": "Respond ONLY with a single, valid JSON object matching the provided schema.",
+      "shoppingNoExtra": "Do not add any other text, markdown formatting or explanations before or after the JSON object.",
+      "none": "none",
+      "vision": "Analyse the photo and identify all food items and ingredients. Give a natural, structured summary like: 'These are your 8 eggs, 2 zucchini, 1 pack of butter, ...'. Reply with a single sentence only.",
+      "noImageGenerated": "No image generated."
+    },
+    "system": {
+      "ideas": "You are Culina, a world-class chef. Develop 3 creative, diverse recipe ideas in English. Use your \"Thinking Process\" to ensure the ideas precisely match the pantry items and restrictions.",
+      "recipe": "You are Culina, a world-class chef. Create a precise recipe in English. Use your \"Thinking Process\" to logically structure the cooking steps and ensure no ingredient is missing from the instructions."
+    }
+  }
+}

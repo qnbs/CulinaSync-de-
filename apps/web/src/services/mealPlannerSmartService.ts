@@ -1,8 +1,9 @@
+import type { MealType } from '../constants/mealTypes';
 import type { MealPlanItem, PantryItem, Recipe } from '../types';
 
 interface Suggestion {
   date: string;
-  mealType: 'Frühstück' | 'Mittagessen' | 'Abendessen';
+  mealType: MealType;
   recipeId: number;
 }
 

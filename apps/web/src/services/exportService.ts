@@ -2,6 +2,7 @@ import { Recipe, ShoppingListItem, MealPlanItem } from '../types';
 import { db } from './db';
 import { loadSettings } from './settingsService';
 import i18next from 'i18next';
+import { MEAL_TYPES } from '../constants/mealTypes';
 
 let papaModulePromise: Promise<typeof import('papaparse')> | null = null;
 let jsPdfModulePromise: Promise<typeof import('jspdf')> | null = null;
@@ -257,7 +258,7 @@ export const exportShoppingListToTxt = (list: ShoppingListItem[]) => {
 };
 
 export const exportShoppingListToMarkdown = (list: ShoppingListItem[]) => {
-    let md = "# Einkaufsliste\n\n";
+    let md = `# ${i18next.t('export.shoppingListTitle')}\n\n`;
     const grouped = getGroupedShoppingList(list);
     Object.keys(grouped).sort().forEach(category => {
         md += `## ${category}\n`;
@@ -275,7 +276,7 @@ export const exportShoppingListToCsv = async (list: ShoppingListItem[]) => {
         Menge: item.quantity,
         Einheit: item.unit,
         Artikel: item.name,
-        Erledigt: item.isChecked ? 'Ja' : 'Nein',
+        Erledigt: item.isChecked ? i18next.t('export.csvCheckedYes') : i18next.t('export.csvCheckedNo'),
     })));
     const Papa = await getPapaModule();
     const csv = Papa.unparse(data);
@@ -349,10 +350,10 @@ export const exportFullDataAsMarkdown = async (): Promise<boolean> => {
     try {
         const data = await getFullData();
         let md = `# CulinaSync Backup - ${new Date().toLocaleString('de-DE')}\n\n`;
-        md += `## Rezepte (${data.recipes.length})\n\n`;
+        md += `## ${i18next.t('export.recipesSection', { count: data.recipes.length })}\n\n`;
         data.recipes.forEach(r => { md += recipeToMarkdown(r) + "\n\n---\n\n" });
         
-        md += `## Einkaufsliste (${data.shoppingList.length})\n\n`;
+        md += `## ${i18next.t('export.shoppingSection', { count: data.shoppingList.length })}\n\n`;
         md += shoppingListToText(data.shoppingList).replace(/---/g, "###");
 
         downloadFile('culinasync_backup.md', md, 'text/markdown;charset=utf-8');
@@ -440,7 +441,7 @@ export const exportMealPlanWeekToIcs = (
 
     for (const date of weekDates) {
         const dateKey = date.toISOString().split('T')[0];
-        const mealTypes: Array<'Frühstück' | 'Mittagessen' | 'Abendessen'> = ['Frühstück', 'Mittagessen', 'Abendessen'];
+        const mealTypes = MEAL_TYPES;
 
         for (const mealType of mealTypes) {
             const meal = mealsByDate[`${dateKey}-${mealType}`];
@@ -449,7 +450,7 @@ export const exportMealPlanWeekToIcs = (
             const recipe = meal.recipeId ? recipesById.get(meal.recipeId) : undefined;
             const summary = recipe
                 ? `${i18next.t(`mealPlanner.mealTypes.${mealType}`, { defaultValue: mealType })}: ${recipe.recipeTitle}`
-                : `${i18next.t(`mealPlanner.mealTypes.${mealType}`, { defaultValue: mealType })}: ${meal.note || 'Meal note'}`;
+                : `${i18next.t(`mealPlanner.mealTypes.${mealType}`, { defaultValue: mealType })}: ${meal.note || i18next.t('export.mealNoteFallback')}`;
 
             const description = recipe
                 ? `${recipe.shortDescription || ''}\\nPortionen: ${meal.servings || recipe.servings}`

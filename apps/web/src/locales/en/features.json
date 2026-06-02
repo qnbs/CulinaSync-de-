@@ -599,6 +599,132 @@
       "generationFailed": "Generation failed",
       "apiKeyMissing": "Gemini API key missing",
       "apiKeyMessage": "Please add your key under Settings → API Key. Without a key, AI features are disabled."
+    },
+    "modifiers": {
+      "quick": "Quick (< 30 min)",
+      "healthy": "Healthy",
+      "lowCarb": "Low carb",
+      "vegetarian": "Vegetarian",
+      "guests": "For guests",
+      "budget": "Budget-friendly"
+    }
+  },
+  "foodDatabase": {
+    "items": {
+      "apple": { "name": "Apple" },
+      "banana": { "name": "Banana" },
+      "egg": { "name": "Egg" },
+      "milk": { "name": "Milk" },
+      "bread": { "name": "Bread" },
+      "butter": { "name": "Butter" },
+      "cheese": { "name": "Cheese" },
+      "chicken_breast": { "name": "Chicken breast" },
+      "salmon": { "name": "Salmon" },
+      "rice": { "name": "Rice" },
+      "pasta": { "name": "Pasta" },
+      "tomato": { "name": "Tomato" },
+      "potato": { "name": "Potato" },
+      "almond": { "name": "Almond" },
+      "hazelnut": { "name": "Hazelnut" },
+      "soy": { "name": "Soy" },
+      "wheat": { "name": "Wheat" },
+      "peanut": { "name": "Peanut" },
+      "shrimp": { "name": "Shrimp" }
+    },
+    "allergens": {
+      "egg": "Egg",
+      "milk": "Milk",
+      "treeNut": "Tree nuts",
+      "soy": "Soy",
+      "gluten": "Gluten",
+      "peanut": "Peanut",
+      "shellfish": "Shellfish"
+    }
+  },
+  "pantryUnits": {
+    "piece": "piece",
+    "gram": "g",
+    "kilogram": "kg",
+    "milliliter": "ml",
+    "liter": "l",
+    "teaspoon": "tsp",
+    "tablespoon": "tbsp",
+    "can": "can",
+    "bunch": "bunch",
+    "clove": "cloves",
+    "bottle": "bottle",
+    "package": "package",
+    "pieceAbbr": "pc"
+  },
+  "export": {
+    "shoppingListTitle": "Shopping list",
+    "recipesSection": "Recipes ({{count}})",
+    "shoppingSection": "Shopping list ({{count}})",
+    "mealNoteFallback": "Meal note",
+    "csvCheckedYes": "Yes",
+    "csvCheckedNo": "No"
+  },
+  "aiOffline": {
+    "recipeTemplates": {
+      "skillet": "Skillet dish",
+      "sheetPan": "Sheet-pan meal",
+      "bowl": "Quick bowl",
+      "pasta": "Creamy pasta",
+      "soup": "Hearty soup"
+    },
+    "shoppingCatalog": {
+      "breakfast": ["Bread", "Butter", "Milk", "Eggs", "Jam"],
+      "grill": ["Baguette", "Tomatoes", "Mozzarella", "Sausage", "Mustard"],
+      "baking": ["Flour", "Sugar", "Butter", "Eggs", "Baking powder"],
+      "pasta": ["Spaghetti", "Parmesan", "Tomatoes", "Garlic", "Basil"],
+      "lasagne": ["Lasagne sheets", "Passata", "Ground meat", "Mozzarella", "Onions"],
+      "salad": ["Cucumber", "Tomatoes", "Lettuce", "Olive oil", "Lemons"]
+    },
+    "defaultCuisine": "Everyday cooking",
+    "defaultPantryTopic": "Pantry cooking",
+    "ideaDescription": "Local offline suggestion focused on {{pantry}} and {{cuisine}}.",
+    "pantryFallback": "your pantry",
+    "recipeSuffix": " (Offline mode)",
+    "recipeShortDescription": "{{description}} This recipe was created locally without cloud AI.",
+    "sectionMain": "Main ingredients",
+    "sectionSeasoning": "Finishing",
+    "fallbackIngredients": {
+      "pasta": "Pasta",
+      "tomatoCan": "Tomatoes",
+      "onion": "Onion"
+    },
+    "instructions": {
+      "prep": "Prepare and sort all ingredients.",
+      "cook": "Sauté aromatics first, then add the main ingredients.",
+      "bind": "Bind with a little liquid or fat and season.",
+      "serve": "Rest briefly and serve."
+    },
+    "tags": {
+      "mainCourse": "Main course",
+      "international": "International",
+      "everyday": "Everyday",
+      "skillet": "Skillet"
+    },
+    "expertTipTitle": "Offline note",
+    "expertTipContent": "This recipe uses local rules as a stable fallback.",
+    "geminiFallback": {
+      "sectionTitle": "",
+      "instructions": {
+        "prep": "Prepare all ingredients.",
+        "cook": "Combine ingredients and cook.",
+        "serve": "Serve and enjoy."
+      },
+      "expertTipTitle": "Offline tip",
+      "expertTipContent": "This recipe was generated without AI.",
+      "shoppingItems": {
+        "bread": "Bread",
+        "milk": "Milk",
+        "apples": "Apples"
+      },
+      "categories": {
+        "bakery": "Bakery",
+        "dairy": "Dairy"
+      }
     }
   }
 }

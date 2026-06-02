@@ -21,6 +21,11 @@ export const GERMAN_HINTS = [
 
 export const EXCLUDE_PATH_PARTS = ['/locales/', '/data/recipes/'];
 
+/** Stored meal-slot IDs (German) — not UI copy */
+export const MEAL_TYPE_IDS = new Set(['Frühstück', 'Mittagessen', 'Abendessen']);
+
+const NON_UI_SOURCE_SUFFIXES = ['/voiceCommands.ts', '/dbMigrations.ts', '/usdaLocal.ts'];
+
 const STRING_LITERAL_REGEX = /(["'`])((?:\\.|(?!\1)[^\\]){3,})\1/g;
 
 const I18N_CALL_MARKERS = ['t(', 'useTranslation(', 'i18next.t('];
@@ -43,6 +48,7 @@ export const hasGermanHint = (value) => {
  * @param {string} value
  */
 export const ignoreLiteral = (value) => {
+  if (MEAL_TYPE_IDS.has(value)) return true;
   if (value.startsWith('http')) return true;
   if (value.includes('className')) return true;
   if (value.includes('--')) return true;
@@ -64,9 +70,14 @@ export const shouldScanFile = (filePath, options = {}) => {
   const normalized = filePath.replaceAll('\\', '/');
   if (!normalized.endsWith('.ts') && !normalized.endsWith('.tsx')) return false;
   if (EXCLUDE_PATH_PARTS.some((part) => normalized.includes(part))) return false;
+  if (NON_UI_SOURCE_SUFFIXES.some((suffix) => normalized.endsWith(suffix))) return false;
   if (!options.includeTests && normalized.includes('/__tests__/')) return false;
   return true;
 };
+
+/** @param {string} line */
+export const lineIsCodeOnly = (line) =>
+  /\.replace\s*\(/.test(line) || /\/.*\/[gimsuy]*/.test(line);
 
 /**
  * @param {string} line
@@ -75,6 +86,7 @@ export const shouldScanFile = (filePath, options = {}) => {
  * @returns {I18nFinding[]}
  */
 export const scanLine = (line, lineNumber, file) => {
+  if (lineIsCodeOnly(line)) return [];
   if (lineUsesI18n(line)) return [];
 
   /** @type {I18nFinding[]} */

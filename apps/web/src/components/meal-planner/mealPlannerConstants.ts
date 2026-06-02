@@ -1,2 +1,1 @@
-export const MEAL_TYPES = ['Frühstück', 'Mittagessen', 'Abendessen'] as const;
-export type MealType = (typeof MEAL_TYPES)[number];
+export { MEAL_TYPES, DEFAULT_MEAL_TYPE, type MealType } from '../../constants/mealTypes';
