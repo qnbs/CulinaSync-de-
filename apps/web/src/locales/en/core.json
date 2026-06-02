@@ -55,6 +55,9 @@
       "aiLimited": "AI features and web recipe import are unavailable while offline.",
       "backOnline": "Back online — AI and web import are available again."
     },
+    "deeplink": {
+      "invalidRecipe": "This recipe link is invalid."
+    },
     "commandSections": {
       "navigation": "Navigation",
       "pantry": "Pantry",

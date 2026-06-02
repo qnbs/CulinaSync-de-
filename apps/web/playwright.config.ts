@@ -5,7 +5,9 @@ const isCi = Boolean(process.env.CI);
 const previewPort = 4173;
 const devPort = 5173;
 const port = isCi ? previewPort : devPort;
-const baseURL = `http://127.0.0.1:${port}`;
+/** Muss zu `vite.config.ts` `base` passen (GitHub Pages: /CulinaSync-de-/). */
+const appBasePath = isCi ? '/CulinaSync-de-/' : '/';
+const baseURL = `http://127.0.0.1:${port}${appBasePath === '/' ? '' : appBasePath.replace(/\/$/, '')}/`;
 
 export default defineConfig({
   testDir: './e2e',
