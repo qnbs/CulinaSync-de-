@@ -12,6 +12,11 @@ on:
         type: boolean
         default: false
         required: false
+      run-e2e-smoke:
+        description: 'Run Playwright smoke against vite preview (slow browser download on cold runners)'
+        type: boolean
+        default: true
+        required: false
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -19,8 +24,7 @@ env:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    # QNBS-v3: Playwright-Chromium-Download kann auf GitHub-Runnern >20 min dauern; 25 min war zu knapp (Cancel)
-    timeout-minutes: 40
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -63,38 +67,21 @@ jobs:
       - name: Dependency audit (high+)
         run: pnpm audit --audit-level=high
 
-      # QNBS-v3: Browser-Cache beschleunigt Folge-Läufe und reduziert Timeout-Risiko beim Chromium-Download
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
+      # QNBS-v3: PR-CI überspringt E2E (CDN-Download >40min auf Runnern); Deploy auf main führt Smoke aus
+      - name: Setup Playwright
+        if: inputs.run-e2e-smoke
+        uses: microsoft/playwright-github-action@v1
         with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-
-      # QNBS-v3: Ein kurzer Smoke gegen `vite preview` (gebautes dist) — kein Dev-Server, keine schweren E2E-Suites
-      - name: Install Playwright Chromium (retry)
-        shell: bash
-        run: |
-          # QNBS-v3: CDN/Netzwerk kann flaken; 3 Versuche verhindern unnötig rote CI bei transienten Download-Fehlern
-          for attempt in 1 2 3; do
-            echo "Playwright install attempt ${attempt}/3"
-            if pnpm exec playwright install --with-deps chromium; then
-              exit 0
-            fi
-            if [ "$attempt" -lt 3 ]; then
-              echo "Install failed, retry in 10s..."
-              sleep 10
-            fi
-          done
-          echo "Playwright install failed after 3 attempts"
-          exit 1
+          browsers: chromium
 
       - name: E2E smoke (Playwright + preview)
+        if: inputs.run-e2e-smoke
         run: pnpm run test:e2e
         env:
           CI: true
 
       - name: Upload Playwright report (on failure)
-        if: failure()
+        if: inputs.run-e2e-smoke && failure()
         uses: actions/upload-artifact@v7
         with:
           name: playwright-report

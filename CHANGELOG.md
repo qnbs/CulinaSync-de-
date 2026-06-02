@@ -14,7 +14,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Geaendert
 
-- **CI:** `ci.yml` — voller Validate-Lauf nur noch bei Pull Requests; Push auf `main` nutzt Deploy-Workflow (kein doppelter Validate mehr).
+- **CI:** `ci.yml` — Validate nur bei PRs ohne Playwright-Smoke (CDN-Timeout auf Runnern); Deploy auf `main` mit vollem Smoke via `microsoft/playwright-github-action`.
+- **CI:** `ci.yml` — kein doppelter Validate-Lauf mit Deploy auf `main`.
 - **Supply-Chain:** Vitest auf **>=4.1.0** (pnpm overrides + `apps/web`) — behebt kritisches Audit-Finding.
 
 ### Dokumentation
