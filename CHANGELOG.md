@@ -36,6 +36,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Dokumentation
 
+- **Post-Merge Doku-Sync:** `STATUS`, `README`, `TESTING` — **364** Tests, PR #31–#34 im Merge-Stand, P1 (PWA/i18n) als erledigt markiert.
 - **Post-M5 Doku-Sync:** `docs/STATUS-2026-06-02.md`, `README.md`, `docs/README.md`, `docs/TESTING.md`, `ROADMAP.md` (M5 ✅), `AUDIT.md`, `docs/AUDIT-REPORT-2026-06.md` (M5-Nachzug), `.github/copilot-instructions.md` — Coverage/Tests/PR-Stand vereinheitlicht.
 
 ## [0.2.1] — 2026-05-16
