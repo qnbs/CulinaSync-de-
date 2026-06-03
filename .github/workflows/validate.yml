@@ -51,6 +51,9 @@ jobs:
       - name: Test with coverage
         run: pnpm run test:coverage
 
+      - name: Test deploy verify scripts
+        run: pnpm run test:scripts
+
       - name: Upload coverage report
         uses: actions/upload-artifact@v7
         with:

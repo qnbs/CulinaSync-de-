@@ -3,6 +3,11 @@
  * Smoke-Checks für GitHub Pages und Vercel Production (HTTP 200 + HTML-Snippet).
  * Keine Secrets. Exit 1 bei hartem Fehler.
  */
+import {
+  evaluateDeployResponse,
+  shouldSkipProtectedVercel,
+} from './lib/deploy-verify-logic.mjs';
+
 const targets = [
   {
     name: 'GitHub Pages',
@@ -36,9 +41,8 @@ for (const target of targets) {
   try {
     const res = await fetchWithTimeout(target.url);
     const body = await res.text();
-    // QNBS-v3: Vercel Deployment Protection liefert 401/403 ohne Session — kein harter CI-Fail für Pages-Deploy
     if (!res.ok) {
-      if (target.name.includes('Vercel') && (res.status === 401 || res.status === 403)) {
+      if (shouldSkipProtectedVercel(res.status, target.name)) {
         console.warn(
           `[deploy-verify] SKIP (geschützt): ${target.name} HTTP ${res.status} — ${target.url}`,
         );
@@ -48,9 +52,9 @@ for (const target of targets) {
       failed = true;
       continue;
     }
-    const missing = target.mustInclude.filter((snippet) => !body.includes(snippet));
-    if (missing.length > 0) {
-      console.error(`[deploy-verify] ${target.name}: Antwort ohne ${missing.join(', ')}`);
+    const verdict = evaluateDeployResponse(res.status, body, target.mustInclude);
+    if (!verdict.ok) {
+      console.error(`[deploy-verify] ${target.name}: Antwort ungültig (${verdict.reason})`);
       failed = true;
       continue;
     }
