@@ -12,18 +12,18 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **Tests:** `syncService` Upload/Download/Merge + `getLastSyncTimestamp`; `syncTransport.test.ts`; `pnpm run test:scripts` für Deploy-Verify-Logik (`scripts/lib/deploy-verify-logic.mjs`).
 - **Doku:** [docs/DB-MIGRATIONS.md](docs/DB-MIGRATIONS.md) — Dexie `DB_MIGRATION_HISTORY`, Backup-Gate, Checkliste (R-007).
 
+### Geaendert
+
+- **Toolchain:** `check:all` umfasst `test:scripts` und `i18n:check`; Test-/Coverage-Zahlen in Doku auf **404** Vitest / **99** Dateien vereinheitlicht.
+
 ### Behoben
 
 - **CI Deploy:** `deploy.yml` — `checkout` vor Post-Deploy-Verify; Vercel-HTTP-401 (Deployment Protection) als Warnung statt Hard-Fail.
 - **CI E2E:** Offline-Smoke lädt Seite zuerst, dann offline; Locator `#offline-status-banner` (strict mode).
 - **Vercel:** Monorepo-Build `pnpm run build --filter=web` in `vercel.json`.
 
-### Hinzugefuegt
-
 - **Deploy:** Handbuch [docs/DEPLOY-PAGES-VERCEL.md](docs/DEPLOY-PAGES-VERCEL.md); `apps/web/vercel.json`; Workflows `deploy-health.yml`; Skripte `verify-pages-artifact`, `verify-live-deployments`; Post-Deploy-Smoke in `deploy.yml` (mit `checkout` im Deploy-Job).
 - **E2E:** Offline-Banner robuster (`useOnlineStatus` Initial-Sync; Playwright: Seite laden, dann `setOffline` + `offline`-Event).
-
-### Hinzugefuegt
 
 - **Audit vNext (2026-06-03):** `docs/AUDIT-vNEXT-2026-06-03.md`, Remediation-Backlog und -Plan; PR-Review-Regel (CodeAnt/Copilot proaktiv).
 - **Sync:** Zod-Validierung für Device-QR/LAN-Payload (`deviceSyncService`); Test für Oversize-Payload.
@@ -52,8 +52,6 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **Vercel:** Production-Deploy nach Lockfile- und Settings-Import-Fix wieder grün (Turbo-Auto-Detect; Output `apps/web/dist` — siehe `docs/DEPLOYMENT.md`).
 - **UI:** `Settings.tsx` — fehlende `Button`/`applyAccentTheme`-Imports nach Design-System-Merge (#50) ergänzt.
 
-### Hinzugefuegt
-
 - **PWA (Advanced):** Hooks `usePwaInstall`, `usePwaUpdate`, `usePwaLaunchHandlers`, `useAppBadge`; `PwaStatusCard` in Einstellungen; Share-Target → KI-Chef; Datei-Handler → Vault-Import; `docs/PWA.md`.
 
 - **M10.2:** Nextcloud-Sync-Adapter (`nextcloudSyncAdapter`, `syncTransport`, Provider-UI, i18n-Fehlercodes).
@@ -68,12 +66,12 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **CI/Deploy:** Service Worker — nur ein `self.__WB_MANIFEST`-Vorkommen (Workbox-Build); Index-Pfad via `__PWA_INDEX_PATH__`.
 - **E2E:** Playwright `baseURL` mit GitHub-Pages-Pfad `/CulinaSync-de-/` in CI.
 - **Deeplinks:** `culinasync://`-Events werden in der App verarbeitet (`useDeepLinkNavigation`).
-- **E2E-CI:** `e2e-smoke.yml` läuft bei Push/PR auf `apps/web/**` (Playwright-Container **v1.59.1**); Doku in `TESTING.md`.
+- **E2E-CI:** `e2e-smoke.yml` läuft bei Push/PR auf `apps/web/**` (Playwright-Container **v1.60.0**); Doku in `TESTING.md`.
 - **M9.3:** `vendor-zustand`-Chunk; `redux-persist` in `vendor-redux`.
 - **M10:** `backupMergeService`, QR-Gerätesync (`deviceSyncService`, `DeviceSyncModal`), Cloud-Sync Merge + letzter Sync-Zeitstempel.
 - **M7/M8-Doku:** `docs/M7-TYPESCRIPT-7-GA-PREP.md`, `docs/M8-TAURI-DESKTOP.md`; Tauri-Version 0.2.2.
 - **E2E:** `navigation-offline.spec.ts` (Desktop-/Mobile-Navigation, Offline-Banner `#offline-status-banner`).
-- **Tests:** **378** Vitest-Tests / **92** Dateien (`backupMergeService`, `deviceSyncService`).
+- **Tests:** **404** Vitest-Tests / **99** Dateien (u. a. `syncService`, `syncTransport`, `deviceSyncService`).
 - **PWA-Härtung (#37):** precached `index.html` für Navigation; Manifest-Shortcuts `?page=…`; `useOnlineStatus` nach Tab-Fokus/bfcache.
 - **A11y (#37):** Install-/Update-Dialoge mit `useModalA11y`; Offline-Banner ARIA; Toasts `assertive` nur bei Fehlern.
 - **Offline-KI (#37):** `aiOfflineFallback.ts`; `geminiService` ohne Faker; `logAppError` für Install/Reset/Export.

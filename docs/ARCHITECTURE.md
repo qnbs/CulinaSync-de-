@@ -117,7 +117,7 @@ Wiederverwendbarer Workflow [`.github/workflows/validate.yml`](../.github/workfl
 
 `install` → `lint` → `type-check` (tsgo; **abhängig von `^build` für Workspace-Packages**) → `test:coverage` → `build` → `bundle-budget` → `pnpm audit --audit-level=high` → Playwright-Smoke → optional Pages-Artefakt.
 
-Lokal: `pnpm run check:all` (gleicher Kern + Audit).
+Lokal: `pnpm run check:all` (lint, type-check, test, test:scripts, i18n, build, budget, audit).
 
 ## Weiterführend
 

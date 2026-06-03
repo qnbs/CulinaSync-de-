@@ -52,12 +52,14 @@ Implementierung → Diagnostics / ESLint für geänderten Bereich → gezielte T
 | Dev-Server | `pnpm run dev` |
 | Lint | `pnpm run lint` |
 | Typen | `pnpm run type-check` |
-| Tests | `pnpm run test` |
+| Tests | `pnpm run test` (**404** Vitest / **99** Dateien) |
+| Script-Tests | `pnpm run test:scripts` |
+| i18n | `pnpm run i18n:check` |
 | Coverage | `pnpm run test:coverage` |
 | Integration | `pnpm run build` |
-| Vollpaket | `pnpm run check:all` |
+| Vollpaket | `pnpm run check:all` (lint, type-check, test, test:scripts, i18n, build, budget, audit) |
 
-CI-Orientierung: **Node 24** in Workflows; **validate.yml** führt u. a. **type-check** und **test:coverage** aus (siehe `.github/copilot-instructions.md`). Nach Push Workflows beobachten bis grün.
+CI-Orientierung: **Node 24**; **validate.yml** — type-check, test:coverage, **test:scripts**, build (siehe `.github/copilot-instructions.md`). Nach Push Workflows beobachten bis grün.
 
 ---
 

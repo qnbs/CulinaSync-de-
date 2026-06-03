@@ -20,7 +20,7 @@
 
 | Metrik | Ist | Threshold (CI) | PRD M5 |
 |--------|-----|----------------|--------|
-| Tests | **397** | — | ✅ |
+| Tests | **404** Vitest (+5 scripts) | — | ✅ |
 | Statements | **77,79 %** | 77 % | ✅ |
 | Lines | **79,27 %** | 79 % | ✅ |
 | Functions | **73,71 %** | 72 % | ✅ |
@@ -33,7 +33,7 @@
 | Check | Ergebnis | Evidence |
 |-------|----------|----------|
 | `pnpm run type-check` | ✅ | tsgo, Turbo cache hit |
-| `pnpm run test:coverage` | ✅ | 397 passed |
+| `pnpm run test:coverage` | ✅ | 404 passed (Vitest) |
 | `pnpm run i18n:check` | ✅ | Parität de/en; Baseline **0** Hardcodes |
 | `pnpm audit --audit-level=high` | ✅ (0 high/critical) | 4 findings total: 1 low, 3 moderate |
 | `pnpm run analyze:bundle` | ✅ | Budget eingehalten; `vendor-export` ~623 KB brotli größter Chunk |

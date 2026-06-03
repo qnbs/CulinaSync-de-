@@ -33,7 +33,7 @@ pnpm run test:scripts   # node --test für scripts/lib (Deploy-Verify)
 pnpm run analyze:bundle
 pnpm run check:bundle-budget
 pnpm run preview
-pnpm run check:all       # lint + type-check + test + build + budget + npm audit (high)
+pnpm run check:all       # lint + type-check + test + test:scripts + i18n + build + budget + audit (high)
 ```
 
 ## TypeScript-Binaries

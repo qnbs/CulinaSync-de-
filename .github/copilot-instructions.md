@@ -57,8 +57,8 @@
 - **Testverzeichnisse:** `apps/web/src/test/` (inkl. `createTestStore.ts`, MSW), `apps/web/src/components/**/__tests__/`, `apps/web/src/contexts/__tests__/`, `apps/web/src/hooks/__tests__/`, `apps/web/src/services/__tests__/`, `apps/web/src/store/__tests__/`.
 - **Benennung:** `*.test.ts` / `*.test.tsx` für Testdateien.
 - **Konfiguration:** `apps/web/vitest.config.ts`; ESLint ignoriert `coverage/**`.
-- **Coverage (M5 ✅, Juni 2026):** ca. **78 %** stmts / **79 %** lines / **72,5 %** funcs / **63 %** branches (v8); Thresholds **77/79/72/62** in `apps/web/vitest.config.ts`. **378** Tests / **92** Dateien. **CI:** `validate.yml` (lint → type-check → test:coverage → build → audit); Playwright in `e2e-smoke.yml` (Container, PR/Push `apps/web/**`); Artefakt **coverage-lcov** (`apps/web/coverage`). Status: `docs/STATUS-2026-06-02.md`.
-- **Ausfuehrung:** `pnpm run test`, `pnpm run test:coverage`, lokal vollstaendig `pnpm run check:all` (inkl. audit high).
+- **Coverage (M5 ✅, Juni 2026):** ca. **78,6 %** stmts / **80,2 %** lines / **74,5 %** funcs / **62,9 %** branches (v8); Thresholds **77/79/72/62** in `apps/web/vitest.config.ts`. **404** Vitest-Tests / **99** Dateien + **`pnpm run test:scripts`** (Deploy-Verify). **CI:** `validate.yml` (lint → type-check → test:coverage → **test:scripts** → build → audit); Playwright **v1.60.0** in `e2e-smoke.yml`; Artefakt **coverage-lcov**. Status: `docs/STATUS-2026-06-03.md`.
+- **Ausfuehrung:** `pnpm run test`, `pnpm run test:coverage`, `pnpm run test:scripts`, `pnpm run i18n:check`; lokal vollstaendig `pnpm run check:all` (inkl. test:scripts, i18n, audit high).
 - Vor `pnpm run build` immer zuerst Diagnostics fuer die geaenderten Dateien pruefen (`get_errors` bzw. Problems-Panel).
 - Typecheck im Alltag: `pnpm run type-check` (**tsgo**). `tsc` wird von ESLint/Vitest als API genutzt — nicht den Full-Build mit purem `tsc` verwechseln (`pnpm run build` = `tsgo && vite build`).
 - Der Full-Build ist der Integrations-Check am Ende und soll nicht der erste Schritt sein, in dem neue Typefehler entdeckt werden.
