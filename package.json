@@ -34,6 +34,8 @@
     "tauri:icons": "node scripts/generate-tauri-icons.mjs",
     "preview": "pnpm --filter web run preview",
     "predeploy": "pnpm --filter web run predeploy",
+    "verify:deploy": "node scripts/verify-live-deployments.mjs",
+    "verify:pages-artifact": "node scripts/verify-pages-artifact.mjs",
     "prepare": "husky"
   },
   "devDependencies": {

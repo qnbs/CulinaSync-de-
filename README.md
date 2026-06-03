@@ -247,13 +247,13 @@ Mehr: [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) · [PRD.md](./PRD.md)
 
 ## Deployment & Hosting
 
-| Ziel | Trigger | Hinweis |
-|------|---------|---------|
-| **GitHub Pages** | Push `main` | `apps/web/dist`, Base `/CulinaSync-de-/` |
-| **Vercel** | Push `main` | Dashboard-Root **`apps/web`**, Output `dist` |
-| **Tauri** | `workflow_dispatch` | [tauri-release.yml](./.github/workflows/tauri-release.yml) |
+| Ziel | URL | Trigger |
+|------|-----|---------|
+| **GitHub Pages** | [qnbs.github.io/CulinaSync-de-](https://qnbs.github.io/CulinaSync-de-/) | Push `main` → `deploy.yml` |
+| **Vercel** | [culina-sync-de-web](https://culina-sync-de-web-qnbs-projects.vercel.app) | Push `main` (Git-Integration) |
+| **Tauri** | — | [tauri-release.yml](./.github/workflows/tauri-release.yml) |
 
-Kein Root-`vercel.json` nötig bei korrektem Vercel-Root — siehe [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md).
+Handbuch: **[docs/DEPLOY-PAGES-VERCEL.md](./docs/DEPLOY-PAGES-VERCEL.md)** · Checks: `pnpm run verify:deploy` · `apps/web/vercel.json`
 
 Nach Push auf `main`: CI-, E2E- und Deploy-Workflows bis **grün** beobachten.
 

@@ -9,6 +9,11 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Hinzugefuegt
 
+- **Deploy:** Handbuch [docs/DEPLOY-PAGES-VERCEL.md](docs/DEPLOY-PAGES-VERCEL.md); `apps/web/vercel.json`; Workflows `deploy-health.yml`; Skripte `verify-pages-artifact`, `verify-live-deployments`; Post-Deploy-Smoke in `deploy.yml`.
+- **E2E:** Offline-Banner robuster (`useOnlineStatus` Initial-Sync; Playwright offline vor `goto`).
+
+### Hinzugefuegt
+
 - **Audit vNext (2026-06-03):** `docs/AUDIT-vNEXT-2026-06-03.md`, Remediation-Backlog und -Plan; PR-Review-Regel (CodeAnt/Copilot proaktiv).
 - **Sync:** Zod-Validierung für Device-QR/LAN-Payload (`deviceSyncService`); Test für Oversize-Payload.
 

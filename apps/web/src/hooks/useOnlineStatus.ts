@@ -9,6 +9,8 @@ export function useOnlineStatus(): boolean {
 
   useEffect(() => {
     const syncOnlineState = () => setIsOnline(readNavigatorOnline());
+    // QNBS-v3: Initial-Sync — Playwright/offline-first load; Events können vor Listener-Attach feuern
+    syncOnlineState();
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
     const handleVisibilityChange = () => {
