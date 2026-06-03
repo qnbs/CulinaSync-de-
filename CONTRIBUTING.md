@@ -43,11 +43,11 @@ Empfohlen (entspricht dem ueblichen Release-Gate inkl. Audit):
 pnpm run check:all
 ```
 
-Wenn die Aenderung Deploy-, Bundle- oder i18n-relevant ist, pruefe zusaetzlich (Teile davon sind in `check:all` enthalten):
+Deploy-, Bundle- und i18n-relevante Checks sind in **`pnpm run check:all`** enthalten (`test:scripts`, `i18n:check`, `check:bundle-budget`). Optional zusaetzlich:
 
 ```bash
-pnpm run check:bundle-budget
 pnpm run i18n:scan
+pnpm run verify:pages-artifact apps/web/dist   # nach GITHUB_ACTIONS=true build
 ```
 
 ## Architekturregeln

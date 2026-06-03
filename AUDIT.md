@@ -9,7 +9,7 @@
 ## Status-Update 2026-06-03 (Full-Scale Audit vNext)
 
 - **Gesamtbewertung:** **9,0 / 10** — produktionsreif für Local-First; Multi-Device/Sync und E2E-Tiefe sind die Haupthebel.
-- **Validierung:** 397 Tests; Coverage **~78 %** stmts / **~79 %** lines / **~62 %** branches; `i18n:check` Baseline **0**; `pnpm audit --audit-level=high` ohne High/Critical.
+- **Validierung:** **404** Vitest-Tests / **99** Dateien + **5** Script-Tests (`test:scripts`); Coverage **~78,6 %** stmts / **~80,2 %** lines / **~62,9 %** branches; `i18n:check` Baseline **0**; `pnpm audit --audit-level=high` ohne High/Critical.
 - **Korrigiert (externe Audits):** Dexie-Migrationen in `dbMigrations.ts`; `exhaustive-deps: warn` (nicht off); `no-explicit-any: error`; RecipeDetail/CookMode gesplittet.
 - **Offen (Top):** Sync Zod/E2E (R-001/R-003), DataPanel-Split (R-002), `exportService`→`dbInstance` (R-004, in Audit-PR), Lighthouse CI, Tauri Release.
 - **PR-Prozess:** `.cursor/rules/300-pr-review-automation.mdc` — CodeAnt/Copilot-Kommentare proaktiv vor Merge.

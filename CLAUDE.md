@@ -25,10 +25,12 @@ Use `pnpm` (preferred) or `npm`. Both lockfiles are present.
 | Type check | `pnpm run type-check` (**tsgo**, not tsc) |
 | Build | `pnpm run build` (= `tsgo && vite build`) |
 | Lint | `pnpm run lint` |
-| Tests (once) | `pnpm run test` |
+| Tests (once) | `pnpm run test` (Vitest, **404** in **99** Dateien) |
+| Script tests | `pnpm run test:scripts` (Deploy-Verify, node --test) |
 | Tests (watch) | `pnpm run test:watch` |
 | Coverage | `pnpm run test:coverage` |
-| Full validation | `pnpm run check:all` |
+| i18n gate | `pnpm run i18n:check` |
+| Full validation | `pnpm run check:all` (lint, type-check, test, test:scripts, i18n, build, budget, audit) |
 
 **Single test file:** `pnpm exec vitest run src/path/to/file.test.ts`
 

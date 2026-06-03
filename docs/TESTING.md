@@ -21,6 +21,8 @@
 ```bash
 pnpm run test
 pnpm run test:coverage
+pnpm run test:scripts   # Deploy-Verify (node --test, auch in CI validate)
+pnpm run i18n:check
 pnpm run check:all
 pnpm run test:e2e   # Playwright (lokal: vorher `pnpm exec playwright install chromium`)
 ```
@@ -36,7 +38,7 @@ cd apps/web && CI=true pnpm exec playwright test
 
 Ohne globales pnpm (z. B. Windows): `npm run test`, `npm run check:all` oder `npx pnpm@10 run test`.
 
-**`check:all`:** `lint` → `type-check` (`tsgo`) → `test` → `build` → `check:bundle-budget` → `npm audit --audit-level=high`.
+**`check:all`:** `lint` → `type-check` (`tsgo`) → `test` → `test:scripts` → `i18n:check` → `build` → `check:bundle-budget` → `npm audit --audit-level=high`.
 
 ## Erwartete Mindestvalidierung
 
@@ -82,15 +84,16 @@ pnpm run check:bundle-budget
 - Voice- und Navigationstrigger
 - Datenbanknahe Cross-Feature-Operationen
 
-## Aktueller Validierungsstand 2026-06-02 (M5 abgeschlossen)
+## Aktueller Validierungsstand 2026-06-03 (M5 abgeschlossen)
 
-- **Vitest:** **378** Tests in **92** Dateien (`pnpm run test`); M5-Suites u. a. Repositories, `geminiService`, UI-Smoke, `MealPlanModal`, PWA (`useOnlineStatus`, `OfflineStatusBar`), Deeplink (`deepLinking`, `useDeepLinkNavigation`).
-- **Coverage (v8):** ca. **78 %** Statements / **79 %** Lines / **63 %** Branches / **72,5 %** Functions — PRD-Ziel (≥70/≥70/≥70/≥60) **erreicht**; **`apps/web/vitest.config.ts`** Thresholds **77 / 79 / 72 / 62**.
-- **CI:** `.github/workflows/validate.yml` — lint → type-check → test:coverage → build → bundle-budget → **`pnpm audit --audit-level=high`**. Playwright-Smoke in **`e2e-smoke.yml`** (Container-Image; bei PR/Push auf `apps/web/**`, wöchentlich, `workflow_dispatch` — nicht im schlanken PR-`validate`). Artefakt **coverage-lcov** (14 Tage). PRs: **`i18n:check`** in `ci.yml`.
+- **Vitest:** **404** Tests in **99** Dateien (`pnpm run test`); u. a. Repositories, `syncService`/`syncTransport`, `geminiService`, UI-Smoke, PWA (`useOnlineStatus`, `OfflineStatusBar`), Device-Sync (Zod).
+- **Scripts:** **`pnpm run test:scripts`** — 5 Node-Tests für `scripts/lib/deploy-verify-logic.mjs` (auch in CI validate).
+- **Coverage (v8):** ca. **78,6 %** Statements / **80,2 %** Lines / **62,9 %** Branches / **74,5 %** Functions — PRD-Ziel **erreicht**; Thresholds **77 / 79 / 72 / 62** in `apps/web/vitest.config.ts`.
+- **CI:** `validate.yml` — lint → type-check → test:coverage → **test:scripts** → build → bundle-budget → audit. Playwright **v1.60.0** in **`e2e-smoke.yml`**. PRs: **`i18n:check`** in `ci.yml`. Artefakt **coverage-lcov** (14 Tage).
 - **i18n lokal:** `pnpm run i18n:check` vor PR; Vollscan `pnpm run i18n:scan` (Report unter `reports/`, gitignored); nach bereinigten Hardcoded-Strings `pnpm run i18n:baseline:update`.
 - **Gemini:** Integrationstests + Zod (`geminiMsw.test.ts`, `geminiService.test.ts`); Schema-Änderungen in `geminiService.ts` mit Tests mitziehen.
 - **Wartung:** `db.ts` nicht isoliert testbar (Import-Side-Effects) — Cross-Feature- und Repository-Tests bevorzugen.
-- Aktueller Snapshot: [STATUS-2026-06-02.md](./STATUS-2026-06-02.md); Vorgänger: [STATUS-2026-05-16.md](./STATUS-2026-05-16.md).
+- Aktueller Snapshot: [STATUS-2026-06-03.md](./STATUS-2026-06-03.md); Vorgänger: [STATUS-2026-06-02.md](./STATUS-2026-06-02.md).
 - `pnpm run lint` mit `--max-warnings 0`; generiertes **`coverage/**`** ist ESLint-ignoriert; `react-hooks/exhaustive-deps` ist auf **`warn`** — Warnungen im geaenderten Code abbauen, bevor auf `error` verschärft wird.
 - Vor Release empfohlen: **`pnpm run check:all`** oder mindestens lint, test, build und bei Bundle-Aenderungen `pnpm run check:bundle-budget`.
 

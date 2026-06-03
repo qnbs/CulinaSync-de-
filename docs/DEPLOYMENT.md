@@ -73,7 +73,7 @@ Diese Warnungen stammen aktuell von Upstream-Runtimes der GitHub-verwalteten Act
 ## Aktueller Arbeitsstand (Doku)
 
 - Ausführlicher Snapshot: [STATUS-2026-05-02.md](./STATUS-2026-05-02.md); davor [STATUS-2026-05-01.md](./STATUS-2026-05-01.md); ältere: [STATUS-2026-04-23.md](./STATUS-2026-04-23.md), [STATUS-2026-04-22.md](./STATUS-2026-04-22.md).
-- Vor einem release-nahen Push auf `main` empfohlen: **`pnpm run check:all`** oder mindestens `pnpm run lint`, `pnpm run test`, `pnpm run build`; Bundle-Budget ist in CI ohnehin Teil von Validate.
+- Vor einem release-nahen Push auf `main` empfohlen: **`pnpm run check:all`** (inkl. `test:scripts`, `i18n:check`) oder mindestens `pnpm run lint`, `pnpm run test`, `pnpm run build`; Bundle-Budget ist in CI ohnehin Teil von Validate.
 
 ## Vercel
 
