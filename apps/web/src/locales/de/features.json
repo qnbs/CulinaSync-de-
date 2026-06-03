@@ -1,90 +1,196 @@
 {
   "help": {
     "title": "Wissensdatenbank",
-    "subtitle": "Anleitungen, Tipps & Systemstatus.",
+    "subtitle": "Anleitungen, Kurzwege, Datenschutz und Live-Systemstatus für deinen Haushalt.",
     "emptyFaq": "Keine passenden Fragen gefunden.",
     "faq": {
-      "heading": "Haeufige Fragen",
+      "heading": "Häufige Fragen",
+      "openSettings": "Zugehörige Einstellungen öffnen",
       "categories": {
         "general": "Allgemein",
         "privacy": "Datenschutz",
-        "features": "Funktionen"
+        "features": "Funktionen",
+        "ai": "KI & Assistent",
+        "data": "Daten & Backup",
+        "pwa": "App & PWA"
+      },
+      "keywords": {
+        "offline": "offline IndexedDB lokal",
+        "indexeddb": "Dexie Speicher",
+        "gemini": "Gemini API Schlüssel",
+        "localAi": "Ollama lokal GPU",
+        "qr": "QR Gerät Sync",
+        "cloud": "WebDAV Nextcloud"
       },
       "localFirst": {
-        "question": "Was bedeutet 'Local-First'?",
-        "answer": "'Local-First' bedeutet, dass alle deine Daten (Rezepte, Vorraete, Plaene) primaer auf deinem Geraet gespeichert werden. Es gibt keine Cloud-Datenbank, die wir kontrollieren. Das garantiert maximale Geschwindigkeit, Privatsphaere und Offline-Verfuegbarkeit."
+        "question": "Was bedeutet „Local-First“?",
+        "answer": "Rezepte, Vorrat, Essensplan und Einkaufsliste leben primär in IndexedDB auf deinem Gerät. CulinaSync betreibt keine zentrale Cloud-Datenbank für deine Küche — du behältst Kontrolle, Tempo und Offline-Nutzung."
       },
       "aiPrivacy": {
         "question": "Was passiert mit meinen Daten beim KI-Chef?",
-        "answer": "Nur der Text deiner Anfrage (Zutaten, Wuensche) wird an die Google Gemini API gesendet. Deine persoenlichen Vorratsdaten oder Essensplaene verlassen dein Geraet nicht, es sei denn, sie sind Teil der spezifischen Anfrage."
+        "answer": "Cloud-KI (Google Gemini) erhält nur den Text deiner Anfrage — und nur, wenn du einen API-Schlüssel hinterlegt hast. Vorrats- und Planungsdaten werden nicht automatisch hochgeladen. Optional kannst du Kontext-Toggles in den KI-Einstellungen steuern, lokale KI (Ollama) nutzen oder Prompts nur lokal speichern (Privatsphäre)."
+      },
+      "apiKey": {
+        "question": "Brauche ich einen API-Schlüssel?",
+        "answer": "Für Gemini in der Cloud: ja. Der Schlüssel wird verschlüsselt nur in IndexedDB auf deinem Gerät gespeichert — nie im Build oder auf unseren Servern. Ohne Schlüssel bleiben Cloud-KI-Funktionen inaktiv; Vorrat, Planer und lokale Features funktionieren weiter."
+      },
+      "localAi": {
+        "question": "Was ist „Lokale KI“?",
+        "answer": "Unter Einstellungen → Lokale KI konfigurierst du Ollama, Modell-Routing und optional GPU-Stufen. Anfragen können on-device bleiben — ideal für sensible Haushaltsdaten oder Offline-Labs. Cloud-Gemini bleibt optional parallel nutzbar."
+      },
+      "syncDevices": {
+        "question": "Wie synchronisiere ich zwischen Geräten?",
+        "answer": "Mehrere Wege: (1) QR-Gerätesync in Daten & Speicher für schnelle Übertragung, (2) verschlüsselter Vault (.csb) zum sicheren Kopieren, (3) Cloud-Sync via WebDAV/Nextcloud mit Merge, (4) klassischer JSON-/Markdown-Export. Wähle die Methode passend zu Vertrauen und WLAN."
+      },
+      "vault": {
+        "question": "Was ist der verschlüsselte Vault (.csb)?",
+        "answer": "Ein passwortgeschützter Snapshot deiner Küche — Rezepte, Vorrat, Plan und Liste in einer Datei. Ideal für USB, NAS oder verschlüsselte Ablage. Import merged oder ersetzt je nach Dialog; teste vor dem Produktiv-Import ein Backup."
+      },
+      "cloudSync": {
+        "question": "Wie funktioniert Cloud-Sync (WebDAV/Nextcloud)?",
+        "answer": "Du hinterlegst Server, Benutzer und Pfad in Daten & Speicher. Upload/Download läuft über deinen eigenen Speicher — CulinaSync hostet keine Haushaltsdaten. Nach dem Merge siehst du den letzten Sync-Zeitstempel; bei Konflikten gilt die dokumentierte Merge-Logik im Daten-Panel."
+      },
+      "policies": {
+        "question": "Wozu dienen Policies (Allergene, Blacklist)?",
+        "answer": "Haushaltsregeln filtern Rezepte und KI-Vorschläge: Allergene, verbotene Zutaten, Mindest-Vorrat. Bei „streng“ blockiert CulinaSync riskante Vorschläge früh — besonders hilfreich für Familien mit Unverträglichkeiten."
       },
       "pantryColor": {
         "question": "Was bedeuten die Farben im Essensplaner?",
-        "answer": "Der Balken unter einem Gericht zeigt die Zutaten-Verfuegbarkeit: Gruen (Alles da), Gelb (Einiges fehlt), Rot (Vieles fehlt). So siehst du sofort, ob du einkaufen musst."
+        "answer": "Der Balken zeigt Zutaten-Verfügbarkeit aus dem Vorrat: Grün (alles da), Gelb (einiges fehlt), Rot (viel fehlt). So erkennst du Einkaufsbedarf auf einen Blick — ohne die Rezeptliste zu öffnen."
       },
-      "syncDevices": {
-        "question": "Kann ich Daten zwischen Geraeten synchronisieren?",
-        "answer": "Aktuell ist CulinaSync als Offline-First-App konzipiert. Eine Synchronisation ist fuer eine spaetere Version geplant. Nutze bis dahin die Export-/Import-Funktion in den Einstellungen."
+      "pwaInstall": {
+        "question": "Wie installiere ich CulinaSync als App?",
+        "answer": "In Daten & Speicher findest du die PWA-Karte: „Zum Home-Bildschirm“ (iOS) oder Install-Prompt (Chrome/Edge). Installierte Apps starten im Standalone-Modus, cachen UI-Shell und bleiben offline nutzbar."
+      },
+      "backupFormats": {
+        "question": "Welches Backup-Format wann?",
+        "answer": "JSON: vollständige Wiederherstellung. Markdown/CSV: Lesen & Teilen. PDF: Archiv/Druck. Für Gerätewechsel empfehlen wir JSON oder Vault; für Alltags-Backup reicht oft ein wöchentlicher JSON-Export."
+      },
+      "cookVoice": {
+        "question": "Kann ich beim Kochen per Sprache steuern?",
+        "answer": "Ja — unter Sprachsteuerung & Audio stellst du TTS, Whisper (lokal) oder Browser-Erkennung ein. Im Kochmodus helfen Sprachbefehle bei Timer und Navigation; destruktive Befehle lassen sich bestätigen."
       }
     },
     "tips": {
-      "heading": "Pro-Tipps (Interaktiv)",
+      "heading": "Pro-Tipps (interaktiv)",
       "cmdPalette": {
-        "title": "Power-User Navigation",
-        "description": "Nutze die Befehlspalette fuer blitzschnellen Zugriff auf alles.",
-        "actionLabel": "Oeffnen (⌘K)"
+        "title": "Befehlspalette",
+        "description": "⌘K / Strg+K — springe zu Modulen, Einstellungen und Aktionen ohne Maus.",
+        "actionLabel": "Palette öffnen"
+      },
+      "apiKey": {
+        "title": "Gemini sicher einrichten",
+        "description": "BYOK in IndexedDB — Schlüssel in Google Cloud auf deine Domain beschränken.",
+        "actionLabel": "API-Schlüssel"
       },
       "voiceControl": {
-        "title": "Hands-Free Kochen",
-        "description": "Steuere den Kochmodus komplett mit deiner Stimme.",
-        "actionLabel": "Mikrofon testen"
+        "title": "Hands-free am Herd",
+        "description": "Stimme, Whisper-Modell und Bestätigungen für destruktive Befehle feinjustieren.",
+        "actionLabel": "Audio-Einstellungen"
       },
       "shoppingGenerate": {
-        "title": "Intelligenter Einkauf",
-        "description": "Lass die App deine Einkaufsliste basierend auf dem Plan fuellen.",
+        "title": "Einkauf aus dem Plan",
+        "description": "Fehlende Zutaten aus dem Essensplan direkt auf die Liste — ein Klick.",
         "actionLabel": "Zur Einkaufsliste"
+      },
+      "mealPlanner": {
+        "title": "Woche planen wie ein Profi",
+        "description": "Farbige Vorrat-Balken + Portionen — vor dem Einkauf den Plan prüfen.",
+        "actionLabel": "Essensplaner"
+      },
+      "aiChef": {
+        "title": "KI-Chef mit Kontext",
+        "description": "Kreativität, Ernährung und Policies kombinieren — dann „Chef fragen“.",
+        "actionLabel": "KI-Chef öffnen"
+      }
+    },
+    "quickLinks": {
+      "heading": "Schnellzugriff Einstellungen",
+      "data": {
+        "label": "Daten & Backup",
+        "description": "Export, Vault, Sync, PWA"
+      },
+      "privacy": {
+        "label": "Privatsphäre",
+        "description": "KI-Spuren, Logs, Local-First"
+      },
+      "localAi": {
+        "label": "Lokale KI",
+        "description": "Ollama, Routing, GPU"
+      },
+      "appearance": {
+        "label": "Design",
+        "description": "Akzent, Kitchen-Modus, A11y"
+      },
+      "policies": {
+        "label": "Policies",
+        "description": "Allergene & Regeln"
+      },
+      "allSettings": {
+        "label": "Haushalt & Sprache",
+        "description": "Name, Sprache, Wochenstart"
       }
     },
     "tech": {
-      "react": "Modernste UI-Library",
-      "gemini": "Fortschrittliche KI-Modelle",
-      "dexie": "IndexedDB-Wrapper",
-      "redux": "State-Management",
-      "tailwind": "Utility-First-Styling",
-      "vite": "Progressive Web App"
+      "react": "UI mit React 19 & lazy Routes",
+      "gemini": "Cloud-KI mit Zod-Validierung",
+      "ollama": "Optionale On-Device-Modelle",
+      "dexie": "IndexedDB, Live-Queries",
+      "redux": "UI- & Session-State",
+      "zustand": "Leichte Transient-UI",
+      "tailwind": "Design-System & A11y",
+      "vite": "PWA, Share Target, SW"
     },
     "philosophy": {
       "offlineFirst": {
-        "title": "Offline First",
-        "description": "Funktioniert immer und ueberall, auch im tiefsten Supermarkt-Keller."
+        "title": "Offline zuerst",
+        "description": "Küche funktioniert ohne Netz — Sync ist Ergänzung, nicht Voraussetzung."
       },
       "privacy": {
-        "title": "Privatsphaere",
-        "description": "Deine Daten gehoeren dir. Kein Tracking, keine Werbung."
+        "title": "Privatsphäre",
+        "description": "Deine Daten bleiben auf dem Gerät; Cloud nur mit deinem Schlüssel & deinem Server."
       },
       "performance": {
-        "title": "Performance",
-        "description": "Keine Ladezeiten. Sofortige Reaktion auf jede Eingabe."
+        "title": "Sofortigkeit",
+        "description": "Dexie + lokale UI — keine Wartezeit auf einen fernen Haushalts-Server."
+      },
+      "trust": {
+        "title": "Vertrauen",
+        "description": "Klare Toggles statt versteckter Telemetrie — du entscheidest, was gespeichert wird."
+      },
+      "open": {
+        "title": "Offene Exporte",
+        "description": "JSON, Markdown, CSV — kein Lock-in für deine Rezepte."
+      },
+      "sync": {
+        "title": "Sync nach Bedarf",
+        "description": "QR, Vault oder WebDAV — wähle die Passung für dein Zuhause."
       }
     },
     "search": {
-      "placeholder": "Wie kann ich...?",
+      "placeholder": "z. B. Backup, API-Schlüssel, Allergene…",
       "inputAria": "Suche in der Wissensdatenbank",
-      "resetAria": "Suche zuruecksetzen"
+      "resetAria": "Suche zurücksetzen"
     },
     "tabs": {
       "knowledge": "Wissen & FAQ",
-      "about": "System & Ueber"
+      "about": "System & Über",
+      "ariaLabel": "Hilfe-Bereiche"
     },
     "about": {
-      "technology": "Technologie",
-      "systemStatus": "Systemstatus",
-      "systemNormal": "System Normal",
-      "status": "Status",
+      "lead": "CulinaSync ist deine local-first Küchen-Assistentin: Vorrat, Planung, Kochen und Einkauf — optional mit Cloud- oder lokaler KI, immer mit exportierbaren Daten.",
+      "technology": "Technologie-Stack",
+      "systemStatus": "Live-Systemstatus",
+      "systemNormal": "Bereit",
+      "systemOffline": "Offline-Modus",
+      "status": "Netzwerk",
       "online": "Online",
+      "offline": "Offline",
       "version": "Version",
-      "storage": "Speicher",
-      "indexedDbActive": "IndexedDB Aktiv"
+      "storage": "Speicher (geschätzt)",
+      "indexedDbActive": "IndexedDB aktiv",
+      "dataLayer": "Datenhaltung",
+      "pwaInstalled": "Als App installiert"
     }
   },
   "whatsNew": {
@@ -506,7 +612,7 @@
       "plan": "Planen"
     },
     "toast": {
-      "bulkAddedToPlan": "{{count}} Rezepte zum Plan hinzugefügt."
+      "bulkAddedToMealPlan": "{{count}} Rezepte zum Plan hinzugefügt."
     },
     "empty": {
       "title": "Keine Rezepte gefunden",
@@ -522,9 +628,6 @@
     },
     "actions": {
       "addToPlan": "Zum Plan"
-    },
-    "toast": {
-      "bulkAddedToMealPlan": "{{count}} Rezepte zum Plan hinzugefügt."
     }
   },
   "recipeCard": {
@@ -611,25 +714,63 @@
   },
   "foodDatabase": {
     "items": {
-      "apple": { "name": "Apfel" },
-      "banana": { "name": "Banane" },
-      "egg": { "name": "Ei" },
-      "milk": { "name": "Milch" },
-      "bread": { "name": "Brot" },
-      "butter": { "name": "Butter" },
-      "cheese": { "name": "Käse" },
-      "chicken_breast": { "name": "Hähnchenbrust" },
-      "salmon": { "name": "Lachs" },
-      "rice": { "name": "Reis" },
-      "pasta": { "name": "Pasta" },
-      "tomato": { "name": "Tomate" },
-      "potato": { "name": "Kartoffel" },
-      "almond": { "name": "Mandel" },
-      "hazelnut": { "name": "Haselnuss" },
-      "soy": { "name": "Soja" },
-      "wheat": { "name": "Weizen" },
-      "peanut": { "name": "Erdnuss" },
-      "shrimp": { "name": "Garnele" }
+      "apple": {
+        "name": "Apfel"
+      },
+      "banana": {
+        "name": "Banane"
+      },
+      "egg": {
+        "name": "Ei"
+      },
+      "milk": {
+        "name": "Milch"
+      },
+      "bread": {
+        "name": "Brot"
+      },
+      "butter": {
+        "name": "Butter"
+      },
+      "cheese": {
+        "name": "Käse"
+      },
+      "chicken_breast": {
+        "name": "Hähnchenbrust"
+      },
+      "salmon": {
+        "name": "Lachs"
+      },
+      "rice": {
+        "name": "Reis"
+      },
+      "pasta": {
+        "name": "Pasta"
+      },
+      "tomato": {
+        "name": "Tomate"
+      },
+      "potato": {
+        "name": "Kartoffel"
+      },
+      "almond": {
+        "name": "Mandel"
+      },
+      "hazelnut": {
+        "name": "Haselnuss"
+      },
+      "soy": {
+        "name": "Soja"
+      },
+      "wheat": {
+        "name": "Weizen"
+      },
+      "peanut": {
+        "name": "Erdnuss"
+      },
+      "shrimp": {
+        "name": "Garnele"
+      }
     },
     "allergens": {
       "egg": "Ei",
@@ -673,12 +814,48 @@
       "soup": "Herzhafte Suppe"
     },
     "shoppingCatalog": {
-      "breakfast": ["Brot", "Butter", "Milch", "Eier", "Marmelade"],
-      "grill": ["Baguette", "Tomaten", "Mozzarella", "Bratwurst", "Senf"],
-      "baking": ["Mehl", "Zucker", "Butter", "Eier", "Backpulver"],
-      "pasta": ["Spaghetti", "Parmesan", "Tomaten", "Knoblauch", "Basilikum"],
-      "lasagne": ["Lasagneplatten", "Passata", "Hackfleisch", "Mozzarella", "Zwiebeln"],
-      "salad": ["Gurke", "Tomaten", "Salat", "Olivenöl", "Zitronen"]
+      "breakfast": [
+        "Brot",
+        "Butter",
+        "Milch",
+        "Eier",
+        "Marmelade"
+      ],
+      "grill": [
+        "Baguette",
+        "Tomaten",
+        "Mozzarella",
+        "Bratwurst",
+        "Senf"
+      ],
+      "baking": [
+        "Mehl",
+        "Zucker",
+        "Butter",
+        "Eier",
+        "Backpulver"
+      ],
+      "pasta": [
+        "Spaghetti",
+        "Parmesan",
+        "Tomaten",
+        "Knoblauch",
+        "Basilikum"
+      ],
+      "lasagne": [
+        "Lasagneplatten",
+        "Passata",
+        "Hackfleisch",
+        "Mozzarella",
+        "Zwiebeln"
+      ],
+      "salad": [
+        "Gurke",
+        "Tomaten",
+        "Salat",
+        "Olivenöl",
+        "Zitronen"
+      ]
     },
     "defaultCuisine": "Alltagsküche",
     "defaultPantryTopic": "Vorratsküche",

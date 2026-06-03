@@ -10,6 +10,7 @@ import { applyAccentTheme } from '../lib/accentTheme';
 import { Button } from './ui';
 
 import { SettingsSidebar } from './settings/SettingsSidebar';
+import { SettingsPanelIntro } from './settings/SettingsPanelIntro';
 import { AppearancePanel } from './settings/panels/AppearancePanel';
 import { AiChefPanel } from './settings/panels/AiChefPanel';
 import { DataPanel } from './settings/panels/DataPanel';
@@ -23,6 +24,11 @@ import { PrivacyPanel } from './settings/panels/PrivacyPanel';
 import { WorkspacePanel } from './settings/panels/WorkspacePanel';
 
 const VoicePanel = lazy(() => import('./settings/panels/VoicePanel').then((module) => ({ default: module.VoicePanel })));
+
+const SETTINGS_SECTION_IDS = new Set([
+    'appearance', 'modules', 'workspace', 'ai', 'localAi',
+    'policies', 'privacy', 'speech', 'apikey', 'health', 'community', 'data',
+]);
 
 const SECTION_TITLE_KEYS: Record<string, string> = {
   appearance: 'settings.sections.appearance',
@@ -64,6 +70,7 @@ const Settings: React.FC<SettingsProps> = ({
     const localSettings = draftSettings ?? globalSettings;
     const activeSection = useMemo(() => {
         if (focusAction) {
+            if (SETTINGS_SECTION_IDS.has(focusAction)) return focusAction;
             if (['import', 'export'].includes(focusAction)) return 'data';
             if (['speech', 'voice'].includes(focusAction)) return 'speech';
             if (['apikey', 'api-key', 'api'].includes(focusAction)) return 'apikey';
@@ -159,6 +166,7 @@ const Settings: React.FC<SettingsProps> = ({
                      )}
                  </div>
 
+                 <SettingsPanelIntro sectionId={activeSection} />
                  {renderPanel()}
              </div>
         </div>
