@@ -26,6 +26,10 @@ Vorgänger: [STATUS-2026-06-02.md](./STATUS-2026-06-02.md) (M5 Coverage abgeschl
 | [DEVELOPMENT.md](./DEVELOPMENT.md) | Setup, Befehle, Konventionen |
 | [TESTING.md](./TESTING.md) | Vitest, Coverage, Playwright E2E |
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | CI/CD, Pages, Vercel, Lighthouse |
+| [DEPLOY-PAGES-VERCEL.md](./DEPLOY-PAGES-VERCEL.md) | Pages + Vercel Handbuch, Verify-Skripte |
+| [AUDIT-vNEXT-2026-06-03.md](./AUDIT-vNEXT-2026-06-03.md) | Full-Scale Audit vNext |
+| [AUDIT-REMEDIATION-BACKLOG.md](./AUDIT-REMEDIATION-BACKLOG.md) | Priorisierter Remediation-Backlog |
+| [AUDIT-REMEDIATION-PLAN.md](./AUDIT-REMEDIATION-PLAN.md) | Umsetzungsplan Audit-Findings |
 | [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) | Fehlerbilder |
 | [SECURITY-AUDIT-2026.md](./SECURITY-AUDIT-2026.md) | Security-Review |
 | [LIVE-DEMO-QA.md](./LIVE-DEMO-QA.md) | Manuelle Demo-Checkliste |

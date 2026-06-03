@@ -26,7 +26,9 @@ test.describe('CulinaSync Navigation & Offline', () => {
       Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false });
       window.dispatchEvent(new Event('offline'));
     });
-    await expect(page.getByRole('status')).toContainText(/offline/i, { timeout: 15_000 });
+    await expect(page.locator('#offline-status-banner')).toContainText(/offline/i, {
+      timeout: 15_000,
+    });
     await context.setOffline(false);
   });
 });

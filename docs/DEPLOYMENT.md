@@ -37,7 +37,7 @@ Das Repository verwendet GitHub Actions fuer CI, Deploy und CodeQL.
 - **`node scripts/verify-pages-artifact.mjs`** vor Upload (index.html, 404.html aus `public/`)
 - Optional lokal: **Lighthouse CI** mit `lighthouserc.json` (`staticDistDir: ./apps/web/dist`) nach `pnpm run build`
 - Deployment nach GitHub Pages
-- Post-Deploy: **`node scripts/verify-live-deployments.mjs`** (Pages + Vercel HTTP 200)
+- Post-Deploy: **`node scripts/verify-live-deployments.mjs`** (Pages + Vercel HTTP 200; Deploy-Job benötigt **`actions/checkout`** fuer das Skript)
 
 ### CodeQL
 

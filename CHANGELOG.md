@@ -9,8 +9,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Hinzugefuegt
 
-- **Deploy:** Handbuch [docs/DEPLOY-PAGES-VERCEL.md](docs/DEPLOY-PAGES-VERCEL.md); `apps/web/vercel.json`; Workflows `deploy-health.yml`; Skripte `verify-pages-artifact`, `verify-live-deployments`; Post-Deploy-Smoke in `deploy.yml`.
-- **E2E:** Offline-Banner robuster (`useOnlineStatus` Initial-Sync; Playwright offline vor `goto`).
+- **Deploy:** Handbuch [docs/DEPLOY-PAGES-VERCEL.md](docs/DEPLOY-PAGES-VERCEL.md); `apps/web/vercel.json`; Workflows `deploy-health.yml`; Skripte `verify-pages-artifact`, `verify-live-deployments`; Post-Deploy-Smoke in `deploy.yml` (mit `checkout` im Deploy-Job).
+- **E2E:** Offline-Banner robuster (`useOnlineStatus` Initial-Sync; Playwright: Seite laden, dann `setOffline` + `offline`-Event).
 
 ### Hinzugefuegt
 

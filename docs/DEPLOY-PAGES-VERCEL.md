@@ -31,7 +31,8 @@ flowchart LR
   validate --> artifact[apps/web/dist]
   artifact --> deploy[deploy-pages@v5]
   deploy --> pages[github-pages environment]
-  pages --> smoke[verify-live-deployments.mjs]
+  pages --> checkout[checkout@v6]
+  checkout --> smoke[verify-live-deployments.mjs]
 ```
 
 - **Build:** `pnpm run build` mit `GITHUB_ACTIONS=true` → `vite.config.ts` setzt `base: '/CulinaSync-de-/'`
@@ -67,12 +68,12 @@ pnpm --filter web exec vite preview --host 127.0.0.1 --port 4173
 |-------------|------|
 | **Root Directory** | `apps/web` |
 | **Framework Preset** | Vite (oder Other + `vercel.json`) |
-| **Build Command** | `pnpm run build` (siehe `apps/web/vercel.json`) |
+| **Build Command** | `cd ../.. && pnpm run build --filter=web` (siehe `apps/web/vercel.json`) |
 | **Output Directory** | `dist` |
 | **Install Command** | `cd ../.. && pnpm install --frozen-lockfile` |
 | **Node.js** | 24.x |
 
-Repo-Datei **`apps/web/vercel.json`** dokumentiert Install/Build/Output, SPA-Rewrites und Security-Header — auch wenn das Dashboard bereits konfiguriert ist.
+Repo-Datei **`apps/web/vercel.json`** dokumentiert Install/Build/Output und Security-Header — auch wenn das Dashboard bereits konfiguriert ist. SPA-Fallback über Vite/`index.html` (keine zusätzlichen Vercel-Rewrites nötig bei statischem Export).
 
 ### Unterschied zu Pages
 
