@@ -12,6 +12,8 @@ import { db } from '../services/dbInstance';
 import { addToast, setFocusAction, setVoiceAction } from '../store/slices/uiSlice';
 import { hasApiKey } from '../services/apiKeyService';
 import { useAiChef } from '../features/ai-chef/hooks/useAiChef';
+import { useTransientUiStore } from '../store/transientUiStore';
+import { PwaShareBanner } from './pwa/PwaShareBanner';
 
 const HISTORY_KEY = 'culinaSyncAiChefHistory';
 const MAX_HISTORY = 5;
@@ -20,6 +22,7 @@ const AiChef: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { voiceAction, focusAction } = useAppSelector(state => state.ui);
+  const pendingShareText = useTransientUiStore((s) => s.pendingShareText);
 
   const [craving, setCraving] = useState('');
   const [includeIngredients, setIncludeIngredients] = useState<string[]>([]);
@@ -37,7 +40,8 @@ const AiChef: React.FC = () => {
 
   const initialPrompt = voiceAction?.type === 'GENERATE_RECIPE' ? voiceAction.payload : undefined;
   const voiceCraving = useMemo(() => initialPrompt?.split('#')[0] ?? '', [initialPrompt]);
-  const effectiveCraving = voiceCraving || craving;
+  const shareCraving = pendingShareText?.trim() ?? '';
+  const effectiveCraving = voiceCraving || shareCraving || craving;
   const deferredCraving = useDeferredValue(effectiveCraving);
   const currentPrompt: StructuredPrompt = {
     craving: deferredCraving,
@@ -60,6 +64,11 @@ const AiChef: React.FC = () => {
       dispatch(setFocusAction(null));
     }
   }, [focusAction, dispatch]);
+
+  useEffect(() => {
+    if (!pendingShareText?.trim()) return;
+    dispatch(setFocusAction('prompt'));
+  }, [pendingShareText, dispatch]);
 
   useEffect(() => {
     hasApiKey()
@@ -116,7 +125,7 @@ const AiChef: React.FC = () => {
   };
   
   if (finalRecipe) {
-      return <RecipeDetail recipe={finalRecipe} onBack={backToIdeas} />
+      return <RecipeDetail recipe={finalRecipe} onBack={backToIdeas} />;
   }
 
   if (isLoading) {
@@ -133,6 +142,8 @@ const AiChef: React.FC = () => {
         <h2 className="text-3xl font-bold tracking-tight text-zinc-100 bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">KI-Chef</h2>
         <p className="text-zinc-400 mt-1">Dein persönlicher Sternekoch.</p>
       </div>
+
+      <PwaShareBanner />
 
       {error && (
         <div className="flex items-start gap-4 bg-red-900/20 border border-red-500/30 text-red-300 p-4 rounded-lg page-fade-in">

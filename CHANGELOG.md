@@ -10,8 +10,11 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ### Geaendert
 
 - **Deps:** `react` und `react-dom` auf **19.2.7** ausgerichtet; `pnpm-lock.yaml` nach Main-Merges repariert.
+- **PWA:** Service Worker aktualisiert Updates erst nach Nutzer-Bestätigung (`SKIP_WAITING`); erweitertes Web-App-Manifest (Share Target, File Handler, Protocol Handler, Screenshots, Launch Handler).
 
 ### Hinzugefuegt
+
+- **PWA (Advanced):** Hooks `usePwaInstall`, `usePwaUpdate`, `usePwaLaunchHandlers`, `useAppBadge`; `PwaStatusCard` in Einstellungen; Share-Target → KI-Chef; Datei-Handler → Vault-Import; `docs/PWA.md`.
 
 - **M10.2:** Nextcloud-Sync-Adapter (`nextcloudSyncAdapter`, `syncTransport`, Provider-UI, i18n-Fehlercodes).
 - **M8:** Tauri-2-Cargo-Workspace (`src-tauri/Cargo.toml`, `capabilities/`), Icon-Script, `tauri-release.yml` Matrix.

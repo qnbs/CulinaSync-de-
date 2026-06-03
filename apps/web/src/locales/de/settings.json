@@ -390,6 +390,30 @@
         "title": "App installieren",
         "description": "Fuer das beste Offline-Erlebnis."
       },
+      "pwa": {
+        "title": "Progressive Web App",
+        "description": "Installation, Offline-Cache und Plattform-Integration.",
+        "standalone": "Installiert",
+        "browserTab": "Browser-Tab",
+        "online": "Online",
+        "offline": "Offline",
+        "iosInstallHint": "Auf iPhone/iPad: Teilen → Zum Home-Bildschirm. CulinaSync oeffnet sich wie eine native App.",
+        "checkUpdate": "Nach Updates suchen",
+        "capabilitiesTitle": "Plattform-Funktionen",
+        "notSupported": "nicht verfuegbar",
+        "fileReceived": "Datei „{{name}}“ empfangen — Vault-Import startet.",
+        "capability": {
+          "install": "Installation (beforeinstallprompt)",
+          "standalone": "Standalone-Anzeige",
+          "serviceWorker": "Service Worker",
+          "shareTarget": "Teilen-Ziel (Share Target)",
+          "fileHandling": "Datei-Oeffnen (.csb / .json)",
+          "appBadge": "App-Badge (Einkaufsliste)",
+          "backgroundSync": "Background Sync",
+          "push": "Push-Benachrichtigungen",
+          "periodicSync": "Periodic Background Sync"
+        }
+      },
       "storage": {
         "title": "Speicherstatus",
         "used": "verwendet",

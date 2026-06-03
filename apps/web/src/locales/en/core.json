@@ -48,7 +48,11 @@
     "pwa": {
       "updateDownloading": "App update is downloading.",
       "updateReady": "A new version is ready. Please reload.",
-      "offlineReady": "Offline mode is ready."
+      "offlineReady": "Offline mode is ready.",
+      "updateCheckDone": "Checked for updates.",
+      "updateCheckFailed": "Update check failed.",
+      "shareReceivedTitle": "Shared content",
+      "shareReceivedHint": "Text is in the AI Chef prompt — adjust if needed."
     },
     "offline": {
       "banner": "You are offline — pantry, recipes, meal plan, and shopping list still work locally.",
