@@ -1,0 +1,27 @@
+{
+  "aiChef": {
+    "input": {
+      "title": "Your craving",
+      "surpriseMe": "Surprise me",
+      "promptPlaceholder": "What are you craving today? (e.g. 'Something warming with curry' or 'A light summer dish')",
+      "askChef": "Ask chef",
+      "ingredientsTitle": "Ingredients & pantry",
+      "rescueExpiringTitle": "Rescue expiring items",
+      "rescueExpiringDescription": "Add {{items}} automatically.",
+      "includeLabel": "Must include",
+      "includePlaceholder": "+ Ingredient",
+      "excludeLabel": "Must not include",
+      "excludePlaceholder": "- Ingredient",
+      "contextTitle": "Context & modifiers",
+      "noExtras": "No extras"
+    },
+    "results": {
+      "title": "I have {{count}} ideas for you.",
+      "description": "Choose your favorite to generate the full recipe.",
+      "newRequest": "New request",
+      "selectAria": "Select recipe idea {{title}} and generate full recipe",
+      "creating": "Creating...",
+      "createRecipe": "Create recipe"
+    }
+  }
+}

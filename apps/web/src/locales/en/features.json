@@ -15,6 +15,7 @@
         "pwa": "App & PWA"
       },
       "keywords": {
+        "tour": "onboarding tour introduction",
         "offline": "offline IndexedDB local",
         "indexeddb": "Dexie storage",
         "gemini": "Gemini API key",
@@ -69,6 +70,10 @@
       "cookVoice": {
         "question": "Can I control cooking by voice?",
         "answer": "Yes — under Speech & audio set TTS, Whisper (local), or browser recognition. Cook mode supports voice for timers and navigation; destructive commands can require confirmation."
+      },
+      "onboarding": {
+        "question": "How do I restart the introduction?",
+        "answer": "In Help → Pro tips, choose “Open tour” (first card). The tour covers navigation, main content, and module switching — you can load demo pantry data again."
       }
     },
     "tips": {
@@ -102,6 +107,11 @@
         "title": "AI Chef with context",
         "description": "Combine creativity, diet, and policies — then ask the chef.",
         "actionLabel": "Open AI Chef"
+      },
+      "onboardingReplay": {
+        "title": "Replay onboarding",
+        "description": "Re-run the welcome tour covering header, main area, and bottom navigation anytime.",
+        "actionLabel": "Open tour"
       }
     },
     "quickLinks": {
@@ -209,7 +219,7 @@
   },
   "onboarding": {
     "title": "Welcome to CulinaSync!",
-    "description": "Start with a guided tour or load demo data for an interactive tutorial.",
+    "description": "Start with a guided tour or load demo data for a hands-on tutorial.",
     "startTour": "Start tour",
     "tour": {
       "title": "Guided tour",
@@ -224,6 +234,14 @@
       "load": "Load demo",
       "loading": "Loading demo...",
       "loaded": "Demo loaded"
+    },
+    "skip": "Skip",
+    "joyride": {
+      "back": "Back",
+      "close": "Close",
+      "last": "Done",
+      "next": "Next",
+      "skip": "Skip tour"
     }
   },
   "mealPlanner": {

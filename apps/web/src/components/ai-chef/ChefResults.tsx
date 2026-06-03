@@ -17,15 +17,15 @@ export const ChefResults: React.FC<ChefResultsProps> = ({ ideas, onSelectIdea, o
         <div className="space-y-8 page-fade-in max-w-6xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
                 <div>
-                    <h3 className="text-2xl font-bold text-zinc-100">{t('settings.aiChef.results.title', { count: ideas.length })}</h3>
-                    <p className="text-zinc-400">{t('settings.aiChef.results.description')}</p>
+                    <h3 className="text-2xl font-bold text-zinc-100">{t('aiChef.results.title', { count: ideas.length })}</h3>
+                    <p className="text-zinc-400">{t('aiChef.results.description')}</p>
                 </div>
                 <button 
                     type="button"
                     onClick={onReset}
                     className="text-sm font-medium text-zinc-400 hover:text-zinc-200 flex items-center gap-2 py-2 px-4 rounded-lg hover:bg-zinc-800 transition-colors"
                 >
-                    <RefreshCw size={16}/> {t('settings.aiChef.results.newRequest')}
+                    <RefreshCw size={16}/> {t('aiChef.results.newRequest')}
                 </button>
             </div>
 
@@ -51,10 +51,10 @@ export const ChefResults: React.FC<ChefResultsProps> = ({ ideas, onSelectIdea, o
                                 type="button"
                                 onClick={() => onSelectIdea(idea)}
                                 disabled={isLoading}
-                                aria-label={t('settings.aiChef.results.selectAria', { title: idea.recipeTitle })}
+                                aria-label={t('aiChef.results.selectAria', { title: idea.recipeTitle })}
                                 className="mt-6 w-full py-3 rounded-xl bg-zinc-800 text-zinc-200 font-bold group-hover:bg-[var(--color-accent-500)] group-hover:text-zinc-900 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-wait"
                             >
-                                {isPending ? t('settings.aiChef.results.creating') : t('settings.aiChef.results.createRecipe')} <ArrowRight size={18}/>
+                                {isPending ? t('aiChef.results.creating') : t('aiChef.results.createRecipe')} <ArrowRight size={18}/>
                             </button>
                         </div>
                     );

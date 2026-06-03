@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Joyride, STATUS, type EventData, type Step } from 'react-joyride';
 import { ChefHat, FlaskConical, Sparkles, PlayCircle, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -8,23 +8,37 @@ import { db } from '../services/dbInstance';
 const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
     const { t } = useTranslation();
 
-    const tourSteps: Step[] = [
-        {
-            target: '[data-tour="header"]',
-            content: t('onboarding.tour.step1'),
-            placement: 'bottom',
-        },
-        {
-            target: '#main-content',
-            content: t('onboarding.tour.step2'),
-            placement: 'top',
-        },
-        {
-            target: '[data-tour="bottom-nav"]',
-            content: t('onboarding.tour.step3'),
-            placement: 'top',
-        },
-    ];
+    const tourSteps: Step[] = useMemo(
+        () => [
+            {
+                target: '[data-tour="header"]',
+                content: t('onboarding.tour.step1'),
+                placement: 'bottom',
+            },
+            {
+                target: '#main-content',
+                content: t('onboarding.tour.step2'),
+                placement: 'top',
+            },
+            {
+                target: '[data-tour="bottom-nav"]',
+                content: t('onboarding.tour.step3'),
+                placement: 'top',
+            },
+        ],
+        [t],
+    );
+
+    const joyrideLocale = useMemo(
+        () => ({
+            back: t('onboarding.joyride.back'),
+            close: t('onboarding.joyride.close'),
+            last: t('onboarding.joyride.last'),
+            next: t('onboarding.joyride.next'),
+            skip: t('onboarding.joyride.skip'),
+        }),
+        [t],
+    );
 
     const [runTour, setRunTour] = useState(false);
     const [seedLoading, setSeedLoading] = useState(false);
@@ -81,19 +95,13 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
                     primaryColor: '#f59e0b',
                     buttons: ['back', 'skip', 'primary'],
                 }}
-                locale={{
-                    back: 'Zurueck',
-                    close: 'Schliessen',
-                    last: 'Fertig',
-                    next: 'Weiter',
-                    skip: 'Ueberspringen',
-                }}
+                locale={joyrideLocale}
             />
             {!runTour && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 page-fade-in glass-overlay">
                     <div ref={modalRef} className="w-full max-w-lg text-center rounded-2xl p-8 space-y-6 modal-fade-in glass-modal" role="dialog" aria-modal="true" aria-labelledby="onboarding-title" aria-describedby="onboarding-description" tabIndex={-1}>
                     <div className="flex justify-center items-center gap-4 text-[var(--color-accent-400)]">
-                       <ChefHat size={32} />
+                       <ChefHat size={32} aria-hidden />
                               <h2 id="onboarding-title" className="text-2xl font-bold text-zinc-100">{t('onboarding.title')}</h2>
                     </div>
 
@@ -101,14 +109,14 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
 
                     <div className="grid grid-cols-1 gap-3 text-left">
                         <div className="glass-card rounded-xl p-4 flex items-start gap-3">
-                            <PlayCircle className="text-[var(--color-accent-400)] mt-0.5" size={20} />
+                            <PlayCircle className="text-[var(--color-accent-400)] mt-0.5" size={20} aria-hidden />
                             <div>
                                 <h3 className="font-semibold text-zinc-100">{t('onboarding.tour.title')}</h3>
                                 <p className="text-sm text-zinc-400">{t('onboarding.tour.description')}</p>
                             </div>
                         </div>
                         <div className="glass-card rounded-xl p-4 flex items-start gap-3">
-                            <FlaskConical className="text-emerald-400 mt-0.5" size={20} />
+                            <FlaskConical className="text-emerald-400 mt-0.5" size={20} aria-hidden />
                             <div>
                                 <h3 className="font-semibold text-zinc-100">{t('onboarding.demo.title')}</h3>
                                 <p className="text-sm text-zinc-400">{t('onboarding.demo.description')}</p>
@@ -123,7 +131,7 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
                             onClick={() => setRunTour(true)}
                             className="flex-1 flex items-center justify-center gap-2 bg-[var(--color-accent-500)] text-zinc-900 font-bold py-3 px-4 rounded-md hover:bg-[var(--color-accent-400)] transition-colors"
                         >
-                            <Sparkles size={18} /> {t('onboarding.startTour')}
+                            <Sparkles size={18} aria-hidden /> {t('onboarding.startTour')}
                         </button>
                         <button
                             type="button"
@@ -131,7 +139,7 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
                             onClick={handleSeedData}
                             className="flex-1 flex items-center justify-center gap-2 bg-zinc-800 text-zinc-100 font-bold py-3 px-4 rounded-md border border-zinc-700 hover:bg-zinc-700 disabled:opacity-50"
                         >
-                            {seedDone ? <Check size={18} /> : <FlaskConical size={18} />}
+                            {seedDone ? <Check size={18} aria-hidden /> : <FlaskConical size={18} aria-hidden />}
                             {seedDone ? t('onboarding.demo.loaded') : (seedLoading ? t('onboarding.demo.loading') : t('onboarding.demo.load'))}
                         </button>
                     </div>
@@ -141,7 +149,7 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
                         onClick={onComplete}
                         className="text-sm text-zinc-500 hover:text-zinc-300"
                     >
-                        Ueberspringen
+                        {t('onboarding.skip')}
                     </button>
                     </div>
                 </div>

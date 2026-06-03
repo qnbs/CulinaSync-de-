@@ -15,6 +15,7 @@
         "pwa": "App & PWA"
       },
       "keywords": {
+        "tour": "Onboarding Tour Einführung",
         "offline": "offline IndexedDB lokal",
         "indexeddb": "Dexie Speicher",
         "gemini": "Gemini API Schlüssel",
@@ -69,6 +70,10 @@
       "cookVoice": {
         "question": "Kann ich beim Kochen per Sprache steuern?",
         "answer": "Ja — unter Sprachsteuerung & Audio stellst du TTS, Whisper (lokal) oder Browser-Erkennung ein. Im Kochmodus helfen Sprachbefehle bei Timer und Navigation; destruktive Befehle lassen sich bestätigen."
+      },
+      "onboarding": {
+        "question": "Wie starte ich die Einführung erneut?",
+        "answer": "Unter Hilfe → Pro-Tipps „Tour öffnen“ oder in den Pro-Tipps ganz oben. Die Tour erklärt Navigation, Hauptbereich und Modulwechsel — Demo-Daten kannst du erneut laden."
       }
     },
     "tips": {
@@ -102,6 +107,11 @@
         "title": "KI-Chef mit Kontext",
         "description": "Kreativität, Ernährung und Policies kombinieren — dann „Chef fragen“.",
         "actionLabel": "KI-Chef öffnen"
+      },
+      "onboardingReplay": {
+        "title": "Onboarding erneut starten",
+        "description": "Die Willkommens-Tour mit Header, Hauptbereich und Bottom-Navigation jederzeit wiederholen.",
+        "actionLabel": "Tour öffnen"
       }
     },
     "quickLinks": {
@@ -209,7 +219,7 @@
   },
   "onboarding": {
     "title": "Willkommen bei CulinaSync!",
-    "description": "Starte mit einer gefuehrten Tour oder lade Demo-Daten fuer ein interaktives Tutorial.",
+    "description": "Starte mit einer geführten Tour oder lade Demo-Daten für ein interaktives Tutorial.",
     "startTour": "Tour starten",
     "tour": {
       "title": "Gefuehrte Tour",
@@ -224,6 +234,14 @@
       "load": "Demo laden",
       "loading": "Lade Demo...",
       "loaded": "Demo geladen"
+    },
+    "skip": "Überspringen",
+    "joyride": {
+      "back": "Zurück",
+      "close": "Schließen",
+      "last": "Fertig",
+      "next": "Weiter",
+      "skip": "Tour überspringen"
     }
   },
   "mealPlanner": {

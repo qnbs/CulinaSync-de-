@@ -57,14 +57,14 @@ const App: React.FC = () => {
   const isCommandPaletteOpen = useTransientUiStore((s) => s.commandPaletteOpen);
   const setCommandPaletteOpen = useTransientUiStore((s) => s.setCommandPaletteOpen);
   const toggleCommandPalette = useTransientUiStore((s) => s.toggleCommandPalette);
+  const onboardingOpen = useTransientUiStore((s) => s.onboardingOpen);
+  const onboardingSession = useTransientUiStore((s) => s.onboardingSession);
+  const closeOnboarding = useTransientUiStore((s) => s.closeOnboarding);
 
   const [appVersion] = useState<string>(APP_VERSION || 'N/A');
-  const [showOnboarding, setShowOnboarding] = useState(() => {
-    if (typeof window === 'undefined') {
-      return false;
-    }
-    return !window.localStorage.getItem('culinaSyncOnboarded');
-  });
+  const showOnboarding =
+    onboardingOpen ||
+    (typeof window !== 'undefined' && !window.localStorage.getItem('culinaSyncOnboarded'));
   const isOnline = useOnlineStatus();
   useDeepLinkNavigation();
   useAccentTheme();
@@ -105,7 +105,7 @@ const App: React.FC = () => {
 
   const handleOnboardingComplete = () => {
     localStorage.setItem('culinaSyncOnboarded', 'true');
-    setShowOnboarding(false);
+    closeOnboarding();
   };
 
   const removeToast = useCallback((id: string) => {
@@ -293,7 +293,12 @@ const App: React.FC = () => {
           {t('app.skipToContent')}
         </a>
         <Suspense fallback={null}>
-          {showOnboarding && <Onboarding onComplete={handleOnboardingComplete} />}
+          {showOnboarding && (
+            <Onboarding
+              key={`onboarding-${onboardingSession}`}
+              onComplete={handleOnboardingComplete}
+            />
+          )}
         </Suspense>
         <div data-tour="header">
           <Header 
