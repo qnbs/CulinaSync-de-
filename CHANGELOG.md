@@ -7,6 +7,12 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben
+
+- **CI Deploy:** `deploy.yml` — `checkout` vor Post-Deploy-Verify; Vercel-HTTP-401 (Deployment Protection) als Warnung statt Hard-Fail.
+- **CI E2E:** Offline-Smoke lädt Seite zuerst, dann offline; Locator `#offline-status-banner` (strict mode).
+- **Vercel:** Monorepo-Build `pnpm run build --filter=web` in `vercel.json`.
+
 ### Hinzugefuegt
 
 - **Deploy:** Handbuch [docs/DEPLOY-PAGES-VERCEL.md](docs/DEPLOY-PAGES-VERCEL.md); `apps/web/vercel.json`; Workflows `deploy-health.yml`; Skripte `verify-pages-artifact`, `verify-live-deployments`; Post-Deploy-Smoke in `deploy.yml` (mit `checkout` im Deploy-Job).

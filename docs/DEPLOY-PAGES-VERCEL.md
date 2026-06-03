@@ -54,6 +54,7 @@ pnpm --filter web exec vite preview --host 127.0.0.1 --port 4173
 
 | Symptom | Ursache | Fix |
 |---------|---------|-----|
+| Deploy-Smoke: Vercel 401 | Deployment Protection aktiv | Erwartet: Warnung `SKIP (geschützt)`; Pages-Check bleibt hart |
 | Weiße Seite, 404 auf Assets | Falscher `base` / Preview ohne Subpath | `GITHUB_ACTIONS=true` beim Build; Preview-URL mit `/CulinaSync-de-/` |
 | Deep-Link 404 | `dist/404.html` fehlt | `public/404.html` prüfen; `verify-pages-artifact` |
 | Alter Cache | CDN/Browser | Hard-Reload; `?v=` Query |
