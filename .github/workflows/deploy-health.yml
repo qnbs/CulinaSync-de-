@@ -1,0 +1,29 @@
+# =============================================================================
+# CulinaSync – Deploy Health (manuell / nach Incidents)
+# =============================================================================
+# Prüft GitHub Pages + Vercel Production per HTTP. Kein Build.
+# =============================================================================
+
+name: Deploy Health
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Verify GitHub Pages + Vercel URLs
+        run: node scripts/verify-live-deployments.mjs

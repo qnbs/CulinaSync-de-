@@ -17,7 +17,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "preview": "vite preview",
-    "predeploy": "pnpm run build && pnpm run check:bundle-budget && cp dist/index.html dist/404.html"
+    "predeploy": "pnpm run build && pnpm run check:bundle-budget",
+    "verify:pages-artifact": "node ../../scripts/verify-pages-artifact.mjs dist"
   },
   "dependencies": {
     "@domain/ai-core": "workspace:*",

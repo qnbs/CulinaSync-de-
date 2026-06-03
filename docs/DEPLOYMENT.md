@@ -6,8 +6,10 @@ Das Repository verwendet GitHub Actions fuer CI, Deploy und CodeQL.
 
 - CI: `.github/workflows/ci.yml`
 - Deploy: `.github/workflows/deploy.yml`
+- Deploy Health: `.github/workflows/deploy-health.yml` (Live-URL-Smoke, optional Lighthouse)
 - CodeQL: `.github/workflows/codeql.yml`
-- **Vercel (Preview/Production):** Projekt `culina-sync-de-web` (Turbo-Auto-Detect, Build-Output `apps/web/dist` — kein separates `vercel.json` nötig, solange Dashboard-Root mit Monorepo übereinstimmt)
+- **Vollständiges Pages/Vercel-Handbuch:** [DEPLOY-PAGES-VERCEL.md](./DEPLOY-PAGES-VERCEL.md)
+- **Vercel (Preview/Production):** Projekt `culina-sync-de-web`; Repo-Config `apps/web/vercel.json` (Dashboard-Root `apps/web`, Output `dist`)
 
 ## Build- und Deploy-Fluss
 
@@ -32,8 +34,10 @@ Das Repository verwendet GitHub Actions fuer CI, Deploy und CodeQL.
 - identischer pnpm-/Node-Setup wie Validate (wiederverwendbarer Workflow `validate.yml` mit `upload-pages-artifact: true`)
 - Lint, **Typecheck**, Tests **mit Coverage**, Build, Bundle-Budget
 - Upload des **`apps/web/dist`**-Artifacts fuer Pages
+- **`node scripts/verify-pages-artifact.mjs`** vor Upload (index.html, 404.html aus `public/`)
 - Optional lokal: **Lighthouse CI** mit `lighthouserc.json` (`staticDistDir: ./apps/web/dist`) nach `pnpm run build`
 - Deployment nach GitHub Pages
+- Post-Deploy: **`node scripts/verify-live-deployments.mjs`** (Pages + Vercel HTTP 200)
 
 ### CodeQL
 
@@ -73,12 +77,14 @@ Diese Warnungen stammen aktuell von Upstream-Runtimes der GitHub-verwalteten Act
 
 ## Vercel
 
-- **Root:** Repository-Root (pnpm-Workspace, Turbo erkennt `web`-Package).
-- **Install:** `pnpm install` (Lockfile muss konsistent sein — `pnpm install --frozen-lockfile` wie in CI).
-- **Build:** Turbo `web`-Package (`tsgo && vite build`); Vercel erkennt Turbo automatisch.
-- **Output:** `apps/web/dist` (Vite `base` ist lokal `/`, nicht der GitHub-Pages-Pfad). Im Vercel-Dashboard **nicht** fälschlich nur `dist` am Repo-Root erwarten, wenn der Build im Workspace `apps/web` landet.
-- **Node:** 24.x (wie `package.json` `engines` und GitHub Actions).
-- Typischer Production-Fehler nach Main-Merges: `ERR_PNPM_LOCKFILE_MISSING_DEPENDENCY` (kaputtes `pnpm-lock.yaml`) oder TS-Fehler durch unvollständige UI-Migrationen — beides blockiert den Build vor dem Vite-Schritt.
+Siehe **[DEPLOY-PAGES-VERCEL.md](./DEPLOY-PAGES-VERCEL.md)** für Dashboard-Matrix, Rewrites und Troubleshooting.
+
+- **Root:** `apps/web` im Dashboard; **`apps/web/vercel.json`** im Repo
+- **Install:** `cd ../.. && pnpm install --frozen-lockfile`
+- **Build:** `pnpm run build` → `apps/web/dist`
+- **Output:** `dist` (relativ zu `apps/web`); Vite `base` **`/`** (nicht `/CulinaSync-de-/`)
+- **Node:** 24.x
+- **Verify:** `pnpm run verify:deploy`
 
 ## Operative Checks nach einem produktionsrelevanten Fix
 

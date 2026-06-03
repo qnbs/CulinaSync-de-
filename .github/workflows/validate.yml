@@ -106,6 +106,10 @@ jobs:
             apps/web/test-results
           retention-days: 7
 
+      - name: Verify GitHub Pages artifact
+        if: inputs.upload-pages-artifact
+        run: node scripts/verify-pages-artifact.mjs apps/web/dist
+
       - name: Setup Pages
         if: inputs.upload-pages-artifact
         uses: actions/configure-pages@v6
