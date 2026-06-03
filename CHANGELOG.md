@@ -7,8 +7,16 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefuegt
+
+- **Help:** 12 FAQs (Vault, Cloud-Sync, API-Key, lokale KI, PWA, Policies), 6 interaktive Pro-Tipps, Schnellzugriff auf Einstellungen, Live-Systemstatus (Netzwerk, Speicher, PWA), erweiterte Philosophie/Tech-Stack.
+- **Einstellungen:** Kontext-Intros (`SettingsPanelIntro`) pro Bereich mit Kurztipps; Deep-Links aus Hilfe via `focusTarget`.
+
 ### Geaendert
 
+- **Help/FAQ:** Sync- und KI-Antworten an aktuelle Daten-, Vault- und Local-AI-Funktionen angepasst.
+- **Einstellungen:** Erweiterte `focusAction`-Zuordnung für alle Sidebar-Bereiche; doppelte Schalter im Design-Panel entfernt.
+- **Privatsphäre:** Klarstellung zu Analytics-Toggle (vorbereitet, ohne aktives Telemetrie-Backend).
 - **README:** Umfassend überarbeitet (Vision, Monorepo, Architektur-Regeln, Deployment Pages+Vercel, Doku-Index).
 - **Docs:** `docs/README.md` auf STATUS-2026-06-03, PWA/DESIGN-SYSTEM; Housekeeping-Checkliste; `TESTING.md` Playwright-Image **v1.60.0**.
 - **CI:** E2E-Smoke-Container auf `playwright:v1.60.0-noble` (Abgleich mit `@playwright/test` 1.60); `GlobalErrorBoundary`-Test mit i18n-Provider und `role="alert"`; E2E-Helper `seedDismissedAppModals` (Onboarding/Whats-New); i18n-Scan schließt `buildPwaManifest.ts` aus; Coverage-Tests für PWA-Registration und `transientUiStore`.

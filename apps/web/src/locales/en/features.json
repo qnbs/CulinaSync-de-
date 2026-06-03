@@ -1,90 +1,196 @@
 {
   "help": {
     "title": "Knowledge base",
-    "subtitle": "Guides, tips & system status.",
+    "subtitle": "Guides, shortcuts, privacy notes, and live system status for your household.",
     "emptyFaq": "No matching questions found.",
     "faq": {
       "heading": "Frequently asked questions",
+      "openSettings": "Open related settings",
       "categories": {
         "general": "General",
         "privacy": "Privacy",
-        "features": "Features"
+        "features": "Features",
+        "ai": "AI & assistant",
+        "data": "Data & backup",
+        "pwa": "App & PWA"
+      },
+      "keywords": {
+        "offline": "offline IndexedDB local",
+        "indexeddb": "Dexie storage",
+        "gemini": "Gemini API key",
+        "localAi": "Ollama local GPU",
+        "qr": "QR device sync",
+        "cloud": "WebDAV Nextcloud"
       },
       "localFirst": {
-        "question": "What does 'Local-First' mean?",
-        "answer": "'Local-First' means that all your data, such as recipes, pantry stock, and plans, is stored primarily on your device. There is no cloud database that we control. That guarantees maximum speed, privacy, and offline availability."
+        "question": "What does “local-first” mean?",
+        "answer": "Recipes, pantry, meal plan, and shopping list live primarily in IndexedDB on your device. CulinaSync does not run a central cloud database for your kitchen — you keep control, speed, and offline use."
       },
       "aiPrivacy": {
-        "question": "What happens to my data when using AI Chef?",
-        "answer": "Only the text of your request, such as ingredients and preferences, is sent to the Google Gemini API. Your personal pantry data or meal plans do not leave your device unless they are explicitly part of the request."
+        "question": "What happens to my data in AI Chef?",
+        "answer": "Cloud AI (Google Gemini) receives only the text of your request — and only if you stored an API key. Pantry and planning data are not uploaded automatically. You can control context toggles in AI settings, use local AI (Ollama), or keep prompts on-device only (privacy)."
       },
-      "pantryColor": {
-        "question": "What do the colors in the meal planner mean?",
-        "answer": "The bar under a dish shows ingredient availability: green means everything is available, yellow means some items are missing, and red means many items are missing. That way you can immediately see whether you need to shop."
+      "apiKey": {
+        "question": "Do I need an API key?",
+        "answer": "For Gemini in the cloud: yes. The key is encrypted in IndexedDB on your device only — never in the build or on our servers. Without a key, cloud AI stays inactive; pantry, planner, and local features still work."
+      },
+      "localAi": {
+        "question": "What is “local AI”?",
+        "answer": "Under Settings → Local AI you configure Ollama, model routing, and optional GPU tiers. Requests can stay on-device — ideal for sensitive household data or offline labs. Cloud Gemini remains optional in parallel."
       },
       "syncDevices": {
-        "question": "Can I sync data between devices?",
-        "answer": "CulinaSync is currently designed as an offline-first app. Synchronization is planned for a later version. Until then, use the export and import function in settings."
+        "question": "How do I sync between devices?",
+        "answer": "Several paths: (1) QR device sync in Data & storage, (2) encrypted vault (.csb) for secure copy, (3) cloud sync via WebDAV/Nextcloud with merge, (4) classic JSON/Markdown export. Pick what fits your trust model and network."
+      },
+      "vault": {
+        "question": "What is the encrypted vault (.csb)?",
+        "answer": "A password-protected snapshot of your kitchen — recipes, pantry, plan, and list in one file. Great for USB, NAS, or encrypted storage. Import merges or replaces per dialog; test with a backup before going live."
+      },
+      "cloudSync": {
+        "question": "How does cloud sync (WebDAV/Nextcloud) work?",
+        "answer": "You configure server, user, and path under Data & storage. Upload/download uses your own storage — CulinaSync does not host household data. After merge you see the last sync timestamp; conflicts follow the merge rules in the data panel."
+      },
+      "policies": {
+        "question": "What are policies (allergens, blacklist) for?",
+        "answer": "Household rules filter recipes and AI suggestions: allergens, banned ingredients, minimum stock. In strict mode CulinaSync blocks risky suggestions early — especially helpful for families with intolerances."
+      },
+      "pantryColor": {
+        "question": "What do meal planner colors mean?",
+        "answer": "The bar shows ingredient availability from pantry: green (all set), yellow (some missing), red (many missing). Spot shopping needs at a glance — without opening the recipe list."
+      },
+      "pwaInstall": {
+        "question": "How do I install CulinaSync as an app?",
+        "answer": "In Data & storage open the PWA card: Add to Home Screen (iOS) or the install prompt (Chrome/Edge). Installed apps run standalone, cache the UI shell, and stay usable offline."
+      },
+      "backupFormats": {
+        "question": "Which backup format when?",
+        "answer": "JSON: full restore. Markdown/CSV: read & share. PDF: archive/print. For device changes we recommend JSON or vault; for routine backup a weekly JSON export is often enough."
+      },
+      "cookVoice": {
+        "question": "Can I control cooking by voice?",
+        "answer": "Yes — under Speech & audio set TTS, Whisper (local), or browser recognition. Cook mode supports voice for timers and navigation; destructive commands can require confirmation."
       }
     },
     "tips": {
       "heading": "Pro tips (interactive)",
       "cmdPalette": {
-        "title": "Power-user navigation",
-        "description": "Use the command palette for lightning-fast access to everything.",
-        "actionLabel": "Open (⌘K)"
+        "title": "Command palette",
+        "description": "⌘K / Ctrl+K — jump to modules, settings, and actions without the mouse.",
+        "actionLabel": "Open palette"
+      },
+      "apiKey": {
+        "title": "Set up Gemini safely",
+        "description": "BYOK in IndexedDB — restrict the key in Google Cloud to your domain.",
+        "actionLabel": "API key"
       },
       "voiceControl": {
-        "title": "Hands-free cooking",
-        "description": "Control cook mode completely with your voice.",
-        "actionLabel": "Test microphone"
+        "title": "Hands-free at the stove",
+        "description": "Tune voice, Whisper model, and confirmations for destructive commands.",
+        "actionLabel": "Audio settings"
       },
       "shoppingGenerate": {
-        "title": "Smart shopping",
-        "description": "Let the app fill your shopping list based on the plan.",
-        "actionLabel": "Go to shopping list"
+        "title": "Shop from the plan",
+        "description": "Push missing ingredients from the meal plan to the list in one step.",
+        "actionLabel": "Shopping list"
+      },
+      "mealPlanner": {
+        "title": "Plan the week like a pro",
+        "description": "Colored pantry bars + servings — review the plan before shopping.",
+        "actionLabel": "Meal planner"
+      },
+      "aiChef": {
+        "title": "AI Chef with context",
+        "description": "Combine creativity, diet, and policies — then ask the chef.",
+        "actionLabel": "Open AI Chef"
+      }
+    },
+    "quickLinks": {
+      "heading": "Settings shortcuts",
+      "data": {
+        "label": "Data & backup",
+        "description": "Export, vault, sync, PWA"
+      },
+      "privacy": {
+        "label": "Privacy",
+        "description": "AI traces, logs, local-first"
+      },
+      "localAi": {
+        "label": "Local AI",
+        "description": "Ollama, routing, GPU"
+      },
+      "appearance": {
+        "label": "Appearance",
+        "description": "Accent, kitchen mode, a11y"
+      },
+      "policies": {
+        "label": "Policies",
+        "description": "Allergens & rules"
+      },
+      "allSettings": {
+        "label": "Household & language",
+        "description": "Name, locale, week start"
       }
     },
     "tech": {
-      "react": "Modern UI library",
-      "gemini": "Advanced AI models",
-      "dexie": "IndexedDB wrapper",
-      "redux": "State management",
-      "tailwind": "Utility-first styling",
-      "vite": "Progressive web app"
+      "react": "UI with React 19 & lazy routes",
+      "gemini": "Cloud AI with Zod validation",
+      "ollama": "Optional on-device models",
+      "dexie": "IndexedDB, live queries",
+      "redux": "UI & session state",
+      "zustand": "Lightweight transient UI",
+      "tailwind": "Design system & a11y",
+      "vite": "PWA, share target, SW"
     },
     "philosophy": {
       "offlineFirst": {
         "title": "Offline first",
-        "description": "Works anytime and anywhere, even in the deepest supermarket basement."
+        "description": "Kitchen works without network — sync is additive, not required."
       },
       "privacy": {
         "title": "Privacy",
-        "description": "Your data belongs to you. No tracking, no ads."
+        "description": "Your data stays on device; cloud only with your key and your server."
       },
       "performance": {
-        "title": "Performance",
-        "description": "No loading times. Immediate response to every interaction."
+        "title": "Instant feel",
+        "description": "Dexie + local UI — no waiting on a remote household server."
+      },
+      "trust": {
+        "title": "Trust",
+        "description": "Clear toggles instead of hidden telemetry — you choose what is stored."
+      },
+      "open": {
+        "title": "Open exports",
+        "description": "JSON, Markdown, CSV — no lock-in for your recipes."
+      },
+      "sync": {
+        "title": "Sync on demand",
+        "description": "QR, vault, or WebDAV — pick what fits your home."
       }
     },
     "search": {
-      "placeholder": "How can I...?",
+      "placeholder": "e.g. backup, API key, allergens…",
       "inputAria": "Search the knowledge base",
       "resetAria": "Reset search"
     },
     "tabs": {
       "knowledge": "Knowledge & FAQ",
-      "about": "System & About"
+      "about": "System & about",
+      "ariaLabel": "Help sections"
     },
     "about": {
-      "technology": "Technology",
-      "systemStatus": "System status",
-      "systemNormal": "System normal",
-      "status": "Status",
+      "lead": "CulinaSync is your local-first kitchen assistant: pantry, planning, cooking, and shopping — optionally with cloud or local AI, always with exportable data.",
+      "technology": "Technology stack",
+      "systemStatus": "Live system status",
+      "systemNormal": "Ready",
+      "systemOffline": "Offline mode",
+      "status": "Network",
       "online": "Online",
+      "offline": "Offline",
       "version": "Version",
-      "storage": "Storage",
-      "indexedDbActive": "IndexedDB active"
+      "storage": "Storage (estimate)",
+      "indexedDbActive": "IndexedDB active",
+      "dataLayer": "Data layer",
+      "pwaInstalled": "Installed as app"
     }
   },
   "whatsNew": {
@@ -506,7 +612,7 @@
       "plan": "Plan"
     },
     "toast": {
-      "bulkAddedToPlan": "{{count}} recipe(s) added to the meal plan."
+      "bulkAddedToMealPlan": "{{count}} recipes added to plan."
     },
     "empty": {
       "title": "No recipes found",
@@ -522,9 +628,6 @@
     },
     "actions": {
       "addToPlan": "Add to plan"
-    },
-    "toast": {
-      "bulkAddedToMealPlan": "{{count}} recipes added to plan."
     }
   },
   "recipeCard": {
@@ -611,25 +714,63 @@
   },
   "foodDatabase": {
     "items": {
-      "apple": { "name": "Apple" },
-      "banana": { "name": "Banana" },
-      "egg": { "name": "Egg" },
-      "milk": { "name": "Milk" },
-      "bread": { "name": "Bread" },
-      "butter": { "name": "Butter" },
-      "cheese": { "name": "Cheese" },
-      "chicken_breast": { "name": "Chicken breast" },
-      "salmon": { "name": "Salmon" },
-      "rice": { "name": "Rice" },
-      "pasta": { "name": "Pasta" },
-      "tomato": { "name": "Tomato" },
-      "potato": { "name": "Potato" },
-      "almond": { "name": "Almond" },
-      "hazelnut": { "name": "Hazelnut" },
-      "soy": { "name": "Soy" },
-      "wheat": { "name": "Wheat" },
-      "peanut": { "name": "Peanut" },
-      "shrimp": { "name": "Shrimp" }
+      "apple": {
+        "name": "Apple"
+      },
+      "banana": {
+        "name": "Banana"
+      },
+      "egg": {
+        "name": "Egg"
+      },
+      "milk": {
+        "name": "Milk"
+      },
+      "bread": {
+        "name": "Bread"
+      },
+      "butter": {
+        "name": "Butter"
+      },
+      "cheese": {
+        "name": "Cheese"
+      },
+      "chicken_breast": {
+        "name": "Chicken breast"
+      },
+      "salmon": {
+        "name": "Salmon"
+      },
+      "rice": {
+        "name": "Rice"
+      },
+      "pasta": {
+        "name": "Pasta"
+      },
+      "tomato": {
+        "name": "Tomato"
+      },
+      "potato": {
+        "name": "Potato"
+      },
+      "almond": {
+        "name": "Almond"
+      },
+      "hazelnut": {
+        "name": "Hazelnut"
+      },
+      "soy": {
+        "name": "Soy"
+      },
+      "wheat": {
+        "name": "Wheat"
+      },
+      "peanut": {
+        "name": "Peanut"
+      },
+      "shrimp": {
+        "name": "Shrimp"
+      }
     },
     "allergens": {
       "egg": "Egg",
@@ -673,12 +814,48 @@
       "soup": "Hearty soup"
     },
     "shoppingCatalog": {
-      "breakfast": ["Bread", "Butter", "Milk", "Eggs", "Jam"],
-      "grill": ["Baguette", "Tomatoes", "Mozzarella", "Sausage", "Mustard"],
-      "baking": ["Flour", "Sugar", "Butter", "Eggs", "Baking powder"],
-      "pasta": ["Spaghetti", "Parmesan", "Tomatoes", "Garlic", "Basil"],
-      "lasagne": ["Lasagne sheets", "Passata", "Ground meat", "Mozzarella", "Onions"],
-      "salad": ["Cucumber", "Tomatoes", "Lettuce", "Olive oil", "Lemons"]
+      "breakfast": [
+        "Bread",
+        "Butter",
+        "Milk",
+        "Eggs",
+        "Jam"
+      ],
+      "grill": [
+        "Baguette",
+        "Tomatoes",
+        "Mozzarella",
+        "Sausage",
+        "Mustard"
+      ],
+      "baking": [
+        "Flour",
+        "Sugar",
+        "Butter",
+        "Eggs",
+        "Baking powder"
+      ],
+      "pasta": [
+        "Spaghetti",
+        "Parmesan",
+        "Tomatoes",
+        "Garlic",
+        "Basil"
+      ],
+      "lasagne": [
+        "Lasagne sheets",
+        "Passata",
+        "Ground meat",
+        "Mozzarella",
+        "Onions"
+      ],
+      "salad": [
+        "Cucumber",
+        "Tomatoes",
+        "Lettuce",
+        "Olive oil",
+        "Lemons"
+      ]
     },
     "defaultCuisine": "Everyday cooking",
     "defaultPantryTopic": "Pantry cooking",

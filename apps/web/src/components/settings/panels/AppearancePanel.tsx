@@ -85,51 +85,6 @@ export const AppearancePanel: React.FC<AppearancePanelProps> = ({ settings, onCh
                         onCheckedChange={(v) => onChange('appearance.showNutritionBadges', v)}
                     />
                     </div>
-
-                    <div className="bg-zinc-900/30 border border-white/5 rounded-xl p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h4 className="font-bold text-zinc-200">{t('settings.appearance.reducedMotion.title')}</h4>
-                                <p className="text-xs text-zinc-500 mt-1">{t('settings.appearance.reducedMotion.description')}</p>
-                            </div>
-                            <button
-                                onClick={() => onChange('appearance.reducedMotion', !settings.appearance.reducedMotion)}
-                                className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${settings.appearance.reducedMotion ? 'bg-[var(--color-accent-500)]' : 'bg-zinc-700'}`}
-                            >
-                                <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform duration-300 shadow-md ${settings.appearance.reducedMotion ? 'translate-x-6' : ''}`} />
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="bg-zinc-900/30 border border-white/5 rounded-xl p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h4 className="font-bold text-zinc-200">{t('settings.appearance.compactDensity.title')}</h4>
-                                <p className="text-xs text-zinc-500 mt-1">{t('settings.appearance.compactDensity.description')}</p>
-                            </div>
-                            <button
-                                onClick={() => onChange('appearance.compactDensity', !settings.appearance.compactDensity)}
-                                className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${settings.appearance.compactDensity ? 'bg-[var(--color-accent-500)]' : 'bg-zinc-700'}`}
-                            >
-                                <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform duration-300 shadow-md ${settings.appearance.compactDensity ? 'translate-x-6' : ''}`} />
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="bg-zinc-900/30 border border-white/5 rounded-xl p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h4 className="font-bold text-zinc-200">{t('settings.appearance.nutritionBadges.title')}</h4>
-                                <p className="text-xs text-zinc-500 mt-1">{t('settings.appearance.nutritionBadges.description')}</p>
-                            </div>
-                            <button
-                                onClick={() => onChange('appearance.showNutritionBadges', !settings.appearance.showNutritionBadges)}
-                                className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${settings.appearance.showNutritionBadges ? 'bg-[var(--color-accent-500)]' : 'bg-zinc-700'}`}
-                            >
-                                <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform duration-300 shadow-md ${settings.appearance.showNutritionBadges ? 'translate-x-6' : ''}`} />
-                            </button>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Live Preview Card */}
