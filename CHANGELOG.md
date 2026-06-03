@@ -13,6 +13,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Geaendert
 
+- **UI:** Header, BottomNav, Settings, GlobalErrorBoundary, PantryItemModal und WhatsNewModal auf Design-System-Komponenten umgestellt; Glass-/Motion-Utilities und `reduced-motion` / `compact-density` in `index.css`.
 - **CI/Deploy:** Service Worker — nur ein `self.__WB_MANIFEST`-Vorkommen (Workbox-Build); Index-Pfad via `__PWA_INDEX_PATH__`.
 - **E2E:** Playwright `baseURL` mit GitHub-Pages-Pfad `/CulinaSync-de-/` in CI.
 - **Deeplinks:** `culinasync://`-Events werden in der App verarbeitet (`useDeepLinkNavigation`).

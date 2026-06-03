@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { lazy, Suspense, useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppSettings, BeforeInstallPromptEvent } from '../types';
 import { Save, RotateCcw } from 'lucide-react';
@@ -71,11 +71,7 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
     }, [focusAction, selectedSection]);
 
     useEffect(() => {
-      const colors = ACCENT_COLORS[localSettings.appearance.accentColor];
-      const root = document.documentElement;
-      Object.entries(colors).forEach(([shade, value]) => {
-        root.style.setProperty(`--color-accent-${shade}`, value as string);
-      });
+      applyAccentTheme(localSettings.appearance.accentColor);
     }, [localSettings.appearance.accentColor]);
 
     const isDirty = useMemo(() => draftSettings !== null && JSON.stringify(draftSettings) !== JSON.stringify(globalSettings), [draftSettings, globalSettings]);
@@ -140,12 +136,12 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
                      
                      {isDirty && (
                          <div className="flex gap-2 animate-fade-in">
-                            <button onClick={handleDiscard} className="p-2 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 transition-colors" title={t('settings.actions.discard')}>
-                                 <RotateCcw size={20} />
-                             </button>
-                             <button onClick={handleSave} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-accent-500)] text-zinc-900 font-bold hover:bg-[var(--color-accent-400)] transition-all shadow-lg shadow-[var(--color-accent-glow)]">
+                            <Button type="button" variant="ghost" size="sm" onClick={handleDiscard} title={t('settings.actions.discard')} aria-label={t('settings.actions.discard')}>
+                                 <RotateCcw size={18} />
+                             </Button>
+                             <Button type="button" size="sm" onClick={handleSave}>
                                  <Save size={18} /> {t('common.save')}
-                             </button>
+                             </Button>
                          </div>
                      )}
                  </div>

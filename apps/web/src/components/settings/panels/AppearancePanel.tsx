@@ -1,7 +1,8 @@
 import React from 'react';
 import { AppSettings } from '../../../types';
-import { Check, Moon, Sun } from 'lucide-react';
+import { Check, Sun } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Switch } from '../../ui';
 
 const ACCENT_COLORS: Record<AppSettings['appearance']['accentColor'], { labelKey: string; hex: string; gradient: string }> = {
     amber: { labelKey: 'settings.appearance.colors.amber', hex: '#f59e0b', gradient: 'from-amber-400 to-amber-600' },
@@ -46,51 +47,43 @@ export const AppearancePanel: React.FC<AppearancePanelProps> = ({ settings, onCh
                         </div>
                     </div>
 
-                    <div className="bg-zinc-900/30 border border-white/5 rounded-xl p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h4 className="font-bold text-zinc-200">{t('settings.appearance.highContrast.title')}</h4>
-                                <p className="text-xs text-zinc-500 mt-1">{t('settings.appearance.highContrast.description')}</p>
-                            </div>
-                            <button 
-                                onClick={() => onChange('appearance.highContrast', !settings.appearance.highContrast)}
-                                className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${settings.appearance.highContrast ? 'bg-[var(--color-accent-500)]' : 'bg-zinc-700'}`}
-                            >
-                                <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform duration-300 shadow-md flex items-center justify-center ${settings.appearance.highContrast ? 'translate-x-6' : ''}`}>
-                                    {settings.appearance.highContrast ? <Sun size={12} className="text-zinc-900"/> : <Moon size={12} className="text-zinc-500"/>}
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="bg-zinc-900/30 border border-white/5 rounded-xl p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h4 className="font-bold text-zinc-200">{t('settings.appearance.kitchenMode.title')}</h4>
-                                <p className="text-xs text-zinc-500 mt-1">{t('settings.appearance.kitchenMode.description')}</p>
-                            </div>
-                            <button
-                                onClick={() => onChange('appearance.kitchenMode', !settings.appearance.kitchenMode)}
-                                className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${settings.appearance.kitchenMode ? 'bg-[var(--color-accent-500)]' : 'bg-zinc-700'}`}
-                            >
-                                <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform duration-300 shadow-md ${settings.appearance.kitchenMode ? 'translate-x-6' : ''}`} />
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="bg-zinc-900/30 border border-white/5 rounded-xl p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h4 className="font-bold text-zinc-200">{t('settings.appearance.largeText.title')}</h4>
-                                <p className="text-xs text-zinc-500 mt-1">{t('settings.appearance.largeText.description')}</p>
-                            </div>
-                            <button
-                                onClick={() => onChange('appearance.largeText', !settings.appearance.largeText)}
-                                className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${settings.appearance.largeText ? 'bg-[var(--color-accent-500)]' : 'bg-zinc-700'}`}
-                            >
-                                <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform duration-300 shadow-md ${settings.appearance.largeText ? 'translate-x-6' : ''}`} />
-                            </button>
-                        </div>
+                    <div className="space-y-3">
+                    <Switch
+                        label={t('settings.appearance.highContrast.title')}
+                        description={t('settings.appearance.highContrast.description')}
+                        checked={settings.appearance.highContrast}
+                        onCheckedChange={(v) => onChange('appearance.highContrast', v)}
+                    />
+                    <Switch
+                        label={t('settings.appearance.kitchenMode.title')}
+                        description={t('settings.appearance.kitchenMode.description')}
+                        checked={settings.appearance.kitchenMode}
+                        onCheckedChange={(v) => onChange('appearance.kitchenMode', v)}
+                    />
+                    <Switch
+                        label={t('settings.appearance.largeText.title')}
+                        description={t('settings.appearance.largeText.description')}
+                        checked={settings.appearance.largeText}
+                        onCheckedChange={(v) => onChange('appearance.largeText', v)}
+                    />
+                    <Switch
+                        label={t('settings.appearance.reducedMotion.title')}
+                        description={t('settings.appearance.reducedMotion.description')}
+                        checked={settings.appearance.reducedMotion}
+                        onCheckedChange={(v) => onChange('appearance.reducedMotion', v)}
+                    />
+                    <Switch
+                        label={t('settings.appearance.compactDensity.title')}
+                        description={t('settings.appearance.compactDensity.description')}
+                        checked={settings.appearance.compactDensity}
+                        onCheckedChange={(v) => onChange('appearance.compactDensity', v)}
+                    />
+                    <Switch
+                        label={t('settings.appearance.nutritionBadges.title')}
+                        description={t('settings.appearance.nutritionBadges.description')}
+                        checked={settings.appearance.showNutritionBadges}
+                        onCheckedChange={(v) => onChange('appearance.showNutritionBadges', v)}
+                    />
                     </div>
 
                     <div className="bg-zinc-900/30 border border-white/5 rounded-xl p-4">

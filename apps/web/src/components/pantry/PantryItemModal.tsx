@@ -3,7 +3,6 @@ import { PantryItem } from '../../types';
 import { foodDatabase, FoodEntry } from '../../data/foodDatabase';
 import { Save } from 'lucide-react';
 import { getCategoryForItem } from '../../services/utils';
-import { useModalA11y } from '../../hooks/useModalA11y';
 import { useTranslation } from 'react-i18next';
 import {
   findFoodEntryByName,
@@ -11,6 +10,7 @@ import {
   getFoodDisplayName,
   pantryCategoryLabelForFood,
 } from '../../utils/foodDatabaseLabels';
+import { Button, Card, Input, Modal, Textarea } from '../ui';
 
 const UNIT_KEYS = ['piece', 'gram', 'kilogram', 'milliliter', 'liter', 'teaspoon', 'tablespoon', 'can', 'bunch', 'clove', 'bottle', 'package'] as const;
 
@@ -28,18 +28,10 @@ export const PantryItemModal: React.FC<{
     const defaultUnit = t('pantryUnits.piece');
     const [formData, setFormData] = useState<Partial<PantryItem>>(() => createInitialFormData(item, defaultUnit));
     const nameInputRef = useRef<HTMLInputElement>(null);
-    const modalRef = useRef<HTMLDivElement>(null);
     const unitOptions = useMemo(
       () => UNIT_KEYS.map((key) => ({ key, label: t(`pantryUnits.${key}`) })),
       [t],
     );
-
-    useModalA11y({
-        isOpen: true,
-        onClose,
-        containerRef: modalRef,
-        initialFocusRef: nameInputRef,
-    });
 
     const existingCategories = useMemo(() => Array.from(new Set(pantryItems.map(p => p.category).filter(Boolean))), [pantryItems]);
     
@@ -67,82 +59,122 @@ export const PantryItemModal: React.FC<{
     };
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center z-50 page-fade-in glass-overlay" onClick={onClose}>
-            <div
-                ref={modalRef}
-            className="rounded-lg p-6 w-full max-w-lg glass-modal"
-                onClick={e => e.stopPropagation()}
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="pantry-item-modal-title"
-                tabIndex={-1}
-            >
-                <h3 id="pantry-item-modal-title" className="text-xl font-bold mb-6">{item ? t('pantry.modal.editTitle') : t('pantry.modal.newTitle')}</h3>
-                <form onSubmit={handleSave} className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div className="sm:col-span-2">
-                           <label htmlFor="itemName" className="block text-sm font-medium text-zinc-400 mb-1">{t('pantry.modal.nameLabel')}</label>
-                           <input
-                               id="itemName"
-                               ref={nameInputRef}
-                               type="text"
-                               value={formData.name || ''}
-                               onChange={handleNameChange}
-                               className="w-full bg-zinc-700 rounded p-2 focus:ring-2 focus:ring-[var(--color-accent-500)]"
-                               required
-                               list="food-autocomplete-list"
-                           />
-                           <datalist id="food-autocomplete-list">
-                               {foodDatabase.map(f => (
-                                 <option key={f.id} value={getFoodDisplayName(f.id, t)} />
-                               ))}
-                           </datalist>
-                        </div>
-                        <div>
-                           <label htmlFor="itemCategory" className="block text-sm font-medium text-zinc-400 mb-1">{t('pantry.modal.categoryLabel')}</label>
-                           <input id="itemCategory" type="text" value={formData.category || ''} onChange={e => handleChange('category', e.target.value)} className="w-full bg-zinc-700 rounded p-2 focus:ring-2 focus:ring-[var(--color-accent-500)]" list="categories-list" />
-                           <datalist id="categories-list">{existingCategories.map(c => <option key={c} value={c} />)}</datalist>
-                        </div>
+        <Modal
+            open
+            onClose={onClose}
+            title={item ? t('pantry.modal.editTitle') : t('pantry.modal.newTitle')}
+            size="lg"
+            initialFocusRef={nameInputRef}
+            footer={
+                <div className="flex justify-end gap-3">
+                    <Button type="button" variant="ghost" onClick={onClose}>
+                        {t('common.cancel')}
+                    </Button>
+                    <Button type="submit" form="pantry-item-form" className="gap-2">
+                        <Save size={16} aria-hidden />
+                        {t('common.save')}
+                    </Button>
+                </div>
+            }
+        >
+            <form id="pantry-item-form" onSubmit={handleSave} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="sm:col-span-2">
+                        <Input
+                            ref={nameInputRef}
+                            id="itemName"
+                            label={t('pantry.modal.nameLabel')}
+                            value={formData.name || ''}
+                            onChange={handleNameChange}
+                            required
+                            list="food-autocomplete-list"
+                        />
+                        <datalist id="food-autocomplete-list">
+                            {foodDatabase.map(f => (
+                              <option key={f.id} value={getFoodDisplayName(f.id, t)} />
+                            ))}
+                        </datalist>
                     </div>
-                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        <div>
-                           <label htmlFor="itemQuantity" className="block text-sm font-medium text-zinc-400 mb-1">{t('pantry.modal.quantityLabel')}</label>
-                           <input id="itemQuantity" type="number" value={formData.quantity || ''} onChange={e => handleChange('quantity', parseFloat(e.target.value))} className="w-full bg-zinc-700 rounded p-2 focus:ring-2 focus:ring-[var(--color-accent-500)]" required min="0" step="any" />
-                        </div>
-                        <div>
-                            <label htmlFor="itemUnit" className="block text-sm font-medium text-zinc-400 mb-1">{t('pantry.modal.unitLabel')}</label>
-                            <input id="itemUnit" type="text" value={formData.unit || ''} onChange={e => handleChange('unit', e.target.value)} className="w-full bg-zinc-700 rounded p-2 focus:ring-2 focus:ring-[var(--color-accent-500)]" required list="units-list"/>
-                            <datalist id="units-list">{unitOptions.map(u => <option key={u.key} value={u.label}/>)}</datalist>
-                        </div>
-                        <div className="col-span-2">
-                           <label htmlFor="itemExpiry" className="block text-sm font-medium text-zinc-400 mb-1">{t('pantry.modal.expiryDateLabel')}</label>
-                           <input id="itemExpiry" type="date" value={formData.expiryDate || ''} onChange={e => handleChange('expiryDate', e.target.value)} className="w-full bg-zinc-700 rounded p-2 focus:ring-2 focus:ring-[var(--color-accent-500)]" />
-                        </div>
+                    <div>
+                        <Input
+                            id="itemCategory"
+                            label={t('pantry.modal.categoryLabel')}
+                            type="text"
+                            value={formData.category || ''}
+                            onChange={e => handleChange('category', e.target.value)}
+                            list="categories-list"
+                        />
+                        <datalist id="categories-list">{existingCategories.map(c => <option key={c} value={c} />)}</datalist>
                     </div>
-                     <div>
-                        <label htmlFor="minQuantity" className="block text-sm font-medium text-zinc-400 mb-1">{t('pantry.modal.minQuantityLabel')}</label>
-                        <input id="minQuantity" type="number" placeholder={t('pantry.modal.minQuantityPlaceholder')} value={formData.minQuantity || ''} onChange={e => handleChange('minQuantity', parseFloat(e.target.value) || undefined)} className="w-full bg-zinc-700 rounded p-2 focus:ring-2 focus:ring-[var(--color-accent-500)]" min="0" step="any" />
-                        <p className="text-xs text-zinc-500 mt-1">{t('pantry.modal.minQuantityHint')}</p>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <Input
+                        id="itemQuantity"
+                        label={t('pantry.modal.quantityLabel')}
+                        type="number"
+                        value={
+                          formData.quantity != null && !Number.isNaN(formData.quantity)
+                            ? formData.quantity
+                            : ''
+                        }
+                        onChange={e => {
+                          const parsed = parseFloat(e.target.value);
+                          handleChange('quantity', Number.isNaN(parsed) ? undefined : parsed);
+                        }}
+                        required
+                        min={0}
+                        step="any"
+                    />
+                    <div>
+                        <Input
+                            id="itemUnit"
+                            label={t('pantry.modal.unitLabel')}
+                            type="text"
+                            value={formData.unit || ''}
+                            onChange={e => handleChange('unit', e.target.value)}
+                            required
+                            list="units-list"
+                        />
+                        <datalist id="units-list">{unitOptions.map(u => <option key={u.key} value={u.label}/>)}</datalist>
                     </div>
-                     <div>
-                        <label htmlFor="itemNotes" className="block text-sm font-medium text-zinc-400 mb-1">{t('pantry.modal.notesLabel')}</label>
-                        <textarea id="itemNotes" value={formData.notes || ''} onChange={e => handleChange('notes', e.target.value)} className="w-full bg-zinc-700 rounded p-2 focus:ring-2 focus:ring-[var(--color-accent-500)]" rows={2}></textarea>
+                    <div className="col-span-2">
+                        <Input
+                            id="itemExpiry"
+                            label={t('pantry.modal.expiryDateLabel')}
+                            type="date"
+                            value={formData.expiryDate || ''}
+                            onChange={e => handleChange('expiryDate', e.target.value)}
+                        />
                     </div>
-                    {foodMatch && (
-                        <div className="bg-zinc-800 rounded-lg p-3 mb-2 text-xs text-zinc-300">
-                            <div className="font-bold text-sm mb-1">{t('pantry.modal.nutritionTitle')}</div>
-                            <div>{t('pantry.modal.nutritionSummary', { kcal: foodMatch.kcal, protein: foodMatch.protein, fat: foodMatch.fat, carbs: foodMatch.carbs })}</div>
-                            {foodMatch.allergenCodes?.length ? (
-                                <div className="mt-1 text-red-400">{t('pantry.modal.allergensLabel')}: {formatFoodAllergens(foodMatch.allergenCodes, t)}</div>
-                            ) : null}
-                        </div>
-                    )}
-                    <div className="flex justify-end gap-3 pt-4">
-                        <button type="button" onClick={onClose} className="py-2 px-4 rounded-md text-zinc-300 hover:bg-zinc-700">{t('common.cancel')}</button>
-                        <button type="submit" className="flex items-center gap-2 py-2 px-4 rounded bg-[var(--color-accent-500)] text-zinc-900 font-bold hover:bg-[var(--color-accent-400)]"><Save size={16}/> {t('common.save')}</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+                </div>
+                <Input
+                    id="minQuantity"
+                    label={t('pantry.modal.minQuantityLabel')}
+                    type="number"
+                    placeholder={t('pantry.modal.minQuantityPlaceholder')}
+                    value={formData.minQuantity ?? ''}
+                    onChange={e => handleChange('minQuantity', parseFloat(e.target.value) || undefined)}
+                    hint={t('pantry.modal.minQuantityHint')}
+                    min={0}
+                    step="any"
+                />
+                <Textarea
+                    id="itemNotes"
+                    label={t('pantry.modal.notesLabel')}
+                    value={formData.notes || ''}
+                    onChange={e => handleChange('notes', e.target.value)}
+                    rows={2}
+                />
+                {foodMatch && (
+                    <Card variant="flat" padding="sm" className="text-xs text-zinc-300">
+                        <div className="font-bold text-sm mb-1">{t('pantry.modal.nutritionTitle')}</div>
+                        <div>{t('pantry.modal.nutritionSummary', { kcal: foodMatch.kcal, protein: foodMatch.protein, fat: foodMatch.fat, carbs: foodMatch.carbs })}</div>
+                        {foodMatch.allergenCodes?.length ? (
+                            <div className="mt-1 text-red-400">{t('pantry.modal.allergensLabel')}: {formatFoodAllergens(foodMatch.allergenCodes, t)}</div>
+                        ) : null}
+                    </Card>
+                )}
+            </form>
+        </Modal>
     );
 };
