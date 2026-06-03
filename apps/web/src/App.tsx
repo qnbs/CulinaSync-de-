@@ -99,11 +99,19 @@ const App: React.FC = () => {
     root.classList.toggle('high-contrast', settings.appearance.highContrast);
     root.classList.toggle('kitchen-mode', settings.appearance.kitchenMode);
     root.classList.toggle('large-text', settings.appearance.largeText);
+    root.classList.toggle('reduced-motion', settings.appearance.reducedMotion);
+    root.classList.toggle('compact-density', settings.appearance.compactDensity);
 
     return () => {
-      root.classList.remove('high-contrast', 'kitchen-mode', 'large-text');
+      root.classList.remove('high-contrast', 'kitchen-mode', 'large-text', 'reduced-motion', 'compact-density');
     };
-  }, [settings.appearance.highContrast, settings.appearance.kitchenMode, settings.appearance.largeText]);
+  }, [
+    settings.appearance.highContrast,
+    settings.appearance.kitchenMode,
+    settings.appearance.largeText,
+    settings.appearance.reducedMotion,
+    settings.appearance.compactDensity,
+  ]);
 
   useEffect(() => {
     const handleUpdateReady = () => {

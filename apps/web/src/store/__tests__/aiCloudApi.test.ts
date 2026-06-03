@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { configureStore } from '@reduxjs/toolkit';
+import { getDefaultSettings } from '../../services/settingsMerge';
 import { aiCloudApi } from '../aiCloudApi';
 
 const mockGenerateRecipeIdeas = vi.fn();
@@ -26,12 +27,7 @@ describe('aiCloudApi', () => {
       aiCloudApi.endpoints.generateRecipeIdeas.initiate({
         prompt: { craving: 'Curry', includeIngredients: [], excludeIngredients: [], modifiers: [] },
         pantryItems: [],
-        aiPreferences: {
-          dietaryRestrictions: [],
-          preferredCuisines: [],
-          customInstruction: '',
-          creativityLevel: 0.5,
-        },
+        aiPreferences: { ...getDefaultSettings().aiPreferences, creativityLevel: 0.5 },
       }),
     );
 

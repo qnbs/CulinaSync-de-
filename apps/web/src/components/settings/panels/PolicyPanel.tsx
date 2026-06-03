@@ -12,16 +12,30 @@ interface PolicyPanelProps {
 
 export const PolicyPanel: React.FC<PolicyPanelProps> = ({ settings, onChange }) => {
   const { t } = useTranslation();
-  const policies = settings.policies || {};
+  const policies = settings.policies;
 
   return (
     <div className="space-y-8 page-fade-in">
       <section className="glass-card rounded-2xl p-6">
         <h3 className="text-lg font-bold text-zinc-100 mb-6">{t('settings.policy.title')}</h3>
+        <div className="mb-6 p-4 rounded-xl bg-zinc-900/40 border border-zinc-800">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={policies.strictAllergenEnforcement}
+              onChange={(e) => onChange('policies.strictAllergenEnforcement', e.target.checked)}
+              className="rounded accent-[var(--color-accent-500)]"
+            />
+            <div>
+              <span className="text-sm font-bold text-zinc-200">{t('settings.policy.strictEnforcementLabel')}</span>
+              <p className="text-xs text-zinc-500 mt-0.5">{t('settings.policy.strictEnforcementDesc')}</p>
+            </div>
+          </label>
+        </div>
         <div className="mb-6">
           <label className="block text-sm font-bold text-zinc-300 mb-2">{t('settings.policy.avoidAllergensLabel')}</label>
           <TagInput
-            tags={policies.avoidAllergens || []}
+            tags={policies.avoidAllergens}
             setTags={tags => onChange('policies.avoidAllergens', tags)}
             placeholder={t('settings.policy.avoidAllergensPlaceholder')}
             suggestions={ALLERGEN_SUGGESTION_KEYS.map((key) => t(`settings.policy.allergenSuggestions.${key}`))}
@@ -30,7 +44,7 @@ export const PolicyPanel: React.FC<PolicyPanelProps> = ({ settings, onChange }) 
         <div className="mb-6">
           <label className="block text-sm font-bold text-zinc-300 mb-2">{t('settings.policy.blacklistLabel')}</label>
           <TagInput
-            tags={policies.ingredientBlacklist || []}
+            tags={policies.ingredientBlacklist}
             setTags={tags => onChange('policies.ingredientBlacklist', tags)}
             placeholder={t('settings.policy.blacklistPlaceholder')}
           />
