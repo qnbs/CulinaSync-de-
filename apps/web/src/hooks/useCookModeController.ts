@@ -42,7 +42,7 @@ export const useCookModeController = (recipe: Recipe, onExit: () => void) => {
   }, [scheduleInactivityHide]);
 
   useEffect(() => {
-    requestWakeLock();
+    void requestWakeLock();
 
     const handleActivity = () => revealUi();
     window.addEventListener('mousemove', handleActivity);
@@ -53,7 +53,7 @@ export const useCookModeController = (recipe: Recipe, onExit: () => void) => {
     scheduleInactivityHide();
 
     return () => {
-      releaseWakeLock();
+      void releaseWakeLock();
       if (inactivityTimerRef.current) window.clearTimeout(inactivityTimerRef.current);
       window.removeEventListener('mousemove', handleActivity);
       window.removeEventListener('touchstart', handleActivity);

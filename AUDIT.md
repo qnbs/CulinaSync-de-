@@ -11,7 +11,7 @@
 - **Gesamtbewertung:** weiter **9,0 / 10** ([AUDIT-vNEXT](./docs/AUDIT-vNEXT-2026-06-03.md)).
 - **Validierung (PR #66):** **427** Vitest / **101** Dateien; Coverage **~79,1 %** stmts / **~80,6 %** lines / **~63,7 %** branches; Thresholds **80/78/73/63**; E2E **9** Specs (inkl. Sync, Local-AI-Settings, Pantry).
 - **Umgesetzt:** R-001 (Device-Sync Zod), R-002 (DataPanel → `data-panel/`), R-003 (E2E-Basis), R-004 (`exportService`→`dbInstance`); Doku-Sync ROADMAP M11, PRD, STATUS, TESTING.
-- **Offen (Top):** M11 Local AI L1–L3, Branch-Coverage **64 %**, Typed ESLint R-005, Lighthouse CI, Tauri Tag-Release.
+- **Offen (Top):** Lighthouse CI, Tauri Tag-Release, Coverage **88 %** (M5.9).
 - **PR-Prozess:** `.cursor/rules/300-pr-review-automation.mdc`.
 
 ## Status-Update 2026-06-03 (Full-Scale Audit vNext)
@@ -94,7 +94,7 @@
 ## Status-Update 2026-05-01 (Cursor IDE)
 
 - **Projektregeln für den Agent:** `.cursor/rules/culinasync-core.mdc` (immer aktiv) und `culinasync-react.mdc` (bei `*.tsx`) — komprimierte Ableitung aus `.github/copilot-instructions.md` für konsistente Antworten in Cursor.
-- **Hinweis:** ESLint in `eslint.config.js` — `no-explicit-any`, `exhaustive-deps`, `no-unused-vars` **error**; CI/lint-staged **`--max-warnings 0`**. Typed Rules (`no-floating-promises`) folgen in R-005.
+- **Hinweis:** ESLint in `eslint.config.js` — `no-explicit-any`, `exhaustive-deps`, `no-unused-vars`, `no-floating-promises` (projectService) **error**; CI/lint-staged **`--max-warnings 0`**.
 - **CI-Stand:** CodeQL nutzt nur noch `javascript`; `validate.yml` ist wiederverwendbar; Deploy ruft denselben Validate-Workflow auf — bei Push auf `main` laufen dennoch **zwei** Validate-Läufe parallel (`ci.yml` + `deploy.yml`), falls gewünscht später mit `workflow_run` oder Skip entkoppeln.
 
 ---

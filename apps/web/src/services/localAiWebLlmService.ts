@@ -49,7 +49,7 @@ export const generateRecipeIdeasWithWebLlm = async (
     const parsed = parseAiJsonWithSchema(jsonText, recipeIdeasResponseSchema);
     return parsed.ideas;
   } catch (error) {
-    logAppError(error, 'localAiWebLlm.recipe-ideas');
+    void logAppError(error, 'localAiWebLlm.recipe-ideas');
     return null;
   }
 };
@@ -88,7 +88,7 @@ export const generateRecipeWithWebLlm = async (
     }
     return null;
   } catch (error) {
-    logAppError(error, 'localAiWebLlm.recipe');
+    void logAppError(error, 'localAiWebLlm.recipe');
     return null;
   }
 };

@@ -22,6 +22,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Geaendert
 
+- **ESLint (R-005):** `@typescript-eslint/no-floating-promises` mit `projectService` (src + `index.tsx`); ~34 Stellen mit `void`/explizitem Handling.
 - **Doku (Perfection Schritt D):** `ROADMAP.md` M11 Local AI, M5.7–5.9, M10.5; `PRD.md` v1.1 (Coverage-Stufenplan 88 %); `STATUS-2026-06-03`, `TESTING.md`, `AUDIT.md`, `instructions.md`, `AUDIT-REMEDIATION-BACKLOG`, `PROJECT-STRUCTURE.md`.
 - **Coverage:** Vitest-Thresholds Stufe 1 — 80/78/73/**64** (lines/stmts/funcs/branches); Ist ~79,6 % / **64,0 %** branches (470 Tests / 109 Dateien).
 - **CI:** `ci.yml` Job `main-guard` auf Push `main` (grüner CI-Status ohne Doppel-Coverage); Regel `302-ci-correction-loop.mdc` (dauerhafte Korrekturschleife).

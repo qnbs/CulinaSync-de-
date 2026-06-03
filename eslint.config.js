@@ -5,6 +5,12 @@ import tseslint from 'typescript-eslint';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 
+const typedLintFiles = [
+  'apps/web/src/**/*.{ts,tsx}',
+  'apps/web/index.tsx',
+  'packages/ai-core/src/**/*.ts',
+];
+
 export default tseslint.config(
   {
     ignores: [
@@ -18,7 +24,7 @@ export default tseslint.config(
     ],
   },
   {
-    files: ['apps/web/**/*.{ts,tsx}', 'packages/ai-core/**/*.ts'],
+    files: typedLintFiles,
     extends: [
       js.configs.recommended,
       react.configs.flat.recommended,
@@ -59,8 +65,23 @@ export default tseslint.config(
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
-      // Typed rules (no-floating-promises, …): Follow-up R-005 mit projectService — siehe docs/AUDIT-REMEDIATION-BACKLOG.md
       'no-console': ['error', { allow: ['warn', 'error', 'debug'] }],
+    },
+  },
+  // QNBS-v3: R-005 — typisierte ESLint-Regeln via projectService (monorepo-tsconfigs)
+  {
+    files: typedLintFiles,
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-floating-promises': [
+        'error',
+        { ignoreVoid: true, ignoreIIFE: true },
+      ],
     },
   },
 );

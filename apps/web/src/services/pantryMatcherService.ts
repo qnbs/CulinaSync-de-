@@ -70,6 +70,6 @@ export const updatePantryMatches = async (recipeIds?: number[]): Promise<void> =
 export const debouncedUpdateAllPantryMatches = () => {
     clearTimeout(debounceTimeout);
     debounceTimeout = window.setTimeout(() => {
-        updatePantryMatches();
+        void updatePantryMatches();
     }, 1500); // 1.5-second debounce
 };

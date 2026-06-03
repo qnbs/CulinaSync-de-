@@ -14,7 +14,7 @@ declare let self: ServiceWorkerGlobalScope & {
 // QNBS-v3: skipWaiting nur nach Nutzer-Bestätigung (postMessage) — kein harter Tab-Wechsel mitten in Flows
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'SKIP_WAITING') {
-    self.skipWaiting();
+    void self.skipWaiting();
   }
 });
 

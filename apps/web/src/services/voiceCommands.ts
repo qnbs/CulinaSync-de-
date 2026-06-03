@@ -37,7 +37,7 @@ export const executeVoiceAction = (
         addToast(i18next.t('voiceCommands.navigatedTo', { page: page.charAt(0).toUpperCase() + page.slice(1) }));
     } else if (action.type === 'ADD_SHOPPING_ITEM') {
         const itemPayload = action.payload as Omit<ShoppingListItem, 'id' | 'sortOrder' | 'category'>;
-        addShoppingListItem(itemPayload).then(() => {
+        void addShoppingListItem(itemPayload).then(() => {
             addToast(i18next.t('voiceCommands.addedToShoppingList', { name: itemPayload.name }));
             if (currentPage !== 'shopping-list') {
               navigate('shopping-list');
@@ -45,7 +45,7 @@ export const executeVoiceAction = (
         });
     } else if (action.type === 'ADD_PANTRY_ITEM') {
         const itemPayload = action.payload as Omit<PantryItem, 'id' | 'createdAt' | 'updatedAt'>;
-        addOrUpdatePantryItem(itemPayload).then(({ status, item }) => {
+        void addOrUpdatePantryItem(itemPayload).then(({ status, item }) => {
              const message = status === 'added' 
                 ? i18next.t('voiceCommands.addedToPantry', { name: item.name })
                 : i18next.t('voiceCommands.updatedInPantry', { name: item.name });
@@ -56,7 +56,7 @@ export const executeVoiceAction = (
         });
     } else if (action.type === 'REMOVE_PANTRY_ITEM') {
         const itemName = action.payload as string;
-        removeItemFromPantry(itemName).then((success) => {
+        void removeItemFromPantry(itemName).then((success) => {
             if(success) {
                 addToast(i18next.t('voiceCommands.removedFromPantry', { name: itemName }));
             } else {

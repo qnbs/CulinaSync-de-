@@ -117,7 +117,7 @@ const withRag = async (
     const rag = await buildLocalAiRagContext({ prompt, settings });
     return enrichPromptWithRag(prompt, rag);
   } catch (error) {
-    logAppError(error, 'localAiRag.buildContext');
+    void logAppError(error, 'localAiRag.buildContext');
     return prompt;
   }
 };
@@ -149,7 +149,7 @@ export const generateRecipeIdeas = async (
     if (!shouldUseOfflineFallback(error)) {
       throw error;
     }
-    logAppError(error, 'aiProvider.cloud.recipe-ideas');
+    void logAppError(error, 'aiProvider.cloud.recipe-ideas');
     const { data } = await runLocalGenerative(ctx, runLocal);
     return data;
   }
@@ -184,7 +184,7 @@ export const generateRecipe = async (
     if (!shouldUseOfflineFallback(error)) {
       throw error;
     }
-    logAppError(error, 'aiProvider.cloud.recipe');
+    void logAppError(error, 'aiProvider.cloud.recipe');
     const { data } = await runLocalGenerative(ctx, runLocal);
     return data;
   }
@@ -216,7 +216,7 @@ export const generateShoppingList = async (
     if (!shouldUseOfflineFallback(error)) {
       throw error;
     }
-    logAppError(error, 'aiProvider.cloud.shopping-list');
+    void logAppError(error, 'aiProvider.cloud.shopping-list');
     const { data } = await runLocalGenerative(ctx, runLocal);
     return data;
   }

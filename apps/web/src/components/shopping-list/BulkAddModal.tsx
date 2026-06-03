@@ -23,7 +23,7 @@ export const BulkAddModal = () => {
     };
 
     const handleAdd = () => {
-        handleBulkAdd(parsedItems);
+        void handleBulkAdd(parsedItems);
         handleClose();
     };
 

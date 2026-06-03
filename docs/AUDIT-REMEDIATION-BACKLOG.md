@@ -9,7 +9,7 @@
 | R-002 | High | `refactor(settings): split DataPanel sync/vault sections` | Wartbarkeit, Bundle | M | Größte Settings-Datei; Sync wächst | — | ✅ PR #66 |
 | R-003 | High | `test(e2e): critical journeys sync, chef, cook-mode` | Regressionsschutz | L | Smoke reicht nicht für M10 | R-001 optional | ✅ PR #67 (`cook-mode.spec.ts`) |
 | R-004 | Medium | `refactor(db): services import dbInstance only` | Testbarkeit | S | Letzte `./db`-Imports in Services bereinieren | — | ✅ `exportService` |
-| R-005 | Medium | `chore(eslint): typed rules + floating promises` | Hook-Bugs | M | `exhaustive-deps` **error** (2026-06-03); typed lint folgt | R-004 hilft |
+| R-005 | Medium | `chore(eslint): typed rules + floating promises` | Hook-Bugs | M | `no-floating-promises` **error** + projectService | R-004 hilft | ✅ PR #67 |
 | R-006 | Medium | `test: raise branch coverage sync + recipeRepository` | CI-Stabilität | M | Threshold **64 %** (1746/2728) | — | ✅ M5.8 PR #67 |
 | R-007 | Medium | `docs: document Dexie migration + backup gate` ✅ | User Trust | S | Erledigt: `docs/DB-MIGRATIONS.md` | — |
 | R-008 | Medium | `feat(sync): optional encrypted credential storage` | Security | M | localStorage Metadaten | apiKeyService pattern |

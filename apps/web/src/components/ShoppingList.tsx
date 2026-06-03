@@ -48,11 +48,11 @@ const ShoppingListComponent: React.FC = () => {
 
     useEffect(() => {
         if (isShoppingMode) {
-            requestWakeLock();
+            void requestWakeLock();
         } else {
-            releaseWakeLock();
+            void releaseWakeLock();
         }
-        return () => { releaseWakeLock(); }
+        return () => { void releaseWakeLock(); };
     }, [isShoppingMode, requestWakeLock, releaseWakeLock]);
 
     if (shoppingList === undefined) {

@@ -14,7 +14,7 @@ export const PantryQuickAdd = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!input.trim()) return;
-        handleQuickAdd(input);
+        void handleQuickAdd(input);
         setInput('');
     };
 

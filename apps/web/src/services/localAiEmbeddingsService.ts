@@ -155,7 +155,7 @@ export const reindexAllEmbeddings = async (settings: AppSettings): Promise<void>
       await indexPantryEmbedding(item);
     }
   } catch (error) {
-    logAppError(error, 'localAiEmbeddings.reindexAll');
+    void logAppError(error, 'localAiEmbeddings.reindexAll');
   }
 };
 

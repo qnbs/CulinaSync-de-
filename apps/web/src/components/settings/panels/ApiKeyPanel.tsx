@@ -86,7 +86,7 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
     });
 
     useEffect(() => {
-        hasApiKey().then(result => {
+        void hasApiKey().then((result) => {
             setHasKey(result);
             setIsLoading(false);
         });
