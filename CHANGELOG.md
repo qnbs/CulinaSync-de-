@@ -9,6 +9,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Hinzugefuegt
 
+- **E2E:** `cook-mode.spec.ts` — Rezeptbuch → Kochmodus → Schrittwechsel → Beenden (R-003).
+- **Tests (M5.8):** Branch-Coverage **64 %** — `aiJsonParse`, `aiProviderWebLlm`, erweiterte Local-AI-Service-Tests; Vitest-Threshold branches **64**.
 - **M11.3 RAG v2:** `localAiEmbeddingsService`, Dexie `aiEmbeddings` (v13), Transformers.js `Xenova/all-MiniLM-L6-v2`, Hybrid-RAG in `localAiRagService`; Chunk `vendor-transformers`.
 - **M11.2 WebLLM:** `webLlmEngineManager`, `completeWebLlmChat` (JSON-Mode); `localAiWebLlmService` für Rezept-Ideen/Rezept; Setting `localAi.enableWebLlmInference`; Chunk `vendor-webllm`.
 - **M11.1 Local AI:** `@domain/ai-core` — `gpuTier`, `modelRegistry`, `providerChain`, WebLLM/Transformers/Heuristic-Engines (Feature-Flags); `aiProviderService` + `localAiRagService` (Keyword-RAG v1); `aiService` delegiert.
@@ -21,7 +23,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ### Geaendert
 
 - **Doku (Perfection Schritt D):** `ROADMAP.md` M11 Local AI, M5.7–5.9, M10.5; `PRD.md` v1.1 (Coverage-Stufenplan 88 %); `STATUS-2026-06-03`, `TESTING.md`, `AUDIT.md`, `instructions.md`, `AUDIT-REMEDIATION-BACKLOG`, `PROJECT-STRUCTURE.md`.
-- **Coverage:** Vitest-Thresholds Stufe 1 — 80/78/73/63 (lines/stmts/funcs/branches); Ist ~80,6 % / ~63,7 % branches — Ziel 64 % in Follow-up.
+- **Coverage:** Vitest-Thresholds Stufe 1 — 80/78/73/**64** (lines/stmts/funcs/branches); Ist ~79,6 % / **64,0 %** branches (470 Tests / 109 Dateien).
 - **CI:** `ci.yml` Job `main-guard` auf Push `main` (grüner CI-Status ohne Doppel-Coverage); Regel `302-ci-correction-loop.mdc` (dauerhafte Korrekturschleife).
 - **ESLint:** `exhaustive-deps` **error**; `no-console` strikt (nur warn/error/debug); `console.log` → `console.debug` in Services.
 - **Agent-Regeln:** `301-strict-quality-gates.mdc`; `300-pr-review-automation.mdc` — CodeAnt/Copilot **sofort** abarbeiten, kein Merge mit offenen Threads.
@@ -29,6 +31,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Behoben
 
+- **Rezept-Detail:** `RecipeActionBar` nutzt korrekte i18n-Keys (`startCookMode`, `addMissingToShopping`, Favorit-Labels); fehlende Export-/Speichern-Keys in de/en ergänzt (leere Buttons in Production).
 - **CI Deploy:** `deploy.yml` — `checkout` vor Post-Deploy-Verify; Vercel-HTTP-401 (Deployment Protection) als Warnung statt Hard-Fail.
 - **CI E2E:** Offline-Smoke lädt Seite zuerst, dann offline; Locator `#offline-status-banner` (strict mode).
 - **Vercel:** Monorepo-Build `pnpm run build --filter=web` in `vercel.json`.

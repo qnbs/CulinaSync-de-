@@ -73,6 +73,25 @@ describe('localAiRagService', () => {
     expect(context.chunks.some((chunk) => chunk.sourceType === 'recipe')).toBe(true);
   });
 
+  it('nutzt semantic retrieval wenn nur Embeddings treffen', async () => {
+    mockSearchSemantic.mockResolvedValueOnce([
+      { sourceType: 'pantry', sourceId: 42, text: 'Basilikum frisch', score: 0.88 },
+    ]);
+
+    const context = await buildLocalAiRagContext({
+      prompt: {
+        craving: 'Basilikum',
+        includeIngredients: [],
+        excludeIngredients: [],
+        modifiers: [],
+      },
+      settings: getDefaultSettings(),
+    });
+
+    expect(context.retrievalMode).toBe('semantic');
+    expect(context.chunks[0]?.text).toMatch(/Basilikum/i);
+  });
+
   it('nutzt hybrid retrieval wenn semantische Treffer vorliegen', async () => {
     const pantryId = await db.pantry.add({
       name: 'Tomaten',

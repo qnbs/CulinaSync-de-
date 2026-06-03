@@ -12,6 +12,10 @@ import {
 } from '@domain/ai-core';
 
 describe('@domain/ai-core cosineSearch', () => {
+  it('cosineSimilarity liefert 0 fuer leere Vektoren', () => {
+    expect(cosineSimilarity([], [])).toBe(0);
+  });
+
   it('cosineSimilarity erkennt identische Vektoren', () => {
     expect(cosineSimilarity([1, 0], [1, 0])).toBeCloseTo(1);
   });
