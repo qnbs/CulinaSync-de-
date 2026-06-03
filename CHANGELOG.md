@@ -11,7 +11,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 - **README:** Umfassend überarbeitet (Vision, Monorepo, Architektur-Regeln, Deployment Pages+Vercel, Doku-Index).
 - **Docs:** `docs/README.md` auf STATUS-2026-06-03, PWA/DESIGN-SYSTEM; Housekeeping-Checkliste; `TESTING.md` Playwright-Image **v1.60.0**.
-- **CI:** E2E-Smoke-Container auf `playwright:v1.60.0-noble` (Abgleich mit `@playwright/test` 1.60); `GlobalErrorBoundary`-Test mit i18n-Provider und `role="alert"`.
+- **CI:** E2E-Smoke-Container auf `playwright:v1.60.0-noble` (Abgleich mit `@playwright/test` 1.60); `GlobalErrorBoundary`-Test mit i18n-Provider und `role="alert"`; E2E-Helper `seedDismissedAppModals` (Onboarding/Whats-New); i18n-Scan schließt `buildPwaManifest.ts` aus; Coverage-Tests für PWA-Registration und `transientUiStore`.
 - **Deps:** `react` und `react-dom` auf **19.2.7** ausgerichtet; `pnpm-lock.yaml` nach Main-Merges repariert.
 - **Vercel:** Production-Deploy nach Lockfile- und Settings-Import-Fix wieder grün (Turbo-Auto-Detect; Output `apps/web/dist` — siehe `docs/DEPLOYMENT.md`).
 - **UI:** `Settings.tsx` — fehlende `Button`/`applyAccentTheme`-Imports nach Design-System-Merge (#50) ergänzt.
