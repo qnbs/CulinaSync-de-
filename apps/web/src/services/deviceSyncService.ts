@@ -38,7 +38,12 @@ const deviceSyncPayloadSchema = z.object({
   recipes: z.array(recipeSyncSchema).max(MAX_ITEMS_PER_TABLE),
 });
 
-export type DeviceSyncPayload = z.infer<typeof deviceSyncPayloadSchema>;
+export type DeviceSyncPayload = {
+  v: 1;
+  exportedAt: string;
+  pantry: PantryItem[];
+  recipes: Recipe[];
+};
 
 const trimForQr = (data: FullBackupData): DeviceSyncPayload => ({
   v: 1,
@@ -77,9 +82,10 @@ export const parseDeviceSyncTransferString = (raw: string): DeviceSyncPayload =>
     throw new Error('invalid-payload');
   }
   return {
-    ...result.data,
+    v: result.data.v,
+    exportedAt: result.data.exportedAt,
     pantry: result.data.pantry as PantryItem[],
-    recipes: result.data.recipes as Recipe[],
+    recipes: result.data.recipes as unknown as Recipe[],
   };
 };
 
