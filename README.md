@@ -1,24 +1,24 @@
 # CulinaSync
 
-**Local-first Küchen-Assistentin** — Vorrat, Rezepte, Essensplan, Einkauf und optional KI, die im Browser bleibt und mit dir mitwächst.
+**Local-first Küchen-Assistentin** — Vorrat, Rezepte, Essensplan, Einkauf und **KI mit Wahl**: on-device, heuristisch offline oder optional Cloud-Gemini (BYOK).
 
 | | |
 |---|---|
 | **Live (GitHub Pages)** | [qnbs.github.io/CulinaSync-de-](https://qnbs.github.io/CulinaSync-de-/) |
-| **Vercel Preview / Production** | [culina-sync-de-web](https://culina-sync-de-web-qnbs-projects.vercel.app) (Monorepo-Deploy bei Push auf `main`) |
+| **Vercel Production** | [culina-sync-de-web](https://culina-sync-de-web-qnbs-projects.vercel.app) |
 | **Version** | `0.2.2` |
-| **Stack** | React 19 · Vite 8 · TypeScript (`tsgo`) · Dexie · Redux (UI) · PWA |
+| **Stack** | React 19 · Vite 8 · TypeScript (`tsgo`) · Dexie · Redux (UI) · PWA · Local-AI-Routing |
 
-[Architektur](./docs/ARCHITECTURE.md) · [Entwicklung](./docs/DEVELOPMENT.md) · [Deployment](./docs/DEPLOYMENT.md) · [PWA](./docs/PWA.md) · [Design-System](./docs/DESIGN-SYSTEM.md) · [Testing](./docs/TESTING.md) · [Roadmap](./ROADMAP.md) · [Beitragen](./CONTRIBUTING.md)
+[Architektur](./docs/ARCHITECTURE.md) · [Entwicklung](./docs/DEVELOPMENT.md) · [Deployment](./docs/DEPLOYMENT.md) · [PWA](./docs/PWA.md) · [Local AI](./docs/LOCAL-AI-ARCHITECTURE.md) · [Design-System](./docs/DESIGN-SYSTEM.md) · [Testing](./docs/TESTING.md) · [Roadmap](./ROADMAP.md)
 
 ---
 
 ## Warum CulinaSync?
 
-CulinaSync ist keine generische SaaS-App, sondern eine **verlässliche Haushalts-PWA**: Daten liegen bei dir (IndexedDB), die Oberfläche ist für Alltag und Küche gebaut, und KI ist **optional** — nur mit deinem eigenen Gemini-Key, nie im Build eingebettet.
+CulinaSync ist keine generische SaaS-App, sondern eine **verlässliche Haushalts-PWA**: Domain-Daten liegen bei dir (IndexedDB), die Oberfläche ist für Alltag und Küche gebaut, und KI ist **optional und steuerbar** — Local-first-Routing, heuristische Offline-Fallbacks oder Gemini nur mit deinem eigenen API-Key (nie im Build).
 
 ```mermaid
-flowchart LR
+flowchart TB
   subgraph client [Browser / PWA]
     UI[React UI]
     Redux[Redux UI/Session]
@@ -28,11 +28,23 @@ flowchart LR
     UI --> Dexie
     SW --> UI
   end
-  subgraph optional [Optional]
-    Gemini[Gemini API]
+
+  subgraph ai [KI-Schicht]
+    AIS[aiService.ts]
+    Local[aiOfflineFallback / Local-AI-Prefs]
+    Gemini[geminiService.ts BYOK]
+    AIS --> Local
+    AIS -.->|routing + key| Gemini
+    UI --> AIS
+  end
+
+  subgraph optional [Sync & Integration]
     NC[Nextcloud WebDAV]
-    Gemini -.-> UI
+    QR[QR-Gerätesync]
+    Vault[Vault .csb]
     NC -.-> Dexie
+    QR -.-> Dexie
+    Vault -.-> Dexie
   end
 ```
 
@@ -40,19 +52,18 @@ flowchart LR
 
 ## Aktueller Stand (Juni 2026)
 
-Vollständiger Snapshot: **[docs/STATUS-2026-06-03.md](./docs/STATUS-2026-06-03.md)** · Vorgänger: [STATUS-2026-06-02.md](./docs/STATUS-2026-06-02.md)
+Snapshot: **[docs/STATUS-2026-06-03.md](./docs/STATUS-2026-06-03.md)** · Änderungen: [CHANGELOG.md](./CHANGELOG.md)
 
 | Bereich | Stand |
 |---------|--------|
-| **Tests** | 380+ Vitest-Tests; Coverage v8 ~78 % stmts / ~79 % lines (PRD M5 erfüllt) |
-| **i18n** | Deutsch + Englisch; Gates `pnpm run i18n:check` (Baseline 0 Hardcoded im Prod-Scan) |
-| **PWA** | Erweitertes Manifest, Share Target, Badges, kontrolliertes SW-Update — [docs/PWA.md](./docs/PWA.md) |
-| **Sync** | Geräte-QR, Cloud-Backup, **Nextcloud WebDAV** (M10.2) |
-| **Desktop** | Tauri-2-Workspace vorbereitet — [docs/M8-TAURI-DESKTOP.md](./docs/M8-TAURI-DESKTOP.md) |
-| **UI** | Design-System-Kit (`apps/web/src/components/ui/`) — [docs/DESIGN-SYSTEM.md](./docs/DESIGN-SYSTEM.md) |
-| **CI** | `validate.yml` + E2E-Smoke + CodeQL; Deploy GitHub Pages + Vercel bei `main` |
-
-Änderungshistorie: [CHANGELOG.md](./CHANGELOG.md)
+| **Tests** | 380+ Vitest-Tests; Coverage v8 ~79 % lines (Schwellen 77/79/72/62) |
+| **i18n** | de/en; `core` · `settings` · `features` · `gemini` · **`aiChef`**; Baseline-Scan **0** Hardcoded in Prod |
+| **PWA** | Manifest, Share Target, Badges, SW-Update, Datei-Handler — [docs/PWA.md](./docs/PWA.md) |
+| **Local AI** | 4-Layer-Stack, Routing, Ollama-URL, GPU/Modell-Prefs — [docs/LOCAL-AI-ARCHITECTURE.md](./docs/LOCAL-AI-ARCHITECTURE.md) |
+| **Help** | 12 FAQs, Pro-Tipps, Einstellungs-Deep-Links, Live-Systemstatus |
+| **Einstellungen** | 12 Bereiche + Kontext-Intros (`SettingsPanelIntro`) |
+| **Sync** | QR-Gerät, verschlüsselter Vault, WebDAV/Nextcloud, JSON/MD/CSV/PDF |
+| **CI** | validate + E2E-Smoke (Playwright **v1.60.0**) + CodeQL; Deploy Pages + Vercel |
 
 ---
 
@@ -61,13 +72,88 @@ Vollständiger Snapshot: **[docs/STATUS-2026-06-03.md](./docs/STATUS-2026-06-03.
 | Feature | Kurzbeschreibung |
 |---------|------------------|
 | **Vorrat** | Ablaufdaten, Filter, Smart-Input, automatischer Rezept-Abgleich (Dexie-Hooks) |
-| **Rezeptbuch** | Detailansicht, Zutaten-Matching, Export (PDF/CSV lazy) |
-| **Essensplan** | Wochenübersicht, Querverknüpfung zu Rezepten und Einkauf |
-| **Einkaufsliste** | Kategorien, Sprach-/Smart-Input, reaktiv via `useLiveQuery` |
-| **KI-Chef** | Gemini mit Zod-validiertem JSON; Local-AI-Routing in Einstellungen |
-| **PWA** | Offline-Grundlage, Install, Share-to-Chef, Datei-Launch, App-Badge |
-| **Sync & Backup** | LWW-Merge, QR-Gerätesync, optional Nextcloud |
-| **Barrierefreiheit** | Modals mit Fokus-Falle, `role="dialog"`, reduzierte Bewegung / kompakte Dichte |
+| **Rezeptbuch** | Detail, Zutaten-Matching, Export (PDF/CSV lazy) |
+| **Essensplan** | Woche, Vorrat-Balken (grün/gelb/rot), Einkauf-Anbindung |
+| **Einkaufsliste** | Kategorien, Sprach-/Smart-Input, `useLiveQuery` |
+| **KI-Chef** | Ideen & Rezepte über `aiService` — Local / Cloud / Offline-Fallback |
+| **Local AI** | Einstellungen: 4 Layer, Routing, WebGPU, Cache, Vision, Embeddings, **Ollama** |
+| **PWA** | Offline, Install, Share→Chef, Datei-Launch, App-Badge |
+| **Sync & Backup** | LWW-Merge, QR, Nextcloud, Factory-Reset |
+| **Sprache** | TTS, Browser-STT oder Whisper lokal; Kochmodus-Befehle |
+| **Policies** | Allergene, Blacklist, Mindest-Vorrat, strikte Durchsetzung |
+| **Health Connect** | Nährwert-Export (Apple/Google/Samsung) — rein lokal berechnet |
+| **Community** | Opt-in IPFS/Nostr Rezept-Sharing |
+| **Hilfe** | Wissensdatenbank, Tour erneut starten, Schnellzugriff Einstellungen |
+
+---
+
+## Local AI — Überblick
+
+CulinaSync trennt **Daten** (immer lokal in Dexie) von **Inferenz** (konfigurierbar). Die Zielarchitektur ist ein **4-Layer-Stack**; heute aktiv sind vor allem **Routing**, **Einstellungen** und **heuristische Offline-KI** (`aiOfflineFallback`), Cloud optional über Gemini.
+
+| Layer | Technologie (Roadmap / Prefs) | Heute |
+|-------|------------------------------|--------|
+| **L1** | WebLLM (WebGPU) | Modell-Prefs in Einstellungen |
+| **L2** | ONNX Runtime Web (Vision) | Toggle Vision + EXIF-Stripping |
+| **L3** | Transformers.js (Embeddings) | Toggle Embeddings / RAG-Chunks |
+| **L4** | Heuristik / Templates | **Aktiv** — `aiOfflineFallback`, Einkauf, Rezept-Ideen |
+
+### Routing & Facade
+
+Alle KI-Aufrufe aus Features laufen über **`apps/web/src/services/aiService.ts`** (nicht direkt `geminiService.ts`):
+
+| Modus | Verhalten |
+|-------|-----------|
+| **local-first** | Zuerst Local/Heuristik; Cloud nur mit API-Key und erlaubtem Fallback |
+| **local-only** | Kein Gemini; nur Local/Offline |
+| **cloud-first** | Gemini bevorzugt; bei Fehler Offline-Fallback |
+
+Einstellungen → **Lokale KI**: Aktivierung, Local-only, Cloud-Fallback, GPU-Tier, bevorzugtes Modell, parallele Jobs, Inferenz-Cache (TTL), Speicherlimit, **Ollama** (URL z. B. `http://127.0.0.1:11434`).
+
+```text
+KI-Chef / Einkauf
+       ↓
+  aiService.ts          ← einziger Feature-Einstieg
+       ↓
+ shouldPreferLocalAi?  → aiOfflineFallback (L4)
+       ↓
+ shouldAllowCloudAi?   → geminiService.ts (BYOK, Zod)
+       ↓
+ Fehler/Offline        → aiOfflineFallback
+```
+
+**Paket:** `packages/ai-core` — Worker-Bus, Sanitize, Local-AI-Facade (Phase 1+). Doku: [LOCAL-AI-ARCHITECTURE.md](./docs/LOCAL-AI-ARCHITECTURE.md) · Audit: [LOCAL-AI-AUDIT-2026-06.md](./docs/LOCAL-AI-AUDIT-2026-06.md).
+
+**Gemini (Cloud):** Weiterhin nur `geminiService.ts`, strukturierte Antworten mit Zod — API-Key in `apiKeyService.ts` (verschlüsselt, IndexedDB).
+
+---
+
+## Einstellungen & Hilfe
+
+### 12 Einstellungsbereiche
+
+| Bereich | Inhalt |
+|---------|--------|
+| Design | Akzent, Kitchen-Modus, A11y, Live-Vorschau |
+| Haushalt & Sprache | Name, de/en, Wochenstart, Portionen |
+| Haushalt & Module | Vorrat, Rezepte, Einkauf, Planer, Kochmodus |
+| KI-Chef | Kreativität, Ernährung, Küchen, RAG-Kontext |
+| **Lokale KI** | 4-Layer, Routing, GPU, Modelle, Ollama, Cache |
+| Policies | Allergene, Blacklist, Mindestbestand |
+| Privatsphäre | KI-Spuren, Logs, Local-First-Hinweise |
+| Sprache & Audio | TTS, Whisper, Dauerhören |
+| API-Schlüssel | Gemini BYOK |
+| Health Connect | Export-Formate |
+| Community | IPFS/Nostr (opt-in) |
+| Daten & Speicher | PWA, Backup, Vault, Sync, Reset |
+
+Jeder Bereich zeigt ein **Kontext-Intro** mit Kurztipps (`SettingsPanelIntro`). Aus der **Hilfe** springst du per Deep-Link (`focusTarget`) direkt in den passenden Bereich.
+
+### Wissensdatenbank (Hilfe)
+
+- **12 FAQs** — Local-first, KI-Datenschutz, API-Key, Local AI, Sync (QR/Vault/Cloud), Policies, PWA, Backups, Sprache
+- **Pro-Tipps** — Palette, API-Key, Audio, Einkauf, Essensplaner, KI-Chef, **Onboarding-Tour erneut**
+- **Live-Status** — Netzwerk, Speicher-Schätzung, PWA installiert, IndexedDB
 
 ---
 
@@ -76,14 +162,14 @@ Vollständiger Snapshot: **[docs/STATUS-2026-06-03.md](./docs/STATUS-2026-06-03.
 | Pfad | Rolle |
 |------|--------|
 | `apps/web/` | PWA (Vite, React, Dexie, Features) — **Hauptanwendung** |
-| `packages/ai-core/` | Geteilte KI-Typen / Hilfen |
+| `packages/ai-core/` | KI-Typen, Worker-Bus, Local-AI-Facade, Prompt-Sanitize |
 | `packages/ui/` | Design-Tokens (`tokens.css`) |
-| `src-tauri/` | Tauri-2-Desktop-Workspace (Cargo) |
+| `src-tauri/` | Tauri-2-Desktop-Workspace |
+| `apps/web/src/locales/{de,en}/` | `core.json`, `settings.json`, `features.json`, `gemini.json`, **`aiChef.json`** |
 | `.github/workflows/` | CI, Deploy, E2E, CodeQL, Tauri-Release |
-| `docs/` | Architektur, Betrieb, Status-Snapshots |
-| `graphify-out/` | Codebase-Graph (siehe [CLAUDE.md](./CLAUDE.md)) |
+| `docs/` | Architektur, Local AI, PWA, Status-Snapshots |
 
-App-Einstieg: **`apps/web/index.tsx`** (nicht Repo-Root). Alle DB-Schreibzugriffe nur über **`apps/web/src/services/db.ts`** und Repositories.
+**Einstieg:** `apps/web/index.tsx` · **DB:** nur `apps/web/src/services/db.ts` + Repositories.
 
 ---
 
@@ -91,15 +177,16 @@ App-Einstieg: **`apps/web/index.tsx`** (nicht Repo-Root). Alle DB-Schreibzugriff
 
 | Schicht | Technologie |
 |---------|-------------|
-| UI | React 19, Tailwind 4, Lucide |
+| UI | React 19, Tailwind 4, Lucide, Design-System (`components/ui/`) |
 | Build | Vite 8, Turbo, pnpm 10 |
-| Typen | TypeScript 6 + **`tsgo`** (nativer Type-Check) |
+| Typen | TypeScript + **`tsgo`** |
 | Daten | Dexie 4 / IndexedDB (Source of Truth) |
-| UI-State | Redux Toolkit + redux-persist (nur Settings) |
-| KI | `@google/genai` nur in `geminiService.ts`, Zod-Schemas |
-| Tests | Vitest 4, Testing Library, MSW, Playwright (E2E) |
-| PWA | vite-plugin-pwa, Workbox (`injectManifest`, `src/sw.ts`) |
-| CI | Node 24, GitHub Actions, GitHub Pages, Vercel |
+| UI-State | Redux Toolkit; Zustand (transiente UI); redux-persist (Settings) |
+| KI Cloud | `@google/genai` in `geminiService.ts`, Zod |
+| KI Local | `aiService.ts` + `aiOfflineFallback` + `packages/ai-core` |
+| Tests | Vitest 4, Testing Library, MSW, Playwright |
+| PWA | vite-plugin-pwa, Workbox (`src/sw.ts`) |
+| CI | Node 24, GitHub Actions, Pages, Vercel |
 
 ---
 
@@ -107,48 +194,52 @@ App-Einstieg: **`apps/web/index.tsx`** (nicht Repo-Root). Alle DB-Schreibzugriff
 
 ### Voraussetzungen
 
-- **Node.js 24** (`.node-version`, CI, DevContainer)
-- **pnpm 10+** (`packageManager` in `package.json`)
+- **Node.js 24**
+- **pnpm 10+**
 
 ### Installation & Dev
 
 ```bash
 pnpm install
-pnpm run dev          # Turbo → apps/web (Vite)
+pnpm run dev
 ```
 
-Öffnen: `http://localhost:5173` (lokal `base: /`).
+Lokal: `http://localhost:5173` · Production-Pfad: `/CulinaSync-de-/`
+
+### Local AI lokal testen
+
+1. App starten → **Einstellungen → Lokale KI** → aktivieren, Routing `local-first` oder `local-only`.
+2. Optional **Ollama** auf dem Rechner starten und URL eintragen (für Phase-1-Anbindung vorbereitet).
+3. **KI-Chef** ohne API-Key: heuristische Rezept-Ideen aus Vorrat/Kontext.
+4. Mit API-Key: Gemini unter **API-Schlüssel**; Routing `cloud-first` oder Fallback erlauben.
 
 ### Wichtige Befehle
 
 | Befehl | Zweck |
 |--------|--------|
-| `pnpm run lint` | ESLint (Monorepo) |
-| `pnpm run type-check` | **tsgo** (nicht `tsc` für Builds) |
-| `pnpm run test` | Vitest (alle Packages) |
+| `pnpm run lint` | ESLint |
+| `pnpm run type-check` | **tsgo** |
+| `pnpm run test` | Vitest |
 | `pnpm run test:coverage` | Coverage + Thresholds |
-| `pnpm run build` | `tsgo` + Vite Production |
-| `pnpm run test:e2e` | Playwright gegen `vite preview` |
-| `pnpm run check:bundle-budget` | Bundle-Limits |
-| `pnpm run check:all` | Volle Pre-Push-Validierung |
+| `pnpm run build` | Production-Build |
+| `pnpm run test:e2e` | Playwright (Preview in CI) |
+| `pnpm run check:all` | Volle Validierung vor Release |
 | `pnpm run i18n:check` | Locale-Parität + Baseline |
 
 Einzeltest: `pnpm --filter web exec vitest run src/path/to/file.test.ts`
 
-Details: [docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md) · Agenten-Kanon: [.github/copilot-instructions.md](./.github/copilot-instructions.md)
+Details: [docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md) · Agenten: [.github/copilot-instructions.md](./.github/copilot-instructions.md)
 
 ---
 
 ## Architektur-Regeln (kurz)
 
-Diese Grenzen sind bewusst streng — sie halten die App wartbar und sicher:
-
-1. **Dexie:** Keine direkten `db.table()`-Aufrufe in Komponenten; nur Repositories / `db.ts`.
-2. **Gemini:** Nur `apps/web/src/services/geminiService.ts`; AI-JSON immer mit Zod prüfen.
-3. **API-Key:** Nie `VITE_*` / `process.env` im Client-Build; Speicherung über `apiKeyService.ts` (verschlüsselt in IndexedDB).
-4. **Redux:** Nur UI/Session; Domain-Daten nicht in Redux spiegeln.
-5. **Modals:** `useModalA11y`, `role="dialog"`, `aria-modal`.
-6. **Fehler:** `logAppError()`; Thunk-Fehler → Listener-Middleware; Render-Fehler → `GlobalErrorBoundary`.
+1. **Dexie:** Keine `db.table()` in Komponenten — nur Repositories / `db.ts`.
+2. **Gemini:** Nur `geminiService.ts`; Features nutzen **`aiService.ts`**.
+3. **API-Key:** Nie `VITE_*` im Build; `apiKeyService.ts` (IndexedDB).
+4. **Redux:** UI/Session only; Domain in Dexie.
+5. **Modals:** `useModalA11y`, `role="dialog"`.
+6. **Fehler:** `logAppError()`; `GlobalErrorBoundary` für Render.
 
 Mehr: [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) · [PRD.md](./PRD.md)
 
@@ -156,25 +247,24 @@ Mehr: [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) · [PRD.md](./PRD.md)
 
 ## Deployment & Hosting
 
-| Ziel | Trigger | Artefakt / URL |
-|------|---------|----------------|
-| **GitHub Pages** | Push `main` → `deploy.yml` | `apps/web/dist`, Base `/CulinaSync-de-/` |
-| **Vercel** | GitHub-Integration | Turbo-Build `web`; Output `apps/web/dist` (Dashboard-Root) |
+| Ziel | Trigger | Hinweis |
+|------|---------|---------|
+| **GitHub Pages** | Push `main` | `apps/web/dist`, Base `/CulinaSync-de-/` |
+| **Vercel** | Push `main` | Dashboard-Root **`apps/web`**, Output `dist` |
 | **Tauri** | `workflow_dispatch` | [tauri-release.yml](./.github/workflows/tauri-release.yml) |
 
-Vercel-Hinweis: Kein Root-`vercel.json` nötig, wenn das Projekt im Dashboard auf **`apps/web`** zeigt — andernfalls sucht die Plattform `dist` am falschen Pfad. Siehe [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md).
+Kein Root-`vercel.json` nötig bei korrektem Vercel-Root — siehe [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md).
+
+Nach Push auf `main`: CI-, E2E- und Deploy-Workflows bis **grün** beobachten.
 
 ---
 
-## Qualität, Security & Observability
+## Qualität & Security
 
-- **Lint + Typecheck + Tests + Build + Audit** in `validate.yml` (wiederverwendbar für CI und Deploy).
-- **E2E-Smoke:** Playwright im Container `mcr.microsoft.com/playwright:v1.60.0-noble` ([e2e-smoke.yml](./.github/workflows/e2e-smoke.yml)).
-- **CodeQL** für JS/TS.
-- **Bundle-Budget** und **pnpm audit --audit-level=high**.
-- **Security:** [SECURITY.md](./SECURITY.md) · Review: [docs/SECURITY-AUDIT-2026.md](./docs/SECURITY-AUDIT-2026.md)
-
-Nach jedem Push auf `main`: CI-/Deploy-/CodeQL-Läufe beobachten bis grün (Team-Konvention).
+- **validate.yml:** Lint, tsgo, Tests, Coverage, Build, Audit, Bundle-Budget.
+- **E2E-Smoke:** Playwright `v1.60.0-noble`, inkl. Navigation + Offline-Banner.
+- **CodeQL** · **pnpm audit** (high+).
+- [SECURITY.md](./SECURITY.md) · [docs/SECURITY-AUDIT-2026.md](./docs/SECURITY-AUDIT-2026.md)
 
 ---
 
@@ -182,27 +272,27 @@ Nach jedem Push auf `main`: CI-/Deploy-/CodeQL-Läufe beobachten bis grün (Team
 
 | Dokument | Inhalt |
 |----------|--------|
-| [instructions.md](./instructions.md) | Gates & Checklisten für Menschen und Agenten |
-| [PRD.md](./PRD.md) | Scope, FR/NFR, Akzeptanzkriterien |
-| [docs/README.md](./docs/README.md) | Dokumentations-Hub |
-| [docs/STATUS-2026-06-03.md](./docs/STATUS-2026-06-03.md) | **Aktueller** Projektstand |
-| [docs/PWA.md](./docs/PWA.md) | Manifest, SW, Install, Share |
-| [docs/DESIGN-SYSTEM.md](./docs/DESIGN-SYSTEM.md) | UI-Kit, Tokens, Migrationen |
-| [docs/LOCAL-AI-ARCHITECTURE.md](./docs/LOCAL-AI-ARCHITECTURE.md) | Local-AI-Roadmap |
-| [docs/TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md) | Häufige Fehler (inkl. Lockfile / Vercel) |
-| [CHANGELOG.md](./CHANGELOG.md) | Release-Notizen (Keep a Changelog) |
+| [docs/README.md](./docs/README.md) | Doku-Hub |
+| [docs/STATUS-2026-06-03.md](./docs/STATUS-2026-06-03.md) | Projektstand |
+| [docs/LOCAL-AI-ARCHITECTURE.md](./docs/LOCAL-AI-ARCHITECTURE.md) | **4-Layer Local AI, Phase 1–4** |
+| [docs/LOCAL-AI-AUDIT-2026-06.md](./docs/LOCAL-AI-AUDIT-2026-06.md) | Phase-0-Audit |
+| [docs/PWA.md](./docs/PWA.md) | PWA, Share, SW |
+| [docs/DESIGN-SYSTEM.md](./docs/DESIGN-SYSTEM.md) | UI-Kit |
+| [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) | Pages + Vercel |
+| [docs/TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md) | Lockfile, Deploy, E2E |
+| [CHANGELOG.md](./CHANGELOG.md) | Release-Notizen |
 
 ---
 
 ## Desktop (Tauri)
 
-Native Wrapper auf Basis **Tauri 2** (`src-tauri/`). Icons: `pnpm run tauri:icons`. Vollständige Release-Matrix folgt Roadmap M8.
+Native Shell auf **Tauri 2** (`src-tauri/`). Icons: `pnpm run tauri:icons`. Siehe [docs/M8-TAURI-DESKTOP.md](./docs/M8-TAURI-DESKTOP.md).
 
 ---
 
 ## Mitwirken
 
-Conventional Commits (commitlint + husky). Ablauf und Erwartungen: [CONTRIBUTING.md](./CONTRIBUTING.md).
+Conventional Commits (commitlint + husky). [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ---
 
