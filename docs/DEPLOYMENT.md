@@ -7,7 +7,7 @@ Das Repository verwendet GitHub Actions fuer CI, Deploy und CodeQL.
 - CI: `.github/workflows/ci.yml`
 - Deploy: `.github/workflows/deploy.yml`
 - CodeQL: `.github/workflows/codeql.yml`
-- **Vercel (Preview/Production):** Projekt `culina-sync-de-web`, Konfiguration in `vercel.json` (Monorepo-Root, Turbo-Build `web` → `apps/web/dist`)
+- **Vercel (Preview/Production):** Projekt `culina-sync-de-web` (Turbo-Auto-Detect, Build-Output `apps/web/dist` — kein separates `vercel.json` nötig, solange Dashboard-Root mit Monorepo übereinstimmt)
 
 ## Build- und Deploy-Fluss
 
@@ -75,8 +75,8 @@ Diese Warnungen stammen aktuell von Upstream-Runtimes der GitHub-verwalteten Act
 
 - **Root:** Repository-Root (pnpm-Workspace, Turbo erkennt `web`-Package).
 - **Install:** `pnpm install` (Lockfile muss konsistent sein — `pnpm install --frozen-lockfile` wie in CI).
-- **Build:** `pnpm exec turbo run build --filter=web` (siehe `vercel.json`).
-- **Output:** `apps/web/dist` (Vite `base` ist lokal `/`, nicht der GitHub-Pages-Pfad).
+- **Build:** Turbo `web`-Package (`tsgo && vite build`); Vercel erkennt Turbo automatisch.
+- **Output:** `apps/web/dist` (Vite `base` ist lokal `/`, nicht der GitHub-Pages-Pfad). Im Vercel-Dashboard **nicht** fälschlich nur `dist` am Repo-Root erwarten, wenn der Build im Workspace `apps/web` landet.
 - **Node:** 24.x (wie `package.json` `engines` und GitHub Actions).
 - Typischer Production-Fehler nach Main-Merges: `ERR_PNPM_LOCKFILE_MISSING_DEPENDENCY` (kaputtes `pnpm-lock.yaml`) oder TS-Fehler durch unvollständige UI-Migrationen — beides blockiert den Build vor dem Vite-Schritt.
 
