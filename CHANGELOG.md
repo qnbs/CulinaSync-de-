@@ -7,6 +7,10 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geaendert
+
+- **Deps:** `react` und `react-dom` auf **19.2.7** ausgerichtet; `pnpm-lock.yaml` nach Main-Merges repariert.
+
 ### Hinzugefuegt
 
 - **M10.2:** Nextcloud-Sync-Adapter (`nextcloudSyncAdapter`, `syncTransport`, Provider-UI, i18n-Fehlercodes).
