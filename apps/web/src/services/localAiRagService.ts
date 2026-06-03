@@ -1,17 +1,9 @@
 import type { AppSettings, Recipe, StructuredPrompt } from '../types';
 import { db } from './dbInstance';
+import { searchSemanticRagChunks } from './localAiEmbeddingsService';
+import type { LocalAiRagChunk, LocalAiRagContext } from './localAiRagTypes';
 
-export type LocalAiRagChunk = {
-  sourceType: 'recipe' | 'pantry';
-  sourceId: number;
-  text: string;
-  score: number;
-};
-
-export type LocalAiRagContext = {
-  chunks: LocalAiRagChunk[];
-  promptBlock: string;
-};
+export type { LocalAiRagChunk, LocalAiRagContext } from './localAiRagTypes';
 
 const tokenize = (value: string): string[] =>
   value
@@ -37,13 +29,29 @@ const buildKeywords = (prompt: StructuredPrompt): string[] => {
   return tokenize(raw);
 };
 
-export const buildLocalAiRagContext = async (options: {
-  prompt: StructuredPrompt;
-  settings: AppSettings;
-}): Promise<LocalAiRagContext> => {
-  const { prompt, settings } = options;
+const buildQueryText = (prompt: StructuredPrompt): string =>
+  [prompt.craving, ...prompt.includeIngredients, ...prompt.modifiers].join(' ').trim();
+
+const chunkKey = (chunk: LocalAiRagChunk): string => `${chunk.sourceType}:${chunk.sourceId}`;
+
+const mergeChunks = (primary: LocalAiRagChunk[], secondary: LocalAiRagChunk[], limit: number): LocalAiRagChunk[] => {
+  const merged = new Map<string, LocalAiRagChunk>();
+  for (const chunk of [...primary, ...secondary]) {
+    const key = chunkKey(chunk);
+    const existing = merged.get(key);
+    if (!existing || chunk.score > existing.score) {
+      merged.set(key, chunk);
+    }
+  }
+  return [...merged.values()].sort((left, right) => right.score - left.score).slice(0, limit);
+};
+
+const buildKeywordChunks = async (
+  prompt: StructuredPrompt,
+  settings: AppSettings,
+  limit: number,
+): Promise<LocalAiRagChunk[]> => {
   const keywords = buildKeywords(prompt);
-  const limit = Math.min(settings.aiPreferences.maxRagChunks, 12);
   const chunks: LocalAiRagChunk[] = [];
 
   if (settings.aiPreferences.useRecipeHistoryContext) {
@@ -68,15 +76,40 @@ export const buildLocalAiRagContext = async (options: {
     }
   }
 
-  chunks.sort((left, right) => right.score - left.score);
-  const top = chunks.slice(0, limit);
+  return chunks.sort((left, right) => right.score - left.score).slice(0, limit);
+};
+
+// QNBS-v3: M11.3 — Hybrid-RAG: Transformers-Embeddings (Dexie) + Keyword-Fallback
+export const buildLocalAiRagContext = async (options: {
+  prompt: StructuredPrompt;
+  settings: AppSettings;
+}): Promise<LocalAiRagContext> => {
+  const { prompt, settings } = options;
+  const limit = Math.min(settings.aiPreferences.maxRagChunks, 12);
+  const queryText = buildQueryText(prompt);
+
+  const semanticChunks =
+    queryText.length > 0
+      ? await searchSemanticRagChunks({ queryText, settings, limit })
+      : [];
+
+  const keywordChunks = await buildKeywordChunks(prompt, settings, limit);
+
+  let chunks: LocalAiRagChunk[];
+  let retrievalMode: LocalAiRagContext['retrievalMode'];
+
+  if (semanticChunks.length > 0) {
+    chunks = mergeChunks(semanticChunks, keywordChunks, limit);
+    retrievalMode = keywordChunks.length > 0 ? 'hybrid' : 'semantic';
+  } else {
+    chunks = keywordChunks;
+    retrievalMode = 'keyword';
+  }
 
   const promptBlock =
-    top.length === 0
-      ? ''
-      : top.map((chunk) => `- ${chunk.text}`).join('\n');
+    chunks.length === 0 ? '' : chunks.map((chunk) => `- ${chunk.text}`).join('\n');
 
-  return { chunks: top, promptBlock };
+  return { chunks, promptBlock, retrievalMode };
 };
 
 export const enrichPromptWithRag = (

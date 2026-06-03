@@ -97,7 +97,7 @@ pnpm run check:bundle-budget
 
 ## Aktueller Validierungsstand 2026-06-03 (M5+ / Perfection Stufe 1)
 
-- **Vitest:** **448** Tests in **106** Dateien (`pnpm run test`); u. a. `localAiWebLlmService`, `aiProviderService`, `localAiRagService`, `@domain/ai-core` provider chain.
+- **Vitest:** **453** Tests in **107** Dateien (`pnpm run test`); u. a. `localAiEmbeddingsService`, `localAiWebLlmService`, Hybrid-RAG, `@domain/ai-core` cosineSearch.
 - **Scripts:** **`pnpm run test:scripts`** — 5 Node-Tests für `scripts/lib/deploy-verify-logic.mjs` (auch in CI validate).
 - **Coverage (v8):** ca. **79,1 %** Statements / **80,6 %** Lines / **63,7 %** Branches / **74,5 %** Functions — Thresholds **80 / 78 / 73 / 63** in `apps/web/vitest.config.ts`; Langfrist-Ziel **88 %** siehe `ROADMAP.md` M5.9.
 - **E2E:** **9** Playwright-Tests (`CI=true pnpm run test:e2e` nach `pnpm run build`).

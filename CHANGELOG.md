@@ -9,6 +9,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Hinzugefuegt
 
+- **M11.3 RAG v2:** `localAiEmbeddingsService`, Dexie `aiEmbeddings` (v13), Transformers.js `Xenova/all-MiniLM-L6-v2`, Hybrid-RAG in `localAiRagService`; Chunk `vendor-transformers`.
 - **M11.2 WebLLM:** `webLlmEngineManager`, `completeWebLlmChat` (JSON-Mode); `localAiWebLlmService` für Rezept-Ideen/Rezept; Setting `localAi.enableWebLlmInference`; Chunk `vendor-webllm`.
 - **M11.1 Local AI:** `@domain/ai-core` — `gpuTier`, `modelRegistry`, `providerChain`, WebLLM/Transformers/Heuristic-Engines (Feature-Flags); `aiProviderService` + `localAiRagService` (Keyword-RAG v1); `aiService` delegiert.
 - **Settings:** `DataPanel` in Module unter `data-panel/` (Vault, Cloud-Sync, Device-Sync, Storage); Logik in `useDataPanelSync` / `useDataPanelVault`.

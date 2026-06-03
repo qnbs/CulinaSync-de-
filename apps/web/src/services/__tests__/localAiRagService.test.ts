@@ -1,12 +1,21 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { db } from '../dbInstance';
 import { getDefaultSettings } from '../settingsMerge';
 import { buildLocalAiRagContext, enrichPromptWithRag } from '../localAiRagService';
 
+const mockSearchSemantic = vi.fn();
+
+vi.mock('../localAiEmbeddingsService', () => ({
+  searchSemanticRagChunks: (...args: unknown[]) => mockSearchSemantic(...args),
+}));
+
 describe('localAiRagService', () => {
   beforeEach(async () => {
+    vi.clearAllMocks();
+    mockSearchSemantic.mockResolvedValue([]);
     await db.recipes.clear();
     await db.pantry.clear();
+    await db.aiEmbeddings.clear();
   });
 
   it('buildLocalAiRagContext liefert passende Pantry-Chunks', async () => {
@@ -64,6 +73,34 @@ describe('localAiRagService', () => {
     expect(context.chunks.some((chunk) => chunk.sourceType === 'recipe')).toBe(true);
   });
 
+  it('nutzt hybrid retrieval wenn semantische Treffer vorliegen', async () => {
+    const pantryId = await db.pantry.add({
+      name: 'Tomaten',
+      quantity: 2,
+      unit: 'Stk',
+      category: 'Gemüse',
+      createdAt: 1,
+      updatedAt: 1,
+    });
+
+    mockSearchSemantic.mockResolvedValueOnce([
+      { sourceType: 'pantry', sourceId: pantryId, text: 'Tomaten 2 Stk', score: 0.9 },
+    ]);
+
+    const context = await buildLocalAiRagContext({
+      prompt: {
+        craving: 'Tomaten',
+        includeIngredients: [],
+        excludeIngredients: [],
+        modifiers: [],
+      },
+      settings: getDefaultSettings(),
+    });
+
+    expect(context.retrievalMode).toBe('hybrid');
+    expect(context.chunks.length).toBeGreaterThan(0);
+  });
+
   it('enrichPromptWithRag erweitert includeIngredients', () => {
     const enriched = enrichPromptWithRag(
       {
@@ -75,6 +112,7 @@ describe('localAiRagService', () => {
       {
         chunks: [],
         promptBlock: '- Tomaten 2 Stk',
+        retrievalMode: 'keyword',
       },
     );
 

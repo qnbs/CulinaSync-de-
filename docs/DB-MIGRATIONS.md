@@ -25,6 +25,7 @@ CulinaSync nutzt **Dexie** mit versionierten Stores und expliziten Upgrade-Hooks
 | **10** | Normalisierung `imageUrl` |
 | **11** | Tabelle `appLogs` |
 | **12** | Zusammengesetzte Indizes Vorrat (`category+expiryDate`) |
+| **13** | Tabelle `aiEmbeddings` (semantisches Local-AI-RAG) |
 
 Vollständige Liste und Store-Definitionen: `DB_MIGRATION_HISTORY` in `dbMigrations.ts`.
 

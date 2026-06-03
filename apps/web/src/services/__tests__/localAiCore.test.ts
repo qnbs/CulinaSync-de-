@@ -1,13 +1,33 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import {
+  cosineSimilarity,
   extractJsonPayload,
   ProviderChainExhaustedError,
+  rankByCosineSimilarity,
   resetGpuTierCacheForTests,
   resolveGenerativeModel,
   resolveGpuTier,
   runProviderChain,
   shouldSkipWebGpuLayer,
 } from '@domain/ai-core';
+
+describe('@domain/ai-core cosineSearch', () => {
+  it('cosineSimilarity erkennt identische Vektoren', () => {
+    expect(cosineSimilarity([1, 0], [1, 0])).toBeCloseTo(1);
+  });
+
+  it('rankByCosineSimilarity sortiert absteigend', () => {
+    const ranked = rankByCosineSimilarity(
+      [1, 0],
+      [
+        { vector: [0, 1], meta: 'b' },
+        { vector: [1, 0], meta: 'a' },
+      ],
+      2,
+    );
+    expect(ranked[0]?.meta).toBe('a');
+  });
+});
 
 describe('@domain/ai-core jsonExtract', () => {
   it('extractJsonPayload entfernt Markdown-Fences', () => {

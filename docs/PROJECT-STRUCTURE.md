@@ -34,7 +34,7 @@
 ### `apps/web/src/services/`
 
 - DB-Einstieg: `db.ts`, Repositories unter `repositories/`
-- KI: `aiProviderService.ts` (Local-first Routing), `localAiWebLlmService.ts` (WebLLM L1), `aiService.ts` (Re-Export), `geminiService.ts` (einzige Gemini-Fassade), `localAiRagService.ts` (Keyword-RAG v1), `aiPromptBuilder.ts` / `aiJsonParse.ts`, `aiOfflineFallback.ts` (L4)
+- KI: `aiProviderService.ts` (Local-first Routing), `localAiWebLlmService.ts` (WebLLM L1), `localAiEmbeddingsService.ts` (Transformers-RAG), `localAiRagService.ts` (Hybrid-RAG), `aiService.ts` (Re-Export), `geminiService.ts` (einzige Gemini-Fassade), `aiPromptBuilder.ts` / `aiJsonParse.ts`, `aiOfflineFallback.ts` (L4)
 - Keys: `apiKeyService.ts`
 - Export, Voice, Scanner, Sync, Settings-Hilfen
 

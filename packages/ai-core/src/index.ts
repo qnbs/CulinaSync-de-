@@ -51,10 +51,21 @@ export {
   type WebLlmEngineStatus,
 } from './engines/localAiWebLlmEngine.js';
 export {
+  embedText,
+  embedTexts,
+  EMBEDDING_MODEL_ID,
   getTransformersEngineStatus,
+  isTransformersEmbeddingAvailable,
   isTransformersLayerEnabled,
+  resetTransformersEmbeddingForTests,
   type TransformersEngineStatus,
 } from './engines/localAiTransformersEngine.js';
+
+export {
+  cosineSimilarity,
+  rankByCosineSimilarity,
+  type ScoredVector,
+} from './rag/cosineSearch.js';
 
 export {
   buildLocalAiRuntimeConfig,
