@@ -48,6 +48,7 @@ vi.mock('@google/genai', () => ({
   },
 }));
 
+import { getDefaultSettings } from '../settingsMerge';
 import {
   extractPantryItemsFromImage,
   extractRecipeFromWebContent,
@@ -75,6 +76,7 @@ const validRecipePayload = {
 };
 
 const aiPrefs = {
+  ...getDefaultSettings().aiPreferences,
   dietaryRestrictions: ['vegetarian'],
   preferredCuisines: ['Italian'],
   customInstruction: 'Keep it simple',
@@ -159,12 +161,7 @@ describe('geminiService', () => {
     const ideas = await generateRecipeIdeas(
       { craving: 'Curry', includeIngredients: [], excludeIngredients: [], modifiers: [] },
       [],
-      {
-        dietaryRestrictions: [],
-        preferredCuisines: [],
-        customInstruction: '',
-        creativityLevel: 0.5,
-      },
+      { ...getDefaultSettings().aiPreferences, creativityLevel: 0.5 },
     );
 
     expect(ideas).toHaveLength(1);

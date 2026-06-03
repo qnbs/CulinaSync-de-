@@ -63,6 +63,88 @@ export const AiChefPanel: React.FC<AiChefPanelProps> = ({ settings, onChange }) 
                 </div>
             </section>
 
+            <section className="glass-card rounded-2xl p-6 space-y-6">
+                <h3 className="text-lg font-bold text-zinc-100">{t('settings.aiChef.routingTitle')}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-bold text-zinc-300 mb-2">{t('settings.aiChef.routingModeLabel')}</label>
+                        <select
+                            value={settings.aiPreferences.routingMode}
+                            onChange={(e) => onChange('aiPreferences.routingMode', e.target.value)}
+                            className="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 outline-none"
+                        >
+                            <option value="local-first">{t('settings.localAi.routing.localFirst')}</option>
+                            <option value="local-only">{t('settings.localAi.routing.localOnly')}</option>
+                            <option value="cloud-first">{t('settings.localAi.routing.cloudFirst')}</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-zinc-300 mb-2">{t('settings.aiChef.responseStyleLabel')}</label>
+                        <select
+                            value={settings.aiPreferences.responseStyle}
+                            onChange={(e) => onChange('aiPreferences.responseStyle', e.target.value)}
+                            className="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 outline-none"
+                        >
+                            <option value="concise">{t('settings.aiChef.responseStyle.concise')}</option>
+                            <option value="balanced">{t('settings.aiChef.responseStyle.balanced')}</option>
+                            <option value="detailed">{t('settings.aiChef.responseStyle.detailed')}</option>
+                        </select>
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={settings.aiPreferences.usePantryContext}
+                            onChange={(e) => onChange('aiPreferences.usePantryContext', e.target.checked)}
+                            className="rounded accent-[var(--color-accent-500)]"
+                        />
+                        <span className="text-sm text-zinc-300">{t('settings.aiChef.contextPantry')}</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={settings.aiPreferences.useMealPlanContext}
+                            onChange={(e) => onChange('aiPreferences.useMealPlanContext', e.target.checked)}
+                            className="rounded accent-[var(--color-accent-500)]"
+                        />
+                        <span className="text-sm text-zinc-300">{t('settings.aiChef.contextMealPlan')}</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={settings.aiPreferences.useRecipeHistoryContext}
+                            onChange={(e) => onChange('aiPreferences.useRecipeHistoryContext', e.target.checked)}
+                            className="rounded accent-[var(--color-accent-500)]"
+                        />
+                        <span className="text-sm text-zinc-300">{t('settings.aiChef.contextRecipes')}</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={settings.aiPreferences.structuredOutputStrict}
+                            onChange={(e) => onChange('aiPreferences.structuredOutputStrict', e.target.checked)}
+                            className="rounded accent-[var(--color-accent-500)]"
+                        />
+                        <span className="text-sm text-zinc-300">{t('settings.aiChef.strictJson')}</span>
+                    </label>
+                </div>
+                <div className="p-3 rounded-xl bg-zinc-900/50">
+                    <div className="flex justify-between mb-2">
+                        <span className="text-sm font-bold text-zinc-300">{t('settings.aiChef.ragChunksLabel')}</span>
+                        <span className="font-mono text-[var(--color-accent-400)]">{settings.aiPreferences.maxRagChunks}</span>
+                    </div>
+                    <input
+                        type="range"
+                        min={4}
+                        max={32}
+                        value={settings.aiPreferences.maxRagChunks}
+                        onChange={(e) => onChange('aiPreferences.maxRagChunks', parseInt(e.target.value, 10))}
+                        className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[var(--color-accent-500)]"
+                    />
+                </div>
+            </section>
+
             <section className="space-y-6">
                 <div>
                     <label className="block text-sm font-bold text-zinc-300 mb-2 uppercase tracking-wider">{t('settings.aiChef.dietaryLabel')}</label>

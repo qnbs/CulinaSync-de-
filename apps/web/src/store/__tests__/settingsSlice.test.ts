@@ -1,39 +1,37 @@
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('../../services/settingsService', () => {
+vi.mock('../../services/settingsService', async () => {
+  const { getDefaultSettings } = await import('../../services/settingsMerge');
+  const defaults = getDefaultSettings();
   const mockSettings = {
-    language: 'de',
+    ...defaults,
     displayName: '',
     defaultServings: 4,
-    weekStart: 'Monday',
-    aiPreferences: { dietaryRestrictions: [], preferredCuisines: [], customInstruction: '', creativityLevel: 0.7 },
-    pantry: { defaultSort: 'name', isGrouped: false, expiryWarningDays: 3 },
-    recipeBook: { defaultSort: 'newest' },
-    shoppingList: { groupCheckedAtBottom: false, defaultSort: 'category', autoCategorize: true },
-    speechSynthesis: { voice: null, rate: 1, pitch: 1 },
-    appearance: { accentColor: 'emerald', highContrast: false, kitchenMode: false, largeText: false },
+    appearance: { ...defaults.appearance, accentColor: 'emerald' as const },
+    pantry: { ...defaults.pantry, isGrouped: false },
+    shoppingList: { ...defaults.shoppingList, groupCheckedAtBottom: false },
   };
   return {
     loadSettings: () => ({ ...mockSettings }),
     getDefaultSettings: () => ({ ...mockSettings }),
     saveSettings: vi.fn(),
+    SETTINGS_KEY: 'culinaSyncSettings',
+    PERSISTED_SETTINGS_KEY: 'persist:settings',
+    mergeWithDefaults: (await import('../../services/settingsMerge')).mergeWithDefaults,
   };
 });
 
+import { getDefaultSettings } from '../../services/settingsMerge';
 import reducer, { setPantryGrouping, setPantrySort, updateSettings } from '../slices/settingsSlice';
 import type { AppSettings } from '../../types';
 
 const BASE_SETTINGS: AppSettings = {
-  language: 'de',
+  ...getDefaultSettings(),
   displayName: '',
   defaultServings: 4,
-  weekStart: 'Monday',
-  aiPreferences: { dietaryRestrictions: [], preferredCuisines: [], customInstruction: '', creativityLevel: 0.7 },
-  pantry: { defaultSort: 'name', isGrouped: false, expiryWarningDays: 3 },
-  recipeBook: { defaultSort: 'newest' },
-  shoppingList: { groupCheckedAtBottom: false, defaultSort: 'category', autoCategorize: true },
-  speechSynthesis: { voice: null, rate: 1, pitch: 1 },
-  appearance: { accentColor: 'emerald', highContrast: false, kitchenMode: false, largeText: false },
+  appearance: { ...getDefaultSettings().appearance, accentColor: 'emerald' },
+  pantry: { ...getDefaultSettings().pantry, isGrouped: false },
+  shoppingList: { ...getDefaultSettings().shoppingList, groupCheckedAtBottom: false },
 };
 
 describe('settingsSlice', () => {

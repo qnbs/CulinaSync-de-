@@ -1,7 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AppSettings, PantryItem, RecipeIdea, ShoppingListItem } from '../../types';
+import { getDefaultSettings } from '../settingsMerge';
 
 const mockGenerateRecipeIdeas = vi.fn();
+const mockLoadSettings = vi.fn();
+
+vi.mock('../settingsService', () => ({
+  loadSettings: () => mockLoadSettings(),
+  getDefaultSettings: () => getDefaultSettings(),
+}));
 const mockGenerateRecipe = vi.fn();
 const mockGenerateShoppingList = vi.fn();
 
@@ -11,12 +18,25 @@ vi.mock('../geminiService', () => ({
   generateShoppingList: (...args: unknown[]) => mockGenerateShoppingList(...args),
 }));
 
-const aiPreferences: AppSettings['aiPreferences'] = {
-  dietaryRestrictions: [],
-  preferredCuisines: ['Italienisch'],
-  customInstruction: '',
-  creativityLevel: 0.5,
-};
+const cloudFirstSettings = (): AppSettings => ({
+  ...getDefaultSettings(),
+  aiPreferences: {
+    ...getDefaultSettings().aiPreferences,
+    preferredCuisines: ['Italienisch'],
+    creativityLevel: 0.5,
+    routingMode: 'cloud-first',
+  },
+});
+
+const localFirstSettings = (): AppSettings => ({
+  ...getDefaultSettings(),
+  aiPreferences: {
+    ...getDefaultSettings().aiPreferences,
+    preferredCuisines: ['Italienisch'],
+    creativityLevel: 0.5,
+    routingMode: 'local-first',
+  },
+});
 
 const pantryItems: PantryItem[] = [
   {
@@ -29,6 +49,8 @@ const pantryItems: PantryItem[] = [
     updatedAt: 1,
   },
 ];
+
+const aiPreferences = cloudFirstSettings().aiPreferences;
 
 const prompt = {
   craving: 'Pasta',
@@ -45,6 +67,7 @@ const chosenIdea: RecipeIdea = {
 describe('aiService offline fallback', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockLoadSettings.mockReturnValue(cloudFirstSettings());
   });
 
   it('generateRecipeIdeas nutzt lokalen Fallback bei fehlendem API-Key', async () => {
@@ -59,6 +82,14 @@ describe('aiService offline fallback', () => {
     mockGenerateRecipeIdeas.mockRejectedValueOnce(new Error('Unexpected validation'));
     const { generateRecipeIdeas } = await import('../aiService');
     await expect(generateRecipeIdeas(prompt, pantryItems, aiPreferences)).rejects.toThrow('Unexpected');
+  });
+
+  it('generateRecipeIdeas nutzt lokalen Pfad bei local-first ohne Cloud-Aufruf', async () => {
+    mockLoadSettings.mockReturnValue(localFirstSettings());
+    const { generateRecipeIdeas } = await import('../aiService');
+    const ideas = await generateRecipeIdeas(prompt, pantryItems, localFirstSettings().aiPreferences);
+    expect(ideas).toHaveLength(3);
+    expect(mockGenerateRecipeIdeas).not.toHaveBeenCalled();
   });
 
   it('generateRecipeIdeas delegiert an Gemini bei Erfolg', async () => {

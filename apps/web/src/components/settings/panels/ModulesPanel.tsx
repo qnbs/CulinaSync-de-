@@ -7,18 +7,6 @@ interface ModulesPanelProps {
     onChange: (path: string, value: unknown) => void;
 }
 
-const Toggle = ({ label, desc, checked, onToggle }: { label: string, desc: string, checked: boolean, onToggle: () => void }) => (
-    <div className="flex items-center justify-between p-4 glass-card rounded-xl hover:bg-zinc-900/50 transition-colors cursor-pointer" onClick={onToggle}>
-        <div>
-            <h4 className="font-bold text-zinc-200">{label}</h4>
-            <p className="text-xs text-zinc-500 mt-1">{desc}</p>
-        </div>
-        <div className={`w-12 h-6 rounded-full p-0.5 transition-colors duration-300 ${checked ? 'bg-[var(--color-accent-500)]' : 'bg-zinc-700'}`}>
-            <div className={`w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform duration-300 ${checked ? 'translate-x-6' : ''}`} />
-        </div>
-    </div>
-);
-
 export const ModulesPanel: React.FC<ModulesPanelProps> = ({ settings, onChange }) => {
     const { t, i18n } = useTranslation();
 
@@ -56,8 +44,7 @@ export const ModulesPanel: React.FC<ModulesPanelProps> = ({ settings, onChange }
             </section>
 
             <section className="space-y-4">
-                 <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-wider mb-4">{t('settings.modules.featuresTitle')}</h3>
-                 
+                 <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-wider mb-4">{t('settings.modules.householdTitle')}</h3>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                      <div>
                         <label className="block text-sm font-bold text-zinc-300 mb-2">{t('settings.weekStart')}</label>
@@ -76,31 +63,12 @@ export const ModulesPanel: React.FC<ModulesPanelProps> = ({ settings, onChange }
                             type="number" 
                             min="1" 
                             value={settings.defaultServings} 
-                            onChange={e => onChange('defaultServings', parseInt(e.target.value))}
+                            onChange={e => onChange('defaultServings', parseInt(e.target.value, 10))}
                             className="w-full bg-zinc-900/50 border border-zinc-700 rounded-xl p-3 outline-none"
                         />
                      </div>
                  </div>
-
-                 <Toggle 
-                    label={t('settings.modules.autoCategorizeLabel')} 
-                    desc={t('settings.modules.autoCategorizeDesc')}
-                    checked={settings.shoppingList.autoCategorize} 
-                    onToggle={() => onChange('shoppingList.autoCategorize', !settings.shoppingList.autoCategorize)} 
-                 />
-                 
-                 <div className="p-4 glass-card rounded-xl">
-                     <div className="flex justify-between items-center mb-2">
-                        <span className="font-bold text-zinc-200">{t('settings.modules.expiryWarning')}</span>
-                        <span className="font-mono text-[var(--color-accent-400)]">{t('settings.modules.expiryDays', { count: settings.pantry.expiryWarningDays })}</span>
-                     </div>
-                     <input 
-                        type="range" min="1" max="14" 
-                        value={settings.pantry.expiryWarningDays} 
-                        onChange={e => onChange('pantry.expiryWarningDays', parseInt(e.target.value))}
-                        className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[var(--color-accent-500)]"
-                     />
-                 </div>
+                 <p className="text-xs text-zinc-500">{t('settings.modules.workspaceHint')}</p>
             </section>
         </div>
     );
