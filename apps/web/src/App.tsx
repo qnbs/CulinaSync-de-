@@ -17,6 +17,8 @@ import { useModalA11y } from './hooks/useModalA11y';
 import { getPageFromLocationSearch } from './utils/pwaLaunchParams';
 import { logAppError } from './services/errorLoggingService';
 import { useDeepLinkNavigation } from './hooks/useDeepLinkNavigation';
+import { useAccentTheme } from './hooks/useAccentTheme';
+import { Button, Spinner } from './components/ui';
 
 const APP_VERSION = __APP_VERSION__;
 
@@ -36,11 +38,9 @@ const CommandPalette = lazy(() => import('./components/CommandPalette').then(m =
 
 const LoadingSpinner: React.FC = () => {
   const { t } = useTranslation();
-
   return (
-  <div className="flex justify-center items-center h-64" role="status" aria-live="polite" aria-label={t('app.loading')}>
-        <div className="w-16 h-16 border-4 border-[var(--color-accent-500)] border-t-transparent rounded-full animate-spin"></div>
-    <span className="sr-only">{t('app.loading')}</span>
+    <div className="flex justify-center items-center h-64">
+      <Spinner size="lg" label={t('app.loading')} />
     </div>
   );
 };
@@ -67,6 +67,7 @@ const App: React.FC = () => {
   const [showUpdateReadyNotice, setShowUpdateReadyNotice] = useState(false);
   const isOnline = useOnlineStatus();
   useDeepLinkNavigation();
+  useAccentTheme();
   const wasOnlineRef = useRef(isOnline);
   const installDialogRef = useRef<HTMLDivElement>(null);
   const updateDialogRef = useRef<HTMLDivElement>(null);
@@ -325,7 +326,7 @@ const App: React.FC = () => {
     <GlobalErrorBoundary>
       <WhatsNewModal />
       <div className="min-h-screen text-zinc-200">
-        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-[60] bg-zinc-900 border border-zinc-600 text-zinc-100 rounded px-3 py-2">
+        <a href="#main-content" className="ui-skip-link">
           {t('app.skipToContent')}
         </a>
         <Suspense fallback={null}>
@@ -363,20 +364,20 @@ const App: React.FC = () => {
             aria-labelledby="install-reminder-title"
             aria-describedby="install-reminder-desc"
             tabIndex={-1}
-            className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-40 w-[min(92vw,24rem)] rounded-2xl border border-[var(--color-accent-500)]/30 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur"
+            className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-40 w-[min(92vw,24rem)] glass-hud rounded-2xl border border-[var(--color-accent-500)]/30 p-4 shadow-2xl page-fade-in"
           >
             <h4 id="install-reminder-title" className="text-sm font-bold text-zinc-100">{t('app.installReminder.title')}</h4>
-            <p id="install-reminder-desc" className="mt-1 text-sm text-zinc-400">{t('app.installReminder.description')}</p>
-            <div className="mt-4 flex gap-2">
-              <button type="button" onClick={handleInstallPWA} className="flex-1 rounded-lg bg-[var(--color-accent-500)] px-3 py-2 text-sm font-bold text-zinc-900">
+            <p id="install-reminder-desc" className="mt-1 text-sm text-zinc-400 leading-relaxed">{t('app.installReminder.description')}</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button type="button" size="sm" onClick={handleInstallPWA} className="flex-1 min-w-[6rem]">
                 {t('app.installReminder.install')}
-              </button>
-              <button type="button" onClick={handleInstallRemindLater} className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-semibold text-zinc-300">
+              </Button>
+              <Button type="button" size="sm" variant="secondary" onClick={handleInstallRemindLater}>
                 {t('app.installReminder.later')}
-              </button>
-              <button type="button" onClick={handleInstallDismiss} className="rounded-lg border border-zinc-800 px-3 py-2 text-sm font-semibold text-zinc-500">
+              </Button>
+              <Button type="button" size="sm" variant="ghost" onClick={handleInstallDismiss}>
                 {t('app.installReminder.dismiss')}
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -389,17 +390,17 @@ const App: React.FC = () => {
             aria-labelledby="pwa-update-title"
             aria-describedby="pwa-update-desc"
             tabIndex={-1}
-            className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-4 z-40 w-[min(92vw,24rem)] rounded-2xl border border-sky-400/30 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur"
+            className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-4 z-40 w-[min(92vw,24rem)] glass-hud rounded-2xl border border-[var(--color-accent-500)]/25 p-4 shadow-2xl page-fade-in"
           >
             <h4 id="pwa-update-title" className="text-sm font-bold text-zinc-100">{t('app.pwaUpdate.title')}</h4>
-            <p id="pwa-update-desc" className="mt-1 text-sm text-zinc-400">{t('app.pwaUpdate.description')}</p>
+            <p id="pwa-update-desc" className="mt-1 text-sm text-zinc-400 leading-relaxed">{t('app.pwaUpdate.description')}</p>
             <div className="mt-4 flex gap-2">
-              <button type="button" onClick={handleReloadForUpdate} className="flex-1 rounded-lg bg-sky-400 px-3 py-2 text-sm font-bold text-zinc-950">
+              <Button type="button" size="sm" onClick={handleReloadForUpdate} className="flex-1">
                 {t('app.pwaUpdate.reload')}
-              </button>
-              <button type="button" onClick={() => setShowUpdateReadyNotice(false)} className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-semibold text-zinc-300">
+              </Button>
+              <Button type="button" size="sm" variant="secondary" onClick={() => setShowUpdateReadyNotice(false)}>
                 {t('app.pwaUpdate.later')}
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -423,7 +424,7 @@ const App: React.FC = () => {
                       key={toast.id}
                       role="status"
                       aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
-                      className="max-w-sm w-full rounded-lg pointer-events-auto overflow-hidden page-fade-in glass-hud ring-1 ring-black/20"
+                      className="max-w-sm w-full rounded-2xl pointer-events-auto overflow-hidden page-fade-in glass-hud ring-1 ring-white/10 interactive-lift"
                     >
                         <div className="p-4">
                             <div className="flex items-start">

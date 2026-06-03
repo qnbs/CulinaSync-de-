@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { lazy, Suspense, useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppSettings, BeforeInstallPromptEvent } from '../types';
 import { Save, RotateCcw } from 'lucide-react';
@@ -6,6 +6,8 @@ import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { updateSettings } from '../store/slices/settingsSlice';
 import { addToast as addToastAction } from '../store/slices/uiSlice';
 import { applySettingsChange } from '../services/settingsMutators';
+import { applyAccentTheme } from '../lib/accentTheme';
+import { Button } from './ui';
 
 import { SettingsSidebar } from './settings/SettingsSidebar';
 import { AppearancePanel } from './settings/panels/AppearancePanel';
@@ -21,13 +23,6 @@ import { PrivacyPanel } from './settings/panels/PrivacyPanel';
 import { WorkspacePanel } from './settings/panels/WorkspacePanel';
 
 const VoicePanel = lazy(() => import('./settings/panels/VoicePanel').then((module) => ({ default: module.VoicePanel })));
-
-const ACCENT_COLORS: Record<AppSettings['appearance']['accentColor'], Record<string, string>> = {
-  amber: { '300': '#fcd34d', '400': '#fbbf24', '500': '#f59e0b', glow: 'rgba(251, 191, 36, 0.3)', 'glow-soft': 'rgba(251, 191, 36, 0.2)', '400-semi': 'rgba(251, 191, 36, 0.8)' },
-  rose: { '300': '#fda4af', '400': '#fb7185', '500': '#f43f5e', glow: 'rgba(244, 63, 94, 0.3)', 'glow-soft': 'rgba(244, 63, 94, 0.2)', '400-semi': 'rgba(251, 113, 133, 0.8)' },
-  sky: { '300': '#7dd3fc', '400': '#38bdf8', '500': '#0ea5e9', glow: 'rgba(14, 165, 233, 0.3)', 'glow-soft': 'rgba(14, 165, 233, 0.2)', '400-semi': 'rgba(56, 189, 248, 0.8)' },
-  emerald: { '300': '#6ee7b7', '400': '#34d399', '500': '#10b981', glow: 'rgba(16, 185, 129, 0.3)', 'glow-soft': 'rgba(16, 185, 129, 0.2)', '400-semi': 'rgba(52, 211, 153, 0.8)' },
-};
 
 const SECTION_TITLE_KEYS: Record<string, string> = {
   appearance: 'settings.sections.appearance',
@@ -71,11 +66,7 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
     }, [focusAction, selectedSection]);
 
     useEffect(() => {
-      const colors = ACCENT_COLORS[localSettings.appearance.accentColor];
-      const root = document.documentElement;
-      Object.entries(colors).forEach(([shade, value]) => {
-        root.style.setProperty(`--color-accent-${shade}`, value as string);
-      });
+      applyAccentTheme(localSettings.appearance.accentColor);
     }, [localSettings.appearance.accentColor]);
 
     const isDirty = useMemo(() => draftSettings !== null && JSON.stringify(draftSettings) !== JSON.stringify(globalSettings), [draftSettings, globalSettings]);
@@ -140,12 +131,12 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
                      
                      {isDirty && (
                          <div className="flex gap-2 animate-fade-in">
-                            <button onClick={handleDiscard} className="p-2 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 transition-colors" title={t('settings.actions.discard')}>
-                                 <RotateCcw size={20} />
-                             </button>
-                             <button onClick={handleSave} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-accent-500)] text-zinc-900 font-bold hover:bg-[var(--color-accent-400)] transition-all shadow-lg shadow-[var(--color-accent-glow)]">
+                            <Button type="button" variant="ghost" size="sm" onClick={handleDiscard} title={t('settings.actions.discard')} aria-label={t('settings.actions.discard')}>
+                                 <RotateCcw size={18} />
+                             </Button>
+                             <Button type="button" size="sm" onClick={handleSave}>
                                  <Save size={18} /> {t('common.save')}
-                             </button>
+                             </Button>
                          </div>
                      )}
                  </div>

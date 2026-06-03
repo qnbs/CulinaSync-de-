@@ -1,6 +1,7 @@
 import React, { type ErrorInfo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { logAppError } from '../services/errorLoggingService';
-import i18n from '../i18n';
+import { Button, Card } from './ui';
 
 interface State {
   hasError: boolean;
@@ -25,18 +26,24 @@ export class GlobalErrorBoundary extends React.Component<{ children: React.React
 
   render() {
     if (this.state.hasError) {
-      const { t } = i18n;
-
-      return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70">
-          <div className="bg-zinc-900 rounded-2xl shadow-2xl max-w-md w-full p-6 text-center animate-fade-in" role="alert" aria-live="assertive">
-            <h2 className="text-xl font-bold mb-2 text-red-400">{t('app.globalErrorBoundary.title')}</h2>
-            <p className="mb-4 text-zinc-200">{t('app.globalErrorBoundary.description')}</p>
-            <button className="bg-[var(--color-accent-500)] text-white px-4 py-2 rounded" onClick={() => window.location.reload()}>{t('app.globalErrorBoundary.reload')}</button>
-          </div>
-        </div>
-      );
+      return <ErrorFallback onReload={() => window.location.reload()} />;
     }
     return this.props.children;
   }
 }
+
+const ErrorFallback: React.FC<{ onReload: () => void }> = ({ onReload }) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center glass-overlay p-4">
+      <Card variant="card" className="glass-modal max-w-md w-full text-center page-fade-in" padding="lg">
+        <h2 className="text-xl font-bold mb-2 text-red-400">{t('app.globalErrorBoundary.title')}</h2>
+        <p className="mb-6 text-zinc-300 leading-relaxed">{t('app.globalErrorBoundary.description')}</p>
+        <Button type="button" onClick={onReload} fullWidth>
+          {t('app.globalErrorBoundary.reload')}
+        </Button>
+      </Card>
+    </div>
+  );
+};
