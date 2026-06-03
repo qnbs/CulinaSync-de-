@@ -279,6 +279,7 @@ Nach Push auf `main`: CI-, E2E- und Deploy-Workflows bis **grün** beobachten.
 | [docs/PWA.md](./docs/PWA.md) | PWA, Share, SW |
 | [docs/DESIGN-SYSTEM.md](./docs/DESIGN-SYSTEM.md) | UI-Kit |
 | [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) | Pages + Vercel |
+| [docs/DEPLOY-PAGES-VERCEL.md](./docs/DEPLOY-PAGES-VERCEL.md) | Pages/Vercel Handbuch + Verify-Skripte |
 | [docs/TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md) | Lockfile, Deploy, E2E |
 | [CHANGELOG.md](./CHANGELOG.md) | Release-Notizen |
 
