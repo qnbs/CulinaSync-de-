@@ -7,6 +7,10 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefuegt
+
+- **Local AI (Phase 0):** `docs/LOCAL-AI-AUDIT-2026-06.md` (Ist-Analyse vs. CannaGuide/StoryCraft, i18n-Gates, Gap-Matrix) und `docs/LOCAL-AI-ARCHITECTURE.md` (4-Layer-Stack, Ziel-Services, Phasenplan 1–4).
+
 ### Geaendert
 
 - **CI/Deploy:** Service Worker — nur ein `self.__WB_MANIFEST`-Vorkommen (Workbox-Build); Index-Pfad via `__PWA_INDEX_PATH__`.
