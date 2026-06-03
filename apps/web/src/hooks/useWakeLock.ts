@@ -23,9 +23,9 @@ export const useWakeLock = (): [boolean, () => Promise<void>, () => Promise<void
         const lock = await wakeLockNavigator.wakeLock.request('screen');
         wakeLockRef.current = lock;
         setIsLocked(true);
-        console.log('Wake Lock is active.');
+        console.debug('Wake Lock is active.');
         lock.addEventListener('release', () => {
-          console.log('Wake Lock was released.');
+          console.debug('Wake Lock was released.');
           setIsLocked(false);
           wakeLockRef.current = null;
         });

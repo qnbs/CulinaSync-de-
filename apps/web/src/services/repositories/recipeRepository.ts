@@ -16,13 +16,13 @@ export const syncSeedRecipes = async (): Promise<void> => {
 
                 if (newRecipes.length === 0) {
                     if (import.meta.env.DEV) {
-                        console.log('Database sync: No new seed recipes to add.');
+                        console.debug('Database sync: No new seed recipes to add.');
                     }
                     return [] as number[];
                 }
 
                 if (import.meta.env.DEV) {
-                    console.log(`Syncing database: Found ${newRecipes.length} new seed recipes to add.`);
+                    console.debug(`Syncing database: Found ${newRecipes.length} new seed recipes to add.`);
                 }
 
                 return db.recipes.bulkAdd(

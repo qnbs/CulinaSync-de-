@@ -42,7 +42,7 @@ export const migrateLegacySettings = (): void => {
     sessionStorage.setItem(MIGRATION_DONE_FLAG, '1');
 
     if (import.meta.env.DEV) {
-      console.info('[CulinaSync] Legacy settings migrated to Redux Persist.');
+      console.debug('[CulinaSync] Legacy settings migrated to Redux Persist.');
     }
   } catch (error) {
     console.error('[CulinaSync] Settings migration failed:', error);

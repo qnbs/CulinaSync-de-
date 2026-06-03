@@ -28,7 +28,7 @@ const calculateMatch = (recipe: Recipe, pantryMap: Map<string, number>): { perce
 
 export const updatePantryMatches = async (recipeIds?: number[]): Promise<void> => {
     if (import.meta.env.DEV) {
-        console.log(`Updating pantry matches. Recipe IDs: ${recipeIds ? recipeIds.join(',') : 'All'}`);
+        console.debug(`Updating pantry matches. Recipe IDs: ${recipeIds ? recipeIds.join(',') : 'All'}`);
     }
     try {
         const pantryItems: PantryItem[] = await db.pantry.toArray();
@@ -59,7 +59,7 @@ export const updatePantryMatches = async (recipeIds?: number[]): Promise<void> =
         if (updates.length > 0) {
             await db.recipes.bulkUpdate(updates);
             if (import.meta.env.DEV) {
-                console.log(`Successfully updated pantry match for ${updates.length} recipes.`);
+                console.debug(`Successfully updated pantry match for ${updates.length} recipes.`);
             }
         }
     } catch (error) {
