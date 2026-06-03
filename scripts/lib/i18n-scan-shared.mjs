@@ -24,7 +24,13 @@ export const EXCLUDE_PATH_PARTS = ['/locales/', '/data/recipes/'];
 /** Stored meal-slot IDs (German) — not UI copy */
 export const MEAL_TYPE_IDS = new Set(['Frühstück', 'Mittagessen', 'Abendessen']);
 
-const NON_UI_SOURCE_SUFFIXES = ['/voiceCommands.ts', '/dbMigrations.ts', '/usdaLocal.ts'];
+// QNBS-v3: PWA-Manifest-Strings sind Build-Zeit-Metadaten, keine UI-Copy (siehe buildPwaManifest.ts)
+const NON_UI_SOURCE_SUFFIXES = [
+  '/voiceCommands.ts',
+  '/dbMigrations.ts',
+  '/usdaLocal.ts',
+  '/buildPwaManifest.ts',
+];
 
 const STRING_LITERAL_REGEX = /(["'`])((?:\\.|(?!\1)[^\\]){3,})\1/g;
 
