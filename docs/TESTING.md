@@ -94,7 +94,7 @@ pnpm run check:bundle-budget
 - **Gemini:** Integrationstests + Zod (`geminiMsw.test.ts`, `geminiService.test.ts`); Schema-Änderungen in `geminiService.ts` mit Tests mitziehen.
 - **Wartung:** `db.ts` nicht isoliert testbar (Import-Side-Effects) — Cross-Feature- und Repository-Tests bevorzugen.
 - Aktueller Snapshot: [STATUS-2026-06-03.md](./STATUS-2026-06-03.md); Vorgänger: [STATUS-2026-06-02.md](./STATUS-2026-06-02.md).
-- `pnpm run lint` mit `--max-warnings 0`; generiertes **`coverage/**`** ist ESLint-ignoriert; `react-hooks/exhaustive-deps` ist auf **`warn`** — Warnungen im geaenderten Code abbauen, bevor auf `error` verschärft wird.
+- `pnpm run lint` mit **`--max-warnings 0`**; `react-hooks/exhaustive-deps` und `no-explicit-any` sind **`error`**; `no-console` erlaubt nur warn/error/debug (siehe `301-strict-quality-gates.mdc`).
 - Vor Release empfohlen: **`pnpm run check:all`** oder mindestens lint, test, build und bei Bundle-Aenderungen `pnpm run check:bundle-budget`.
 
 ### Vitest unter Windows / mit Coverage

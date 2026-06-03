@@ -1,0 +1,45 @@
+---
+description: Strikte Quality- und Security-Gates — Lint, Types, Tests, keine Warnungen
+alwaysApply: true
+---
+
+# Strikte Quality-Gates (dauerhaft, verbindlich)
+
+## Null-Toleranz in CI und vor Push
+
+| Gate | Befehl | Erwartung |
+|------|--------|-----------|
+| **Lint** | `pnpm run lint` | **0 Errors, 0 Warnings** (`--max-warnings 0`) |
+| **Types** | `pnpm run type-check` | **tsgo** grün (kein `tsc`-Build als Ersatz) |
+| **Tests** | `pnpm run test` + `pnpm run test:scripts` | alle grün, nichts überspringen |
+| **i18n** | `pnpm run i18n:check` | de/en Parität, Baseline **0** |
+| **Audit** | `pnpm audit --audit-level=high` | in `check:all`, keine High/Critical ignorieren |
+| **Vollvalidierung** | `pnpm run check:all` | vor Merge auf `main` |
+
+## ESLint (verbindlich)
+
+- `@typescript-eslint/no-explicit-any`: **`error`** — kein `any`, keine Ausnahme ohne Architektur-Freigabe.
+- `react-hooks/exhaustive-deps`: **`error`** — keine offenen Hook-Dependency-Warnungen.
+- `no-console`: **`error`** — nur `console.warn`, `console.error`, `console.debug` (kein `console.log` / `info`).
+- **Keine** `eslint-disable` ohne kurze Begründung im PR; Bot-Kommentare dazu sofort klären.
+
+## TypeScript
+
+- Builds über **tsgo**; Typfehler nie mit `@ts-ignore` oder `as any` „wegdiskutieren“.
+- Neue öffentliche APIs typisiert; Zod für externe/AI-JSON-Daten (`parseAiJsonWithSchema`-Muster).
+
+## Security (Hard Constraints)
+
+- Kein Gemini/API-Key in Build/Env (`VITE_*`, `process.env`).
+- Dexie nur über `db.ts` + Repositories.
+- Fehler: `logAppError`, keine leeren `catch`.
+
+## Agent-Pflicht bei jedem PR
+
+1. **CodeAnt / Copilot / Bugbot / Menschen:** alle Inline-Kommentare **sofort** bearbeiten — siehe `.cursor/rules/300-pr-review-automation.mdc`.
+2. Nach jedem Fix: betroffener Slice → lint + type-check + Tests.
+3. CI/Deploy-Workflows **bis grün** beobachten; bei Rot: Fix → commit → push → erneut beobachten.
+
+## Follow-up (bewusst gestaffelt)
+
+- Typed ESLint (`no-floating-promises`, …): **R-005** in `docs/AUDIT-REMEDIATION-BACKLOG.md` — erst mit `parserOptions.project` / projectService, dann aktivieren.

@@ -50,4 +50,5 @@ Ziel: **bestmögliche Umsetzung unter voller Sachlage** — flexibel und kontext
 | **Nachfragen** | Nur bei **wesentlichen** Unklarheiten: widersprüchliche Ziele, irreversible oder sicherheitskritische Entscheidungen, mehrere gleich plausible Produktpfade. Fragen **kurz**, mit **klaren Optionen** — kein Rückfrage-Taktieren bei allem. |
 | **Bestätigungsgesteuert** | Vor `git push --force`, massiven Löschungen, Schema-/Migrations-Risiko oder bewusstem Architektur-Bruch: **explizite Nutzer-Zustimmung** einholen, wenn nicht bereits zweifelsfrei angeordnet. |
 | **Interaktiv wenn nötig** | Wenn Information fehlt und Annahme riskant ist → eine gezielte Rückfrage statt Raten. Wenn Annahme üblich und reversibel → dokumentierte Vernunftsannahme und weiterarbeiten. |
-| **Übergabe / Abschluss** | Nach größeren Sessions: **kurzer Handoff** — erreichte Ziele, Repo-Zustand (`main`/Branch), offene Follow-ups, empfohlener nächster Schritt (z. B. `npm run check:all`). |
+| **Übergabe / Abschluss** | Nach größeren Sessions: **kurzer Handoff** — erreichte Ziele, Repo-Zustand (`main`/Branch), offene Follow-ups, empfohlener nächster Schritt (z. B. `pnpm run check:all`). |
+| **PR-Bots & Gates** | CodeAnt/Copilot/Bugbot **sofort** abarbeiten; Lint **0 warnings**, kein `any` — `301-strict-quality-gates.mdc`, `300-pr-review-automation.mdc`. |

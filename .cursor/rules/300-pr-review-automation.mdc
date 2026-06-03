@@ -1,36 +1,55 @@
 ---
-description: PR-Review — CodeAnt, Copilot und Inline-Kommentare proaktiv abarbeiten
+description: PR-Review — CodeAnt, Copilot und Inline-Kommentare SOFORT und vollständig abarbeiten
 alwaysApply: true
 ---
 
-# PR-Review & Bot-Kommentare (dauerhaft)
+# PR-Review & Bot-Kommentare (Pflicht, ohne Ausnahme)
 
-## Modus operandi
+## Sofort-Pflicht (unmissverständlich)
 
-Bei **jedem** Pull Request (eigener Agent-PR oder Review-Auftrag):
+**Bei jedem Pull Request** — eigener Agent-PR, Review-Auftrag oder Nachzug auf `main`:
 
-1. **Alle Inline-Kommentare** einlesen — insbesondere von **CodeAnt**, **Copilot**, **Cursor Bugbot**, menschlichen Reviewern.
-2. **Proaktiv abarbeiten** vor Merge: Fix umsetzen, Test ergänzen, oder **kurz begründen**, warum nicht (mit Verweis auf Architektur-Regel).
-3. **Keine offenen Threads** ohne Antwort — auch „nit“-Hinweise, wenn der Fix &lt; 5 Minuten ist.
-4. Nach Fixes: betroffene Tests + `pnpm run lint` + `type-check` für den geänderten Slice; bei user-visible Änderungen `i18n:check`.
+1. **Zuerst** alle PR-Diskussionen lesen: **CodeAnt.ai**, **GitHub Copilot**, **Cursor Bugbot**, **Socket**, **CodeQL**, menschliche Reviewer.
+2. **Sofort abarbeiten** — noch **bevor** „ready for review“, Merge oder Session-Ende:
+   - Security/Daten → **Fix + Test** in derselben Session.
+   - Architektur (Dexie, `geminiService`, API-Key, Redux/Dexie-Grenze) → **Fix** oder **eine** klare Ablehnung mit Regel-Verweis.
+   - Lint/Type/Test-Hinweise → **Fix**, keine „später“-Todos.
+   - Style-Nits → **Fix**, wenn unter ~5 Minuten; sonst begründete Ablehnung im Thread.
+3. **Kein offener Thread** ohne Antwort (Reply im PR oder Fix-Commit mit Referenz).
+4. **Kein Merge**, solange ein relevanter Bot-/Review-Kommentar unbeantwortet oder unbegründet offen ist.
+
+## Ablauf pro Kommentar
+
+| Schritt | Aktion |
+|--------|--------|
+| 1 | Kommentar verstehen (Datei + Zeile öffnen) |
+| 2 | Fix implementieren **oder** Ablehnung mit Verweis auf `.cursor/rules/culinasync-core.mdc` / `301-strict-quality-gates.mdc` |
+| 3 | `pnpm run lint` + `pnpm run type-check` für geänderte Dateien |
+| 4 | Tests für geänderte Logik; bei UI `pnpm run i18n:check` |
+| 5 | Commit (Conventional Commits) + Push; CI beobachten |
 
 ## Priorität
 
-| Quelle | Typisch | Aktion |
-|--------|---------|--------|
-| Security / Datenverlust | CodeAnt, CodeQL | Sofort fixen |
-| Architektur (Dexie, Gemini, API-Key) | Copilot, Rules | Fix oder dokumentierte Ausnahme |
-| Style / Naming | Bot nit | Fix wenn lokal konsistent |
-| False positive | Bot | Kommentar + ggf. ESLint-Kommentar mit Begründung |
+| Quelle | Aktion |
+|--------|--------|
+| Security / Datenverlust | **Sofort** fixen |
+| `no-explicit-any`, Secrets, Dexie direkt | **Sofort** fixen |
+| Architektur | Fix oder dokumentierte Ausnahme im PR |
+| Coverage / fehlende Tests | Test ergänzen wenn sinnvoll |
+| False positive | Thread-Antwort + ggf. präziser ESLint-Kommentar |
 
-## Checkliste vor PR „ready for review“
+## Checkliste vor Merge
 
-- [ ] Alle Review-Kommentare adressiert
-- [ ] CHANGELOG [Unreleased] bei substanziellen Änderungen
+- [ ] **Alle** Inline-Kommentare (CodeAnt, Copilot, Bugbot, Menschen) adressiert
+- [ ] `pnpm run lint` — **0 warnings**
+- [ ] `pnpm run type-check` grün
+- [ ] Betroffene Vitest + ggf. `test:scripts`
+- [ ] `CHANGELOG.md` [Unreleased] bei substanziellen Änderungen
 - [ ] QNBS-v3-Kommentar bei neuer nicht-trivialer Logik
-- [ ] CI beobachten bis grün (validate, E2E wenn getriggert, Deploy)
+- [ ] CI grün (validate, E2E wenn getriggert, Deploy auf `main`)
 
 ## Referenzen
 
+- Quality-Gates: `.cursor/rules/301-strict-quality-gates.mdc`
 - Audit-Backlog: `docs/AUDIT-REMEDIATION-BACKLOG.md`
 - Copilot: `.github/copilot-instructions.md` § PR-Review

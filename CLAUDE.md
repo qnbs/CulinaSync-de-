@@ -36,6 +36,8 @@ Use `pnpm` (preferred) or `npm`. Both lockfiles are present.
 
 **Recommended agent workflow:** Diagnostics / ESLint for changed area → targeted tests → `type-check` → `check:all` only before commit/push. Never start with a full build to discover type errors.
 
+**Strict gates:** Lint with **0 warnings**; no `any`; all PR bot comments (CodeAnt, Copilot, Bugbot) resolved before merge — `.cursor/rules/300-pr-review-automation.mdc`, `301-strict-quality-gates.mdc`.
+
 ## Architecture
 
 ### Stack

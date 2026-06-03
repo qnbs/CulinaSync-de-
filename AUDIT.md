@@ -10,7 +10,7 @@
 
 - **Gesamtbewertung:** **9,0 / 10** — produktionsreif für Local-First; Multi-Device/Sync und E2E-Tiefe sind die Haupthebel.
 - **Validierung:** **404** Vitest-Tests / **99** Dateien + **5** Script-Tests (`test:scripts`); Coverage **~78,6 %** stmts / **~80,2 %** lines / **~62,9 %** branches; `i18n:check` Baseline **0**; `pnpm audit --audit-level=high` ohne High/Critical.
-- **Korrigiert (externe Audits):** Dexie-Migrationen in `dbMigrations.ts`; `exhaustive-deps: warn` (nicht off); `no-explicit-any: error`; RecipeDetail/CookMode gesplittet.
+- **Korrigiert (externe Audits):** Dexie-Migrationen in `dbMigrations.ts`; `exhaustive-deps` und `no-explicit-any` **error**; `no-console` strikt (nur warn/error/debug); RecipeDetail/CookMode gesplittet.
 - **Offen (Top):** Sync Zod/E2E (R-001/R-003), DataPanel-Split (R-002), `exportService`→`dbInstance` (R-004, in Audit-PR), Lighthouse CI, Tauri Release.
 - **PR-Prozess:** `.cursor/rules/300-pr-review-automation.mdc` — CodeAnt/Copilot-Kommentare proaktiv vor Merge.
 
@@ -87,7 +87,7 @@
 ## Status-Update 2026-05-01 (Cursor IDE)
 
 - **Projektregeln für den Agent:** `.cursor/rules/culinasync-core.mdc` (immer aktiv) und `culinasync-react.mdc` (bei `*.tsx`) — komprimierte Ableitung aus `.github/copilot-instructions.md` für konsistente Antworten in Cursor.
-- **Hinweis:** `AUDIT.md`-Abschnitte zu ESLint `@typescript-eslint/no-explicit-any` sind veraltet; in `eslint.config.js` steht die Regel auf `error` (nicht `off`). `react-hooks/exhaustive-deps` bleibt weiterhin `off` (vgl. H1).
+- **Hinweis:** ESLint in `eslint.config.js` — `no-explicit-any`, `exhaustive-deps`, `no-unused-vars` **error**; CI/lint-staged **`--max-warnings 0`**. Typed Rules (`no-floating-promises`) folgen in R-005.
 - **CI-Stand:** CodeQL nutzt nur noch `javascript`; `validate.yml` ist wiederverwendbar; Deploy ruft denselben Validate-Workflow auf — bei Push auf `main` laufen dennoch **zwei** Validate-Läufe parallel (`ci.yml` + `deploy.yml`), falls gewünscht später mit `workflow_run` oder Skip entkoppeln.
 
 ---

@@ -9,7 +9,7 @@
 | R-002 | High | `refactor(settings): split DataPanel sync/vault sections` | Wartbarkeit, Bundle | M | Größte Settings-Datei; Sync wächst | — |
 | R-003 | High | `test(e2e): critical journeys sync, chef, cook-mode` | Regressionsschutz | L | Smoke reicht nicht für M10 | R-001 optional |
 | R-004 | Medium | `refactor(db): services import dbInstance only` | Testbarkeit | S | Letzte `./db`-Imports in Services bereinigen | — |
-| R-005 | Medium | `chore(eslint): exhaustive-deps warn → error` | Hook-Bugs | M | Bereits `warn`, 0 disables | R-004 hilft |
+| R-005 | Medium | `chore(eslint): typed rules + floating promises` | Hook-Bugs | M | `exhaustive-deps` **error** (2026-06-03); typed lint folgt | R-004 hilft |
 | R-006 | Medium | `test: raise branch coverage sync + recipeRepository` | CI-Stabilität | M | 62 % branches knapp | — |
 | R-007 | Medium | `docs: document Dexie migration + backup gate` ✅ | User Trust | S | Erledigt: `docs/DB-MIGRATIONS.md` | — |
 | R-008 | Medium | `feat(sync): optional encrypted credential storage` | Security | M | localStorage Metadaten | apiKeyService pattern |

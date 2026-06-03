@@ -52,6 +52,11 @@ Standard commands (full list in `CLAUDE.md` / README):
 - `pnpm run build`
 - `pnpm run check:all` — lint + type-check + test + test:scripts + i18n + build + bundle budget + audit (heavy; use before push)
 
+### Quality & PR review (mandatory)
+
+- **Lint:** `--max-warnings 0`; `@typescript-eslint/no-explicit-any` and `react-hooks/exhaustive-deps` are **errors**.
+- **PRs:** Address **all** inline comments from CodeAnt, Copilot, Bugbot, and humans **immediately** before merge — see `.cursor/rules/300-pr-review-automation.mdc` and `301-strict-quality-gates.mdc`.
+
 ### Manual “hello world” (core domain)
 
 1. Open the dev URL, dismiss onboarding with **Überspringen** if shown.
