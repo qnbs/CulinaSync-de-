@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import type { FullBackupData, PantryItem, Recipe } from '../types';
 import { getFullData } from './exportService';
 import { mergeBackupWithConflictResolution, type BackupMergeResult } from './backupMergeService';
@@ -6,12 +7,38 @@ const DEVICE_SYNC_PREFIX = 'culinasync-device-sync:v1:';
 const MAX_QR_PAYLOAD_CHARS = 2800;
 const MAX_ITEMS_PER_TABLE = 40;
 
-export type DeviceSyncPayload = {
-  v: 1;
-  exportedAt: string;
-  pantry: PantryItem[];
-  recipes: Recipe[];
-};
+const MAX_SYNC_NAME_LEN = 500;
+
+// QNBS-v3: QR/LAN-Transfer — Zod-Gate wie geminiService, begrenzt Payload-Größe und Form
+const pantryItemSyncSchema = z.object({
+  id: z.number().optional(),
+  name: z.string().min(1).max(MAX_SYNC_NAME_LEN),
+  quantity: z.number(),
+  unit: z.string().max(64),
+  expiryDate: z.string().optional(),
+  category: z.string().max(128).optional(),
+  createdAt: z.number(),
+  updatedAt: z.number(),
+  minQuantity: z.number().optional(),
+  notes: z.string().max(2000).optional(),
+});
+
+const recipeSyncSchema = z
+  .object({
+    id: z.number().optional(),
+    recipeTitle: z.string().min(1).max(MAX_SYNC_NAME_LEN),
+    ingredients: z.array(z.unknown()).default([]),
+  })
+  .passthrough();
+
+const deviceSyncPayloadSchema = z.object({
+  v: z.literal(1),
+  exportedAt: z.string().min(1).max(64),
+  pantry: z.array(pantryItemSyncSchema).max(MAX_ITEMS_PER_TABLE),
+  recipes: z.array(recipeSyncSchema).max(MAX_ITEMS_PER_TABLE),
+});
+
+export type DeviceSyncPayload = z.infer<typeof deviceSyncPayloadSchema>;
 
 const trimForQr = (data: FullBackupData): DeviceSyncPayload => ({
   v: 1,
@@ -39,11 +66,21 @@ export const parseDeviceSyncTransferString = (raw: string): DeviceSyncPayload =>
   }
   const encoded = trimmed.slice(DEVICE_SYNC_PREFIX.length);
   const json = decodeURIComponent(escape(atob(encoded)));
-  const parsed = JSON.parse(json) as DeviceSyncPayload;
-  if (parsed.v !== 1 || !Array.isArray(parsed.pantry) || !Array.isArray(parsed.recipes)) {
+  let parsedJson: unknown;
+  try {
+    parsedJson = JSON.parse(json);
+  } catch {
+    throw new Error('invalid-json');
+  }
+  const result = deviceSyncPayloadSchema.safeParse(parsedJson);
+  if (!result.success) {
     throw new Error('invalid-payload');
   }
-  return parsed;
+  return {
+    ...result.data,
+    pantry: result.data.pantry as PantryItem[],
+    recipes: result.data.recipes as Recipe[],
+  };
 };
 
 export const applyDeviceSyncPayload = async (payload: DeviceSyncPayload): Promise<BackupMergeResult> => {

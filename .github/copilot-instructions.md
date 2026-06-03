@@ -104,6 +104,15 @@
 - Dieser Fix-/Commit-/Push-/Beobachtungszyklus wird so lange wiederholt, bis der Repo-Zustand grün ist und der Deploy-Lauf erfolgreich abgeschlossen wurde.
 - Ein Push ohne anschließende Beobachtung der Workflows gilt in diesem Repo nicht als Abschluss.
 
+## PR-Review (CodeAnt, Copilot, Bugbot — dauerhaft)
+
+- **Vor Merge:** Alle Inline-PR-Kommentare proaktiv abarbeiten — Fix, Test, oder kurze begründete Ablehnung.
+- **Priorität:** Security/Daten > Architektur-Regeln (Dexie, `geminiService`, kein `VITE_*`) > Tests > Style-Nits.
+- **Keine offenen Review-Threads** ohne Antwort; kleine Bot-Nits mitfixen, wenn &lt; 5 Minuten.
+- **Nach Fixes:** lint + type-check + betroffene Vitest-Suites; bei UI-Strings `pnpm run i18n:check`.
+- **Audit-Backlog:** `docs/AUDIT-REMEDIATION-BACKLOG.md`; vollständiger Report `docs/AUDIT-vNEXT-2026-06-03.md`.
+- Cursor-Regel: `.cursor/rules/300-pr-review-automation.mdc` (alwaysApply).
+
 ## Terminal-Nutzung
 - Terminal-Befehle dürfen ausgeführt werden, wenn sie zur Aufgabe beitragen (z. B. `pnpm install`, `pnpm run build`, `tsc --noEmit`, `pnpm run test`).
 - Verwende immer nur **ein einziges** Terminal.

@@ -1,5 +1,5 @@
 import { Recipe, ShoppingListItem, MealPlanItem } from '../types';
-import { db } from './db';
+import { db } from './dbInstance';
 import { loadSettings } from './settingsService';
 import { logAppError } from './errorLoggingService';
 import i18next from 'i18next';

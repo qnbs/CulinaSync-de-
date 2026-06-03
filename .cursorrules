@@ -28,6 +28,11 @@ Bei reinen Mini-Edits: Erklärung nur in der Chat-Antwort — keine Kommentar-Pf
 
 ---
 
+## PR-Review (dauerhaft)
+
+- Vor Merge alle Inline-Kommentare (CodeAnt, Copilot, Bugbot, Menschen) proaktiv abarbeiten — Fix, Test oder begründete Ablehnung.
+- Details: `.cursor/rules/300-pr-review-automation.mdc`, `.github/copilot-instructions.md` § PR-Review, `docs/AUDIT-REMEDIATION-BACKLOG.md`.
+
 ## Ausführungsregeln & Prozeduren (dauerhaft)
 
 - **Optimal nach eigenem Ermessen:** Kontext aus Rules, Code und `docs/` einbeziehen; für CulinaSync die **passende**, nicht die generisch-teuerste Lösung umsetzen.
