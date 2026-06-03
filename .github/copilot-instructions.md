@@ -110,7 +110,7 @@
 - **Priorität:** Security/Daten > `no-explicit-any` / Secrets / Dexie-Grenzen > Architektur (`geminiService`, kein `VITE_*`) > Tests > Style.
 - **Nach jedem Fix:** `pnpm run lint` (**--max-warnings 0**), `pnpm run type-check`, betroffene Tests; UI → `pnpm run i18n:check`.
 - **Kein Merge** bei unbeantworteten Bot-/Review-Kommentaren.
-- Cursor: `.cursor/rules/300-pr-review-automation.mdc`, `.cursor/rules/301-strict-quality-gates.mdc` (alwaysApply).
+- Cursor: `300-pr-review-automation.mdc`, `301-strict-quality-gates.mdc`, `302-ci-correction-loop.mdc` (alwaysApply).
 
 ## Quality-Gates (strikt)
 

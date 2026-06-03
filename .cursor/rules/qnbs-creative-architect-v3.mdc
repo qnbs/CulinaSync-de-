@@ -52,3 +52,4 @@ Ziel: **bestmögliche Umsetzung unter voller Sachlage** — flexibel und kontext
 | **Interaktiv wenn nötig** | Wenn Information fehlt und Annahme riskant ist → eine gezielte Rückfrage statt Raten. Wenn Annahme üblich und reversibel → dokumentierte Vernunftsannahme und weiterarbeiten. |
 | **Übergabe / Abschluss** | Nach größeren Sessions: **kurzer Handoff** — erreichte Ziele, Repo-Zustand (`main`/Branch), offene Follow-ups, empfohlener nächster Schritt (z. B. `pnpm run check:all`). |
 | **PR-Bots & Gates** | CodeAnt/Copilot/Bugbot **sofort** abarbeiten; Lint **0 warnings**, kein `any` — `301-strict-quality-gates.mdc`, `300-pr-review-automation.mdc`. |
+| **CI-Schleife** | Nach jedem Push bis grün: `gh run list` → fix → push — **nie** bei rotem CI abschließen — `302-ci-correction-loop.mdc`. |

@@ -59,7 +59,7 @@ Implementierung → Diagnostics / ESLint für geänderten Bereich → gezielte T
 | Integration | `pnpm run build` |
 | Vollpaket | `pnpm run check:all` (lint, type-check, test, test:scripts, i18n, build, budget, audit) |
 
-CI-Orientierung: **Node 24**; **validate.yml** — type-check, test:coverage, **test:scripts**, build (siehe `.github/copilot-instructions.md`). Nach Push Workflows beobachten bis grün.
+CI-Orientierung: **Node 24**; PR → volles `validate.yml`; **main** → `main-guard` + Deploy-validate. **CI-Korrekturschleife Pflicht:** `gh run list` → bei Rot fixen → push → wiederholen bis grün — `302-ci-correction-loop.mdc`, `.github/copilot-instructions.md`.
 
 ---
 

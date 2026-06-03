@@ -28,11 +28,12 @@ Bei reinen Mini-Edits: Erklärung nur in der Chat-Antwort — keine Kommentar-Pf
 
 ---
 
-## PR-Review & Quality-Gates (dauerhaft, strikt)
+## PR-Review, Quality-Gates & CI-Schleife (dauerhaft, strikt)
 
+- **CI-Korrekturschleife:** Nach jedem Push Workflows bis **grün** beobachten; bei Rot sofort fixen und erneut pushen — kein Task-Ende bei rotem CI. `.cursor/rules/302-ci-correction-loop.mdc`.
 - **Sofort:** Alle Inline-Kommentare (CodeAnt.ai, Copilot, Bugbot, Menschen) **vor Merge** abarbeiten — kein offener Thread.
 - **Lint/Types:** `--max-warnings 0`, `no-explicit-any` **error**, `exhaustive-deps` **error**; `pnpm run check:all` vor Push auf `main`.
-- Details: `.cursor/rules/300-pr-review-automation.mdc`, `.cursor/rules/301-strict-quality-gates.mdc`, `.github/copilot-instructions.md`.
+- Details: `300-pr-review-automation.mdc`, `301-strict-quality-gates.mdc`, `302-ci-correction-loop.mdc`, `.github/copilot-instructions.md`.
 
 ## Ausführungsregeln & Prozeduren (dauerhaft)
 

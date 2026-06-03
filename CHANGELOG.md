@@ -14,6 +14,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Geaendert
 
+- **CI:** `ci.yml` Job `main-guard` auf Push `main` (grüner CI-Status ohne Doppel-Coverage); Regel `302-ci-correction-loop.mdc` (dauerhafte Korrekturschleife).
 - **ESLint:** `exhaustive-deps` **error**; `no-console` strikt (nur warn/error/debug); `console.log` → `console.debug` in Services.
 - **Agent-Regeln:** `301-strict-quality-gates.mdc`; `300-pr-review-automation.mdc` — CodeAnt/Copilot **sofort** abarbeiten, kein Merge mit offenen Threads.
 - **Toolchain:** `check:all` umfasst `test:scripts` und `i18n:check`; Test-/Coverage-Zahlen in Doku auf **404** Vitest / **99** Dateien vereinheitlicht.

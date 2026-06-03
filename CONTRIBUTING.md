@@ -43,6 +43,8 @@ Empfohlen (entspricht dem ueblichen Release-Gate inkl. Audit):
 pnpm run check:all
 ```
 
+Nach dem Push: GitHub Actions beobachten bis grün (`gh run list --branch <branch>`). Bei Fehlschlag: Logs lesen, lokal fixen, erneut pushen — siehe `.cursor/rules/302-ci-correction-loop.mdc`.
+
 Deploy-, Bundle- und i18n-relevante Checks sind in **`pnpm run check:all`** enthalten (`test:scripts`, `i18n:check`, `check:bundle-budget`). Optional zusaetzlich:
 
 ```bash
