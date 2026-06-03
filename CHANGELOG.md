@@ -17,11 +17,12 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Geaendert
 
+- **Doku (Perfection Schritt D):** `ROADMAP.md` M11 Local AI, M5.7–5.9, M10.5; `PRD.md` v1.1 (Coverage-Stufenplan 88 %); `STATUS-2026-06-03`, `TESTING.md`, `AUDIT.md`, `instructions.md`, `AUDIT-REMEDIATION-BACKLOG`, `PROJECT-STRUCTURE.md`.
 - **Coverage:** Vitest-Thresholds Stufe 1 — 80/78/73/63 (lines/stmts/funcs/branches); Ist ~80,6 % / ~63,7 % branches — Ziel 64 % in Follow-up.
 - **CI:** `ci.yml` Job `main-guard` auf Push `main` (grüner CI-Status ohne Doppel-Coverage); Regel `302-ci-correction-loop.mdc` (dauerhafte Korrekturschleife).
 - **ESLint:** `exhaustive-deps` **error**; `no-console` strikt (nur warn/error/debug); `console.log` → `console.debug` in Services.
 - **Agent-Regeln:** `301-strict-quality-gates.mdc`; `300-pr-review-automation.mdc` — CodeAnt/Copilot **sofort** abarbeiten, kein Merge mit offenen Threads.
-- **Toolchain:** `check:all` umfasst `test:scripts` und `i18n:check`; Test-/Coverage-Zahlen in Doku auf **404** Vitest / **99** Dateien vereinheitlicht.
+- **Toolchain:** `check:all` umfasst `test:scripts` und `i18n:check`; Test-/Coverage-Zahlen in Doku auf **427** Vitest / **101** Dateien vereinheitlicht.
 
 ### Behoben
 

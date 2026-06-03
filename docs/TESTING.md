@@ -27,6 +27,17 @@ pnpm run check:all
 pnpm run test:e2e   # Playwright (lokal: vorher `pnpm exec playwright install chromium`)
 ```
 
+**E2E-Specs (`apps/web/e2e/`):**
+
+| Datei | Abdeckung |
+|-------|-----------|
+| `smoke.spec.ts` | Startseite lädt |
+| `navigation-offline.spec.ts` | Navigation Desktop/Mobile, Offline-Banner |
+| `sync-settings.spec.ts` | Daten-Panel, QR-Modal, Nextcloud-Probe (mock WebDAV) |
+| `chef-local.spec.ts` | Local-AI Strict-Toggle, KI-Chef erreichbar |
+| `pantry-cook.spec.ts` | Vorratskammer: Artikel anlegen |
+| `helpers/appStorage.ts`, `helpers/navigation.ts` | Onboarding aus, Navigation |
+
 **E2E lokal (wie CI / GitHub Pages):**
 
 ```bash
@@ -84,11 +95,12 @@ pnpm run check:bundle-budget
 - Voice- und Navigationstrigger
 - Datenbanknahe Cross-Feature-Operationen
 
-## Aktueller Validierungsstand 2026-06-03 (M5 abgeschlossen)
+## Aktueller Validierungsstand 2026-06-03 (M5+ / Perfection Stufe 1)
 
-- **Vitest:** **404** Tests in **99** Dateien (`pnpm run test`); u. a. Repositories, `syncService`/`syncTransport`, `geminiService`, UI-Smoke, PWA (`useOnlineStatus`, `OfflineStatusBar`), Device-Sync (Zod).
+- **Vitest:** **427** Tests in **101** Dateien (`pnpm run test`); u. a. `data-panel/`, `aiSettingsHelpers`, `categoryLabels`, erweiterte `backupMergeService`/`syncService`, Device-Sync (Zod).
 - **Scripts:** **`pnpm run test:scripts`** — 5 Node-Tests für `scripts/lib/deploy-verify-logic.mjs` (auch in CI validate).
-- **Coverage (v8):** ca. **78,6 %** Statements / **80,2 %** Lines / **62,9 %** Branches / **74,5 %** Functions — PRD-Ziel **erreicht**; Thresholds **77 / 79 / 72 / 62** in `apps/web/vitest.config.ts`.
+- **Coverage (v8):** ca. **79,1 %** Statements / **80,6 %** Lines / **63,7 %** Branches / **74,5 %** Functions — Thresholds **80 / 78 / 73 / 63** in `apps/web/vitest.config.ts`; Langfrist-Ziel **88 %** siehe `ROADMAP.md` M5.9.
+- **E2E:** **9** Playwright-Tests (`CI=true pnpm run test:e2e` nach `pnpm run build`).
 - **CI:** `validate.yml` — lint → type-check → test:coverage → **test:scripts** → build → bundle-budget → audit. Playwright **v1.60.0** in **`e2e-smoke.yml`**. PRs: **`i18n:check`** in `ci.yml`. Artefakt **coverage-lcov** (14 Tage).
 - **i18n lokal:** `pnpm run i18n:check` vor PR; Vollscan `pnpm run i18n:scan` (Report unter `reports/`, gitignored); nach bereinigten Hardcoded-Strings `pnpm run i18n:baseline:update`.
 - **Gemini:** Integrationstests + Zod (`geminiMsw.test.ts`, `geminiService.test.ts`); Schema-Änderungen in `geminiService.ts` mit Tests mitziehen.
