@@ -46,7 +46,8 @@ Standard commands (full list in `CLAUDE.md` / README):
 
 - `pnpm run lint`
 - `pnpm run type-check` (tsgo; Turbo builds `@domain/ai-core` first)
-- `pnpm run test` (~220 tests)
+- `pnpm run test` (~378 tests)
+- `pnpm run i18n:check` (de/en parity + baseline 0)
 - `pnpm run build`
 - `pnpm run check:all` — lint + type-check + test + build + bundle budget + audit (heavy; use before push)
 

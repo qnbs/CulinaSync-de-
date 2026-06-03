@@ -82,12 +82,12 @@ describe('syncService cloud transfer', () => {
     vi.unstubAllGlobals();
   });
 
-  it('uploadEncryptedBackup sendet PUT mit Blob', async () => {
+  it('uploadEncryptedBlob sendet PUT mit Bearer', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true });
     vi.stubGlobal('fetch', fetchMock);
-    const { uploadEncryptedBackup } = await import('../syncService');
+    const { uploadEncryptedBlob } = await import('../syncTransport');
     const payload = new Uint8Array([1, 2, 3]);
-    await uploadEncryptedBackup('https://example.com/backup', payload, 'token-1');
+    await uploadEncryptedBlob('https://example.com/backup', payload, { type: 'bearer', token: 'token-1' });
     expect(fetchMock).toHaveBeenCalledWith(
       'https://example.com/backup',
       expect.objectContaining({
@@ -97,9 +97,9 @@ describe('syncService cloud transfer', () => {
     );
   });
 
-  it('downloadEncryptedBackup wirft bei HTTP-Fehler', async () => {
+  it('downloadEncryptedBlob wirft bei HTTP-Fehler', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
-    const { downloadEncryptedBackup } = await import('../syncService');
-    await expect(downloadEncryptedBackup('https://example.com/x')).rejects.toThrow('Download fehlgeschlagen');
+    const { downloadEncryptedBlob } = await import('../syncTransport');
+    await expect(downloadEncryptedBlob('https://example.com/x')).rejects.toThrow('download-failed');
   });
 });

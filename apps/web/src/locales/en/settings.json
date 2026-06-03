@@ -429,7 +429,31 @@
         "mergeRestore": "Merge (conflicts)",
         "mergeSuccess": "Cloud backup merged (newer entries kept).",
         "lastSync": "Last successful sync: {{date}}",
-        "helper": "All data is encrypted locally before upload. The password never leaves your device. WebDAV/NextCloud: use a `.csb` file target URL."
+        "helper": "All data is encrypted locally before upload. The password never leaves your device. WebDAV/NextCloud: use a `.csb` file target.",
+        "providerLabel": "Provider",
+        "providerGeneric": "Custom URL (WebDAV/S3)",
+        "providerNextcloud": "Nextcloud",
+        "nextcloud": {
+          "serverPlaceholder": "https://cloud.example.com",
+          "userPlaceholder": "Username",
+          "appPasswordPlaceholder": "App password (local only)",
+          "remotePathPlaceholder": "culinasync-backup.csb",
+          "remotePathHint": "File name in your Nextcloud files folder",
+          "testConnection": "Test connection",
+          "testOk": "Nextcloud is reachable.",
+          "testFailed": "Connection failed."
+        },
+        "errors": {
+          "unknown": "Sync failed.",
+          "upload_failed": "Upload failed (HTTP {{status}}).",
+          "download_failed": "Download failed (HTTP {{status}}).",
+          "nextcloud_missing_server": "Please enter a server URL.",
+          "nextcloud_missing_user": "Please enter a username.",
+          "nextcloud_missing_password": "Please enter an app password.",
+          "nextcloud_invalid_url": "Invalid server URL.",
+          "nextcloud_invalid_protocol": "Only http:// or https:// allowed.",
+          "nextcloud_probe_failed": "Nextcloud unreachable or credentials invalid."
+        }
       },
       "deviceSync": {
         "sectionTitle": "Device transfer (QR)",

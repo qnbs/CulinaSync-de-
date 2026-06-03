@@ -2,6 +2,8 @@ node_modules
 dist
 .turbo
 storybook-static
+src-tauri/target/
+src-tauri/gen/
 
 # Generated output
 coverage/
