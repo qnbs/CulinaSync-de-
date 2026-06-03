@@ -28,10 +28,10 @@ export default defineConfig({
       reportsDirectory: './coverage',
       // QNBS-v3: M5 Functions≥70 (Snapshot 2026-06-02): ~78 % stmts / ~79 % lines / ~72,5 % funcs / ~63 % branches
       thresholds: {
-        lines: 79,
-        statements: 77,
-        functions: 72,
-        branches: 62,
+        lines: 80,
+        statements: 78,
+        functions: 73,
+        branches: 63,
       },
     },
   },

@@ -1,6 +1,6 @@
 # Projektstruktur
 
-> **Stand:** 2026-05-16 — pnpm/Turborepo-Monorepo (`apps/web`, `packages/*`)
+> **Stand:** 2026-06-03 — pnpm/Turborepo-Monorepo (`apps/web`, `packages/*`)
 
 ## Root (Monorepo)
 
@@ -19,12 +19,12 @@
 - `package.json`: App-Abhängigkeiten und Scripts (`dev`, `build`, `test`, …)
 - `public/`: statische Assets (PWA, Logos, `404.html`)
 - `.storybook/`: Storybook-Konfiguration
-- `e2e/`: Playwright-Smoke gegen `vite preview`
+- `e2e/`: Playwright (Smoke, Offline, Sync, Chef, Pantry) gegen `vite preview` in CI
 
 ### `apps/web/src/components/`
 
 - Top-Level-Seiten: `PantryManager.tsx`, `RecipeBook.tsx`, `MealPlanner.tsx`, `ShoppingList.tsx`, `Settings.tsx`
-- Feature-Unterordner: `recipe-detail/`, `cook-mode/`, `shopping-list/`, `meal-planner/`, …
+- Feature-Unterordner: `recipe-detail/`, `cook-mode/`, `shopping-list/`, `meal-planner/`, `settings/panels/data-panel/`, …
 - `__tests__/`: Smoke- und Komponententests
 
 ### `apps/web/src/hooks/`

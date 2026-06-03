@@ -1,6 +1,6 @@
 # CulinaSync — Entwicklungs- und Agenten-Anweisungen
 
-**Version:** 1.2 · **Stand:** 2026-06-03  
+**Version:** 1.3 · **Stand:** 2026-06-03  
 **Zweck:** Diese Datei ist der **primäre Einstieg** für Menschen und KI-Agenten. Sie verbindet Produktvorgaben (`PRD.md`), Architektur (`docs/`) und tägliche Arbeitsregeln — ohne `.github/copilot-instructions.md` zu ersetzen (diese bleiben die detaillierte technische Referenz).
 
 ---
@@ -52,7 +52,8 @@ Implementierung → Diagnostics / ESLint für geänderten Bereich → gezielte T
 | Dev-Server | `pnpm run dev` |
 | Lint | `pnpm run lint` |
 | Typen | `pnpm run type-check` |
-| Tests | `pnpm run test` (**404** Vitest / **99** Dateien) |
+| Tests | `pnpm run test` (**427** Vitest / **101** Dateien) |
+| E2E | `pnpm run test:e2e` (**9** Specs; CI: nach `build`) |
 | Script-Tests | `pnpm run test:scripts` |
 | i18n | `pnpm run i18n:check` |
 | Coverage | `pnpm run test:coverage` |
@@ -67,7 +68,7 @@ CI-Orientierung: **Node 24**; PR → volles `validate.yml`; **main** → `main-g
 
 - Framework: **Vitest**, **MSW**, **Testing Library**; Muster unter `apps/web/src/**/*.test.ts(x)`.
 - **Verboten:** Fehlgeschlagene Tests dauerhaft auskommentieren oder löschen, um CI zu „grün zu tricksen“.
-- Coverage (Juni 2026): **~78 %/79 %/73 %/63 %** (stmts/lines/funcs/branches); Thresholds **77/79/72/62** in `apps/web/vitest.config.ts` — M5 ✅ (siehe `docs/STATUS-2026-06-03.md`).
+- Coverage (Juni 2026): **~79 %/81 %/75 %/64 %** (stmts/lines/funcs/branches, gerundet); Thresholds **80/78/73/63** (Stufe 1) — M5 ✅; Ziel **88 %** → `ROADMAP.md` M5.9 (siehe `docs/STATUS-2026-06-03.md`).
 
 ---
 

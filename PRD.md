@@ -2,7 +2,7 @@
 
 **Produkt:** CulinaSync  
 **Version:** 1.0  
-**Stand:** 2026-05-02  
+**Stand:** 2026-06-03  
 **Maintainer:** siehe Repository (`CONTRIBUTING.md`, `README.md`)  
 **Verbunden mit:** `instructions.md`, `ROADMAP.md`, `docs/ARCHITECTURE.md`
 
@@ -124,7 +124,7 @@ IDs dienen Traceability in Issues und PRs.
 | NFR-03 | Performance | Seiten lazy laden; schwere Bibliotheken dynamisch nachladen wo vorgesehen; Bundle-Budget-CI einhalten. |
 | NFR-04 | Zuverlässigkeit | Fehler logging-fähig; globale und Feature-Grenzen für Abstürze dokumentiert. |
 | NFR-05 | Wartbarkeit | Schichten trennen (UI / State / Services / DB); große Dateien aufteilen (siehe `.cursor/rules/200-architecture-limits.mdc`). |
-| NFR-06 | Qualität | CI: Lint, Tests, Build; Coverage-Ziel Roadmap **≥70 %** (Ausgang ~42 %). |
+| NFR-06 | Qualität | CI: Lint, Tests, Build, E2E-Smoke+; Coverage **M5 ≥70 % erreicht** (Juni 2026 ~**80 %** Lines); Stufenplan Perfection **80 → 88 %** Lines/Branches (siehe `ROADMAP.md` M5.9). |
 | NFR-07 | A11y | WCAG-orientierte Patterns für neue Oberflächen; Regressionen vermeiden. |
 
 ---
@@ -143,7 +143,8 @@ IDs dienen Traceability in Issues und PRs.
 | Metrik | Zielrichtung | Messung |
 |--------|--------------|---------|
 | CI-Stabilität | Grün auf `main` | GitHub Actions |
-| Test-Coverage | ≥70 % Statements/Lines | `pnpm run test:coverage` |
+| Test-Coverage | **≥70 %** (M5) · Stufe 1 **~80 %** Lines · Ziel **≥88 %** Lines+Branches | `pnpm run test:coverage` |
+| E2E (kritische Journeys) | Sync, Pantry, KI-Chef-Basis grün in CI | `pnpm run test:e2e` |
 | Bundle-Größe | Innerhalb `budget.json` | CI Bundle-Budget-Script |
 | i18n | Keine neuen Hardcoded-Strings ohne Ticket | Scanner-Skripte / Review |
 | Security | Keine offenen kritischen Dependabot/CodeQL ohne Plan | GitHub Security |
@@ -156,9 +157,9 @@ Detaillierte Tasks: **`ROADMAP.md`**. PRD-Überblick:
 
 | Epoche | Thema |
 |--------|--------|
-| Erledigt / fortgeschritten | TS/tsgo, CI-Hygiene, i18n-Wellen, Architektur-Cleanup MealPlanner/CookMode/RecipeDetail, Zod+Gemini, Tauri-CSP, Testausbau |
-| Aktiv | M5 Coverage-Ziel, verbleibende Hook-/Integrationstests |
-| Geplant | TS 7 GA (M7), Tauri Release (M8), Bundle-Tuning (M9), optional Sync (M10) |
+| Erledigt / fortgeschritten | TS/tsgo, CI-Hygiene, i18n, Architektur-Cleanup, Zod+Gemini, M5 Coverage, M9 Bundle, **M10 Sync**, DataPanel-Split, E2E-Basis (PR #66) |
+| Aktiv | M11 Local AI (4-Layer), M5.8 Branch-Coverage 64 %, Typed ESLint (R-005) |
+| Geplant | TS 7 GA (M7), Tauri Release (M8), Lighthouse CI, optional Dexie-Verschlüsselung |
 
 ---
 
@@ -166,6 +167,7 @@ Detaillierte Tasks: **`ROADMAP.md`**. PRD-Überblick:
 
 | Datum | Version | Änderung |
 |-------|---------|----------|
+| 2026-06-03 | 1.1 | NFR-06/Erfolgsmetriken: M5 erreicht, Perfection-Stufenplan 88 %, E2E-Journeys; Roadmap M11 Local AI |
 | 2026-05-02 | 1.0 | Initiale PRD aus README, ARCHITECTURE, ROADMAP, Copilot-Instructions konsolidiert |
 
 ---

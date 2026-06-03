@@ -92,20 +92,20 @@ Keine bekannten Datenverlust-, Secret-Leak- oder Build-Blocker auf `main`.
 | **Fix** | Services nur `dbInstance`; **nur** App-Bootstrap importiert `db.ts` einmal (`index.tsx` o.ä. prüfen) |
 | **Status** | 🔧 `exportService` → `dbInstance` in Audit-PR |
 
-#### M2 — `react-hooks/exhaustive-deps: warn`
+#### M2 — `react-hooks/exhaustive-deps` (erledigt: **error**)
 
 | Feld | Inhalt |
 |------|--------|
-| **Evidence** | `eslint.config.js` Zeile 53; **keine** `eslint-disable` in `src/` |
-| **Impact** | Stale Closures möglich; nicht mehr `off` wie in altem AUDIT.md |
-| **Fix** | `pnpm run lint` → Warnungen zählen; Hook für Hook bereinigen → `error` |
+| **Evidence** | `eslint.config.js`; **keine** `eslint-disable` in `src/` |
+| **Impact** | Stale Closures — mit **`error`** + `--max-warnings 0` abgesichert (2026-06-03, PR #64) |
+| **Fix** | ~~Warnungs-Nullung → `error`~~ **Erledigt**; Follow-up: typed ESLint (R-005) |
 
-#### M3 — Branch-Coverage 62,39 % (unter ROADMAP-Ziel 60 % branches ✅, aber knapp)
+#### M3 — Branch-Coverage (~63,7 %; Threshold 63 ✅, Ziel 64 %)
 
 | Feld | Inhalt |
 |------|--------|
-| **Evidence** | `recipeRepository` 64 % lines / 45 % branches; `syncService` 38 % branches; `pantryCategoryLabels` 41 % |
-| **Fix** | Gezielte Tests für LWW-Merge-Zweige, `syncDownload` merge vs replace, Kategorie-Edge-Cases |
+| **Evidence** | PR #66: Ist **~63,7 %** branches; Vitest-Threshold **63**; ROADMAP M5.8 → **64 %** |
+| **Fix** | Weitere Tests: `recipeRepository`-Zweige, `syncService` merge/replace, Kategorie-Edge-Cases |
 
 #### M4 — Dexie-Migrationen existieren — Doku/Onboarding aktualisieren
 
@@ -200,8 +200,8 @@ flowchart LR
 
 | Behauptung extern | Ist-Stand 2026-06-03 |
 |-------------------|----------------------|
-| Coverage ~59–61 % | **~78–79 %** |
-| `exhaustive-deps: off` | **`warn`** |
+| Coverage ~59–61 % | **~79–81 %** (PR #66: Thresholds 80/78/73/63) |
+| `exhaustive-deps: off` | **`error`** (seit 2026-06-03) |
 | `no-explicit-any: off` | **`error`** |
 | Dexie-Migration fehlt | **`dbMigrations.ts` vorhanden** |
 | Import-Zyklen db.ts | **Teilweise gelöst**; Rest: `exportService` → `db` |
@@ -214,9 +214,9 @@ flowchart LR
 
 1. **H1** — Zod für `DeviceSyncPayload` (dieser PR).
 2. **M1** — `exportService` importiert `dbInstance` (dieser PR).
-3. **H3** — E2E-Spec für Settings→Sync (nächster Sprint).
-4. **M2** — ESLint exhaustive-deps → `error` nach Warnungs-Nullung.
-5. **H2** — `DataPanel` in Subkomponenten splitten.
+3. ~~**H3** — E2E-Spec für Settings→Sync~~ **Basis erledigt** (PR #66: `sync-settings`, `chef-local`, `pantry-cook`).
+4. ~~**M2** — ESLint exhaustive-deps → `error`~~ **Erledigt** (2026-06-03).
+5. ~~**H2** — `DataPanel` in Subkomponenten splitten~~ **Erledigt** (PR #66).
 
 ---
 

@@ -1,6 +1,6 @@
 # CulinaSync — Roadmap
 
-> **Stand:** 2. Juni 2026 (M5 abgeschlossen, Docs-Nachzug) · Basis: vollständiges Code-, Architektur- und Security-Audit (14.–22. April 2026) + Follow-up-Sessions Mai/Juni 2026  
+> **Stand:** 3. Juni 2026 (M5+, M9–M10 ✅, Perfection-Sprint PR #66) · Basis: vollständiges Code-, Architektur- und Security-Audit (14.–22. April 2026) + Follow-up-Sessions Mai/Juni 2026  
 > **Format:** Milestones geordnet nach Priorität. Jedes Item mit Herkunft (AUDIT-Referenz), Aufwandsschätzung und Status.
 
 ---
@@ -118,6 +118,12 @@
 
 **Wartung (post-M5):** Coverage >75 % halten; optional `db.ts`-Isolation; E2E/Playwright ausbauen; keine neuen Threshold-Senkungen ohne CHANGELOG.
 
+| # | Maßnahme | Datei(en) | Aufwand | Status |
+|---|---|---|---|---|
+| 5.7 | Perfection Stufe 1: Coverage-Thresholds **80/78/73/63**; E2E Sync/Chef/Pantry; `DataPanel` → `data-panel/` | PR #66, `vitest.config.ts`, `apps/web/e2e/` | Mittel | ✅ |
+| 5.8 | Branch-Coverage **≥64 %** (Ist ~63,7 %) + gezielte Sync/Repository-Tests | `__tests__/syncService`, `recipeRepository` | Mittel | 🔲 |
+| 5.9 | Langfrist-Ziel **≥88 %** Lines/Branches (Programm, nicht ein Sprint) | PRD NFR-06, `vitest.config.ts` | Hoch | 🔲 Stufenplan |
+
 ---
 
 ## Milestone 6 — Dokumentation
@@ -156,7 +162,7 @@ _Vorbedingung: TS 7.0 Stable Release (voraussichtlich Q3 2026)_
 | Punkt | Herkunft | Entscheidung |
 |---|---|---|
 | `api-key` Kommentar "Secure API Key Management" ist irreführend (XOR-Obfuskation, kein echter Crypto) | S1 | Bei Milestone 4.2 beheben |
-| `react-hooks/exhaustive-deps: 'off'` — stale-closure-Risiko in diversen Hooks | H1/H2 | Nach Milestone 3 schrittweise auf `warn` heben und Hooks bereinigen |
+| ~~`react-hooks/exhaustive-deps: 'off'`~~ | H1/H2 | **Erledigt (2026-06-03):** `error` in `eslint.config.js`; `no-console` strikt — siehe PR #64 |
 | ~~Settings Legacy-Fallback~~ | K2 | **Erledigt:** Migration nach `persist:settings` via `migrateLegacySettings`; direktes Auslesen von `culinaSyncSettings` in `loadSettings()` entfernt (`settingsKeys` / `settingsMerge`) |
 
 ---
@@ -206,12 +212,36 @@ _Vorbedingung: M1 (DevContainer mit Rust), Tauri 2 stabil_
 
 **Gesamtaufwand Milestone 10:** ~20–28 h
 
+| # | Maßnahme | Datei(en) | Aufwand | Status |
+|---|---|---|---|---|
+| 10.5 | E2E: Sync-Settings, Local-AI-Toggle, Pantry-Kernflow | `apps/web/e2e/sync-settings.spec.ts`, `chef-local.spec.ts`, `pantry-cook.spec.ts` | Mittel | ✅ (PR #66); Cook-Mode-E2E folgt |
+
+---
+
+## Milestone 11 — Local AI (4-Layer, Production)
+
+**Ziel:** Local-first KI neben BYOK-Gemini — Heuristik (L4) ist aktiv; WebLLM/ONNX/Transformers (L1–L3) produktiv schalten.
+
+_Vorbedingung: M9 Bundle-Budget; Architekturvertrag [`docs/LOCAL-AI-ARCHITECTURE.md`](docs/LOCAL-AI-ARCHITECTURE.md)_
+
+| # | Maßnahme | Datei(en) | Aufwand | Status |
+|---|---|---|---|---|
+| 11.0 | PRD/Doku: „Local default, Cloud optional“; Benchmark-Kriterien | `PRD.md`, `LOCAL-AI-AUDIT-2026-06.md` | S | 🟨 Doku in PR #66-Nachzug |
+| 11.1 | `aiProviderService` + Fallback-Kette; Lazy-Chunks ML | `packages/ai-core`, `apps/web/src/services/` | Hoch | 🔲 |
+| 11.2 | WebLLM (L1) Feature-Flag: Rezept-Ideen/Rezept | `aiService.ts`, Worker-Bus | Hoch | 🔲 |
+| 11.3 | Transformers.js Embeddings + domänen-RAG (Dexie) | `localAiRagService` (neu) | Hoch | 🔲 |
+| 11.4 | ONNX Vision Pantry-Foto (L2) | Vision-Worker, Budget-Gate | Hoch | 🔲 |
+| 11.5 | E2E „Chef ohne Netz“ + MSW | `e2e/chef-local.spec.ts` erweitern | Mittel | 🟨 Basis in PR #66 |
+
+**Gesamtaufwand Milestone 11:** groß (mehrere PRs); nicht mit M5-Coverage-Ziel verwechseln.
+
 ---
 
 ## Changelog dieser Roadmap
 
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.5 | 2026-06-03 | **M11 Local AI** angehängt; M5.7–5.9 Perfection/Coverage-Stufen; M10.5 E2E; `exhaustive-deps` als erledigt; PR #66 |
 | 1.4 | 2026-06-02 | **M5 abgeschlossen** (~78/79/72,5/63 % Coverage); PR #20/#29/#30; Docs-Nachzug STATUS/README/TESTING; M6.6 |
 | 1.3 | 2026-05-02 | M3.3 MealPlanner-Context; M4.1 Zod in `geminiService`; Legacy-Settings-Migration ohne Runtime-Fallback in `loadSettings`; A11y-Sweep; CI Node 24 in validate/ci; M6.4 Doku-Sync; `docs/STATUS-2026-05-02.md` |
 | 1.2 | 2026-05-01 | M3.1/M3.2 erledigt; M4.3 CSP Tauri; M5/6 Fortschritt (Tests, Mermaid, JSDoc, README); Verweis `docs/STATUS-2026-05-01.md` |

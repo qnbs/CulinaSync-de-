@@ -35,6 +35,40 @@ describe('backupMergeService', () => {
     vi.clearAllMocks();
   });
 
+  it('ignoriert Eintraege ohne id', async () => {
+    const { mergeBackupWithConflictResolution } = await import('../backupMergeService');
+    const data: FullBackupData = {
+      pantry: [{ name: 'OhneId', quantity: 1, unit: 'l', createdAt: 1, updatedAt: 2 }],
+      recipes: [
+        {
+          recipeTitle: 'OhneId',
+          shortDescription: '',
+          prepTime: '',
+          cookTime: '',
+          totalTime: '',
+          servings: '1',
+          difficulty: '',
+          ingredients: [],
+          instructions: [],
+          nutritionPerServing: { calories: '0', protein: '0', carbs: '0', fat: '0' },
+          tags: { course: [], cuisine: [], occasion: [], mainIngredient: [], prepMethod: [], diet: [] },
+          expertTips: [],
+          updatedAt: 2,
+        },
+      ],
+      mealPlan: [],
+      shoppingList: [],
+      exportedAt: '2026-06-03T00:00:00.000Z',
+    };
+
+    const result = await mergeBackupWithConflictResolution(data);
+
+    expect(pantryPut).not.toHaveBeenCalled();
+    expect(recipesPut).not.toHaveBeenCalled();
+    expect(result.skippedOlderPantry).toBe(0);
+    expect(result.skippedOlderRecipes).toBe(0);
+  });
+
   it('ueberschreibt neuere Vorratseintraege und ueberspringt aeltere', async () => {
     pantryGet.mockResolvedValueOnce({ id: 1, name: 'Alt', quantity: 1, unit: 'l', updatedAt: 10 });
     const { mergeBackupWithConflictResolution } = await import('../backupMergeService');
@@ -50,6 +84,72 @@ describe('backupMergeService', () => {
 
     expect(pantryPut).not.toHaveBeenCalled();
     expect(result.skippedOlderPantry).toBe(1);
+  });
+
+  it('ueberschreibt neuere Rezepte und ueberspringt aeltere', async () => {
+    recipesGet.mockResolvedValueOnce({
+      id: 3,
+      recipeTitle: 'Alt',
+      shortDescription: '',
+      prepTime: '',
+      cookTime: '',
+      totalTime: '',
+      servings: '1',
+      difficulty: '',
+      ingredients: [],
+      instructions: [],
+      nutritionPerServing: { calories: '0', protein: '0', carbs: '0', fat: '0' },
+      tags: { course: [], cuisine: [], occasion: [], mainIngredient: [], prepMethod: [], diet: [] },
+      expertTips: [],
+      updatedAt: 100,
+    });
+    const { mergeBackupWithConflictResolution } = await import('../backupMergeService');
+    const data: FullBackupData = {
+      pantry: [],
+      recipes: [
+        {
+          id: 3,
+          recipeTitle: 'Neu',
+          shortDescription: '',
+          prepTime: '',
+          cookTime: '',
+          totalTime: '',
+          servings: '1',
+          difficulty: '',
+          ingredients: [],
+          instructions: [],
+          nutritionPerServing: { calories: '0', protein: '0', carbs: '0', fat: '0' },
+          tags: { course: [], cuisine: [], occasion: [], mainIngredient: [], prepMethod: [], diet: [] },
+          expertTips: [],
+          updatedAt: 50,
+        },
+      ],
+      mealPlan: [],
+      shoppingList: [],
+      exportedAt: '2026-06-03T00:00:00.000Z',
+    };
+
+    const result = await mergeBackupWithConflictResolution(data);
+
+    expect(recipesPut).not.toHaveBeenCalled();
+    expect(result.skippedOlderRecipes).toBe(1);
+  });
+
+  it('ueberschreibt neuere Vorratseintraege per LWW', async () => {
+    pantryGet.mockResolvedValueOnce({ id: 1, name: 'Alt', quantity: 1, unit: 'l', updatedAt: 5 });
+    const { mergeBackupWithConflictResolution } = await import('../backupMergeService');
+    const data: FullBackupData = {
+      pantry: [{ id: 1, name: 'Neu', quantity: 2, unit: 'l', createdAt: 1, updatedAt: 20 }],
+      recipes: [],
+      mealPlan: [],
+      shoppingList: [],
+      exportedAt: '2026-06-03T00:00:00.000Z',
+    };
+
+    const result = await mergeBackupWithConflictResolution(data);
+
+    expect(pantryPut).toHaveBeenCalledWith(expect.objectContaining({ name: 'Neu' }));
+    expect(result.skippedOlderPantry).toBe(0);
   });
 
   it('legt fehlende Eintraege an und merged Plan/Einkauf', async () => {
