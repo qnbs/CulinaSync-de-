@@ -1,6 +1,8 @@
 import { importData } from './repositories/dataRepository';
 import { mergeBackupWithConflictResolution } from './backupMergeService';
 import { logAppError } from './errorLoggingService';
+import type { ResolvedSyncTarget } from './syncTarget';
+import { downloadEncryptedBlob, uploadEncryptedBlob } from './syncTransport';
 import type { FullBackupData } from '../types';
 
 export type SyncRestoreMode = 'replace' | 'merge';
@@ -77,37 +79,12 @@ export async function decryptBackup(blob: Uint8Array, password: string): Promise
   return JSON.parse(dec.decode(decrypted));
 }
 
-// --- Cloud Upload/Download (WebDAV, S3, Custom) ---
-// Hier nur Demo: Upload/Download zu/von URL mit fetch (z. B. WebDAV-Server)
-
-export async function uploadEncryptedBackup(url: string, data: Uint8Array, token?: string) {
-  const uploadBuffer = new Uint8Array(data);
-  const res = await fetch(url, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/octet-stream',
-      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-    },
-    body: new Blob([uploadBuffer.buffer], { type: 'application/octet-stream' })
-  });
-  if (!res.ok) throw new Error('Upload fehlgeschlagen');
-}
-
-export async function downloadEncryptedBackup(url: string, token?: string): Promise<Uint8Array> {
-  const res = await fetch(url, {
-    method: 'GET',
-    headers: token ? { 'Authorization': `Bearer ${token}` } : undefined
-  });
-  if (!res.ok) throw new Error('Download fehlgeschlagen');
-  return new Uint8Array(await res.arrayBuffer());
-}
-
-// --- High-level Sync-API ---
-export async function syncUpload(password: string, url: string, token?: string) {
+// --- High-level Sync-API (generic WebDAV URL + Nextcloud via ResolvedSyncTarget) ---
+export async function syncUpload(password: string, target: ResolvedSyncTarget) {
   try {
     const data = await (await import('./exportService')).getFullData();
     const encrypted = await encryptBackup(data, password);
-    await uploadEncryptedBackup(url, encrypted, token);
+    await uploadEncryptedBlob(target.url, encrypted, target.auth);
     if (typeof window !== 'undefined') {
       window.localStorage.setItem('culinaSyncLastSyncAt', String(Date.now()));
     }
@@ -119,12 +96,11 @@ export async function syncUpload(password: string, url: string, token?: string) 
 
 export async function syncDownload(
   password: string,
-  url: string,
-  token?: string,
+  target: ResolvedSyncTarget,
   mode: SyncRestoreMode = 'replace',
 ) {
   try {
-    const encrypted = await downloadEncryptedBackup(url, token);
+    const encrypted = await downloadEncryptedBlob(target.url, target.auth);
     const data = await decryptBackup(encrypted, password);
     if (mode === 'merge') {
       await mergeBackupWithConflictResolution(data);

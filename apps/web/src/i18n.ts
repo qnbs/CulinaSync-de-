@@ -17,15 +17,26 @@ const resources = {
 const settings = loadSettings();
 const defaultLanguage = settings.language || 'de';
 
+const isDev = import.meta.env.DEV;
+
+// QNBS-v3: Fehlende Keys in Dev warnen; Prod ohne rohe Key-Anzeige (Fallback de → en)
 i18n
   .use(initReactI18next)
   .init({
     resources,
     lng: defaultLanguage,
-    fallbackLng: 'en',
+    fallbackLng: ['de', 'en'],
+    returnEmptyString: false,
     interpolation: {
-      escapeValue: false
-    }
+      escapeValue: false,
+    },
+    parseMissingKeyHandler: (key) => {
+      if (isDev) {
+        console.warn(`[i18n] missing key: ${key}`);
+        return `[${key}]`;
+      }
+      return '';
+    },
   });
 
 export default i18n;

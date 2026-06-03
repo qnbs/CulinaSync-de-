@@ -1,34 +1,95 @@
-# M8: Vorbereitung — vollstaendiger Tauri-Build wenn Cargo-Workspace ergaenzt ist
-name: Tauri prep (config + web build)
+# M8: Tauri 2 desktop builds (matrix) + config verify on every dispatch
+name: Tauri release
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@v6
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: 'pnpm'
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@stable
 
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      - name: Web build (dist fuer Tauri distDir)
+      - name: Generate Tauri icons
+        run: node scripts/generate-tauri-icons.mjs
+
+      - name: Web build
         run: pnpm run build
 
-      - name: Tauri config vorhanden
-        run: test -f src-tauri/tauri.conf.json && test -f src-tauri/main.rs
+      - name: Cargo check (Tauri)
+        working-directory: src-tauri
+        run: cargo check
+
+  build:
+    needs: verify
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: ubuntu-22.04
+            args: ''
+          - platform: windows-latest
+            args: ''
+          - platform: macos-latest
+            args: '--target aarch64-apple-darwin'
+          - platform: macos-latest
+            args: '--target x86_64-apple-darwin'
+
+    runs-on: ${{ matrix.platform }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev librsvg2-dev patchelf
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Tauri icons
+        run: node scripts/generate-tauri-icons.mjs
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: src-tauri
+          tagName: ${{ github.ref_name }}
+          releaseName: 'CulinaSync ${{ github.ref_name }}'
+          releaseBody: 'Desktop installers (Windows, macOS, Linux) for CulinaSync.'
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}

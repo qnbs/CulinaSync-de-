@@ -170,7 +170,7 @@ _Vorbedingung: M1 (DevContainer mit Rust), Tauri 2 stabil_
 | # | Maßnahme | Datei(en) | Aufwand | Status |
 |---|---|---|---|---|
 | 8.1 | `tauri.conf.json` für Release konfigurieren (Bundle-Identifier, Icons, Fenster-Einstellungen) | `src-tauri/tauri.conf.json` | Niedrig | ✅ Version/CSP/Identifier; `docs/M8-TAURI-DESKTOP.md` |
-| 8.2 | GitHub Actions Release-Workflow für Tauri-Builds (matrix: windows, macos, linux) | `.github/workflows/tauri-release.yml` | Mittel (3–4 h) | 🟨 Prep-Workflow; native Matrix folgt mit Cargo |
+| 8.2 | GitHub Actions Release-Workflow für Tauri-Builds (matrix: windows, macos, linux) | `.github/workflows/tauri-release.yml` | Mittel (3–4 h) | ✅ verify + Matrix (Tag `v*` / `workflow_dispatch`) |
 | 8.3 | Plattformspezifische CSP und native Dialoge in `src-tauri/main.rs` | `src-tauri/main.rs` | Mittel (2 h) | 🔲 |
 | 8.4 | README.md um Desktop-Download-Sektion und Installationsanleitung ergänzen | `README.md` | Niedrig (1 h) | 🔲 |
 
@@ -200,7 +200,7 @@ _Vorbedingung: M1 (DevContainer mit Rust), Tauri 2 stabil_
 | # | Maßnahme | Datei(en) | Aufwand | Status |
 |---|---|---|---|---|
 | 10.1 | QR-Code-Export/Import für Pantry + Rezepte (lokaler Sync über LAN) | `src/services/` | Hoch (6–8 h) | ✅ `deviceSyncService` + `DeviceSyncModal` |
-| 10.2 | WebDAV-Sync-Adapter (Nextcloud, ownCloud) als optionaler Provider | `src/services/syncService.ts` | Hoch (8–12 h) | 🟨 Generischer PUT/GET; Doku-Hinweis WebDAV `.csb` |
+| 10.2 | WebDAV-Sync-Adapter (Nextcloud, ownCloud) als optionaler Provider | `src/services/nextcloudSyncAdapter.ts`, `syncTransport.ts` | Hoch (8–12 h) | ✅ Nextcloud UI + Basic-Auth WebDAV; Generic-URL weiterhin |
 | 10.3 | Sync-Status-UI im Settings-Panel | `src/components/Settings.tsx` | Mittel (3–4 h) | ✅ Letzter Sync, Merge-Restore, QR-Sektion |
 | 10.4 | Konflikt-Resolution-Strategie (Last-Write-Wins mit Timestamp) | `src/services/` | Mittel (3–4 h) | ✅ `backupMergeService` (Vault, QR, Cloud-Merge) |
 

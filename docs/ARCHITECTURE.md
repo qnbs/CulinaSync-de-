@@ -56,6 +56,21 @@ Orchestrierung: **pnpm workspaces** + **Turborepo** (`turbo.json`). Root-Scripts
 4. Hooks lesen via `useLiveQuery` und aktualisieren die UI.
 5. Redux für Shell-, Fokus-, Modal- und Prozesszustand.
 
+### Sync & Backup (optional)
+
+- **Cloud:** `syncService` + `syncTransport` (PUT/GET); Provider **generic URL** oder **Nextcloud** (`nextcloudSyncAdapter` → WebDAV `remote.php/dav/files/…`).
+- **Gerät:** `deviceSyncService` (QR/Text, LWW via `backupMergeService`).
+- **Vault:** `.csb` AES-GCM (`snapshotVaultService`).
+
+```mermaid
+flowchart LR
+  UI["DataPanel"] --> SS["syncService"]
+  SS --> ST["syncTransport"]
+  NC["nextcloudSyncAdapter"] --> ST
+  SS --> BM["backupMergeService"]
+  BM --> DB["Dexie Repositories"]
+```
+
 ### Diagramm (Überblick)
 
 ```mermaid

@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getLastSyncTimestamp, syncUpload, syncDownload } from '../../../services/syncService';
+import { probeNextcloudConnection } from '../../../services/nextcloudSyncAdapter';
+import {
+  resolveGenericSyncTarget,
+  resolveNextcloudSyncTarget,
+  type SyncProviderId,
+} from '../../../services/syncTarget';
+import { formatSyncErrorMessage } from '../../../services/syncUiErrors';
 import { db } from '../../../services/dbInstance';
 import { importData } from '../../../services/repositories/dataRepository';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -13,6 +20,11 @@ import { useModalA11y } from '../../../hooks/useModalA11y';
 import { useTranslation } from 'react-i18next';
 import { downloadEncryptedVault, mergeEncryptedVaultFile } from '../../../services/snapshotVaultService';
 import { logAppError } from '../../../services/errorLoggingService';
+
+const SYNC_PROVIDER_STORAGE_KEY = 'culinaSyncSyncProvider';
+const NEXTCLOUD_SERVER_STORAGE_KEY = 'culinaSyncNextcloudServer';
+const NEXTCLOUD_USER_STORAGE_KEY = 'culinaSyncNextcloudUser';
+const NEXTCLOUD_PATH_STORAGE_KEY = 'culinaSyncNextcloudRemotePath';
 
 const ResetConfirmationModal: React.FC<{
     onClose: () => void;
@@ -158,9 +170,19 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
     };
 
     // --- Sync State ---
+    const [syncProvider, setSyncProvider] = useState<SyncProviderId>(() => {
+        const stored = localStorage.getItem(SYNC_PROVIDER_STORAGE_KEY);
+        return stored === 'nextcloud' ? 'nextcloud' : 'generic';
+    });
     const [syncUrl, setSyncUrl] = useState('');
     const [syncPassword, setSyncPassword] = useState('');
     const [syncToken, setSyncToken] = useState('');
+    const [nextcloudServer, setNextcloudServer] = useState(() => localStorage.getItem(NEXTCLOUD_SERVER_STORAGE_KEY) ?? '');
+    const [nextcloudUser, setNextcloudUser] = useState(() => localStorage.getItem(NEXTCLOUD_USER_STORAGE_KEY) ?? '');
+    const [nextcloudAppPassword, setNextcloudAppPassword] = useState('');
+    const [nextcloudRemotePath, setNextcloudRemotePath] = useState(
+        () => localStorage.getItem(NEXTCLOUD_PATH_STORAGE_KEY) ?? 'culinasync-backup.csb',
+    );
     const [syncStatus, setSyncStatus] = useState<string | null>(null);
     const [syncLoading, setSyncLoading] = useState(false);
     const [vaultPassphrase, setVaultPassphrase] = useState('');
@@ -169,16 +191,62 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
     const [lastSyncAt, setLastSyncAt] = useState<number | null>(() => getLastSyncTimestamp());
     const vaultFileInputRef = useRef<HTMLInputElement>(null);
 
+    const syncCredentialsReady =
+        syncPassword.trim().length > 0 &&
+        (syncProvider === 'generic'
+            ? syncUrl.trim().length > 0
+            : nextcloudServer.trim().length > 0 &&
+              nextcloudUser.trim().length > 0 &&
+              nextcloudAppPassword.trim().length > 0);
+
+    const persistNextcloudPrefs = () => {
+        localStorage.setItem(SYNC_PROVIDER_STORAGE_KEY, syncProvider);
+        localStorage.setItem(NEXTCLOUD_SERVER_STORAGE_KEY, nextcloudServer);
+        localStorage.setItem(NEXTCLOUD_USER_STORAGE_KEY, nextcloudUser);
+        localStorage.setItem(NEXTCLOUD_PATH_STORAGE_KEY, nextcloudRemotePath);
+    };
+
+    const resolveActiveSyncTarget = () => {
+        if (syncProvider === 'nextcloud') {
+            return resolveNextcloudSyncTarget({
+                serverUrl: nextcloudServer,
+                username: nextcloudUser,
+                appPassword: nextcloudAppPassword,
+                remotePath: nextcloudRemotePath,
+            });
+        }
+        return resolveGenericSyncTarget(syncUrl, syncToken || undefined);
+    };
+
     const handleSyncUpload = async () => {
         setSyncStatus(null);
         setSyncLoading(true);
         try {
-            await syncUpload(syncPassword, syncUrl, syncToken || undefined);
+            persistNextcloudPrefs();
+            await syncUpload(syncPassword, resolveActiveSyncTarget());
             setLastSyncAt(getLastSyncTimestamp());
             setSyncStatus(t('settings.data.sync.uploadSuccess'));
         } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            setSyncStatus(`${t('settings.data.sync.uploadError')} ${message}`);
+            setSyncStatus(`${t('settings.data.sync.uploadError')} ${formatSyncErrorMessage(error, t)}`);
+        } finally {
+            setSyncLoading(false);
+        }
+    };
+
+    const handleNextcloudProbe = async () => {
+        setSyncStatus(null);
+        setSyncLoading(true);
+        try {
+            persistNextcloudPrefs();
+            const ok = await probeNextcloudConnection({
+                serverUrl: nextcloudServer,
+                username: nextcloudUser,
+                appPassword: nextcloudAppPassword,
+                remotePath: nextcloudRemotePath,
+            });
+            setSyncStatus(ok ? t('settings.data.sync.nextcloud.testOk') : t('settings.data.sync.nextcloud.testFailed'));
+        } catch (error) {
+            setSyncStatus(formatSyncErrorMessage(error, t));
         } finally {
             setSyncLoading(false);
         }
@@ -232,7 +300,8 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
         setSyncStatus(null);
         setSyncLoading(true);
         try {
-            await syncDownload(syncPassword, syncUrl, syncToken || undefined, mode);
+            persistNextcloudPrefs();
+            await syncDownload(syncPassword, resolveActiveSyncTarget(), mode);
             setLastSyncAt(getLastSyncTimestamp());
             if (mode === 'replace') {
                 setSyncStatus(t('settings.data.sync.restoreSuccess'));
@@ -243,8 +312,7 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
                 addToast(t('settings.data.sync.mergeSuccess'), 'success');
             }
         } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            setSyncStatus(`${t('settings.data.sync.restoreError')} ${message}`);
+            setSyncStatus(`${t('settings.data.sync.restoreError')} ${formatSyncErrorMessage(error, t)}`);
         } finally {
             setSyncLoading(false);
         }
@@ -404,37 +472,116 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
                 <h3 className="text-lg font-bold text-zinc-100 mb-4 flex items-center gap-2">
                     <HardDrive className="text-[var(--color-accent-400)]"/> {t('settings.data.sync.title')}
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <input
-                        type="url"
-                        className="bg-zinc-950 border border-zinc-700 rounded-xl p-3 focus:ring-2 focus:ring-accent-500 focus:outline-none font-mono"
-                        placeholder={t('settings.data.sync.urlPlaceholder')}
-                        value={syncUrl}
-                        onChange={e => setSyncUrl(e.target.value)}
-                        autoComplete="off"
-                    />
-                    <input
-                        type="password"
-                        className="bg-zinc-950 border border-zinc-700 rounded-xl p-3 focus:ring-2 focus:ring-accent-500 focus:outline-none font-mono"
-                        placeholder={t('settings.data.sync.passwordPlaceholder')}
-                        value={syncPassword}
-                        onChange={e => setSyncPassword(e.target.value)}
-                        autoComplete="new-password"
-                    />
-                    <input
-                        type="text"
-                        className="bg-zinc-950 border border-zinc-700 rounded-xl p-3 focus:ring-2 focus:ring-accent-500 focus:outline-none font-mono"
-                        placeholder={t('settings.data.sync.tokenPlaceholder')}
-                        value={syncToken}
-                        onChange={e => setSyncToken(e.target.value)}
-                        autoComplete="off"
-                    />
-                </div>
+                <fieldset className="mb-4">
+                    <legend className="mb-2 text-sm font-medium text-zinc-300">{t('settings.data.sync.providerLabel')}</legend>
+                    <div className="flex flex-wrap gap-4 text-sm text-zinc-300">
+                        <label className="flex items-center gap-2">
+                            <input
+                                type="radio"
+                                name="sync-provider"
+                                checked={syncProvider === 'generic'}
+                                onChange={() => setSyncProvider('generic')}
+                            />
+                            {t('settings.data.sync.providerGeneric')}
+                        </label>
+                        <label className="flex items-center gap-2">
+                            <input
+                                type="radio"
+                                name="sync-provider"
+                                checked={syncProvider === 'nextcloud'}
+                                onChange={() => setSyncProvider('nextcloud')}
+                            />
+                            {t('settings.data.sync.providerNextcloud')}
+                        </label>
+                    </div>
+                </fieldset>
+                {syncProvider === 'generic' ? (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <input
+                            type="url"
+                            className="bg-zinc-950 border border-zinc-700 rounded-xl p-3 focus:ring-2 focus:ring-accent-500 focus:outline-none font-mono"
+                            placeholder={t('settings.data.sync.urlPlaceholder')}
+                            value={syncUrl}
+                            onChange={e => setSyncUrl(e.target.value)}
+                            autoComplete="off"
+                        />
+                        <input
+                            type="password"
+                            className="bg-zinc-950 border border-zinc-700 rounded-xl p-3 focus:ring-2 focus:ring-accent-500 focus:outline-none font-mono"
+                            placeholder={t('settings.data.sync.passwordPlaceholder')}
+                            value={syncPassword}
+                            onChange={e => setSyncPassword(e.target.value)}
+                            autoComplete="new-password"
+                        />
+                        <input
+                            type="text"
+                            className="bg-zinc-950 border border-zinc-700 rounded-xl p-3 focus:ring-2 focus:ring-accent-500 focus:outline-none font-mono"
+                            placeholder={t('settings.data.sync.tokenPlaceholder')}
+                            value={syncToken}
+                            onChange={e => setSyncToken(e.target.value)}
+                            autoComplete="off"
+                        />
+                    </div>
+                ) : (
+                    <div className="mb-4 space-y-3">
+                        <input
+                            type="url"
+                            className="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-3 focus:ring-2 focus:ring-accent-500 focus:outline-none font-mono"
+                            placeholder={t('settings.data.sync.nextcloud.serverPlaceholder')}
+                            value={nextcloudServer}
+                            onChange={(e) => setNextcloudServer(e.target.value)}
+                            autoComplete="off"
+                        />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <input
+                                type="text"
+                                className="bg-zinc-950 border border-zinc-700 rounded-xl p-3 focus:ring-2 focus:ring-accent-500 focus:outline-none font-mono"
+                                placeholder={t('settings.data.sync.nextcloud.userPlaceholder')}
+                                value={nextcloudUser}
+                                onChange={(e) => setNextcloudUser(e.target.value)}
+                                autoComplete="username"
+                            />
+                            <input
+                                type="password"
+                                className="bg-zinc-950 border border-zinc-700 rounded-xl p-3 focus:ring-2 focus:ring-accent-500 focus:outline-none font-mono"
+                                placeholder={t('settings.data.sync.nextcloud.appPasswordPlaceholder')}
+                                value={nextcloudAppPassword}
+                                onChange={(e) => setNextcloudAppPassword(e.target.value)}
+                                autoComplete="new-password"
+                            />
+                        </div>
+                        <input
+                            type="text"
+                            className="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-3 focus:ring-2 focus:ring-accent-500 focus:outline-none font-mono"
+                            placeholder={t('settings.data.sync.nextcloud.remotePathPlaceholder')}
+                            value={nextcloudRemotePath}
+                            onChange={(e) => setNextcloudRemotePath(e.target.value)}
+                            autoComplete="off"
+                        />
+                        <p className="text-xs text-zinc-500">{t('settings.data.sync.nextcloud.remotePathHint')}</p>
+                        <input
+                            type="password"
+                            className="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-3 focus:ring-2 focus:ring-accent-500 focus:outline-none font-mono"
+                            placeholder={t('settings.data.sync.passwordPlaceholder')}
+                            value={syncPassword}
+                            onChange={e => setSyncPassword(e.target.value)}
+                            autoComplete="new-password"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => void handleNextcloudProbe()}
+                            disabled={syncLoading}
+                            className="px-4 py-2 rounded-xl border border-zinc-600 text-zinc-200 font-semibold hover:bg-zinc-800 disabled:opacity-50"
+                        >
+                            {t('settings.data.sync.nextcloud.testConnection')}
+                        </button>
+                    </div>
+                )}
                 <div className="flex flex-wrap gap-3 mb-2">
                     <button
                         type="button"
                         onClick={() => void handleSyncUpload()}
-                        disabled={syncLoading || !syncUrl || !syncPassword}
+                        disabled={syncLoading || !syncCredentialsReady}
                         className="px-4 py-2 rounded-xl bg-accent-500 text-zinc-900 font-bold hover:bg-accent-400 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed transition-all"
                     >
                         {syncLoading ? t('settings.data.sync.uploading') : t('settings.data.sync.upload')}
@@ -442,7 +589,7 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
                     <button
                         type="button"
                         onClick={() => void handleSyncDownload('replace')}
-                        disabled={syncLoading || !syncUrl || !syncPassword}
+                        disabled={syncLoading || !syncCredentialsReady}
                         className="px-4 py-2 rounded-xl bg-accent-500 text-zinc-900 font-bold hover:bg-accent-400 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed transition-all"
                     >
                         {syncLoading ? t('settings.data.sync.restoring') : t('settings.data.sync.restore')}
@@ -450,7 +597,7 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
                     <button
                         type="button"
                         onClick={() => void handleSyncDownload('merge')}
-                        disabled={syncLoading || !syncUrl || !syncPassword}
+                        disabled={syncLoading || !syncCredentialsReady}
                         className="px-4 py-2 rounded-xl border border-zinc-600 text-zinc-200 font-semibold hover:bg-zinc-800 disabled:opacity-50"
                     >
                         {t('settings.data.sync.mergeRestore')}

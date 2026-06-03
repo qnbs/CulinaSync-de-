@@ -30,6 +30,8 @@
     "i18n:check:baseline": "node scripts/check-i18n-baseline.mjs",
     "i18n:check:changed": "node scripts/check-i18n-hardcoded-changed.mjs",
     "i18n:baseline:update": "node scripts/update-i18n-baseline.mjs",
+    "check:ts-ga": "node scripts/check-typescript-ga.mjs",
+    "tauri:icons": "node scripts/generate-tauri-icons.mjs",
     "preview": "pnpm --filter web run preview",
     "predeploy": "pnpm --filter web run predeploy",
     "prepare": "husky"

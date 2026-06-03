@@ -1,6 +1,6 @@
 # CulinaSync — Entwicklungs- und Agenten-Anweisungen
 
-**Version:** 1.1 · **Stand:** 2026-05-16  
+**Version:** 1.2 · **Stand:** 2026-06-03  
 **Zweck:** Diese Datei ist der **primäre Einstieg** für Menschen und KI-Agenten. Sie verbindet Produktvorgaben (`PRD.md`), Architektur (`docs/`) und tägliche Arbeitsregeln — ohne `.github/copilot-instructions.md` zu ersetzen (diese bleiben die detaillierte technische Referenz).
 
 ---
@@ -16,7 +16,7 @@
 | P2 | **`docs/PROJECT-STRUCTURE.md`** | Ordnerzugehörigkeit neuer Dateien |
 | P2 | **`ROADMAP.md`** | Meilensteine, Audit-Referenzen, grobe Aufwände |
 | P2 | **`SECURITY.md`** | Meldewege, Schlüssel-/Export-Konventionen |
-| P3 | **`docs/STATUS-*.md`** | Zeitlich begrenzte Snapshots (aktuell: `STATUS-2026-05-16.md`) |
+| P3 | **`docs/STATUS-*.md`** | Zeitlich begrenzte Snapshots (aktuell: `STATUS-2026-06-03.md`) |
 
 **Regel für Agenten:** Vor **architektonisch wirksamen** Änderungen (neue Domänen-Schicht, neue Persistenz, Breaking UX) mindestens **`PRD.md`** (Scope + NFR) und **`docs/ARCHITECTURE.md`** lesen. Bei reinen Bugfixes oder lokaler UI-Anpassung genügen technische Regeln + betroffene Dateien.
 
@@ -35,7 +35,7 @@ Local-first, installierbare **PWA** für Vorrat, Rezepte, Essensplan und Einkauf
 3. **Gemini:** Nur **`apps/web/src/services/geminiService.ts`**; strukturierte Antworten nach **`JSON.parse`** mit **Zod** absichern (`parseAiJsonWithSchema`-Muster).
 4. **API-Key:** Niemals `VITE_*`, `process.env` oder Build-Embed für Nutzerschlüssel — nur **`apiKeyService.ts`** und Einstellungen.
 5. **Redux:** Primär UI/Session; nur **`settings`** persistiert; Domaindaten nicht duplizieren.
-6. **i18n:** Nutzersichtbare Strings in **`apps/web/src/locales/de/`** und **`apps/web/src/locales/en/`** synchron (`core`, `settings`, `features`).
+6. **i18n:** Nutzersichtbare Strings in **`apps/web/src/locales/de/`** und **`apps/web/src/locales/en/`** synchron (`core`, `settings`, `features`). Vor PR: **`pnpm run i18n:check`** (Baseline **0**, keine neuen Hardcoded-Strings in geänderten Zeilen).
 7. **A11y:** Modals mit **`useModalA11y`**; siehe Copilot-Instructions für Tabs/Banner/Icons.
 8. **Fehler:** **`logAppError`**, Listener-Middleware für Thunks, **`GlobalErrorBoundary`** für Renderfehler.
 
@@ -65,7 +65,7 @@ CI-Orientierung: **Node 24** in Workflows; **validate.yml** führt u. a. **type-
 
 - Framework: **Vitest**, **MSW**, **Testing Library**; Muster unter `apps/web/src/**/*.test.ts(x)`.
 - **Verboten:** Fehlgeschlagene Tests dauerhaft auskommentieren oder löschen, um CI zu „grün zu tricksen“.
-- Coverage-Ziel laut Roadmap: **≥70 %** Statements/Lines (Snapshot Mai 2026 ca. **59 %/61 %**; Thresholds in `apps/web/vitest.config.ts` — siehe `ROADMAP.md` M5).
+- Coverage (Juni 2026): **~78 %/79 %/73 %/63 %** (stmts/lines/funcs/branches); Thresholds **77/79/72/62** in `apps/web/vitest.config.ts` — M5 ✅ (siehe `docs/STATUS-2026-06-03.md`).
 
 ---
 

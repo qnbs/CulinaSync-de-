@@ -1,0 +1,28 @@
+[package]
+name = "culinasync"
+version = "0.2.2"
+description = "CulinaSync — local-first kitchen hub"
+authors = ["qnbs"]
+edition = "2021"
+rust-version = "1.77"
+
+[lib]
+name = "culinasync_lib"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[[bin]]
+name = "culinasync"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true
