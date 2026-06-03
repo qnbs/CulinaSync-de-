@@ -1,0 +1,74 @@
+---
+description: Dauerhafter CI-Korrekturschleifen-Modus — bis alles grün, nie Task-Ende bei Rot
+alwaysApply: true
+---
+
+# CI-Korrekturschleife (Pflicht, persistent, proaktiv)
+
+## Grundsatz
+
+**Ein Push/PR/Merge ist erst abgeschlossen, wenn alle relevanten GitHub-Actions-Workflows grün sind** (oder der fehlgeschlagene Check nachweislich extern ist, z. B. Vercel Rate-Limit — dann im PR/Handoff dokumentieren).
+
+**Rot = weiterarbeiten.** Kein „später“, kein Task-Ende mit offenem CI.
+
+## Relevante Workflows
+
+| Kontext | Workflows beobachten |
+|---------|-------------------|
+| **PR** | `CI` (validate + i18n), `E2E Smoke` (bei `apps/web/**`), CodeQL, optional Vercel |
+| **Push `main`** | `CI` (`main-guard`), `Deploy to GitHub Pages` (volles validate), `E2E Smoke` (bei `apps/web/**`), CodeQL |
+| **Manuell** | `Deploy Health`, `E2E Smoke` workflow_dispatch |
+
+## Korrekturschleife (immer dieselbe Reihenfolge)
+
+```text
+1. gh run list --branch <branch> --limit 10
+2. Bei failure: gh run view <run-id> --log-failed
+3. Lokal reproduzieren (siehe Befehle unten)
+4. Fix + Tests + lint + type-check
+5. commit (Conventional Commits) → push
+6. Schritt 1 wiederholen — bis grün oder dokumentierte External-Blockade
+```
+
+## Lokale Befehle (vor Push)
+
+```bash
+pnpm run lint              # --max-warnings 0
+pnpm run type-check
+pnpm run test:scripts
+pnpm run i18n:check
+# Bei apps/web-Änderungen zusätzlich:
+pnpm exec vitest run <betroffene-tests>
+# Vor Merge auf main / Release:
+pnpm run check:all
+```
+
+## Typische CI-Fehler & Fixes
+
+| Symptom | Ursache | Fix |
+|---------|---------|-----|
+| ESLint / exhaustive-deps | Hook-Deps, any, console.log | Regeln in `301-strict-quality-gates.mdc`; `console.debug` |
+| test:coverage Threshold | Coverage unter Schwellwert | gezielte Tests, kein Threshold senken ohne Absprache |
+| E2E offline | `setOffline` vor `goto` | Seite laden → offline → `#offline-status-banner` |
+| Deploy verify MODULE_NOT_FOUND | kein checkout im deploy-Job | `actions/checkout` vor Verify-Skript |
+| Deploy verify Vercel 401 | Deployment Protection | erwartet: SKIP-Warnung in `verify-live-deployments.mjs` |
+| i18n-check | fehlende de/en Keys | `pnpm run i18n:check`, Keys in beiden Locales |
+| CI „skipped“ auf main (alt) | nur deploy lief validate | `ci.yml` → `main-guard` (ab 2026-06-03) |
+
+## Proaktiv (vor dem Rot werden)
+
+- Nach jedem Commit auf PR-Branch: `gh pr checks` oder `gh run list`.
+- Nach Merge auf `main`: Deploy-Workflow bis Ende beobachten (~5–6 min).
+- Bot-PR-Kommentare (CodeAnt, Copilot) **vor** Merge — `300-pr-review-automation.mdc`.
+
+## Externe Blockaden
+
+- **Vercel rate limit / 401 Protection:** kein Merge-Blocker für GitHub, aber im Handoff notieren.
+- **CodeQL „skipping“:** oft Folge-Job — Analyze-Job muss grün sein.
+
+## Referenzen
+
+- Quality: `301-strict-quality-gates.mdc`
+- PR-Review: `300-pr-review-automation.mdc`
+- Workflows: `.github/workflows/ci.yml`, `deploy.yml`, `validate.yml`, `e2e-smoke.yml`
+- STATUS CI-Modell: `docs/STATUS-2026-06-03.md`

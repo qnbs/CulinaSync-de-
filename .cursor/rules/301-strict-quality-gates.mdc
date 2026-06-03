@@ -38,7 +38,7 @@ alwaysApply: true
 
 1. **CodeAnt / Copilot / Bugbot / Menschen:** alle Inline-Kommentare **sofort** bearbeiten — siehe `.cursor/rules/300-pr-review-automation.mdc`.
 2. Nach jedem Fix: betroffener Slice → lint + type-check + Tests.
-3. CI/Deploy-Workflows **bis grün** beobachten; bei Rot: Fix → commit → push → erneut beobachten.
+3. CI/Deploy-Workflows **bis grün** beobachten — vollständige Schleife: `.cursor/rules/302-ci-correction-loop.mdc`.
 
 ## Follow-up (bewusst gestaffelt)
 
