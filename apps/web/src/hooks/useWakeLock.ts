@@ -48,7 +48,7 @@ export const useWakeLock = (): [boolean, () => Promise<void>, () => Promise<void
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (wakeLockRef.current && document.visibilityState === 'visible') {
-        requestWakeLock();
+        void requestWakeLock();
       }
     };
     
@@ -60,7 +60,7 @@ export const useWakeLock = (): [boolean, () => Promise<void>, () => Promise<void
         // Use a variable to avoid race conditions with the ref
         const lock = wakeLockRef.current;
         wakeLockRef.current = null;
-        lock.release();
+        void lock.release();
       }
     };
   }, [requestWakeLock]);

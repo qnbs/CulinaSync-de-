@@ -26,6 +26,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Behoben
 
+- **Rezept-Detail:** `RecipeActionBar` nutzt korrekte i18n-Keys (`startCookMode`, `addMissingToShopping`, Favorit-Labels); fehlende Export-/Speichern-Keys in de/en ergänzt (leere Buttons in Production).
 - **CI Deploy:** `deploy.yml` — `checkout` vor Post-Deploy-Verify; Vercel-HTTP-401 (Deployment Protection) als Warnung statt Hard-Fail.
 - **CI E2E:** Offline-Smoke lädt Seite zuerst, dann offline; Locator `#offline-status-banner` (strict mode).
 - **Vercel:** Monorepo-Build `pnpm run build --filter=web` in `vercel.json`.

@@ -5,7 +5,6 @@
  * @module services/geminiService
  */
 import type { GoogleGenAI } from "@google/genai";
-import { sanitizeForPrompt } from '@domain/ai-core';
 import DOMPurify from 'dompurify';
 import { retry } from './retryUtils';
 import { AppSettings, PantryItem, Recipe, StructuredPrompt, ShoppingListItem, RecipeIdea } from "../types";
@@ -13,8 +12,15 @@ import { loadApiKey } from "./apiKeyService";
 import { logAppError } from './errorLoggingService';
 import { buildLocalRecipeIdeas } from './aiOfflineFallback';
 import i18next from 'i18next';
-import { z } from 'zod';
 import { buildRecipeIdeasSchema, buildRecipeSchema, buildShoppingListSchema } from './geminiSchemas';
+import {
+  geminiNutritionVerificationSchema,
+  parseAiJsonWithSchema,
+  recipeAiSchema,
+  recipeIdeasResponseSchema,
+  shoppingListGenerationSchema,
+} from './aiJsonParse';
+import { constructBasePrompt, geminiSystem } from './aiPromptBuilder';
 
 // --- Dynamic AI Client (loaded from secure IndexedDB, never from env/build) ---
 let _aiClient: GoogleGenAI | null = null;
@@ -37,92 +43,6 @@ const getGenAIModule = async () => {
     }
 
     return _genAiModulePromise;
-};
-
-const recipeIdeaSchema = z.object({
-  recipeTitle: z.string(),
-  shortDescription: z.string(),
-});
-
-const recipeIdeasResponseSchema = z.object({
-  ideas: z.array(recipeIdeaSchema).min(1),
-});
-
-const ingredientItemSchema = z.object({
-  quantity: z.string(),
-  unit: z.string(),
-  name: z.string(),
-});
-
-const ingredientGroupSchema = z.object({
-  sectionTitle: z.string(),
-  items: z.array(ingredientItemSchema),
-});
-
-const nutritionPerServingSchema = z.object({
-  calories: z.string(),
-  protein: z.string(),
-  fat: z.string(),
-  carbs: z.string(),
-});
-
-const tagsSchema = z.object({
-  course: z.array(z.string()),
-  cuisine: z.array(z.string()),
-  occasion: z.array(z.string()),
-  mainIngredient: z.array(z.string()),
-  prepMethod: z.array(z.string()),
-  diet: z.array(z.string()),
-});
-
-const expertTipSchema = z.object({
-  title: z.string(),
-  content: z.string(),
-});
-
-const recipeAiSchema = z.object({
-  recipeTitle: z.string(),
-  shortDescription: z.string(),
-  prepTime: z.string(),
-  cookTime: z.string(),
-  totalTime: z.string(),
-  servings: z.string(),
-  difficulty: z.string(),
-  ingredients: z.array(ingredientGroupSchema),
-  instructions: z.array(z.string()),
-  nutritionPerServing: nutritionPerServingSchema,
-  tags: tagsSchema,
-  expertTips: z.array(expertTipSchema),
-});
-
-const shoppingListGenerationSchema = z.object({
-  items: z.array(
-    z.object({
-      name: z.string(),
-      quantity: z.number().finite(),
-      unit: z.string(),
-      category: z.string().optional(),
-    }),
-  ),
-});
-
-const geminiNutritionVerificationSchema = z.object({
-  summary: z.string(),
-  warnings: z.array(z.string()),
-});
-
-const parseAiJsonWithSchema = <T>(jsonText: string, schema: z.ZodType<T>): T => {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(jsonText);
-  } catch {
-    throw new Error('invalid JSON');
-  }
-  const result = schema.safeParse(parsed);
-  if (!result.success) {
-    throw new Error('invalid structure');
-  }
-  return result.data;
 };
 
 const sanitizeWebContentForPrompt = (webContent: string): string => {
@@ -173,7 +93,6 @@ export const invalidateAIClient = () => {
 };
 
 const geminiPrompt = (key: string) => i18next.t(`gemini.prompt.${key}`);
-const geminiSystem = (key: string) => i18next.t(`gemini.system.${key}`);
 
 const isNetworkError = (errMsg: string): boolean =>
     errMsg.includes('FETCH_ERROR') || errMsg.includes('NetworkError') || errMsg.includes('Failed to fetch') || errMsg.includes('network');
@@ -200,48 +119,6 @@ const handleGeminiError = (error: unknown, context: string): Error => {
     }
     return new Error(i18next.t('gemini.error.unexpected'));
 };
-
-const constructBasePrompt = (
-    prompt: StructuredPrompt,
-    pantryItems: PantryItem[],
-    aiPreferences: AppSettings['aiPreferences']
-): string => {
-  const pantryList = sanitizeForPrompt(
-    pantryItems.map(item => `${item.quantity} ${item.unit} ${item.name}`).join(', ')
-      || geminiPrompt('pantryEmpty'),
-  );
-  const userPromptParts: string[] = [];
-  userPromptParts.push(geminiPrompt('userIntro'));
-  userPromptParts.push(`- ${geminiPrompt('mainRequest')}: "${sanitizeForPrompt(prompt.craving)}"`);
-
-  if (prompt.includeIngredients.length > 0) {
-      userPromptParts.push(`- ${geminiPrompt('mustInclude')}: ${sanitizeForPrompt(prompt.includeIngredients.join(', '))}`);
-  }
-  if (prompt.excludeIngredients.length > 0) {
-      userPromptParts.push(`- ${geminiPrompt('mustExclude')}: ${sanitizeForPrompt(prompt.excludeIngredients.join(', '))}`);
-  }
-  if (prompt.modifiers.length > 0) {
-      userPromptParts.push(`- ${geminiPrompt('modifiers')}: ${sanitizeForPrompt(prompt.modifiers.join(', '))}`);
-  }
-
-  userPromptParts.push(`\n**${geminiPrompt('globalSettings')}:**`);
-  if (aiPreferences.dietaryRestrictions.length > 0) {
-    userPromptParts.push(`- ${geminiPrompt('dietaryRestrictions')}: ${sanitizeForPrompt(aiPreferences.dietaryRestrictions.join(', '))}.`);
-  }
-  if (aiPreferences.preferredCuisines.length > 0) {
-    userPromptParts.push(`- ${geminiPrompt('preferredCuisines')}: ${sanitizeForPrompt(aiPreferences.preferredCuisines.join(', '))}.`);
-  }
-  if (aiPreferences.customInstruction) {
-    userPromptParts.push(`- ${geminiPrompt('customInstruction')}: "${sanitizeForPrompt(aiPreferences.customInstruction)}".`);
-  }
-
-  userPromptParts.push(`\n**${geminiPrompt('pantryHeader')}:**`);
-  userPromptParts.push(pantryList);
-
-  userPromptParts.push(`\n${geminiPrompt('closing')}`);
-
-  return userPromptParts.join('\n');
-}
 
 export const generateRecipeIdeas = async (
   prompt: StructuredPrompt,

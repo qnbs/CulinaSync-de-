@@ -129,7 +129,7 @@ describe('useShoppingList', () => {
   it('setzt bei handleClearList ein clear-Pending, wenn die Liste nicht leer ist', () => {
     const { result } = renderHook(() => useShoppingList(), { wrapper });
     act(() => {
-      result.current.handleClearList();
+      void result.current.handleClearList();
     });
     expect(result.current.pendingAction).toEqual({ type: 'clear' });
     expect(result.current.confirmationDialog?.title).toBe('shoppingList.confirm.clearTitle');
@@ -159,7 +159,7 @@ describe('useShoppingList', () => {
     const { result } = renderHook(() => useShoppingList(), { wrapper });
 
     act(() => {
-      result.current.handleClearList();
+      void result.current.handleClearList();
     });
     await act(async () => {
       await result.current.confirmPendingAction();

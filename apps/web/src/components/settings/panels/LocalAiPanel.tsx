@@ -128,6 +128,13 @@ export const LocalAiPanel: React.FC<LocalAiPanelProps> = ({ settings, onChange }
           checked={localAi.preferWebGpu}
           onToggle={() => onChange('localAi.preferWebGpu', !localAi.preferWebGpu)}
         />
+        <SettingsToggle
+          label={t('settings.localAi.webLlmInferenceLabel')}
+          description={t('settings.localAi.webLlmInferenceDesc')}
+          checked={localAi.enableWebLlmInference}
+          disabled={!localAi.enabled || localAi.preferredGenerativeModel === 'heuristic-only'}
+          onToggle={() => onChange('localAi.enableWebLlmInference', !localAi.enableWebLlmInference)}
+        />
         <div className="p-4 glass-card rounded-xl">
           <div className="flex justify-between mb-2">
             <span className="font-bold text-zinc-200">{t('settings.localAi.maxJobsLabel')}</span>

@@ -525,6 +525,8 @@
       "modelActive": "Selected: {{model}}",
       "preferWebGpuLabel": "Prefer WebGPU",
       "preferWebGpuDesc": "Fastest path on modern GPUs; otherwise WASM fallback.",
+      "webLlmInferenceLabel": "WebLLM inference (L1)",
+      "webLlmInferenceDesc": "Loads a local language model via WebGPU for recipe ideas and full recipes. Requires storage; first load may take a while.",
       "maxJobsLabel": "Parallel jobs",
       "capabilitiesTitle": "Capabilities",
       "visionLabel": "Vision (pantry scan)",

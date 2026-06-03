@@ -58,13 +58,14 @@ export const RecipeActionBar: React.FC<RecipeActionBarProps> = ({
             <FileDown size={20} /> {t('recipeDetail.actions.exportTxt')}
           </button>
           <button onClick={handleAddMissingToShoppingList} className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-accent-500)]/20 text-[var(--color-accent-400)] hover:bg-[var(--color-accent-500)]/30 transition-colors">
-            <ShoppingCartIcon size={20} /> {t('recipeDetail.actions.addMissingToShoppingList')}
+            <ShoppingCartIcon size={20} /> {t('recipeDetail.actions.addMissingToShopping')}
           </button>
           <button onClick={handleToggleFavorite} className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-accent-500)]/20 text-[var(--color-accent-400)] hover:bg-[var(--color-accent-500)]/30 transition-colors">
-            <Star size={20} className={recipe.isFavorite ? 'text-yellow-400' : 'text-zinc-400'} /> {t('recipeDetail.actions.toggleFavorite')}
+            <Star size={20} className={recipe.isFavorite ? 'text-yellow-400' : 'text-zinc-400'} />{' '}
+            {recipe.isFavorite ? t('recipeDetail.actions.removeFavorite') : t('recipeDetail.actions.markFavorite')}
           </button>
           <button onClick={handleStartCookMode} className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg ${isCookModeActive ? 'bg-[var(--color-accent-500)] text-zinc-900 font-bold' : 'bg-[var(--color-accent-500)]/20 text-[var(--color-accent-400)]'} hover:bg-[var(--color-accent-500)]/30 transition-colors`}>
-            <CookingPot size={20} /> {t('recipeDetail.actions.cookMode')}
+            <CookingPot size={20} /> {t('recipeDetail.actions.startCookMode')}
           </button>
         </>
       )}

@@ -51,9 +51,9 @@ describe('RecipeActionBar', () => {
       </I18nextProvider>,
     );
 
-    await user.click(screen.getByRole('button', { name: /recipeDetail.actions.save/i }));
+    await user.click(screen.getByRole('button', { name: i18n.t('recipeDetail.actions.save') }));
     expect(handlers.handleSave).toHaveBeenCalled();
-    expect(screen.queryByRole('button', { name: /recipeDetail.actions.delete/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: i18n.t('recipeDetail.actions.delete') })).not.toBeInTheDocument();
   });
 
   it('loest Export- und Kochmodus-Aktionen aus', async () => {
@@ -71,16 +71,16 @@ describe('RecipeActionBar', () => {
       </I18nextProvider>,
     );
 
-    await user.click(screen.getByRole('button', { name: /recipeDetail.actions.exportPdf/i }));
+    await user.click(screen.getByRole('button', { name: i18n.t('recipeDetail.actions.exportPdf') }));
     expect(handlers.handleExport).toHaveBeenCalledWith('pdf');
 
-    await user.click(screen.getByRole('button', { name: /recipeDetail.actions.addMissingToShoppingList/i }));
+    await user.click(screen.getByRole('button', { name: i18n.t('recipeDetail.actions.addMissingToShopping') }));
     expect(handlers.handleAddMissingToShoppingList).toHaveBeenCalled();
 
-    await user.click(screen.getByRole('button', { name: /recipeDetail.actions.toggleFavorite/i }));
+    await user.click(screen.getByRole('button', { name: i18n.t('recipeDetail.actions.removeFavorite') }));
     expect(handlers.handleToggleFavorite).toHaveBeenCalled();
 
-    await user.click(screen.getByRole('button', { name: /recipeDetail.actions.cookMode/i }));
+    await user.click(screen.getByRole('button', { name: i18n.t('recipeDetail.actions.startCookMode') }));
     expect(handlers.handleStartCookMode).toHaveBeenCalled();
   });
 
@@ -99,19 +99,19 @@ describe('RecipeActionBar', () => {
       </I18nextProvider>,
     );
 
-    await user.click(screen.getByRole('button', { name: /recipeDetail.actions.delete/i }));
+    await user.click(screen.getByRole('button', { name: i18n.t('recipeDetail.actions.delete') }));
     expect(handlers.handleDelete).toHaveBeenCalled();
 
-    await user.click(screen.getByRole('button', { name: /recipeDetail.actions.exportCsv/i }));
+    await user.click(screen.getByRole('button', { name: i18n.t('recipeDetail.actions.exportCsv') }));
     expect(handlers.handleExport).toHaveBeenCalledWith('csv');
 
-    await user.click(screen.getByRole('button', { name: /recipeDetail.actions.exportJson/i }));
+    await user.click(screen.getByRole('button', { name: i18n.t('recipeDetail.actions.exportJson') }));
     expect(handlers.handleExport).toHaveBeenCalledWith('json');
 
-    await user.click(screen.getByRole('button', { name: /recipeDetail.actions.exportMd/i }));
+    await user.click(screen.getByRole('button', { name: i18n.t('recipeDetail.actions.exportMd') }));
     expect(handlers.handleExport).toHaveBeenCalledWith('md');
 
-    await user.click(screen.getByRole('button', { name: /recipeDetail.actions.exportTxt/i }));
+    await user.click(screen.getByRole('button', { name: i18n.t('recipeDetail.actions.exportTxt') }));
     expect(handlers.handleExport).toHaveBeenCalledWith('txt');
   });
 });

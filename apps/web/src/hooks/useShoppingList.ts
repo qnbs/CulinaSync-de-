@@ -63,7 +63,7 @@ export const useShoppingList = () => {
   }, [dispatch]);
 
   const handleToggle = useCallback((item: ShoppingListItem) => {
-    dispatch(toggleItemCheckedAsync(item));
+    void dispatch(toggleItemCheckedAsync(item));
   }, [dispatch]);
 
   const handleClearList = useCallback(async () => {
@@ -95,7 +95,7 @@ export const useShoppingList = () => {
   useEffect(() => {
     if (focusAction) {
         if(focusAction === 'addItem' && addItemInputRef.current) addItemInputRef.current.focus();
-        if(focusAction === 'generate') handleGenerateFromPlan();
+        if(focusAction === 'generate') void handleGenerateFromPlan();
         if(focusAction === 'clear') {
           if (shoppingList.length === 0) {
             dispatch(setFocusAction(null));
@@ -197,7 +197,7 @@ export const useShoppingList = () => {
     const prevItem = itemsInCategory[targetIdx -1];
     const newSortOrder = ((prevItem ? prevItem.sortOrder : 0) + targetItem.sortOrder) / 2;
     
-    dispatch(updateItemOrderAsync({ ...draggedItem, category: targetItem.category, sortOrder: newSortOrder }));
+    void dispatch(updateItemOrderAsync({ ...draggedItem, category: targetItem.category, sortOrder: newSortOrder }));
   }, [draggedItem, shoppingList, dispatch]);
 
   const onCategoryDrop = useCallback(async (category: string) => {
@@ -207,7 +207,7 @@ export const useShoppingList = () => {
     const lastItem = itemsInCategory[itemsInCategory.length - 1];
     const newSortOrder = (lastItem ? lastItem.sortOrder : 0) + 1000;
     
-    dispatch(updateItemOrderAsync({ ...draggedItem, category, sortOrder: newSortOrder }));
+    void dispatch(updateItemOrderAsync({ ...draggedItem, category, sortOrder: newSortOrder }));
   }, [draggedItem, shoppingList, dispatch]);
 
   const onDragEnd = useCallback(() => {
@@ -280,7 +280,7 @@ export const useShoppingList = () => {
       return;
     }
 
-    dispatch(deleteItemAsync(actionToRun.id));
+    void dispatch(deleteItemAsync(actionToRun.id));
   }, [effectivePendingAction, dispatch, addToast, shoppingList, t]);
 
   const cancelPendingAction = useCallback(() => {

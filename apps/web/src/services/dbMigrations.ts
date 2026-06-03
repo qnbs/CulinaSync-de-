@@ -37,6 +37,11 @@ const version12Stores: MigrationTableMap = {
   appLogs: '++id, level, source, createdAt, synced',
 };
 
+const version13Stores: MigrationTableMap = {
+  ...version12Stores,
+  aiEmbeddings: '++id, sourceType, sourceId, [sourceType+sourceId], updatedAt, modelId',
+};
+
 export const DB_MIGRATION_HISTORY: MigrationDefinition[] = [
   {
     version: 8,
@@ -91,6 +96,11 @@ export const DB_MIGRATION_HISTORY: MigrationDefinition[] = [
     version: 12,
     description: 'Ergaenzt Compound-Indizes fuer Vorratslisten nach Kategorie und Ablaufdatum.',
     stores: version12Stores,
+  },
+  {
+    version: 13,
+    description: 'Fuegt aiEmbeddings fuer lokales semantisches RAG (M11.3) hinzu.',
+    stores: version13Stores,
   },
 ];
 

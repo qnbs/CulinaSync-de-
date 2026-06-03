@@ -12,7 +12,7 @@ export const ModulesPanel: React.FC<ModulesPanelProps> = ({ settings, onChange }
 
     const handleLanguageChange = (lang: string) => {
         onChange('language', lang);
-        i18n.changeLanguage(lang);
+        void i18n.changeLanguage(lang);
     };
 
     return (

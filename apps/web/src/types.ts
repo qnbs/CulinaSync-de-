@@ -103,6 +103,17 @@ export type LocalAiGenerativeModel =
 export type SpeechRecognitionMode = 'browser' | 'whisper';
 export type WhisperModelSize = 'tiny' | 'base' | 'small';
 export type PantryUnitSystem = 'metric' | 'imperial';
+export type AiEmbeddingSourceType = 'recipe' | 'pantry';
+
+export interface AiEmbeddingRecord {
+  id?: number;
+  sourceType: AiEmbeddingSourceType;
+  sourceId: number;
+  contentHash: string;
+  modelId: string;
+  vector: number[];
+  updatedAt: number;
+}
 
 export interface AppSettings {
   language: 'de' | 'en';
@@ -126,6 +137,7 @@ export interface AppSettings {
     enabled: boolean;
     localOnlyMode: boolean;
     allowCloudFallback: boolean;
+    enableWebLlmInference: boolean;
     preferWebGpu: boolean;
     gpuTierPreference: GpuTierPreference;
     preferredGenerativeModel: LocalAiGenerativeModel;

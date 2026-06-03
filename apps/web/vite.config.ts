@@ -16,6 +16,8 @@ const chunkGroups: Array<[string, string[]]> = [
   ['vendor-i18n', ['i18next', 'react-i18next', 'i18next-browser-languagedetector', 'i18next-http-backend']],
   ['vendor-icons', ['lucide-react']],
   ['vendor-ai', ['@google/genai', '@domain/ai-core']],
+  ['vendor-webllm', ['@mlc-ai/web-llm']],
+  ['vendor-transformers', ['@xenova/transformers']],
   ['vendor-forms', ['react-hook-form', '@hookform/resolvers', 'zod', 'dompurify']],
   // Heavy/optional libs — excluded from SW precache via globIgnores, runtime-cached instead
   ['vendor-scanner', ['@ericblade/quagga2', 'tesseract.js']],
@@ -58,6 +60,8 @@ export default defineConfig({
           '**/vendor-workbox-*.js',
           '**/vendor-export-*.js',
           '**/vendor-misc-*.js',
+          '**/vendor-webllm-*.js',
+          '**/vendor-transformers-*.js',
         ],
       },
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'logo-192x192.png', 'logo-512x512.png'],
@@ -99,6 +103,8 @@ export default defineConfig({
           'vendor-export',
           'vendor-zustand',
           'vendor-misc',
+          'vendor-webllm',
+          'vendor-transformers',
         ];
         return deps.filter(dep => !deferredChunks.some(chunk => dep.includes(`/${chunk}-`)));
       },

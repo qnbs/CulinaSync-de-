@@ -28,6 +28,7 @@ export type SettingsPath =
   | 'localAi.enabled'
   | 'localAi.localOnlyMode'
   | 'localAi.allowCloudFallback'
+  | 'localAi.enableWebLlmInference'
   | 'localAi.preferWebGpu'
   | 'localAi.gpuTierPreference'
   | 'localAi.preferredGenerativeModel'
@@ -194,6 +195,9 @@ export const settingsMutators: Record<SettingsPath, (draft: AppSettings, value: 
   },
   'localAi.allowCloudFallback': (draft, value) => {
     if (typeof value === 'boolean') draft.localAi.allowCloudFallback = value;
+  },
+  'localAi.enableWebLlmInference': (draft, value) => {
+    if (typeof value === 'boolean') draft.localAi.enableWebLlmInference = value;
   },
   'localAi.preferWebGpu': (draft, value) => {
     if (typeof value === 'boolean') draft.localAi.preferWebGpu = value;

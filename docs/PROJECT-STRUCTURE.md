@@ -34,7 +34,7 @@
 ### `apps/web/src/services/`
 
 - DB-Einstieg: `db.ts`, Repositories unter `repositories/`
-- KI: `geminiService.ts` (einzige Gemini-Fassade)
+- KI: `aiProviderService.ts` (Local-first Routing), `localAiWebLlmService.ts` (WebLLM L1), `localAiEmbeddingsService.ts` (Transformers-RAG), `localAiRagService.ts` (Hybrid-RAG), `aiService.ts` (Re-Export), `geminiService.ts` (einzige Gemini-Fassade), `aiPromptBuilder.ts` / `aiJsonParse.ts`, `aiOfflineFallback.ts` (L4)
 - Keys: `apiKeyService.ts`
 - Export, Voice, Scanner, Sync, Settings-Hilfen
 
@@ -60,8 +60,10 @@
 
 ### `packages/ai-core/` (`@domain/ai-core`)
 
-- Shared AI-Hilfen: `sanitizeForPrompt`, `workerBus`, optionale ML-Imports
-- Wird von `apps/web` per `workspace:*` eingebunden
+- Shared AI-Infrastruktur: `sanitizeForPrompt`, `WorkerBus`, `providerChain`, `gpuTier`, `modelRegistry`
+- Engines (Feature-Flags): `localAiWebLlmEngine`, `localAiTransformersEngine`, `localAiHeuristicEngine`
+- Optionale ML-Imports: `tryImportWebLlm`, `tryImportTransformers` (dynamisch, kein Bundle-Leak)
+- Wird von `apps/web` per `workspace:*` eingebunden; Build vor `web#type-check` (Turbo `^build`)
 
 ### `packages/ui/` (`@domain/ui`)
 

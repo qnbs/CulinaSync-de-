@@ -57,8 +57,8 @@ export const ShoppingListActive = () => {
                             onClick={() => !isShoppingMode && handleToggleCategoryCollapse(category)}
                         >
                              {editingCategory?.oldName === category && !isShoppingMode ? (
-                                <form onSubmit={e => { e.preventDefault(); handleRenameCategory(); }} className="flex-grow mr-4">
-                                    <input type="text" value={editingCategory.newName} onChange={e => setEditingCategory({ ...editingCategory, newName: e.target.value })} onBlur={handleRenameCategory} autoFocus className="font-bold text-[var(--color-accent-400)] bg-zinc-800 border-[var(--color-accent-500)] border-2 rounded-md w-full p-1 text-lg" />
+                                <form onSubmit={e => { e.preventDefault(); void handleRenameCategory(); }} className="flex-grow mr-4">
+                                    <input type="text" value={editingCategory.newName} onChange={e => setEditingCategory({ ...editingCategory, newName: e.target.value })} onBlur={() => { void handleRenameCategory(); }} autoFocus className="font-bold text-[var(--color-accent-400)] bg-zinc-800 border-[var(--color-accent-500)] border-2 rounded-md w-full p-1 text-lg" />
                                 </form>
                             ) : (
                                 <h3 

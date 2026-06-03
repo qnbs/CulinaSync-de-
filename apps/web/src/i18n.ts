@@ -20,7 +20,7 @@ const defaultLanguage = settings.language || 'de';
 const isDev = import.meta.env.DEV;
 
 // QNBS-v3: Fehlende Keys in Dev warnen; Prod ohne rohe Key-Anzeige (Fallback de → en)
-i18n
+void i18n
   .use(initReactI18next)
   .init({
     resources,

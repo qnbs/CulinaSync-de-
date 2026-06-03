@@ -94,7 +94,7 @@
 ## Status-Update 2026-05-01 (Cursor IDE)
 
 - **Projektregeln für den Agent:** `.cursor/rules/culinasync-core.mdc` (immer aktiv) und `culinasync-react.mdc` (bei `*.tsx`) — komprimierte Ableitung aus `.github/copilot-instructions.md` für konsistente Antworten in Cursor.
-- **Hinweis:** ESLint in `eslint.config.js` — `no-explicit-any`, `exhaustive-deps`, `no-unused-vars` **error**; CI/lint-staged **`--max-warnings 0`**. Typed Rules (`no-floating-promises`) folgen in R-005.
+- **Hinweis:** ESLint in `eslint.config.js` — `no-explicit-any`, `exhaustive-deps`, `no-unused-vars`, `no-floating-promises` (projectService) **error**; CI/lint-staged **`--max-warnings 0`**.
 - **CI-Stand:** CodeQL nutzt nur noch `javascript`; `validate.yml` ist wiederverwendbar; Deploy ruft denselben Validate-Workflow auf — bei Push auf `main` laufen dennoch **zwei** Validate-Läufe parallel (`ci.yml` + `deploy.yml`), falls gewünscht später mit `workflow_run` oder Skip entkoppeln.
 
 ---

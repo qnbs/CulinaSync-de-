@@ -14,7 +14,9 @@ import {
   PRIMARY_DATA_STORES,
   PRIMARY_DB_NAME,
 } from './dbMigrations';
+import { debouncedReindexAllEmbeddings, removeEmbeddingForSource } from './localAiEmbeddingsService';
 import { debouncedUpdateAllPantryMatches, updatePantryMatches } from './pantryMatcherService';
+import { loadSettings } from './settingsService';
 import { syncSeedRecipes } from './repositories/recipeRepository';
 import { logAppError } from './errorLoggingService';
 import i18n from '../i18n';
@@ -55,17 +57,43 @@ const populateDB = async () => {
 // Setup hooks outside the class constructor to avoid circular dependencies in class definition file
 db.on('populate', populateDB);
 
+const scheduleEmbeddingMaintenance = () => {
+  debouncedReindexAllEmbeddings(loadSettings());
+};
+
 // When pantry changes, recalculate for all recipes (debounced)
-db.pantry.hook('creating', debouncedUpdateAllPantryMatches);
-db.pantry.hook('updating', debouncedUpdateAllPantryMatches);
-db.pantry.hook('deleting', debouncedUpdateAllPantryMatches);
+db.pantry.hook('creating', () => {
+  debouncedUpdateAllPantryMatches();
+  scheduleEmbeddingMaintenance();
+});
+db.pantry.hook('updating', () => {
+  debouncedUpdateAllPantryMatches();
+  scheduleEmbeddingMaintenance();
+});
+db.pantry.hook('deleting', (primKey) => {
+  debouncedUpdateAllPantryMatches();
+  if (typeof primKey === 'number') {
+    void removeEmbeddingForSource('pantry', primKey);
+  }
+});
 
 // When a recipe is created or updated, calculate for just that recipe
 db.recipes.hook('creating', (primKey, _obj, trans) => {
-    trans.on('complete', () => updatePantryMatches([primKey as number]));
+    trans.on('complete', () => {
+      void updatePantryMatches([primKey as number]);
+      scheduleEmbeddingMaintenance();
+    });
 });
 db.recipes.hook('updating', (_modifications, primKey, _obj, trans) => {
-    trans.on('complete', () => updatePantryMatches([primKey as number]));
+    trans.on('complete', () => {
+      void updatePantryMatches([primKey as number]);
+      scheduleEmbeddingMaintenance();
+    });
+});
+db.recipes.hook('deleting', (primKey) => {
+  if (typeof primKey === 'number') {
+    void removeEmbeddingForSource('recipe', primKey);
+  }
 });
 
 // Open DB and sync (Legacy-DB-Name → DataDB, dann Backup-Gate)
