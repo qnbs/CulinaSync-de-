@@ -48,7 +48,11 @@
     "pwa": {
       "updateDownloading": "App-Update wird heruntergeladen.",
       "updateReady": "Eine neue Version ist bereit. Bitte neu laden.",
-      "offlineReady": "Offline-Modus ist bereit."
+      "offlineReady": "Offline-Modus ist bereit.",
+      "updateCheckDone": "Nach Updates gesucht.",
+      "updateCheckFailed": "Update-Prüfung fehlgeschlagen.",
+      "shareReceivedTitle": "Geteilter Inhalt",
+      "shareReceivedHint": "Der Text steht im KI-Chef-Prompt — passe ihn bei Bedarf an."
     },
     "offline": {
       "banner": "Du bist offline — Vorrat, Rezepte, Plan und Einkaufsliste funktionieren weiter lokal.",

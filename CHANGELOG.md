@@ -15,6 +15,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Hinzugefuegt
 
+- **PWA (Advanced):** Hooks `usePwaInstall`, `usePwaUpdate`, `usePwaLaunchHandlers`, `useAppBadge`; `PwaStatusCard` in Einstellungen; Share-Target → KI-Chef; Datei-Handler → Vault-Import; `docs/PWA.md`.
+
 - **M10.2:** Nextcloud-Sync-Adapter (`nextcloudSyncAdapter`, `syncTransport`, Provider-UI, i18n-Fehlercodes).
 - **M8:** Tauri-2-Cargo-Workspace (`src-tauri/Cargo.toml`, `capabilities/`), Icon-Script, `tauri-release.yml` Matrix.
 - **M7:** `pnpm run check:ts-ga` — Gate bis TypeScript 7.0 GA auf npm.

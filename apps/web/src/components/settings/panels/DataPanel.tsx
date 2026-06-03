@@ -20,6 +20,8 @@ import { useModalA11y } from '../../../hooks/useModalA11y';
 import { useTranslation } from 'react-i18next';
 import { downloadEncryptedVault, mergeEncryptedVaultFile } from '../../../services/snapshotVaultService';
 import { logAppError } from '../../../services/errorLoggingService';
+import { PwaStatusCard } from '../../pwa/PwaStatusCard';
+import { useTransientUiStore } from '../../../store/transientUiStore';
 
 const SYNC_PROVIDER_STORAGE_KEY = 'culinaSyncSyncProvider';
 const NEXTCLOUD_SERVER_STORAGE_KEY = 'culinaSyncNextcloudServer';
@@ -82,14 +84,25 @@ interface DataPanelProps {
     installPromptEvent: BeforeInstallPromptEvent | null;
     onInstallPWA: () => void;
     isStandalone: boolean;
+    isIos?: boolean;
+    onCheckForUpdate?: () => void;
 }
 
-export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEvent, onInstallPWA, isStandalone }) => {
+export const DataPanel: React.FC<DataPanelProps> = ({
+    addToast,
+    installPromptEvent,
+    onInstallPWA,
+    isStandalone,
+    isIos = false,
+    onCheckForUpdate,
+}) => {
     const { t } = useTranslation();
     const dispatch = useAppDispatch();
     const [isResetModalOpen, setResetModalOpen] = useState(false);
     const [storageEstimate, setStorageEstimate] = useState<{ used: number; quota: number } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const pendingLaunchFile = useTransientUiStore((s) => s.pendingLaunchFile);
+    const setPendingLaunchFile = useTransientUiStore((s) => s.setPendingLaunchFile);
 
     const pantryCount = useLiveQuery(() => db.pantry.count());
     const recipeCount = useLiveQuery(() => db.recipes.count());
@@ -190,6 +203,18 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
     const [deviceSyncOpen, setDeviceSyncOpen] = useState(false);
     const [lastSyncAt, setLastSyncAt] = useState<number | null>(() => getLastSyncTimestamp());
     const vaultFileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (!pendingLaunchFile) return;
+        addToast(t('settings.data.pwa.fileReceived', { name: pendingLaunchFile.name }), 'info');
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(pendingLaunchFile);
+        if (vaultFileInputRef.current) {
+            vaultFileInputRef.current.files = dataTransfer.files;
+            vaultFileInputRef.current.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        setPendingLaunchFile(null);
+    }, [pendingLaunchFile, addToast, setPendingLaunchFile, t]);
 
     const syncCredentialsReady =
         syncPassword.trim().length > 0 &&
@@ -381,18 +406,13 @@ export const DataPanel: React.FC<DataPanelProps> = ({ addToast, installPromptEve
                 </div>
             </section>
 
-            {/* Install PWA */}
-            {installPromptEvent && !isStandalone && (
-                 <section className="bg-gradient-to-r from-[var(--color-accent-500)]/10 to-transparent border border-[var(--color-accent-500)]/20 rounded-2xl p-6 flex items-center justify-between">
-                    <div>
-                        <h4 className="font-bold text-[var(--color-accent-400)]">{t('settings.data.install.title')}</h4>
-                        <p className="text-sm text-zinc-400">{t('settings.data.install.description')}</p>
-                    </div>
-                    <button onClick={onInstallPWA} className="bg-[var(--color-accent-500)] text-zinc-900 font-bold py-2 px-4 rounded-xl hover:bg-[var(--color-accent-400)] transition-colors shadow-lg">
-                        {t('app.installReminder.install')}
-                    </button>
-                 </section>
-            )}
+            <PwaStatusCard
+                isStandalone={isStandalone}
+                isIos={isIos}
+                canInstall={!!installPromptEvent && !isStandalone}
+                onInstall={onInstallPWA}
+                onCheckUpdate={onCheckForUpdate}
+            />
 
             {/* Actions */}
             <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">

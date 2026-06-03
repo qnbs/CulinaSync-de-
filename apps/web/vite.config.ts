@@ -5,6 +5,7 @@ import viteCompression from 'vite-plugin-compression';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { fileURLToPath, URL } from 'url';
 import pkg from './package.json';
+import { buildPwaManifest } from './src/config/buildPwaManifest';
 
 const chunkGroups: Array<[string, string[]]> = [
   ['vendor-react', ['react', 'react-dom']],
@@ -60,52 +61,7 @@ export default defineConfig({
         ],
       },
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'logo-192x192.png', 'logo-512x512.png'],
-      manifest: {
-        name: 'CulinaSync',
-        short_name: 'CulinaSync',
-        description: 'Dein kollaborativer kulinarischer Hub für den Haushalt. Offline. Privat. Nahtlos.',
-        theme_color: '#18181b',
-        background_color: '#18181b',
-        start_url: base,
-        display: 'standalone',
-        scope: base,
-        icons: [
-          {
-            src: 'logo-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-          },
-          {
-            src: 'logo-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable',
-          },
-        ],
-        shortcuts: [
-          {
-            name: 'Vorratskammer',
-            short_name: 'Vorrat',
-            description: 'Öffnet die Vorratskammer',
-            url: `${base}?page=pantry`,
-            icons: [{ src: 'logo-192x192.png', sizes: '192x192' }]
-          },
-          {
-            name: 'Einkaufsliste',
-            short_name: 'Liste',
-            description: 'Öffnet die Einkaufsliste',
-            url: `${base}?page=shopping-list`,
-            icons: [{ src: 'logo-192x192.png', sizes: '192x192' }]
-          },
-          {
-            name: 'KI-Chef',
-            short_name: 'KI-Chef',
-            description: 'Generiert ein neues Rezept',
-            url: `${base}?page=chef`,
-            icons: [{ src: 'logo-192x192.png', sizes: '192x192' }]
-          }
-        ]
-      },
+      manifest: buildPwaManifest({ base }),
     }),
     viteCompression({
       algorithm: 'brotliCompress',

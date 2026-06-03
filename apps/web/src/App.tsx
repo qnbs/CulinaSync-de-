@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 
 import { useTranslation } from 'react-i18next';
 import Header from './components/Header';
 import { type Command } from './components/CommandPalette';
-import { Page, BeforeInstallPromptEvent, ShoppingListItem, PantryItem } from './types';
+import { Page, ShoppingListItem, PantryItem } from './types';
 import { useSpeechRecognition } from './hooks/useSpeechRecognition';
 import { processCommand, executeVoiceAction } from './services/voiceCommands';
 import { CheckCircle, Bot, Milk, BookOpen, CalendarDays, ShoppingCart, Settings as SettingsIcon, HelpCircle, PlusCircle, RefreshCw, Trash2, Download, Upload, Mic, AlertTriangle, Info, X } from 'lucide-react';
@@ -14,11 +14,15 @@ import { GlobalErrorBoundary } from './components/GlobalErrorBoundary';
 import OfflineStatusBar from './components/OfflineStatusBar';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
 import { useModalA11y } from './hooks/useModalA11y';
-import { getPageFromLocationSearch } from './utils/pwaLaunchParams';
-import { logAppError } from './services/errorLoggingService';
 import { useDeepLinkNavigation } from './hooks/useDeepLinkNavigation';
 import { useAccentTheme } from './hooks/useAccentTheme';
+import { usePwaInstall } from './hooks/usePwaInstall';
+import { usePwaUpdate } from './hooks/usePwaUpdate';
+import { usePwaLaunchHandlers } from './hooks/usePwaLaunchHandlers';
+import { useAppBadge } from './hooks/useAppBadge';
 import { Button, Spinner } from './components/ui';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from './services/dbInstance';
 
 const APP_VERSION = __APP_VERSION__;
 
@@ -55,45 +59,30 @@ const App: React.FC = () => {
   const toggleCommandPalette = useTransientUiStore((s) => s.toggleCommandPalette);
 
   const [appVersion] = useState<string>(APP_VERSION || 'N/A');
-  const [installPromptEvent, setInstallPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isStandalone] = useState(() => typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches);
   const [showOnboarding, setShowOnboarding] = useState(() => {
     if (typeof window === 'undefined') {
       return false;
     }
     return !window.localStorage.getItem('culinaSyncOnboarded');
   });
-  const [showInstallReminder, setShowInstallReminder] = useState(false);
-  const [showUpdateReadyNotice, setShowUpdateReadyNotice] = useState(false);
   const isOnline = useOnlineStatus();
   useDeepLinkNavigation();
   useAccentTheme();
+  usePwaLaunchHandlers();
+
+  const uncheckedShoppingCount = useLiveQuery(
+    async () => db.shoppingList.filter((item) => !item.isChecked).count(),
+    [],
+  );
+  useAppBadge(uncheckedShoppingCount);
+
   const wasOnlineRef = useRef(isOnline);
   const installDialogRef = useRef<HTMLDivElement>(null);
   const updateDialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     void import('./services/db');
-
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setInstallPromptEvent(e as BeforeInstallPromptEvent);
-
-      const dismissedUntil = Number(window.localStorage.getItem('culinaSyncInstallRemindAfter') || '0');
-      const permanentlyDismissed = window.localStorage.getItem('culinaSyncInstallDismissed') === 'true';
-      const now = Date.now();
-
-      if (!isStandalone && !permanentlyDismissed && now >= dismissedUntil) {
-        setShowInstallReminder(true);
-      }
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-  }, [isStandalone]);
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -114,15 +103,6 @@ const App: React.FC = () => {
     settings.appearance.compactDensity,
   ]);
 
-  useEffect(() => {
-    const handleUpdateReady = () => {
-      setShowUpdateReadyNotice(true);
-    };
-
-    window.addEventListener('culinasync:pwa-update-ready', handleUpdateReady);
-    return () => window.removeEventListener('culinasync:pwa-update-ready', handleUpdateReady);
-  }, []);
-
   const handleOnboardingComplete = () => {
     localStorage.setItem('culinaSyncOnboarded', 'true');
     setShowOnboarding(false);
@@ -136,6 +116,18 @@ const App: React.FC = () => {
     dispatch(addToastAction({ message, type }));
   }, [dispatch]);
 
+  const {
+    installPromptEvent,
+    isStandalone,
+    isIos,
+    showInstallDialog,
+    handleInstallPWA,
+    handleInstallRemindLater,
+    handleInstallDismiss,
+  } = usePwaInstall(addToast);
+
+  const { showUpdateReadyNotice, handleReloadForUpdate, dismissUpdateNotice } = usePwaUpdate();
+
   useEffect(() => {
     if (toasts.length > 0) {
       const latestToast = toasts[toasts.length - 1];
@@ -146,42 +138,6 @@ const App: React.FC = () => {
     }
   }, [toasts, removeToast]);
 
-  const handleInstallPWA = async () => {
-    if (!installPromptEvent) {
-      addToast(t('app.install.unavailable'), 'info');
-      return;
-    }
-    try {
-      installPromptEvent.prompt();
-      const { outcome } = await installPromptEvent.userChoice;
-      if (outcome === 'accepted') {
-        addToast(t('app.install.success'), 'success');
-        window.localStorage.removeItem('culinaSyncInstallRemindAfter');
-        window.localStorage.removeItem('culinaSyncInstallDismissed');
-        setShowInstallReminder(false);
-      } else {
-        window.localStorage.setItem('culinaSyncInstallRemindAfter', String(Date.now() + 3 * 24 * 60 * 60 * 1000));
-        setShowInstallReminder(false);
-      }
-      setInstallPromptEvent(null);
-    } catch (error) {
-      void logAppError(error, 'app.pwa.install');
-      addToast(t('app.install.unavailable'), 'error');
-    }
-  };
-
-  const handleInstallRemindLater = () => {
-    window.localStorage.setItem('culinaSyncInstallRemindAfter', String(Date.now() + 3 * 24 * 60 * 60 * 1000));
-    setShowInstallReminder(false);
-  };
-
-  const handleInstallDismiss = () => {
-    window.localStorage.setItem('culinaSyncInstallDismissed', 'true');
-    setShowInstallReminder(false);
-  };
-
-  const showInstallDialog = showInstallReminder && !!installPromptEvent && !isStandalone;
-
   useModalA11y({
     isOpen: showInstallDialog,
     onClose: handleInstallRemindLater,
@@ -190,21 +146,19 @@ const App: React.FC = () => {
 
   useModalA11y({
     isOpen: showUpdateReadyNotice,
-    onClose: () => setShowUpdateReadyNotice(false),
+    onClose: dismissUpdateNotice,
     containerRef: updateDialogRef,
   });
 
-  useEffect(() => {
-    const launchPage = getPageFromLocationSearch(window.location.search);
-    if (launchPage) {
-      dispatch(setCurrentPage({ page: launchPage }));
+  const handleCheckForUpdate = useCallback(async () => {
+    try {
+      const registration = await navigator.serviceWorker?.getRegistration();
+      await registration?.update();
+      addToast(t('app.pwa.updateCheckDone'), 'info');
+    } catch {
+      addToast(t('app.pwa.updateCheckFailed'), 'error');
     }
-  }, [dispatch]);
-
-  const handleReloadForUpdate = () => {
-    setShowUpdateReadyNotice(false);
-    window.location.reload();
-  };
+  }, [addToast, t]);
 
   const {
     finalTranscript,
@@ -316,7 +270,16 @@ const App: React.FC = () => {
         case 'recipes': return <RecipeBook />;
         case 'meal-planner': return <MealPlanner />;
         case 'shopping-list': return <ShoppingList />;
-        case 'settings': return <Settings installPromptEvent={installPromptEvent} onInstallPWA={handleInstallPWA} isStandalone={isStandalone} />;
+        case 'settings':
+          return (
+            <Settings
+              installPromptEvent={installPromptEvent}
+              onInstallPWA={handleInstallPWA}
+              isStandalone={isStandalone}
+              isIos={isIos}
+              onCheckForUpdate={handleCheckForUpdate}
+            />
+          );
         case 'help': return <Help appVersion={appVersion} />;
         default: return <PantryManager />;
     }
@@ -398,7 +361,7 @@ const App: React.FC = () => {
               <Button type="button" size="sm" onClick={handleReloadForUpdate} className="flex-1">
                 {t('app.pwaUpdate.reload')}
               </Button>
-              <Button type="button" size="sm" variant="secondary" onClick={() => setShowUpdateReadyNotice(false)}>
+              <Button type="button" size="sm" variant="secondary" onClick={dismissUpdateNotice}>
                 {t('app.pwaUpdate.later')}
               </Button>
             </div>

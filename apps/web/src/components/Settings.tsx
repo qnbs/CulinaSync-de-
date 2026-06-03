@@ -43,9 +43,17 @@ interface SettingsProps {
     installPromptEvent: BeforeInstallPromptEvent | null;
     onInstallPWA: () => void;
     isStandalone: boolean;
+    isIos?: boolean;
+    onCheckForUpdate?: () => void;
 }
 
-const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, isStandalone }) => {
+const Settings: React.FC<SettingsProps> = ({
+  installPromptEvent,
+  onInstallPWA,
+  isStandalone,
+  isIos = false,
+  onCheckForUpdate,
+}) => {
     const { t } = useTranslation();
     const dispatch = useAppDispatch();
     const globalSettings = useAppSelector(state => state.settings);
@@ -107,7 +115,17 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
             case 'health': return <HealthConnectPanel />;
             case 'community': return <CommunityPanel />;
             case 'apikey': return <ApiKeyPanel addToast={addToastWrapper} />;
-            case 'data': return <DataPanel addToast={addToastWrapper} installPromptEvent={installPromptEvent} onInstallPWA={onInstallPWA} isStandalone={isStandalone} />;
+            case 'data':
+              return (
+                <DataPanel
+                  addToast={addToastWrapper}
+                  installPromptEvent={installPromptEvent}
+                  onInstallPWA={onInstallPWA}
+                  isStandalone={isStandalone}
+                  isIos={isIos}
+                  onCheckForUpdate={onCheckForUpdate}
+                />
+              );
             case 'speech': return (
                 <Suspense fallback={<div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 text-zinc-400">{t('settings.voicePanel.loading')}</div>}>
                     <VoicePanel settings={localSettings} onChange={handleChange} />

@@ -9,13 +9,14 @@ import './src/index.css';
 import i18n from './src/i18n';
 import App from './src/App';
 import { installGlobalErrorLogging, logAppError } from './src/services/errorLoggingService';
+import { setPwaUpdateHandler } from './src/services/pwaRegistration';
 installGlobalErrorLogging();
 
 const emitPwaEvent = (eventName: string) => {
   window.dispatchEvent(new CustomEvent(eventName));
 };
 
-registerSW({
+const updateSW = registerSW({
   immediate: true,
   onRegisteredSW(_swUrl, registration) {
     if (!registration) {
@@ -38,6 +39,8 @@ registerSW({
     void logAppError(error, 'service-worker.register');
   },
 });
+
+setPwaUpdateHandler(updateSW);
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
