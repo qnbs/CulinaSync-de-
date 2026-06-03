@@ -6,8 +6,6 @@ import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { updateSettings } from '../store/slices/settingsSlice';
 import { addToast as addToastAction } from '../store/slices/uiSlice';
 import { applySettingsChange } from '../services/settingsMutators';
-import { applyAccentTheme } from '../lib/accentTheme';
-import { Button } from './ui';
 
 import { SettingsSidebar } from './settings/SettingsSidebar';
 import { AppearancePanel } from './settings/panels/AppearancePanel';
@@ -23,6 +21,13 @@ import { PrivacyPanel } from './settings/panels/PrivacyPanel';
 import { WorkspacePanel } from './settings/panels/WorkspacePanel';
 
 const VoicePanel = lazy(() => import('./settings/panels/VoicePanel').then((module) => ({ default: module.VoicePanel })));
+
+const ACCENT_COLORS: Record<AppSettings['appearance']['accentColor'], Record<string, string>> = {
+  amber: { '300': '#fcd34d', '400': '#fbbf24', '500': '#f59e0b', glow: 'rgba(251, 191, 36, 0.3)', 'glow-soft': 'rgba(251, 191, 36, 0.2)', '400-semi': 'rgba(251, 191, 36, 0.8)' },
+  rose: { '300': '#fda4af', '400': '#fb7185', '500': '#f43f5e', glow: 'rgba(244, 63, 94, 0.3)', 'glow-soft': 'rgba(244, 63, 94, 0.2)', '400-semi': 'rgba(251, 113, 133, 0.8)' },
+  sky: { '300': '#7dd3fc', '400': '#38bdf8', '500': '#0ea5e9', glow: 'rgba(14, 165, 233, 0.3)', 'glow-soft': 'rgba(14, 165, 233, 0.2)', '400-semi': 'rgba(56, 189, 248, 0.8)' },
+  emerald: { '300': '#6ee7b7', '400': '#34d399', '500': '#10b981', glow: 'rgba(16, 185, 129, 0.3)', 'glow-soft': 'rgba(16, 185, 129, 0.2)', '400-semi': 'rgba(52, 211, 153, 0.8)' },
+};
 
 const SECTION_TITLE_KEYS: Record<string, string> = {
   appearance: 'settings.sections.appearance',

@@ -9,8 +9,6 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Hinzugefuegt
 
-- **UI Design System:** Gemeinsames Kit unter `apps/web/src/components/ui/` (Button, Input, Modal, Switch, Card, Badge, Spinner, PageHeader, Skeleton); Design-Tokens in `packages/ui/tokens.css`; `docs/DESIGN-SYSTEM.md`; globale Akzentfarbe via `useAccentTheme()`; gemeinsame Navigation `config/mainNav.ts`.
-- **Einstellungen (Premium):** Erweitertes `AppSettings`-Schema (lokale KI, Privatsphäre, Haushalt/Workspace, Kochmodus, Essensplaner, erweiterte Sprache); neue Panels „Lokale KI“, „Privatsphäre“, „Haushalt“; KI-Routing local-first in `aiService`; Persistenz für Whisper/STT.
 - **Local AI (Phase 0):** `docs/LOCAL-AI-AUDIT-2026-06.md` (Ist-Analyse vs. CannaGuide/StoryCraft, i18n-Gates, Gap-Matrix) und `docs/LOCAL-AI-ARCHITECTURE.md` (4-Layer-Stack, Ziel-Services, Phasenplan 1–4).
 
 ### Geaendert
