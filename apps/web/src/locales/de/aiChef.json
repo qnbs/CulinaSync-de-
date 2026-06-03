@@ -1,0 +1,27 @@
+{
+  "aiChef": {
+    "input": {
+      "title": "Dein Wunsch",
+      "surpriseMe": "Ueberrasch mich",
+      "promptPlaceholder": "Worauf hast du heute Appetit? (z.B. 'Etwas waermendes mit Curry' oder 'Ein leichtes Sommergericht')",
+      "askChef": "Chef fragen",
+      "ingredientsTitle": "Zutaten & Vorrat",
+      "rescueExpiringTitle": "Ablaufende Artikel retten",
+      "rescueExpiringDescription": "Fuege {{items}} automatisch hinzu.",
+      "includeLabel": "Muss enthalten sein",
+      "includePlaceholder": "+ Zutat",
+      "excludeLabel": "Darf nicht enthalten sein",
+      "excludePlaceholder": "- Zutat",
+      "contextTitle": "Kontext & Modifikatoren",
+      "noExtras": "Keine Extras"
+    },
+    "results": {
+      "title": "Ich habe {{count}} Ideen fuer dich.",
+      "description": "Waehle deinen Favoriten, um das vollstaendige Rezept zu generieren.",
+      "newRequest": "Neue Anfrage",
+      "selectAria": "Rezeptidee {{title}} auswaehlen und vollstaendiges Rezept erstellen",
+      "creating": "Wird erstellt...",
+      "createRecipe": "Rezept erstellen"
+    }
+  }
+}

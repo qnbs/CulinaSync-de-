@@ -538,8 +538,13 @@ const panelIntroEn = {
 function patchFile(relPath, lang) {
   const filePath = path.join(root, relPath);
   const json = JSON.parse(readFileSync(filePath, 'utf8'));
-  json.help = lang === 'de' ? helpDe : helpEn;
+  if (relPath.includes('features.json')) {
+    json.help = lang === 'de' ? helpDe : helpEn;
+  }
   if (relPath.includes('settings.json')) {
+    if (!json.settings) {
+      throw new Error(`Expected { settings } root in ${relPath}`);
+    }
     json.settings.panelIntro = lang === 'de' ? panelIntroDe : panelIntroEn;
     if (json.settings.privacy) {
       json.settings.privacy.analyticsDesc =
@@ -556,7 +561,11 @@ function patchFile(relPath, lang) {
   console.log('patched', relPath);
 }
 
-patchFile('apps/web/src/locales/de/features.json', 'de');
-patchFile('apps/web/src/locales/en/features.json', 'en');
-patchFile('apps/web/src/locales/de/settings.json', 'de');
-patchFile('apps/web/src/locales/en/settings.json', 'en');
+/** @param {string} relPath @param {'de'|'en'} lang */
+const patchFeatures = (relPath, lang) => patchFile(relPath, lang);
+const patchSettings = (relPath, lang) => patchFile(relPath, lang);
+
+patchFeatures('apps/web/src/locales/de/features.json', 'de');
+patchFeatures('apps/web/src/locales/en/features.json', 'en');
+patchSettings('apps/web/src/locales/de/settings.json', 'de');
+patchSettings('apps/web/src/locales/en/settings.json', 'en');

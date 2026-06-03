@@ -17,6 +17,7 @@ import {
   Settings,
   CalendarDays,
   Heart,
+  PlayCircle,
 } from 'lucide-react';
 
 export type HelpSettingsFocus =
@@ -47,7 +48,8 @@ export type HelpActionId =
   | 'NAV_AI_CHEF'
   | 'NAV_MEAL_PLANNER'
   | 'NAV_SETTINGS'
-  | 'NAV_PANTRY';
+  | 'NAV_PANTRY'
+  | 'REPLAY_ONBOARDING';
 
 export interface FaqEntry {
   id: string;
@@ -76,6 +78,13 @@ export interface QuickLinkEntry {
 }
 
 export const FAQS: FaqEntry[] = [
+  {
+    id: 'onboarding',
+    categoryKey: 'help.faq.categories.general',
+    questionKey: 'help.faq.onboarding.question',
+    answerKey: 'help.faq.onboarding.answer',
+    keywordKeys: ['help.faq.keywords.tour'],
+  },
   {
     id: 'local-first',
     categoryKey: 'help.faq.categories.general',
@@ -165,6 +174,14 @@ export const FAQS: FaqEntry[] = [
 ];
 
 export const PRO_TIPS: ProTipEntry[] = [
+  {
+    id: 'onboarding-replay',
+    icon: PlayCircle,
+    titleKey: 'help.tips.onboardingReplay.title',
+    descriptionKey: 'help.tips.onboardingReplay.description',
+    actionLabelKey: 'help.tips.onboardingReplay.actionLabel',
+    actionId: 'REPLAY_ONBOARDING',
+  },
   {
     id: 'cmd-palette',
     icon: TerminalSquare,

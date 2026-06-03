@@ -7,6 +7,8 @@ describe('transientUiStore', () => {
       commandPaletteOpen: false,
       pendingShareText: null,
       pendingLaunchFile: null,
+      onboardingOpen: false,
+      onboardingSession: 0,
     });
   });
 
@@ -16,6 +18,15 @@ describe('transientUiStore', () => {
     expect(useTransientUiStore.getState().commandPaletteOpen).toBe(true);
     useTransientUiStore.getState().toggleCommandPalette();
     expect(useTransientUiStore.getState().commandPaletteOpen).toBe(false);
+  });
+
+  it('öffnet und schließt Onboarding-Replay', () => {
+    expect(useTransientUiStore.getState().onboardingOpen).toBe(false);
+    useTransientUiStore.getState().openOnboarding();
+    expect(useTransientUiStore.getState().onboardingOpen).toBe(true);
+    expect(useTransientUiStore.getState().onboardingSession).toBe(1);
+    useTransientUiStore.getState().closeOnboarding();
+    expect(useTransientUiStore.getState().onboardingOpen).toBe(false);
   });
 
   it('speichert pending Share-Text und Launch-Datei', () => {

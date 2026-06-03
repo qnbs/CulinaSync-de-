@@ -64,13 +64,13 @@ export const ChefInput: React.FC<ChefInputProps> = ({
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-lg font-bold text-zinc-100 flex items-center gap-2">
                             <Wand2 className={`transition-colors ${isFocused ? 'text-[var(--color-accent-400)]' : 'text-zinc-500'}`} /> 
-                            {t('settings.aiChef.input.title')}
+                            {t('aiChef.input.title')}
                         </h3>
                         <button 
                             onClick={onSurpriseMe} 
                             className="glass-button px-3 py-1.5 rounded-full text-xs font-bold text-[var(--color-accent-400)] hover:text-[var(--color-accent-300)] flex items-center gap-2 transition-all hover:shadow-[0_0_10px_rgba(var(--color-accent-glow),0.3)]"
                         >
-                            <Sparkles size={14}/> {t('settings.aiChef.input.surpriseMe')}
+                            <Sparkles size={14}/> {t('aiChef.input.surpriseMe')}
                         </button>
                     </div>
 
@@ -82,7 +82,7 @@ export const ChefInput: React.FC<ChefInputProps> = ({
                             onChange={(e) => setCraving(e.target.value)}
                             onFocus={() => setIsFocused(true)}
                             onBlur={() => setIsFocused(false)}
-                            placeholder={t('settings.aiChef.input.promptPlaceholder')}
+                            placeholder={t('aiChef.input.promptPlaceholder')}
                             className="w-full bg-transparent border-none p-2 text-xl lg:text-2xl text-zinc-100 placeholder-zinc-600 focus:ring-0 outline-none resize-none h-32 transition-all leading-relaxed"
                             disabled={isLoading}
                         />
@@ -94,7 +94,7 @@ export const ChefInput: React.FC<ChefInputProps> = ({
                                 disabled={isLoading || !craving.trim()}
                                 className="flex items-center gap-2 bg-[var(--color-accent-500)] text-zinc-900 font-bold py-3 px-6 rounded-2xl hover:bg-[var(--color-accent-400)] hover:scale-105 active:scale-95 transition-all disabled:bg-zinc-800 disabled:text-zinc-600 disabled:hover:scale-100 shadow-lg shadow-[var(--color-accent-glow)]"
                             >
-                                <span>{t('settings.aiChef.input.askChef')}</span>
+                                <span>{t('aiChef.input.askChef')}</span>
                                 <Send size={18} className="mt-0.5"/>
                             </button>
                         </div>
@@ -106,7 +106,7 @@ export const ChefInput: React.FC<ChefInputProps> = ({
                 {/* Ingredients Panel */}
                 <section className="glass-panel p-6 rounded-2xl space-y-5">
                      <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
-                        <PlusCircle size={14}/> {t('settings.aiChef.input.ingredientsTitle')}
+                        <PlusCircle size={14}/> {t('aiChef.input.ingredientsTitle')}
                     </h3>
                     
                     {expiringItems.length > 0 && (
@@ -116,20 +116,20 @@ export const ChefInput: React.FC<ChefInputProps> = ({
                         >
                             <Clock size={18} className="text-amber-500 mt-0.5 group-hover:animate-pulse" />
                             <div>
-                                <span className="block text-amber-400 text-xs font-bold uppercase mb-0.5">{t('settings.aiChef.input.rescueExpiringTitle')}</span>
-                                <span className="text-zinc-400 text-xs">{t('settings.aiChef.input.rescueExpiringDescription', { items: expiringItems.join(', ') })}</span>
+                                <span className="block text-amber-400 text-xs font-bold uppercase mb-0.5">{t('aiChef.input.rescueExpiringTitle')}</span>
+                                <span className="text-zinc-400 text-xs">{t('aiChef.input.rescueExpiringDescription', { items: expiringItems.join(', ') })}</span>
                             </div>
                         </button>
                     )}
 
                     <div className="space-y-4">
                         <div>
-                            <label className="text-xs text-zinc-400 mb-1.5 block font-medium ml-1">{t('settings.aiChef.input.includeLabel')}</label>
-                            <TagInput tags={includeIngredients} setTags={setIncludeIngredients} placeholder={t('settings.aiChef.input.includePlaceholder')} suggestions={pantrySuggestions} />
+                            <label className="text-xs text-zinc-400 mb-1.5 block font-medium ml-1">{t('aiChef.input.includeLabel')}</label>
+                            <TagInput tags={includeIngredients} setTags={setIncludeIngredients} placeholder={t('aiChef.input.includePlaceholder')} suggestions={pantrySuggestions} />
                         </div>
                         <div>
-                            <label className="text-xs text-zinc-400 mb-1.5 block font-medium ml-1">{t('settings.aiChef.input.excludeLabel')}</label>
-                            <TagInput tags={excludeIngredients} setTags={setExcludeIngredients} placeholder={t('settings.aiChef.input.excludePlaceholder')} suggestions={pantrySuggestions} />
+                            <label className="text-xs text-zinc-400 mb-1.5 block font-medium ml-1">{t('aiChef.input.excludeLabel')}</label>
+                            <TagInput tags={excludeIngredients} setTags={setExcludeIngredients} placeholder={t('aiChef.input.excludePlaceholder')} suggestions={pantrySuggestions} />
                         </div>
                     </div>
                 </section>
@@ -137,7 +137,7 @@ export const ChefInput: React.FC<ChefInputProps> = ({
                 {/* Context Panel */}
                 <section className="glass-panel p-6 rounded-2xl space-y-5">
                     <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
-                        <BrainCircuit size={14}/> {t('settings.aiChef.input.contextTitle')}
+                        <BrainCircuit size={14}/> {t('aiChef.input.contextTitle')}
                     </h3>
                     <div className="flex flex-wrap gap-2">
                         {MODIFIER_KEYS.map((modKey) => {
@@ -172,7 +172,7 @@ export const ChefInput: React.FC<ChefInputProps> = ({
                             >
                                 <p className="font-medium text-zinc-200 line-clamp-1 group-hover:text-[var(--color-accent-400)] transition-colors">{prompt.craving}</p>
                                 <p className="text-xs text-zinc-500 mt-1 line-clamp-1">
-                                    {prompt.modifiers.length > 0 ? prompt.modifiers.join(', ') : t('settings.aiChef.input.noExtras')}
+                                    {prompt.modifiers.length > 0 ? prompt.modifiers.join(', ') : t('aiChef.input.noExtras')}
                                 </p>
                              </button>
                          ))}

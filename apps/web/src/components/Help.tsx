@@ -66,6 +66,9 @@ const Help: React.FC<HelpProps> = ({ appVersion }) => {
         case 'NAV_PANTRY':
           dispatch(setCurrentPage({ page: 'pantry' }));
           break;
+        case 'REPLAY_ONBOARDING':
+          useTransientUiStore.getState().openOnboarding();
+          break;
         default:
           break;
       }

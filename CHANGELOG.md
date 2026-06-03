@@ -9,11 +9,14 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Hinzugefuegt
 
+- **Onboarding:** Tour aus Hilfe erneut starten (`openOnboarding`); Joyride- und UI-Texte vollständig i18n (de/en).
+- **i18n:** Eigenes Locale-File `aiChef.json` für KI-Chef-UI (`aiChef.input` / `aiChef.results`); Einstellungen behalten `settings.aiChef` nur für Präferenzen.
 - **Help:** 12 FAQs (Vault, Cloud-Sync, API-Key, lokale KI, PWA, Policies), 6 interaktive Pro-Tipps, Schnellzugriff auf Einstellungen, Live-Systemstatus (Netzwerk, Speicher, PWA), erweiterte Philosophie/Tech-Stack.
 - **Einstellungen:** Kontext-Intros (`SettingsPanelIntro`) pro Bereich mit Kurztipps; Deep-Links aus Hilfe via `focusTarget`.
 
 ### Geaendert
 
+- **Locales:** Doppelte `help`-Sektion fälschlich in `settings.json` entfernt (nur noch in `features.json`).
 - **Help/FAQ:** Sync- und KI-Antworten an aktuelle Daten-, Vault- und Local-AI-Funktionen angepasst.
 - **Einstellungen:** Erweiterte `focusAction`-Zuordnung für alle Sidebar-Bereiche; doppelte Schalter im Design-Panel entfernt.
 - **Privatsphäre:** Klarstellung zu Analytics-Toggle (vorbereitet, ohne aktives Telemetrie-Backend).
