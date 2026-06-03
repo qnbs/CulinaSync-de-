@@ -8,6 +8,7 @@ import type { LocalAiRuntimeConfig } from './providers/types.js';
 export type LocalAiRuntimeInput = {
   enabled: boolean;
   preferWebGpu: boolean;
+  enableWebLlmInference: boolean;
   gpuTierPreference: GpuTierPreference;
   preferredGenerativeModel: GenerativeModelId;
   enableEmbeddings: boolean;
@@ -33,6 +34,7 @@ export const buildLocalAiRuntimeConfig = async (
   return {
     enabled: input.enabled,
     preferWebGpu: input.preferWebGpu,
+    enableWebLlmInference: input.enableWebLlmInference,
     gpuTierPreference: input.gpuTierPreference,
     preferredGenerativeModel: input.preferredGenerativeModel,
     enableEmbeddings: input.enableEmbeddings,

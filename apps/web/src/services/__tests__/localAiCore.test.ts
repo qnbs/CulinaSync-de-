@@ -1,5 +1,6 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import {
+  extractJsonPayload,
   ProviderChainExhaustedError,
   resetGpuTierCacheForTests,
   resolveGenerativeModel,
@@ -7,6 +8,13 @@ import {
   runProviderChain,
   shouldSkipWebGpuLayer,
 } from '@domain/ai-core';
+
+describe('@domain/ai-core jsonExtract', () => {
+  it('extractJsonPayload entfernt Markdown-Fences', () => {
+    const json = extractJsonPayload('```json\n{"ideas":[]}\n```');
+    expect(JSON.parse(json)).toEqual({ ideas: [] });
+  });
+});
 
 describe('@domain/ai-core provider chain', () => {
   it('runProviderChain nutzt ersten erfolgreichen Layer', async () => {

@@ -20,6 +20,7 @@ import {
 } from './aiOfflineFallback';
 import { shouldAllowCloudAi, shouldPreferLocalAi, getActiveSettingsForAi } from './aiSettingsHelpers';
 import { buildLocalAiRagContext, enrichPromptWithRag } from './localAiRagService';
+import { generateRecipeIdeasWithWebLlm, generateRecipeWithWebLlm } from './localAiWebLlmService';
 import {
   generateRecipe as generateRecipeWithGemini,
   generateRecipeIdeas as generateRecipeIdeasWithGemini,
@@ -29,32 +30,61 @@ import {
 const toRuntimeInput = (settings: AppSettings) => ({
   enabled: settings.localAi.enabled,
   preferWebGpu: settings.localAi.preferWebGpu,
+  enableWebLlmInference: settings.localAi.enableWebLlmInference,
   gpuTierPreference: settings.localAi.gpuTierPreference,
   preferredGenerativeModel: settings.localAi.preferredGenerativeModel,
   enableEmbeddings: settings.localAi.enableEmbeddings,
 });
 
-// QNBS-v3: M11.1 — Local-first Routing über Provider-Kette (L1–L3 Feature-Flags, L4 Heuristik garantiert)
+type LocalGenerativeContext = {
+  task: AiGenerativeTask;
+  settings: AppSettings;
+  prompt: StructuredPrompt;
+  pantryItems: PantryItem[];
+  aiPreferences: AppSettings['aiPreferences'];
+  chosenIdea?: RecipeIdea;
+};
+
+// QNBS-v3: M11.1/11.2 — Provider-Kette L1 WebLLM → L3 Transformers → L4 Heuristik
 const runLocalGenerative = async <T>(
-  task: AiGenerativeTask,
-  settings: AppSettings,
+  ctx: LocalGenerativeContext,
   runHeuristic: () => T,
 ): Promise<{ data: T; layer: 'webllm' | 'transformers' | 'heuristic' }> => {
+  const { task, settings } = ctx;
   const runtime = await buildLocalAiRuntimeConfig(toRuntimeInput(settings));
   const model = resolveGenerativeModel(settings.localAi.preferredGenerativeModel, runtime.resolvedGpuTier);
   const webLlmStatus = await getWebLlmEngineStatus(runtime, model);
   const transformersStatus = await getTransformersEngineStatus(runtime);
 
+  const runWebLlm = async (): Promise<T | null> => {
+    if (!webLlmStatus.available) {
+      return null;
+    }
+    if (task === 'recipe-ideas') {
+      return (await generateRecipeIdeasWithWebLlm(
+        ctx.prompt,
+        ctx.pantryItems,
+        ctx.aiPreferences,
+        settings,
+      )) as T | null;
+    }
+    if (task === 'recipe' && ctx.chosenIdea) {
+      return (await generateRecipeWithWebLlm(
+        ctx.prompt,
+        ctx.pantryItems,
+        ctx.aiPreferences,
+        ctx.chosenIdea,
+        settings,
+      )) as T | null;
+    }
+    return null;
+  };
+
   return runProviderChain([
     {
       layer: 'webllm',
       enabled: isWebLlmLayerEnabled(runtime),
-      run: async () => {
-        if (!webLlmStatus.available) {
-          return null;
-        }
-        return null;
-      },
+      run: runWebLlm,
     },
     {
       layer: 'transformers',
@@ -100,9 +130,16 @@ export const generateRecipeIdeas = async (
   const settings = getActiveSettingsForAi();
   const enrichedPrompt = await withRag(prompt, settings);
   const runLocal = () => buildLocalRecipeIdeas(enrichedPrompt, pantryItems, aiPreferences);
+  const ctx: LocalGenerativeContext = {
+    task: 'recipe-ideas',
+    settings,
+    prompt: enrichedPrompt,
+    pantryItems,
+    aiPreferences,
+  };
 
   if (shouldPreferLocalAi(settings) || !shouldAllowCloudAi(settings)) {
-    const { data } = await runLocalGenerative('recipe-ideas', settings, runLocal);
+    const { data } = await runLocalGenerative(ctx, runLocal);
     return data;
   }
 
@@ -113,7 +150,7 @@ export const generateRecipeIdeas = async (
       throw error;
     }
     logAppError(error, 'aiProvider.cloud.recipe-ideas');
-    const { data } = await runLocalGenerative('recipe-ideas', settings, runLocal);
+    const { data } = await runLocalGenerative(ctx, runLocal);
     return data;
   }
 };
@@ -127,9 +164,17 @@ export const generateRecipe = async (
   const settings = getActiveSettingsForAi();
   const enrichedPrompt = await withRag(prompt, settings);
   const runLocal = () => buildLocalRecipe(enrichedPrompt, pantryItems, chosenIdea);
+  const ctx: LocalGenerativeContext = {
+    task: 'recipe',
+    settings,
+    prompt: enrichedPrompt,
+    pantryItems,
+    aiPreferences,
+    chosenIdea,
+  };
 
   if (shouldPreferLocalAi(settings) || !shouldAllowCloudAi(settings)) {
-    const { data } = await runLocalGenerative('recipe', settings, runLocal);
+    const { data } = await runLocalGenerative(ctx, runLocal);
     return data;
   }
 
@@ -140,7 +185,7 @@ export const generateRecipe = async (
       throw error;
     }
     logAppError(error, 'aiProvider.cloud.recipe');
-    const { data } = await runLocalGenerative('recipe', settings, runLocal);
+    const { data } = await runLocalGenerative(ctx, runLocal);
     return data;
   }
 };
@@ -152,9 +197,16 @@ export const generateShoppingList = async (
 ): Promise<Omit<ShoppingListItem, 'id' | 'isChecked'>[]> => {
   const settings = getActiveSettingsForAi();
   const runLocal = () => buildLocalShoppingList(prompt, pantryItems, currentListItems);
+  const ctx: LocalGenerativeContext = {
+    task: 'shopping-list',
+    settings,
+    prompt: { craving: prompt, includeIngredients: [], excludeIngredients: [], modifiers: [] },
+    pantryItems,
+    aiPreferences: settings.aiPreferences,
+  };
 
   if (shouldPreferLocalAi(settings) || !shouldAllowCloudAi(settings)) {
-    const { data } = await runLocalGenerative('shopping-list', settings, runLocal);
+    const { data } = await runLocalGenerative(ctx, runLocal);
     return data;
   }
 
@@ -165,7 +217,7 @@ export const generateShoppingList = async (
       throw error;
     }
     logAppError(error, 'aiProvider.cloud.shopping-list');
-    const { data } = await runLocalGenerative('shopping-list', settings, runLocal);
+    const { data } = await runLocalGenerative(ctx, runLocal);
     return data;
   }
 };

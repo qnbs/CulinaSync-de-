@@ -126,6 +126,7 @@ export interface AppSettings {
     enabled: boolean;
     localOnlyMode: boolean;
     allowCloudFallback: boolean;
+    enableWebLlmInference: boolean;
     preferWebGpu: boolean;
     gpuTierPreference: GpuTierPreference;
     preferredGenerativeModel: LocalAiGenerativeModel;

@@ -30,6 +30,7 @@ export const getDefaultSettings = (): AppSettings => ({
     enabled: true,
     localOnlyMode: false,
     allowCloudFallback: true,
+    enableWebLlmInference: false,
     preferWebGpu: true,
     gpuTierPreference: 'auto',
     preferredGenerativeModel: 'auto',

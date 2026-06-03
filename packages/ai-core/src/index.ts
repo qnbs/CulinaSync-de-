@@ -39,9 +39,15 @@ export {
 } from './providers/types.js';
 
 export { runHeuristicEngine, type HeuristicEngineHandlers } from './engines/localAiHeuristicEngine.js';
+export { extractJsonPayload } from './jsonExtract.js';
 export {
+  completeWebLlmChat,
   getWebLlmEngineStatus,
   isWebLlmLayerEnabled,
+  resetWebLlmEngineForTests,
+  unloadWebLlmEngine,
+  type WebLlmChatMessage,
+  type WebLlmCompletionOptions,
   type WebLlmEngineStatus,
 } from './engines/localAiWebLlmEngine.js';
 export {

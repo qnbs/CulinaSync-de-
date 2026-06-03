@@ -8,6 +8,7 @@ export type AiGenerativeTask = 'recipe-ideas' | 'recipe' | 'shopping-list';
 export type LocalAiRuntimeConfig = {
   enabled: boolean;
   preferWebGpu: boolean;
+  enableWebLlmInference: boolean;
   gpuTierPreference: GpuTierPreference;
   preferredGenerativeModel: GenerativeModelId;
   enableEmbeddings: boolean;

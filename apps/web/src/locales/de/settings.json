@@ -525,6 +525,8 @@
       "modelActive": "Auswahl: {{model}}",
       "preferWebGpuLabel": "WebGPU bevorzugen",
       "preferWebGpuDesc": "Schnellster Pfad auf modernen GPUs; sonst WASM-Fallback.",
+      "webLlmInferenceLabel": "WebLLM-Inferenz (L1)",
+      "webLlmInferenceDesc": "Lädt ein lokales Sprachmodell per WebGPU für Rezept-Ideen und Rezepte. Erfordert Speicher und erstes Laden kann dauern.",
       "maxJobsLabel": "Parallele Jobs",
       "capabilitiesTitle": "Fähigkeiten",
       "visionLabel": "Vision (Vorrats-Scan)",
