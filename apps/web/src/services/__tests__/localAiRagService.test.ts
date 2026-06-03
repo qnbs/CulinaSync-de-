@@ -1,0 +1,83 @@
+import { beforeEach, describe, expect, it } from 'vitest';
+import { db } from '../dbInstance';
+import { getDefaultSettings } from '../settingsMerge';
+import { buildLocalAiRagContext, enrichPromptWithRag } from '../localAiRagService';
+
+describe('localAiRagService', () => {
+  beforeEach(async () => {
+    await db.recipes.clear();
+    await db.pantry.clear();
+  });
+
+  it('buildLocalAiRagContext liefert passende Pantry-Chunks', async () => {
+    await db.pantry.add({
+      name: 'Tomaten',
+      quantity: 3,
+      unit: 'Stk',
+      category: 'Gemüse',
+      createdAt: 1,
+      updatedAt: 1,
+    });
+
+    const settings = getDefaultSettings();
+    const context = await buildLocalAiRagContext({
+      prompt: {
+        craving: 'Tomaten',
+        includeIngredients: [],
+        excludeIngredients: [],
+        modifiers: [],
+      },
+      settings,
+    });
+
+    expect(context.chunks.length).toBeGreaterThan(0);
+    expect(context.promptBlock).toMatch(/Tomaten/i);
+  });
+
+  it('buildLocalAiRagContext indexiert Rezepte bei Keyword-Treffer', async () => {
+    await db.recipes.add({
+      recipeTitle: 'Tomaten-Basilikum-Pasta',
+      shortDescription: 'Frisch',
+      prepTime: '10',
+      cookTime: '15',
+      totalTime: '25',
+      servings: '2',
+      difficulty: 'leicht',
+      ingredients: [{ sectionTitle: 'Haupt', items: [{ name: 'Tomaten', quantity: '2', unit: 'Stk' }] }],
+      instructions: ['Kochen'],
+      nutritionPerServing: { calories: '0', protein: '0', fat: '0', carbs: '0' },
+      tags: { course: [], cuisine: [], occasion: [] },
+      isFavorite: false,
+      updatedAt: 1,
+    } as never);
+
+    const context = await buildLocalAiRagContext({
+      prompt: {
+        craving: 'Tomaten Pasta',
+        includeIngredients: [],
+        excludeIngredients: [],
+        modifiers: [],
+      },
+      settings: getDefaultSettings(),
+    });
+
+    expect(context.chunks.some((chunk) => chunk.sourceType === 'recipe')).toBe(true);
+  });
+
+  it('enrichPromptWithRag erweitert includeIngredients', () => {
+    const enriched = enrichPromptWithRag(
+      {
+        craving: 'Pasta',
+        includeIngredients: ['Basilikum'],
+        excludeIngredients: [],
+        modifiers: [],
+      },
+      {
+        chunks: [],
+        promptBlock: '- Tomaten 2 Stk',
+      },
+    );
+
+    expect(enriched.includeIngredients).toContain('tomaten');
+  });
+});

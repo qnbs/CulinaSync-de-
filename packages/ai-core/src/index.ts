@@ -6,3 +6,52 @@ export {
 } from './workerBus.js';
 export { createLocalAiFacade, type LocalAiFacade } from './localAiFacade.js';
 export { tryImportTransformers, tryImportWebLlm } from './optionalMlImports.js';
+
+export {
+  detectGpuTier,
+  resolveGpuTier,
+  shouldSkipWebGpuLayer,
+  type GpuTier,
+  type GpuTierDetection,
+  type GpuTierPreference,
+} from './config/gpuTier.js';
+
+export {
+  MODEL_REGISTRY,
+  getModelEntry,
+  resolveGenerativeModel,
+  type GenerativeModelId,
+  type ModelRegistryEntry,
+} from './config/modelRegistry.js';
+
+export {
+  runProviderChain,
+  layerOrderForGenerative,
+} from './providers/providerChain.js';
+
+export {
+  ProviderChainExhaustedError,
+  type AiGenerativeTask,
+  type LocalAiLayerId,
+  type LocalAiRuntimeConfig,
+  type ProviderAttempt,
+  type ProviderChainResult,
+} from './providers/types.js';
+
+export { runHeuristicEngine, type HeuristicEngineHandlers } from './engines/localAiHeuristicEngine.js';
+export {
+  getWebLlmEngineStatus,
+  isWebLlmLayerEnabled,
+  type WebLlmEngineStatus,
+} from './engines/localAiWebLlmEngine.js';
+export {
+  getTransformersEngineStatus,
+  isTransformersLayerEnabled,
+  type TransformersEngineStatus,
+} from './engines/localAiTransformersEngine.js';
+
+export {
+  buildLocalAiRuntimeConfig,
+  resetGpuTierCacheForTests,
+  type LocalAiRuntimeInput,
+} from './localAiRuntime.js';

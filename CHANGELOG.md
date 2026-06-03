@@ -9,6 +9,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Hinzugefuegt
 
+- **M11.1 Local AI:** `@domain/ai-core` — `gpuTier`, `modelRegistry`, `providerChain`, WebLLM/Transformers/Heuristic-Engines (Feature-Flags); `aiProviderService` + `localAiRagService` (Keyword-RAG v1); `aiService` delegiert.
 - **Settings:** `DataPanel` in Module unter `data-panel/` (Vault, Cloud-Sync, Device-Sync, Storage); Logik in `useDataPanelSync` / `useDataPanelVault`.
 - **E2E:** `sync-settings`, `chef-local`, `pantry-cook` + Navigation-Helper.
 - **Tests:** `backupMergeService` LWW-Rezepte; `syncService` Download-Fehlerpfade; `formatStorageBytes`.

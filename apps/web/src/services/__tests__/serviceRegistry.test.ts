@@ -13,7 +13,7 @@ const registryMocks = vi.hoisted(() => ({
   initWhisper: vi.fn(async () => undefined),
 }));
 
-vi.mock('../aiService', () => ({
+vi.mock('../aiProviderService', () => ({
   generateRecipeIdeas: registryMocks.generateRecipeIdeas,
   generateRecipe: registryMocks.generateRecipe,
   generateShoppingList: registryMocks.generateShoppingList,
@@ -79,7 +79,7 @@ describe('serviceRegistry', () => {
     expect(typeof s.scanner.recognizeTextFromImage).toBe('function');
   });
 
-  it('Default-Gateways delegieren an aiService, geminiService, scanner und whisper', async () => {
+  it('Default-Gateways delegieren an aiProviderService, geminiService, scanner und whisper', async () => {
     resetAppServices();
     const s = getAppServices();
     const file = new File([], 'scan.jpg');

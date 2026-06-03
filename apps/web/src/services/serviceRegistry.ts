@@ -41,16 +41,16 @@ export interface AppServices {
 const defaultServices: AppServices = {
   ai: {
     generateRecipeIdeas: async (prompt, pantryItems, aiPreferences) => {
-      const aiService = await import('./aiService');
-      return aiService.generateRecipeIdeas(prompt, pantryItems, aiPreferences);
+      const aiProvider = await import('./aiProviderService');
+      return aiProvider.generateRecipeIdeas(prompt, pantryItems, aiPreferences);
     },
     generateRecipe: async (prompt, pantryItems, aiPreferences, chosenIdea) => {
-      const aiService = await import('./aiService');
-      return aiService.generateRecipe(prompt, pantryItems, aiPreferences, chosenIdea);
+      const aiProvider = await import('./aiProviderService');
+      return aiProvider.generateRecipe(prompt, pantryItems, aiPreferences, chosenIdea);
     },
     generateShoppingList: async (prompt, pantryItems, currentListItems) => {
-      const aiService = await import('./aiService');
-      return aiService.generateShoppingList(prompt, pantryItems, currentListItems);
+      const aiProvider = await import('./aiProviderService');
+      return aiProvider.generateShoppingList(prompt, pantryItems, currentListItems);
     },
     generateRecipeImage: async (recipeTitle) => {
       const geminiService = await import('./geminiService');
