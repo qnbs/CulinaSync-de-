@@ -7,6 +7,7 @@ Das Repository verwendet GitHub Actions fuer CI, Deploy und CodeQL.
 - CI: `.github/workflows/ci.yml`
 - Deploy: `.github/workflows/deploy.yml`
 - CodeQL: `.github/workflows/codeql.yml`
+- **Vercel (Preview/Production):** Projekt `culina-sync-de-web` (Turbo-Auto-Detect, Build-Output `apps/web/dist` — kein separates `vercel.json` nötig, solange Dashboard-Root mit Monorepo übereinstimmt)
 
 ## Build- und Deploy-Fluss
 
@@ -70,10 +71,20 @@ Diese Warnungen stammen aktuell von Upstream-Runtimes der GitHub-verwalteten Act
 - Ausführlicher Snapshot: [STATUS-2026-05-02.md](./STATUS-2026-05-02.md); davor [STATUS-2026-05-01.md](./STATUS-2026-05-01.md); ältere: [STATUS-2026-04-23.md](./STATUS-2026-04-23.md), [STATUS-2026-04-22.md](./STATUS-2026-04-22.md).
 - Vor einem release-nahen Push auf `main` empfohlen: **`pnpm run check:all`** oder mindestens `pnpm run lint`, `pnpm run test`, `pnpm run build`; Bundle-Budget ist in CI ohnehin Teil von Validate.
 
+## Vercel
+
+- **Root:** Repository-Root (pnpm-Workspace, Turbo erkennt `web`-Package).
+- **Install:** `pnpm install` (Lockfile muss konsistent sein — `pnpm install --frozen-lockfile` wie in CI).
+- **Build:** Turbo `web`-Package (`tsgo && vite build`); Vercel erkennt Turbo automatisch.
+- **Output:** `apps/web/dist` (Vite `base` ist lokal `/`, nicht der GitHub-Pages-Pfad). Im Vercel-Dashboard **nicht** fälschlich nur `dist` am Repo-Root erwarten, wenn der Build im Workspace `apps/web` landet.
+- **Node:** 24.x (wie `package.json` `engines` und GitHub Actions).
+- Typischer Production-Fehler nach Main-Merges: `ERR_PNPM_LOCKFILE_MISSING_DEPENDENCY` (kaputtes `pnpm-lock.yaml`) oder TS-Fehler durch unvollständige UI-Migrationen — beides blockiert den Build vor dem Vite-Schritt.
+
 ## Operative Checks nach einem produktionsrelevanten Fix
 
 1. GitHub-Run fuer CI pruefen.
 2. GitHub-Run fuer Deploy pruefen.
 3. GitHub-Run fuer CodeQL pruefen.
-4. Live-Demo frisch laden, idealerweise mit Cache-Busting-Query.
-5. Browserfehler und PWA-/Asset-Verhalten pruefen.
+4. **Vercel:** Production-Deployment auf `main` (Inspector → Build-Logs).
+5. Live-Demo frisch laden, idealerweise mit Cache-Busting-Query.
+6. Browserfehler und PWA-/Asset-Verhalten pruefen.
