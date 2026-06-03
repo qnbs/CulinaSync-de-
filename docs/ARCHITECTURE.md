@@ -33,7 +33,7 @@ Orchestrierung: **pnpm workspaces** + **Turborepo** (`turbo.json`). Root-Scripts
 
 ### Persistente Domaindaten
 
-- Dexie/IndexedDB = Source of Truth für `pantry`, `recipes`, `mealPlan`, `shoppingList`.
+- Dexie/IndexedDB = Source of Truth für `pantry`, `recipes`, `mealPlan`, `shoppingList`. Schema-Versionen und Upgrades: [DB-MIGRATIONS.md](./DB-MIGRATIONS.md).
 - Lesen: `useLiveQuery` in domainnahen Hooks.
 - Schreiben: Repositories und Services — **nicht** direkt aus Komponenten.
 

@@ -11,7 +11,7 @@
 | R-004 | Medium | `refactor(db): services import dbInstance only` | Testbarkeit | S | Letzte `./db`-Imports in Services bereinigen | — |
 | R-005 | Medium | `chore(eslint): exhaustive-deps warn → error` | Hook-Bugs | M | Bereits `warn`, 0 disables | R-004 hilft |
 | R-006 | Medium | `test: raise branch coverage sync + recipeRepository` | CI-Stabilität | M | 62 % branches knapp | — |
-| R-007 | Medium | `docs: document Dexie migration + backup gate` | User Trust | S | Falsche „fehlt Migration“-Narrative | — |
+| R-007 | Medium | `docs: document Dexie migration + backup gate` ✅ | User Trust | S | Erledigt: `docs/DB-MIGRATIONS.md` | — |
 | R-008 | Medium | `feat(sync): optional encrypted credential storage` | Security | M | localStorage Metadaten | apiKeyService pattern |
 | R-009 | Medium | `ci: Lighthouse CI on PR previews` | PWA/A11y Scores | M | Mobile UX | Vercel/Pages preview |
 | R-010 | Low | `chore(deps): resolve moderate audit findings` | Supply chain | S | 3 moderate offen | Dependabot |
