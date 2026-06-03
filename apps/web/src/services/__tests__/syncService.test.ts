@@ -175,4 +175,16 @@ describe('syncService high-level API', () => {
     await expect(syncUpload('pw', target)).rejects.toThrow('network');
     expect(logAppError).toHaveBeenCalled();
   });
+
+  it('logs and rethrows on merge download failure', async () => {
+    downloadEncryptedBlob.mockRejectedValue(new Error('timeout'));
+    await expect(syncDownload('pw', target, 'merge')).rejects.toThrow('timeout');
+    expect(logAppError).toHaveBeenCalled();
+  });
+
+  it('syncDownload replace logs decrypt failures', async () => {
+    downloadEncryptedBlob.mockResolvedValue(new Uint8Array([1, 2, 3]));
+    await expect(syncDownload('pw', target, 'replace')).rejects.toThrow();
+    expect(logAppError).toHaveBeenCalled();
+  });
 });

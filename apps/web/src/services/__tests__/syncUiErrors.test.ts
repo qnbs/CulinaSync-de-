@@ -1,23 +1,35 @@
-import { describe, expect, it } from 'vitest';
+import type { TFunction } from 'i18next';
+import { describe, expect, it, vi } from 'vitest';
 import { formatSyncErrorMessage } from '../syncUiErrors';
-
-const t = ((key: string, opts?: { status?: string; defaultValue?: string }) => {
-  if (key === 'settings.data.sync.errors.upload_failed') {
-    return `Upload HTTP ${opts?.status ?? ''}`;
-  }
-  if (key === 'settings.data.sync.errors.unknown') {
-    return 'Unbekannter Sync-Fehler';
-  }
-  return opts?.defaultValue ?? '';
-}) as Parameters<typeof formatSyncErrorMessage>[1];
+import { SYNC_ERROR_CODES } from '../syncErrorCodes';
 
 describe('syncUiErrors', () => {
-  it('mappt bekannte Sync-Codes auf i18n', () => {
-    const message = formatSyncErrorMessage(new Error('upload-failed:401'), t);
-    expect(message).toContain('401');
+  it('maps known sync error codes to i18n', () => {
+    const t = vi.fn(() => 'Server fehlt') as unknown as TFunction;
+    expect(formatSyncErrorMessage(new Error(SYNC_ERROR_CODES.nextcloudMissingServer), t)).toBe(
+      'Server fehlt',
+    );
   });
 
-  it('gibt unbekannte Fehler unveraendert zurueck', () => {
-    expect(formatSyncErrorMessage(new Error('custom'), t)).toBe('custom');
+  it('uses unknown fallback when translation key is empty', () => {
+    const t = vi.fn((key: string, opts?: { defaultValue?: string }) => {
+      if (key.endsWith('unknown')) return 'unknown-sync';
+      if (opts && 'defaultValue' in opts) return '';
+      return `translated:${key}`;
+    }) as unknown as TFunction;
+
+    expect(formatSyncErrorMessage(new Error(`${SYNC_ERROR_CODES.uploadFailed}:503`), t)).toBe(
+      'unknown-sync',
+    );
+  });
+
+  it('falls back to message for unknown errors', () => {
+    const t = vi.fn() as unknown as TFunction;
+    expect(formatSyncErrorMessage(new Error('custom failure'), t)).toBe('custom failure');
+  });
+
+  it('stringifies non-Error values', () => {
+    const t = vi.fn() as unknown as TFunction;
+    expect(formatSyncErrorMessage('oops', t)).toBe('oops');
   });
 });
