@@ -1,7 +1,42 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { decryptBackup, encryptBackup } from '../syncService';
+import {
+  decryptBackup,
+  encryptBackup,
+  getLastSyncTimestamp,
+  syncDownload,
+  syncUpload,
+} from '../syncService';
 import type { FullBackupData } from '../../types';
+
+const uploadEncryptedBlob = vi.fn();
+const downloadEncryptedBlob = vi.fn();
+const getFullData = vi.fn();
+const importData = vi.fn();
+const mergeBackupWithConflictResolution = vi.fn();
+const logAppError = vi.fn();
+
+vi.mock('../syncTransport', () => ({
+  uploadEncryptedBlob: (...args: unknown[]) => uploadEncryptedBlob(...args),
+  downloadEncryptedBlob: (...args: unknown[]) => downloadEncryptedBlob(...args),
+}));
+
+vi.mock('../exportService', () => ({
+  getFullData: (...args: unknown[]) => getFullData(...args),
+}));
+
+vi.mock('../repositories/dataRepository', () => ({
+  importData: (...args: unknown[]) => importData(...args),
+}));
+
+vi.mock('../backupMergeService', () => ({
+  mergeBackupWithConflictResolution: (...args: unknown[]) =>
+    mergeBackupWithConflictResolution(...args),
+}));
+
+vi.mock('../errorLoggingService', () => ({
+  logAppError: (...args: unknown[]) => logAppError(...args),
+}));
 
 const LEGACY_SALT = new TextEncoder().encode('culinasync-salt');
 
@@ -77,29 +112,67 @@ describe('syncService backup encryption', () => {
   });
 });
 
-describe('syncService cloud transfer', () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
+describe('syncService high-level API', () => {
+  const target = { url: 'https://cloud.example/backup.enc', auth: { type: 'bearer' as const, token: 't' } };
+  const sampleBackup: FullBackupData = {
+    pantry: [],
+    recipes: [],
+    mealPlan: [],
+    shoppingList: [],
+    exportedAt: '2026-06-03T12:00:00.000Z',
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+    getFullData.mockResolvedValue(sampleBackup);
+    uploadEncryptedBlob.mockResolvedValue(undefined);
+    downloadEncryptedBlob.mockResolvedValue(new Uint8Array());
+    importData.mockResolvedValue(undefined);
+    mergeBackupWithConflictResolution.mockResolvedValue(undefined);
   });
 
-  it('uploadEncryptedBlob sendet PUT mit Bearer', async () => {
-    const fetchMock = vi.fn().mockResolvedValue({ ok: true });
-    vi.stubGlobal('fetch', fetchMock);
-    const { uploadEncryptedBlob } = await import('../syncTransport');
-    const payload = new Uint8Array([1, 2, 3]);
-    await uploadEncryptedBlob('https://example.com/backup', payload, { type: 'bearer', token: 'token-1' });
-    expect(fetchMock).toHaveBeenCalledWith(
-      'https://example.com/backup',
-      expect.objectContaining({
-        method: 'PUT',
-        headers: expect.objectContaining({ Authorization: 'Bearer token-1' }),
-      }),
+  it('syncUpload encrypts payload and stores last sync timestamp', async () => {
+    await syncUpload('pw', target);
+
+    expect(getFullData).toHaveBeenCalled();
+    expect(uploadEncryptedBlob).toHaveBeenCalledWith(
+      target.url,
+      expect.any(Uint8Array),
+      target.auth,
     );
+    expect(getLastSyncTimestamp()).toEqual(expect.any(Number));
   });
 
-  it('downloadEncryptedBlob wirft bei HTTP-Fehler', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
-    const { downloadEncryptedBlob } = await import('../syncTransport');
-    await expect(downloadEncryptedBlob('https://example.com/x')).rejects.toThrow('download-failed');
+  it('syncDownload replace mode imports decrypted data', async () => {
+    const encrypted = await encryptBackup(sampleBackup, 'pw');
+    downloadEncryptedBlob.mockResolvedValue(encrypted);
+
+    await syncDownload('pw', target, 'replace');
+
+    expect(importData).toHaveBeenCalledWith(sampleBackup);
+    expect(mergeBackupWithConflictResolution).not.toHaveBeenCalled();
+    expect(getLastSyncTimestamp()).toEqual(expect.any(Number));
+  });
+
+  it('syncDownload merge mode uses conflict resolver', async () => {
+    const encrypted = await encryptBackup(sampleBackup, 'pw');
+    downloadEncryptedBlob.mockResolvedValue(encrypted);
+
+    await syncDownload('pw', target, 'merge');
+
+    expect(mergeBackupWithConflictResolution).toHaveBeenCalledWith(sampleBackup);
+    expect(importData).not.toHaveBeenCalled();
+  });
+
+  it('getLastSyncTimestamp returns null for invalid stored value', () => {
+    localStorage.setItem('culinaSyncLastSyncAt', 'not-a-number');
+    expect(getLastSyncTimestamp()).toBeNull();
+  });
+
+  it('logs and rethrows on upload failure', async () => {
+    uploadEncryptedBlob.mockRejectedValue(new Error('network'));
+    await expect(syncUpload('pw', target)).rejects.toThrow('network');
+    expect(logAppError).toHaveBeenCalled();
   });
 });

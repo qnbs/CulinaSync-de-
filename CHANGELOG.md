@@ -7,6 +7,11 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefuegt
+
+- **Tests:** `syncService` Upload/Download/Merge + `getLastSyncTimestamp`; `syncTransport.test.ts`; `pnpm run test:scripts` für Deploy-Verify-Logik (`scripts/lib/deploy-verify-logic.mjs`).
+- **Doku:** [docs/DB-MIGRATIONS.md](docs/DB-MIGRATIONS.md) — Dexie `DB_MIGRATION_HISTORY`, Backup-Gate, Checkliste (R-007).
+
 ### Behoben
 
 - **CI Deploy:** `deploy.yml` — `checkout` vor Post-Deploy-Verify; Vercel-HTTP-401 (Deployment Protection) als Warnung statt Hard-Fail.

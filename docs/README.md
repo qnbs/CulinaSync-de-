@@ -22,6 +22,7 @@ Vorgänger: [STATUS-2026-06-02.md](./STATUS-2026-06-02.md) (M5 Coverage abgeschl
 | [M7-TYPESCRIPT-7-GA-PREP.md](./M7-TYPESCRIPT-7-GA-PREP.md) | TS 7.0 GA Vorbereitung |
 | [M8-TAURI-DESKTOP.md](./M8-TAURI-DESKTOP.md) | Desktop / Tauri 2 |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Schichten, Datenfluss, Monorepo |
+| [DB-MIGRATIONS.md](./DB-MIGRATIONS.md) | Dexie-Schema, `DB_MIGRATION_HISTORY`, Backup-Gate |
 | [PROJECT-STRUCTURE.md](./PROJECT-STRUCTURE.md) | Repo-Layout (`apps/web/src/`) |
 | [DEVELOPMENT.md](./DEVELOPMENT.md) | Setup, Befehle, Konventionen |
 | [TESTING.md](./TESTING.md) | Vitest, Coverage, Playwright E2E |

@@ -29,6 +29,7 @@ pnpm run lint
 pnpm run test
 pnpm run build           # tsgo && vite build
 pnpm run test:coverage
+pnpm run test:scripts   # node --test für scripts/lib (Deploy-Verify)
 pnpm run analyze:bundle
 pnpm run check:bundle-budget
 pnpm run preview
