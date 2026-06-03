@@ -1,7 +1,18 @@
 # CulinaSync — Full App & Repo Audit
 
-> **Audit-Datum:** 2026-04-14
-> **Scope:** Code-Qualität, Architektur, Sicherheit, A11y, i18n, Performance, Testing, CI/CD, DevContainer, Dependencies, Dokumentation
+> **Audit-Datum:** 2026-04-14 (historische Findings unten)  
+> **Aktueller Full-Scale Audit:** **[docs/AUDIT-vNEXT-2026-06-03.md](docs/AUDIT-vNEXT-2026-06-03.md)** (Gesamt **9,0/10**)  
+> **Backlog & Plan:** [AUDIT-REMEDIATION-BACKLOG.md](docs/AUDIT-REMEDIATION-BACKLOG.md) · [AUDIT-REMEDIATION-PLAN.md](docs/AUDIT-REMEDIATION-PLAN.md)
+
+---
+
+## Status-Update 2026-06-03 (Full-Scale Audit vNext)
+
+- **Gesamtbewertung:** **9,0 / 10** — produktionsreif für Local-First; Multi-Device/Sync und E2E-Tiefe sind die Haupthebel.
+- **Validierung:** 397 Tests; Coverage **~78 %** stmts / **~79 %** lines / **~62 %** branches; `i18n:check` Baseline **0**; `pnpm audit --audit-level=high` ohne High/Critical.
+- **Korrigiert (externe Audits):** Dexie-Migrationen in `dbMigrations.ts`; `exhaustive-deps: warn` (nicht off); `no-explicit-any: error`; RecipeDetail/CookMode gesplittet.
+- **Offen (Top):** Sync Zod/E2E (R-001/R-003), DataPanel-Split (R-002), `exportService`→`dbInstance` (R-004, in Audit-PR), Lighthouse CI, Tauri Release.
+- **PR-Prozess:** `.cursor/rules/300-pr-review-automation.mdc` — CodeAnt/Copilot-Kommentare proaktiv vor Merge.
 
 ---
 

@@ -9,6 +9,15 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Hinzugefuegt
 
+- **Audit vNext (2026-06-03):** `docs/AUDIT-vNEXT-2026-06-03.md`, Remediation-Backlog und -Plan; PR-Review-Regel (CodeAnt/Copilot proaktiv).
+- **Sync:** Zod-Validierung für Device-QR/LAN-Payload (`deviceSyncService`); Test für Oversize-Payload.
+
+### Geaendert
+
+- **DB-Imports:** `exportService` nutzt `dbInstance` statt `db` (weniger Side-Effects in Tests).
+
+### Hinzugefuegt
+
 - **Onboarding:** Tour aus Hilfe erneut starten (`openOnboarding`); Joyride- und UI-Texte vollständig i18n (de/en).
 - **i18n:** Eigenes Locale-File `aiChef.json` für KI-Chef-UI (`aiChef.input` / `aiChef.results`); Einstellungen behalten `settings.aiChef` nur für Präferenzen.
 - **Help:** 12 FAQs (Vault, Cloud-Sync, API-Key, lokale KI, PWA, Policies), 6 interaktive Pro-Tipps, Schnellzugriff auf Einstellungen, Live-Systemstatus (Netzwerk, Speicher, PWA), erweiterte Philosophie/Tech-Stack.

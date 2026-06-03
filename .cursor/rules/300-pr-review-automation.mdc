@@ -1,0 +1,36 @@
+---
+description: PR-Review — CodeAnt, Copilot und Inline-Kommentare proaktiv abarbeiten
+alwaysApply: true
+---
+
+# PR-Review & Bot-Kommentare (dauerhaft)
+
+## Modus operandi
+
+Bei **jedem** Pull Request (eigener Agent-PR oder Review-Auftrag):
+
+1. **Alle Inline-Kommentare** einlesen — insbesondere von **CodeAnt**, **Copilot**, **Cursor Bugbot**, menschlichen Reviewern.
+2. **Proaktiv abarbeiten** vor Merge: Fix umsetzen, Test ergänzen, oder **kurz begründen**, warum nicht (mit Verweis auf Architektur-Regel).
+3. **Keine offenen Threads** ohne Antwort — auch „nit“-Hinweise, wenn der Fix &lt; 5 Minuten ist.
+4. Nach Fixes: betroffene Tests + `pnpm run lint` + `type-check` für den geänderten Slice; bei user-visible Änderungen `i18n:check`.
+
+## Priorität
+
+| Quelle | Typisch | Aktion |
+|--------|---------|--------|
+| Security / Datenverlust | CodeAnt, CodeQL | Sofort fixen |
+| Architektur (Dexie, Gemini, API-Key) | Copilot, Rules | Fix oder dokumentierte Ausnahme |
+| Style / Naming | Bot nit | Fix wenn lokal konsistent |
+| False positive | Bot | Kommentar + ggf. ESLint-Kommentar mit Begründung |
+
+## Checkliste vor PR „ready for review“
+
+- [ ] Alle Review-Kommentare adressiert
+- [ ] CHANGELOG [Unreleased] bei substanziellen Änderungen
+- [ ] QNBS-v3-Kommentar bei neuer nicht-trivialer Logik
+- [ ] CI beobachten bis grün (validate, E2E wenn getriggert, Deploy)
+
+## Referenzen
+
+- Audit-Backlog: `docs/AUDIT-REMEDIATION-BACKLOG.md`
+- Copilot: `.github/copilot-instructions.md` § PR-Review
