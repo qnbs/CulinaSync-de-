@@ -7,7 +7,8 @@ const mockDb = vi.hoisted(() => ({
   shoppingList: { toArray: vi.fn() },
 }));
 
-vi.mock('../db', () => ({
+// dbInstance mock — exportService liest Dexie ohne db.ts Side-Effects
+vi.mock('../dbInstance', () => ({
   db: mockDb,
 }));
 
