@@ -240,3 +240,25 @@ html.large-text {
     font-size: 17px;
   }
 }
+
+html.reduced-motion *,
+html.reduced-motion *::before,
+html.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+html.compact-density {
+  --settings-density-scale: 0.92;
+}
+
+html.compact-density .glass-card,
+html.compact-density .glass-panel {
+  padding: calc(1rem * var(--settings-density-scale, 0.92));
+}
+
+html.compact-density .page-fade-in {
+  gap: calc(1.5rem * var(--settings-density-scale, 0.92));
+}

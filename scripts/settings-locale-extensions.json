@@ -1,0 +1,440 @@
+{
+  "de": {
+    "sections": {
+      "workspace": "Haushalt & Module",
+      "localAi": "Lokale KI",
+      "privacy": "Privatsphäre",
+      "health": "Gesundheit",
+      "community": "Community"
+    },
+    "sidebar": {
+      "workspace": {
+        "label": "Haushalt",
+        "description": "Vorrat, Rezepte, Planung"
+      },
+      "localAi": {
+        "label": "Lokale KI",
+        "description": "Offline-Modelle & GPU"
+      },
+      "privacy": {
+        "label": "Privatsphäre",
+        "description": "Daten & KI-Spuren"
+      }
+    },
+    "modules": {
+      "householdTitle": "Haushalt",
+      "workspaceHint": "Vorrat, Rezeptbuch, Einkauf und Kochmodus findest du unter „Haushalt“."
+    },
+    "appearance": {
+      "reducedMotion": {
+        "title": "Bewegung reduzieren",
+        "description": "Deaktiviert Animationen für ruhigere, fokussiertere Bedienung."
+      },
+      "compactDensity": {
+        "title": "Kompakte Dichte",
+        "description": "Mehr Inhalt auf dem Bildschirm — ideal für Tablets am Herd."
+      },
+      "nutritionBadges": {
+        "title": "Nährwert-Badges",
+        "description": "Zeigt Nährwert-Hinweise in Rezeptlisten und Details."
+      }
+    },
+    "aiChef": {
+      "routingTitle": "KI-Routing & Kontext",
+      "routingModeLabel": "Bevorzugter Pfad",
+      "responseStyleLabel": "Antwortstil",
+      "responseStyle": {
+        "concise": "Knapp",
+        "balanced": "Ausgewogen",
+        "detailed": "Ausführlich"
+      },
+      "contextPantry": "Vorratskontext für RAG einbeziehen",
+      "contextMealPlan": "Essensplan-Historie einbeziehen",
+      "contextRecipes": "Rezept-Historie einbeziehen",
+      "strictJson": "Strikte JSON-Validierung (Zod)",
+      "ragChunksLabel": "RAG-Kontext-Chunks"
+    },
+    "localAi": {
+      "stackTitle": "4-Layer Local Inference",
+      "stackDescription": "WebLLM → ONNX → Transformers.js → Heuristik — automatischer Fallback bei schwacher Hardware.",
+      "layers": {
+        "webllm": "WebLLM",
+        "onnx": "ONNX",
+        "transformers": "Transformers",
+        "heuristic": "Heuristik"
+      },
+      "coreTitle": "Kern",
+      "enabledLabel": "Lokale KI aktiv",
+      "enabledDesc": "Nutzt On-Device-Inferenz, sobald Modelle verfügbar sind.",
+      "localOnlyLabel": "Nur lokal (Strict)",
+      "localOnlyDesc": "Blockiert Cloud-Aufrufe vollständig — maximale Privatsphäre.",
+      "cloudFallbackLabel": "Cloud-Fallback erlauben",
+      "cloudFallbackDesc": "Bei lokalem Fehler optional Gemini (BYOK) nutzen.",
+      "routingLabel": "Routing-Modus",
+      "routing": {
+        "localFirst": "Lokal zuerst",
+        "localOnly": "Nur lokal",
+        "cloudFirst": "Cloud zuerst"
+      },
+      "hardwareTitle": "Hardware & Modelle",
+      "gpuTierLabel": "GPU-Profil",
+      "gpuTier": {
+        "auto": "Automatisch",
+        "high": "Maximale Qualität",
+        "balanced": "Ausgewogen",
+        "efficient": "Sparsam"
+      },
+      "gpuTierActive": "Aktives Profil: {{tier}}",
+      "modelLabel": "Generatives Modell",
+      "models": {
+        "auto": "Automatisch (nach GPU)",
+        "webllm-qwen-2.5-1.5b": "Qwen 2.5 1.5B",
+        "webllm-phi-3.5": "Phi-3.5 Mini",
+        "webllm-llama-3.2-1b": "Llama 3.2 1B",
+        "heuristic-only": "Nur Heuristik"
+      },
+      "modelActive": "Auswahl: {{model}}",
+      "preferWebGpuLabel": "WebGPU bevorzugen",
+      "preferWebGpuDesc": "Schnellster Pfad auf modernen GPUs; sonst WASM-Fallback.",
+      "maxJobsLabel": "Parallele Jobs",
+      "capabilitiesTitle": "Fähigkeiten",
+      "visionLabel": "Vision (Vorrats-Scan)",
+      "visionDesc": "ONNX/CLIP für Foto-Erkennung ohne Cloud.",
+      "embeddingsLabel": "Embeddings & RAG",
+      "embeddingsDesc": "Semantische Suche über deine Rezepte und den Vorrat.",
+      "cacheLabel": "Inference-Cache",
+      "cacheDesc": "Zwischenspeichert Antworten mit TTL in IndexedDB.",
+      "cacheTtlLabel": "Cache-TTL",
+      "cacheTtlHours": "{{count}} Stunden",
+      "stripExifLabel": "EXIF bei Fotos entfernen",
+      "stripExifDesc": "Entfernt Metadaten vor der Vision-Analyse.",
+      "storageTitle": "Speicher",
+      "storageLimitLabel": "Max. Modell-Speicher",
+      "downloadedModelsHint": "{{count}} Modell(e) als heruntergeladen markiert.",
+      "ollamaTitle": "Ollama (Desktop)",
+      "ollamaEnabledLabel": "Ollama-Connector",
+      "ollamaEnabledDesc": "Optional lokale Server-Modelle auf dem Rechner nutzen.",
+      "ollamaUrlLabel": "Ollama-Basis-URL",
+      "privacyNotice": "Bei lokaler Nutzung verlassen deine Haushaltsdaten das Gerät nicht. Cloud-Pfade nutzen nur deinen eigenen API-Key."
+    },
+    "privacy": {
+      "title": "Privatsphäre & Daten",
+      "subtitle": "Du entscheidest, was gespeichert, geteilt oder gelöscht wird.",
+      "dataTitle": "Daten & Diagnostik",
+      "analyticsLabel": "Anonyme Nutzungsstatistik",
+      "analyticsDesc": "Hilft bei der Verbesserung — ohne Rezept- oder Vorrat-Inhalte.",
+      "diagnosticsLabel": "Fehlerdiagnose teilen",
+      "diagnosticsDesc": "Nur technische Metadaten, keine API-Keys.",
+      "redactPiiLabel": "PII in Logs schwärzen",
+      "redactPiiDesc": "Namen und freie Texte in Fehlerlogs reduzieren.",
+      "aiTitle": "KI-Spuren",
+      "persistPromptsLabel": "Prompts lokal speichern",
+      "persistPromptsDesc": "Ermöglicht Verlauf und Cache — nur auf diesem Gerät.",
+      "clearCacheLabel": "KI-Cache bei Reset leeren",
+      "clearCacheDesc": "Löscht Inference-Cache beim Werksreset.",
+      "localFirstTitle": "Local-first Standard",
+      "localFirstDesc": "CulinaSync ist für Offline und Gerät-first gebaut. Cloud-KI bleibt optional.",
+      "resetHint": "Vollständige Löschung aller Daten: Bereich „Daten & Speicher“ → Werksreset."
+    },
+    "workspace": {
+      "pantryTitle": "Vorrat",
+      "pantrySortLabel": "Standard-Sortierung",
+      "unitSystemLabel": "Einheitensystem",
+      "unitMetric": "Metrisch",
+      "unitImperial": "Imperial",
+      "pantryGroupedLabel": "Nach Kategorie gruppieren",
+      "pantryGroupedDesc": "Gruppiert Einträge in der Vorratsansicht.",
+      "expiryBadgesLabel": "Ablauf-Badges",
+      "expiryBadgesDesc": "Hebt bald ablaufende Artikel hervor.",
+      "lowStockLabel": "Mindestbestand hervorheben",
+      "lowStockDesc": "Markiert Artikel unter deinen Policy-Schwellen.",
+      "sort": {
+        "name": "Name",
+        "expiry": "Ablaufdatum",
+        "updated": "Zuletzt geändert",
+        "created": "Erstellt"
+      },
+      "recipeTitle": "Rezeptbuch",
+      "recipeSortLabel": "Standard-Sortierung",
+      "recipeSort": {
+        "newest": "Neueste",
+        "favorites": "Favoriten",
+        "az": "A–Z",
+        "za": "Z–A"
+      },
+      "recipeViewLabel": "Standard-Ansicht",
+      "recipeView": {
+        "grid": "Kacheln",
+        "list": "Liste"
+      },
+      "nutritionPreviewLabel": "Nährwert-Vorschau",
+      "nutritionPreviewDesc": "Zeigt geschätzte Nährwerte in der Übersicht.",
+      "shoppingTitle": "Einkaufsliste",
+      "shoppingSortLabel": "Sortierung",
+      "shoppingSort": {
+        "category": "Kategorie",
+        "alpha": "Alphabetisch"
+      },
+      "checkedBottomLabel": "Erledigte nach unten",
+      "checkedBottomDesc": "Abgehakte Artikel ans Listenende sortieren.",
+      "mergeDuplicatesLabel": "Duplikate intelligent mergen",
+      "mergeDuplicatesDesc": "Fasst gleiche Artikel mit ähnlichen Namen zusammen.",
+      "suggestQuantitiesLabel": "Mengen aus Rezepten",
+      "suggestQuantitiesDesc": "Schlägt Mengen basierend auf geplanten Mahlzeiten vor.",
+      "mealPlannerTitle": "Essensplaner",
+      "varietyLabel": "Abwechslung bevorzugen",
+      "varietyDesc": "Vermeidet zu häufige Wiederholungen derselben Gerichte.",
+      "expiryPlanLabel": "Ablaufdaten priorisieren",
+      "expiryPlanDesc": "Plant Gerichte mit bald ablaufenden Zutaten zuerst.",
+      "pantrySuggestLabel": "Vorrats-Vorschläge",
+      "pantrySuggestDesc": "Berücksichtigt verfügbare Zutaten bei Vorschlägen.",
+      "avoidRepeatLabel": "Wiederholung vermeiden (Tage)",
+      "avoidRepeatDays": "{{count}} Tage",
+      "cookModeTitle": "Kochmodus",
+      "cookAiLabel": "KI-Assistent im Kochmodus",
+      "cookAiDesc": "Schrittweise Hilfe, Substitutionen und Timing (wenn Modell verfügbar).",
+      "cookAutoAdvanceLabel": "Schritte automatisch vorrücken",
+      "cookAutoAdvanceDesc": "Nach Timer-Ende zum nächsten Schritt wechseln.",
+      "cookTimerSoundLabel": "Timer-Sound",
+      "cookTimerSoundDesc": "Akustisches Signal bei abgelaufenen Timern.",
+      "cookWakeLockLabel": "Bildschirm wach halten",
+      "cookWakeLockDesc": "Verhindert Display-Sleep während des Kochens.",
+      "cookChecklistLabel": "Zutaten-Checkliste",
+      "cookChecklistDesc": "Zeigt abhakbare Zutatenliste neben den Schritten."
+    },
+    "speech": {
+      "whisperModelLabel": "Whisper-Modellgröße",
+      "whisperSize": {
+        "tiny": "Tiny (schnell)",
+        "base": "Base (ausgewogen)",
+        "small": "Small (genauer)"
+      },
+      "continuousListening": "Dauerhaftes Zuhören",
+      "confirmDestructive": "Destruktive Sprachbefehle bestätigen",
+      "volumeLabel": "Lautstärke"
+    },
+    "policy": {
+      "strictEnforcementLabel": "Allergene strikt durchsetzen",
+      "strictEnforcementDesc": "Blockiert KI-Vorschläge mit verbotenen Allergenen."
+    }
+  },
+  "en": {
+    "sections": {
+      "workspace": "Household & modules",
+      "localAi": "Local AI",
+      "privacy": "Privacy",
+      "health": "Health",
+      "community": "Community"
+    },
+    "sidebar": {
+      "workspace": {
+        "label": "Household",
+        "description": "Pantry, recipes, planning"
+      },
+      "localAi": {
+        "label": "Local AI",
+        "description": "Offline models & GPU"
+      },
+      "privacy": {
+        "label": "Privacy",
+        "description": "Data & AI traces"
+      }
+    },
+    "modules": {
+      "householdTitle": "Household",
+      "workspaceHint": "Pantry, recipe book, shopping, and cook mode live under “Household”."
+    },
+    "appearance": {
+      "reducedMotion": {
+        "title": "Reduce motion",
+        "description": "Minimizes animations for calmer, focused use."
+      },
+      "compactDensity": {
+        "title": "Compact density",
+        "description": "Fits more on screen — great for kitchen tablets."
+      },
+      "nutritionBadges": {
+        "title": "Nutrition badges",
+        "description": "Shows nutrition hints in recipe lists and details."
+      }
+    },
+    "aiChef": {
+      "routingTitle": "AI routing & context",
+      "routingModeLabel": "Preferred path",
+      "responseStyleLabel": "Response style",
+      "responseStyle": {
+        "concise": "Concise",
+        "balanced": "Balanced",
+        "detailed": "Detailed"
+      },
+      "contextPantry": "Include pantry context for RAG",
+      "contextMealPlan": "Include meal plan history",
+      "contextRecipes": "Include recipe history",
+      "strictJson": "Strict JSON validation (Zod)",
+      "ragChunksLabel": "RAG context chunks"
+    },
+    "localAi": {
+      "stackTitle": "4-layer local inference",
+      "stackDescription": "WebLLM → ONNX → Transformers.js → heuristic — automatic fallback on weak hardware.",
+      "layers": {
+        "webllm": "WebLLM",
+        "onnx": "ONNX",
+        "transformers": "Transformers",
+        "heuristic": "Heuristic"
+      },
+      "coreTitle": "Core",
+      "enabledLabel": "Local AI enabled",
+      "enabledDesc": "Uses on-device inference when models are available.",
+      "localOnlyLabel": "Local only (strict)",
+      "localOnlyDesc": "Blocks all cloud calls — maximum privacy.",
+      "cloudFallbackLabel": "Allow cloud fallback",
+      "cloudFallbackDesc": "Optionally use Gemini (BYOK) if local inference fails.",
+      "routingLabel": "Routing mode",
+      "routing": {
+        "localFirst": "Local first",
+        "localOnly": "Local only",
+        "cloudFirst": "Cloud first"
+      },
+      "hardwareTitle": "Hardware & models",
+      "gpuTierLabel": "GPU profile",
+      "gpuTier": {
+        "auto": "Automatic",
+        "high": "Maximum quality",
+        "balanced": "Balanced",
+        "efficient": "Efficient"
+      },
+      "gpuTierActive": "Active profile: {{tier}}",
+      "modelLabel": "Generative model",
+      "models": {
+        "auto": "Automatic (by GPU)",
+        "webllm-qwen-2.5-1.5b": "Qwen 2.5 1.5B",
+        "webllm-phi-3.5": "Phi-3.5 mini",
+        "webllm-llama-3.2-1b": "Llama 3.2 1B",
+        "heuristic-only": "Heuristic only"
+      },
+      "modelActive": "Selected: {{model}}",
+      "preferWebGpuLabel": "Prefer WebGPU",
+      "preferWebGpuDesc": "Fastest path on modern GPUs; otherwise WASM fallback.",
+      "maxJobsLabel": "Parallel jobs",
+      "capabilitiesTitle": "Capabilities",
+      "visionLabel": "Vision (pantry scan)",
+      "visionDesc": "ONNX/CLIP for photo recognition without cloud.",
+      "embeddingsLabel": "Embeddings & RAG",
+      "embeddingsDesc": "Semantic search over your recipes and pantry.",
+      "cacheLabel": "Inference cache",
+      "cacheDesc": "Caches responses with TTL in IndexedDB.",
+      "cacheTtlLabel": "Cache TTL",
+      "cacheTtlHours": "{{count}} hours",
+      "stripExifLabel": "Strip EXIF from photos",
+      "stripExifDesc": "Removes metadata before vision analysis.",
+      "storageTitle": "Storage",
+      "storageLimitLabel": "Max model storage",
+      "downloadedModelsHint": "{{count}} model(s) marked as downloaded.",
+      "ollamaTitle": "Ollama (desktop)",
+      "ollamaEnabledLabel": "Ollama connector",
+      "ollamaEnabledDesc": "Optionally use local server models on your machine.",
+      "ollamaUrlLabel": "Ollama base URL",
+      "privacyNotice": "With local use, your household data never leaves the device. Cloud paths only use your own API key."
+    },
+    "privacy": {
+      "title": "Privacy & data",
+      "subtitle": "You control what is stored, shared, or deleted.",
+      "dataTitle": "Data & diagnostics",
+      "analyticsLabel": "Anonymous usage stats",
+      "analyticsDesc": "Helps improve the app — no recipe or pantry contents.",
+      "diagnosticsLabel": "Share crash diagnostics",
+      "diagnosticsDesc": "Technical metadata only, no API keys.",
+      "redactPiiLabel": "Redact PII in logs",
+      "redactPiiDesc": "Reduces names and free text in error logs.",
+      "aiTitle": "AI traces",
+      "persistPromptsLabel": "Store prompts locally",
+      "persistPromptsDesc": "Enables history and cache — on this device only.",
+      "clearCacheLabel": "Clear AI cache on reset",
+      "clearCacheDesc": "Deletes inference cache on factory reset.",
+      "localFirstTitle": "Local-first by design",
+      "localFirstDesc": "CulinaSync is built for offline and device-first use. Cloud AI stays optional.",
+      "resetHint": "Full data wipe: “Data & storage” → factory reset."
+    },
+    "workspace": {
+      "pantryTitle": "Pantry",
+      "pantrySortLabel": "Default sort",
+      "unitSystemLabel": "Unit system",
+      "unitMetric": "Metric",
+      "unitImperial": "Imperial",
+      "pantryGroupedLabel": "Group by category",
+      "pantryGroupedDesc": "Groups items in the pantry view.",
+      "expiryBadgesLabel": "Expiry badges",
+      "expiryBadgesDesc": "Highlights items expiring soon.",
+      "lowStockLabel": "Highlight low stock",
+      "lowStockDesc": "Marks items below your policy thresholds.",
+      "sort": {
+        "name": "Name",
+        "expiry": "Expiry date",
+        "updated": "Last updated",
+        "created": "Created"
+      },
+      "recipeTitle": "Recipe book",
+      "recipeSortLabel": "Default sort",
+      "recipeSort": {
+        "newest": "Newest",
+        "favorites": "Favorites",
+        "az": "A–Z",
+        "za": "Z–A"
+      },
+      "recipeViewLabel": "Default view",
+      "recipeView": {
+        "grid": "Grid",
+        "list": "List"
+      },
+      "nutritionPreviewLabel": "Nutrition preview",
+      "nutritionPreviewDesc": "Shows estimated nutrition in overview.",
+      "shoppingTitle": "Shopping list",
+      "shoppingSortLabel": "Sort order",
+      "shoppingSort": {
+        "category": "Category",
+        "alpha": "Alphabetical"
+      },
+      "checkedBottomLabel": "Checked items at bottom",
+      "checkedBottomDesc": "Moves completed items to the end.",
+      "mergeDuplicatesLabel": "Smart merge duplicates",
+      "mergeDuplicatesDesc": "Merges similar item names intelligently.",
+      "suggestQuantitiesLabel": "Quantities from recipes",
+      "suggestQuantitiesDesc": "Suggests amounts from planned meals.",
+      "mealPlannerTitle": "Meal planner",
+      "varietyLabel": "Prefer variety",
+      "varietyDesc": "Avoids repeating the same dishes too often.",
+      "expiryPlanLabel": "Prioritize expiry dates",
+      "expiryPlanDesc": "Plans meals using soon-to-expire ingredients first.",
+      "pantrySuggestLabel": "Pantry suggestions",
+      "pantrySuggestDesc": "Considers available ingredients in suggestions.",
+      "avoidRepeatLabel": "Avoid repeat (days)",
+      "avoidRepeatDays": "{{count}} days",
+      "cookModeTitle": "Cook mode",
+      "cookAiLabel": "AI assistant in cook mode",
+      "cookAiDesc": "Step help, substitutions, and timing (when a model is available).",
+      "cookAutoAdvanceLabel": "Auto-advance steps",
+      "cookAutoAdvanceDesc": "Moves to the next step when a timer ends.",
+      "cookTimerSoundLabel": "Timer sound",
+      "cookTimerSoundDesc": "Plays a sound when timers finish.",
+      "cookWakeLockLabel": "Keep screen awake",
+      "cookWakeLockDesc": "Prevents display sleep while cooking.",
+      "cookChecklistLabel": "Ingredient checklist",
+      "cookChecklistDesc": "Shows a checkable ingredient list beside steps."
+    },
+    "speech": {
+      "whisperModelLabel": "Whisper model size",
+      "whisperSize": {
+        "tiny": "Tiny (fast)",
+        "base": "Base (balanced)",
+        "small": "Small (more accurate)"
+      },
+      "continuousListening": "Continuous listening",
+      "confirmDestructive": "Confirm destructive voice commands",
+      "volumeLabel": "Volume"
+    },
+    "policy": {
+      "strictEnforcementLabel": "Strict allergen enforcement",
+      "strictEnforcementDesc": "Blocks AI suggestions containing forbidden allergens."
+    }
+  }
+}

@@ -91,6 +91,19 @@ export interface ShoppingListItem {
     sortOrder: number;
 }
 
+export type AiRoutingMode = 'local-only' | 'local-first' | 'cloud-first';
+export type AiResponseStyle = 'concise' | 'balanced' | 'detailed';
+export type GpuTierPreference = 'auto' | 'high' | 'balanced' | 'efficient';
+export type LocalAiGenerativeModel =
+  | 'auto'
+  | 'webllm-qwen-2.5-1.5b'
+  | 'webllm-phi-3.5'
+  | 'webllm-llama-3.2-1b'
+  | 'heuristic-only';
+export type SpeechRecognitionMode = 'browser' | 'whisper';
+export type WhisperModelSize = 'tiny' | 'base' | 'small';
+export type PantryUnitSystem = 'metric' | 'imperial';
+
 export interface AppSettings {
   language: 'de' | 'en';
   displayName: string;
@@ -100,36 +113,99 @@ export interface AppSettings {
     dietaryRestrictions: string[];
     preferredCuisines: string[];
     customInstruction: string;
-    creativityLevel: number; // 0.0 to 1.0 (Temperature)
+    creativityLevel: number;
+    routingMode: AiRoutingMode;
+    responseStyle: AiResponseStyle;
+    usePantryContext: boolean;
+    useMealPlanContext: boolean;
+    useRecipeHistoryContext: boolean;
+    maxRagChunks: number;
+    structuredOutputStrict: boolean;
+  };
+  localAi: {
+    enabled: boolean;
+    localOnlyMode: boolean;
+    allowCloudFallback: boolean;
+    preferWebGpu: boolean;
+    gpuTierPreference: GpuTierPreference;
+    preferredGenerativeModel: LocalAiGenerativeModel;
+    enableVision: boolean;
+    enableEmbeddings: boolean;
+    enableInferenceCache: boolean;
+    cacheTtlHours: number;
+    maxConcurrentJobs: number;
+    maxModelStorageMb: number;
+    downloadedModels: string[];
+    stripExifOnVision: boolean;
+    ollamaEnabled: boolean;
+    ollamaBaseUrl: string;
+  };
+  privacy: {
+    analyticsEnabled: boolean;
+    shareDiagnostics: boolean;
+    persistAiPromptsLocally: boolean;
+    autoClearInferenceCache: boolean;
+    redactPiiInLogs: boolean;
   };
   pantry: {
     defaultSort: 'name' | 'expiryDate' | 'updatedAt' | 'createdAt';
     isGrouped: boolean;
     expiryWarningDays: number;
+    showExpiryBadges: boolean;
+    unitSystem: PantryUnitSystem;
+    highlightLowStock: boolean;
   };
   recipeBook: {
     defaultSort: 'newest' | 'favorites' | 'a-z' | 'z-a';
+    showNutritionPreview: boolean;
+    defaultView: 'grid' | 'list';
   };
   shoppingList: {
     groupCheckedAtBottom: boolean;
     defaultSort: 'category' | 'alpha';
     autoCategorize: boolean;
+    smartMergeDuplicates: boolean;
+    suggestQuantitiesFromRecipes: boolean;
+  };
+  mealPlanner: {
+    preferVariety: boolean;
+    respectExpiryDates: boolean;
+    suggestFromPantry: boolean;
+    avoidRepeatWithinDays: number;
+  };
+  cookMode: {
+    aiAssistantEnabled: boolean;
+    autoAdvanceSteps: boolean;
+    timerSoundEnabled: boolean;
+    keepScreenAwake: boolean;
+    showIngredientChecklist: boolean;
   };
   speechSynthesis: {
-    voice: string | null; // Stores voiceURI
+    voice: string | null;
     rate: number;
     pitch: number;
+    volume: number;
+  };
+  speechRecognition: {
+    mode: SpeechRecognitionMode;
+    whisperModelSize: WhisperModelSize;
+    continuousListening: boolean;
+    confirmDestructiveCommands: boolean;
   };
   appearance: {
     accentColor: 'amber' | 'rose' | 'sky' | 'emerald';
     highContrast: boolean;
     kitchenMode: boolean;
     largeText: boolean;
+    reducedMotion: boolean;
+    compactDensity: boolean;
+    showNutritionBadges: boolean;
   };
-  policies?: {
-    avoidAllergens?: string[]; // z.B. ['Milch', 'Erdnuss']
-    ingredientBlacklist?: string[]; // z.B. ['Koriander', 'Sellerie']
-    minPantryStock?: { name: string; min: number }[]; // z.B. [{name: 'Reis', min: 1}]
+  policies: {
+    avoidAllergens: string[];
+    ingredientBlacklist: string[];
+    minPantryStock: { name: string; min: number }[];
+    strictAllergenEnforcement: boolean;
   };
 }
 
