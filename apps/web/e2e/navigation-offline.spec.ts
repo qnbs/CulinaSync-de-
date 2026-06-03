@@ -19,9 +19,13 @@ test.describe('CulinaSync Navigation & Offline', () => {
 
   test('Offline-Banner erscheint ohne Netzwerk', async ({ page, baseURL, context }) => {
     await seedDismissedAppModals(page);
-    await context.setOffline(true);
     await page.goto(baseURL ?? '/');
     await expect(page.locator('#main-content')).toBeVisible();
+    await context.setOffline(true);
+    await page.evaluate(() => {
+      Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false });
+      window.dispatchEvent(new Event('offline'));
+    });
     await expect(page.getByRole('status')).toContainText(/offline/i, { timeout: 15_000 });
     await context.setOffline(false);
   });
