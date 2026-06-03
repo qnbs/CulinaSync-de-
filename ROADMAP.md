@@ -227,9 +227,9 @@ _Vorbedingung: M9 Bundle-Budget; Architekturvertrag [`docs/LOCAL-AI-ARCHITECTURE
 | # | Maßnahme | Datei(en) | Aufwand | Status |
 |---|---|---|---|---|
 | 11.0 | PRD/Doku: „Local default, Cloud optional“; Benchmark-Kriterien | `PRD.md`, `LOCAL-AI-AUDIT-2026-06.md` | S | 🟨 Doku in PR #66-Nachzug |
-| 11.1 | `aiProviderService` + Fallback-Kette; Lazy-Chunks ML | `packages/ai-core`, `apps/web/src/services/` | Hoch | ✅ |
-| 11.2 | WebLLM (L1) Feature-Flag: Rezept-Ideen/Rezept | `localAiWebLlmService.ts`, `webLlmEngineManager` | Hoch | ✅ |
-| 11.3 | Transformers.js Embeddings + domänen-RAG (Dexie) | `localAiEmbeddingsService`, Dexie v13 `aiEmbeddings` | Hoch | ✅ |
+| 11.1 | `aiProviderService` + Fallback-Kette; Lazy-Chunks ML | `packages/ai-core`, `apps/web/src/services/` | Hoch | 🔲 |
+| 11.2 | WebLLM (L1) Feature-Flag: Rezept-Ideen/Rezept | `aiService.ts`, Worker-Bus | Hoch | 🔲 |
+| 11.3 | Transformers.js Embeddings + domänen-RAG (Dexie) | `localAiRagService` (neu) | Hoch | 🔲 |
 | 11.4 | ONNX Vision Pantry-Foto (L2) | Vision-Worker, Budget-Gate | Hoch | 🔲 |
 | 11.5 | E2E „Chef ohne Netz“ + MSW | `e2e/chef-local.spec.ts` erweitern | Mittel | 🟨 Basis in PR #66 |
 

@@ -25,16 +25,6 @@ export async function goToPantry(page: Page): Promise<void> {
   await expect(page.locator('#main-content')).toBeVisible();
 }
 
-export async function goToRecipes(page: Page): Promise<void> {
-  const bottomNav = page.getByRole('navigation', { name: /hauptnavigation/i });
-  if (await bottomNav.isVisible().catch(() => false)) {
-    await bottomNav.getByRole('button', { name: /^rezepte$/i }).click();
-  } else {
-    await page.getByRole('button', { name: /rezept/i }).first().click();
-  }
-  await expect(page.locator('#main-content')).toBeVisible();
-}
-
 export async function goToAiChef(page: Page): Promise<void> {
   await page.getByRole('button', { name: /ki-chef|ki koch/i }).first().click();
   await expect(page.locator('#main-content')).toBeVisible();
