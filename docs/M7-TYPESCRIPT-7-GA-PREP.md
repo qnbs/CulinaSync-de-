@@ -22,6 +22,7 @@ TS **7.0 stable** ist auf npm noch nicht als GA verfügbar (nur `7.0.0-dev.*`). 
 ```bash
 pnpm run check:ts-ga          # Exit 0 = noch kein GA; Exit 1 = Upgrade anstoßen
 pnpm run check:ts-ga -- --json
+npm view typescript versions --json | tail -5
 pnpm run type-check
 ```
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { AppSettings } from '../../../types';
 import { useSpeechSynthesis } from '../../../hooks/useSpeechSynthesis';
 import { useWhisperRecognition } from '../../../hooks/useWhisperRecognition';
@@ -15,7 +15,7 @@ const VOICE_TEST_BAR_HEIGHTS = ['35%', '60%', '85%', '55%', '75%'] as const;
 export const VoicePanel: React.FC<VoicePanelProps> = ({ settings, onChange }) => {
     const { t } = useTranslation();
     const { voices, speak, isSpeaking, cancel } = useSpeechSynthesis();
-    const [mode, setMode] = useState<'browser' | 'whisper'>('browser');
+    const mode = settings.speechRecognition.mode;
     const whisper = useWhisperRecognition();
     const isPlayingTest = isSpeaking;
 
@@ -95,10 +95,59 @@ export const VoicePanel: React.FC<VoicePanelProps> = ({ settings, onChange }) =>
 
                 <div className="mt-6">
                     <h4 className="text-lg font-bold text-zinc-100 mb-2">{t('settings.speech.modeTitle')}</h4>
-                    <select value={mode} onChange={e => setMode(e.target.value as 'browser' | 'whisper')} className="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 appearance-none focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none">
+                    <select value={mode} onChange={e => onChange('speechRecognition.mode', e.target.value)} className="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 appearance-none focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none">
                         <option value="browser">{t('settings.speech.browserMode')}</option>
                         <option value="whisper">{t('settings.speech.whisperMode')}</option>
                     </select>
+                </div>
+                {mode === 'whisper' && (
+                    <div className="mt-4 p-4 glass-card rounded-xl">
+                        <label className="block text-sm font-bold text-zinc-300 mb-2">{t('settings.speech.whisperModelLabel')}</label>
+                        <select
+                            value={settings.speechRecognition.whisperModelSize}
+                            onChange={(e) => onChange('speechRecognition.whisperModelSize', e.target.value)}
+                            className="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 outline-none"
+                        >
+                            <option value="tiny">{t('settings.speech.whisperSize.tiny')}</option>
+                            <option value="base">{t('settings.speech.whisperSize.base')}</option>
+                            <option value="small">{t('settings.speech.whisperSize.small')}</option>
+                        </select>
+                    </div>
+                )}
+                <div className="mt-4 space-y-2">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={settings.speechRecognition.continuousListening}
+                            onChange={(e) => onChange('speechRecognition.continuousListening', e.target.checked)}
+                            className="rounded accent-[var(--color-accent-500)]"
+                        />
+                        <span className="text-sm text-zinc-300">{t('settings.speech.continuousListening')}</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={settings.speechRecognition.confirmDestructiveCommands}
+                            onChange={(e) => onChange('speechRecognition.confirmDestructiveCommands', e.target.checked)}
+                            className="rounded accent-[var(--color-accent-500)]"
+                        />
+                        <span className="text-sm text-zinc-300">{t('settings.speech.confirmDestructive')}</span>
+                    </label>
+                </div>
+                <div className="mt-4">
+                    <div className="flex justify-between mb-2">
+                        <label className="text-sm font-bold text-zinc-300 uppercase tracking-wider">{t('settings.speech.volumeLabel')}</label>
+                        <span className="text-xs text-zinc-500 font-mono">{Math.round(settings.speechSynthesis.volume * 100)}%</span>
+                    </div>
+                    <input
+                        type="range"
+                        min={0}
+                        max={1}
+                        step={0.05}
+                        value={settings.speechSynthesis.volume}
+                        onChange={(e) => onChange('speechSynthesis.volume', parseFloat(e.target.value))}
+                        className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[var(--color-accent-500)]"
+                    />
                 </div>
                 {mode === 'whisper' && (
                     <div className="space-y-2">

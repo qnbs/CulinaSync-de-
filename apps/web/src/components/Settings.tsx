@@ -5,8 +5,8 @@ import { Save, RotateCcw } from 'lucide-react';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { updateSettings } from '../store/slices/settingsSlice';
 import { addToast as addToastAction } from '../store/slices/uiSlice';
+import { applySettingsChange } from '../services/settingsMutators';
 
-// New Modular Components
 import { SettingsSidebar } from './settings/SettingsSidebar';
 import { AppearancePanel } from './settings/panels/AppearancePanel';
 import { AiChefPanel } from './settings/panels/AiChefPanel';
@@ -16,6 +16,9 @@ import { ApiKeyPanel } from './settings/panels/ApiKeyPanel';
 import { PolicyPanel } from './settings/panels/PolicyPanel';
 import { HealthConnectPanel } from './settings/panels/HealthConnectPanel';
 import { CommunityPanel } from './settings/panels/CommunityPanel';
+import { LocalAiPanel } from './settings/panels/LocalAiPanel';
+import { PrivacyPanel } from './settings/panels/PrivacyPanel';
+import { WorkspacePanel } from './settings/panels/WorkspacePanel';
 
 const VoicePanel = lazy(() => import('./settings/panels/VoicePanel').then((module) => ({ default: module.VoicePanel })));
 
@@ -26,105 +29,19 @@ const ACCENT_COLORS: Record<AppSettings['appearance']['accentColor'], Record<str
   emerald: { '300': '#6ee7b7', '400': '#34d399', '500': '#10b981', glow: 'rgba(16, 185, 129, 0.3)', 'glow-soft': 'rgba(16, 185, 129, 0.2)', '400-semi': 'rgba(52, 211, 153, 0.8)' },
 };
 
-type SettingsPath =
-    | 'language'
-    | 'displayName'
-    | 'defaultServings'
-    | 'weekStart'
-    | 'shoppingList.autoCategorize'
-    | 'pantry.expiryWarningDays'
-    | 'appearance.accentColor'
-    | 'appearance.highContrast'
-    | 'appearance.kitchenMode'
-    | 'appearance.largeText'
-    | 'aiPreferences.creativityLevel'
-    | 'aiPreferences.dietaryRestrictions'
-    | 'aiPreferences.preferredCuisines'
-    | 'aiPreferences.customInstruction'
-    | 'policies.avoidAllergens'
-    | 'policies.ingredientBlacklist'
-    | 'policies.minPantryStock'
-    | 'speechSynthesis.voice'
-    | 'speechSynthesis.rate'
-    | 'speechSynthesis.pitch';
-
-const isAccentColor = (value: unknown): value is AppSettings['appearance']['accentColor'] =>
-    typeof value === 'string' && ['amber', 'rose', 'sky', 'emerald'].includes(value);
-
-const isLanguage = (value: unknown): value is AppSettings['language'] => value === 'de' || value === 'en';
-const isWeekStart = (value: unknown): value is AppSettings['weekStart'] => value === 'Monday' || value === 'Sunday';
-const isStringArray = (value: unknown): value is string[] => Array.isArray(value) && value.every((entry) => typeof entry === 'string');
-const isMinPantryStock = (value: unknown): value is NonNullable<AppSettings['policies']>['minPantryStock'] =>
-    Array.isArray(value) && value.every((entry) => {
-        if (!entry || typeof entry !== 'object') {
-            return false;
-        }
-
-        const candidate = entry as { name?: unknown; min?: unknown };
-        return typeof candidate.name === 'string' && typeof candidate.min === 'number' && Number.isFinite(candidate.min) && candidate.min >= 0;
-    });
-
-const settingsMutators: Record<SettingsPath, (draft: AppSettings, value: unknown) => void> = {
-    language: (draft, value) => {
-        if (isLanguage(value)) draft.language = value;
-    },
-    displayName: (draft, value) => {
-        if (typeof value === 'string') draft.displayName = value;
-    },
-    defaultServings: (draft, value) => {
-        if (typeof value === 'number' && Number.isFinite(value) && value >= 1) draft.defaultServings = value;
-    },
-    weekStart: (draft, value) => {
-        if (isWeekStart(value)) draft.weekStart = value;
-    },
-    'shoppingList.autoCategorize': (draft, value) => {
-        if (typeof value === 'boolean') draft.shoppingList.autoCategorize = value;
-    },
-    'pantry.expiryWarningDays': (draft, value) => {
-        if (typeof value === 'number' && Number.isFinite(value) && value >= 1) draft.pantry.expiryWarningDays = value;
-    },
-    'appearance.accentColor': (draft, value) => {
-        if (isAccentColor(value)) draft.appearance.accentColor = value;
-    },
-    'appearance.highContrast': (draft, value) => {
-        if (typeof value === 'boolean') draft.appearance.highContrast = value;
-    },
-    'appearance.kitchenMode': (draft, value) => {
-        if (typeof value === 'boolean') draft.appearance.kitchenMode = value;
-    },
-    'appearance.largeText': (draft, value) => {
-        if (typeof value === 'boolean') draft.appearance.largeText = value;
-    },
-    'aiPreferences.creativityLevel': (draft, value) => {
-        if (typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1) draft.aiPreferences.creativityLevel = value;
-    },
-    'aiPreferences.dietaryRestrictions': (draft, value) => {
-        if (isStringArray(value)) draft.aiPreferences.dietaryRestrictions = value;
-    },
-    'aiPreferences.preferredCuisines': (draft, value) => {
-        if (isStringArray(value)) draft.aiPreferences.preferredCuisines = value;
-    },
-    'aiPreferences.customInstruction': (draft, value) => {
-        if (typeof value === 'string') draft.aiPreferences.customInstruction = value;
-    },
-    'policies.avoidAllergens': (draft, value) => {
-        if (isStringArray(value)) draft.policies = { ...(draft.policies ?? {}), avoidAllergens: value };
-    },
-    'policies.ingredientBlacklist': (draft, value) => {
-        if (isStringArray(value)) draft.policies = { ...(draft.policies ?? {}), ingredientBlacklist: value };
-    },
-    'policies.minPantryStock': (draft, value) => {
-        if (isMinPantryStock(value)) draft.policies = { ...(draft.policies ?? {}), minPantryStock: value };
-    },
-    'speechSynthesis.voice': (draft, value) => {
-        if (value === null || typeof value === 'string') draft.speechSynthesis.voice = value;
-    },
-    'speechSynthesis.rate': (draft, value) => {
-        if (typeof value === 'number' && Number.isFinite(value) && value >= 0.5 && value <= 2) draft.speechSynthesis.rate = value;
-    },
-    'speechSynthesis.pitch': (draft, value) => {
-        if (typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 2) draft.speechSynthesis.pitch = value;
-    },
+const SECTION_TITLE_KEYS: Record<string, string> = {
+  appearance: 'settings.sections.appearance',
+  modules: 'settings.sections.modules',
+  workspace: 'settings.sections.workspace',
+  ai: 'settings.sections.ai',
+  localAi: 'settings.sections.localAi',
+  policies: 'settings.sections.policies',
+  privacy: 'settings.sections.privacy',
+  health: 'settings.sections.health',
+  community: 'settings.sections.community',
+  apikey: 'settings.sections.apiKey',
+  speech: 'settings.sections.speech',
+  data: 'settings.sections.data',
 };
 
 interface SettingsProps {
@@ -147,11 +64,12 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
             if (['import', 'export'].includes(focusAction)) return 'data';
             if (['speech', 'voice'].includes(focusAction)) return 'speech';
             if (['apikey', 'api-key', 'api'].includes(focusAction)) return 'apikey';
+            if (['local-ai', 'localai'].includes(focusAction)) return 'localAi';
+            if (['privacy'].includes(focusAction)) return 'privacy';
         }
         return selectedSection;
     }, [focusAction, selectedSection]);
 
-    // Live Theme Application
     useEffect(() => {
       const colors = ACCENT_COLORS[localSettings.appearance.accentColor];
       const root = document.documentElement;
@@ -174,15 +92,12 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
     };
 
     const handleChange = useCallback((path: string, value: unknown) => {
-        const mutator = settingsMutators[path as SettingsPath];
-        if (!mutator) {
-            return;
-        }
-
         setDraftSettings(prev => {
             const sourceState = prev ?? globalSettings;
             const newState = structuredClone(sourceState);
-            mutator(newState, value);
+            if (!applySettingsChange(newState, path, value)) {
+              return prev;
+            }
             return newState;
         });
     }, [globalSettings]);
@@ -192,8 +107,12 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
     const renderPanel = () => {
         switch (activeSection) {
             case 'appearance': return <AppearancePanel settings={localSettings} onChange={handleChange} />;
+            case 'modules': return <ModulesPanel settings={localSettings} onChange={handleChange} />;
+            case 'workspace': return <WorkspacePanel settings={localSettings} onChange={handleChange} />;
             case 'ai': return <AiChefPanel settings={localSettings} onChange={handleChange} />;
+            case 'localAi': return <LocalAiPanel settings={localSettings} onChange={handleChange} />;
             case 'policies': return <PolicyPanel settings={localSettings} onChange={handleChange} />;
+            case 'privacy': return <PrivacyPanel settings={localSettings} onChange={handleChange} />;
             case 'health': return <HealthConnectPanel />;
             case 'community': return <CommunityPanel />;
             case 'apikey': return <ApiKeyPanel addToast={addToastWrapper} />;
@@ -203,10 +122,11 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
                     <VoicePanel settings={localSettings} onChange={handleChange} />
                 </Suspense>
             );
-            case 'modules': return <ModulesPanel settings={localSettings} onChange={handleChange} />;
             default: return null;
         }
     };
+
+    const sectionTitleKey = SECTION_TITLE_KEYS[activeSection];
 
     return (
         <div className="flex flex-col md:flex-row gap-8 lg:gap-12 pb-24 min-h-[60vh]">
@@ -215,16 +135,9 @@ const Settings: React.FC<SettingsProps> = ({ installPromptEvent, onInstallPWA, i
              <div className="flex-grow min-w-0">
                  <div className="flex justify-between items-center mb-6">
                      <h2 className="text-2xl font-bold text-zinc-100">
-                         {activeSection === 'appearance' && t('settings.sections.appearance')}
-                         {activeSection === 'modules' && t('settings.sections.modules')}
-                         {activeSection === 'ai' && t('settings.sections.ai')}
-                         {activeSection === 'policies' && t('settings.sections.policies')}
-                         {activeSection === 'apikey' && t('settings.sections.apiKey')}
-                         {activeSection === 'speech' && t('settings.sections.speech')}
-                         {activeSection === 'data' && t('settings.sections.data')}
+                         {sectionTitleKey ? t(sectionTitleKey) : t('settings.title')}
                      </h2>
                      
-                     {/* Floating Action Bar for Mobile/Desktop Consistency */}
                      {isDirty && (
                          <div className="flex gap-2 animate-fade-in">
                             <button onClick={handleDiscard} className="p-2 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 transition-colors" title={t('settings.actions.discard')}>

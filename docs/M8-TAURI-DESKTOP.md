@@ -34,8 +34,8 @@ Artefakte je Plattform unter `src-tauri/target/release/bundle/`.
 
 ## Deep Links (Desktop)
 
-Protokoll `culinasync://` — Handler in `apps/web/src/deepLinking.ts`, App-Listener `useDeepLinkNavigation`. Native Registrierung folgt mit Tauri 2 `deep-link` Plugin in `main.rs`.
+Protokoll `culinasync://` — Handler in `apps/web/src/deepLinking.ts`, App-Listener `useDeepLinkNavigation`. Native Registrierung folgt mit Tauri 2 `deep-link` Plugin in `src-tauri/src/lib.rs`.
 
 ## Version
 
-`package.version` in `tauri.conf.json` soll mit `apps/web/package.json` (**0.2.2**) synchron gehalten werden.
+`version` in `tauri.conf.json` soll mit `apps/web/package.json` (**0.2.2**) synchron gehalten werden.

@@ -1,5 +1,19 @@
 import React from 'react';
-import { Palette, Settings as SettingsIcon, Bot, Mic, Database, Key, LucideProps } from 'lucide-react';
+import {
+  Palette,
+  Settings as SettingsIcon,
+  Bot,
+  Mic,
+  Database,
+  Key,
+  LucideProps,
+  Shield,
+  Sparkles,
+  Lock,
+  LayoutGrid,
+  Heart,
+  Users,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export interface SectionDef {
@@ -8,8 +22,6 @@ export interface SectionDef {
     icon: React.FC<LucideProps>;
     description: string;
 }
-
-import { Shield } from 'lucide-react';
 
 interface SettingsSidebarProps {
     activeSection: string;
@@ -21,12 +33,15 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ activeSection,
     const settingsSections: SectionDef[] = [
         { id: 'appearance', label: t('settings.sidebar.appearance.label'), icon: Palette, description: t('settings.sidebar.appearance.description') },
         { id: 'modules', label: t('settings.sidebar.modules.label'), icon: SettingsIcon, description: t('settings.sidebar.modules.description') },
+        { id: 'workspace', label: t('settings.sidebar.workspace.label'), icon: LayoutGrid, description: t('settings.sidebar.workspace.description') },
         { id: 'ai', label: t('settings.sidebar.ai.label'), icon: Bot, description: t('settings.sidebar.ai.description') },
+        { id: 'localAi', label: t('settings.sidebar.localAi.label'), icon: Sparkles, description: t('settings.sidebar.localAi.description') },
         { id: 'policies', label: t('settings.sidebar.policies.label'), icon: Shield, description: t('settings.sidebar.policies.description') },
-        { id: 'health', label: t('settings.sidebar.health.label'), icon: Database, description: t('settings.sidebar.health.description') },
-        { id: 'community', label: t('settings.sidebar.community.label'), icon: Database, description: t('settings.sidebar.community.description') },
-        { id: 'apikey', label: t('settings.sidebar.apiKey.label'), icon: Key, description: t('settings.sidebar.apiKey.description') },
+        { id: 'privacy', label: t('settings.sidebar.privacy.label'), icon: Lock, description: t('settings.sidebar.privacy.description') },
         { id: 'speech', label: t('settings.sidebar.speech.label'), icon: Mic, description: t('settings.sidebar.speech.description') },
+        { id: 'apikey', label: t('settings.sidebar.apiKey.label'), icon: Key, description: t('settings.sidebar.apiKey.description') },
+        { id: 'health', label: t('settings.sidebar.health.label'), icon: Heart, description: t('settings.sidebar.health.description') },
+        { id: 'community', label: t('settings.sidebar.community.label'), icon: Users, description: t('settings.sidebar.community.description') },
         { id: 'data', label: t('settings.sidebar.data.label'), icon: Database, description: t('settings.sidebar.data.description') },
     ];
     return (
@@ -43,7 +58,6 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ activeSection,
                                 : 'hover:bg-zinc-800/40 text-zinc-400 hover:text-zinc-100'
                         }`}
                     >
-                        {/* Active Indicator */}
                         {isActive && (
                             <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-r-full bg-[var(--color-accent-500)] md:block hidden shadow-[0_0_10px_var(--color-accent-glow)]" />
                         )}

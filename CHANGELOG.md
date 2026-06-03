@@ -13,6 +13,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **M8:** Tauri-2-Cargo-Workspace (`src-tauri/Cargo.toml`, `capabilities/`), Icon-Script, `tauri-release.yml` Matrix.
 - **M7:** `pnpm run check:ts-ga` — Gate bis TypeScript 7.0 GA auf npm.
 - **Audit:** `docs/STATUS-2026-06-03.md`, i18n `parseMissingKeyHandler`, ARCHITECTURE Sync-Diagramm.
+- **Local AI (Phase 0):** `docs/LOCAL-AI-AUDIT-2026-06.md` und `docs/LOCAL-AI-ARCHITECTURE.md` (bereits auf `main`; Referenz für Phase 1).
 
 ### Geaendert
 
