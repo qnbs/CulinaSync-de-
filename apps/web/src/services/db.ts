@@ -21,7 +21,7 @@ import i18n from '../i18n';
 
 // --- Initialization Logic ---
 const populateDB = async () => {
-    console.log("Populating database for the first time...");
+    console.debug("Populating database for the first time...");
     try {
         const { allSeedRecipes: seedRecipes } = await import('../data/recipes/index');
         const now = Date.now();
@@ -38,9 +38,9 @@ const populateDB = async () => {
                 await db.recipes.bulkPut(seedRecipes.map(r => ({ ...r, isFavorite: false, updatedAt: now })));
             }
         });
-        console.log("Default pantry items added.");
+        console.debug("Default pantry items added.");
         if (seedRecipes.length > 0) {
-            console.log(`${seedRecipes.length} seed recipes added during initial population.`);
+            console.debug(`${seedRecipes.length} seed recipes added during initial population.`);
         }
         // After populating, calculate all matches
         await updatePantryMatches();

@@ -195,7 +195,7 @@ const App: React.FC = () => {
   useEffect(() => {
     if (finalTranscript) {
       if (import.meta.env.DEV) {
-        console.log("Processing final command:", finalTranscript);
+        console.debug('Processing final command:', finalTranscript);
       }
         const action = processCommand(finalTranscript, currentPage);
         

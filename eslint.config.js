@@ -12,6 +12,9 @@ export default tseslint.config(
       '**/node_modules/**',
       '**/coverage/**',
       'packages/**/dist/**',
+      'apps/web/.storybook/**',
+      'apps/web/e2e/**',
+      'apps/web/playwright.config.ts',
     ],
   },
   {
@@ -49,9 +52,15 @@ export default tseslint.config(
       'react/display-name': 'off',
       'react/prop-types': 'off',
       'react-refresh/only-export-components': 'off',
-      // Staged migration: warn in CI; Reduktion in Follow-up-PRs (H1)
-      'react-hooks/exhaustive-deps': 'warn',
+      // QNBS-v3: Strikte Quality-Gates — CI/lint-staged nutzen --max-warnings 0
+      'react-hooks/exhaustive-deps': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+      // Typed rules (no-floating-promises, …): Follow-up R-005 mit projectService — siehe docs/AUDIT-REMEDIATION-BACKLOG.md
+      'no-console': ['error', { allow: ['warn', 'error', 'debug'] }],
     },
   },
 );
