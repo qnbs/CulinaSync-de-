@@ -7,16 +7,28 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.2.4] — 2026-06-04
+
 ### Hinzugefuegt
 
-- **Demo (R-011):** `?demo=1` / `?try=1` Deep-Links; `demoSeedService`; GitHub-Pages-Banner; Demo-CTA in leerer Vorratskammer.
-- **Sync (R-008):** Nextcloud App-Passwort verschlüsselt in IndexedDB; Server/User/Pfad in sessionStorage (Migration von localStorage).
+- **Demo (R-011):** `?demo=1` / `?try=1` Deep-Links; `demoSeedService`; GitHub-Pages-Banner; Demo-CTA in leerer Vorratskammer (PR #69).
+- **Sync (R-008):** Nextcloud App-Passwort verschlüsselt in IndexedDB; Server/User/Pfad in sessionStorage (Migration von localStorage) (PR #69).
+
+### Behoben
+
+- **CodeQL #8:** `extractJsonPayload` ohne polynomial-regex auf LLM-Rohtext (PR #70).
+- **CI/Deploy:** `PantryList`-Tests mit Redux-`Provider` nach Demo-CTA in `EmptyState` (Deploy validate grün).
+- **Tauri (R-012):** GTK/WebKit-Deps im `verify`-Job von `tauri-release.yml` (PR #69).
+
+### Geaendert
+
+- **Release:** Tag `v0.2.4` — Tauri Draft-Build inkl. GTK-Fix; Pages-Deploy mit Demo + Security-Fixes.
 
 ## [0.2.3] — 2026-06-04
 
 ### Hinzugefuegt
 
-- **Release:** Tag `v0.2.3` — Tauri-Workflow (Draft); nach Merge erneut mit GTK-Fix in verify.
+- **Release:** Tag `v0.2.3` — erster Tauri-Workflow-Lauf (verify ohne GTK — superseded by **v0.2.4**).
 
 - **Deps (R-010):** `turbo` **2.9.16**; `pnpm.overrides` für `brace-expansion`, `ws`, `cookie`, `tmp` — `pnpm audit` ohne Findings.
 - **Tauri (R-012):** `CULINASYNC_DESKTOP_BUILD` trennt Vite-`base` `/` (Desktop) von Pages-CI; `tauri-release.yml` Release-Body + Verify-Build.
@@ -27,7 +39,6 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Behoben
 
-- **CodeQL #8:** `extractJsonPayload` in `@domain/ai-core` ohne polynomial-regex auf LLM-Rohtext (ReDoS-sicher via `indexOf`/`slice`).
 - **Merge PR #67 auf `main`:** `goToRecipes` in `e2e/helpers/navigation.ts` wiederhergestellt; `DataPanel` `void` für `navigator.storage.estimate`; Vitest-Branch-Threshold **64** (M5.8).
 - **Rezept-Detail:** `RecipeActionBar` i18n-Keys (`startCookMode`, Favorit, Export).
 
@@ -339,7 +350,9 @@ Die folgenden Eintraege dokumentieren die Arbeit zwischen **v0.1.0** und **v0.2.
 - CI-Pipeline mit Lint, TypeScript-Check, Tests und Bundle-Budget
 - CodeQL Security Analysis
 
-[Unreleased]: https://github.com/qnbs/CulinaSync-de-/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/qnbs/CulinaSync-de-/compare/v0.2.4...HEAD
+[0.2.4]: https://github.com/qnbs/CulinaSync-de-/compare/v0.2.3...v0.2.4
+[0.2.3]: https://github.com/qnbs/CulinaSync-de-/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/qnbs/CulinaSync-de-/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/qnbs/CulinaSync-de-/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/qnbs/CulinaSync-de-/compare/v0.1.0...v0.2.0
