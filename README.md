@@ -6,7 +6,7 @@
 |---|---|
 | **Live (GitHub Pages)** | [qnbs.github.io/CulinaSync-de-](https://qnbs.github.io/CulinaSync-de-/) |
 | **Vercel Production** | [culina-sync-de-web](https://culina-sync-de-web-qnbs-projects.vercel.app) |
-| **Version** | `0.2.2` |
+| **Version** | `0.2.4` |
 | **Stack** | React 19 · Vite 8 · TypeScript (`tsgo`) · Dexie · Redux (UI) · PWA · Local-AI-Routing |
 
 [Architektur](./docs/ARCHITECTURE.md) · [Entwicklung](./docs/DEVELOPMENT.md) · [Deployment](./docs/DEPLOYMENT.md) · [PWA](./docs/PWA.md) · [Local AI](./docs/LOCAL-AI-ARCHITECTURE.md) · [Design-System](./docs/DESIGN-SYSTEM.md) · [Testing](./docs/TESTING.md) · [Roadmap](./ROADMAP.md)
@@ -289,7 +289,7 @@ Nach Push auf `main`: CI-, E2E- und Deploy-Workflows bis **grün** beobachten.
 
 Native Shell auf **Tauri 2** (`src-tauri/`). Icons: `pnpm run tauri:icons`. Build und Release: [docs/M8-TAURI-DESKTOP.md](./docs/M8-TAURI-DESKTOP.md).
 
-**Installierbare Builds:** Nach einem Tag `v*` (z. B. `v0.2.2`) erstellt [tauri-release.yml](./.github/workflows/tauri-release.yml) einen **Draft** auf GitHub Releases (Windows `.msi`/`.exe`, macOS `.dmg`, Linux `.AppImage`/`.deb`) — dort veröffentlichen.
+**Installierbare Builds:** Nach einem Tag `v*` (z. B. `v0.2.4`) erstellt [tauri-release.yml](./.github/workflows/tauri-release.yml) einen **Draft** auf GitHub Releases (Windows `.msi`/`.exe`, macOS `.dmg`, Linux `.AppImage`/`.deb`) — dort veröffentlichen.
 
 ---
 

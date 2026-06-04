@@ -33,7 +33,7 @@ cargo tauri build    # CLI: cargo install tauri-cli --locked
 ## GitHub Release (R-012)
 
 1. Version in `apps/web/package.json` und `src-tauri/tauri.conf.json` angleichen.
-2. Tag pushen: `git tag v0.2.2 && git push origin v0.2.2` (oder `workflow_dispatch` in Actions).
+2. Tag pushen: `git tag v0.2.4 && git push origin v0.2.4` (oder `workflow_dispatch` in Actions).
 3. Workflow erzeugt einen **Draft Release** mit Windows/macOS/Linux-Artefakten — manuell veröffentlichen.
 
 **Rust:** stable **≥ 1.85** empfohlen (Tauri-2-Abhängigkeiten). CI nutzt `dtolnay/rust-toolchain@stable`.
@@ -46,4 +46,4 @@ Protokoll `culinasync://` — Handler in `apps/web/src/deepLinking.ts`, App-List
 
 ## Version
 
-`version` in `tauri.conf.json` soll mit `apps/web/package.json` (**0.2.2**) synchron gehalten werden.
+`version` in `tauri.conf.json` soll mit `apps/web/package.json` (**0.2.4**) synchron gehalten werden.
