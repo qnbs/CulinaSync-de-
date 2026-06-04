@@ -75,7 +75,7 @@
 - `src-tauri/`: Tauri-Desktop-Wrapper (`tauri.conf.json` → `apps/web/dist`)
 - `.github/workflows/`: `validate.yml` (lint → type-check → test:coverage → build → budget → **audit** → Playwright), `ci.yml`, `deploy.yml`, CodeQL
 - `docs/`: Fach- und Betriebsdokumentation
-- `lighthouserc.json`: Lighthouse CI gegen `apps/web/dist` (manuell / optional)
+- `lighthouserc.json` / `lighthouserc.mobile.json`: Lighthouse CI via `vite preview` (PR: `lighthouse-ci.yml`)
 
 ## Orientierung für neue Änderungen
 

@@ -116,7 +116,8 @@ Optional: `npx @lhci/cli autorun` mit `lighthouserc.json` gegen lokales `dist` o
 | `validate.yml` | Lint, tsgo, Coverage, Build, Audit, optional E2E |
 | `deploy.yml` | Pages-Build + Deploy + Live-Smoke |
 | `e2e-smoke.yml` | Playwright auf `main`/PR (`apps/web/**`) |
-| `deploy-health.yml` | Täglich/manuell: Live-URL-Checks (+ optional Lighthouse) |
+| `lighthouse-ci.yml` | PR: Lighthouse gegen gebautes `dist` (Pages-Basis `/CulinaSync-de-/`) |
+| `deploy-health.yml` | Täglich/manuell: Live-URL-Checks |
 | `ci.yml` | PR: validate ohne E2E; i18n-check |
 
 ---

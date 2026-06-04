@@ -27,7 +27,7 @@ export default defineConfig({
   webServer: isCi
     ? {
         // QNBS-v3: Cloud-CI — kein `vite dev`/Turbo-Server; nur statisches Preview nach `pnpm run build`
-        command: `pnpm exec vite preview --host 127.0.0.1 --strictPort --port ${previewPort}`,
+        command: `GITHUB_ACTIONS=true pnpm exec vite preview --host 127.0.0.1 --strictPort --port ${previewPort}`,
         url: baseURL,
         reuseExistingServer: false,
         timeout: 120_000,

@@ -287,7 +287,9 @@ Nach Push auf `main`: CI-, E2E- und Deploy-Workflows bis **grün** beobachten.
 
 ## Desktop (Tauri)
 
-Native Shell auf **Tauri 2** (`src-tauri/`). Icons: `pnpm run tauri:icons`. Siehe [docs/M8-TAURI-DESKTOP.md](./docs/M8-TAURI-DESKTOP.md).
+Native Shell auf **Tauri 2** (`src-tauri/`). Icons: `pnpm run tauri:icons`. Build und Release: [docs/M8-TAURI-DESKTOP.md](./docs/M8-TAURI-DESKTOP.md).
+
+**Installierbare Builds:** Nach einem Tag `v*` (z. B. `v0.2.2`) erstellt [tauri-release.yml](./.github/workflows/tauri-release.yml) einen **Draft** auf GitHub Releases (Windows `.msi`/`.exe`, macOS `.dmg`, Linux `.AppImage`/`.deb`) — dort veröffentlichen.
 
 ---
 

@@ -1,0 +1,111 @@
+# =============================================================================
+# CulinaSync – Lighthouse CI on PRs (R-009)
+# =============================================================================
+# Audits the PR build served like GitHub Pages (`/CulinaSync-de-/`) via vite preview.
+# Reports: temporary public storage + PR comment (treosh/lighthouse-ci-action).
+# =============================================================================
+
+name: Lighthouse CI
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  GITHUB_ACTIONS: true
+  CI: true
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/web/**'
+      - 'packages/**'
+      - 'lighthouserc.json'
+      - 'lighthouserc.mobile.json'
+      - 'scripts/lighthouse-puppeteer.cjs'
+      - '.github/workflows/lighthouse-ci.yml'
+  workflow_dispatch:
+    inputs:
+      include_mobile:
+        description: 'Also run mobile Lighthouse config'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: lighthouse-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lighthouse-desktop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (GitHub Pages base path)
+        run: pnpm run build
+
+      - name: Install Chromium for Lighthouse
+        id: chrome
+        run: |
+          pnpm exec playwright install chromium
+          CHROME_PATH="$(find "$HOME/.cache/ms-playwright" -name chrome -type f | head -1)"
+          echo "path=${CHROME_PATH}" >> "$GITHUB_OUTPUT"
+          echo "CHROME_PATH=${CHROME_PATH}" >> "$GITHUB_ENV"
+
+      - name: Lighthouse CI (desktop)
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+  lighthouse-mobile:
+    if: github.event_name == 'workflow_dispatch' && inputs.include_mobile == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (GitHub Pages base path)
+        run: pnpm run build
+
+      - name: Install Chromium for Lighthouse
+        run: |
+          pnpm exec playwright install chromium
+          echo "CHROME_PATH=$(find "$HOME/.cache/ms-playwright" -name chrome -type f | head -1)" >> "$GITHUB_ENV"
+
+      - name: Lighthouse CI (mobile)
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./lighthouserc.mobile.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true

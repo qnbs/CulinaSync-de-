@@ -28,9 +28,11 @@ const chunkGroups: Array<[string, string[]]> = [
   ['vendor-export', ['jspdf', 'html2canvas', 'papaparse']],
 ];
 
-// GitHub Pages subpath: set automatically in CI via GITHUB_ACTIONS env
+// GitHub Pages subpath in CI; Tauri/desktop builds set CULINASYNC_DESKTOP_BUILD=1 for base "/"
 const REPO_NAME = 'CulinaSync-de-';
-const base = process.env.GITHUB_ACTIONS ? `/${REPO_NAME}/` : '/';
+const useGitHubPagesBase =
+  Boolean(process.env.GITHUB_ACTIONS) && process.env.CULINASYNC_DESKTOP_BUILD !== '1';
+const base = useGitHubPagesBase ? `/${REPO_NAME}/` : '/';
 const pwaIndexPath = `${base}index.html`.replace(/\/{2,}/g, '/');
 
 export default defineConfig({

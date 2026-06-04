@@ -9,6 +9,9 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Hinzugefuegt
 
+- **Deps (R-010):** `turbo` **2.9.16**; `pnpm.overrides` für `brace-expansion`, `ws`, `cookie`, `tmp` — `pnpm audit` ohne Findings.
+- **Tauri (R-012):** `CULINASYNC_DESKTOP_BUILD` trennt Vite-`base` `/` (Desktop) von Pages-CI; `tauri-release.yml` Release-Body + Verify-Build.
+- **CI (R-009):** `lighthouse-ci.yml` auf PRs — `@lhci/cli`, `lighthouserc.json` (vite preview + Pages-Pfad), PR-Kommentar via temporary public storage; `scripts/lighthouse-puppeteer.cjs` (Onboarding aus).
 - **M11 Local AI (PR #67):** `@domain/ai-core` (Provider-Chain, GPU-Tier, Model-Registry); `aiProviderService`, WebLLM (L1), Transformers.js Embeddings + Hybrid-RAG (Dexie v13 `aiEmbeddings`).
 - **E2E:** `cook-mode.spec.ts` (R-003); **10** Playwright-Tests / **6** Specs gesamt.
 - **ESLint (R-005):** Typed-Block mit `projectService` + `@typescript-eslint/no-floating-promises` für `apps/web/src/**`, `packages/ai-core/src/**`.

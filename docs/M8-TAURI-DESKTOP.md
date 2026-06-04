@@ -23,10 +23,18 @@
 ```bash
 pnpm install
 pnpm run tauri:icons   # einmalig / bei Icon-Änderung
-pnpm run build
+CULINASYNC_DESKTOP_BUILD=1 pnpm run build   # base "/" (nicht GitHub-Pages-Subpath)
 cd src-tauri
 cargo tauri build    # CLI: cargo install tauri-cli --locked
 ```
+
+**CI:** `tauri-release.yml` setzt `CULINASYNC_DESKTOP_BUILD=1` — sonst würde `GITHUB_ACTIONS` den Pages-Pfad `/CulinaSync-de-/` in `vite.config.ts` aktivieren.
+
+## GitHub Release (R-012)
+
+1. Version in `apps/web/package.json` und `src-tauri/tauri.conf.json` angleichen.
+2. Tag pushen: `git tag v0.2.2 && git push origin v0.2.2` (oder `workflow_dispatch` in Actions).
+3. Workflow erzeugt einen **Draft Release** mit Windows/macOS/Linux-Artefakten — manuell veröffentlichen.
 
 **Rust:** stable **≥ 1.85** empfohlen (Tauri-2-Abhängigkeiten). CI nutzt `dtolnay/rust-toolchain@stable`.
 
