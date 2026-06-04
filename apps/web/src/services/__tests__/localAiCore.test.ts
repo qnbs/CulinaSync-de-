@@ -38,6 +38,22 @@ describe('@domain/ai-core jsonExtract', () => {
     const json = extractJsonPayload('```json\n{"ideas":[]}\n```');
     expect(JSON.parse(json)).toEqual({ ideas: [] });
   });
+
+  it('extractJsonPayload ohne json-Sprach-Tag', () => {
+    const json = extractJsonPayload('```\n{"ok":true}\n```');
+    expect(JSON.parse(json)).toEqual({ ok: true });
+  });
+
+  it('extractJsonPayload schneidet Rohtext zwischen geschweiften Klammern', () => {
+    const json = extractJsonPayload('Hier ist JSON: {"a":1} Ende.');
+    expect(JSON.parse(json)).toEqual({ a: 1 });
+  });
+
+  it('extractJsonPayload bleibt bei sehr langem LLM-Text performant', () => {
+    const padding = 'x'.repeat(50_000);
+    const json = extractJsonPayload(`${padding}\n\`\`\`json\n{"n":1}\n\`\`\``);
+    expect(JSON.parse(json)).toEqual({ n: 1 });
+  });
 });
 
 describe('@domain/ai-core provider chain', () => {
