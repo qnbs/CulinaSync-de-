@@ -4,9 +4,9 @@
   "version": "0.2.4",
   "identifier": "io.github.qnbs.culinasync",
   "build": {
-    "beforeDevCommand": "cd .. && pnpm run dev",
+    "beforeDevCommand": "bash ../scripts/tauri-pnpm-dev.sh",
     "devUrl": "http://localhost:5173",
-    "beforeBuildCommand": "cd .. && pnpm run build",
+    "beforeBuildCommand": "bash ../scripts/tauri-pnpm-build.sh",
     "frontendDist": "../apps/web/dist"
   },
   "app": {
