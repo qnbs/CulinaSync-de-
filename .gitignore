@@ -10,6 +10,7 @@ coverage/
 reports/
 test-results/
 playwright-report/
+.lighthouseci/
 *.gz
 *.br
 stats.html

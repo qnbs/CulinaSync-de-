@@ -13,7 +13,7 @@
 | R-006 | Medium | `test: raise branch coverage sync + recipeRepository` | CI-Stabilität | M | M5.8: Threshold **64** % branches | — | ✅ PR #67 (~64 % branches) |
 | R-007 | Medium | `docs: document Dexie migration + backup gate` ✅ | User Trust | S | Erledigt: `docs/DB-MIGRATIONS.md` | — |
 | R-008 | Medium | `feat(sync): optional encrypted credential storage` | Security | M | localStorage Metadaten | apiKeyService pattern |
-| R-009 | Medium | `ci: Lighthouse CI on PR previews` | PWA/A11y Scores | M | Mobile UX | Vercel/Pages preview |
+| R-009 | Medium | `ci: Lighthouse CI on PR previews` | PWA/A11y Scores | M | Mobile UX | Pages preview path | ✅ `lighthouse-ci.yml` (PR) |
 | R-010 | Low | `chore(deps): resolve moderate audit findings` | Supply chain | S | 3 moderate offen | Dependabot |
 | R-011 | Low | `feat(demo): seed or try-without-data for Pages` | Onboarding | M | Erstbesucher GitHub Pages | — |
 | R-012 | Medium | `release(tauri): M8 first tagged desktop build` | Desktop | L | ROADMAP M8 | CI GTK image |
@@ -23,7 +23,7 @@
 ## Sprint-Vorschlag (aktuell)
 
 **Erledigt (PR #66 + #67):** R-001–R-007 (R-007 Doku), M5.8, M11.1–11.3, E2E Cook-Mode, ESLint typed  
-**Nächster Sprint:** R-009 (Lighthouse CI), R-010 (audit deps), R-012 (M8 Tauri Release)
+**Nächster Sprint:** R-010 (audit deps), R-012 (M8 Tauri Release), R-011 (Demo-Seed)
 
 ## Definition of Done (Backlog-Item)
 

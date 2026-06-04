@@ -36,6 +36,8 @@
     "predeploy": "pnpm --filter web run predeploy",
     "verify:deploy": "node scripts/verify-live-deployments.mjs",
     "verify:pages-artifact": "node scripts/verify-pages-artifact.mjs",
+    "lighthouse:ci": "lhci autorun",
+    "lighthouse:ci:mobile": "lhci autorun --config=./lighthouserc.mobile.json",
     "test:scripts": "node --test scripts/__tests__/*.test.mjs",
     "prepare": "husky"
   },
@@ -43,6 +45,7 @@
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
     "@eslint/js": "^10.0.1",
+    "@lhci/cli": "0.14.0",
     "@playwright/test": "^1.60.0",
     "eslint": "^10.4.1",
     "eslint-plugin-react": "^7.37.5",
