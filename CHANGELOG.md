@@ -27,6 +27,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Behoben
 
+- **CodeQL #8:** `extractJsonPayload` in `@domain/ai-core` ohne polynomial-regex auf LLM-Rohtext (ReDoS-sicher via `indexOf`/`slice`).
 - **Merge PR #67 auf `main`:** `goToRecipes` in `e2e/helpers/navigation.ts` wiederhergestellt; `DataPanel` `void` für `navigator.storage.estimate`; Vitest-Branch-Threshold **64** (M5.8).
 - **Rezept-Detail:** `RecipeActionBar` i18n-Keys (`startCookMode`, Favorit, Export).
 
@@ -44,7 +45,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **Coverage:** Vitest-Thresholds **80/78/73/64** (lines/stmts/funcs/branches); Ist ~**79,6 %** / ~**64,0 %** branches (M5.8 ✅).
 - **CI:** `ci.yml` Job `main-guard` auf Push `main` (grüner CI-Status ohne Doppel-Coverage); Regel `302-ci-correction-loop.mdc` (dauerhafte Korrekturschleife).
 - **ESLint:** `exhaustive-deps` **error**; `no-console` strikt (nur warn/error/debug); `console.log` → `console.debug` in Services.
-- **Agent-Regeln:** `301-strict-quality-gates.mdc`; `300-pr-review-automation.mdc` — CodeAnt/Copilot **sofort** abarbeiten, kein Merge mit offenen Threads.
+- **Agent-Regeln:** `301-strict-quality-gates.mdc`; `300-pr-review-automation.mdc` — CodeAnt/Copilot/CodeQL **sofort** abarbeiten, kein Merge mit offenen Threads oder offenen CodeQL High/Critical.
 - **Toolchain:** `check:all` umfasst `test:scripts` und `i18n:check`; Doku: **470** Vitest / **109** Dateien.
 
 ### Behoben (PR #66)

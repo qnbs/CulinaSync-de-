@@ -106,7 +106,8 @@
 
 ## PR-Review (CodeAnt, Copilot, Bugbot — Pflicht, sofort)
 
-- **Sofort und vollständig:** Jeden Inline-Kommentar von **CodeAnt.ai**, **Copilot**, **Bugbot**, **Socket**, Menschen **in derselben Session** bearbeiten — **vor** Merge, ohne offene Threads.
+- **Sofort und vollständig:** Jeden Inline-Kommentar von **CodeAnt.ai**, **Copilot**, **Bugbot**, **Socket**, **CodeQL** (Security-Tab), Menschen **in derselben Session** bearbeiten — **vor** Merge, ohne offene Threads.
+- **CodeQL auf `main`:** Offene Alerts (insb. High/Critical) **sofort** beheben — nicht auf den nächsten PR schieben. ReDoS: kein Regex mit `[\s\S]*?` auf LLM-/Nutzer-Rohtext.
 - **Priorität:** Security/Daten > `no-explicit-any` / Secrets / Dexie-Grenzen > Architektur (`geminiService`, kein `VITE_*`) > Tests > Style.
 - **Nach jedem Fix:** `pnpm run lint` (**--max-warnings 0**), `pnpm run type-check`, betroffene Tests; UI → `pnpm run i18n:check`.
 - **Kein Merge** bei unbeantworteten Bot-/Review-Kommentaren.

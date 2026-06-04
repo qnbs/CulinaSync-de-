@@ -33,6 +33,17 @@ alwaysApply: true
 - Kein Gemini/API-Key in Build/Env (`VITE_*`, `process.env`).
 - Dexie nur über `db.ts` + Repositories.
 - Fehler: `logAppError`, keine leeren `catch`.
+- **CodeQL:** Offene Alerts auf `main` und in PRs **sofort** beheben (Security + High zuerst). Kein Regex mit Backtracking auf Nutzer-/LLM-Rohtext; keine `eslint-disable` für Security-Regeln ohne dokumentierte Ausnahme im PR-Thread.
+
+## CodeQL & statische Security (Pflicht)
+
+| Priorität | Aktion |
+|-----------|--------|
+| **High / Critical** | Fix in derselben Session, vor Merge |
+| **Medium** | Fix oder begründete Ausnahme + Issue-Link im PR |
+| **Polynomial regex / ReDoS** | String-APIs (`indexOf`, `slice`) oder begrenzte Parser — nie `[\s\S]*?` auf unkontrollierten Input |
+
+Nach Fix: Security-Tab in GitHub prüfen; CodeQL-Workflow **grün** beobachten (`302-ci-correction-loop.mdc`).
 
 ## Agent-Pflicht bei jedem PR
 

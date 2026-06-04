@@ -9,7 +9,7 @@ alwaysApply: true
 
 **Bei jedem Pull Request** — eigener Agent-PR, Review-Auftrag oder Nachzug auf `main`:
 
-1. **Zuerst** alle PR-Diskussionen lesen: **CodeAnt.ai**, **GitHub Copilot**, **Cursor Bugbot**, **Socket**, **CodeQL**, menschliche Reviewer.
+1. **Zuerst** alle PR-Diskussionen lesen: **CodeAnt.ai**, **GitHub Copilot**, **Cursor Bugbot**, **Socket**, **CodeQL** (Security-Tab + PR-Checks), menschliche Reviewer.
 2. **Sofort abarbeiten** — noch **bevor** „ready for review“, Merge oder Session-Ende:
    - Security/Daten → **Fix + Test** in derselben Session.
    - Architektur (Dexie, `geminiService`, API-Key, Redux/Dexie-Grenze) → **Fix** oder **eine** klare Ablehnung mit Regel-Verweis.
@@ -32,7 +32,7 @@ alwaysApply: true
 
 | Quelle | Aktion |
 |--------|--------|
-| Security / Datenverlust | **Sofort** fixen |
+| Security / Datenverlust / **CodeQL High** | **Sofort** fixen (auch auf `main` ohne offenen PR) |
 | `no-explicit-any`, Secrets, Dexie direkt | **Sofort** fixen |
 | Architektur | Fix oder dokumentierte Ausnahme im PR |
 | Coverage / fehlende Tests | Test ergänzen wenn sinnvoll |

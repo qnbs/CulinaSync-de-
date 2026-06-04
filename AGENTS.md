@@ -57,6 +57,8 @@ Standard commands (full list in `CLAUDE.md` / README):
 - **CI correction loop:** After every push, run `gh run list` and fix until green — never end a task with red CI. See `.cursor/rules/302-ci-correction-loop.mdc`.
 - **Lint:** `--max-warnings 0`; `@typescript-eslint/no-explicit-any` and `react-hooks/exhaustive-deps` are **errors**.
 - **PRs:** Address **all** inline comments from CodeAnt, Copilot, Bugbot, and humans **immediately** before merge — `300-pr-review-automation.mdc`, `301-strict-quality-gates.mdc`.
+- **CodeQL:** Open alerts on `main` or in the PR **must be fixed in the same session** (High/Critical first). After push, confirm the CodeQL workflow is green (`gh run list`, Security tab).
+- **No regressions:** Never merge with failing lint, type-check, tests, i18n baseline, or open CodeQL High/Critical.
 
 ### Manual “hello world” (core domain)
 
