@@ -4,9 +4,9 @@
   "version": "0.2.4",
   "identifier": "io.github.qnbs.culinasync",
   "build": {
-    "beforeDevCommand": "bash -c 'bash \"$(git rev-parse --show-toplevel)/scripts/tauri-pnpm-dev.sh\"'",
+    "beforeDevCommand": "pnpm run tauri:dev",
     "devUrl": "http://localhost:5173",
-    "beforeBuildCommand": "bash -c 'bash \"$(git rev-parse --show-toplevel)/scripts/tauri-pnpm-build.sh\"'",
+    "beforeBuildCommand": "pnpm run tauri:build",
     "frontendDist": "../apps/web/dist"
   },
   "app": {

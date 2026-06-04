@@ -48,4 +48,4 @@ Protokoll `culinasync://` — Handler in `apps/web/src/deepLinking.ts`, App-List
 
 `version` in `tauri.conf.json` soll mit `apps/web/package.json` (**0.2.4**) synchron gehalten werden.
 
-**Build-Hooks:** `beforeBuildCommand` / `beforeDevCommand` rufen `scripts/tauri-pnpm-*.sh` auf (Repo-Root per Script-Pfad, funktioniert in CI und lokal aus `src-tauri`).
+**Build-Hooks:** `pnpm run tauri:build` / `tauri:dev` (Root-`package.json` → `scripts/tauri-pnpm-*.mjs`, plattformübergreifend).
