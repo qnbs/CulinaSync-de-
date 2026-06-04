@@ -121,7 +121,7 @@
 | # | Maßnahme | Datei(en) | Aufwand | Status |
 |---|---|---|---|---|
 | 5.7 | Perfection Stufe 1: Coverage-Thresholds **80/78/73/63**; E2E Sync/Chef/Pantry; `DataPanel` → `data-panel/` | PR #66, `vitest.config.ts`, `apps/web/e2e/` | Mittel | ✅ |
-| 5.8 | Branch-Coverage **≥64 %** (Ist ~63,7 %) + gezielte Sync/Repository-Tests | `__tests__/syncService`, `recipeRepository` | Mittel | 🔲 |
+| 5.8 | Branch-Coverage **≥64 %** + Local-AI-/Service-Tests | `vitest.config.ts`, `__tests__/*` | Mittel | ✅ PR #67 |
 | 5.9 | Langfrist-Ziel **≥88 %** Lines/Branches (Programm, nicht ein Sprint) | PRD NFR-06, `vitest.config.ts` | Hoch | 🔲 Stufenplan |
 
 ---

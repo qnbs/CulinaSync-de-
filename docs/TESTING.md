@@ -95,18 +95,18 @@ pnpm run check:bundle-budget
 - Voice- und Navigationstrigger
 - Datenbanknahe Cross-Feature-Operationen
 
-## Aktueller Validierungsstand 2026-06-03 (M5+ / Perfection Stufe 1)
+## Aktueller Validierungsstand 2026-06-04 (`main` nach PR #67)
 
-- **Vitest:** **427** Tests in **101** Dateien (`pnpm run test`); u. a. `data-panel/`, `aiSettingsHelpers`, `categoryLabels`, erweiterte `backupMergeService`/`syncService`, Device-Sync (Zod).
+- **Vitest:** **470** Tests in **109** Dateien (`pnpm run test`); u. a. Local AI (`aiProviderService`, embeddings, WebLLM), `data-panel/`, Device-Sync (Zod).
 - **Scripts:** **`pnpm run test:scripts`** — 5 Node-Tests für `scripts/lib/deploy-verify-logic.mjs` (auch in CI validate).
-- **Coverage (v8):** ca. **79,1 %** Statements / **80,6 %** Lines / **63,7 %** Branches / **74,5 %** Functions — Thresholds **80 / 78 / 73 / 63** in `apps/web/vitest.config.ts`; Langfrist-Ziel **88 %** siehe `ROADMAP.md` M5.9.
-- **E2E:** **9** Playwright-Tests (`CI=true pnpm run test:e2e` nach `pnpm run build`).
+- **Coverage (v8):** ca. **79,6 %** Statements / **81,1 %** Lines / **64,0 %** Branches / **75,1 %** Functions — Thresholds **80 / 78 / 73 / 64** in `apps/web/vitest.config.ts`; Langfrist-Ziel **88 %** siehe `ROADMAP.md` M5.9.
+- **E2E:** **10** Playwright-Tests in **6** Specs (`CI=true pnpm run test:e2e` nach `pnpm run build`).
 - **CI:** `validate.yml` — lint → type-check → test:coverage → **test:scripts** → build → bundle-budget → audit. Playwright **v1.60.0** in **`e2e-smoke.yml`**. PRs: **`i18n:check`** in `ci.yml`. Artefakt **coverage-lcov** (14 Tage).
 - **i18n lokal:** `pnpm run i18n:check` vor PR; Vollscan `pnpm run i18n:scan` (Report unter `reports/`, gitignored); nach bereinigten Hardcoded-Strings `pnpm run i18n:baseline:update`.
 - **Gemini:** Integrationstests + Zod (`geminiMsw.test.ts`, `geminiService.test.ts`); Schema-Änderungen in `geminiService.ts` mit Tests mitziehen.
 - **Wartung:** `db.ts` nicht isoliert testbar (Import-Side-Effects) — Cross-Feature- und Repository-Tests bevorzugen.
 - Aktueller Snapshot: [STATUS-2026-06-03.md](./STATUS-2026-06-03.md); Vorgänger: [STATUS-2026-06-02.md](./STATUS-2026-06-02.md).
-- `pnpm run lint` mit **`--max-warnings 0`**; `react-hooks/exhaustive-deps` und `no-explicit-any` sind **`error`**; `no-console` erlaubt nur warn/error/debug (siehe `301-strict-quality-gates.mdc`).
+- `pnpm run lint` mit **`--max-warnings 0`**; `react-hooks/exhaustive-deps`, `no-explicit-any`, **`no-floating-promises`** (projectService) sind **`error`**; `no-console` erlaubt nur warn/error/debug (siehe `301-strict-quality-gates.mdc`).
 - Vor Release empfohlen: **`pnpm run check:all`** oder mindestens lint, test, build und bei Bundle-Aenderungen `pnpm run check:bundle-budget`.
 
 ### Vitest unter Windows / mit Coverage

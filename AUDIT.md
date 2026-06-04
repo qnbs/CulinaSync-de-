@@ -6,12 +6,12 @@
 
 ---
 
-## Status-Update 2026-06-03 (Perfection-Sprint PR #66 + Doku)
+## Status-Update 2026-06-04 (`main` nach PR #66 + #67)
 
-- **Gesamtbewertung:** weiter **9,0 / 10** ([AUDIT-vNEXT](./docs/AUDIT-vNEXT-2026-06-03.md)).
-- **Validierung (PR #66):** **427** Vitest / **101** Dateien; Coverage **~79,1 %** stmts / **~80,6 %** lines / **~63,7 %** branches; Thresholds **80/78/73/63**; E2E **9** Specs (inkl. Sync, Local-AI-Settings, Pantry).
-- **Umgesetzt:** R-001 (Device-Sync Zod), R-002 (DataPanel → `data-panel/`), R-003 (E2E-Basis), R-004 (`exportService`→`dbInstance`); Doku-Sync ROADMAP M11, PRD, STATUS, TESTING.
-- **Offen (Top):** M11 Local AI L1–L3, Branch-Coverage **64 %**, Typed ESLint R-005, Lighthouse CI, Tauri Tag-Release.
+- **Gesamtbewertung:** **9,0 / 10** ([AUDIT-vNEXT](./docs/AUDIT-vNEXT-2026-06-03.md)).
+- **Validierung:** **470** Vitest / **109** Dateien; Coverage **~79,6 %** stmts / **~81,1 %** lines / **~75,1 %** funcs / **~64,0 %** branches; Thresholds **80/78/73/64**; E2E **10** Tests / **6** Specs (inkl. Cook-Mode).
+- **Umgesetzt:** R-001–R-006 (siehe [Backlog](./docs/AUDIT-REMEDIATION-BACKLOG.md)); M11.1–11.3 Local AI; R-005 `no-floating-promises`.
+- **Offen (Top):** M7 TS7 GA, M8 Tauri Release, M5.9 Coverage 88 %, Lighthouse CI, optional Dexie-Verschlüsselung.
 - **PR-Prozess:** `.cursor/rules/300-pr-review-automation.mdc`.
 
 ## Status-Update 2026-06-03 (Full-Scale Audit vNext)

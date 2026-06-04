@@ -7,6 +7,10 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben
+
+- **Merge PR #67:** `goToRecipes` in `e2e/helpers/navigation.ts` wiederhergestellt; `DataPanel` `void` für `navigator.storage.estimate`; Vitest-Branch-Threshold **64** (M5.8).
+
 ### Hinzugefuegt
 
 - **Settings:** `DataPanel` in Module unter `data-panel/` (Vault, Cloud-Sync, Device-Sync, Storage); Logik in `useDataPanelSync` / `useDataPanelVault`.

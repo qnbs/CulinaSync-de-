@@ -52,8 +52,8 @@ Implementierung → Diagnostics / ESLint für geänderten Bereich → gezielte T
 | Dev-Server | `pnpm run dev` |
 | Lint | `pnpm run lint` |
 | Typen | `pnpm run type-check` |
-| Tests | `pnpm run test` (**427** Vitest / **101** Dateien) |
-| E2E | `pnpm run test:e2e` (**9** Specs; CI: nach `build`) |
+| Tests | `pnpm run test` (**470** Vitest / **109** Dateien) |
+| E2E | `pnpm run test:e2e` (**10** Tests / **6** Specs; CI: nach `build`) |
 | Script-Tests | `pnpm run test:scripts` |
 | i18n | `pnpm run i18n:check` |
 | Coverage | `pnpm run test:coverage` |
@@ -68,7 +68,8 @@ CI-Orientierung: **Node 24**; PR → volles `validate.yml`; **main** → `main-g
 
 - Framework: **Vitest**, **MSW**, **Testing Library**; Muster unter `apps/web/src/**/*.test.ts(x)`.
 - **Verboten:** Fehlgeschlagene Tests dauerhaft auskommentieren oder löschen, um CI zu „grün zu tricksen“.
-- Coverage (Juni 2026): **~79 %/81 %/75 %/64 %** (stmts/lines/funcs/branches, gerundet); Thresholds **80/78/73/63** (Stufe 1) — M5 ✅; Ziel **88 %** → `ROADMAP.md` M5.9 (siehe `docs/STATUS-2026-06-03.md`).
+- Coverage (Juni 2026): **~79,6 %/81,1 %/75,1 %/64,0 %** (stmts/lines/funcs/branches); Thresholds **80/78/73/64** — M5 ✅ / M5.8 ✅; Ziel **88 %** → `ROADMAP.md` M5.9 (siehe `docs/STATUS-2026-06-03.md`).
+- ESLint: **`no-floating-promises`** (**error**, `projectService`) neben `exhaustive-deps` / `no-explicit-any`.
 
 ---
 

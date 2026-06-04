@@ -84,7 +84,7 @@ export const DataPanel: React.FC<DataPanelProps> = ({
 
   useEffect(() => {
     if ('storage' in navigator && 'estimate' in navigator.storage) {
-      navigator.storage.estimate().then(({ usage, quota }) => {
+      void navigator.storage.estimate().then(({ usage, quota }) => {
         setStorageEstimate({ used: usage || 0, quota: quota || 0 });
       });
     }
