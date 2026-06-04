@@ -9,7 +9,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Behoben
 
-- **Tauri CI:** `beforeBuildCommand` nutzt `scripts/tauri-pnpm-build.sh` — korrektes Monorepo-Root in tauri-action (kein `cd ..` ins leere Parent).
+- **Tauri CI:** `beforeBuildCommand` nutzt `scripts/tauri-pnpm-build.sh` via `git rev-parse --show-toplevel` (tauri-action-CWD + lokales `src-tauri`).
 
 ## [0.2.4] — 2026-06-04
 
