@@ -100,6 +100,7 @@ export const CloudSyncSection: React.FC<CloudSyncSectionProps> = (sync) => {
             autoComplete="off"
           />
           <p className="text-xs text-zinc-500">{t('settings.data.sync.nextcloud.remotePathHint')}</p>
+          <p className="text-xs text-zinc-500">{t('settings.data.sync.nextcloud.credentialsHint')}</p>
           <input
             type="password"
             className="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-3 focus:ring-2 focus:ring-accent-500 focus:outline-none font-mono"

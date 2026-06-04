@@ -15,6 +15,8 @@ import OfflineStatusBar from './components/OfflineStatusBar';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
 import { useModalA11y } from './hooks/useModalA11y';
 import { useDeepLinkNavigation } from './hooks/useDeepLinkNavigation';
+import { useDemoEntryQuery, type DemoEntryResult } from './hooks/useDemoEntryQuery';
+import { DemoModeBanner } from './components/DemoModeBanner';
 import { useAccentTheme } from './hooks/useAccentTheme';
 import { usePwaInstall } from './hooks/usePwaInstall';
 import { usePwaUpdate } from './hooks/usePwaUpdate';
@@ -69,6 +71,23 @@ const App: React.FC = () => {
   useDeepLinkNavigation();
   useAccentTheme();
   usePwaLaunchHandlers();
+
+  const handleDemoEntryResolved = useCallback(
+    (mode: DemoEntryResult) => {
+      if (!mode) {
+        return;
+      }
+      localStorage.setItem('culinaSyncOnboarded', 'true');
+      closeOnboarding();
+      if (mode === 'demo') {
+        dispatch(addToastAction({ message: t('demo.entry.loaded'), type: 'success' }));
+      } else {
+        dispatch(addToastAction({ message: t('demo.entry.try'), type: 'info' }));
+      }
+    },
+    [closeOnboarding, dispatch, t],
+  );
+  useDemoEntryQuery(handleDemoEntryResolved);
 
   const uncheckedShoppingCount = useLiveQuery(
     async () => db.shoppingList.filter((item) => !item.isChecked).count(),
@@ -300,6 +319,7 @@ const App: React.FC = () => {
             />
           )}
         </Suspense>
+        <DemoModeBanner />
         <div data-tour="header">
           <Header 
             currentPage={currentPage} 

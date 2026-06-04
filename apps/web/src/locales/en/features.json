@@ -217,6 +217,21 @@
       "seo": "SEO/meta/OG/Twitter, preload, print styles, version badge"
     }
   },
+  "demo": {
+    "entry": {
+      "loaded": "Demo pantry items have been loaded.",
+      "try": "Started empty — your data stays on this device only."
+    },
+    "banner": {
+      "ariaLabel": "Demo hint",
+      "message": "New on GitHub Pages? Load sample pantry data and try CulinaSync with no setup.",
+      "cta": "Load demo",
+      "loading": "Loading demo…",
+      "loaded": "{{count}} demo items added to your pantry.",
+      "error": "Could not load demo data.",
+      "dismiss": "Dismiss hint"
+    }
+  },
   "onboarding": {
     "title": "Welcome to CulinaSync!",
     "description": "Start with a guided tour or load demo data for a hands-on tutorial.",
@@ -463,7 +478,8 @@
       "noResultsTitle": "No results found",
       "emptyTitle": "Your pantry is empty",
       "noResultsDescription": "Try adjusting your search terms or filters.",
-      "emptyDescription": "Add your first item in the top right to keep track of everything."
+      "emptyDescription": "Add your first item in the top right to keep track of everything.",
+      "loadDemo": "Load demo data"
     },
     "quickAdd": {
       "placeholder": "Smart add: e.g. '500g spaghetti'",

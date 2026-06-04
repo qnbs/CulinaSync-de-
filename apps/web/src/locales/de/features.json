@@ -217,6 +217,21 @@
       "seo": "SEO/Meta/OG/Twitter, Preload, Print-Styles, Version-Badge"
     }
   },
+  "demo": {
+    "entry": {
+      "loaded": "Demo-Vorratsdaten wurden geladen.",
+      "try": "Leer gestartet — deine Daten bleiben nur auf diesem Gerät."
+    },
+    "banner": {
+      "ariaLabel": "Demo-Hinweis",
+      "message": "Neu auf GitHub Pages? Lade Beispiel-Vorratsdaten und probiere CulinaSync ohne Setup.",
+      "cta": "Demo laden",
+      "loading": "Lade Demo…",
+      "loaded": "{{count}} Demo-Artikel im Vorrat.",
+      "error": "Demo konnte nicht geladen werden.",
+      "dismiss": "Hinweis schließen"
+    }
+  },
   "onboarding": {
     "title": "Willkommen bei CulinaSync!",
     "description": "Starte mit einer geführten Tour oder lade Demo-Daten für ein interaktives Tutorial.",
@@ -463,7 +478,8 @@
       "noResultsTitle": "Keine Ergebnisse gefunden",
       "emptyTitle": "Deine Vorratskammer ist leer",
       "noResultsDescription": "Versuche, deine Suchbegriffe oder Filter anzupassen.",
-      "emptyDescription": "Fuege deinen ersten Artikel oben rechts hinzu, um den Ueberblick zu behalten."
+      "emptyDescription": "Fuege deinen ersten Artikel oben rechts hinzu, um den Ueberblick zu behalten.",
+      "loadDemo": "Demo-Daten laden"
     },
     "quickAdd": {
       "placeholder": "Smart Add: z.B. '500g Spaghetti'",

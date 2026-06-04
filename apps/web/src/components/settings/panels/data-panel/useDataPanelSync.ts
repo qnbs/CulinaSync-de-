@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getLastSyncTimestamp, syncDownload, syncUpload } from '../../../../services/syncService';
 import { probeNextcloudConnection } from '../../../../services/nextcloudSyncAdapter';
@@ -14,6 +14,11 @@ import {
   NEXTCLOUD_USER_STORAGE_KEY,
   SYNC_PROVIDER_STORAGE_KEY,
 } from './dataPanelConstants';
+import { readSyncPref, writeSyncPref } from './syncPrefStorage';
+import {
+  loadNextcloudAppPassword,
+  saveNextcloudAppPassword,
+} from '../../../../services/syncCredentialService';
 
 type ToastFn = (message: string, type: 'success' | 'error' | 'info') => void;
 
@@ -21,22 +26,30 @@ export const useDataPanelSync = (addToast: ToastFn) => {
   const { t } = useTranslation();
 
   const [syncProvider, setSyncProvider] = useState<SyncProviderId>(() => {
-    const stored = localStorage.getItem(SYNC_PROVIDER_STORAGE_KEY);
+    const stored = readSyncPref(SYNC_PROVIDER_STORAGE_KEY);
     return stored === 'nextcloud' ? 'nextcloud' : 'generic';
   });
   const [syncUrl, setSyncUrl] = useState('');
   const [syncPassword, setSyncPassword] = useState('');
   const [syncToken, setSyncToken] = useState('');
   const [nextcloudServer, setNextcloudServer] = useState(
-    () => localStorage.getItem(NEXTCLOUD_SERVER_STORAGE_KEY) ?? '',
+    () => readSyncPref(NEXTCLOUD_SERVER_STORAGE_KEY),
   );
   const [nextcloudUser, setNextcloudUser] = useState(
-    () => localStorage.getItem(NEXTCLOUD_USER_STORAGE_KEY) ?? '',
+    () => readSyncPref(NEXTCLOUD_USER_STORAGE_KEY),
   );
   const [nextcloudAppPassword, setNextcloudAppPassword] = useState('');
   const [nextcloudRemotePath, setNextcloudRemotePath] = useState(
-    () => localStorage.getItem(NEXTCLOUD_PATH_STORAGE_KEY) ?? 'culinasync-backup.csb',
+    () => readSyncPref(NEXTCLOUD_PATH_STORAGE_KEY, 'culinasync-backup.csb'),
   );
+
+  useEffect(() => {
+    void loadNextcloudAppPassword().then((stored) => {
+      if (stored) {
+        setNextcloudAppPassword(stored);
+      }
+    });
+  }, []);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
   const [syncLoading, setSyncLoading] = useState(false);
   const [lastSyncAt, setLastSyncAt] = useState<number | null>(() => getLastSyncTimestamp());
@@ -50,11 +63,12 @@ export const useDataPanelSync = (addToast: ToastFn) => {
         nextcloudAppPassword.trim().length > 0);
 
   const persistNextcloudPrefs = useCallback(() => {
-    localStorage.setItem(SYNC_PROVIDER_STORAGE_KEY, syncProvider);
-    localStorage.setItem(NEXTCLOUD_SERVER_STORAGE_KEY, nextcloudServer);
-    localStorage.setItem(NEXTCLOUD_USER_STORAGE_KEY, nextcloudUser);
-    localStorage.setItem(NEXTCLOUD_PATH_STORAGE_KEY, nextcloudRemotePath);
-  }, [nextcloudRemotePath, nextcloudServer, nextcloudUser, syncProvider]);
+    writeSyncPref(SYNC_PROVIDER_STORAGE_KEY, syncProvider);
+    writeSyncPref(NEXTCLOUD_SERVER_STORAGE_KEY, nextcloudServer);
+    writeSyncPref(NEXTCLOUD_USER_STORAGE_KEY, nextcloudUser);
+    writeSyncPref(NEXTCLOUD_PATH_STORAGE_KEY, nextcloudRemotePath);
+    void saveNextcloudAppPassword(nextcloudAppPassword);
+  }, [nextcloudAppPassword, nextcloudRemotePath, nextcloudServer, nextcloudUser, syncProvider]);
 
   const resolveActiveSyncTarget = useCallback(() => {
     if (syncProvider === 'nextcloud') {
