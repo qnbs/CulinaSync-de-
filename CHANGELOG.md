@@ -9,7 +9,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Behoben
 
-- **Tauri CI:** `beforeBuildCommand` nutzt `scripts/tauri-pnpm-build.sh` via `git rev-parse --show-toplevel` (tauri-action-CWD + lokales `src-tauri`).
+- **Tauri CI:** `pnpm run tauri:build` (Node-Skript, Windows/macOS/Linux); `rustup target add` für beide macOS-Architekturen im Release-Workflow.
 
 ## [0.2.4] — 2026-06-04
 
