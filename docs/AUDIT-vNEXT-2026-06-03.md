@@ -1,8 +1,9 @@
 # CulinaSync-de- — Full-Scale Audit vNext
 
-> **Datum:** 2026-06-03  
+> **Datum:** 2026-06-03 (Snapshot) · **Aktualisierung Metriken:** 2026-06-04 (`main` @ `1b82f3b`, PR #66 + #67)  
 > **Scope:** Code, Architektur, Security, Local AI, Sync, i18n, Testing, CI/CD, Tauri, DX, Dokumentation  
-> **Basis-Commit:** `main` @ `ae302be` (nach PR #57)  
+> **Basis-Commit (Snapshot):** `main` @ `ae302be` (nach PR #57) — Findings teils durch #66/#67 geschlossen  
+> **Aktueller Stand:** [`STATUS-2026-06-03.md`](./STATUS-2026-06-03.md) · [`AUDIT-REMEDIATION-BACKLOG.md`](./AUDIT-REMEDIATION-BACKLOG.md)  
 > **Methodik:** Exploration → `pnpm run type-check`, `test:coverage`, `i18n:check`, `analyze:bundle`, `pnpm audit`, Deep-Dive `apps/web/src`, Cross-Ref PRD/ROADMAP/STATUS/AUDIT.md
 
 ---
@@ -16,15 +17,16 @@
 | **Multi-Device / öffentlicher Launch** | ⚠️ Mittel | Sync LWW + WebDAV/QR **ohne** vollständige E2E-/Property-Tests; Credentials-UX verbesserungsfähig. |
 | **Sicherheit** | ✅ Stark | Kein API-Key im Build; AES-GCM-Backups; Zod bei Gemini; **keine** Critical/High in `pnpm audit --audit-level=high`. |
 
-**Wichtig:** Externe Audits (Juni 2026) mit Coverage ~59–61 % sind **veraltet**. Aktuell (lokal, Node 24):
+**Wichtig:** Externe Audits (Juni 2026) mit Coverage ~59–61 % sind **veraltet**. Aktuell (`main` nach PR #67, Node 24):
 
-| Metrik | Ist | Threshold (CI) | PRD M5 |
-|--------|-----|----------------|--------|
-| Tests | **404** Vitest (+5 scripts) | — | ✅ |
-| Statements | **77,79 %** | 77 % | ✅ |
-| Lines | **79,27 %** | 79 % | ✅ |
-| Functions | **73,71 %** | 72 % | ✅ |
-| Branches | **62,39 %** | 62 % | ✅ (knapp) |
+| Metrik | Ist | Threshold (CI) | PRD M5 / M5.8 |
+|--------|-----|----------------|---------------|
+| Tests | **470** Vitest (+5 scripts) | — | ✅ |
+| Statements | **~79,6 %** | 80 % | ✅ |
+| Lines | **~81,1 %** | 78 % | ✅ |
+| Functions | **~75,1 %** | 73 % | ✅ |
+| Branches | **~64,0 %** | 64 % | ✅ M5.8 |
+| E2E | **10** / **6** Specs | — | ✅ R-003 |
 
 ---
 
@@ -100,12 +102,12 @@ Keine bekannten Datenverlust-, Secret-Leak- oder Build-Blocker auf `main`.
 | **Impact** | Stale Closures — mit **`error`** + `--max-warnings 0` abgesichert (2026-06-03, PR #64) |
 | **Fix** | ~~Warnungs-Nullung → `error`~~ **Erledigt**; Follow-up: typed ESLint (R-005) |
 
-#### M3 — Branch-Coverage (~63,7 %; Threshold 63 ✅, Ziel 64 %)
+#### M3 — Branch-Coverage (~~offen~~ → **erledigt** M5.8)
 
 | Feld | Inhalt |
 |------|--------|
-| **Evidence** | PR #66: Ist **~63,7 %** branches; Vitest-Threshold **63**; ROADMAP M5.8 → **64 %** |
-| **Fix** | Weitere Tests: `recipeRepository`-Zweige, `syncService` merge/replace, Kategorie-Edge-Cases |
+| **Evidence** | PR #67: Ist **~64,0 %** branches; Vitest-Threshold **64** in `vitest.config.ts` |
+| **Fix** | ~~Weitere Tests~~ **Erledigt**; langfristig ROADMAP M5.9 → **88 %** |
 
 #### M4 — Dexie-Migrationen existieren — Doku/Onboarding aktualisieren
 

@@ -7,11 +7,18 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefuegt
+
+- **M11 Local AI (PR #67):** `@domain/ai-core` (Provider-Chain, GPU-Tier, Model-Registry); `aiProviderService`, WebLLM (L1), Transformers.js Embeddings + Hybrid-RAG (Dexie v13 `aiEmbeddings`).
+- **E2E:** `cook-mode.spec.ts` (R-003); **10** Playwright-Tests / **6** Specs gesamt.
+- **ESLint (R-005):** Typed-Block mit `projectService` + `@typescript-eslint/no-floating-promises` für `apps/web/src/**`, `packages/ai-core/src/**`.
+
 ### Behoben
 
-- **Merge PR #67:** `goToRecipes` in `e2e/helpers/navigation.ts` wiederhergestellt; `DataPanel` `void` für `navigator.storage.estimate`; Vitest-Branch-Threshold **64** (M5.8).
+- **Merge PR #67 auf `main`:** `goToRecipes` in `e2e/helpers/navigation.ts` wiederhergestellt; `DataPanel` `void` für `navigator.storage.estimate`; Vitest-Branch-Threshold **64** (M5.8).
+- **Rezept-Detail:** `RecipeActionBar` i18n-Keys (`startCookMode`, Favorit, Export).
 
-### Hinzugefuegt
+### Hinzugefuegt (PR #66)
 
 - **Settings:** `DataPanel` in Module unter `data-panel/` (Vault, Cloud-Sync, Device-Sync, Storage); Logik in `useDataPanelSync` / `useDataPanelVault`.
 - **E2E:** `sync-settings`, `chef-local`, `pantry-cook` + Navigation-Helper.
@@ -22,30 +29,27 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ### Geaendert
 
 - **Doku (Perfection Schritt D):** `ROADMAP.md` M11 Local AI, M5.7–5.9, M10.5; `PRD.md` v1.1 (Coverage-Stufenplan 88 %); `STATUS-2026-06-03`, `TESTING.md`, `AUDIT.md`, `instructions.md`, `AUDIT-REMEDIATION-BACKLOG`, `PROJECT-STRUCTURE.md`.
-- **Coverage:** Vitest-Thresholds Stufe 1 — 80/78/73/63 (lines/stmts/funcs/branches); Ist ~80,6 % / ~63,7 % branches — Ziel 64 % in Follow-up.
+- **Coverage:** Vitest-Thresholds **80/78/73/64** (lines/stmts/funcs/branches); Ist ~**79,6 %** / ~**64,0 %** branches (M5.8 ✅).
 - **CI:** `ci.yml` Job `main-guard` auf Push `main` (grüner CI-Status ohne Doppel-Coverage); Regel `302-ci-correction-loop.mdc` (dauerhafte Korrekturschleife).
 - **ESLint:** `exhaustive-deps` **error**; `no-console` strikt (nur warn/error/debug); `console.log` → `console.debug` in Services.
 - **Agent-Regeln:** `301-strict-quality-gates.mdc`; `300-pr-review-automation.mdc` — CodeAnt/Copilot **sofort** abarbeiten, kein Merge mit offenen Threads.
-- **Toolchain:** `check:all` umfasst `test:scripts` und `i18n:check`; Test-/Coverage-Zahlen in Doku auf **427** Vitest / **101** Dateien vereinheitlicht.
+- **Toolchain:** `check:all` umfasst `test:scripts` und `i18n:check`; Doku: **470** Vitest / **109** Dateien.
 
-### Behoben
+### Behoben (PR #66)
 
-- **Rezept-Detail:** `RecipeActionBar` nutzt korrekte i18n-Keys (`startCookMode`, `addMissingToShopping`, Favorit-Labels); fehlende Export-/Speichern-Keys in de/en ergänzt (leere Buttons in Production).
-- **CI Deploy:** `deploy.yml` — `checkout` vor Post-Deploy-Verify; Vercel-HTTP-401 (Deployment Protection) als Warnung statt Hard-Fail.
+- **CI Deploy:** `deploy.yml` — `checkout` vor Post-Deploy-Verify; Vercel-HTTP-401 als Warnung statt Hard-Fail.
 - **CI E2E:** Offline-Smoke lädt Seite zuerst, dann offline; Locator `#offline-status-banner` (strict mode).
+
+### Geaendert (PR #66, Fortsetzung)
+
 - **Vercel:** Monorepo-Build `pnpm run build --filter=web` in `vercel.json`.
+- **Deploy:** [docs/DEPLOY-PAGES-VERCEL.md](docs/DEPLOY-PAGES-VERCEL.md), `deploy-health.yml`, Post-Deploy-Smoke.
+- **E2E:** Offline-Banner robuster (`useOnlineStatus`; Playwright offline-Flow).
+- **Audit vNext:** `docs/AUDIT-vNEXT-2026-06-03.md`, Remediation-Backlog/-Plan.
+- **Sync:** Zod-Validierung Device-QR/LAN (`deviceSyncService`).
+- **DB-Imports:** `exportService` → `dbInstance`.
 
-- **Deploy:** Handbuch [docs/DEPLOY-PAGES-VERCEL.md](docs/DEPLOY-PAGES-VERCEL.md); `apps/web/vercel.json`; Workflows `deploy-health.yml`; Skripte `verify-pages-artifact`, `verify-live-deployments`; Post-Deploy-Smoke in `deploy.yml` (mit `checkout` im Deploy-Job).
-- **E2E:** Offline-Banner robuster (`useOnlineStatus` Initial-Sync; Playwright: Seite laden, dann `setOffline` + `offline`-Event).
-
-- **Audit vNext (2026-06-03):** `docs/AUDIT-vNEXT-2026-06-03.md`, Remediation-Backlog und -Plan; PR-Review-Regel (CodeAnt/Copilot proaktiv).
-- **Sync:** Zod-Validierung für Device-QR/LAN-Payload (`deviceSyncService`); Test für Oversize-Payload.
-
-### Geaendert
-
-- **DB-Imports:** `exportService` nutzt `dbInstance` statt `db` (weniger Side-Effects in Tests).
-
-### Hinzugefuegt
+### Hinzugefuegt (aeltere Eintraege)
 
 - **Onboarding:** Tour aus Hilfe erneut starten (`openOnboarding`); Joyride- und UI-Texte vollständig i18n (de/en).
 - **i18n:** Eigenes Locale-File `aiChef.json` für KI-Chef-UI (`aiChef.input` / `aiChef.results`); Einstellungen behalten `settings.aiChef` nur für Präferenzen.

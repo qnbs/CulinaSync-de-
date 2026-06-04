@@ -1,6 +1,6 @@
 # CulinaSync — Roadmap
 
-> **Stand:** 3. Juni 2026 (M5+, M9–M10 ✅, Perfection-Sprint PR #66) · Basis: vollständiges Code-, Architektur- und Security-Audit (14.–22. April 2026) + Follow-up-Sessions Mai/Juni 2026  
+> **Stand:** 4. Juni 2026 (`main`: PR #66 + #67) · M5+, M9–M11.3 ✅ · Basis: Audit April 2026 + Follow-ups Mai/Juni 2026  
 > **Format:** Milestones geordnet nach Priorität. Jedes Item mit Herkunft (AUDIT-Referenz), Aufwandsschätzung und Status.
 
 ---
@@ -101,7 +101,7 @@
 | Metrik | Aktuell | Ziel |
 |---|---|---|
 | Statements | **~78 %** | ≥70 % |
-| Branches | **~63 %** | ≥60 % |
+| Branches | **~64 %** | ≥60 % |
 | Functions | **~72,5 %** | ≥70 % |
 | Lines | **~79 %** | ≥70 % |
 
@@ -214,7 +214,7 @@ _Vorbedingung: M1 (DevContainer mit Rust), Tauri 2 stabil_
 
 | # | Maßnahme | Datei(en) | Aufwand | Status |
 |---|---|---|---|---|
-| 10.5 | E2E: Sync-Settings, Local-AI-Toggle, Pantry-Kernflow | `apps/web/e2e/sync-settings.spec.ts`, `chef-local.spec.ts`, `pantry-cook.spec.ts` | Mittel | ✅ (PR #66); Cook-Mode-E2E folgt |
+| 10.5 | E2E: Sync, Chef, Pantry, Cook-Mode (**10** Tests) | `apps/web/e2e/*.spec.ts` | Mittel | ✅ PR #66 + #67 |
 
 ---
 
@@ -226,10 +226,10 @@ _Vorbedingung: M9 Bundle-Budget; Architekturvertrag [`docs/LOCAL-AI-ARCHITECTURE
 
 | # | Maßnahme | Datei(en) | Aufwand | Status |
 |---|---|---|---|---|
-| 11.0 | PRD/Doku: „Local default, Cloud optional“; Benchmark-Kriterien | `PRD.md`, `LOCAL-AI-AUDIT-2026-06.md` | S | 🟨 Doku in PR #66-Nachzug |
-| 11.1 | `aiProviderService` + Fallback-Kette; Lazy-Chunks ML | `packages/ai-core`, `apps/web/src/services/` | Hoch | 🔲 |
-| 11.2 | WebLLM (L1) Feature-Flag: Rezept-Ideen/Rezept | `aiService.ts`, Worker-Bus | Hoch | 🔲 |
-| 11.3 | Transformers.js Embeddings + domänen-RAG (Dexie) | `localAiRagService` (neu) | Hoch | 🔲 |
+| 11.0 | PRD/Doku: „Local default, Cloud optional“; Benchmark-Kriterien | `PRD.md`, `LOCAL-AI-AUDIT-2026-06.md` | S | 🟨 laufend |
+| 11.1 | `aiProviderService` + Fallback-Kette; Lazy-Chunks ML | `packages/ai-core`, `apps/web/src/services/` | Hoch | ✅ PR #67 |
+| 11.2 | WebLLM (L1) Feature-Flag: Rezept-Ideen/Rezept | `localAiWebLlmService`, `vendor-webllm` | Hoch | ✅ PR #67 |
+| 11.3 | Transformers.js Embeddings + Hybrid-RAG (Dexie v13) | `localAiEmbeddingsService`, `aiEmbeddings` | Hoch | ✅ PR #67 |
 | 11.4 | ONNX Vision Pantry-Foto (L2) | Vision-Worker, Budget-Gate | Hoch | 🔲 |
 | 11.5 | E2E „Chef ohne Netz“ + MSW | `e2e/chef-local.spec.ts` erweitern | Mittel | 🟨 Basis in PR #66 |
 
@@ -241,6 +241,7 @@ _Vorbedingung: M9 Bundle-Budget; Architekturvertrag [`docs/LOCAL-AI-ARCHITECTURE
 
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.6 | 2026-06-04 | **M11.1–11.3** auf `main` (PR #67); M5.8 **64 %** branches; Cook-Mode-E2E; R-005 ESLint |
 | 1.5 | 2026-06-03 | **M11 Local AI** angehängt; M5.7–5.9 Perfection/Coverage-Stufen; M10.5 E2E; `exhaustive-deps` als erledigt; PR #66 |
 | 1.4 | 2026-06-02 | **M5 abgeschlossen** (~78/79/72,5/63 % Coverage); PR #20/#29/#30; Docs-Nachzug STATUS/README/TESTING; M6.6 |
 | 1.3 | 2026-05-02 | M3.3 MealPlanner-Context; M4.1 Zod in `geminiService`; Legacy-Settings-Migration ohne Runtime-Fallback in `loadSettings`; A11y-Sweep; CI Node 24 in validate/ci; M6.4 Doku-Sync; `docs/STATUS-2026-05-02.md` |

@@ -157,9 +157,9 @@ Detaillierte Tasks: **`ROADMAP.md`**. PRD-Überblick:
 
 | Epoche | Thema |
 |--------|--------|
-| Erledigt / fortgeschritten | TS/tsgo, CI-Hygiene, i18n, Architektur-Cleanup, Zod+Gemini, M5 Coverage, M9 Bundle, **M10 Sync**, DataPanel-Split, E2E-Basis (PR #66) |
-| Aktiv | M11 Local AI (4-Layer), M5.8 Branch-Coverage 64 %, Typed ESLint (R-005) |
-| Geplant | TS 7 GA (M7), Tauri Release (M8), Lighthouse CI, optional Dexie-Verschlüsselung |
+| Erledigt / fortgeschritten | M5/M5.8 Coverage, M9 Bundle, M10 Sync, Perfection (#66), **M11.1–11.3** Local AI, E2E inkl. Cook-Mode, R-005 ESLint (#67) |
+| Aktiv | M11.4 ONNX Vision, M5.9 Coverage 88 %, Doku/Benchmark Local AI |
+| Geplant | TS 7 GA (M7), Tauri Release (M8), Lighthouse CI (R-009), optional Dexie-Verschlüsselung |
 
 ---
 
@@ -167,6 +167,7 @@ Detaillierte Tasks: **`ROADMAP.md`**. PRD-Überblick:
 
 | Datum | Version | Änderung |
 |-------|---------|----------|
+| 2026-06-04 | 1.2 | M11.1–11.3 auf `main`; M5.8 64 % branches; E2E Cook-Mode; nur `main` als Integrationsbranch |
 | 2026-06-03 | 1.1 | NFR-06/Erfolgsmetriken: M5 erreicht, Perfection-Stufenplan 88 %, E2E-Journeys; Roadmap M11 Local AI |
 | 2026-05-02 | 1.0 | Initiale PRD aus README, ARCHITECTURE, ROADMAP, Copilot-Instructions konsolidiert |
 

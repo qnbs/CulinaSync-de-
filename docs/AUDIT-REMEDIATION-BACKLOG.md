@@ -7,10 +7,10 @@
 |----|----------|-------------|--------|--------|----------|----------------|--------|
 | R-001 | High | `feat(sync): Zod-validate device sync QR payload` | Security / Datenintegrität | S | QR-Sync ist live ohne Schema-Gate | — | ✅ PR #66 / main |
 | R-002 | High | `refactor(settings): split DataPanel sync/vault sections` | Wartbarkeit, Bundle | M | Größte Settings-Datei; Sync wächst | — | ✅ PR #66 |
-| R-003 | High | `test(e2e): critical journeys sync, chef, cook-mode` | Regressionsschutz | L | Smoke reicht nicht für M10 | R-001 optional | 🟨 Basis PR #66 (Cook-Mode-E2E offen) |
+| R-003 | High | `test(e2e): critical journeys sync, chef, cook-mode` | Regressionsschutz | L | Smoke reicht nicht für M10 | R-001 optional | ✅ PR #66 + #67 (10 E2E, inkl. Cook-Mode) |
 | R-004 | Medium | `refactor(db): services import dbInstance only` | Testbarkeit | S | Letzte `./db`-Imports in Services bereinieren | — | ✅ `exportService` |
-| R-005 | Medium | `chore(eslint): typed rules + floating promises` | Hook-Bugs | M | `exhaustive-deps` **error** (2026-06-03); typed lint folgt | R-004 hilft |
-| R-006 | Medium | `test: raise branch coverage sync + recipeRepository` | CI-Stabilität | M | Ist ~63,7 %; Threshold 63 | — | 🟨 PR #66 Teilerfolg |
+| R-005 | Medium | `chore(eslint): typed rules + floating promises` | Hook-Bugs | M | `exhaustive-deps` **error**; typed lint + `no-floating-promises` | R-004 hilft | ✅ PR #67 (`projectService`) |
+| R-006 | Medium | `test: raise branch coverage sync + recipeRepository` | CI-Stabilität | M | M5.8: Threshold **64** % branches | — | ✅ PR #67 (~64 % branches) |
 | R-007 | Medium | `docs: document Dexie migration + backup gate` ✅ | User Trust | S | Erledigt: `docs/DB-MIGRATIONS.md` | — |
 | R-008 | Medium | `feat(sync): optional encrypted credential storage` | Security | M | localStorage Metadaten | apiKeyService pattern |
 | R-009 | Medium | `ci: Lighthouse CI on PR previews` | PWA/A11y Scores | M | Mobile UX | Vercel/Pages preview |
@@ -20,10 +20,10 @@
 | R-013 | Low | `docs(legal): privacy policy DE` | Launch DE | M | Öffentliche Veröffentlichung | — |
 | R-014 | Info | `chore(graphify): update after code sessions` | Agent DX | S | Team policy | — |
 
-## Sprint-Vorschlag (sofort–2 Wochen)
+## Sprint-Vorschlag (aktuell)
 
-**Sprint A (Woche 1):** R-001, R-004, R-007, R-010  
-**Sprint B (Woche 2):** R-003 (1. Spec Sync), R-005, R-006 (syncService branches)
+**Erledigt (PR #66 + #67):** R-001–R-007 (R-007 Doku), M5.8, M11.1–11.3, E2E Cook-Mode, ESLint typed  
+**Nächster Sprint:** R-009 (Lighthouse CI), R-010 (audit deps), R-012 (M8 Tauri Release)
 
 ## Definition of Done (Backlog-Item)
 
