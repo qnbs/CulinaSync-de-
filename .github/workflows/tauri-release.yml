@@ -34,6 +34,8 @@ jobs:
 
       - name: Web build
         run: pnpm run build
+        env:
+          CULINASYNC_DESKTOP_BUILD: '1'
 
       - name: Cargo check (Tauri)
         working-directory: src-tauri
@@ -85,11 +87,14 @@ jobs:
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CULINASYNC_DESKTOP_BUILD: '1'
         with:
           projectPath: src-tauri
           tagName: ${{ github.ref_name }}
           releaseName: 'CulinaSync ${{ github.ref_name }}'
-          releaseBody: 'Desktop installers (Windows, macOS, Linux) for CulinaSync.'
+          releaseBody: |
+            Desktop installers (Windows, macOS, Linux) for CulinaSync.
+            See [docs/M8-TAURI-DESKTOP.md](https://github.com/qnbs/CulinaSync-de-/blob/main/docs/M8-TAURI-DESKTOP.md).
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
