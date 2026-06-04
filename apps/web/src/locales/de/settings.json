@@ -440,6 +440,7 @@
           "appPasswordPlaceholder": "App-Passwort (nur lokal)",
           "remotePathPlaceholder": "culinasync-backup.csb",
           "remotePathHint": "Dateiname im Nextcloud-Dateien-Ordner",
+          "credentialsHint": "Server und Benutzername nur in dieser Browser-Sitzung. App-Passwort verschluesselt in IndexedDB (wie der Gemini-Key).",
           "testConnection": "Verbindung pruefen",
           "testOk": "Nextcloud erreichbar.",
           "testFailed": "Verbindung fehlgeschlagen."

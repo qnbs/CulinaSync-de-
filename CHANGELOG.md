@@ -10,10 +10,13 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ### Hinzugefuegt
 
 - **Demo (R-011):** `?demo=1` / `?try=1` Deep-Links; `demoSeedService`; GitHub-Pages-Banner; Demo-CTA in leerer Vorratskammer.
+- **Sync (R-008):** Nextcloud App-Passwort verschlüsselt in IndexedDB; Server/User/Pfad in sessionStorage (Migration von localStorage).
 
 ## [0.2.3] — 2026-06-04
 
 ### Hinzugefuegt
+
+- **Release:** Tag `v0.2.3` — Tauri-Workflow (Draft); nach Merge erneut mit GTK-Fix in verify.
 
 - **Deps (R-010):** `turbo` **2.9.16**; `pnpm.overrides` für `brace-expansion`, `ws`, `cookie`, `tmp` — `pnpm audit` ohne Findings.
 - **Tauri (R-012):** `CULINASYNC_DESKTOP_BUILD` trennt Vite-`base` `/` (Desktop) von Pages-CI; `tauri-release.yml` Release-Body + Verify-Build.
