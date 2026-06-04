@@ -9,6 +9,12 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Hinzugefuegt
 
+- **Demo (R-011):** `?demo=1` / `?try=1` Deep-Links; `demoSeedService`; GitHub-Pages-Banner; Demo-CTA in leerer Vorratskammer.
+
+## [0.2.3] — 2026-06-04
+
+### Hinzugefuegt
+
 - **Deps (R-010):** `turbo` **2.9.16**; `pnpm.overrides` für `brace-expansion`, `ws`, `cookie`, `tmp` — `pnpm audit` ohne Findings.
 - **Tauri (R-012):** `CULINASYNC_DESKTOP_BUILD` trennt Vite-`base` `/` (Desktop) von Pages-CI; `tauri-release.yml` Release-Body + Verify-Build.
 - **CI (R-009):** `lighthouse-ci.yml` auf PRs — `@lhci/cli`, `lighthouserc.json` (vite preview + Pages-Pfad), PR-Kommentar via temporary public storage; `scripts/lighthouse-puppeteer.cjs` (Onboarding aus).

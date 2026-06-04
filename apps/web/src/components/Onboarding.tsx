@@ -3,7 +3,7 @@ import { Joyride, STATUS, type EventData, type Step } from 'react-joyride';
 import { ChefHat, FlaskConical, Sparkles, PlayCircle, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useModalA11y } from '../hooks/useModalA11y';
-import { db } from '../services/dbInstance';
+import { loadDemoPantrySeed } from '../services/demoSeedService';
 
 const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
     const { t } = useTranslation();
@@ -63,15 +63,7 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
     const handleSeedData = async () => {
         setSeedLoading(true);
         try {
-            const now = Date.now();
-            await db.transaction('rw', db.pantry, async () => {
-                await db.pantry.bulkAdd([
-                    { name: 'Tomaten', quantity: 6, unit: 'Stk', category: 'Gemuese', createdAt: now, updatedAt: now },
-                    { name: 'Spaghetti', quantity: 1, unit: 'Packung', category: 'Trockenware', createdAt: now, updatedAt: now },
-                    { name: 'Olivenoel', quantity: 1, unit: 'Flasche', category: 'Grundlagen', createdAt: now, updatedAt: now },
-                    { name: 'Knoblauch', quantity: 3, unit: 'Zehen', category: 'Gemuese', createdAt: now, updatedAt: now },
-                ]);
-            });
+            await loadDemoPantrySeed();
             setSeedDone(true);
         } finally {
             setSeedLoading(false);

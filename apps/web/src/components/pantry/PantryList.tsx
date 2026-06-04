@@ -7,9 +7,27 @@ import PantryListItem from '../PantryListItem';
 import { PantryItem } from '../../types';
 import { useWindowSize } from '../../hooks/useWindowSize';
 import { resolvePantryCategoryLabel } from '../../utils/categoryLabels';
+import { loadDemoPantrySeed } from '../../services/demoSeedService';
+import { useAppDispatch } from '../../store/hooks';
+import { addToast } from '../../store/slices/uiSlice';
 
 const EmptyState: React.FC<{ totalItemCount: number }> = ({ totalItemCount }) => {
     const { t } = useTranslation();
+    const dispatch = useAppDispatch();
+    const [demoLoading, setDemoLoading] = React.useState(false);
+    const isEmpty = totalItemCount === 0;
+
+    const handleLoadDemo = async () => {
+        setDemoLoading(true);
+        try {
+            const count = await loadDemoPantrySeed();
+            dispatch(addToast({ message: t('demo.banner.loaded', { count }), type: 'success' }));
+        } catch {
+            dispatch(addToast({ message: t('demo.banner.error'), type: 'error' }));
+        } finally {
+            setDemoLoading(false);
+        }
+    };
 
     return (
         <div className="flex flex-col items-center justify-center py-24 px-4 text-center border-2 border-dashed border-zinc-800/50 rounded-2xl bg-zinc-900/20">
@@ -24,6 +42,16 @@ const EmptyState: React.FC<{ totalItemCount: number }> = ({ totalItemCount }) =>
                     ? t('pantry.emptyState.noResultsDescription')
                     : t('pantry.emptyState.emptyDescription')}
             </p>
+            {isEmpty && (
+                <button
+                    type="button"
+                    disabled={demoLoading}
+                    onClick={() => void handleLoadDemo()}
+                    className="mt-6 px-4 py-2 rounded-lg border border-zinc-600 text-zinc-200 font-semibold hover:bg-zinc-800 disabled:opacity-50"
+                >
+                    {demoLoading ? t('onboarding.demo.loading') : t('pantry.emptyState.loadDemo')}
+                </button>
+            )}
         </div>
     );
 };

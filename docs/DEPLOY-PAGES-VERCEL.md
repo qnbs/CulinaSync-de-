@@ -40,6 +40,15 @@ flowchart LR
 - **SPA 404:** `apps/web/public/404.html` wird von Vite nach `dist/404.html` kopiert (Deep-Link-Redirect) — **nicht** durch `index.html` überschreiben
 - **E2E:** separater Workflow `e2e-smoke.yml` (Playwright-Container, gleicher `base`-Pfad)
 
+### Demo-Links (R-011)
+
+| URL | Verhalten |
+|-----|-----------|
+| `…/CulinaSync-de-/?demo=1` | Demo-Vorratsdaten laden, Onboarding übersprungen |
+| `…/CulinaSync-de-/?try=1` | Leer starten (lokal), Onboarding übersprungen |
+
+Auf `qnbs.github.io` erscheint zusätzlich ein einmaliger **Demo-Hinweis** (Banner).
+
 ### Lokaler Pages-Test
 
 ```bash

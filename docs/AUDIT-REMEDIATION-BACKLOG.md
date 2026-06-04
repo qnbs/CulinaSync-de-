@@ -15,15 +15,15 @@
 | R-008 | Medium | `feat(sync): optional encrypted credential storage` | Security | M | localStorage Metadaten | apiKeyService pattern |
 | R-009 | Medium | `ci: Lighthouse CI on PR previews` | PWA/A11y Scores | M | Mobile UX | Pages preview path | ✅ `lighthouse-ci.yml` (PR) |
 | R-010 | Low | `chore(deps): resolve moderate audit findings` | Supply chain | S | 3 moderate offen | Dependabot | ✅ turbo 2.9.16 + pnpm overrides |
-| R-011 | Low | `feat(demo): seed or try-without-data for Pages` | Onboarding | M | Erstbesucher GitHub Pages | — |
-| R-012 | Medium | `release(tauri): M8 first tagged desktop build` | Desktop | L | ROADMAP M8 | CI GTK image | 🟨 Workflow + `CULINASYNC_DESKTOP_BUILD`; Tag `v*` manuell |
+| R-011 | Low | `feat(demo): seed or try-without-data for Pages` | Onboarding | M | Erstbesucher GitHub Pages | ✅ `?demo=1` / `?try=1`, Pages-Banner |
+| R-012 | Medium | `release(tauri): M8 first tagged desktop build` | Desktop | L | ROADMAP M8 | CI GTK image | 🟨 Tag **v0.2.3** pushed; Draft Release prüfen |
 | R-013 | Low | `docs(legal): privacy policy DE` | Launch DE | M | Öffentliche Veröffentlichung | — |
 | R-014 | Info | `chore(graphify): update after code sessions` | Agent DX | S | Team policy | — |
 
 ## Sprint-Vorschlag (aktuell)
 
 **Erledigt (PR #66 + #67):** R-001–R-007 (R-007 Doku), M5.8, M11.1–11.3, E2E Cook-Mode, ESLint typed  
-**Nächster Sprint:** R-012 Tag `v0.2.2` + Draft Release veröffentlichen, R-011 (Demo-Seed), R-008 (Sync-Credentials)
+**Nächster Sprint:** R-012 Draft **v0.2.3** veröffentlichen, R-008 (Sync-Credentials), M11.4 ONNX
 
 ## Definition of Done (Backlog-Item)
 
