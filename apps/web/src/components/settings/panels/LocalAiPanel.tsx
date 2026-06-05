@@ -1,7 +1,9 @@
 import React, { useMemo } from 'react';
-import { Cpu, Database, HardDrive, Layers, Shield, Sparkles, WifiOff } from 'lucide-react';
+import { Cpu, Database, HardDrive, Layers, Shield, Sparkles, WifiOff, Wand2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { AppSettings } from '../../../types';
+import { useTransientUiStore } from '../../../store/transientUiStore';
+import { Button } from '../../ui';
 import { SettingsToggle } from '../SettingsToggle';
 
 interface LocalAiPanelProps {
@@ -12,6 +14,7 @@ interface LocalAiPanelProps {
 export const LocalAiPanel: React.FC<LocalAiPanelProps> = ({ settings, onChange }) => {
   const { t } = useTranslation();
   const { localAi, aiPreferences } = settings;
+  const requestLocalAiSetup = useTransientUiStore((s) => s.requestLocalAiSetup);
 
   const gpuLabel = useMemo(
     () => t(`settings.localAi.gpuTier.${localAi.gpuTierPreference}`),
@@ -25,6 +28,22 @@ export const LocalAiPanel: React.FC<LocalAiPanelProps> = ({ settings, onChange }
 
   return (
     <div className="space-y-8 page-fade-in">
+      {!localAi.setupWizardCompleted && (
+        <section className="glass-card rounded-2xl p-5 border border-[var(--color-accent-500)]/30">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-base font-bold text-zinc-100 flex items-center gap-2">
+                <Wand2 size={18} className="text-[var(--color-accent-400)]" aria-hidden />
+                {t('localAiSetup.panelTitle')}
+              </h3>
+              <p className="text-sm text-zinc-400 mt-1">{t('localAiSetup.panelDesc')}</p>
+            </div>
+            <Button type="button" onClick={requestLocalAiSetup}>
+              {t('localAiSetup.panelAction')}
+            </Button>
+          </div>
+        </section>
+      )}
       <section className="glass-card rounded-2xl p-6 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-4 opacity-10">
           <Sparkles size={96} />

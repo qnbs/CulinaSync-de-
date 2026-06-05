@@ -1,8 +1,24 @@
 # Local AI — Zielarchitektur (CulinaSync-de-)
 
-**Version:** 2026.06.03 (Phase 0)  
-**Status:** Entwurf / Implementierungsvertrag für Phase 1–4  
+**Version:** 2026.06.03 (Phase 1 — M11 live, M11.4 Ergänzungen)  
+**Status:** Implementiert für Kernpfade; ONNX/Vision/Cook-Mode-Assistent noch offen  
 **Ziel:** Local-first kulinarische KI — tiefer integriert als CannaGuide-2025 und StoryCraft-Studio, bei gleicher 4-Layer-Philosophie.
+
+---
+
+## 0. Ist-Stand (Code, Juni 2026)
+
+| Bereich | Status |
+|---------|--------|
+| **Routing** | `aiProviderService.ts` — Default **`local-first`** (`settingsMerge`); Cloud optional (BYOK) |
+| **L1 WebLLM** | Implementiert, **opt-in** (`enableWebLlmInference: false` default) |
+| **L2 ONNX** | Nicht implementiert |
+| **L3 Transformers** | Embeddings live (`localAiTransformersEngine`); generative L3 = Stub (`null`) |
+| **L4 Heuristik** | `aiOfflineFallback` + `runHeuristicEngine` — immer verfügbar |
+| **RAG** | Hybrid semantic + keyword (`localAiRagService`); Quellen: Rezepte, Vorrat, **Essensplan** |
+| **Embeddings** | Dexie v13 `aiEmbeddings`; Indexierung via DB-Hooks; **Worker** `embedding.worker.ts` + `WorkerBus` |
+| **Onboarding** | `LocalAiSetupModal` — GPU-Check, Embeddings/WebLLM aktivieren |
+| **WorkerBus** | `packages/ai-core/workerBus.ts` + `localAiWorkerBus.ts` (Reindex Priority 0) |
 
 ---
 
@@ -53,15 +69,13 @@ flowchart TB
   TF -.->|fail| HEU
 
   subgraph Workers
-    BUS[WorkerBus]
-    LLM_W[llm.worker.ts]
-    VIS_W[vision.worker.ts]
+    BUS[WorkerBus / localAiWorkerBus]
+    NUT_W[nutritionWorker.ts]
     EMB_W[embedding.worker.ts]
   end
 
-  WLLM --> BUS --> LLM_W
-  ONNX --> BUS --> VIS_W
   TF --> BUS --> EMB_W
+  NUT_W -.->|heuristisch| HEU
 
   subgraph Data
     RAG[localAiRagService]
@@ -169,7 +183,7 @@ Tests injizieren weiterhin Mocks über `setAppServices`.
 |--------|-------------------|-------------|
 | Rezepte | `recipeRepository` | Titel, Zutaten, Tags, Anleitungen |
 | Vorrat | `pantryRepository` | Name, Menge, Kategorie, **Ablauf** |
-| Essensplan | `mealPlanRepository` | Historie, Wiederholungen, Slots |
+| Essensplan | `mealPlanRepository` + Dexie-Hooks | Datum, Mahlzeit, Rezepttitel, Notiz |
 | Einstellungen | Redux `settings` | Diät, Küchen, Custom Instruction |
 
 ### 4.2 Pipeline

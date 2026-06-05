@@ -5,9 +5,13 @@ import { buildLocalAiRagContext, enrichPromptWithRag } from '../localAiRagServic
 
 const mockSearchSemantic = vi.fn();
 
-vi.mock('../localAiEmbeddingsService', () => ({
-  searchSemanticRagChunks: (...args: unknown[]) => mockSearchSemantic(...args),
-}));
+vi.mock('../localAiEmbeddingsService', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../localAiEmbeddingsService')>();
+  return {
+    ...actual,
+    searchSemanticRagChunks: (...args: unknown[]) => mockSearchSemantic(...args),
+  };
+});
 
 describe('localAiRagService', () => {
   beforeEach(async () => {
@@ -15,6 +19,7 @@ describe('localAiRagService', () => {
     mockSearchSemantic.mockResolvedValue([]);
     await db.recipes.clear();
     await db.pantry.clear();
+    await db.mealPlan.clear();
     await db.aiEmbeddings.clear();
   });
 
@@ -118,6 +123,43 @@ describe('localAiRagService', () => {
 
     expect(context.retrievalMode).toBe('hybrid');
     expect(context.chunks.length).toBeGreaterThan(0);
+  });
+
+  it('buildLocalAiRagContext indexiert Meal-Plan bei Keyword-Treffer', async () => {
+    const recipeId = await db.recipes.add({
+      recipeTitle: 'Gemüsecurry',
+      shortDescription: 'Frisch',
+      prepTime: '10',
+      cookTime: '15',
+      totalTime: '25',
+      servings: '2',
+      difficulty: 'leicht',
+      ingredients: [{ sectionTitle: 'Haupt', items: [{ name: 'Curry', quantity: '1', unit: 'TL' }] }],
+      instructions: ['Kochen'],
+      nutritionPerServing: { calories: '0', protein: '0', fat: '0', carbs: '0' },
+      tags: { course: [], cuisine: [], occasion: [] },
+      isFavorite: false,
+      updatedAt: 1,
+    } as never);
+
+    await db.mealPlan.add({
+      date: '2026-06-12',
+      mealType: 'Abendessen',
+      recipeId,
+      note: 'Curry Abend',
+    });
+
+    const context = await buildLocalAiRagContext({
+      prompt: {
+        craving: 'Curry',
+        includeIngredients: [],
+        excludeIngredients: [],
+        modifiers: [],
+      },
+      settings: getDefaultSettings(),
+    });
+
+    expect(context.chunks.some((chunk) => chunk.sourceType === 'mealPlan')).toBe(true);
   });
 
   it('enrichPromptWithRag erweitert includeIngredients', () => {

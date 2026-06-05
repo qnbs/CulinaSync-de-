@@ -7,6 +7,10 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefuegt
+
+- **M11.4 Local AI:** Meal-Plan-RAG (`sourceType: mealPlan`), Dexie-Pre-Filter in semantischer Suche; `embedding.worker.ts` + `embeddingWorkerService`; `localAiWorkerBus` fuer Reindex (Priority 0); `LocalAiSetupModal` + Onboarding-Hinweis; Doku-Sync (`LOCAL-AI-AUDIT`, `LOCAL-AI-ARCHITECTURE`).
+
 ### Behoben
 
 - **Tauri CI:** `pnpm run tauri:build` (Node-Skript, Windows/macOS/Linux); `rustup target add` für beide macOS-Architekturen im Release-Workflow.

@@ -96,6 +96,18 @@ db.recipes.hook('deleting', (primKey) => {
   }
 });
 
+db.mealPlan.hook('creating', () => {
+  scheduleEmbeddingMaintenance();
+});
+db.mealPlan.hook('updating', () => {
+  scheduleEmbeddingMaintenance();
+});
+db.mealPlan.hook('deleting', (primKey) => {
+  if (typeof primKey === 'number') {
+    void removeEmbeddingForSource('mealPlan', primKey);
+  }
+});
+
 // Open DB and sync (Legacy-DB-Name → DataDB, dann Backup-Gate)
 void migrateLegacyPrimaryDatabaseIfNeeded()
     .then(() => ensureMigrationBackup(PRIMARY_DB_NAME, LATEST_DB_VERSION, PRIMARY_DATA_STORES))

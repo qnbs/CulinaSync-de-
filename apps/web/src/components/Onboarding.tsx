@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Joyride, STATUS, type EventData, type Step } from 'react-joyride';
-import { ChefHat, FlaskConical, Sparkles, PlayCircle, Check } from 'lucide-react';
+import { ChefHat, FlaskConical, Sparkles, PlayCircle, Check, Bot } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useModalA11y } from '../hooks/useModalA11y';
 import { loadDemoPantrySeed } from '../services/demoSeedService';
@@ -112,6 +112,13 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
                             <div>
                                 <h3 className="font-semibold text-zinc-100">{t('onboarding.demo.title')}</h3>
                                 <p className="text-sm text-zinc-400">{t('onboarding.demo.description')}</p>
+                            </div>
+                        </div>
+                        <div className="glass-card rounded-xl p-4 flex items-start gap-3">
+                            <Bot className="text-sky-400 mt-0.5" size={20} aria-hidden />
+                            <div>
+                                <h3 className="font-semibold text-zinc-100">{t('onboarding.localAi.title')}</h3>
+                                <p className="text-sm text-zinc-400">{t('onboarding.localAi.description')}</p>
                             </div>
                         </div>
                     </div>

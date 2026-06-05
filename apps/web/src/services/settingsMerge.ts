@@ -44,6 +44,7 @@ export const getDefaultSettings = (): AppSettings => ({
     stripExifOnVision: true,
     ollamaEnabled: false,
     ollamaBaseUrl: 'http://127.0.0.1:11434',
+    setupWizardCompleted: false,
   },
   privacy: {
     analyticsEnabled: false,

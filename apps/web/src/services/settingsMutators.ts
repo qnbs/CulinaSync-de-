@@ -42,6 +42,7 @@ export type SettingsPath =
   | 'localAi.stripExifOnVision'
   | 'localAi.ollamaEnabled'
   | 'localAi.ollamaBaseUrl'
+  | 'localAi.setupWizardCompleted'
   | 'privacy.analyticsEnabled'
   | 'privacy.shareDiagnostics'
   | 'privacy.persistAiPromptsLocally'
@@ -240,6 +241,9 @@ export const settingsMutators: Record<SettingsPath, (draft: AppSettings, value: 
   },
   'localAi.ollamaBaseUrl': (draft, value) => {
     if (typeof value === 'string' && value.length <= 256) draft.localAi.ollamaBaseUrl = value;
+  },
+  'localAi.setupWizardCompleted': (draft, value) => {
+    if (typeof value === 'boolean') draft.localAi.setupWizardCompleted = value;
   },
   'privacy.analyticsEnabled': (draft, value) => {
     if (typeof value === 'boolean') draft.privacy.analyticsEnabled = value;

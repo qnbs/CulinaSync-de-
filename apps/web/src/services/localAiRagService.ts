@@ -1,6 +1,6 @@
 import type { AppSettings, Recipe, StructuredPrompt } from '../types';
 import { db } from './dbInstance';
-import { searchSemanticRagChunks } from './localAiEmbeddingsService';
+import { mealPlanToEmbeddingText, searchSemanticRagChunks } from './localAiEmbeddingsService';
 import type { LocalAiRagChunk, LocalAiRagContext } from './localAiRagTypes';
 
 export type { LocalAiRagChunk, LocalAiRagContext } from './localAiRagTypes';
@@ -46,6 +46,34 @@ const mergeChunks = (primary: LocalAiRagChunk[], secondary: LocalAiRagChunk[], l
   return [...merged.values()].sort((left, right) => right.score - left.score).slice(0, limit);
 };
 
+const buildMealPlanKeywordChunks = async (
+  keywords: string[],
+  limit: number,
+): Promise<LocalAiRagChunk[]> => {
+  const mealPlanItems = await db.mealPlan.toArray();
+  if (mealPlanItems.length === 0) {
+    return [];
+  }
+
+  const recipeIds = [
+    ...new Set(mealPlanItems.map((item) => item.recipeId).filter((id): id is number => id !== undefined)),
+  ];
+  const recipes =
+    recipeIds.length > 0 ? await db.recipes.where('id').anyOf(recipeIds).toArray() : [];
+  const recipeById = new Map(recipes.map((recipe) => [recipe.id, recipe.recipeTitle]));
+
+  const chunks: LocalAiRagChunk[] = [];
+  for (const item of mealPlanItems) {
+    const text = mealPlanToEmbeddingText(item, recipeById.get(item.recipeId ?? -1));
+    const score = scoreText(text, keywords);
+    if (score > 0 && item.id !== undefined) {
+      chunks.push({ sourceType: 'mealPlan', sourceId: item.id, text, score });
+    }
+  }
+
+  return chunks.sort((left, right) => right.score - left.score).slice(0, limit);
+};
+
 const buildKeywordChunks = async (
   prompt: StructuredPrompt,
   settings: AppSettings,
@@ -76,10 +104,15 @@ const buildKeywordChunks = async (
     }
   }
 
+  if (settings.aiPreferences.useMealPlanContext) {
+    const mealPlanChunks = await buildMealPlanKeywordChunks(keywords, limit);
+    chunks.push(...mealPlanChunks);
+  }
+
   return chunks.sort((left, right) => right.score - left.score).slice(0, limit);
 };
 
-// QNBS-v3: M11.3 — Hybrid-RAG: Transformers-Embeddings (Dexie) + Keyword-Fallback
+// QNBS-v3: M11.3 — Hybrid-RAG: Transformers-Embeddings (Dexie) + Keyword-Fallback inkl. Meal-Plan
 export const buildLocalAiRagContext = async (options: {
   prompt: StructuredPrompt;
   settings: AppSettings;

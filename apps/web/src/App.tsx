@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from './store/hooks';
 import { setCurrentPage, addToast as addToastAction, removeToast as removeToastAction } from './store/slices/uiSlice';
 import { useTransientUiStore } from './store/transientUiStore';
 import { WhatsNewModal } from './components/WhatsNewModal';
+import { LocalAiSetupHost } from './components/local-ai/LocalAiSetupHost';
 import { GlobalErrorBoundary } from './components/GlobalErrorBoundary';
 import OfflineStatusBar from './components/OfflineStatusBar';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
@@ -307,6 +308,7 @@ const App: React.FC = () => {
   return (
     <GlobalErrorBoundary>
       <WhatsNewModal />
+      <LocalAiSetupHost />
       <div className="min-h-screen text-zinc-200">
         <a href="#main-content" className="ui-skip-link">
           {t('app.skipToContent')}

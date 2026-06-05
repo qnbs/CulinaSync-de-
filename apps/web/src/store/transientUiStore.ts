@@ -14,6 +14,9 @@ type TransientUiState = {
   onboardingSession: number;
   openOnboarding: () => void;
   closeOnboarding: () => void;
+  localAiSetupRequested: boolean;
+  requestLocalAiSetup: () => void;
+  clearLocalAiSetupRequest: () => void;
 };
 
 export const useTransientUiStore = create<TransientUiState>((set, get) => ({
@@ -32,4 +35,7 @@ export const useTransientUiStore = create<TransientUiState>((set, get) => ({
       onboardingSession: get().onboardingSession + 1,
     }),
   closeOnboarding: () => set({ onboardingOpen: false }),
+  localAiSetupRequested: false,
+  requestLocalAiSetup: () => set({ localAiSetupRequested: true }),
+  clearLocalAiSetupRequest: () => set({ localAiSetupRequested: false }),
 }));
