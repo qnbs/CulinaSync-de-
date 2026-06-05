@@ -105,6 +105,15 @@ describe('localAiEmbeddingsService', () => {
     expect(available).toBe(false);
   });
 
+  it('isSemanticRagAvailable ist false wenn localAi deaktiviert', async () => {
+    const { isSemanticRagAvailable } = await import('../localAiEmbeddingsService');
+    const available = await isSemanticRagAvailable({
+      ...getDefaultSettings(),
+      localAi: { ...getDefaultSettings().localAi, enabled: false },
+    });
+    expect(available).toBe(false);
+  });
+
   it('isSemanticRagAvailable ist false wenn Transformers fehlt', async () => {
     mockGetTransformersEngineStatus.mockResolvedValueOnce({ available: false, reason: 'module-missing' });
     const { isSemanticRagAvailable } = await import('../localAiEmbeddingsService');
@@ -317,5 +326,57 @@ describe('localAiEmbeddingsService', () => {
     });
 
     expect(chunks.every((chunk) => chunk.sourceType !== 'mealPlan')).toBe(true);
+  });
+
+  it('searchSemanticRagChunks liefert leer wenn alle Kontext-Flags aus', async () => {
+    mockEmbedText.mockResolvedValueOnce([1, 0, 0]);
+    const { searchSemanticRagChunks } = await import('../localAiEmbeddingsService');
+    const settings = {
+      ...getDefaultSettings(),
+      aiPreferences: {
+        ...getDefaultSettings().aiPreferences,
+        usePantryContext: false,
+        useRecipeHistoryContext: false,
+        useMealPlanContext: false,
+      },
+    };
+
+    const chunks = await searchSemanticRagChunks({
+      queryText: 'Tomaten',
+      settings,
+      limit: 5,
+    });
+
+    expect(chunks).toEqual([]);
+  });
+
+  it('reindexAllEmbeddings indexiert auch Meal-Plan-Eintraege', async () => {
+    await db.mealPlan.add({
+      date: '2026-06-15',
+      mealType: 'Mittagessen',
+      note: 'Salat',
+    });
+
+    const { reindexAllEmbeddings } = await import('../localAiEmbeddingsService');
+    await reindexAllEmbeddings(getDefaultSettings());
+
+    const mealEmbedding = await db.aiEmbeddings.where('sourceType').equals('mealPlan').first();
+    expect(mealEmbedding).toBeDefined();
+  });
+
+  it('indexMealPlanEmbedding ueberspringt Eintraege ohne id', async () => {
+    const { indexMealPlanEmbedding } = await import('../localAiEmbeddingsService');
+    await indexMealPlanEmbedding({ date: '2026-06-01', mealType: 'Abendessen', note: 'Pizza' });
+    expect(mockEmbedText).not.toHaveBeenCalled();
+  });
+
+  it('indexRecipeEmbedding ueberspringt leeren Rezepttext', async () => {
+    const { indexRecipeEmbedding } = await import('../localAiEmbeddingsService');
+    await indexRecipeEmbedding({
+      id: 5,
+      recipeTitle: '   ',
+      ingredients: [],
+    } as never);
+    expect(mockEmbedText).not.toHaveBeenCalled();
   });
 });
