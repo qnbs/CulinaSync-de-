@@ -7,35 +7,26 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
-### Hinzugefuegt
-
-- **Tests:** Local-AI-Setup, Embedding-Worker, WorkerBus — Branch-Coverage wieder ≥64 %.
-
-### Behoben
-
-- **Deploy/CI:** Branch-Coverage-Gate (63,41 % → ≥64 %) durch gezielte Tests fuer M11.4-Module.
-- **Tauri Windows:** `icon.ico` wird als echtes ICO mit eingebetteten PNGs erzeugt (ohne `to-ico`-Audit-Risiko).
-
-### Hinzugefuegt (M11.4)
-
-- **Tauri CI:** `pnpm run tauri:build` (Node-Skript, Windows/macOS/Linux); `rustup target add` für beide macOS-Architekturen im Release-Workflow.
-
-## [0.2.4] — 2026-06-04
+## [0.2.4] — 2026-06-05
 
 ### Hinzugefuegt
 
+- **M11.4 Local AI (PR #75):** Meal-Plan-RAG, Embedding-Worker, `LocalAiSetupModal`, Doku-Sync.
 - **Demo (R-011):** `?demo=1` / `?try=1` Deep-Links; `demoSeedService`; GitHub-Pages-Banner; Demo-CTA in leerer Vorratskammer (PR #69).
 - **Sync (R-008):** Nextcloud App-Passwort verschlüsselt in IndexedDB; Server/User/Pfad in sessionStorage (Migration von localStorage) (PR #69).
+- **Tests (PR #76):** Local-AI-Setup, Embedding-Worker, WorkerBus — Branch-Coverage wieder ≥64 %.
 
 ### Behoben
 
+- **Deploy/CI (PR #76):** Branch-Coverage-Gate (63,41 % → ≥64 %) nach M11.4.
+- **Tauri Windows (PR #76):** `icon.ico` als echtes ICO mit eingebetteten PNGs (RC2175 behoben); alle Plattformen grün.
 - **CodeQL #8:** `extractJsonPayload` ohne polynomial-regex auf LLM-Rohtext (PR #70).
-- **CI/Deploy:** `PantryList`-Tests mit Redux-`Provider` nach Demo-CTA in `EmptyState` (Deploy validate grün).
-- **Tauri (R-012):** GTK/WebKit-Deps im `verify`-Job von `tauri-release.yml` (PR #69).
+- **CI/Deploy:** `PantryList`-Tests mit Redux-`Provider` nach Demo-CTA in `EmptyState` (PR #71).
+- **Tauri (R-012):** GTK/WebKit-Deps, Monorepo-`beforeBuildCommand`, macOS-Rust-Targets (PR #69–#74).
 
 ### Geaendert
 
-- **Release:** Tag `v0.2.4` — Tauri Draft-Build inkl. GTK-Fix; Pages-Deploy mit Demo + Security-Fixes.
+- **Release:** Tag `v0.2.4` (re-tag 2026-06-05) — Tauri Draft mit Windows/macOS/Linux-Installern; Pages-Deploy mit M11.4 + CI-Fixes.
 
 ## [0.2.3] — 2026-06-04
 
