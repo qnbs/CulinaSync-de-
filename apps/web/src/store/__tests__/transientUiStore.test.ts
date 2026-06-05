@@ -9,6 +9,7 @@ describe('transientUiStore', () => {
       pendingLaunchFile: null,
       onboardingOpen: false,
       onboardingSession: 0,
+      localAiSetupRequested: false,
     });
   });
 
@@ -40,5 +41,13 @@ describe('transientUiStore', () => {
     expect(useTransientUiStore.getState().pendingLaunchFile).toBe(file);
     useTransientUiStore.getState().setPendingLaunchFile(null);
     expect(useTransientUiStore.getState().pendingLaunchFile).toBeNull();
+  });
+
+  it('steuert Local-AI-Setup-Anfrage', () => {
+    expect(useTransientUiStore.getState().localAiSetupRequested).toBe(false);
+    useTransientUiStore.getState().requestLocalAiSetup();
+    expect(useTransientUiStore.getState().localAiSetupRequested).toBe(true);
+    useTransientUiStore.getState().clearLocalAiSetupRequest();
+    expect(useTransientUiStore.getState().localAiSetupRequested).toBe(false);
   });
 });

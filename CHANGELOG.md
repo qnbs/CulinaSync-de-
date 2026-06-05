@@ -9,9 +9,14 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Hinzugefuegt
 
-- **M11.4 Local AI:** Meal-Plan-RAG (`sourceType: mealPlan`), Dexie-Pre-Filter in semantischer Suche; `embedding.worker.ts` + `embeddingWorkerService`; `localAiWorkerBus` fuer Reindex (Priority 0); `LocalAiSetupModal` + Onboarding-Hinweis; Doku-Sync (`LOCAL-AI-AUDIT`, `LOCAL-AI-ARCHITECTURE`).
+- **Tests:** Local-AI-Setup, Embedding-Worker, WorkerBus — Branch-Coverage wieder ≥64 %.
 
 ### Behoben
+
+- **Deploy/CI:** Branch-Coverage-Gate (63,41 % → ≥64 %) durch gezielte Tests fuer M11.4-Module.
+- **Tauri Windows:** `icon.ico` wird als echtes ICO mit eingebetteten PNGs erzeugt (ohne `to-ico`-Audit-Risiko).
+
+### Hinzugefuegt (M11.4)
 
 - **Tauri CI:** `pnpm run tauri:build` (Node-Skript, Windows/macOS/Linux); `rustup target add` für beide macOS-Architekturen im Release-Workflow.
 

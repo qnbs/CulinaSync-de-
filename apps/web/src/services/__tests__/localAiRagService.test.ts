@@ -162,6 +162,24 @@ describe('localAiRagService', () => {
     expect(context.chunks.some((chunk) => chunk.sourceType === 'mealPlan')).toBe(true);
   });
 
+  it('nutzt nur keyword retrieval bei leerem Query-Text', async () => {
+    mockSearchSemantic.mockClear();
+
+    const context = await buildLocalAiRagContext({
+      prompt: {
+        craving: '',
+        includeIngredients: [],
+        excludeIngredients: [],
+        modifiers: [],
+      },
+      settings: getDefaultSettings(),
+    });
+
+    expect(context.retrievalMode).toBe('keyword');
+    expect(mockSearchSemantic).not.toHaveBeenCalled();
+    expect(context.chunks).toHaveLength(0);
+  });
+
   it('enrichPromptWithRag erweitert includeIngredients', () => {
     const enriched = enrichPromptWithRag(
       {
@@ -178,5 +196,18 @@ describe('localAiRagService', () => {
     );
 
     expect(enriched.includeIngredients).toContain('tomaten');
+  });
+
+  it('enrichPromptWithRag laesst Prompt unveraendert ohne RAG-Block', () => {
+    const prompt = {
+      craving: 'Pasta',
+      includeIngredients: ['Basilikum'],
+      excludeIngredients: [],
+      modifiers: [],
+    };
+
+    expect(enrichPromptWithRag(prompt, { chunks: [], promptBlock: '', retrievalMode: 'keyword' })).toEqual(
+      prompt,
+    );
   });
 });
