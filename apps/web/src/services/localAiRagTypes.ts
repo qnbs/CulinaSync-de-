@@ -1,5 +1,5 @@
 export type LocalAiRagChunk = {
-  sourceType: 'recipe' | 'pantry';
+  sourceType: 'recipe' | 'pantry' | 'mealPlan';
   sourceId: number;
   text: string;
   score: number;

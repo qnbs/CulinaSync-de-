@@ -250,6 +250,10 @@
       "loading": "Loading demo...",
       "loaded": "Demo loaded"
     },
+    "localAi": {
+      "title": "Local AI (default)",
+      "description": "Recipe ideas and RAG run local-first — cloud optional via Gemini API key."
+    },
     "skip": "Skip",
     "joyride": {
       "back": "Back",
@@ -258,6 +262,23 @@
       "next": "Next",
       "skip": "Skip tour"
     }
+  },
+  "localAiSetup": {
+    "title": "Set up local AI",
+    "description": "CulinaSync uses local-first by default — no API key required. Optionally enable WebLLM and embeddings.",
+    "skip": "Later",
+    "enableEmbeddings": "Enable embeddings",
+    "enableFull": "Embeddings + WebLLM",
+    "routingTitle": "Routing",
+    "gpuTitle": "Hardware",
+    "gpuWebGpu": "WebGPU detected — profile: {{tier}}",
+    "gpuWasm": "No WebGPU — Transformers.js runs via WASM (slightly slower).",
+    "offlineTitle": "Offline capable",
+    "offlineDesc": "Heuristics (layer 4) are always available; RAG uses recipes, pantry, and meal plan.",
+    "hint": "You can adjust everything anytime under Settings → Local AI.",
+    "panelTitle": "Setup wizard",
+    "panelDesc": "Configure GPU check, embeddings, and WebLLM in a few steps.",
+    "panelAction": "Start wizard"
   },
   "mealPlanner": {
     "mealTypes": {

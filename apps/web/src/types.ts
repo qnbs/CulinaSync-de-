@@ -103,7 +103,7 @@ export type LocalAiGenerativeModel =
 export type SpeechRecognitionMode = 'browser' | 'whisper';
 export type WhisperModelSize = 'tiny' | 'base' | 'small';
 export type PantryUnitSystem = 'metric' | 'imperial';
-export type AiEmbeddingSourceType = 'recipe' | 'pantry';
+export type AiEmbeddingSourceType = 'recipe' | 'pantry' | 'mealPlan';
 
 export interface AiEmbeddingRecord {
   id?: number;
@@ -151,6 +151,7 @@ export interface AppSettings {
     stripExifOnVision: boolean;
     ollamaEnabled: boolean;
     ollamaBaseUrl: string;
+    setupWizardCompleted: boolean;
   };
   privacy: {
     analyticsEnabled: boolean;

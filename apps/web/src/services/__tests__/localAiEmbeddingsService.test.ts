@@ -5,6 +5,10 @@ import { getDefaultSettings } from '../settingsMerge';
 const mockEmbedText = vi.fn();
 const mockGetTransformersEngineStatus = vi.fn();
 
+vi.mock('../embeddingWorkerService', () => ({
+  embedTextInWorker: (text: string) => mockEmbedText(text),
+}));
+
 vi.mock('@domain/ai-core', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@domain/ai-core')>();
   return {
@@ -18,6 +22,7 @@ describe('localAiEmbeddingsService', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     await db.aiEmbeddings.clear();
+    await db.mealPlan.clear();
     mockGetTransformersEngineStatus.mockResolvedValue({ available: true });
     mockEmbedText.mockImplementation(async (text: string) => {
       if (text.includes('Tomaten')) {
@@ -225,5 +230,92 @@ describe('localAiEmbeddingsService', () => {
     await reindexAllEmbeddings(getDefaultSettings());
 
     expect(await db.aiEmbeddings.count()).toBeGreaterThan(0);
+  });
+
+  it('indexMealPlanEmbedding speichert Vektor mit Rezepttitel', async () => {
+    const recipeId = await db.recipes.add({
+      recipeTitle: 'Linsensuppe',
+      shortDescription: 'x',
+      prepTime: '5',
+      cookTime: '10',
+      totalTime: '15',
+      servings: '2',
+      difficulty: 'leicht',
+      ingredients: [{ sectionTitle: 'H', items: [{ name: 'Linsen', quantity: '1', unit: 'Stk' }] }],
+      instructions: ['kochen'],
+      nutritionPerServing: { calories: '0', protein: '0', fat: '0', carbs: '0' },
+      tags: { course: [], cuisine: [], occasion: [], mainIngredient: [], prepMethod: [], diet: [] },
+      isFavorite: false,
+      updatedAt: 1,
+    } as never);
+
+    const mealId = await db.mealPlan.add({
+      date: '2026-06-10',
+      mealType: 'Abendessen',
+      recipeId,
+      note: 'Reste',
+    });
+
+    const { indexMealPlanEmbedding } = await import('../localAiEmbeddingsService');
+    await indexMealPlanEmbedding({
+      id: mealId,
+      date: '2026-06-10',
+      mealType: 'Abendessen',
+      recipeId,
+      note: 'Reste',
+    });
+
+    const stored = await db.aiEmbeddings.where('[sourceType+sourceId]').equals(['mealPlan', mealId]).first();
+    expect(stored?.sourceType).toBe('mealPlan');
+    expect(mockEmbedText).toHaveBeenCalledWith(expect.stringContaining('Linsensuppe'));
+  });
+
+  it('searchSemanticRagChunks filtert per sourceType-Index', async () => {
+    const pantryId = await db.pantry.add({
+      name: 'Tomaten',
+      quantity: 1,
+      unit: 'Stk',
+      category: 'Gemüse',
+      createdAt: 1,
+      updatedAt: 1,
+    });
+
+    await db.aiEmbeddings.bulkAdd([
+      {
+        sourceType: 'pantry',
+        sourceId: pantryId,
+        contentHash: 'p1',
+        modelId: 'Xenova/all-MiniLM-L6-v2',
+        vector: [1, 0, 0],
+        updatedAt: Date.now(),
+      },
+      {
+        sourceType: 'mealPlan',
+        sourceId: 99,
+        contentHash: 'm1',
+        modelId: 'Xenova/all-MiniLM-L6-v2',
+        vector: [0, 1, 0],
+        updatedAt: Date.now(),
+      },
+    ]);
+
+    mockEmbedText.mockResolvedValueOnce([1, 0, 0]);
+
+    const { searchSemanticRagChunks } = await import('../localAiEmbeddingsService');
+    const settings = {
+      ...getDefaultSettings(),
+      aiPreferences: {
+        ...getDefaultSettings().aiPreferences,
+        useMealPlanContext: false,
+      },
+    };
+
+    const chunks = await searchSemanticRagChunks({
+      queryText: 'Tomaten',
+      settings,
+      limit: 5,
+    });
+
+    expect(chunks.every((chunk) => chunk.sourceType !== 'mealPlan')).toBe(true);
   });
 });
