@@ -27,7 +27,7 @@
     "@google/genai": "^1.16.0",
     "@hookform/resolvers": "^5.4.0",
     "@reduxjs/toolkit": "^2.2.6",
-    "dexie": "^4.2.0",
+    "dexie": "^4.4.3",
     "dexie-react-hooks": "^4.2.0",
     "dompurify": "^3.3.1",
     "i18next": "^26.2.0",
