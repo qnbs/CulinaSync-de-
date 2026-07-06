@@ -73,7 +73,7 @@ jobs:
       # QNBS-v3: PR-CI überspringt E2E; Deploy nutzt Cache + chromium-only (ohne deprecated Action)
       - name: Cache Playwright browsers
         if: inputs.run-e2e-smoke
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
