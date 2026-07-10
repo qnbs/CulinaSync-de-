@@ -32,22 +32,20 @@ perpetually-pending coverage check. To enable it later:
    ```
 
 2. Add the repo's `DEEPSOURCE_DSN` as a CI secret.
-3. After the coverage step in `validate.yml`, upload the report:
-
-   ```bash
-   curl https://deepsource.io/cli.sh | sh
-   ./bin/deepsource report --analyzer test-coverage \
-     --key javascript --value-file apps/web/coverage/lcov.info
-   ```
-
-   GitHub Actions does not allow `secrets` in `if:`, so surface the DSN as an
-   env var first, then guard the step on that env var:
+3. After the coverage step in `validate.yml`, upload the report with the official
+   action (a pinned SHA — avoid `curl … | sh`, which runs unpinned remote code).
+   GitHub Actions does not allow `secrets` in `if:`, so surface the DSN as an env
+   var first and guard the step on it:
 
    ```yaml
-   env:
-     DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
-   # on the upload step:
-   #   if: ${{ env.DEEPSOURCE_DSN != '' }}
+   - name: Report coverage to DeepSource
+     env:
+       DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
+     if: ${{ env.DEEPSOURCE_DSN != '' }}
+     uses: deepsourcelabs/test-coverage-action@<pinned-sha> # e.g. v1.x
+     with:
+       key: javascript
+       coverage-file: apps/web/coverage/lcov.info
    ```
 
 ## Autofix / transformers

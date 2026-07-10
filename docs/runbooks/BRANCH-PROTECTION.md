@@ -74,15 +74,16 @@ Add a job that always runs on PRs and aggregates the real result, then require
 that job's context instead of `smoke`:
 
 ```yaml
-# in ci.yml, runs on every PR
+# in ci.yml — always runs on PRs; `smoke` must be a job in THIS workflow
+# (e.g. reuse e2e-smoke.yml via `uses:`) so `needs` can read its result.
 e2e-gate:
-  if: github.event_name == 'pull_request'
-  needs: [smoke]           # or reuse the workflow and read its result
-  if: always()
+  needs: [smoke]
+  if: ${{ always() && github.event_name == 'pull_request' }}
   runs-on: ubuntu-latest
   steps:
     - run: |
-        # pass when smoke succeeded OR was skipped (not applicable to this PR)
+        # pass when smoke succeeded OR was skipped (not applicable to this PR);
+        # fail only on a real failure
         [ "${{ needs.smoke.result }}" = "failure" ] && exit 1 || exit 0
 ```
 
