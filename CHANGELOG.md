@@ -35,6 +35,11 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   Deployments-API (`?environment=github-pages`) statt des nicht existierenden
   `/pages/deployments`-List-Endpoints; markiert Deployments vor dem Löschen als
   `inactive`; behält die 3 neuesten; `gh`/`jq` sind auf Runnern vorinstalliert.
+- **CI/E2E:** Playwright-Container-Image auf `v1.61.1-noble` angehoben (Gleichlauf
+  mit `@playwright/test` 1.61.1) — zuvor brach der E2E-Smoke-Lauf am
+  Image/Version-Mismatch ab.
+- **Deps:** `typescript` auf `~6.0.3` begrenzt, damit die Peer-Range von
+  `typescript-eslint` (`>=4.8.4 <6.1.0`) eingehalten bleibt (CodeRabbit-Review).
 
 ## [0.2.4] — 2026-06-05
 
