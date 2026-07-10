@@ -30,8 +30,9 @@ export const neutralizePromptInjection = (input: string): string =>
   input.replaceAll(PROMPT_INJECTION_PATTERN, '[filtered]');
 
 /**
- * Entfernt typische PII, neutralisiert Prompt-Injection-Versuche und harmonisiert
- * Whitespace für sichere Prompt-Nutzung (RAG / LLM) — cloud UND on-device.
+ * Sanitizes text for prompt use by redacting common personally identifiable information, filtering prompt-injection phrases, and normalizing whitespace.
+ *
+ * @returns The sanitized text with redacted sensitive content and normalized whitespace.
  */
 export function sanitizeForPrompt(input: string): string {
   const withoutPii = redactPhones(
