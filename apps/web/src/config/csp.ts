@@ -6,27 +6,17 @@
  * - `TAURI_CSP` is mirrored into `src-tauri/tauri.conf.json`; a unit test
  *   (`__tests__/csp.test.ts`) fails if the two drift apart.
  *
- * connect-src allowlist — every host maps to a concrete, in-use feature. Bare
- * `https:` (which allowed exfiltration to any host) has been replaced by this
- * explicit list. Add a host here (with a comment) when a feature needs it.
- *   generativelanguage.googleapis.com → Google Gemini (cloud AI, BYOK)
- *   huggingface.co / *.huggingface.co → on-device model weights (transformers.js, WebLLM, Whisper)
- *   cdn.jsdelivr.net                  → @xenova/transformers ONNX-runtime WASM
- *   raw.githubusercontent.com         → WebLLM model-lib WASM binaries
- *   r.jina.ai                         → recipe web-import reader proxy (recipeImportService)
- *   ipfs.infura.io:5001               → community recipe share upload (communityShareService)
+ * connect-src is intentionally `'self' https:` (all HTTPS, no http/ws/other
+ * schemes). An explicit host allowlist is NOT feasible here because several core
+ * features connect to USER-CONFIGURED endpoints that cannot be enumerated:
+ *   - WebDAV / Nextcloud sync → arbitrary user server (deviceSync)
+ *   - IPFS gateway            → user-configurable gateway (communityShareService)
+ * and on top of that the on-device AI stack pulls model weights/WASM from
+ * multiple CDNs (HuggingFace, jsDelivr, GitHub-raw) plus Gemini and the jina
+ * reader. `upgrade-insecure-requests` forces https, so plain http is excluded.
  */
 
-const CONNECT_SRC = [
-  "'self'",
-  'https://generativelanguage.googleapis.com',
-  'https://huggingface.co',
-  'https://*.huggingface.co',
-  'https://cdn.jsdelivr.net',
-  'https://raw.githubusercontent.com',
-  'https://r.jina.ai',
-  'https://ipfs.infura.io:5001',
-].join(' ');
+const CONNECT_SRC = "'self' https:";
 
 // Ordered so the serialized policy is deterministic (drift test compares strings).
 const DIRECTIVES: ReadonlyArray<readonly [string, string]> = [

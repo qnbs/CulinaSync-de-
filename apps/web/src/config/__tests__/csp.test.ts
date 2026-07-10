@@ -14,13 +14,10 @@ describe('Content-Security-Policy single source', () => {
     expect(TAURI_CSP).toContain("script-src 'self' 'wasm-unsafe-eval'");
   });
 
-  it('replaces the bare https: connect-src wildcard with an allowlist', () => {
-    // No blanket "connect-src ... https:" wildcard token anymore.
-    expect(WEB_CSP).not.toMatch(/connect-src[^;]*\shttps:(\s|;|$)/);
-    expect(WEB_CSP).toContain('https://generativelanguage.googleapis.com');
-    expect(WEB_CSP).toContain('https://huggingface.co');
-    expect(WEB_CSP).toContain('https://r.jina.ai');
-    expect(WEB_CSP).toContain('https://ipfs.infura.io:5001');
+  it('keeps connect-src at self+https (user-configured WebDAV/IPFS/model hosts preclude an allowlist)', () => {
+    expect(WEB_CSP).toMatch(/connect-src 'self' https:(;|$)/);
+    // but no insecure schemes are permitted
+    expect(WEB_CSP).not.toMatch(/connect-src[^;]*(\shttp:|\sws:|\s\*)/);
   });
 
   it('keeps upgrade-insecure-requests for web but not for the Tauri webview', () => {

@@ -20,9 +20,11 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   Legacy-Deobfuskation zurückzufallen; Settings-UI kennzeichnet den Geräte-Modus ehrlich als
   Obfuskation (kein Schutz bei Geräte-Zugriff).
 - **CSP:** Single-Source `apps/web/src/config/csp.ts` — in `index.html` per Vite-Plugin
-  injiziert und mit `src-tauri/tauri.conf.json` synchron gehalten (Drift-Test). `connect-src`
-  von blankem `https:` auf eine dokumentierte Host-Allowlist verengt (Gemini, HuggingFace,
-  jsDelivr, GitHub-raw, jina, IPFS); `'wasm-unsafe-eval'` für On-Device-AI-WASM ergänzt.
+  injiziert und mit `src-tauri/tauri.conf.json` synchron gehalten (Drift-Test). `'wasm-unsafe-eval'`
+  für On-Device-AI-WASM (WebLLM/transformers/Whisper) ergänzt. `connect-src` bleibt bewusst
+  `'self' https:` — eine Host-Allowlist ist nicht möglich, da Kern-Features auf user-konfigurierte
+  Endpunkte zugreifen (WebDAV/Nextcloud-Sync, IPFS-Gateway) und die On-Device-Modelle aus mehreren
+  CDNs geladen werden; `upgrade-insecure-requests` erzwingt https.
 - **dompurify:** Bump `^3.3.1 → ^3.4.11`; die beiden divergenten Sanitize-Konfigurationen
   hinter einen einzigen `sanitizeHtml(input, mode)`-Wrapper vereinheitlicht.
 - **Dependencies:** Hochkritische Transitiv-Lücken via pnpm-`overrides` geschlossen —
