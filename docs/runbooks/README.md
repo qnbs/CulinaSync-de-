@@ -10,7 +10,7 @@ make its gate blocking, and troubleshooting.
 | **Codecov** | Coverage analytics + PR coverage annotations | `codecov.yml`, `validate.yml` | [CODECOV.md](./CODECOV.md) |
 | **CodeRabbit AI** | Line-by-line AI code review + summaries | `.coderabbit.yaml` | [CODERABBIT.md](./CODERABBIT.md) |
 | **CodeAnt AI** | AI review + security/quality gates | Dashboard (GitHub App) | [CODEANT.md](./CODEANT.md) |
-| **DeepSource** | Static analysis + secret detection | `.deepsource.toml` | [DEEPSOURCE.md](./DEEPSOURCE.md) |
+| **DeepSource** _(inactive)_ | Static analysis + secret detection — **disabled** 2026-07-10 | `.deepsource.toml` | [DEEPSOURCE.md](./DEEPSOURCE.md) |
 | **Branch protection** | `main` merge gate (`mainrules` ruleset) | GitHub ruleset | [BRANCH-PROTECTION.md](./BRANCH-PROTECTION.md) |
 
 ## The PR review correction loop (all bots)
