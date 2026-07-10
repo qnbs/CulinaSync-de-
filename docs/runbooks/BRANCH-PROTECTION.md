@@ -56,22 +56,32 @@ required status check.
 
 ### Merging with `required_signatures` on
 
-This repo has **SSH commit signing configured globally** (`commit.gpgsign=true`,
-`gpg.format=ssh`, `user.signingkey=~/.ssh/cannaguide_git_signing_2026.pub`) and
-the public key is registered as a **Signing Key** on GitHub. So every local
-commit is signed and GitHub marks it **Verified** (`verification.reason=valid`) —
-the rule is satisfied by **any** merge method (squash, rebase, or a signed merge).
-
-Verify a branch before merging:
+**Policy:** every commit that lands on `main` must carry a verified signature.
+Each contributor configures signing once and registers their own key as a
+**Signing Key** on GitHub (Settings → SSH and GPG keys → **New signing key**):
 
 ```bash
-git log --format='%h %G?' -n 5        # expect G (good) on each
-gh api repos/qnbs/CulinaSync-de-/commits/<sha> --jq .commit.verification
+git config --global commit.gpgsign true
+git config --global gpg.format ssh
+git config --global user.signingkey ~/.ssh/<your_signing_key>.pub
 ```
 
-If signing is ever missing (`%G?` = `N`, or GitHub shows *Unverified*): register
-the signing key at GitHub → Settings → SSH and GPG keys → **New signing key**, or
-as a fallback **Squash and merge** in the UI (GitHub signs the squash commit with
+With this in place every commit is signed and GitHub marks it **Verified**
+(`verification.reason=valid`), so the rule is satisfied by the allowed merge
+methods — **squash or rebase** (`required_linear_history` disallows merge commits).
+
+Verify **every commit the branch introduces** before merging:
+
+```bash
+git log --format='%h %G?' origin/main..HEAD   # expect G (good) on every row
+for s in $(git rev-list origin/main..HEAD); do \
+  gh api repos/qnbs/CulinaSync-de-/commits/$s --jq '.sha[0:7]+" "+.commit.verification.reason'; done
+```
+
+If any commit is unsigned (`%G?` = `N`, or GitHub shows *Unverified*): register
+the signing key as above, re-sign the range (`git rebase --exec 'git commit
+--amend --no-edit -S' origin/main`), or as a fallback **Squash and merge** in the
+UI (GitHub signs the squash commit with
 its own web-flow key), or use the admin bypass.
 
 ### Solo-dev approvals
