@@ -41,7 +41,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     container:
-      image: mcr.microsoft.com/playwright:v1.60.0-noble
+      # QNBS-v3: MUST match @playwright/test in package.json | Playwright refuses to run on image/version mismatch
+      image: mcr.microsoft.com/playwright:v1.61.1-noble
 
     steps:
       - name: Checkout
