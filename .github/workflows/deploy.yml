@@ -22,8 +22,6 @@ permissions:
   contents: read
   pages: write
   id-token: write
-  # QNBS-v3: Required for gh CLI to list/delete deployments
-  deployments: write
 
 concurrency:
   group: 'pages'
@@ -33,8 +31,9 @@ jobs:
   build:
     # Build, validate and upload static artifact for the deploy job.
     uses: ./.github/workflows/validate.yml
-    # QNBS-v3: pass repo secrets (CODECOV_TOKEN) into the reusable workflow for coverage upload
-    secrets: inherit
+    # QNBS-v3: pass only the coverage token (least privilege) into the reusable workflow
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     with:
       upload-pages-artifact: true
       # QNBS-v3: Chromium-CDN-Download auf ubuntu-latest >45min — Smoke via workflow_dispatch (e2e-smoke.yml)
@@ -42,6 +41,12 @@ jobs:
 
   deploy:
     # Deploy uploaded artifact to github-pages environment.
+    # QNBS-v3: deployments:write scoped to this job only (not the build/validate job)
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+      deployments: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
