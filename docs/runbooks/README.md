@@ -24,7 +24,11 @@ unresolved**, then commit + push.
 **Iron rule — loop until quiescent:** after each push, re-trigger the bot
 (e.g. `@coderabbitai review`, `@codeant-ai review`) — a fresh review routinely
 raises *new* findings caused by the fixes themselves (a "wave"). Repeat until a
-fresh review yields **0 new comments** AND **0 unresolved threads**. Never add a
+fresh review yields **0 new comments** AND **0 unresolved threads**. Every wave,
+also sweep **out-of-diff findings** in the review *body* (Outside-diff-range /
+Nitpick / "Additional comments not posted") — these are not inline threads and
+are missed if you only query `reviewThreads`. See
+[CODERABBIT.md → Mandatory sweep](./CODERABBIT.md#mandatory-sweep-out-of-diff-findings-not-just-inline-threads). Never add a
 new suppression to silence a finding — refactor so the rule passes honestly.
 
 **Keep PRs under ~100 changed files** — most bots skip inline comments on larger
