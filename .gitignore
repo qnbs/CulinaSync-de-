@@ -15,6 +15,14 @@ playwright-report/
 *.br
 stats.html
 
+# Knowledge-graph indexes — regenerable, machine-local (regenerate with `graphify update .`).
+# Keep only the small human-readable GRAPH_REPORT.md in the repo; the bulky
+# viewer/data files and the AST cache stay local. CodeGraph's index is never committed.
+graphify-out/cache/
+graphify-out/graph.json
+graphify-out/graph.html
+.codegraph/
+
 # Environment files with secrets
 .env
 .env.local
