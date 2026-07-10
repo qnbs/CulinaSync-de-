@@ -42,10 +42,11 @@ perpetually-pending coverage check. To enable it later:
      env:
        DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
      if: ${{ env.DEEPSOURCE_DSN != '' }}
-     uses: deepsourcelabs/test-coverage-action@<pinned-sha> # e.g. v1.x
+     uses: deepsourcelabs/test-coverage-action@4284bb73a04adb39faaa6bfcc2d0e3dd137ffed7 # v1.1.3
      with:
        key: javascript
        coverage-file: apps/web/coverage/lcov.info
+       dsn: ${{ env.DEEPSOURCE_DSN }}
    ```
 
 ## Autofix / transformers
@@ -58,7 +59,7 @@ the dashboard and re-run local `pnpm run lint` before committing.
 
 DeepSource issues surface as PR checks rather than inline threads. For each
 raised issue: fix at the root or add a scoped, justified skip via a
-`# skipcq: <CHECK-ID>` comment **only** when it's a genuine false positive
+`// skipcq: <CHECK-ID>` comment **only** when it's a genuine false positive
 (documented in the PR). Push and let the analyzer re-run.
 
 ## Making it a required check
@@ -73,4 +74,4 @@ deepsource.io → repo → Settings → require the DeepSource check, then add i
 - **Too many low-value issues:** narrow scope via `exclude_patterns` or disable
   specific checks in the dashboard rather than blanket `skipcq`.
 - **Secrets analyzer false positive:** confirm no real key leaked, then add a
-  scoped `# skipcq` with a comment explaining why the match is safe.
+  scoped `// skipcq` with a comment explaining why the match is safe.
