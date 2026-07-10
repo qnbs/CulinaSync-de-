@@ -1,4 +1,4 @@
-import { createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit';
+import { createListenerMiddleware, isAnyOf, type SerializedError } from '@reduxjs/toolkit';
 import { addToast, navigateToItem } from './slices/uiSlice';
 import { useTransientUiStore } from './transientUiStore';
 import {
@@ -29,15 +29,19 @@ listenerMiddleware.startListening({
     moveToPantryAsync.rejected
     ),
   effect: (action, listenerApi) => {
-    const errorMessage = typeof action.error === 'object'
-      && action.error !== null
-      && 'message' in action.error
-      && typeof action.error.message === 'string'
-      ? action.error.message
+    // QNBS-v3: RTK 2.12 no longer propagates isAnyOf narrowing through startListening's
+    // matcher option, so type the rejected-thunk shape explicitly | keeps error/payload access | version-robust
+    const { payload, error } = action as { payload?: unknown; error?: SerializedError };
+
+    const errorMessage = typeof error === 'object'
+      && error !== null
+      && 'message' in error
+      && typeof error.message === 'string'
+      ? error.message
       : null;
 
-    if (typeof action.payload === 'string') {
-      listenerApi.dispatch(addToast({ message: action.payload, type: 'error' }));
+    if (typeof payload === 'string') {
+      listenerApi.dispatch(addToast({ message: payload, type: 'error' }));
     } else if (errorMessage) {
       listenerApi.dispatch(addToast({ message: errorMessage, type: 'error' }));
     }
