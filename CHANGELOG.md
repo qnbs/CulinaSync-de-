@@ -44,6 +44,16 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **Test/E2E:** `cook-mode`-Smoke-Test gegen Seed-Timing-Flake gehärtet
   (Seed-Rezept-Wartezeit 20 s → 30 s); der E2E-Lauf triggert bei jedem Push auf
   den PR, da der `pull_request`-Paths-Filter den kumulativen `apps/web`-Diff trifft.
+- **Deploy/Smoke:** `verify-live-deployments` toleriert nun Vercel Deployment
+  Protection — ein gefolgter Redirect auf `vercel.com/login` (SSO-Wall, HTTP 200)
+  wird als „geschützt“ erkannt und mit Warnung übersprungen statt den Pages-Deploy
+  hart fehlschlagen zu lassen (`isVercelProtectionPage` + Tests).
+
+### Housekeeping
+
+- **graphify:** Nur `GRAPH_REPORT.md` im Repo; `graphify-out/cache/`,
+  `graph.json`/`graph.html` (~1,5 MB) und `.codegraph/` gitignored (regenerierbar
+  via `graphify update .`).
 
 ## [0.2.4] — 2026-06-05
 

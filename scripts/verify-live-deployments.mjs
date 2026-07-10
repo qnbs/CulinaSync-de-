@@ -5,6 +5,7 @@
  */
 import {
   evaluateDeployResponse,
+  isVercelProtectionPage,
   shouldSkipProtectedVercel,
 } from './lib/deploy-verify-logic.mjs';
 
@@ -41,13 +42,23 @@ for (const target of targets) {
   try {
     const res = await fetchWithTimeout(target.url);
     const body = await res.text();
+    // Vercel Deployment Protection: 401/403, or a followed redirect to an SSO
+    // auth page (HTTP 200 with the auth wall instead of the app). Warn, don't fail.
+    if (
+      shouldSkipProtectedVercel(res.status, target.name) ||
+      isVercelProtectionPage({
+        targetName: target.name,
+        body,
+        finalUrl: res.url,
+        redirected: res.redirected,
+      })
+    ) {
+      console.warn(
+        `[deploy-verify] SKIP (geschützt): ${target.name} — Deployment Protection aktiv (HTTP ${res.status})`,
+      );
+      continue;
+    }
     if (!res.ok) {
-      if (shouldSkipProtectedVercel(res.status, target.name)) {
-        console.warn(
-          `[deploy-verify] SKIP (geschützt): ${target.name} HTTP ${res.status} — ${target.url}`,
-        );
-        continue;
-      }
       console.error(`[deploy-verify] ${target.name}: HTTP ${res.status} — ${target.url}`);
       failed = true;
       continue;
