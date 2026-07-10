@@ -82,6 +82,13 @@ Any section reported by (b) must be opened in the PR UI (or via the review
 though there is no thread to "resolve". Note it in the reply on the summary or a
 related thread so the resolution is traceable.
 
+> **Pagination caveat.** `first:100` (threads) and `first:50` (reviews) are single
+> pages — GitHub caps connections at 100 per page. On a large PR these can truncate
+> silently. When either connection may exceed its page size, request `pageInfo {
+> hasNextPage endCursor }` and loop with `after:"<endCursor>"` until
+> `hasNextPage` is false, so the sweep is exhaustive. (Better yet, keep PRs under
+> ~100 files — see the shared runbook.)
+
 ## Making it a required check
 
 GitHub → Settings → Branches → `main` protection → require the CodeRabbit
