@@ -30,4 +30,3 @@ new suppression to silence a finding — refactor so the rule passes honestly.
 **Keep PRs under ~100 changed files** — most bots skip inline comments on larger
 PRs. Check `git diff --name-only <base>...HEAD | wc -l` before pushing; split
 into stacked PRs if needed.
-</content>

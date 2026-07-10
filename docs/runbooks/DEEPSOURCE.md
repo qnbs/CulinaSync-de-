@@ -25,18 +25,30 @@ Coverage is reported to **Codecov** (see [CODECOV.md](./CODECOV.md)); DeepSource
 perpetually-pending coverage check. To enable it later:
 
 1. Add the `test-coverage` analyzer to `.deepsource.toml`:
+
    ```toml
    [[analyzers]]
    name = "test-coverage"
    ```
+
 2. Add the repo's `DEEPSOURCE_DSN` as a CI secret.
 3. After the coverage step in `validate.yml`, upload the report:
+
    ```bash
    curl https://deepsource.io/cli.sh | sh
    ./bin/deepsource report --analyzer test-coverage \
      --key javascript --value-file apps/web/coverage/lcov.info
    ```
-   (guard with `secrets: inherit` + `if: ${{ secrets.DEEPSOURCE_DSN != '' }}`.)
+
+   GitHub Actions does not allow `secrets` in `if:`, so surface the DSN as an
+   env var first, then guard the step on that env var:
+
+   ```yaml
+   env:
+     DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
+   # on the upload step:
+   #   if: ${{ env.DEEPSOURCE_DSN != '' }}
+   ```
 
 ## Autofix / transformers
 

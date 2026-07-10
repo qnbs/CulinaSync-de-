@@ -21,7 +21,7 @@ the repo. Configuration lives in the CodeAnt app:
 Set in the dashboard:
 - **Auto-review** on PRs targeting `main`.
 - **Ignore paths:** `dist/**`, `coverage/**`, `pnpm-lock.yaml`, `graphify-out/**`,
-  generated locale bundles — mirror `.coderabbit.yaml`'s `path_filters`.
+  `**/*.min.*`, `**/*.snap` — mirror `.coderabbit.yaml`'s `path_filters`.
 - **Quality gate:** enable the checks the team wants to hard-block on and add the
   CodeAnt status to `main` branch protection.
 
