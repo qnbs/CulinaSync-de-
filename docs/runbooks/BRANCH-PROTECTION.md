@@ -56,11 +56,23 @@ required status check.
 
 ### Merging with `required_signatures` on
 
-Local branch commits (including automated ones) are usually **unsigned**, so a
-plain merge is blocked. **Merge via the GitHub UI with "Squash and merge"** —
-GitHub creates the squash commit signed with its own web-flow key, satisfying the
-rule. (Alternatively sign locally: `git config commit.gpgsign true` + a GPG/SSH
-signing key, or use the admin bypass.)
+This repo has **SSH commit signing configured globally** (`commit.gpgsign=true`,
+`gpg.format=ssh`, `user.signingkey=~/.ssh/cannaguide_git_signing_2026.pub`) and
+the public key is registered as a **Signing Key** on GitHub. So every local
+commit is signed and GitHub marks it **Verified** (`verification.reason=valid`) —
+the rule is satisfied by **any** merge method (squash, rebase, or a signed merge).
+
+Verify a branch before merging:
+
+```bash
+git log --format='%h %G?' -n 5        # expect G (good) on each
+gh api repos/qnbs/CulinaSync-de-/commits/<sha> --jq .commit.verification
+```
+
+If signing is ever missing (`%G?` = `N`, or GitHub shows *Unverified*): register
+the signing key at GitHub → Settings → SSH and GPG keys → **New signing key**, or
+as a fallback **Squash and merge** in the UI (GitHub signs the squash commit with
+its own web-flow key), or use the admin bypass.
 
 ### Solo-dev approvals
 
