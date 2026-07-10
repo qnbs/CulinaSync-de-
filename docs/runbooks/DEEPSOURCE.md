@@ -1,5 +1,13 @@
 # Runbook — DeepSource
 
+> **⚠️ Status: INACTIVE (2026-07-10).** DeepSource is currently **disabled** in
+> the dashboard — it surfaced no findings here, overlaps CodeRabbit / CodeAnt /
+> Codecov / GitGuardian / Socket, and its default Test-Coverage metric failed CI
+> without data (coverage is reported to Codecov). `.deepsource.toml` is kept but
+> neutralized. To re-enable, follow the steps in `.deepsource.toml` and re-enable
+> the repo (and soften the Test-Coverage metric) in the DeepSource dashboard.
+> The guide below is retained for that future re-activation.
+
 Static analysis and secret detection for the TS/React (Vite) monorepo.
 
 ## What it does

@@ -1,36 +1,41 @@
+# =============================================================================
+# DeepSource configuration — CulinaSync  [INACTIVE]
+# =============================================================================
+# DeepSource was DISABLED in the dashboard (2026-07-10) — it added no findings
+# here and overlaps CodeRabbit / CodeAnt / Codecov / GitGuardian / Socket, while
+# its default Test-Coverage metric failed CI without data (coverage goes to
+# Codecov). This config is kept inactive for now.
+#
+# To RE-ENABLE: re-enable the repo (and disable/soften the Test-Coverage metric)
+# in the DeepSource dashboard, then uncomment the analyzers below. The operating
+# guide docs/runbooks/DEEPSOURCE.md is likewise flagged inactive.
+# =============================================================================
+
 version = 1
 
-# =============================================================================
-# DeepSource configuration — CulinaSync
-# =============================================================================
-# Operating guide: docs/runbooks/DEEPSOURCE.md
-# Static analysis + secret detection for the TS/React (Vite) monorepo.
-# Test coverage is reported to Codecov (see codecov.yml); DeepSource's
-# test-coverage analyzer is opt-in and documented in the runbook.
-# =============================================================================
-
-exclude_patterns = [
-  "**/dist/**",
-  "**/coverage/**",
-  "**/*.min.js",
-  "**/*.min.css",
-  "graphify-out/**",
-  "packages/ui/**",
-  "**/*.d.ts",
-]
-
-test_patterns = [
-  "**/__tests__/**",
-  "**/*.test.ts",
-  "**/*.test.tsx",
-]
-
-[[analyzers]]
-name = "javascript"
-
-  [analyzers.meta]
-  plugins = ["react"]
-  environment = ["nodejs", "browser"]
-
-[[analyzers]]
-name = "secrets"
+# --- Inactive: uncomment to restore static analysis + secret scanning ---
+# exclude_patterns = [
+#   "**/dist/**",
+#   "**/coverage/**",
+#   "**/*.min.js",
+#   "**/*.min.css",
+#   "graphify-out/**",
+#   "packages/ui/**",
+#   "**/*.d.ts",
+# ]
+#
+# test_patterns = [
+#   "**/__tests__/**",
+#   "**/*.test.ts",
+#   "**/*.test.tsx",
+# ]
+#
+# [[analyzers]]
+# name = "javascript"
+#
+#   [analyzers.meta]
+#   plugins = ["react"]
+#   environment = ["nodejs", "browser"]
+#
+# [[analyzers]]
+# name = "secrets"

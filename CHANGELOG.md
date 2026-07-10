@@ -54,6 +54,10 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **graphify:** Nur `GRAPH_REPORT.md` im Repo; `graphify-out/cache/`,
   `graph.json`/`graph.html` (~1,5 MB) und `.codegraph/` gitignored (regenerierbar
   via `graphify update .`).
+- **DeepSource:** Im Dashboard deaktiviert (keine Findings, Überschneidung mit
+  CodeRabbit/CodeAnt/Codecov/GitGuardian/Socket, Test-Coverage-Metrik ohne Daten).
+  `.deepsource.toml` neutralisiert, Runbook als **inaktiv** markiert (Re-Aktivierung
+  dokumentiert).
 
 ## [0.2.4] — 2026-06-05
 

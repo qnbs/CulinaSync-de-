@@ -49,8 +49,9 @@ required status check.
   **To require it safely** add an always-running gate job (shim) that reports one
   stable check name regardless of paths — see *Requiring a path-filtered check*
   below.
-- **`DeepSource: JavaScript`** — only reports when JS changes; same pending-forever
-  risk. Tracked in the DeepSource dashboard instead.
+- **`DeepSource: JavaScript`** — DeepSource is currently **inactive** (disabled
+  2026-07-10; see the DeepSource runbook). It was never required regardless
+  (conditional on JS changes → pending-forever risk).
 
 ## Operating notes
 
