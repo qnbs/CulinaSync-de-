@@ -72,6 +72,6 @@ deepsource.io → repo → Settings → require the DeepSource check, then add i
 - **Analyzer errors on TOML:** `version = 1` must be the first key; every
   `[[analyzers]]` needs a valid `name`. Validate before pushing.
 - **Too many low-value issues:** narrow scope via `exclude_patterns` or disable
-  specific checks in the dashboard rather than blanket `skipcq`.
+  specific checks in the dashboard rather than blanket suppressions.
 - **Secrets analyzer false positive:** confirm no real key leaked, then add a
   scoped `// skipcq` with a comment explaining why the match is safe.
