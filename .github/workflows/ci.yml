@@ -22,6 +22,8 @@ jobs:
   validate:
     if: github.event_name == 'pull_request'
     uses: ./.github/workflows/validate.yml
+    # QNBS-v3: pass repo secrets (CODECOV_TOKEN) into the reusable workflow for coverage upload
+    secrets: inherit
     with:
       run-e2e-smoke: false
 

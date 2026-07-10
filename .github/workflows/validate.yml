@@ -61,6 +61,16 @@ jobs:
           path: apps/web/coverage
           retention-days: 14
 
+      # QNBS-v3: Upload lcov to Codecov for coverage analytics + PR annotations | non-blocking on outage
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: apps/web/coverage/lcov.info
+          flags: web
+          slug: qnbs/CulinaSync-de-
+          fail_ci_if_error: false
+
       - name: Build
         run: pnpm run build
 
