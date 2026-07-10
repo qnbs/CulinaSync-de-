@@ -21,7 +21,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **DevOps/Review-Bots:** `.coderabbit.yaml` (Hard-Constraints als Path-Instructions)
   und `.deepsource.toml` (JS/React-Analyzer + Secret-Scan).
 - **Docs:** Dedizierte Runbooks unter `docs/runbooks/` für Codecov, CodeRabbit,
-  CodeAnt und DeepSource inkl. Correction-Loop-Prozedur.
+  CodeAnt, DeepSource und Branch-Protection (`mainrules`) inkl. Correction-Loop-
+  Prozedur und verpflichtendem Out-of-Diff-Sweep der CodeRabbit-Review-Bodies.
 
 ### Behoben
 
@@ -40,6 +41,9 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   Image/Version-Mismatch ab.
 - **Deps:** `typescript` auf `~6.0.3` begrenzt, damit die Peer-Range von
   `typescript-eslint` (`>=4.8.4 <6.1.0`) eingehalten bleibt (CodeRabbit-Review).
+- **Test/E2E:** `cook-mode`-Smoke-Test gegen Seed-Timing-Flake gehärtet
+  (Seed-Rezept-Wartezeit 20 s → 30 s); der E2E-Lauf triggert bei jedem Push auf
+  den PR, da der `pull_request`-Paths-Filter den kumulativen `apps/web`-Diff trifft.
 
 ## [0.2.4] — 2026-06-05
 
