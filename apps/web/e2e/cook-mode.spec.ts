@@ -14,8 +14,12 @@ test.describe('Kochmodus — Kernflow', () => {
     await page.goto(baseURL ?? '/');
     await goToRecipes(page);
 
+    // QNBS-v3: seed recipes populate async on first load; on a cold/loaded CI
+    // container that can exceed 20s, causing a flaky miss. Wait for the list to
+    // render at least one recipe card, then the seed card, with generous timeouts.
+    await expect(page.getByRole('button').filter({ hasText: SEED_RECIPE_TITLE }).first())
+      .toBeVisible({ timeout: 30_000 });
     const recipeCard = page.getByRole('button').filter({ hasText: SEED_RECIPE_TITLE }).first();
-    await expect(recipeCard).toBeVisible({ timeout: 20_000 });
     await recipeCard.click();
 
     const cookModeStart = page.getByRole('button', { name: /^kochmodus$/i });

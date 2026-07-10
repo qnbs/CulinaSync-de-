@@ -7,6 +7,44 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Sicherheit
+
+- **Dependencies:** Hochkritische Transitiv-Lücken via pnpm-`overrides` geschlossen —
+  `protobufjs` (npm:protobufjs@^7.6.1, DoS) und `undici` (npm:undici@^7.28.0,
+  TLS-Bypass & WebSocket-DoS). `pnpm audit --audit-level=high` ist wieder grün.
+
+### Hinzugefuegt
+
+- **DevOps/Codecov:** Coverage-Upload (`codecov/codecov-action@v5`) im
+  reusable `validate`-Workflow inkl. `codecov.yml` (informative Project/Patch-Gates,
+  Web-Flag, Ignore-Pfade). Secrets via `secrets: inherit` in `ci.yml` und `deploy.yml`.
+- **DevOps/Review-Bots:** `.coderabbit.yaml` (Hard-Constraints als Path-Instructions)
+  und `.deepsource.toml` (JS/React-Analyzer + Secret-Scan).
+- **Docs:** Dedizierte Runbooks unter `docs/runbooks/` für Codecov, CodeRabbit,
+  CodeAnt, DeepSource und Branch-Protection (`mainrules`) inkl. Correction-Loop-
+  Prozedur und verpflichtendem Out-of-Diff-Sweep der CodeRabbit-Review-Bodies.
+
+### Behoben
+
+- **CI/Store:** `listenerMiddleware` typkompatibel zu `@reduxjs/toolkit` 2.12 —
+  RTK propagiert die `isAnyOf`-Narrowing nicht mehr über die `matcher`-Option,
+  daher explizite Typisierung der Rejected-Thunk-Shape (kein Verhaltensänderung).
+- **Deploy/Vercel:** `vercel.json`-`buildCommand` nutzt `turbo run build --filter=web`,
+  damit Workspace-Deps (`@domain/ai-core`, `@domain/ui`) vor dem Web-Build gebaut
+  werden — zuvor schlug der Vercel-Build an `@domain/ai-core` fehl.
+- **Deploy/Pruning:** GitHub-Pages-Deployment-Pruning korrigiert — nutzt die
+  Deployments-API (`?environment=github-pages`) statt des nicht existierenden
+  `/pages/deployments`-List-Endpoints; markiert Deployments vor dem Löschen als
+  `inactive`; behält die 3 neuesten; `gh`/`jq` sind auf Runnern vorinstalliert.
+- **CI/E2E:** Playwright-Container-Image auf `v1.61.1-noble` angehoben (Gleichlauf
+  mit `@playwright/test` 1.61.1) — zuvor brach der E2E-Smoke-Lauf am
+  Image/Version-Mismatch ab.
+- **Deps:** `typescript` auf `~6.0.3` begrenzt, damit die Peer-Range von
+  `typescript-eslint` (`>=4.8.4 <6.1.0`) eingehalten bleibt (CodeRabbit-Review).
+- **Test/E2E:** `cook-mode`-Smoke-Test gegen Seed-Timing-Flake gehärtet
+  (Seed-Rezept-Wartezeit 20 s → 30 s); der E2E-Lauf triggert bei jedem Push auf
+  den PR, da der `pull_request`-Paths-Filter den kumulativen `apps/web`-Diff trifft.
+
 ## [0.2.4] — 2026-06-05
 
 ### Hinzugefuegt

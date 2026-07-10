@@ -262,7 +262,7 @@ Nach Push auf `main`: CI-, E2E- und Deploy-Workflows bis **grün** beobachten.
 ## Qualität & Security
 
 - **validate.yml:** Lint, tsgo, Tests, Coverage, Build, Audit, Bundle-Budget.
-- **E2E-Smoke:** Playwright `v1.60.0-noble`, inkl. Navigation + Offline-Banner.
+- **E2E-Smoke:** Playwright `v1.61.1-noble`, inkl. Navigation + Offline-Banner.
 - **CodeQL** · **pnpm audit** (high+).
 - [SECURITY.md](./SECURITY.md) · [docs/SECURITY-AUDIT-2026.md](./docs/SECURITY-AUDIT-2026.md)
 
