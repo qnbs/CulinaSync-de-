@@ -11,6 +11,7 @@ make its gate blocking, and troubleshooting.
 | **CodeRabbit AI** | Line-by-line AI code review + summaries | `.coderabbit.yaml` | [CODERABBIT.md](./CODERABBIT.md) |
 | **CodeAnt AI** | AI review + security/quality gates | Dashboard (GitHub App) | [CODEANT.md](./CODEANT.md) |
 | **DeepSource** | Static analysis + secret detection | `.deepsource.toml` | [DEEPSOURCE.md](./DEEPSOURCE.md) |
+| **Branch protection** | `main` merge gate (`mainrules` ruleset) | GitHub ruleset | [BRANCH-PROTECTION.md](./BRANCH-PROTECTION.md) |
 
 ## The PR review correction loop (all bots)
 
