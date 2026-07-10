@@ -164,8 +164,12 @@ const decryptStoredValue = async (storedValue: string): Promise<DecryptOutcome> 
     return { status: 'legacy', key: legacyDeobfuscate(storedValue) };
   }
 
+  // Legacy obfuscation is base64 (not JSON) — it never reaches here (JSON.parse threw above).
+  // A value that parses as JSON but isn't our payload is corrupt, and an encrypted payload we
+  // can't decrypt without WebCrypto is a controlled failure — neither is legacy data, so do NOT
+  // feed JSON to legacyDeobfuscate (atob would throw). Surface a typed 'error'. (CodeAnt #3562208793)
   if (!isEncryptedPayload(parsed) || !hasWebCrypto()) {
-    return { status: 'legacy', key: legacyDeobfuscate(storedValue) };
+    return { status: 'error' };
   }
 
   const mode: KeyMode = parsed.mode ?? 'device';

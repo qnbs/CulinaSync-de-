@@ -193,4 +193,45 @@ describe('apiKeyService', () => {
     await expect(service.getApiKeyStatus()).resolves.toBe('error');
     await expect(service.loadApiKey()).resolves.toBeNull();
   });
+
+  it('returns a typed error (not an atob crash) for an encrypted payload without WebCrypto (CodeAnt #3562208793)', async () => {
+    const indexedDbMock = createIndexedDbMock();
+    vi.stubGlobal('indexedDB', indexedDbMock.indexedDB);
+
+    const service = await import('../apiKeyService');
+    await service.saveApiKey('AIza-encrypted-key'); // encrypted v3 device (WebCrypto available)
+
+    // Re-open in an environment without WebCrypto: the encrypted JSON must NOT be fed to
+    // legacyDeobfuscate (atob would throw) — it must surface a controlled 'error'.
+    const realCrypto = globalThis.crypto;
+    vi.resetModules();
+    vi.stubGlobal('crypto', { getRandomValues: (arr: Uint8Array) => arr });
+    try {
+      const fresh = await import('../apiKeyService');
+      await expect(fresh.getApiKeyStatus()).resolves.toBe('error');
+      await expect(fresh.loadApiKey()).resolves.toBeNull();
+    } finally {
+      vi.stubGlobal('crypto', realCrypto);
+    }
+  });
+
+  it('returns a typed error for a corrupt JSON value that is not our payload', async () => {
+    const indexedDbMock = createIndexedDbMock();
+    vi.stubGlobal('indexedDB', indexedDbMock.indexedDB);
+
+    const service = await import('../apiKeyService');
+    const db = await new Promise<IDBDatabase>((innerResolve, innerReject) => {
+      const request = indexedDB.open('culinasync_secure', 1);
+      request.onupgradeneeded = () => { request.result.createObjectStore('keys', { keyPath: 'id' }); };
+      request.onsuccess = () => innerResolve(request.result);
+      request.onerror = () => innerReject(request.error);
+    });
+    await new Promise<void>((resolve) => {
+      const tx = db.transaction('keys', 'readwrite');
+      tx.objectStore('keys').put({ id: 'gemini_api_key', value: '{"foo":"bar"}', updatedAt: Date.now() });
+      tx.oncomplete = () => { db.close(); resolve(); };
+    });
+
+    await expect(service.getApiKeyStatus()).resolves.toBe('error');
+  });
 });

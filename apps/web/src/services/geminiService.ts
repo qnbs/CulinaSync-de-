@@ -69,16 +69,24 @@ const simpleHash = (str: string): string => {
   return hash.toString(36);
 };
 
+// QNBS-v3: Typisierter Key-State-Fehler | trägt eine benutzerseitige i18n-Message, die handleGeminiError NICHT auf "unexpected" ummappen darf (locked/decrypt-Recover-Flow) | CodeAnt #3562210699
+class ApiKeyStateError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ApiKeyStateError';
+  }
+}
+
 const getAIClient = async (): Promise<GoogleGenAI> => {
   const state = await loadApiKeyState();
   if (state.status === 'locked') {
-    throw new Error(i18next.t('gemini.error.keyLocked'));
+    throw new ApiKeyStateError(i18next.t('gemini.error.keyLocked'));
   }
   if (state.status === 'error') {
-    throw new Error(i18next.t('gemini.error.keyDecryptFailed'));
+    throw new ApiKeyStateError(i18next.t('gemini.error.keyDecryptFailed'));
   }
   if (state.status !== 'ok') {
-    throw new Error(i18next.t('gemini.error.noApiKey'));
+    throw new ApiKeyStateError(i18next.t('gemini.error.noApiKey'));
   }
   const key = state.key;
   const keyHash = simpleHash(key);
@@ -101,6 +109,11 @@ const isNetworkError = (errMsg: string): boolean =>
     errMsg.includes('FETCH_ERROR') || errMsg.includes('NetworkError') || errMsg.includes('Failed to fetch') || errMsg.includes('network');
 
 const handleGeminiError = (error: unknown, context: string): Error => {
+    // Preserve actionable API-key states (missing/locked/decrypt-failed) end-to-end —
+    // do NOT remap them to the generic "unexpected" error (CodeAnt #3562210699).
+    if (error instanceof ApiKeyStateError) {
+        return error;
+    }
     console.error(`Error calling Gemini for ${context}:`, error);
     void logAppError(error, `gemini.${context}`);
     const errorMessage = (error as Error)?.message || String(error);

@@ -2,18 +2,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import translationEN from '../../locales/en';
 import { createI18nTestT } from '../../test/i18nTestUtils';
 
-const { mockGenerateContent, mockGenerateImages, mockLoadApiKey } = vi.hoisted(() => ({
+const { mockGenerateContent, mockGenerateImages, mockLoadApiKey, mockLoadApiKeyState } = vi.hoisted(() => ({
   mockGenerateContent: vi.fn(),
   mockGenerateImages: vi.fn(),
   mockLoadApiKey: vi.fn(),
+  mockLoadApiKeyState: vi.fn(),
 }));
 
 vi.mock('../apiKeyService', () => ({
   loadApiKey: mockLoadApiKey,
-  loadApiKeyState: async () => {
-    const key = await mockLoadApiKey();
-    return key ? { status: 'ok', key } : { status: 'missing' };
-  },
+  loadApiKeyState: mockLoadApiKeyState,
 }));
 
 vi.mock('../retryUtils', () => ({
@@ -30,6 +28,8 @@ vi.mock('i18next', () => ({
       'gemini.error.invalidResponse': 'Invalid AI response.',
       'gemini.error.unexpected': 'Unexpected error.',
       'gemini.error.emptyResponse': 'Empty AI response.',
+      'gemini.error.keyLocked': 'The API key is locked with a passphrase.',
+      'gemini.error.keyDecryptFailed': 'The API key could not be decrypted.',
     } as Record<string, string>),
     language: 'en',
   },
@@ -98,6 +98,11 @@ describe('geminiService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     invalidateAIClient();
+    // Default: derive the key state from mockLoadApiKey so existing tests are unchanged.
+    mockLoadApiKeyState.mockImplementation(async () => {
+      const key = await mockLoadApiKey();
+      return key ? { status: 'ok', key } : { status: 'missing' };
+    });
   });
 
   it('rejects when API key is missing', async () => {
@@ -106,6 +111,18 @@ describe('geminiService', () => {
     await expect(
       generateShoppingList('Pasta fuer 2', [], [])
     ).rejects.toThrow(/No API key configured/i);
+  });
+
+  it('preserves a locked/decrypt-failed key error instead of remapping to "unexpected" (CodeAnt #3562210699)', async () => {
+    mockLoadApiKeyState.mockResolvedValueOnce({ status: 'locked' });
+    await expect(
+      generateShoppingList('Pasta fuer 2', [], [])
+    ).rejects.toThrow(/locked with a passphrase/i);
+
+    mockLoadApiKeyState.mockResolvedValueOnce({ status: 'error' });
+    await expect(
+      generateShoppingList('Pasta fuer 2', [], [])
+    ).rejects.toThrow(/could not be decrypted/i);
   });
 
   it('maps invalid API key errors to user-friendly German message', async () => {
