@@ -5,10 +5,10 @@
  * @module services/geminiService
  */
 import type { GoogleGenAI } from "@google/genai";
-import DOMPurify from 'dompurify';
 import { retry } from './retryUtils';
+import { sanitizeHtml } from './htmlSanitizer';
 import { AppSettings, PantryItem, Recipe, StructuredPrompt, ShoppingListItem, RecipeIdea } from "../types";
-import { loadApiKey } from "./apiKeyService";
+import { loadApiKeyState } from "./apiKeyService";
 import { logAppError } from './errorLoggingService';
 import { buildLocalRecipeIdeas } from './aiOfflineFallback';
 import i18next from 'i18next';
@@ -46,13 +46,9 @@ const getGenAIModule = async () => {
 };
 
 const sanitizeWebContentForPrompt = (webContent: string): string => {
-    // Use DOMPurify to strip all HTML safely — regex-based stripping misses edge cases
-    // like </script foo="bar"> which browsers accept as valid end tags (CodeQL js/bad-tag-filter)
-    const stripped = DOMPurify.sanitize(webContent, {
-        ALLOWED_TAGS: [],
-        ALLOWED_ATTR: [],
-        FORBID_CONTENTS: ['script', 'style', 'noscript'],
-    });
+    // Strip all HTML safely via the shared DOMPurify wrapper — regex-based stripping misses
+    // edge cases like </script foo="bar"> which browsers accept as valid end tags (CodeQL js/bad-tag-filter)
+    const stripped = sanitizeHtml(webContent, 'text');
 
     const normalizedLines = stripped
         .split(/\r?\n/)
@@ -74,10 +70,17 @@ const simpleHash = (str: string): string => {
 };
 
 const getAIClient = async (): Promise<GoogleGenAI> => {
-  const key = await loadApiKey();
-  if (!key) {
+  const state = await loadApiKeyState();
+  if (state.status === 'locked') {
+    throw new Error(i18next.t('gemini.error.keyLocked'));
+  }
+  if (state.status === 'error') {
+    throw new Error(i18next.t('gemini.error.keyDecryptFailed'));
+  }
+  if (state.status !== 'ok') {
     throw new Error(i18next.t('gemini.error.noApiKey'));
   }
+  const key = state.key;
   const keyHash = simpleHash(key);
   if (!_aiClient || _lastKeyHash !== keyHash) {
         const { GoogleGenAI } = await getGenAIModule();

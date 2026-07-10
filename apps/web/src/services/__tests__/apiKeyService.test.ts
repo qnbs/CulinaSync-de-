@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+// Keep the secure-key service decoupled from Dexie in tests.
+vi.mock('../errorLoggingService', () => ({ logAppError: vi.fn() }));
+
 type StoredRecord = { id: string; value: string; updatedAt: number };
 
 const createRequest = <T>(executor: (request: IDBRequest<T>) => void): IDBRequest<T> => {
@@ -129,8 +132,65 @@ describe('apiKeyService', () => {
     await expect(service.loadApiKey()).resolves.toBe('AIza-legacy-test');
 
     await expect.poll(
-      () => indexedDbMock.readRecord('culinasync_secure', 'keys', 'gemini_api_key')?.value.startsWith('{"version":2'),
+      () => indexedDbMock.readRecord('culinasync_secure', 'keys', 'gemini_api_key')?.value.startsWith('{"version":3'),
       { timeout: 15_000 },
     ).toBe(true);
+  });
+
+  it('encrypts with a passphrase and stays locked until unlocked in a new session', async () => {
+    const indexedDbMock = createIndexedDbMock();
+    vi.stubGlobal('indexedDB', indexedDbMock.indexedDB);
+
+    const service = await import('../apiKeyService');
+    await service.saveApiKey('AIza-passphrase-test', 'correct horse battery');
+
+    // Stored payload records passphrase mode and does not contain the plaintext.
+    const stored = indexedDbMock.readRecord('culinasync_secure', 'keys', 'gemini_api_key');
+    expect(stored?.value).toContain('"mode":"passphrase"');
+    expect(stored?.value).not.toContain('AIza-passphrase-test');
+
+    // Same session: the passphrase is cached, so the key is usable.
+    await expect(service.loadApiKey()).resolves.toBe('AIza-passphrase-test');
+
+    // Fresh session (module re-import) → locked until the correct passphrase.
+    vi.resetModules();
+    const fresh = await import('../apiKeyService');
+    await expect(fresh.getApiKeyStatus()).resolves.toBe('locked');
+    await expect(fresh.loadApiKey()).resolves.toBeNull();
+    await expect(fresh.unlockApiKey('wrong passphrase')).resolves.toBe(false);
+    await expect(fresh.getApiKeyStatus()).resolves.toBe('locked');
+    await expect(fresh.unlockApiKey('correct horse battery')).resolves.toBe(true);
+    await expect(fresh.loadApiKey()).resolves.toBe('AIza-passphrase-test');
+  });
+
+  it('surfaces a decryption failure instead of returning garbage', async () => {
+    const indexedDbMock = createIndexedDbMock();
+    vi.stubGlobal('indexedDB', indexedDbMock.indexedDB);
+
+    const service = await import('../apiKeyService');
+    const corrupt = JSON.stringify({
+      version: 3,
+      mode: 'device',
+      salt: btoa('saltsaltsaltsalt'),
+      iv: btoa('iviviviviviv'),
+      ciphertext: btoa('not-a-valid-ciphertext'),
+    });
+
+    const db = await new Promise<IDBDatabase>((innerResolve, innerReject) => {
+      const request = indexedDB.open('culinasync_secure', 1);
+      request.onupgradeneeded = () => {
+        request.result.createObjectStore('keys', { keyPath: 'id' });
+      };
+      request.onsuccess = () => innerResolve(request.result);
+      request.onerror = () => innerReject(request.error);
+    });
+    await new Promise<void>((resolve) => {
+      const tx = db.transaction('keys', 'readwrite');
+      tx.objectStore('keys').put({ id: 'gemini_api_key', value: corrupt, updatedAt: Date.now() });
+      tx.oncomplete = () => { db.close(); resolve(); };
+    });
+
+    await expect(service.getApiKeyStatus()).resolves.toBe('error');
+    await expect(service.loadApiKey()).resolves.toBeNull();
   });
 });

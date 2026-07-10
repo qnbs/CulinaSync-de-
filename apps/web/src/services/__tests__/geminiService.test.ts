@@ -10,6 +10,10 @@ const { mockGenerateContent, mockGenerateImages, mockLoadApiKey } = vi.hoisted((
 
 vi.mock('../apiKeyService', () => ({
   loadApiKey: mockLoadApiKey,
+  loadApiKeyState: async () => {
+    const key = await mockLoadApiKey();
+    return key ? { status: 'ok', key } : { status: 'missing' };
+  },
 }));
 
 vi.mock('../retryUtils', () => ({

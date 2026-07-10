@@ -1,10 +1,10 @@
 import React, { useEffect, useOptimistic, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Key, Eye, EyeOff, CheckCircle, Trash2, Shield, ExternalLink } from 'lucide-react';
+import { Key, Eye, EyeOff, CheckCircle, Trash2, Shield, ExternalLink, Lock, LockOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useModalA11y } from '../../../hooks/useModalA11y';
-import { hasApiKey } from '../../../services/apiKeyService';
+import { getApiKeyStatus, unlockApiKey, type ApiKeyState } from '../../../services/apiKeyService';
 import { createApiKeyFormSchema, type ApiKeyFormValues } from '../../../features/settings/api-key/apiKeySchema';
 import { storeUserApiKey } from '../../../features/settings/api-key/commands/storeUserApiKey';
 import { removeUserApiKey } from '../../../features/settings/api-key/commands/removeUserApiKey';
@@ -75,6 +75,10 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
     const { t } = useTranslation();
     const [showKey, setShowKey] = useState(false);
     const [hasKey, setHasKey] = useState(false);
+    const [keyStatus, setKeyStatus] = useState<ApiKeyState['status']>('missing');
+    const [passphrase, setPassphrase] = useState('');
+    const [unlockValue, setUnlockValue] = useState('');
+    const [isUnlocking, setIsUnlocking] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -86,8 +90,9 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
     });
 
     useEffect(() => {
-        void hasApiKey().then((result) => {
-            setHasKey(result);
+        void getApiKeyStatus().then((status) => {
+            setKeyStatus(status);
+            setHasKey(status !== 'missing');
             setIsLoading(false);
         });
     }, []);
@@ -97,8 +102,10 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
         setOptimisticHasKey(true);
         setIsSaving(true);
         try {
-            await storeUserApiKey(values.apiKey);
+            await storeUserApiKey(values.apiKey, passphrase);
             setHasKey(true);
+            setKeyStatus('ok');
+            setPassphrase('');
             form.reset();
             addToast(t('settings.apiKey.toast.saved'), 'success');
         } catch {
@@ -109,6 +116,26 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
         }
     });
 
+    const handleUnlock = async (event: React.FormEvent) => {
+        event.preventDefault();
+        const passphraseInput = unlockValue.trim();
+        if (!passphraseInput) return;
+        setIsUnlocking(true);
+        try {
+            const unlocked = await unlockApiKey(passphraseInput);
+            if (unlocked) {
+                setKeyStatus('ok');
+                setHasKey(true);
+                setUnlockValue('');
+                addToast(t('settings.apiKey.unlock.success'), 'success');
+            } else {
+                addToast(t('settings.apiKey.unlock.error'), 'error');
+            }
+        } finally {
+            setIsUnlocking(false);
+        }
+    };
+
     const handleDelete = async () => {
         setIsConfirmModalOpen(false);
         const previousHasKey = hasKey;
@@ -117,6 +144,7 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
         try {
             await removeUserApiKey();
             setHasKey(false);
+            setKeyStatus('missing');
             form.reset();
             addToast(t('settings.apiKey.toast.removed'), 'info');
         } catch {
@@ -130,6 +158,18 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
     if (isLoading) {
         return <div className="animate-pulse h-40 bg-zinc-800/50 rounded-2xl" />;
     }
+
+    // Optimistic save/delete may run ahead of the awaited keyStatus update.
+    const displayStatus: ApiKeyState['status'] =
+        optimisticHasKey && keyStatus === 'missing' ? 'ok'
+        : !optimisticHasKey && keyStatus !== 'missing' ? 'missing'
+        : keyStatus;
+    const statusView = {
+        ok: { dot: 'bg-emerald-500 animate-pulse', text: 'text-emerald-400', labelKey: 'settings.apiKey.status.configured' },
+        locked: { dot: 'bg-amber-500', text: 'text-amber-400', labelKey: 'settings.apiKey.status.locked' },
+        error: { dot: 'bg-red-500', text: 'text-red-400', labelKey: 'settings.apiKey.status.error' },
+        missing: { dot: 'bg-red-500', text: 'text-red-400', labelKey: 'settings.apiKey.status.missing' },
+    }[displayStatus];
 
     return (
         <div className="space-y-6 page-fade-in">
@@ -151,11 +191,38 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
                 </h3>
 
                 <div className="flex items-center gap-3 mb-6">
-                    <div className={`w-3 h-3 rounded-full ${optimisticHasKey ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
-                    <span className={`text-sm font-medium ${optimisticHasKey ? 'text-emerald-400' : 'text-red-400'}`}>
-                        {optimisticHasKey ? t('settings.apiKey.status.configured') : t('settings.apiKey.status.missing')}
+                    <div className={`w-3 h-3 rounded-full ${statusView.dot}`} />
+                    <span className={`text-sm font-medium ${statusView.text}`}>
+                        {t(statusView.labelKey)}
                     </span>
                 </div>
+
+                {displayStatus === 'locked' && (
+                    <form onSubmit={handleUnlock} className="glass-card bg-amber-500/10 border-amber-500/30 rounded-xl p-4 mb-6 space-y-3">
+                        <div className="flex items-center gap-2 text-amber-400">
+                            <Lock size={16} />
+                            <h4 className="font-bold text-sm">{t('settings.apiKey.unlock.title')}</h4>
+                        </div>
+                        <p className="text-zinc-400 text-xs leading-relaxed">{t('settings.apiKey.unlock.description')}</p>
+                        <div className="flex gap-2">
+                            <input
+                                type="password"
+                                value={unlockValue}
+                                onChange={(event) => setUnlockValue(event.target.value)}
+                                placeholder={t('settings.apiKey.unlock.placeholder')}
+                                aria-label={t('settings.apiKey.unlock.aria')}
+                                className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-zinc-200 placeholder-zinc-500 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none text-sm"
+                            />
+                            <button
+                                type="submit"
+                                disabled={isUnlocking || !unlockValue.trim()}
+                                className="flex items-center gap-2 bg-amber-500 text-zinc-900 font-bold py-2.5 px-4 rounded-xl hover:bg-amber-400 transition-all disabled:bg-zinc-800 disabled:text-zinc-600 active:scale-95"
+                            >
+                                <LockOpen size={16} /> {isUnlocking ? t('settings.apiKey.unlock.unlocking') : t('settings.apiKey.unlock.action')}
+                            </button>
+                        </div>
+                    </form>
+                )}
 
                 <div className="space-y-4">
                     <div className="relative">
@@ -179,6 +246,19 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
                     {form.formState.errors.apiKey && (
                         <p className="text-sm text-red-400">{form.formState.errors.apiKey.message}</p>
                     )}
+
+                    <div className="relative">
+                        <input
+                            type="password"
+                            value={passphrase}
+                            onChange={(event) => setPassphrase(event.target.value)}
+                            placeholder={t('settings.apiKey.passphrase.placeholder')}
+                            aria-label={t('settings.apiKey.passphrase.aria')}
+                            autoComplete="new-password"
+                            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-zinc-200 placeholder-zinc-500 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none text-sm"
+                        />
+                        <p className="mt-2 text-xs text-zinc-500 leading-relaxed">{t('settings.apiKey.obfuscationNote')}</p>
+                    </div>
 
                     <div className="flex gap-3">
                         <button

@@ -162,9 +162,27 @@
       "replacePlaceholder": "Enter a new key to replace the current one...",
       "securityTitle": "Security notice",
       "securityNotice": "Your API key is stored only locally on your device, encrypted in IndexedDB. It is never sent to our servers, only directly to the Google Gemini API. This alone does not protect against XSS on the same origin.",
+      "obfuscationNote": "Default mode: the key is only obscured with a device fingerprint - this is obfuscation and does NOT protect against access to this device or profile. For real encryption, set an optional passphrase (never stored; must be entered once per session).",
+      "passphrase": {
+        "label": "Passphrase (optional)",
+        "placeholder": "For real encryption - leave empty for device mode",
+        "aria": "Passphrase for encrypting the API key"
+      },
+      "unlock": {
+        "title": "Unlock key",
+        "description": "This API key is protected with a passphrase. Enter it to enable AI features for this session.",
+        "placeholder": "Enter passphrase",
+        "aria": "Passphrase to unlock the API key",
+        "action": "Unlock",
+        "unlocking": "Unlocking...",
+        "success": "Key unlocked.",
+        "error": "Incorrect passphrase."
+      },
       "status": {
         "configured": "API key configured - AI features active",
-        "missing": "No API key - AI features disabled"
+        "missing": "No API key - AI features disabled",
+        "locked": "API key locked - passphrase required",
+        "error": "API key could not be decrypted"
       },
       "toast": {
         "saved": "API key stored securely.",

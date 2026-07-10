@@ -104,7 +104,7 @@ importers:
         specifier: ^4.2.0
         version: 4.4.0(dexie@4.4.4)(react@19.2.7)
       dompurify:
-        specifier: ^3.3.1
+        specifier: ^3.4.11
         version: 3.4.11
       i18next:
         specifier: ^26.2.0
@@ -293,6 +293,9 @@ importers:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
+      vitest:
+        specifier: 4.1.8
+        version: 4.1.8(@types/node@26.1.1)(@vitest/coverage-v8@4.1.8)(jsdom@29.1.1)(msw@2.15.0(@types/node@26.1.1)(typescript@6.0.3))(vite@8.1.4(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))
     optionalDependencies:
       '@mlc-ai/web-llm':
         specifier: ^0.2.79

@@ -1,4 +1,4 @@
-import DOMPurify from 'dompurify';
+import { sanitizeHtml } from './htmlSanitizer';
 import type { Recipe, IngredientItem } from '../types';
 
 const defaultRecipe = (): Recipe => ({
@@ -268,10 +268,7 @@ export const importRecipeFromUrl = async (urlInput: string): Promise<Recipe> => 
     }
   }
 
-  const sanitized = DOMPurify.sanitize(content, {
-    USE_PROFILES: { html: true },
-    FORBID_TAGS: ['script', 'style', 'noscript', 'iframe', 'object', 'embed'],
-  });
+  const sanitized = sanitizeHtml(content, 'html');
 
   const extractionInput = buildGeminiExtractionInput(sanitized);
   const { extractRecipeFromWebContent } = await import('./geminiService');

@@ -145,6 +145,8 @@
       "invalidResponse": "Der KI-Dienst hat eine ungültige Antwort gesendet. Bitte versuche es erneut.",
       "unexpected": "Ein unerwarteter Fehler beim KI-Dienst ist aufgetreten.",
       "noApiKey": "Kein API-Schlüssel konfiguriert. Bitte gib deinen Gemini-API-Schlüssel unter Einstellungen ein.",
+      "keyLocked": "Der API-Schlüssel ist mit einer Passphrase gesperrt. Bitte entsperre ihn unter Einstellungen → API-Schlüssel.",
+      "keyDecryptFailed": "Der API-Schlüssel konnte nicht entschlüsselt werden. Bitte gib ihn unter Einstellungen → API-Schlüssel erneut ein.",
       "emptyResponse": "Die KI hat eine leere Antwort zurückgegeben."
     }
   }
