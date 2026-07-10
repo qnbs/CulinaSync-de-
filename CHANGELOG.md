@@ -7,6 +7,35 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Sicherheit
+
+- **Dependencies:** Hochkritische Transitiv-Lücken via pnpm-`overrides` geschlossen —
+  `protobufjs` (npm:protobufjs@^7.6.1, DoS) und `undici` (npm:undici@^7.28.0,
+  TLS-Bypass & WebSocket-DoS). `pnpm audit --audit-level=high` ist wieder grün.
+
+### Hinzugefuegt
+
+- **DevOps/Codecov:** Coverage-Upload (`codecov/codecov-action@v5`) im
+  reusable `validate`-Workflow inkl. `codecov.yml` (informative Project/Patch-Gates,
+  Web-Flag, Ignore-Pfade). Secrets via `secrets: inherit` in `ci.yml` und `deploy.yml`.
+- **DevOps/Review-Bots:** `.coderabbit.yaml` (Hard-Constraints als Path-Instructions)
+  und `.deepsource.toml` (JS/React-Analyzer + Secret-Scan).
+- **Docs:** Dedizierte Runbooks unter `docs/runbooks/` für Codecov, CodeRabbit,
+  CodeAnt und DeepSource inkl. Correction-Loop-Prozedur.
+
+### Behoben
+
+- **CI/Store:** `listenerMiddleware` typkompatibel zu `@reduxjs/toolkit` 2.12 —
+  RTK propagiert die `isAnyOf`-Narrowing nicht mehr über die `matcher`-Option,
+  daher explizite Typisierung der Rejected-Thunk-Shape (kein Verhaltensänderung).
+- **Deploy/Vercel:** `vercel.json`-`buildCommand` nutzt `turbo run build --filter=web`,
+  damit Workspace-Deps (`@domain/ai-core`, `@domain/ui`) vor dem Web-Build gebaut
+  werden — zuvor schlug der Vercel-Build an `@domain/ai-core` fehl.
+- **Deploy/Pruning:** GitHub-Pages-Deployment-Pruning korrigiert — nutzt die
+  Deployments-API (`?environment=github-pages`) statt des nicht existierenden
+  `/pages/deployments`-List-Endpoints; markiert Deployments vor dem Löschen als
+  `inactive`; behält die 3 neuesten; `gh`/`jq` sind auf Runnern vorinstalliert.
+
 ## [0.2.4] — 2026-06-05
 
 ### Hinzugefuegt

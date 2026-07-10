@@ -1,0 +1,36 @@
+version = 1
+
+# =============================================================================
+# DeepSource configuration — CulinaSync
+# =============================================================================
+# Operating guide: docs/runbooks/DEEPSOURCE.md
+# Static analysis + secret detection for the TS/React (Vite) monorepo.
+# Test coverage is reported to Codecov (see codecov.yml); DeepSource's
+# test-coverage analyzer is opt-in and documented in the runbook.
+# =============================================================================
+
+exclude_patterns = [
+  "**/dist/**",
+  "**/coverage/**",
+  "**/*.min.js",
+  "**/*.min.css",
+  "graphify-out/**",
+  "packages/ui/**",
+  "**/*.d.ts",
+]
+
+test_patterns = [
+  "**/__tests__/**",
+  "**/*.test.ts",
+  "**/*.test.tsx",
+]
+
+[[analyzers]]
+name = "javascript"
+
+  [analyzers.meta]
+  plugins = ["react"]
+  environment = ["nodejs", "browser"]
+
+[[analyzers]]
+name = "secrets"
