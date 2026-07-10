@@ -234,4 +234,52 @@ describe('apiKeyService', () => {
 
     await expect(service.getApiKeyStatus()).resolves.toBe('error');
   });
+
+  it('reports and clears key presence via hasApiKey / deleteApiKey', async () => {
+    const indexedDbMock = createIndexedDbMock();
+    vi.stubGlobal('indexedDB', indexedDbMock.indexedDB);
+
+    const service = await import('../apiKeyService');
+    await expect(service.hasApiKey()).resolves.toBe(false);
+    await expect(service.getApiKeyStatus()).resolves.toBe('missing');
+
+    await service.saveApiKey('AIza-presence-test');
+    await expect(service.hasApiKey()).resolves.toBe(true);
+
+    await service.deleteApiKey();
+    await expect(service.hasApiKey()).resolves.toBe(false);
+    expect(indexedDbMock.readRecord('culinasync_secure', 'keys', 'gemini_api_key')).toBeUndefined();
+  });
+
+  it('decrypts a legacy v2 payload and upgrades it to v3 on load', async () => {
+    const indexedDbMock = createIndexedDbMock();
+    vi.stubGlobal('indexedDB', indexedDbMock.indexedDB);
+
+    const service = await import('../apiKeyService');
+    // Produce a current (v3 device) payload, then downgrade the stored version marker to 2
+    // (no `mode`) to emulate a legacy encrypted blob — same fingerprint password decrypts it.
+    await service.saveApiKey('AIza-v2-upgrade');
+    const current = indexedDbMock.readRecord('culinasync_secure', 'keys', 'gemini_api_key');
+    const asV2 = JSON.parse(current!.value) as Record<string, unknown>;
+    asV2.version = 2;
+    delete asV2.mode;
+
+    const db = await new Promise<IDBDatabase>((innerResolve, innerReject) => {
+      const request = indexedDB.open('culinasync_secure', 1);
+      request.onupgradeneeded = () => { request.result.createObjectStore('keys', { keyPath: 'id' }); };
+      request.onsuccess = () => innerResolve(request.result);
+      request.onerror = () => innerReject(request.error);
+    });
+    await new Promise<void>((resolve) => {
+      const tx = db.transaction('keys', 'readwrite');
+      tx.objectStore('keys').put({ id: 'gemini_api_key', value: JSON.stringify(asV2), updatedAt: Date.now() });
+      tx.oncomplete = () => { db.close(); resolve(); };
+    });
+
+    await expect(service.loadApiKey()).resolves.toBe('AIza-v2-upgrade');
+    await expect.poll(
+      () => indexedDbMock.readRecord('culinasync_secure', 'keys', 'gemini_api_key')?.value.startsWith('{"version":3'),
+      { timeout: 15_000 },
+    ).toBe(true);
+  });
 });
