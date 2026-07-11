@@ -21,9 +21,9 @@
   in `.github/dependabot.yml` ergänzt (war zuvor nicht abgedeckt).
 - **Infra-Hinweis:** `main` hat aktuell **keine** Branch-Protection / Required-Status-Checks
   (`gh api …/branches/main/protection` → 404). Der grüne main-Status ist damit informativ, nicht
-  durchsetzend → Follow-up-Backlog-Item.
+  durchsetzend → Follow-up-Backlog-Item **R-BRANCHPROT**.
 - **Gate-Matrix (grün auf `main`):** lint · type-check · test:coverage · build · bundle-budget
-  (script < 185) · `pnpm audit --high` — via `validate.yml` in main-guard **und** Deploy.
+  (script < 185) · `pnpm audit --audit-level=high` — via `validate.yml` in main-guard **und** Deploy.
 
 ## Status-Update 2026-06-04 (`main` nach PR #66 + #67)
 

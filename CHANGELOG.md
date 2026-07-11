@@ -12,7 +12,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **glib-Unsoundness (Tauri-Desktop, transitiv) dokumentiert & getrackt (GitHub-Alert #23):**
   `glib 0.18.5` (`VariantStrIter`, moderat) kommt transitiv über `tauri → wry → webkit2gtk → gtk`
   (gtk-rs 0.18); der Fix liegt erst in `glib 0.20.10` (semver-inkompatibel, durch webkit2gtk gepinnt —
-  `cargo update -p glib` = „Locking 0 packages"). Betrifft nur die Linux-Desktop-GTK-Bindings, **nicht**
+  `cargo update -p glib` = "Locking 0 packages"). Betrifft nur die Linux-Desktop-GTK-Bindings, **nicht**
   die Web-PWA. Als transitives Risiko akzeptiert und getrackt: `cargo`-Ökosystem in `.github/dependabot.yml`
   ergänzt (war nicht abgedeckt), Eintrag in `SECURITY.md`, Backlog `R-GLIB`. `pnpm audit` (nur npm) unberührt.
 
