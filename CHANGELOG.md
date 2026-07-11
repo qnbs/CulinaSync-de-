@@ -59,6 +59,20 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Behoben
 
+- **Sticky-Header:** Die Titelleiste scrollte weg statt oben fixiert zu bleiben. Ursache: das
+  `sticky top-0`-`<header>` lag im kurzen Wrapper `<div data-tour="header">`, der als Containing-Block
+  die Sticky-Reichweite begrenzte. Sticky auf den Wrapper verlagert (Containing-Block = hoher
+  App-Root) — Header (+ Offline-Statusbar) bleiben jetzt oben fixiert.
+- **Navigation/Scroll-Reset:** App-Seiten starten beim Öffnen jetzt immer oben (`window.scrollTo(0,0)`
+  bei Page-Wechsel) statt die vorige Scroll-Position zu behalten und zu springen.
+
+### Geändert
+
+- **Intro-Gates vorerst deaktiviert (bis ~v1.0):** Onboarding-Flow (inkl. Tour + Tour/Demo-Auswahl,
+  die sich nicht wegklicken ließ), „What's New"-Welcome-Modal und Demo-Mode-Banner hinter das
+  Flag `INTRO_GATES_ENABLED` (`apps/web/src/config/featureFlags.ts`, aktuell `false`) gelegt. Der
+  Code bleibt erhalten; zum Re-Aktivieren Flag auf `true` und die Flows feinschleifen.
+
 - **Mobile-Browser-Scroll:** Seiten waren im mobilen Browser teils nicht scrollbar, während die
   installierte PWA (standalone) funktionierte. Zwei Ursachen behoben: (1) `overscroll-behavior: none`
   lag global auf `<body>` und störte im Browser die Address-Bar-/Overscroll-Mechanik — jetzt nur noch

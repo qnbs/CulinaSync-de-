@@ -27,7 +27,7 @@ const Header: React.FC<HeaderProps> = ({
   const { t } = useTranslation();
 
   return (
-    <header className="glass-panel-strong sticky top-0 z-50 border-b-0 shadow-lg backdrop-blur-xl">
+    <header className="glass-panel-strong border-b-0 shadow-lg backdrop-blur-xl">
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8" aria-label={t('header.barAria')}>
