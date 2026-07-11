@@ -145,6 +145,8 @@
       "invalidResponse": "The AI service returned an invalid response. Please try again.",
       "unexpected": "An unexpected error occurred with the AI service.",
       "noApiKey": "No API key configured. Please enter your Gemini API key under Settings.",
+      "keyLocked": "The API key is locked with a passphrase. Please unlock it under Settings → API Key.",
+      "keyDecryptFailed": "The API key could not be decrypted. Please re-enter it under Settings → API Key.",
       "emptyResponse": "The AI returned an empty response."
     }
   }

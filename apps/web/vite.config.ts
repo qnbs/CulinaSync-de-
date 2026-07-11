@@ -6,6 +6,23 @@ import { visualizer } from 'rollup-plugin-visualizer';
 import { fileURLToPath, URL } from 'url';
 import pkg from './package.json';
 import { buildPwaManifest } from './src/config/buildPwaManifest';
+import { WEB_CSP } from './src/config/csp';
+
+// Inject the Content-Security-Policy from the single source of truth (src/config/csp.ts)
+// so index.html never hardcodes the policy and it can't drift from the Tauri config.
+const cspPlugin = {
+  name: 'culinasync-inject-csp',
+  transformIndexHtml: {
+    order: 'pre' as const,
+    handler: () => [
+      {
+        tag: 'meta',
+        attrs: { 'http-equiv': 'Content-Security-Policy', content: WEB_CSP },
+        injectTo: 'head-prepend' as const,
+      },
+    ],
+  },
+};
 
 const chunkGroups: Array<[string, string[]]> = [
   ['vendor-react', ['react', 'react-dom']],
@@ -42,6 +59,7 @@ export default defineConfig({
     __PWA_INDEX_PATH__: JSON.stringify(pwaIndexPath),
   },
   plugins: [
+    cspPlugin,
     react(),
     VitePWA({
       strategies: 'injectManifest',

@@ -1,24 +1,52 @@
 import { retry } from "./retryUtils";
+import { logAppError } from "./errorLoggingService";
 /**
  * API Key Management Service
- * 
- * Stores the user-provided Gemini API key encrypted in IndexedDB when Web Crypto is available.
- * Falls back to legacy obfuscation only on platforms without crypto support.
- * NEVER stores keys in localStorage, sessionStorage, or the build bundle.
+ *
+ * Stores the user-provided Gemini API key in IndexedDB (never localStorage,
+ * sessionStorage, or the build bundle). Two protection modes:
+ *  - 'device'     — default. AES-GCM key derived (PBKDF2) from a device
+ *                   fingerprint. This is OBFUSCATION, not real protection:
+ *                   anyone with access to this browser/profile can recover it.
+ *  - 'passphrase' — opt-in. AES-GCM key derived from a user passphrase that is
+ *                   never stored. Real encryption; the key is unrecoverable
+ *                   without the passphrase (must be unlocked once per session).
+ *
+ * Decryption failures are surfaced (typed state), never silently swallowed into
+ * a legacy-obfuscation fall-through that would hand back a garbage "key".
  */
 
 const DB_NAME = 'culinasync_secure';
 const STORE_NAME = 'keys';
 const KEY_ID = 'gemini_api_key';
-const ENCRYPTION_VERSION = 2;
-const PBKDF2_ITERATIONS = 250000;
+const ENCRYPTION_VERSION = 3;
+const PBKDF2_ITERATIONS = 600000; // OWASP 2023 baseline for PBKDF2-HMAC-SHA256
+
+type KeyMode = 'device' | 'passphrase';
 
 type EncryptedPayload = {
   version: number;
+  mode?: KeyMode; // absent in legacy v2 payloads → treated as 'device'
   salt: string;
   iv: string;
   ciphertext: string;
 };
+
+/** Discriminated result so callers can distinguish missing / locked / corrupt. */
+export type ApiKeyState =
+  | { status: 'ok'; key: string }
+  | { status: 'missing' }
+  | { status: 'locked' } // passphrase-protected key present but not unlocked this session
+  | { status: 'error' }; // stored but decryption failed (corrupt / wrong environment)
+
+type DecryptOutcome =
+  | { status: 'ok'; key: string; upgrade: boolean; mode: KeyMode }
+  | { status: 'legacy'; key: string }
+  | { status: 'locked' }
+  | { status: 'error'; version?: number };
+
+// In-memory only — the passphrase is never persisted. Cleared on delete/reload.
+let sessionPassphrase: string | null = null;
 
 const getFingerprint = (): string => {
   const nav = navigator;
@@ -60,10 +88,11 @@ const toArrayBuffer = (value: Uint8Array): ArrayBuffer => {
   return value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength) as ArrayBuffer;
 };
 
-const deriveEncryptionKey = async (salt: Uint8Array): Promise<CryptoKey> => {
+// QNBS-v3: PBKDF2-Passwort aus Passphrase ODER Fingerprint | echte vs. Obfuskations-Verschlüsselung | password-Parameter statt hartverdrahtetem Fingerprint (§2.9)
+const deriveEncryptionKey = async (salt: Uint8Array, password: string): Promise<CryptoKey> => {
   const keyMaterial = await crypto.subtle.importKey(
     'raw',
-    textEncoder.encode(getFingerprint()),
+    textEncoder.encode(password),
     'PBKDF2',
     false,
     ['deriveKey']
@@ -86,14 +115,23 @@ const deriveEncryptionKey = async (salt: Uint8Array): Promise<CryptoKey> => {
   );
 };
 
-const encryptApiKey = async (plaintext: string): Promise<string> => {
+// QNBS-v3: leere/Whitespace-Passphrase → device | verhindert mode='device' bei password='' (Nullish vs. truthy Mismatch) | CodeRabbit #3562409564
+const normalizePassphrase = (passphrase?: string): string | undefined => {
+  const trimmed = passphrase?.trim();
+  return trimmed && trimmed.length > 0 ? trimmed : undefined;
+};
+
+const encryptApiKey = async (plaintext: string, passphrase?: string): Promise<string> => {
   if (!hasWebCrypto()) {
     return legacyObfuscate(plaintext);
   }
 
+  const effective = normalizePassphrase(passphrase);
+  const mode: KeyMode = effective ? 'passphrase' : 'device';
+  const password = effective ?? getFingerprint();
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const key = await deriveEncryptionKey(salt);
+  const key = await deriveEncryptionKey(salt, password);
   const ciphertext = await crypto.subtle.encrypt(
     { name: 'AES-GCM', iv: toArrayBuffer(iv) },
     key,
@@ -102,6 +140,7 @@ const encryptApiKey = async (plaintext: string): Promise<string> => {
 
   const payload: EncryptedPayload = {
     version: ENCRYPTION_VERSION,
+    mode,
     salt: toBase64(salt),
     iv: toBase64(iv),
     ciphertext: toBase64(ciphertext),
@@ -116,33 +155,54 @@ const isEncryptedPayload = (value: unknown): value is EncryptedPayload => {
   }
 
   const payload = value as Partial<EncryptedPayload>;
-  return payload.version === ENCRYPTION_VERSION
+  return (payload.version === 2 || payload.version === 3)
     && typeof payload.salt === 'string'
     && typeof payload.iv === 'string'
-    && typeof payload.ciphertext === 'string';
+    && typeof payload.ciphertext === 'string'
+    && (payload.mode === undefined || payload.mode === 'device' || payload.mode === 'passphrase');
 };
 
-const decryptStoredValue = async (storedValue: string): Promise<{ key: string; legacy: boolean }> => {
+// passphraseOverride lets unlockApiKey verify a candidate passphrase WITHOUT mutating the
+// shared sessionPassphrase (avoids the unlock race — CodeRabbit #3562409584).
+const decryptStoredValue = async (storedValue: string, passphraseOverride?: string): Promise<DecryptOutcome> => {
+  let parsed: unknown;
   try {
-    const parsed = JSON.parse(storedValue) as unknown;
-    if (isEncryptedPayload(parsed) && hasWebCrypto()) {
-      const salt = fromBase64(parsed.salt);
-      const iv = fromBase64(parsed.iv);
-      const ciphertext = fromBase64(parsed.ciphertext);
-      const key = await deriveEncryptionKey(salt);
-      const decrypted = await crypto.subtle.decrypt(
-        { name: 'AES-GCM', iv: toArrayBuffer(iv) },
-        key,
-        toArrayBuffer(ciphertext)
-      );
-
-      return { key: textDecoder.decode(decrypted), legacy: false };
-    }
+    parsed = JSON.parse(storedValue);
   } catch {
-    // Fall back to legacy decoding below.
+    // Not JSON → a genuinely legacy (pre-encryption) obfuscated string.
+    return { status: 'legacy', key: legacyDeobfuscate(storedValue) };
   }
 
-  return { key: legacyDeobfuscate(storedValue), legacy: true };
+  // Legacy obfuscation is base64 (not JSON) — it never reaches here (JSON.parse threw above).
+  // A value that parses as JSON but isn't our payload is corrupt, and an encrypted payload we
+  // can't decrypt without WebCrypto is a controlled failure — neither is legacy data, so do NOT
+  // feed JSON to legacyDeobfuscate (atob would throw). Surface a typed 'error'. (CodeAnt #3562208793)
+  if (!isEncryptedPayload(parsed) || !hasWebCrypto()) {
+    return { status: 'error' };
+  }
+
+  const mode: KeyMode = parsed.mode ?? 'device';
+  const password = mode === 'passphrase' ? (passphraseOverride ?? sessionPassphrase) : getFingerprint();
+  if (password === null || password === undefined) {
+    return { status: 'locked' };
+  }
+
+  try {
+    const salt = fromBase64(parsed.salt);
+    const iv = fromBase64(parsed.iv);
+    const ciphertext = fromBase64(parsed.ciphertext);
+    const key = await deriveEncryptionKey(salt, password);
+    const decrypted = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: toArrayBuffer(iv) },
+      key,
+      toArrayBuffer(ciphertext)
+    );
+    return { status: 'ok', key: textDecoder.decode(decrypted), upgrade: parsed.version < ENCRYPTION_VERSION, mode };
+  } catch {
+    // Surface the failure — do NOT fall back to legacy deobfuscation, which
+    // would hand back garbage that then fails opaquely as an "invalid API key".
+    return { status: 'error', version: parsed.version };
+  }
 };
 
 const openDB = (): Promise<IDBDatabase> => {
@@ -159,55 +219,113 @@ const openDB = (): Promise<IDBDatabase> => {
   });
 };
 
-export const saveApiKey = async (key: string): Promise<void> => {
+const getStoredValue = (): Promise<string | null> =>
+  retry(async () => {
+    const idb = await openDB();
+    const tx = idb.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.get(KEY_ID);
+    return new Promise<string | null>((resolve, reject) => {
+      request.onsuccess = () => { idb.close(); resolve((request.result?.value as string | undefined) ?? null); };
+      request.onerror = () => { idb.close(); reject(request.error); };
+    });
+  }, 3, 500);
+
+/**
+ * @param key plaintext API key
+ * @param passphrase optional — when provided, the key is encrypted with real
+ *        (passphrase-derived) encryption instead of device obfuscation.
+ */
+export const saveApiKey = async (key: string, passphrase?: string): Promise<void> => {
+  const effective = normalizePassphrase(passphrase);
+  const value = await encryptApiKey(key, effective);
   await retry(async () => {
     const idb = await openDB();
     const tx = idb.transaction(STORE_NAME, 'readwrite');
     const store = tx.objectStore(STORE_NAME);
-    store.put({ id: KEY_ID, value: await encryptApiKey(key), updatedAt: Date.now() });
+    store.put({ id: KEY_ID, value, updatedAt: Date.now() });
     return new Promise<void>((resolve, reject) => {
       tx.oncomplete = () => { idb.close(); resolve(); };
       tx.onerror = () => { idb.close(); reject(tx.error); };
     });
   }, 3, 500);
+  // Session cache reflects the newly stored key's mode: keep the passphrase when
+  // present, otherwise clear any stale one from a prior passphrase key (CodeRabbit #3562409568).
+  sessionPassphrase = effective ?? null;
 };
 
-export const loadApiKey = async (): Promise<string | null> => {
+/** Full state — lets the UI distinguish missing vs locked vs corrupt. */
+export const loadApiKeyState = async (): Promise<ApiKeyState> => {
+  let stored: string | null;
   try {
-    return await retry(async () => {
-      const idb = await openDB();
-      const tx = idb.transaction(STORE_NAME, 'readonly');
-      const store = tx.objectStore(STORE_NAME);
-      const request = store.get(KEY_ID);
-      return new Promise<string | null>((resolve, reject) => {
-        request.onsuccess = () => {
-          idb.close();
-          if (request.result?.value) {
-            try {
-              decryptStoredValue(request.result.value)
-                .then(({ key, legacy }) => {
-                  if (legacy && hasWebCrypto()) {
-                    void saveApiKey(key).catch(() => undefined);
-                  }
-                  resolve(key);
-                })
-                .catch(() => resolve(null));
-            } catch {
-              resolve(null);
-            }
-          } else {
-            resolve(null);
-          }
-        };
-        request.onerror = () => { idb.close(); reject(request.error); };
-      });
-    }, 3, 500);
-  } catch {
-    return null;
+    stored = await getStoredValue();
+  } catch (error) {
+    void logAppError(error, 'apiKeyService.read');
+    return { status: 'error' };
+  }
+  if (!stored) {
+    return { status: 'missing' };
+  }
+
+  const outcome = await decryptStoredValue(stored);
+  switch (outcome.status) {
+    case 'ok':
+      if (outcome.upgrade && hasWebCrypto()) {
+        // #6 (CodeRabbit #3562409577): preserve the encryption mode on re-encrypt — never
+        // silently downgrade a passphrase-protected key to device obfuscation.
+        const reSavePassphrase = outcome.mode === 'passphrase' ? (sessionPassphrase ?? undefined) : undefined;
+        void saveApiKey(outcome.key, reSavePassphrase).catch(() => undefined);
+      }
+      return { status: 'ok', key: outcome.key };
+    case 'legacy':
+      if (hasWebCrypto()) {
+        void saveApiKey(outcome.key).catch(() => undefined); // migrate legacy → encrypted
+      }
+      return { status: 'ok', key: outcome.key };
+    case 'locked':
+      return { status: 'locked' };
+    default:
+      void logAppError('API key decryption failed', 'apiKeyService.decrypt', { version: outcome.version });
+      return { status: 'error' };
   }
 };
 
+export const loadApiKey = async (): Promise<string | null> => {
+  const state = await loadApiKeyState();
+  return state.status === 'ok' ? state.key : null;
+};
+
+/**
+ * Unlock a passphrase-protected key for this session. Returns true if the
+ * passphrase decrypts the stored key, false otherwise (session stays locked).
+ */
+export const unlockApiKey = async (passphrase: string): Promise<boolean> => {
+  // Verify the candidate passphrase against the stored payload WITHOUT touching the shared
+  // sessionPassphrase, then commit only on success. Overlapping unlock attempts can no longer
+  // clobber each other or relock a just-unlocked session (CodeRabbit #3562409584).
+  const candidate = normalizePassphrase(passphrase);
+  if (!candidate) {
+    return false;
+  }
+  let stored: string | null;
+  try {
+    stored = await getStoredValue();
+  } catch {
+    return false;
+  }
+  if (!stored) {
+    return false;
+  }
+  const outcome = await decryptStoredValue(stored, candidate);
+  if (outcome.status === 'ok') {
+    sessionPassphrase = candidate;
+    return true;
+  }
+  return false;
+};
+
 export const deleteApiKey = async (): Promise<void> => {
+  sessionPassphrase = null;
   await retry(async () => {
     const idb = await openDB();
     const tx = idb.transaction(STORE_NAME, 'readwrite');
@@ -220,7 +338,14 @@ export const deleteApiKey = async (): Promise<void> => {
   }, 3, 500);
 };
 
+/** True only when a usable (decryptable) key is available right now. */
 export const hasApiKey = async (): Promise<boolean> => {
-  const key = await loadApiKey();
-  return key !== null && key.length > 0;
+  const state = await loadApiKeyState();
+  return state.status === 'ok';
+};
+
+/** Lightweight status probe for UI (never exposes the key material). */
+export const getApiKeyStatus = async (): Promise<ApiKeyState['status']> => {
+  const state = await loadApiKeyState();
+  return state.status;
 };

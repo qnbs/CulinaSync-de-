@@ -162,9 +162,27 @@
       "replacePlaceholder": "Neuen Schluessel eingeben zum Ersetzen...",
       "securityTitle": "Sicherheitshinweis",
       "securityNotice": "Dein API-Schluessel wird ausschliesslich lokal auf deinem Geraet verschluesselt in IndexedDB gespeichert. Er wird niemals an unsere Server gesendet, sondern nur direkt an die Google Gemini API. Gegen XSS im selben Ursprung schuetzt das allein jedoch nicht.",
+      "obfuscationNote": "Standard-Modus: Der Schluessel wird nur mit einer Geraete-Kennung verschleiert - das ist Obfuskation und schuetzt NICHT vor Zugriff auf dieses Geraet oder Profil. Fuer echte Verschluesselung vergib eine optionale Passphrase (wird niemals gespeichert und muss pro Sitzung einmal eingegeben werden).",
+      "passphrase": {
+        "label": "Passphrase (optional)",
+        "placeholder": "Fuer echte Verschluesselung - leer lassen fuer Geraete-Modus",
+        "aria": "Passphrase fuer die Verschluesselung des API-Schluessels"
+      },
+      "unlock": {
+        "title": "Schluessel entsperren",
+        "description": "Dieser API-Schluessel ist mit einer Passphrase verschluesselt. Gib sie ein, um die KI-Funktionen fuer diese Sitzung zu aktivieren.",
+        "placeholder": "Passphrase eingeben",
+        "aria": "Passphrase zum Entsperren des API-Schluessels",
+        "action": "Entsperren",
+        "unlocking": "Entsperre...",
+        "success": "Schluessel entsperrt.",
+        "error": "Falsche Passphrase."
+      },
       "status": {
         "configured": "API-Schluessel konfiguriert - KI-Funktionen aktiv",
-        "missing": "Kein API-Schluessel - KI-Funktionen deaktiviert"
+        "missing": "Kein API-Schluessel - KI-Funktionen deaktiviert",
+        "locked": "API-Schluessel gesperrt - Passphrase erforderlich",
+        "error": "API-Schluessel konnte nicht entschluesselt werden"
       },
       "toast": {
         "saved": "API-Schluessel sicher gespeichert.",

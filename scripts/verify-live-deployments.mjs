@@ -17,7 +17,7 @@ const targets = [
   },
   {
     name: 'Vercel Production',
-    url: 'https://culina-sync-de-web-qnbs-projects.vercel.app/',
+    url: 'https://culina-sync-de-web.vercel.app/',
     mustInclude: ['CulinaSync', 'id="root"'],
   },
 ];

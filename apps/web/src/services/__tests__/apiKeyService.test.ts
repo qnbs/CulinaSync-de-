@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+// Keep the secure-key service decoupled from Dexie in tests.
+vi.mock('../errorLoggingService', () => ({ logAppError: vi.fn() }));
+
 type StoredRecord = { id: string; value: string; updatedAt: number };
 
 const createRequest = <T>(executor: (request: IDBRequest<T>) => void): IDBRequest<T> => {
@@ -129,7 +132,189 @@ describe('apiKeyService', () => {
     await expect(service.loadApiKey()).resolves.toBe('AIza-legacy-test');
 
     await expect.poll(
-      () => indexedDbMock.readRecord('culinasync_secure', 'keys', 'gemini_api_key')?.value.startsWith('{"version":2'),
+      () => indexedDbMock.readRecord('culinasync_secure', 'keys', 'gemini_api_key')?.value.startsWith('{"version":3'),
+      { timeout: 15_000 },
+    ).toBe(true);
+  });
+
+  it('encrypts with a passphrase and stays locked until unlocked in a new session', async () => {
+    const indexedDbMock = createIndexedDbMock();
+    vi.stubGlobal('indexedDB', indexedDbMock.indexedDB);
+
+    const service = await import('../apiKeyService');
+    await service.saveApiKey('AIza-passphrase-test', 'correct horse battery');
+
+    // Stored payload records passphrase mode and does not contain the plaintext.
+    const stored = indexedDbMock.readRecord('culinasync_secure', 'keys', 'gemini_api_key');
+    expect(stored?.value).toContain('"mode":"passphrase"');
+    expect(stored?.value).not.toContain('AIza-passphrase-test');
+
+    // Same session: the passphrase is cached, so the key is usable.
+    await expect(service.loadApiKey()).resolves.toBe('AIza-passphrase-test');
+
+    // Fresh session (module re-import) → locked until the correct passphrase.
+    vi.resetModules();
+    const fresh = await import('../apiKeyService');
+    await expect(fresh.getApiKeyStatus()).resolves.toBe('locked');
+    await expect(fresh.loadApiKey()).resolves.toBeNull();
+    await expect(fresh.unlockApiKey('wrong passphrase')).resolves.toBe(false);
+    await expect(fresh.getApiKeyStatus()).resolves.toBe('locked');
+    await expect(fresh.unlockApiKey('correct horse battery')).resolves.toBe(true);
+    await expect(fresh.loadApiKey()).resolves.toBe('AIza-passphrase-test');
+  });
+
+  it('surfaces a decryption failure instead of returning garbage', async () => {
+    const indexedDbMock = createIndexedDbMock();
+    vi.stubGlobal('indexedDB', indexedDbMock.indexedDB);
+
+    const service = await import('../apiKeyService');
+    const corrupt = JSON.stringify({
+      version: 3,
+      mode: 'device',
+      salt: btoa('saltsaltsaltsalt'),
+      iv: btoa('iviviviviviv'),
+      ciphertext: btoa('not-a-valid-ciphertext'),
+    });
+
+    const db = await new Promise<IDBDatabase>((innerResolve, innerReject) => {
+      const request = indexedDB.open('culinasync_secure', 1);
+      request.onupgradeneeded = () => {
+        request.result.createObjectStore('keys', { keyPath: 'id' });
+      };
+      request.onsuccess = () => innerResolve(request.result);
+      request.onerror = () => innerReject(request.error);
+    });
+    await new Promise<void>((resolve) => {
+      const tx = db.transaction('keys', 'readwrite');
+      tx.objectStore('keys').put({ id: 'gemini_api_key', value: corrupt, updatedAt: Date.now() });
+      tx.oncomplete = () => { db.close(); resolve(); };
+    });
+
+    await expect(service.getApiKeyStatus()).resolves.toBe('error');
+    await expect(service.loadApiKey()).resolves.toBeNull();
+  });
+
+  it('returns a typed error (not an atob crash) for an encrypted payload without WebCrypto (CodeAnt #3562208793)', async () => {
+    const indexedDbMock = createIndexedDbMock();
+    vi.stubGlobal('indexedDB', indexedDbMock.indexedDB);
+
+    const service = await import('../apiKeyService');
+    await service.saveApiKey('AIza-encrypted-key'); // encrypted v3 device (WebCrypto available)
+
+    // Re-open in an environment without WebCrypto: the encrypted JSON must NOT be fed to
+    // legacyDeobfuscate (atob would throw) — it must surface a controlled 'error'.
+    const realCrypto = globalThis.crypto;
+    vi.resetModules();
+    vi.stubGlobal('crypto', { getRandomValues: (arr: Uint8Array) => arr });
+    try {
+      const fresh = await import('../apiKeyService');
+      await expect(fresh.getApiKeyStatus()).resolves.toBe('error');
+      await expect(fresh.loadApiKey()).resolves.toBeNull();
+    } finally {
+      vi.stubGlobal('crypto', realCrypto);
+    }
+  });
+
+  it('returns a typed error for a corrupt JSON value that is not our payload', async () => {
+    const indexedDbMock = createIndexedDbMock();
+    vi.stubGlobal('indexedDB', indexedDbMock.indexedDB);
+
+    const service = await import('../apiKeyService');
+    const db = await new Promise<IDBDatabase>((innerResolve, innerReject) => {
+      const request = indexedDB.open('culinasync_secure', 1);
+      request.onupgradeneeded = () => { request.result.createObjectStore('keys', { keyPath: 'id' }); };
+      request.onsuccess = () => innerResolve(request.result);
+      request.onerror = () => innerReject(request.error);
+    });
+    await new Promise<void>((resolve) => {
+      const tx = db.transaction('keys', 'readwrite');
+      tx.objectStore('keys').put({ id: 'gemini_api_key', value: '{"foo":"bar"}', updatedAt: Date.now() });
+      tx.oncomplete = () => { db.close(); resolve(); };
+    });
+
+    await expect(service.getApiKeyStatus()).resolves.toBe('error');
+  });
+
+  it('treats an empty/whitespace passphrase as device mode, not a passphrase lock (CodeRabbit #3562409564)', async () => {
+    const indexedDbMock = createIndexedDbMock();
+    vi.stubGlobal('indexedDB', indexedDbMock.indexedDB);
+
+    const service = await import('../apiKeyService');
+    await service.saveApiKey('AIza-empty-pass', '   ');
+    const stored = indexedDbMock.readRecord('culinasync_secure', 'keys', 'gemini_api_key');
+    expect(stored?.value).toContain('"mode":"device"');
+    await expect(service.getApiKeyStatus()).resolves.toBe('ok');
+
+    // A fresh session must NOT be locked (device mode needs no passphrase).
+    vi.resetModules();
+    const fresh = await import('../apiKeyService');
+    await expect(fresh.getApiKeyStatus()).resolves.toBe('ok');
+    await expect(fresh.loadApiKey()).resolves.toBe('AIza-empty-pass');
+  });
+
+  it('reports and clears key presence via hasApiKey / deleteApiKey', async () => {
+    const indexedDbMock = createIndexedDbMock();
+    vi.stubGlobal('indexedDB', indexedDbMock.indexedDB);
+
+    const service = await import('../apiKeyService');
+    await expect(service.hasApiKey()).resolves.toBe(false);
+    await expect(service.getApiKeyStatus()).resolves.toBe('missing');
+
+    await service.saveApiKey('AIza-presence-test');
+    await expect(service.hasApiKey()).resolves.toBe(true);
+
+    await service.deleteApiKey();
+    await expect(service.hasApiKey()).resolves.toBe(false);
+    expect(indexedDbMock.readRecord('culinasync_secure', 'keys', 'gemini_api_key')).toBeUndefined();
+  });
+
+  it('falls back to legacy obfuscation when WebCrypto is unavailable (save + load roundtrip)', async () => {
+    const indexedDbMock = createIndexedDbMock();
+    vi.stubGlobal('indexedDB', indexedDbMock.indexedDB);
+
+    const realCrypto = globalThis.crypto;
+    vi.stubGlobal('crypto', undefined); // hasWebCrypto() -> false
+    try {
+      const service = await import('../apiKeyService');
+      await service.saveApiKey('AIza-nocrypto');
+      const stored = indexedDbMock.readRecord('culinasync_secure', 'keys', 'gemini_api_key');
+      // legacyObfuscate output is base64 (not our JSON payload) AND must not be plaintext.
+      expect(stored?.value.startsWith('{')).toBe(false);
+      expect(stored?.value).not.toContain('AIza-nocrypto');
+      await expect(service.loadApiKey()).resolves.toBe('AIza-nocrypto');
+    } finally {
+      vi.stubGlobal('crypto', realCrypto);
+    }
+  });
+
+  it('decrypts a legacy v2 payload and upgrades it to v3 on load', async () => {
+    const indexedDbMock = createIndexedDbMock();
+    vi.stubGlobal('indexedDB', indexedDbMock.indexedDB);
+
+    const service = await import('../apiKeyService');
+    // Produce a current (v3 device) payload, then downgrade the stored version marker to 2
+    // (no `mode`) to emulate a legacy encrypted blob — same fingerprint password decrypts it.
+    await service.saveApiKey('AIza-v2-upgrade');
+    const current = indexedDbMock.readRecord('culinasync_secure', 'keys', 'gemini_api_key');
+    const asV2 = JSON.parse(current!.value) as Record<string, unknown>;
+    asV2.version = 2;
+    delete asV2.mode;
+
+    const db = await new Promise<IDBDatabase>((innerResolve, innerReject) => {
+      const request = indexedDB.open('culinasync_secure', 1);
+      request.onupgradeneeded = () => { request.result.createObjectStore('keys', { keyPath: 'id' }); };
+      request.onsuccess = () => innerResolve(request.result);
+      request.onerror = () => innerReject(request.error);
+    });
+    await new Promise<void>((resolve) => {
+      const tx = db.transaction('keys', 'readwrite');
+      tx.objectStore('keys').put({ id: 'gemini_api_key', value: JSON.stringify(asV2), updatedAt: Date.now() });
+      tx.oncomplete = () => { db.close(); resolve(); };
+    });
+
+    await expect(service.loadApiKey()).resolves.toBe('AIza-v2-upgrade');
+    await expect.poll(
+      () => indexedDbMock.readRecord('culinasync_secure', 'keys', 'gemini_api_key')?.value.startsWith('{"version":3'),
       { timeout: 15_000 },
     ).toBe(true);
   });

@@ -9,6 +9,24 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Sicherheit
 
+- **Prompt-Sanitizer (`@domain/ai-core`):** `PHONE_PATTERN` präzisiert — ISO-Daten
+  (`2026-07-15`) und Mengen/Ranges (`200-300`) werden nicht mehr fälschlich als Telefon-
+  nummern redigiert (E.164-Ziffernfenster + Datums-Guard). Zusätzlich Prompt-Injection-
+  Defense (`neutralizePromptInjection`) jetzt auch für den On-Device-Pfad, gespiegelt aus
+  `geminiService`. Neue echte Vitest-Suite ersetzt den `process.exit(0)`-No-op.
+- **API-Schlüssel:** Optionale Passphrase für echte Verschlüsselung (PBKDF2/AES-GCM,
+  `ENCRYPTION_VERSION=3`, Session-Unlock) neben dem Geräte-Modus. Entschlüsselungs-Fehler
+  werden jetzt typisiert nach außen gegeben (`ApiKeyState` `locked`/`error`) statt still auf
+  Legacy-Deobfuskation zurückzufallen; Settings-UI kennzeichnet den Geräte-Modus ehrlich als
+  Obfuskation (kein Schutz bei Geräte-Zugriff).
+- **CSP:** Single-Source `apps/web/src/config/csp.ts` — in `index.html` per Vite-Plugin
+  injiziert und mit `src-tauri/tauri.conf.json` synchron gehalten (Drift-Test). `'wasm-unsafe-eval'`
+  für On-Device-AI-WASM (WebLLM/transformers/Whisper) ergänzt. `connect-src` bleibt bewusst
+  `'self' https:` — eine Host-Allowlist ist nicht möglich, da Kern-Features auf user-konfigurierte
+  Endpunkte zugreifen (WebDAV/Nextcloud-Sync, IPFS-Gateway) und die On-Device-Modelle aus mehreren
+  CDNs geladen werden; `upgrade-insecure-requests` erzwingt https.
+- **dompurify:** Bump `^3.3.1 → ^3.4.11`; die beiden divergenten Sanitize-Konfigurationen
+  hinter einen einzigen `sanitizeHtml(input, mode)`-Wrapper vereinheitlicht.
 - **Dependencies:** Hochkritische Transitiv-Lücken via pnpm-`overrides` geschlossen —
   `protobufjs` (npm:protobufjs@^7.6.1, DoS) und `undici` (npm:undici@^7.28.0,
   TLS-Bypass & WebSocket-DoS). `pnpm audit --audit-level=high` ist wieder grün.
