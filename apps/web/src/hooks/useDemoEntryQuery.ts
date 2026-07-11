@@ -24,7 +24,10 @@ function stripQueryParams(keys: string[]): void {
 export type DemoEntryResult = 'demo' | 'try' | null;
 
 /**
- * R-011: `?demo=1` loads pantry demo + dismisses onboarding; `?try=1` starts empty without tour.
+ * Processes demo and try entry modes specified by the current URL.
+ *
+ * @param onResolved - Callback invoked with the resolved entry mode.
+ * @param enabled - Whether query processing is enabled.
  */
 export function useDemoEntryQuery(
   onResolved?: (result: DemoEntryResult) => void,
