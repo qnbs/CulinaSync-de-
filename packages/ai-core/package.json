@@ -17,7 +17,7 @@
     "lint": "cd ../.. && pnpm exec eslint packages/ai-core --report-unused-disable-directives --max-warnings 0",
     "type-check": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "test:coverage": "vitest run"
+    "test:coverage": "vitest run --coverage"
   },
   "optionalDependencies": {
     "@mlc-ai/web-llm": "^0.2.79",
@@ -25,6 +25,7 @@
     "onnxruntime-web": "^1.22.0"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "4.1.8",
     "typescript": "^6.0.3",
     "vitest": "4.1.8"
   }

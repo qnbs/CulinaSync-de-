@@ -24,6 +24,12 @@ describe('sanitizeForPrompt — PII redaction', () => {
     expect(sanitizeForPrompt('mobil (0176) 1234567')).toContain('[PHONE_REDACTED]');
     expect(sanitizeForPrompt('call +49 30 12345678')).not.toContain('12345678');
   });
+
+  it('redacts slash-separated (DE-style) phone numbers', () => {
+    const out = sanitizeForPrompt('ruf 030/12345678 an');
+    expect(out).toContain('[PHONE_REDACTED]');
+    expect(out).not.toContain('12345678');
+  });
 });
 
 describe('sanitizeForPrompt — no over-redaction (regression for §2.7)', () => {

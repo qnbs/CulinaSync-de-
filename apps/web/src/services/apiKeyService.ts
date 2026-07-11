@@ -20,7 +20,7 @@ const DB_NAME = 'culinasync_secure';
 const STORE_NAME = 'keys';
 const KEY_ID = 'gemini_api_key';
 const ENCRYPTION_VERSION = 3;
-const PBKDF2_ITERATIONS = 250000;
+const PBKDF2_ITERATIONS = 600000; // OWASP 2023 baseline for PBKDF2-HMAC-SHA256
 
 type KeyMode = 'device' | 'passphrase';
 
@@ -40,7 +40,7 @@ export type ApiKeyState =
   | { status: 'error' }; // stored but decryption failed (corrupt / wrong environment)
 
 type DecryptOutcome =
-  | { status: 'ok'; key: string; upgrade: boolean }
+  | { status: 'ok'; key: string; upgrade: boolean; mode: KeyMode }
   | { status: 'legacy'; key: string }
   | { status: 'locked' }
   | { status: 'error'; version?: number };
@@ -115,13 +115,20 @@ const deriveEncryptionKey = async (salt: Uint8Array, password: string): Promise<
   );
 };
 
+// QNBS-v3: leere/Whitespace-Passphrase → device | verhindert mode='device' bei password='' (Nullish vs. truthy Mismatch) | CodeRabbit #3562409564
+const normalizePassphrase = (passphrase?: string): string | undefined => {
+  const trimmed = passphrase?.trim();
+  return trimmed && trimmed.length > 0 ? trimmed : undefined;
+};
+
 const encryptApiKey = async (plaintext: string, passphrase?: string): Promise<string> => {
   if (!hasWebCrypto()) {
     return legacyObfuscate(plaintext);
   }
 
-  const mode: KeyMode = passphrase ? 'passphrase' : 'device';
-  const password = passphrase ?? getFingerprint();
+  const effective = normalizePassphrase(passphrase);
+  const mode: KeyMode = effective ? 'passphrase' : 'device';
+  const password = effective ?? getFingerprint();
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const key = await deriveEncryptionKey(salt, password);
@@ -155,7 +162,9 @@ const isEncryptedPayload = (value: unknown): value is EncryptedPayload => {
     && (payload.mode === undefined || payload.mode === 'device' || payload.mode === 'passphrase');
 };
 
-const decryptStoredValue = async (storedValue: string): Promise<DecryptOutcome> => {
+// passphraseOverride lets unlockApiKey verify a candidate passphrase WITHOUT mutating the
+// shared sessionPassphrase (avoids the unlock race — CodeRabbit #3562409584).
+const decryptStoredValue = async (storedValue: string, passphraseOverride?: string): Promise<DecryptOutcome> => {
   let parsed: unknown;
   try {
     parsed = JSON.parse(storedValue);
@@ -173,8 +182,8 @@ const decryptStoredValue = async (storedValue: string): Promise<DecryptOutcome> 
   }
 
   const mode: KeyMode = parsed.mode ?? 'device';
-  const password = mode === 'passphrase' ? sessionPassphrase : getFingerprint();
-  if (password === null) {
+  const password = mode === 'passphrase' ? (passphraseOverride ?? sessionPassphrase) : getFingerprint();
+  if (password === null || password === undefined) {
     return { status: 'locked' };
   }
 
@@ -188,7 +197,7 @@ const decryptStoredValue = async (storedValue: string): Promise<DecryptOutcome> 
       key,
       toArrayBuffer(ciphertext)
     );
-    return { status: 'ok', key: textDecoder.decode(decrypted), upgrade: parsed.version < ENCRYPTION_VERSION };
+    return { status: 'ok', key: textDecoder.decode(decrypted), upgrade: parsed.version < ENCRYPTION_VERSION, mode };
   } catch {
     // Surface the failure — do NOT fall back to legacy deobfuscation, which
     // would hand back garbage that then fails opaquely as an "invalid API key".
@@ -228,7 +237,8 @@ const getStoredValue = (): Promise<string | null> =>
  *        (passphrase-derived) encryption instead of device obfuscation.
  */
 export const saveApiKey = async (key: string, passphrase?: string): Promise<void> => {
-  const value = await encryptApiKey(key, passphrase);
+  const effective = normalizePassphrase(passphrase);
+  const value = await encryptApiKey(key, effective);
   await retry(async () => {
     const idb = await openDB();
     const tx = idb.transaction(STORE_NAME, 'readwrite');
@@ -239,9 +249,9 @@ export const saveApiKey = async (key: string, passphrase?: string): Promise<void
       tx.onerror = () => { idb.close(); reject(tx.error); };
     });
   }, 3, 500);
-  if (passphrase) {
-    sessionPassphrase = passphrase; // keep unlocked for the rest of the session
-  }
+  // Session cache reflects the newly stored key's mode: keep the passphrase when
+  // present, otherwise clear any stale one from a prior passphrase key (CodeRabbit #3562409568).
+  sessionPassphrase = effective ?? null;
 };
 
 /** Full state — lets the UI distinguish missing vs locked vs corrupt. */
@@ -261,7 +271,10 @@ export const loadApiKeyState = async (): Promise<ApiKeyState> => {
   switch (outcome.status) {
     case 'ok':
       if (outcome.upgrade && hasWebCrypto()) {
-        void saveApiKey(outcome.key).catch(() => undefined); // upgrade v2 → v3 (device)
+        // #6 (CodeRabbit #3562409577): preserve the encryption mode on re-encrypt — never
+        // silently downgrade a passphrase-protected key to device obfuscation.
+        const reSavePassphrase = outcome.mode === 'passphrase' ? (sessionPassphrase ?? undefined) : undefined;
+        void saveApiKey(outcome.key, reSavePassphrase).catch(() => undefined);
       }
       return { status: 'ok', key: outcome.key };
     case 'legacy':
@@ -287,13 +300,27 @@ export const loadApiKey = async (): Promise<string | null> => {
  * passphrase decrypts the stored key, false otherwise (session stays locked).
  */
 export const unlockApiKey = async (passphrase: string): Promise<boolean> => {
-  const previous = sessionPassphrase;
-  sessionPassphrase = passphrase;
-  const state = await loadApiKeyState();
-  if (state.status === 'ok') {
+  // Verify the candidate passphrase against the stored payload WITHOUT touching the shared
+  // sessionPassphrase, then commit only on success. Overlapping unlock attempts can no longer
+  // clobber each other or relock a just-unlocked session (CodeRabbit #3562409584).
+  const candidate = normalizePassphrase(passphrase);
+  if (!candidate) {
+    return false;
+  }
+  let stored: string | null;
+  try {
+    stored = await getStoredValue();
+  } catch {
+    return false;
+  }
+  if (!stored) {
+    return false;
+  }
+  const outcome = await decryptStoredValue(stored, candidate);
+  if (outcome.status === 'ok') {
+    sessionPassphrase = candidate;
     return true;
   }
-  sessionPassphrase = previous;
   return false;
 };
 

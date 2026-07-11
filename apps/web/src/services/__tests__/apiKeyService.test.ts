@@ -235,6 +235,23 @@ describe('apiKeyService', () => {
     await expect(service.getApiKeyStatus()).resolves.toBe('error');
   });
 
+  it('treats an empty/whitespace passphrase as device mode, not a passphrase lock (CodeRabbit #3562409564)', async () => {
+    const indexedDbMock = createIndexedDbMock();
+    vi.stubGlobal('indexedDB', indexedDbMock.indexedDB);
+
+    const service = await import('../apiKeyService');
+    await service.saveApiKey('AIza-empty-pass', '   ');
+    const stored = indexedDbMock.readRecord('culinasync_secure', 'keys', 'gemini_api_key');
+    expect(stored?.value).toContain('"mode":"device"');
+    await expect(service.getApiKeyStatus()).resolves.toBe('ok');
+
+    // A fresh session must NOT be locked (device mode needs no passphrase).
+    vi.resetModules();
+    const fresh = await import('../apiKeyService');
+    await expect(fresh.getApiKeyStatus()).resolves.toBe('ok');
+    await expect(fresh.loadApiKey()).resolves.toBe('AIza-empty-pass');
+  });
+
   it('reports and clears key presence via hasApiKey / deleteApiKey', async () => {
     const indexedDbMock = createIndexedDbMock();
     vi.stubGlobal('indexedDB', indexedDbMock.indexedDB);

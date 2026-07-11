@@ -6,5 +6,11 @@ export default defineConfig({
     environment: 'node',
     include: ['src/**/*.test.ts'],
     reporters: process.env.CI ? ['default', 'github-actions'] : ['default'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov'],
+      include: ['src/**/*.ts'],
+      exclude: ['src/**/*.test.ts'],
+    },
   },
 });

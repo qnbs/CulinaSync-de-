@@ -74,6 +74,7 @@ const RemoveApiKeyConfirmationModal: React.FC<{
 export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
     const { t } = useTranslation();
     const [showKey, setShowKey] = useState(false);
+    const [showPassphrase, setShowPassphrase] = useState(false);
     const [hasKey, setHasKey] = useState(false);
     const [keyStatus, setKeyStatus] = useState<ApiKeyState['status']>('missing');
     const [passphrase, setPassphrase] = useState('');
@@ -116,6 +117,7 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
         }
     });
 
+    // QNBS-v3: Session-Unlock-Flow für passphrase-geschützte Keys | verifiziert Passphrase gegen den gespeicherten Payload und aktiviert KI für die Sitzung | CodeRabbit #3562409552
     const handleUnlock = async (event: React.FormEvent) => {
         event.preventDefault();
         const passphraseInput = unlockValue.trim();
@@ -159,7 +161,7 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
         return <div className="animate-pulse h-40 bg-zinc-800/50 rounded-2xl" />;
     }
 
-    // Optimistic save/delete may run ahead of the awaited keyStatus update.
+    // QNBS-v3: Anzeige-Status aus optimistischem hasKey + awaited keyStatus versöhnen | optimistisches Save/Delete läuft dem echten keyStatus voraus, ohne locked/error zu überschreiben | CodeRabbit #3562409552
     const displayStatus: ApiKeyState['status'] =
         optimisticHasKey && keyStatus === 'missing' ? 'ok'
         : !optimisticHasKey && keyStatus !== 'missing' ? 'missing'
@@ -249,14 +251,22 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ addToast }) => {
 
                     <div className="relative">
                         <input
-                            type="password"
+                            type={showPassphrase ? 'text' : 'password'}
                             value={passphrase}
                             onChange={(event) => setPassphrase(event.target.value)}
                             placeholder={t('settings.apiKey.passphrase.placeholder')}
                             aria-label={t('settings.apiKey.passphrase.aria')}
                             autoComplete="new-password"
-                            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-zinc-200 placeholder-zinc-500 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none text-sm"
+                            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 pr-12 text-zinc-200 placeholder-zinc-500 focus:ring-2 focus:ring-[var(--color-accent-500)] focus:border-transparent outline-none text-sm"
                         />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassphrase(!showPassphrase)}
+                            className="absolute right-3 top-[1.15rem] -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                            aria-label={showPassphrase ? t('settings.apiKey.hideKeyAria') : t('settings.apiKey.showKeyAria')}
+                        >
+                            {showPassphrase ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
                         <p className="mt-2 text-xs text-zinc-500 leading-relaxed">{t('settings.apiKey.obfuscationNote')}</p>
                     </div>
 

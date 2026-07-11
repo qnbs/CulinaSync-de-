@@ -6,7 +6,9 @@ const CREDIT_CARD_PATTERN = /\b(?:\d[ -]*?){13,19}\b/gu;
 // A phone candidate is a digit run (optionally +-prefixed) with typical phone
 // separators. The final redact decision is made in the replacer so we can keep
 // ISO dates and short quantities that a broad regex would otherwise eat.
-const PHONE_CANDIDATE = /(?<!\w)\+?\d[\d\s().-]{5,}\d(?!\w)/gu;
+// '/' is in the class so slash-separated phones (DE style "030/12345678") are caught and
+// so slash dates actually reach the DMY_DATE guard below (CodeRabbit #3562409595).
+const PHONE_CANDIDATE = /(?<!\w)\+?\d[\d\s()./-]{5,}\d(?!\w)/gu;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/u;
 const DMY_DATE = /^\d{1,2}[./]\d{1,2}[./]\d{2,4}$/u;
 
@@ -23,8 +25,11 @@ const redactPhones = (input: string): string =>
 // QNBS-v3: Prompt-Injection-Defense auch für On-Device-Pfad | spiegelt geminiService PROMPT_INJECTION_PATTERN (bisher nur Cloud) | neutralisiert Instruktions-Overrides vor jedem Modell
 // Mirrors the cloud-side guard in apps/web/src/services/geminiService.ts so the
 // local/on-device AI path is defended against instruction-injection too.
+// ReDoS-safe: the verb→noun gap is a bounded {0,3} repetition of "word + required space"
+// rather than adjacent optional \s* groups, so there is no catastrophic backtracking on
+// long whitespace/filler runs (CodeRabbit #3562409597).
 const PROMPT_INJECTION_PATTERN =
-  /(?:(?:ignore|disregard|forget|override)\s+(?:all|any|the|these)?\s*(?:previous|prior|above|earlier)?\s*(?:instructions|prompts?|rules?)|system\s+prompt|developer\s+message|(?:^|\s)(?:assistant|system|user|role|tool\s+call|function\s+call)\s*:|follow\s+these\s+instructions|you\s+are\s+now\b)/giu;
+  /(?:(?:ignore|disregard|forget|override)\s+(?:(?:all|any|the|these|previous|prior|above|earlier)\s+){0,3}(?:instructions|prompts?|rules?)|system\s+prompt|developer\s+message|(?:^|\s)(?:assistant|system|user|role|tool\s+call|function\s+call)\s*:|follow\s+these\s+instructions|you\s+are\s+now\b)/giu;
 
 export const neutralizePromptInjection = (input: string): string =>
   input.replaceAll(PROMPT_INJECTION_PATTERN, '[filtered]');
