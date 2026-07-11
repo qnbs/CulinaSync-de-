@@ -251,6 +251,24 @@ describe('apiKeyService', () => {
     expect(indexedDbMock.readRecord('culinasync_secure', 'keys', 'gemini_api_key')).toBeUndefined();
   });
 
+  it('falls back to legacy obfuscation when WebCrypto is unavailable (save + load roundtrip)', async () => {
+    const indexedDbMock = createIndexedDbMock();
+    vi.stubGlobal('indexedDB', indexedDbMock.indexedDB);
+
+    const realCrypto = globalThis.crypto;
+    vi.stubGlobal('crypto', undefined); // hasWebCrypto() -> false
+    try {
+      const service = await import('../apiKeyService');
+      await service.saveApiKey('AIza-nocrypto');
+      const stored = indexedDbMock.readRecord('culinasync_secure', 'keys', 'gemini_api_key');
+      // legacyObfuscate output is base64, not our JSON payload.
+      expect(stored?.value.startsWith('{')).toBe(false);
+      await expect(service.loadApiKey()).resolves.toBe('AIza-nocrypto');
+    } finally {
+      vi.stubGlobal('crypto', realCrypto);
+    }
+  });
+
   it('decrypts a legacy v2 payload and upgrades it to v3 on load', async () => {
     const indexedDbMock = createIndexedDbMock();
     vi.stubGlobal('indexedDB', indexedDbMock.indexedDB);
