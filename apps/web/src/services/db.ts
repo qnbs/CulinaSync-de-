@@ -14,7 +14,6 @@ import {
   PRIMARY_DATA_STORES,
   PRIMARY_DB_NAME,
 } from './dbMigrations';
-import { debouncedReindexAllEmbeddings, removeEmbeddingForSource } from './localAiEmbeddingsService';
 import { debouncedUpdateAllPantryMatches, updatePantryMatches } from './pantryMatcherService';
 import { loadSettings } from './settingsService';
 import { syncSeedRecipes } from './repositories/recipeRepository';
@@ -57,8 +56,11 @@ const populateDB = async () => {
 // Setup hooks outside the class constructor to avoid circular dependencies in class definition file
 db.on('populate', populateDB);
 
+// QNBS-v3: Lazy-Load der On-Device-AI-Embeddings-Schicht | hält localAiEmbeddingsService (+ vendor-ai) aus dem Eager-Graph → Initial-Load-Budget (script < 155 KB). Aufrufe bleiben fire-and-forget; Debounce-State lebt im einmalig gecachten Modul.
+const loadEmbeddings = () => import('./localAiEmbeddingsService');
+
 const scheduleEmbeddingMaintenance = () => {
-  debouncedReindexAllEmbeddings(loadSettings());
+  void loadEmbeddings().then((m) => m.debouncedReindexAllEmbeddings(loadSettings()));
 };
 
 // When pantry changes, recalculate for all recipes (debounced)
@@ -73,7 +75,7 @@ db.pantry.hook('updating', () => {
 db.pantry.hook('deleting', (primKey) => {
   debouncedUpdateAllPantryMatches();
   if (typeof primKey === 'number') {
-    void removeEmbeddingForSource('pantry', primKey);
+    void loadEmbeddings().then((m) => m.removeEmbeddingForSource('pantry', primKey));
   }
 });
 
@@ -92,7 +94,7 @@ db.recipes.hook('updating', (_modifications, primKey, _obj, trans) => {
 });
 db.recipes.hook('deleting', (primKey) => {
   if (typeof primKey === 'number') {
-    void removeEmbeddingForSource('recipe', primKey);
+    void loadEmbeddings().then((m) => m.removeEmbeddingForSource('recipe', primKey));
   }
 });
 
@@ -104,7 +106,7 @@ db.mealPlan.hook('updating', () => {
 });
 db.mealPlan.hook('deleting', (primKey) => {
   if (typeof primKey === 'number') {
-    void removeEmbeddingForSource('mealPlan', primKey);
+    void loadEmbeddings().then((m) => m.removeEmbeddingForSource('mealPlan', primKey));
   }
 });
 

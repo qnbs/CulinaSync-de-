@@ -1,7 +1,6 @@
 import React from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { updateSettings } from '../../store/slices/settingsSlice';
-import { reindexAllEmbeddings } from '../../services/localAiEmbeddingsService';
 import { useTransientUiStore } from '../../store/transientUiStore';
 import { LocalAiSetupModal, type LocalAiSetupCompletion } from './LocalAiSetupModal';
 
@@ -27,6 +26,8 @@ export const LocalAiSetupHost: React.FC = () => {
       next.localAi.enableWebLlmInference = true;
     }
     dispatch(updateSettings(next));
+    // QNBS-v3: Lazy-Load der Embeddings-Schicht | letzter Eager-Importeur von localAiEmbeddingsService — nur im Wizard-Abschluss-Callback gebraucht, hält den Service aus dem Initial-Load-Graph.
+    const { reindexAllEmbeddings } = await import('../../services/localAiEmbeddingsService');
     await reindexAllEmbeddings(next);
   };
 

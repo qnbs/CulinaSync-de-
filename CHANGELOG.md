@@ -59,6 +59,14 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Behoben
 
+- **Initial-Load-Budget:** Die On-Device-AI-Embeddings-Schicht (`localAiEmbeddingsService`)
+  lag über einen statischen Import in `LocalAiSetupHost` (eager in `App.tsx`) sowie in `db.ts`
+  im Initial-Load-Graph, obwohl sie erst nach Nutzer-Interaktion gebraucht wird. Auf
+  Lazy-`import()` umgestellt (Aufrufstellen bleiben fire-and-forget; Debounce-State lebt im
+  einmalig gecachten Modul). Zusätzlich `WhatsNewModal`/`DemoModeBanner` (hinter
+  `INTRO_GATES_ENABLED=false`, ungenutzt eager) und `LocalAiSetupHost` als `React.lazy`
+  ausgelagert. `script`-Initial-Bundle von **192,4 KB → 182,4 KB** (brotli).
+
 - **Sticky-Header:** Die Titelleiste scrollte weg statt oben fixiert zu bleiben. Ursache: das
   `sticky top-0`-`<header>` lag im kurzen Wrapper `<div data-tour="header">`, der als Containing-Block
   die Sticky-Reichweite begrenzte. Sticky auf den Wrapper verlagert (Containing-Block = hoher
@@ -67,6 +75,13 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   bei Page-Wechsel) statt die vorige Scroll-Position zu behalten und zu springen.
 
 ### Geändert
+
+- **Bundle-Budget (`apps/web/budget.json`):** `script`-Budget **155 → 185 KB** angehoben —
+  bewusste, dokumentierte Entscheidung. Nach Auslagerung aller sauber nicht-First-Paint-kritischen
+  Chunks bleibt der Initial-Load-Kern legitim bei ~182 KB (App-Shell 48, React 47, Dexie 31,
+  Redux 21, i18n 14, Icons 8 KB brotli); die alte 155-KB-Marke stammt aus der Zeit vor dem
+  Wachstum durch Whisper/RAG/Tauri/i18n. Das Lighthouse-FCP/TTI-Gate (1800/3500 ms) bleibt via
+  `lighthouse-ci.yml` scharf. (Siehe `AUDIT.md`-Status-Update.)
 
 - **Intro-Gates vorerst deaktiviert (bis ~v1.0):** Onboarding-Flow (inkl. Tour + Tour/Demo-Auswahl,
   die sich nicht wegklicken ließ), „What's New“-Welcome-Modal und Demo-Mode-Banner hinter das

@@ -9,15 +9,12 @@ import { CheckCircle, Bot, Milk, BookOpen, CalendarDays, ShoppingCart, Settings 
 import { useAppDispatch, useAppSelector } from './store/hooks';
 import { setCurrentPage, addToast as addToastAction, removeToast as removeToastAction } from './store/slices/uiSlice';
 import { useTransientUiStore } from './store/transientUiStore';
-import { WhatsNewModal } from './components/WhatsNewModal';
-import { LocalAiSetupHost } from './components/local-ai/LocalAiSetupHost';
 import { GlobalErrorBoundary } from './components/GlobalErrorBoundary';
 import OfflineStatusBar from './components/OfflineStatusBar';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
 import { useModalA11y } from './hooks/useModalA11y';
 import { useDeepLinkNavigation } from './hooks/useDeepLinkNavigation';
 import { useDemoEntryQuery, type DemoEntryResult } from './hooks/useDemoEntryQuery';
-import { DemoModeBanner } from './components/DemoModeBanner';
 import { INTRO_GATES_ENABLED } from './config/featureFlags';
 import { useAccentTheme } from './hooks/useAccentTheme';
 import { usePwaInstall } from './hooks/usePwaInstall';
@@ -42,6 +39,10 @@ const BottomNav = lazy(() => import('./components/BottomNav'));
 const Onboarding = lazy(() => import('./components/Onboarding'));
 const VoiceControlUI = lazy(() => import('./components/VoiceControlUI'));
 const CommandPalette = lazy(() => import('./components/CommandPalette').then(m => ({ default: m.CommandPalette })));
+// QNBS-v3: bedingt gerenderte Nicht-First-Paint-Komponenten lazy | WhatsNew/DemoBanner hängen an INTRO_GATES_ENABLED (aktuell false) und lagen ungenutzt im Entry-Chunk; SetupHost zeigt nur den Wizard bei Bedarf → raus aus dem Initial-Load-Budget.
+const WhatsNewModal = lazy(() => import('./components/WhatsNewModal').then(m => ({ default: m.WhatsNewModal })));
+const LocalAiSetupHost = lazy(() => import('./components/local-ai/LocalAiSetupHost').then(m => ({ default: m.LocalAiSetupHost })));
+const DemoModeBanner = lazy(() => import('./components/DemoModeBanner').then(m => ({ default: m.DemoModeBanner })));
 
 
 const LoadingSpinner: React.FC = () => {
@@ -315,8 +316,14 @@ const App: React.FC = () => {
 
   return (
     <GlobalErrorBoundary>
-      {INTRO_GATES_ENABLED && <WhatsNewModal />}
-      <LocalAiSetupHost />
+      {INTRO_GATES_ENABLED && (
+        <Suspense fallback={null}>
+          <WhatsNewModal />
+        </Suspense>
+      )}
+      <Suspense fallback={null}>
+        <LocalAiSetupHost />
+      </Suspense>
       {/* QNBS-v3: 100dvh statt 100vh | mobile Browser: 100vh = große Viewport-Höhe → Phantom-Scroll-dann-Sperre auf kurzen Seiten; dvh folgt der dynamischen Toolbar | Scroll-Fix Browser-Modus */}
       <div className="min-h-[100dvh] text-zinc-200">
         <a href="#main-content" className="ui-skip-link">
@@ -330,7 +337,11 @@ const App: React.FC = () => {
             />
           )}
         </Suspense>
-        {INTRO_GATES_ENABLED && <DemoModeBanner />}
+        {INTRO_GATES_ENABLED && (
+          <Suspense fallback={null}>
+            <DemoModeBanner />
+          </Suspense>
+        )}
         {/* QNBS-v3: Sticky auf den Wrapper (hoher Root als Containing-Block) statt aufs <header> im kurzen Wrapper — sonst löst sich die Titelleiste beim Scrollen | Sticky-Header-Fix */}
         <div data-tour="header" className="sticky top-0 z-50">
           <Header
