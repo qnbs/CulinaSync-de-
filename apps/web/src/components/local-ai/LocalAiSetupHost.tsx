@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { updateSettings } from '../../store/slices/settingsSlice';
-import { reindexAllEmbeddings } from '../../services/localAiEmbeddingsService';
+import { logAppError } from '../../services/errorLoggingService';
 import { useTransientUiStore } from '../../store/transientUiStore';
 import { LocalAiSetupModal, type LocalAiSetupCompletion } from './LocalAiSetupModal';
 
@@ -27,7 +27,13 @@ export const LocalAiSetupHost: React.FC = () => {
       next.localAi.enableWebLlmInference = true;
     }
     dispatch(updateSettings(next));
-    await reindexAllEmbeddings(next);
+    // QNBS-v3: Lazy-Load der Embeddings-Schicht + Fehler-Handling | letzter Eager-Importeur; dynamischer import()/Reindex kann fehlschlagen — Fehler werden geloggt statt als Unhandled-Rejection zu propagieren. Wizard bleibt bewusst abgeschlossen (Reindex läuft sonst über die DB-Hooks nach), kein Re-Open bei transientem Fehler.
+    try {
+      const { reindexAllEmbeddings } = await import('../../services/localAiEmbeddingsService');
+      await reindexAllEmbeddings(next);
+    } catch (error) {
+      void logAppError(error, 'LocalAiSetupHost.reindexOnComplete');
+    }
   };
 
   const handleClose = () => {
