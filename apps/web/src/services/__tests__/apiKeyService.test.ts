@@ -278,8 +278,9 @@ describe('apiKeyService', () => {
       const service = await import('../apiKeyService');
       await service.saveApiKey('AIza-nocrypto');
       const stored = indexedDbMock.readRecord('culinasync_secure', 'keys', 'gemini_api_key');
-      // legacyObfuscate output is base64, not our JSON payload.
+      // legacyObfuscate output is base64 (not our JSON payload) AND must not be plaintext.
       expect(stored?.value.startsWith('{')).toBe(false);
+      expect(stored?.value).not.toContain('AIza-nocrypto');
       await expect(service.loadApiKey()).resolves.toBe('AIza-nocrypto');
     } finally {
       vi.stubGlobal('crypto', realCrypto);
