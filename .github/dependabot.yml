@@ -61,3 +61,18 @@ updates:
     labels:
       - "ci"
       - "dependencies"
+
+  # Rust / Cargo (Tauri-Desktop) — src-tauri/Cargo.lock war bisher NICHT von Dependabot
+  # abgedeckt (nur npm + github-actions), weshalb transitive RUSTSEC-Advisories wie der
+  # glib-VariantStrIter-Alert (#23) nicht auto-getrackt wurden. Siehe SECURITY.md / R-GLIB.
+  - package-ecosystem: "cargo"
+    directory: "/src-tauri"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "rust"

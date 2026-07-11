@@ -41,3 +41,20 @@ Fuer nicht-sensitive Sicherheitsverbesserungen oder harte Konfigurationsthemen o
 - Nutzerinhalte duerfen nicht unkontrolliert als HTML oder Dateiname an Browser-Sinks gelangen.
 - Persistente Strukturupdates sollten auf erlaubte Felder begrenzt sein.
 - Workflows sollen auf aktuelle Actions-Versionen und reproduzierbare Installationen ausgerichtet bleiben.
+
+## Bekannte, akzeptierte Risiken (transitiv, kein Upstream-Fix verfuegbar)
+
+- **RUSTSEC — `glib` `VariantStrIter`/`DoubleEndedIterator` Unsoundness (moderat; GitHub-Alert #23).**
+  Der Tauri-2-Desktop-Build (`src-tauri/`) zieht `glib 0.18.5` **transitiv** ueber
+  `tauri → tauri-runtime-wry → wry → webkit2gtk → gtk` (gtk-rs-0.18-Generation). `glib` ist **keine**
+  direkte Dependency. Der Fix liegt erst in `glib 0.20.10` — **semver-inkompatibel** und durch den
+  Linux-webkit2gtk-Backend gepinnt, den Tauri 2.x verlangt; `cargo update -p glib` bestaetigt
+  „Locking 0 packages to latest compatible versions" (kein In-Range-Fix erreichbar).
+  **Bewertung:** betrifft ausschliesslich die Linux-Desktop-GTK-Bindings; die Web-PWA ist nicht
+  betroffen. Ein erzwungener Major-Bump des gtk-rs-Stacks wird bewusst **nicht** vorgenommen
+  (Regressionsrisiko fuer den Desktop-Build unverhaeltnismaessig zur moderaten transitiven Unsoundness).
+  **Mitigation/Tracking:** `cargo`-Oekosystem in `.github/dependabot.yml` aufgenommen (Auto-Tracking
+  kuenftiger Fixes); Re-Evaluation, sobald wry/webkit2gtk auf gtk-rs 0.20 ziehen. Backlog-Referenz:
+  `R-GLIB` in [docs/AUDIT-REMEDIATION-BACKLOG.md](docs/AUDIT-REMEDIATION-BACKLOG.md). Das
+  `pnpm audit --audit-level=high`-CI-Gate deckt nur das npm-Oekosystem ab; dieser Rust-Advisory
+  blockiert CI daher nicht.

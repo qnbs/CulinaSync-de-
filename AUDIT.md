@@ -6,6 +6,25 @@
 
 ---
 
+## Status-Update 2026-07-12 (`main` — Gates/Security/Toolchain-Housekeeping)
+
+- **Umgesetzt:** **WS-BUDGET** — On-Device-AI-Embeddings-Schicht aus dem Initial-Load-Graph gelöst
+  (Lazy-`import()` in `db.ts` + `LocalAiSetupHost`; `WhatsNewModal`/`DemoModeBanner`/`LocalAiSetupHost`
+  als `React.lazy`), `script`-Bundle **192,4 → 182,4 KB** (brotli); `apps/web/budget.json` `script`
+  dokumentiert **155 → 185 KB** (der First-Paint-Kern ist legitim ~182 KB) — PR #103.
+  **WS-GUARD** — `main-guard` ruft jetzt das volle reusable `validate.yml`; der Commit-Status auf
+  `main` deckt denselben Gate-Satz ab wie der Deploy (PR #104).
+- **Security (getrackt, kein Code-Fix):** GitHub-Alert **#23** — `glib 0.18.5`-`VariantStrIter`-
+  Unsoundness (moderat) — als **transitiv / kein Upstream-Fix** dokumentiert (`SECURITY.md`, Backlog
+  `R-GLIB`). Fix erst in glib 0.20.10 (semver-major, durch wry/webkit2gtk gepinnt; `cargo update -p glib`
+  = 0 Änderungen). Betrifft nur den Linux-Desktop-GTK-Backend, **nicht** die Web-PWA. `cargo`-Ökosystem
+  in `.github/dependabot.yml` ergänzt (war zuvor nicht abgedeckt).
+- **Infra-Hinweis:** `main` hat aktuell **keine** Branch-Protection / Required-Status-Checks
+  (`gh api …/branches/main/protection` → 404). Der grüne main-Status ist damit informativ, nicht
+  durchsetzend → Follow-up-Backlog-Item.
+- **Gate-Matrix (grün auf `main`):** lint · type-check · test:coverage · build · bundle-budget
+  (script < 185) · `pnpm audit --high` — via `validate.yml` in main-guard **und** Deploy.
+
 ## Status-Update 2026-06-04 (`main` nach PR #66 + #67)
 
 - **Gesamtbewertung:** **9,0 / 10** ([AUDIT-vNEXT](./docs/AUDIT-vNEXT-2026-06-03.md)).

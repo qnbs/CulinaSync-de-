@@ -12,6 +12,7 @@
 | DB-Schicht testbar | R-004 nur `dbInstance` in Services; `index.tsx` lädt `db.ts` | Kein Service-Import von `./db` |
 | ESLint verschärfen | R-005 Warnungen → 0 → `error` | `max-warnings 0` bleibt grün |
 | Doku-Wahrheit | R-007 Help + AUDIT: Migrationen dokumentiert | Keine „fehlende Migration“-Claims |
+| Gates & Security härten | WS-BUDGET Initial-Load-Budget grün; WS-GUARD `main-guard` = `validate.yml`; R-GLIB glib #23 transitiv getrackt (Dependabot `cargo` + `SECURITY.md`) | `script` < 185 KB; main-Status deckt Deploy-Gate-Satz; glib-Alert dokumentiert & auto-getrackt |
 
 ---
 
