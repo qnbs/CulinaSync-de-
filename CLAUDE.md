@@ -17,22 +17,14 @@ Rules:
 
 ## Commands
 
-Use `pnpm` (preferred) or `npm`. Both lockfiles are present.
+`pnpm` (preferred) or `npm` — both lockfiles present. All scripts live in `package.json`; the
+non-obvious ones (the rest — `dev`, `lint`, `test`, `test:watch`, `test:coverage`, `i18n:check` — are standard):
 
-| Task | Command |
-|------|---------|
-| Dev server | `pnpm run dev` |
-| Type check | `pnpm run type-check` (**tsgo**, not tsc) |
-| Build | `pnpm run build` (= `tsgo && vite build`) |
-| Lint | `pnpm run lint` |
-| Tests (once) | `pnpm run test` (Vitest, **404** in **99** Dateien) |
-| Script tests | `pnpm run test:scripts` (Deploy-Verify, node --test) |
-| Tests (watch) | `pnpm run test:watch` |
-| Coverage | `pnpm run test:coverage` |
-| i18n gate | `pnpm run i18n:check` |
-| Full validation | `pnpm run check:all` (lint, type-check, test, test:scripts, i18n, build, budget, audit) |
-
-**Single test file:** `pnpm exec vitest run src/path/to/file.test.ts`
+- **Type-check / build:** `pnpm run type-check` uses **tsgo** (TypeScript-native Go compiler), not
+  `tsc`; `pnpm run build` = `tsgo && vite build`. `tsc` is only used internally by ESLint/Vitest.
+- **Single test file:** `pnpm exec vitest run src/path/to/file.test.ts`
+- **Script tests:** `pnpm run test:scripts` (`node --test` — deploy-verify + prune-deployments logic).
+- **Full validation:** `pnpm run check:all` (lint, type-check, test, test:scripts, i18n, build, budget, audit).
 
 **Recommended agent workflow:** Diagnostics / ESLint for changed area → targeted tests → `type-check` → `check:all` only before commit/push. Never start with a full build to discover type errors.
 
@@ -43,9 +35,8 @@ Use `pnpm` (preferred) or `npm`. Both lockfiles are present.
 ## Architecture
 
 ### Stack
-React 19 + Vite 8 PWA. **TypeScript 7 (native Go compiler `tsgo`)** — `tsc` is only used internally by ESLint/Vitest, not for builds. Path alias `@/*` → `src/*`.
-
-`index.tsx` (app entry) is in the **repo root**, not `src/`. It is included via `tsconfig.json`.
+React 19 + Vite 8 PWA, TypeScript 7 (native Go compiler `tsgo` — see Commands). Path alias `@/*` → `src/*`.
+`index.tsx` (app entry) is in the **repo root**, not `src/` (included via `tsconfig.json`).
 
 ### Data Architecture
 
