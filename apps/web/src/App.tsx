@@ -309,7 +309,8 @@ const App: React.FC = () => {
     <GlobalErrorBoundary>
       <WhatsNewModal />
       <LocalAiSetupHost />
-      <div className="min-h-screen text-zinc-200">
+      {/* QNBS-v3: 100dvh statt 100vh | mobile Browser: 100vh = große Viewport-Höhe → Phantom-Scroll-dann-Sperre auf kurzen Seiten; dvh folgt der dynamischen Toolbar | Scroll-Fix Browser-Modus */}
+      <div className="min-h-[100dvh] text-zinc-200">
         <a href="#main-content" className="ui-skip-link">
           {t('app.skipToContent')}
         </a>

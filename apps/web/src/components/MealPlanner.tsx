@@ -255,7 +255,7 @@ const MealPlannerInner: React.FC = () => {
     const pendingRecipe = pendingRecipeId ? recipesById.get(pendingRecipeId) : null;
 
     return (
-        <div className="flex flex-col lg:flex-row gap-6 h-full min-h-[calc(100vh-140px)] relative pb-24 md:pb-8">
+        <div className="flex flex-col lg:flex-row gap-6 h-full min-h-[calc(100dvh-140px)] relative pb-24 md:pb-8">
             {isCookMode && recipeForCookMode && <CookModeView recipe={recipeForCookMode} onExit={() => setIsCookMode(false)} />}
             {mealToRemove && (
                 <RemoveMealConfirmationModal
