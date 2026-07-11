@@ -35,11 +35,6 @@ updates:
           - "postcss"
           - "autoprefixer"
           - "tailwindcss"
-      storybook:
-        patterns:
-          - "storybook"
-          - "@storybook/*"
-          - "@chromatic-com/*"
       typescript:
         patterns:
           - "typescript"

@@ -12,7 +12,7 @@
     "build": "node -e \"require('node:fs').mkdirSync('dist',{recursive:true})\"",
     "lint": "node -e \"process.exit(0)\"",
     "type-check": "node -e \"process.exit(0)\"",
-    "test": "node -e \"process.exit(0)\"",
-    "test:coverage": "node -e \"process.exit(0)\""
+    "test": "node --test __tests__/*.test.mjs",
+    "test:coverage": "node --test __tests__/*.test.mjs"
   }
 }

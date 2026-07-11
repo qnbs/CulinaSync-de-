@@ -49,8 +49,29 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   CodeAnt, DeepSource und Branch-Protection (`mainrules`) inkl. Correction-Loop-
   Prozedur und verpflichtendem Out-of-Diff-Sweep der CodeRabbit-Review-Bodies.
 
+### Entfernt
+
+- **Storybook:** Vollständig entfernt (war installiert, aber ungenutzt — 1 Story, keine
+  CI-Anbindung, Versions-Mismatch core 10.4.2 vs. Addons 8.6.18). Entfernt: alle
+  `@storybook/*`/`@chromatic-com/storybook`/`storybook`-Deps, die `.storybook/`-Config,
+  die einzige Story, die `storybook`/`build-storybook`/`chromatic`-Scripts (root + web) und
+  die Dependabot-Gruppierung. Reduziert Dependency-Surface und Dependabot-Lärm.
+
 ### Behoben
 
+- **a11y/Skip-Link (§3.2):** Die im Markup referenzierte Klasse `.ui-skip-link` war nirgends
+  definiert — der Skip-to-Content-Link war unsichtbar und wurde bei Fokus nicht eingeblendet.
+  CSS ergänzt (off-screen bis `:focus`, dann über dem Sticky-Header sichtbar) plus
+  `scroll-margin-top` auf `#main-content`, damit In-Page-Sprünge/Fokus nicht hinter der
+  Sticky-Titelleiste verschwinden.
+- **i18n/VoicePanel (§3.5–3.7):** Hartkodiertes `" (Whisper)"` durch i18n-Keys
+  (`settings.speech.startWhisper`/`stopWhisper`) ersetzt; `whisperMode`-Label von „Whisper.cpp“
+  auf „Whisper“ korrigiert (nutzt jetzt transformers.js, nicht whisper.cpp).
+- **PWA/Service-Worker (§4.1/4.2):** `vendor-webllm-`/`vendor-transformers-`-Chunks werden nun
+  CacheFirst (`heavy-vendor-cache`) statt StaleWhileRevalidate — konsistent mit den übrigen
+  schweren, hash-versionierten AI-Lib-Chunks.
+- **Tests (§4.6):** `packages/ui` hat nun einen echten Smoke-Test (`node --test`: Tailwind-Preset-
+  Shape + Design-Tokens) statt des `process.exit(0)`-No-op.
 - **CI/Store:** `listenerMiddleware` typkompatibel zu `@reduxjs/toolkit` 2.12 —
   RTK propagiert die `isAnyOf`-Narrowing nicht mehr über die `matcher`-Option,
   daher explizite Typisierung der Rejected-Thunk-Shape (kein Verhaltensänderung).
