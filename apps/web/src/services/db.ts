@@ -59,8 +59,13 @@ db.on('populate', populateDB);
 // QNBS-v3: Lazy-Load der On-Device-AI-Embeddings-Schicht | hält localAiEmbeddingsService (+ vendor-ai) aus dem Eager-Graph → Initial-Load-Budget (script < 155 KB). Aufrufe bleiben fire-and-forget; Debounce-State lebt im einmalig gecachten Modul.
 const loadEmbeddings = () => import('./localAiEmbeddingsService');
 
+// QNBS-v3: geteilter Rejection-Handler | Lazy-import() kann (z. B. Chunk-Load-Fehler) rejecten — ohne .catch würde das zur Unhandled-Rejection und die Cleanup-Arbeit entfiele. Fehler laufen über logAppError.
+const onEmbeddingError = (error: unknown) => {
+  void logAppError(error, 'db.embeddingsMaintenance');
+};
+
 const scheduleEmbeddingMaintenance = () => {
-  void loadEmbeddings().then((m) => m.debouncedReindexAllEmbeddings(loadSettings()));
+  void loadEmbeddings().then((m) => m.debouncedReindexAllEmbeddings(loadSettings())).catch(onEmbeddingError);
 };
 
 // When pantry changes, recalculate for all recipes (debounced)
@@ -75,7 +80,7 @@ db.pantry.hook('updating', () => {
 db.pantry.hook('deleting', (primKey) => {
   debouncedUpdateAllPantryMatches();
   if (typeof primKey === 'number') {
-    void loadEmbeddings().then((m) => m.removeEmbeddingForSource('pantry', primKey));
+    void loadEmbeddings().then((m) => m.removeEmbeddingForSource('pantry', primKey)).catch(onEmbeddingError);
   }
 });
 
@@ -94,7 +99,7 @@ db.recipes.hook('updating', (_modifications, primKey, _obj, trans) => {
 });
 db.recipes.hook('deleting', (primKey) => {
   if (typeof primKey === 'number') {
-    void loadEmbeddings().then((m) => m.removeEmbeddingForSource('recipe', primKey));
+    void loadEmbeddings().then((m) => m.removeEmbeddingForSource('recipe', primKey)).catch(onEmbeddingError);
   }
 });
 
@@ -106,7 +111,7 @@ db.mealPlan.hook('updating', () => {
 });
 db.mealPlan.hook('deleting', (primKey) => {
   if (typeof primKey === 'number') {
-    void loadEmbeddings().then((m) => m.removeEmbeddingForSource('mealPlan', primKey));
+    void loadEmbeddings().then((m) => m.removeEmbeddingForSource('mealPlan', primKey)).catch(onEmbeddingError);
   }
 });
 
