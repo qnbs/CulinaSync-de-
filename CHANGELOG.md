@@ -59,6 +59,13 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Behoben
 
+- **Mobile-Browser-Scroll:** Seiten waren im mobilen Browser teils nicht scrollbar, während die
+  installierte PWA (standalone) funktionierte. Zwei Ursachen behoben: (1) `overscroll-behavior: none`
+  lag global auf `<body>` und störte im Browser die Address-Bar-/Overscroll-Mechanik — jetzt nur noch
+  per `@media (display-mode: standalone|fullscreen)` (Pull-to-Refresh-Sperre bleibt in der PWA erhalten);
+  (2) `min-h-screen`/`100vh` am App-Root und in MealPlanner/PlannerSidebar → `100dvh` (dynamische
+  Viewport-Höhe), das der ein-/ausblendenden Mobile-Toolbar folgt und die „Phantom-Scroll-dann-Sperre"
+  auf kurzen Seiten vermeidet.
 - **a11y/Skip-Link (§3.2):** Die im Markup referenzierte Klasse `.ui-skip-link` war nirgends
   definiert — der Skip-to-Content-Link war unsichtbar und wurde bei Fokus nicht eingeblendet.
   CSS ergänzt (off-screen bis `:focus`, dann über dem Sticky-Header sichtbar) plus

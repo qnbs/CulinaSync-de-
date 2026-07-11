@@ -25,7 +25,7 @@ export const PlannerSidebar: React.FC<PlannerSidebarProps> = ({ recipes, onDragS
 
     if (isCollapsed) {
         return (
-             <div className="hidden lg:flex flex-col items-center w-16 border-l border-white/5 bg-zinc-950/30 backdrop-blur-xl pt-4 h-[calc(100vh-8rem)] sticky top-24 rounded-l-2xl">
+             <div className="hidden lg:flex flex-col items-center w-16 border-l border-white/5 bg-zinc-950/30 backdrop-blur-xl pt-4 h-[calc(100dvh-8rem)] sticky top-24 rounded-l-2xl">
                 <button 
                     onClick={onToggle} 
                     title={t('mealPlanner.sidebar.showRecipesTitle')} 
@@ -41,7 +41,7 @@ export const PlannerSidebar: React.FC<PlannerSidebarProps> = ({ recipes, onDragS
     }
 
     return (
-        <div className="w-full lg:w-80 flex-shrink-0 bg-zinc-950/30 backdrop-blur-xl border-l border-white/5 p-4 flex flex-col h-[calc(100vh-8rem)] sticky top-24 rounded-l-2xl">
+        <div className="w-full lg:w-80 flex-shrink-0 bg-zinc-950/30 backdrop-blur-xl border-l border-white/5 p-4 flex flex-col h-[calc(100dvh-8rem)] sticky top-24 rounded-l-2xl">
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h3 className="text-lg font-bold text-zinc-100">{t('mealPlanner.sidebar.title')}</h3>
