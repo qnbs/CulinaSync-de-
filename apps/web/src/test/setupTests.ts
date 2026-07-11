@@ -2,6 +2,12 @@
 import 'fake-indexeddb/auto';
 import '@testing-library/jest-dom/vitest';
 
+// jsdom's window.scrollTo throws "Not implemented" — stub it so the scroll-to-top-on-nav
+// effect (App.tsx) doesn't spam that warning across App-render tests.
+if (typeof window !== 'undefined') {
+  window.scrollTo = (() => {}) as typeof window.scrollTo;
+}
+
 // Optional Web Speech API (jsdom): verhindert undefined beim ersten Import von useSpeechRecognition
 const g = globalThis as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown };
 if (g.SpeechRecognition === undefined) {
