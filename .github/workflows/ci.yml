@@ -28,38 +28,19 @@ jobs:
     with:
       run-e2e-smoke: false
 
-  # QNBS-v3: Grüner CI-Status auf main ohne Doppel-test:coverage (volles validate in deploy.yml)
+  # QNBS-v3: main-guard ruft das volle reusable validate.yml (Single Source of Truth für Gates) |
+  # Grund: der frühere Inline-Block deckte nur lint/type-check/test:scripts/i18n ab — der grüne
+  # main-Status konnte "lügen", während Budget/Build/Audit/Coverage rot waren. Deploy (deploy.yml)
+  # nutzt dasselbe validate.yml, daher deckt der main-Status jetzt exakt denselben Gate-Satz ab wie
+  # der Deploy. E2E läuft separat (run-e2e-smoke: false). concurrency: cancel-in-progress verhindert
+  # doppelte teure Läufe; Korrektheit > Runner-Minuten.
   main-guard:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Lint
-        run: pnpm run lint
-
-      - name: Typecheck
-        run: pnpm run type-check
-
-      - name: Test deploy verify scripts
-        run: pnpm run test:scripts
-
-      - name: i18n check
-        run: pnpm run i18n:check
+    uses: ./.github/workflows/validate.yml
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    with:
+      run-e2e-smoke: false
 
   i18n-check:
     if: github.event_name == 'pull_request'
