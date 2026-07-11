@@ -33,6 +33,13 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Hinzugefuegt
 
+- **On-Device-Whisper (Spracherkennung):** Echte lokale Transkription statt des
+  bisherigen Platzhalters. Neuer Modul-Worker (`whisper.worker.ts`) nutzt die
+  transformers.js-ASR-Pipeline (`Xenova/whisper-tiny`) über `@domain/ai-core`; Audio wird
+  im Main-Thread zu 16-kHz-Mono-PCM dekodiert und in den Worker transferiert. Keine
+  hartkodierten `/public`-Pfade mehr (die zuvor zur Laufzeit 404ten); fehlendes Modell /
+  Offline-Host wird als typisierter Fehler mit lokalisierter Meldung (`voice.whisperModelUnavailable`)
+  ausgegeben statt still zu scheitern. Worker-`onerror` wird behandelt.
 - **DevOps/Codecov:** Coverage-Upload (`codecov/codecov-action@v5`) im
   reusable `validate`-Workflow inkl. `codecov.yml` (informative Project/Patch-Gates,
   Web-Flag, Ignore-Pfade). Secrets via `secrets: inherit` in `ci.yml` und `deploy.yml`.

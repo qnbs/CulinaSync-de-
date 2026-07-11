@@ -39,6 +39,14 @@ export {
 } from './providers/types.js';
 
 export { runHeuristicEngine, type HeuristicEngineHandlers } from './engines/localAiHeuristicEngine.js';
+export {
+  transcribeAudio,
+  isWhisperAvailable,
+  resetWhisperAsrForTests,
+  WHISPER_MODEL_ID,
+  type TranscribeAudioInput,
+  type WhisperProgress,
+} from './engines/whisperAsrEngine.js';
 export { extractJsonPayload } from './jsonExtract.js';
 export {
   completeWebLlmChat,
