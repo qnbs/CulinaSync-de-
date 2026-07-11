@@ -57,10 +57,16 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **Deploy/Vercel:** `vercel.json`-`buildCommand` nutzt `turbo run build --filter=web`,
   damit Workspace-Deps (`@domain/ai-core`, `@domain/ui`) vor dem Web-Build gebaut
   werden — zuvor schlug der Vercel-Build an `@domain/ai-core` fehl.
-- **Deploy/Pruning:** GitHub-Pages-Deployment-Pruning korrigiert — nutzt die
-  Deployments-API (`?environment=github-pages`) statt des nicht existierenden
-  `/pages/deployments`-List-Endpoints; markiert Deployments vor dem Löschen als
-  `inactive`; behält die 3 neuesten; `gh`/`jq` sind auf Runnern vorinstalliert.
+- **Deploy/Pruning (environment-übergreifend):** Das bisherige Pruning filterte nur auf
+  `environment=github-pages`, sodass die **Vercel-`Preview`- (96) und `Production`-Deployments
+  (48) ungebremst volllieffen** (147 sichtbar in der Environments-UI). Ersetzt durch das
+  unit-getestete `scripts/prune-deployments.mjs` (pure Selektionslogik in
+  `scripts/lib/prune-deployments-logic.mjs`), das je Environment die N neuesten behält und den
+  Rest inaktiv setzt + löscht (nur die GitHub-Deployment-*Objekte*, nicht die echten
+  Vercel/Pages-Deployments). `deploy.yml` nutzt es scoped auf `github-pages`; ein neuer,
+  manuell triggerbarer **`Prune Deployments`-Workflow** (workflow_dispatch mit `keep`/
+  `environments`/`dry_run`-Inputs + wöchentlichem Safety-Net-Cron) prunt alle Environments.
+  Einmalige Bereinigung: 138 Alt-Deployments entfernt (147 → 9).
 - **CI/E2E:** Playwright-Container-Image auf `v1.61.1-noble` angehoben (Gleichlauf
   mit `@playwright/test` 1.61.1) — zuvor brach der E2E-Smoke-Lauf am
   Image/Version-Mismatch ab.

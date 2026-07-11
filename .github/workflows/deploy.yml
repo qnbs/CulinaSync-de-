@@ -64,26 +64,13 @@ jobs:
         run: node scripts/verify-live-deployments.mjs
 
       # QNBS-v3: Keep only the 3 newest github-pages deployments | prevents Environment history bloat.
-      # Uses the standard Deployments API (there is no list endpoint under /pages/deployments); a
-      # deployment must be marked inactive before it can be deleted. gh + jq are preinstalled on runners.
+      # Shared, unit-tested pruning script (scripts/prune-deployments.mjs); the manual/scheduled
+      # `Prune Deployments` workflow prunes ALL environments (incl. Vercel Preview/Production).
       - name: Prune old GitHub Pages deployments (keep last 3)
         continue-on-error: true
         env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          gh api --paginate \
-            "repos/${GITHUB_REPOSITORY}/deployments?environment=github-pages&per_page=100" \
-            --jq '.[] | "\(.created_at) \(.id)"' \
-            | sort -rk1,1 \
-            | tail -n +4 \
-            | awk '{print $2}' \
-            | while read -r id; do
-                [ -z "$id" ] && continue
-                echo "Pruning deployment $id"
-                # Surface failures as warnings (not silently swallowed) while still
-                # processing the remaining deployments; continue-on-error keeps the job green.
-                gh api -X POST "repos/${GITHUB_REPOSITORY}/deployments/${id}/statuses" \
-                  -f state=inactive >/dev/null || echo "::warning::could not set deployment ${id} inactive"
-                gh api -X DELETE "repos/${GITHUB_REPOSITORY}/deployments/${id}" >/dev/null || echo "::warning::could not delete deployment ${id}"
-              done
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          KEEP: '3'
+          ENVIRONMENTS: github-pages
+        run: node scripts/prune-deployments.mjs

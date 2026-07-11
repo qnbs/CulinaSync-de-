@@ -1,0 +1,55 @@
+name: Prune Deployments
+
+# Cleans up old GitHub deployment OBJECTS across all environments (github-pages,
+# Vercel Preview/Production, …), keeping the newest N per environment. Deleting a
+# deployment object only removes GitHub's Environments record — it does not touch
+# the live Vercel/Pages deployment (the active one is the newest, always kept).
+
+on:
+  workflow_dispatch:
+    inputs:
+      keep:
+        description: 'Number of newest deployments to keep per environment'
+        required: false
+        default: '3'
+      environments:
+        description: 'Comma-separated environments to prune (blank = all)'
+        required: false
+        default: ''
+      dry_run:
+        description: 'Dry run — list what would be pruned, delete nothing'
+        type: boolean
+        required: false
+        default: false
+  schedule:
+    # Weekly safety net (Mondays 04:00 UTC) so deployments never pile up again.
+    - cron: '0 4 * * 1'
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: prune-deployments
+  cancel-in-progress: false
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Prune deployments
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          KEEP: ${{ github.event.inputs.keep || '3' }}
+          ENVIRONMENTS: ${{ github.event.inputs.environments }}
+          DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '0' }}
+        run: node scripts/prune-deployments.mjs
