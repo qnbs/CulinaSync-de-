@@ -61,3 +61,19 @@ updates:
     labels:
       - "ci"
       - "dependencies"
+
+  # Rust / Cargo (Tauri-Desktop) — src-tauri/Cargo.lock war bisher NICHT von Dependabot
+  # abgedeckt (nur npm + github-actions). Dieser Eintrag ergänzt nur wöchentliche
+  # Version-Update-PRs für /src-tauri; er ist unabhängig von den Dependabot-Security-Alerts
+  # (separates Repo-Setting), die den glib-Alert #23 gemeldet haben. Siehe SECURITY.md / R-GLIB.
+  - package-ecosystem: "cargo"
+    directory: "/src-tauri"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "rust"

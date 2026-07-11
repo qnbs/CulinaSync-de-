@@ -19,6 +19,8 @@
 | R-012 | Medium | `release(tauri): M8 first tagged desktop build` | Desktop | L | ROADMAP M8 | CI GTK image | 🟨 Tag **v0.2.4** — Draft Release nach grünem Tauri-Workflow |
 | R-013 | Low | `docs(legal): privacy policy DE` | Launch DE | M | Öffentliche Veröffentlichung | — |
 | R-014 | Info | `chore(graphify): update after code sessions` | Agent DX | S | Team policy | — |
+| R-GLIB | Medium | `chore(sec): track glib 0.18.5 VariantStrIter unsoundness (GH #23)` | Security (Desktop) | S | Transitiv via Tauri/gtk-rs 0.18; Fix erst glib 0.20.10 (semver-major, durch wry/webkit2gtk gepinnt); `cargo update -p glib` = 0 changes | wry/webkit2gtk → gtk-rs 0.20 | 🟨 tracked — Dependabot(cargo) + SECURITY.md; Re-Eval bei gtk-rs 0.20 |
+| R-BRANCHPROT | Low | `chore(ci): enable branch protection + require main-guard/validate` | Enforcement | S | `main` hat keine Required-Status-Checks → grüner main-Status ist informativ, nicht durchsetzend (WS-GUARD) | WS-GUARD ✅ | ⬜ offen — Governance-Entscheidung des Maintainers |
 
 ## Sprint-Vorschlag (aktuell)
 
