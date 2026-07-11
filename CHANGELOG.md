@@ -65,8 +65,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   `scroll-margin-top` auf `#main-content`, damit In-Page-Sprünge/Fokus nicht hinter der
   Sticky-Titelleiste verschwinden.
 - **i18n/VoicePanel (§3.5–3.7):** Hartkodiertes `" (Whisper)"` durch i18n-Keys
-  (`settings.speech.startWhisper`/`stopWhisper`) ersetzt; `whisperMode`-Label von „Whisper.cpp"
-  auf „Whisper" korrigiert (nutzt jetzt transformers.js, nicht whisper.cpp).
+  (`settings.speech.startWhisper`/`stopWhisper`) ersetzt; `whisperMode`-Label von „Whisper.cpp“
+  auf „Whisper“ korrigiert (nutzt jetzt transformers.js, nicht whisper.cpp).
 - **PWA/Service-Worker (§4.1/4.2):** `vendor-webllm-`/`vendor-transformers-`-Chunks werden nun
   CacheFirst (`heavy-vendor-cache`) statt StaleWhileRevalidate — konsistent mit den übrigen
   schweren, hash-versionierten AI-Lib-Chunks.

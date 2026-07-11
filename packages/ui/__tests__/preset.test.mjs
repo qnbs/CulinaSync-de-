@@ -12,9 +12,12 @@ test('tailwind preset exports a config object with a theme', () => {
   assert.ok(preset.theme, 'preset should define a theme');
 });
 
-test('design tokens expose the accent + surface custom properties on :root', () => {
-  assert.match(tokens, /:root\s*\{/u);
+test('design tokens define the accent + surface custom properties inside :root', () => {
+  const rootMatch = tokens.match(/:root\s*\{([\s\S]*?)\}/u);
+  assert.ok(rootMatch, 'tokens.css should contain a :root block');
+  const rootBlock = rootMatch[1];
   for (const token of ['--color-accent-500', '--surface-base', '--border-subtle']) {
-    assert.ok(tokens.includes(token), `tokens.css should define ${token}`);
+    // Assert the actual declaration ("--token:") lives inside :root, not just anywhere/in a comment.
+    assert.match(rootBlock, new RegExp(`${token}\\s*:`, 'u'), `:root should define ${token}`);
   }
 });
