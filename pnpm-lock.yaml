@@ -89,8 +89,8 @@ importers:
         specifier: ^1.8.4
         version: 1.12.1
       '@google/genai':
-        specifier: ^1.16.0
-        version: 1.52.0
+        specifier: ^2.11.0
+        version: 2.11.0
       '@hookform/resolvers':
         specifier: ^5.4.0
         version: 5.4.0(react-hook-form@7.81.0(react@19.2.7))
@@ -1222,8 +1222,8 @@ packages:
   '@gilbarbara/types@0.2.2':
     resolution: {integrity: sha512-QuQDBRRcm1Q8AbSac2W1YElurOhprj3Iko/o+P1fJxUWS4rOGKMVli98OXS7uo4z+cKAif6a+L9bcZFSyauQpQ==}
 
-  '@google/genai@1.52.0':
-    resolution: {integrity: sha512-gwSvbpiN/17O9TbsqSsE/OzZcpv5Fo4RQjdngGgogtuB9RsyJ8ZHhX5KjHj1bp5N9snN2eK8LDGXSaWW2hof8Q==}
+  '@google/genai@2.11.0':
+    resolution: {integrity: sha512-d2Csf29vS0GfHc52H0MG25ccY4FKvvbDgqDlEovLrPLF8sPegWr/GGO+LMOy85/1SnX0iV0zDAW7R8SsvWg8Vg==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       '@modelcontextprotocol/sdk': ^1.25.2
@@ -6782,7 +6782,7 @@ snapshots:
     dependencies:
       type-fest: 4.41.0
 
-  '@google/genai@1.52.0':
+  '@google/genai@2.11.0':
     dependencies:
       google-auth-library: 10.9.0
       p-retry: 4.6.2
