@@ -91,7 +91,7 @@ const App: React.FC = () => {
     },
     [closeOnboarding, dispatch, t],
   );
-  useDemoEntryQuery(handleDemoEntryResolved);
+  useDemoEntryQuery(handleDemoEntryResolved, INTRO_GATES_ENABLED);
 
   const uncheckedShoppingCount = useLiveQuery(
     async () => db.shoppingList.filter((item) => !item.isChecked).count(),

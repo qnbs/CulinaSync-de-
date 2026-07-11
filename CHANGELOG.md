@@ -69,7 +69,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ### Geändert
 
 - **Intro-Gates vorerst deaktiviert (bis ~v1.0):** Onboarding-Flow (inkl. Tour + Tour/Demo-Auswahl,
-  die sich nicht wegklicken ließ), „What's New"-Welcome-Modal und Demo-Mode-Banner hinter das
+  die sich nicht wegklicken ließ), „What's New“-Welcome-Modal und Demo-Mode-Banner hinter das
   Flag `INTRO_GATES_ENABLED` (`apps/web/src/config/featureFlags.ts`, aktuell `false`) gelegt. Der
   Code bleibt erhalten; zum Re-Aktivieren Flag auf `true` und die Flows feinschleifen.
 
