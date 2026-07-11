@@ -260,9 +260,11 @@
       "test": "Testen",
       "stop": "Stop",
       "start": "Start",
+      "startWhisper": "Start (Whisper)",
+      "stopWhisper": "Stop (Whisper)",
       "modeTitle": "Sprachmodus",
       "browserMode": "Browser SpeechRecognition",
-      "whisperMode": "Whisper.cpp (lokal, privacy-first)",
+      "whisperMode": "Whisper (lokal, privacy-first)",
       "testPhrase": "Hallo! Ich bin dein persönlicher Küchenassistent.",
       "whisperModelLabel": "Whisper-Modellgröße",
       "whisperSize": {

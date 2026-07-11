@@ -29,6 +29,34 @@
   animation: pulse-soft 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* Skip-to-content link: off-screen until focused, then revealed above the sticky header. */
+.ui-skip-link {
+  position: absolute;
+  left: 0.5rem;
+  top: -4rem;
+  z-index: 100;
+  padding: 0.6rem 1rem;
+  border-radius: 0.75rem;
+  background: var(--color-accent-500, #22c55e);
+  color: #18181b;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.4);
+  transition: top 0.2s ease;
+}
+
+.ui-skip-link:focus,
+.ui-skip-link:focus-visible {
+  top: 0.5rem;
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* The header is sticky (top-0, h-16). Offset in-page jumps (e.g. the skip link)
+   so the target isn't hidden behind it and focus isn't obscured. */
+#main-content {
+  scroll-margin-top: 4.5rem;
+}
+
 .glass-panel {
   background: rgba(24, 24, 27, 0.4);
   backdrop-filter: blur(12px);

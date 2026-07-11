@@ -152,7 +152,7 @@ export const VoicePanel: React.FC<VoicePanelProps> = ({ settings, onChange }) =>
                 {mode === 'whisper' && (
                     <div className="space-y-2">
                         <button onClick={whisper.isListening ? whisper.stopListening : whisper.startListening} className="bg-[var(--color-accent-500)] text-white px-4 py-2 rounded">
-                            {whisper.isListening ? t('settings.speech.stop') : t('settings.speech.start')} (Whisper)
+                            {whisper.isListening ? t('settings.speech.stopWhisper') : t('settings.speech.startWhisper')}
                         </button>
                         <div className="mt-2">
                             <span className="font-mono text-xs text-zinc-400">{whisper.transcript}</span>
