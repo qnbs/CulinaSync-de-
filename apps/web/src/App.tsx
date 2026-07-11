@@ -18,6 +18,7 @@ import { useModalA11y } from './hooks/useModalA11y';
 import { useDeepLinkNavigation } from './hooks/useDeepLinkNavigation';
 import { useDemoEntryQuery, type DemoEntryResult } from './hooks/useDemoEntryQuery';
 import { DemoModeBanner } from './components/DemoModeBanner';
+import { INTRO_GATES_ENABLED } from './config/featureFlags';
 import { useAccentTheme } from './hooks/useAccentTheme';
 import { usePwaInstall } from './hooks/usePwaInstall';
 import { usePwaUpdate } from './hooks/usePwaUpdate';
@@ -65,9 +66,11 @@ const App: React.FC = () => {
   const closeOnboarding = useTransientUiStore((s) => s.closeOnboarding);
 
   const [appVersion] = useState<string>(APP_VERSION || 'N/A');
+  // QNBS-v3: Intro-Gates (Onboarding/Tour/Demo/What's-New) bis ~v1.0 abgeschaltet | störender, nicht-wegklickbarer Tour/Demo-Eingang | INTRO_GATES_ENABLED
   const showOnboarding =
-    onboardingOpen ||
-    (typeof window !== 'undefined' && !window.localStorage.getItem('culinaSyncOnboarded'));
+    INTRO_GATES_ENABLED &&
+    (onboardingOpen ||
+      (typeof window !== 'undefined' && !window.localStorage.getItem('culinaSyncOnboarded')));
   const isOnline = useOnlineStatus();
   useDeepLinkNavigation();
   useAccentTheme();
@@ -88,7 +91,7 @@ const App: React.FC = () => {
     },
     [closeOnboarding, dispatch, t],
   );
-  useDemoEntryQuery(handleDemoEntryResolved);
+  useDemoEntryQuery(handleDemoEntryResolved, INTRO_GATES_ENABLED);
 
   const uncheckedShoppingCount = useLiveQuery(
     async () => db.shoppingList.filter((item) => !item.isChecked).count(),
@@ -103,6 +106,11 @@ const App: React.FC = () => {
   useEffect(() => {
     void import('./services/db');
   }, []);
+
+  // QNBS-v3: jede App-Seite oben starten | SPA-Navigation behält sonst die vorige Scroll-Position → Sprünge | Scroll-Reset bei Page-Wechsel
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentPage]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -307,7 +315,7 @@ const App: React.FC = () => {
 
   return (
     <GlobalErrorBoundary>
-      <WhatsNewModal />
+      {INTRO_GATES_ENABLED && <WhatsNewModal />}
       <LocalAiSetupHost />
       {/* QNBS-v3: 100dvh statt 100vh | mobile Browser: 100vh = große Viewport-Höhe → Phantom-Scroll-dann-Sperre auf kurzen Seiten; dvh folgt der dynamischen Toolbar | Scroll-Fix Browser-Modus */}
       <div className="min-h-[100dvh] text-zinc-200">
@@ -322,9 +330,10 @@ const App: React.FC = () => {
             />
           )}
         </Suspense>
-        <DemoModeBanner />
-        <div data-tour="header">
-          <Header 
+        {INTRO_GATES_ENABLED && <DemoModeBanner />}
+        {/* QNBS-v3: Sticky auf den Wrapper (hoher Root als Containing-Block) statt aufs <header> im kurzen Wrapper — sonst löst sich die Titelleiste beim Scrollen | Sticky-Header-Fix */}
+        <div data-tour="header" className="sticky top-0 z-50">
+          <Header
             currentPage={currentPage} 
             setCurrentPage={navigate}
             isListening={isListening}

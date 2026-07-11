@@ -24,13 +24,21 @@ function stripQueryParams(keys: string[]): void {
 export type DemoEntryResult = 'demo' | 'try' | null;
 
 /**
- * R-011: `?demo=1` loads pantry demo + dismisses onboarding; `?try=1` starts empty without tour.
+ * Processes demo and try entry modes specified by the current URL.
+ *
+ * @param onResolved - Callback invoked with the resolved entry mode.
+ * @param enabled - Whether query processing is enabled.
  */
-export function useDemoEntryQuery(onResolved?: (result: DemoEntryResult) => void): void {
+export function useDemoEntryQuery(
+  onResolved?: (result: DemoEntryResult) => void,
+  enabled = true,
+): void {
   const handled = useRef(false);
 
   useEffect(() => {
-    if (handled.current || typeof window === 'undefined') {
+    // Gated off with the intro gates: `?demo=1` / `?try=1` must not mark onboarding
+    // complete or load demo data while INTRO_GATES_ENABLED is false (CodeRabbit).
+    if (!enabled || handled.current || typeof window === 'undefined') {
       return;
     }
 
@@ -58,5 +66,5 @@ export function useDemoEntryQuery(onResolved?: (result: DemoEntryResult) => void
     void loadDemoPantrySeed()
       .then(() => onResolved?.('demo'))
       .catch(() => onResolved?.('demo'));
-  }, [onResolved]);
+  }, [onResolved, enabled]);
 }

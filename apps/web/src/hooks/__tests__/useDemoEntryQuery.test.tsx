@@ -44,4 +44,18 @@ describe('useDemoEntryQuery', () => {
     expect(loadDemoPantrySeed).not.toHaveBeenCalled();
     expect(localStorage.getItem('culinaSyncOnboarded')).toBe('true');
   });
+
+  it('is a no-op when disabled (intro gates off): ?demo=1 loads nothing', async () => {
+    const onResolved = vi.fn();
+    window.history.replaceState({}, '', '/?demo=1');
+
+    renderHook(() => useDemoEntryQuery(onResolved, false));
+
+    // Give the effect a tick; nothing should fire.
+    await Promise.resolve();
+    expect(loadDemoPantrySeed).not.toHaveBeenCalled();
+    expect(onResolved).not.toHaveBeenCalled();
+    expect(localStorage.getItem('culinaSyncOnboarded')).toBeNull();
+    expect(window.location.search).toContain('demo=1'); // query left untouched
+  });
 });
