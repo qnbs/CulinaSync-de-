@@ -135,7 +135,8 @@
   },
   "voice": {
     "whisperTranscriptionFailed": "Transkription fehlgeschlagen",
-    "whisperAudioUnavailable": "Audioaufnahme nicht möglich"
+    "whisperAudioUnavailable": "Audioaufnahme nicht möglich",
+    "whisperModelUnavailable": "Whisper-Modell konnte nicht geladen werden (offline oder nicht verfügbar). Bitte nutze stattdessen den Diktat-Modus."
   },
   "gemini": {
     "error": {

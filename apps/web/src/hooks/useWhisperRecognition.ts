@@ -38,7 +38,14 @@ export const useWhisperRecognition = (): WhisperRecognitionHook => {
           const result: WhisperResult = await getAppServices().whisper.transcribeWithWhisper(audioBlob);
           setTranscript(result.text);
         } catch (error) {
-          setError(error instanceof Error ? error.message : i18next.t('voice.whisperTranscriptionFailed'));
+          // Map technical failures (model/host unavailable, worker load error) to a clear,
+          // localized message instead of leaking raw error strings; suggests using dictation
+          // (Web Speech) mode instead of silently failing.
+          const message = error instanceof Error ? error.message : '';
+          const key = /unavailable|worker-error|context|fetch|network|load/i.test(message)
+            ? 'voice.whisperModelUnavailable'
+            : 'voice.whisperTranscriptionFailed';
+          setError(i18next.t(key));
         }
       };
       mediaRecorder.start();
