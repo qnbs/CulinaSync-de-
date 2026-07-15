@@ -26,6 +26,7 @@ test.describe('KI-Chef — Offline', () => {
   });
 
   test('Chef fragen offline liefert lokale Ideen ohne Crash', async ({ page, baseURL, context }) => {
+    test.setTimeout(60_000);
     await page.goto(baseURL ?? '/');
     await openSettingsSection(page, /lokale ki/i);
     const localOnly = page.getByRole('switch', { name: /nur lokal/i });
@@ -37,7 +38,13 @@ test.describe('KI-Chef — Offline', () => {
     }
 
     await goToAiChef(page);
-    await expect(page.getByRole('button', { name: /chef fragen/i })).toBeVisible();
+    const askButton = page.getByRole('button', { name: /chef fragen/i });
+    await expect(askButton).toBeVisible();
+
+    // Button ist disabled ohne Craving-Text
+    const cravingInput = page.getByRole('textbox').first();
+    await cravingInput.fill('Pasta mit Tomaten');
+    await expect(askButton).toBeEnabled({ timeout: 10_000 });
 
     await context.setOffline(true);
     await page.evaluate(() => {
@@ -45,8 +52,7 @@ test.describe('KI-Chef — Offline', () => {
       window.dispatchEvent(new Event('offline'));
     });
 
-    await page.getByRole('button', { name: /chef fragen/i }).click();
-    // Heuristik/Offline-Fallback: Ideen-Karten oder zumindest kein Error-Crash
+    await askButton.click();
     await expect(page.locator('#main-content')).toBeVisible({ timeout: 20_000 });
     await expect(page.getByText(/fehler|crash/i)).toHaveCount(0);
     await context.setOffline(false);
