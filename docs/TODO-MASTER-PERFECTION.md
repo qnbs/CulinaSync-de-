@@ -63,8 +63,8 @@ Siehe vorherige Session / CHANGELOG. Kurz: RAG, Sanitizer, Whisper, Backup-Zod, 
 ## Phase 3 — Verification
 
 - [x] lint · type-check · i18n · Vitest (+coverage gate) · test:scripts · build · audit (lokal)
-- [ ] CI auf PR bis grün
-- [ ] Bot-Kommentare am PR abarbeiten
+- [x] CI auf PR bis grün (validate, i18n, E2E Smoke, CodeQL, Lighthouse, Socket, GitGuardian)
+- [x] Bot-Inline-Kommentare: keine offenen Review-Threads (CodeRabbit draft-skip)
 
 ---
 
