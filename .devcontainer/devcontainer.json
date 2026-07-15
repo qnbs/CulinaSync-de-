@@ -7,7 +7,7 @@
       "profile": "minimal"
     }
   },
-  "onCreateCommand": "npm install -g pnpm@10",
+  "onCreateCommand": "npm install -g pnpm@11.13.0",
   "postCreateCommand": "pnpm install",
   "postStartCommand": "pnpm --filter web exec tsgo --version",
   "customizations": {

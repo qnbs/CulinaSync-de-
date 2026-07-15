@@ -178,7 +178,7 @@ Jeder Bereich zeigt ein **Kontext-Intro** mit Kurztipps (`SettingsPanelIntro`). 
 | Schicht | Technologie |
 |---------|-------------|
 | UI | React 19, Tailwind 4, Lucide, Design-System (`components/ui/`) |
-| Build | Vite 8, Turbo, pnpm 10 |
+| Build | Vite 8, Turbo, pnpm 11 |
 | Typen | TypeScript + **`tsgo`** |
 | Daten | Dexie 4 / IndexedDB (Source of Truth) |
 | UI-State | Redux Toolkit; Zustand (transiente UI); redux-persist (Settings) |
@@ -195,7 +195,7 @@ Jeder Bereich zeigt ein **Kontext-Intro** mit Kurztipps (`SettingsPanelIntro`). 
 ### Voraussetzungen
 
 - **Node.js 24**
-- **pnpm 10+**
+- **pnpm 11+** (`packageManager`: `pnpm@11.13.0`)
 
 ### Installation & Dev
 

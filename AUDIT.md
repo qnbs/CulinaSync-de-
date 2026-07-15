@@ -6,6 +6,23 @@
 
 ---
 
+## Status-Update 2026-07-15 (`main` — Phase 0 Complete)
+
+- **Phase 0 (Master Perfection):** Dependabot-Cluster abgearbeitet + kritisches Toolchain-Fix.
+  - **Merged/Satisfied:** #106 (`tauri` 2.11.5 inkl. `tauri-build` 2.6.3) — #107 leer/superseded;
+    npm-Bumps `turbo` 2.10.5 · `typescript-eslint` 8.64.0 · `dompurify` 3.4.12 · `postcss` ^8.5.17
+    im Konsolidierungs-PR.
+  - **P0 Fix:** **pnpm 10 → 11.13.0** — npm retired Legacy-Audit-Endpoints am 2026-07-15
+    (`pnpm audit` → HTTP 410). Settings nach `pnpm-workspace.yaml` + `allowBuilds`.
+  - **R-BRANCHPROT ✅:** Ruleset `mainrules` (id `18769260`) ist **active** mit Required Status
+    Checks (`validate / validate`, `i18n-check`, GitGuardian, Socket, `Analyze (javascript)`),
+    PR-Pflicht, linear history, no force-push. Der 2026-07-12-Hinweis („keine Branch-Protection“)
+    bezog sich auf die klassische Branch-Protection-API (404); Enforcement läuft über Rulesets.
+    Runbook: [`docs/runbooks/BRANCH-PROTECTION.md`](docs/runbooks/BRANCH-PROTECTION.md).
+- **Lokal verifiziert:** lint · type-check · **517** Vitest · test:scripts · i18n · build ·
+  bundle-budget (**script 182,2 KB** / 185) · `pnpm audit --audit-level=high` (0 high/critical).
+- **glib (#23):** weiterhin tracked (`R-GLIB`) — kein In-Range-Fix.
+
 ## Status-Update 2026-07-12 (`main` — Gates/Security/Toolchain-Housekeeping)
 
 - **Umgesetzt:** **WS-BUDGET** — On-Device-AI-Embeddings-Schicht aus dem Initial-Load-Graph gelöst
@@ -19,9 +36,9 @@
   `R-GLIB`). Fix erst in glib 0.20.10 (semver-major, durch wry/webkit2gtk gepinnt; `cargo update -p glib`
   = 0 Änderungen). Betrifft nur den Linux-Desktop-GTK-Backend, **nicht** die Web-PWA. `cargo`-Ökosystem
   in `.github/dependabot.yml` ergänzt (war zuvor nicht abgedeckt).
-- **Infra-Hinweis:** `main` hat aktuell **keine** Branch-Protection / Required-Status-Checks
-  (`gh api …/branches/main/protection` → 404). Der grüne main-Status ist damit informativ, nicht
-  durchsetzend → Follow-up-Backlog-Item **R-BRANCHPROT**.
+- **Infra-Hinweis (historisch 2026-07-12):** Klassische Branch-Protection-API → 404; Enforcement
+  läuft über Ruleset `mainrules` — seit 2026-07-15 als **R-BRANCHPROT ✅** dokumentiert (siehe
+  Status-Update oben).
 - **Gate-Matrix (grün auf `main`):** lint · type-check · test:coverage · build · bundle-budget
   (script < 185) · `pnpm audit --audit-level=high` — via `validate.yml` in main-guard **und** Deploy.
 

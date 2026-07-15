@@ -47,7 +47,7 @@ cd apps/web && CI=true pnpm exec playwright test
 
 **E2E in GitHub Actions:** Workflow [`.github/workflows/e2e-smoke.yml`](../.github/workflows/e2e-smoke.yml) — Container **`mcr.microsoft.com/playwright:v1.60.0-noble`** (muss zur `@playwright/test`-Version in `package.json` passen); bei Push/PR auf `apps/web/**` und wöchentlich; manuell unter **Actions → E2E Smoke → Run workflow**.
 
-Ohne globales pnpm (z. B. Windows): `npm run test`, `npm run check:all` oder `npx pnpm@10 run test`.
+Ohne globales pnpm (z. B. Windows): `npm run test`, `npm run check:all` oder `npx pnpm@11 run test`.
 
 **`check:all`:** `lint` → `type-check` (`tsgo`) → `test` → `test:scripts` → `i18n:check` → `build` → `check:bundle-budget` → `npm audit --audit-level=high`.
 

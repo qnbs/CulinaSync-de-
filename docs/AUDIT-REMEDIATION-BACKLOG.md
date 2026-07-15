@@ -20,12 +20,13 @@
 | R-013 | Low | `docs(legal): privacy policy DE` | Launch DE | M | Öffentliche Veröffentlichung | — |
 | R-014 | Info | `chore(graphify): update after code sessions` | Agent DX | S | Team policy | — |
 | R-GLIB | Medium | `chore(sec): track glib 0.18.5 VariantStrIter unsoundness (GH #23)` | Security (Desktop) | S | Transitiv via Tauri/gtk-rs 0.18; Fix erst glib 0.20.10 (semver-major, durch wry/webkit2gtk gepinnt); `cargo update -p glib` = 0 changes | wry/webkit2gtk → gtk-rs 0.20 | 🟨 tracked — Dependabot(cargo) + SECURITY.md; Re-Eval bei gtk-rs 0.20 |
-| R-BRANCHPROT | Low | `chore(ci): enable branch protection + require main-guard/validate` | Enforcement | S | `main` hat keine Required-Status-Checks → grüner main-Status ist informativ, nicht durchsetzend (WS-GUARD) | WS-GUARD ✅ | ⬜ offen — Governance-Entscheidung des Maintainers |
+| R-BRANCHPROT | Low | `chore(ci): enable branch protection + require main-guard/validate` | Enforcement | S | Ruleset `mainrules` aktiv (Required Checks + PR + linear + no force-push); klassische Protection-API bleibt 404 | WS-GUARD ✅ | ✅ 2026-07-15 — verifiziert + Runbook sync |
 
 ## Sprint-Vorschlag (aktuell)
 
 **Erledigt (PR #66 + #67):** R-001–R-007 (R-007 Doku), M5.8, M11.1–11.3, E2E Cook-Mode, ESLint typed  
-**Nächster Sprint:** R-012 Draft **v0.2.4** veröffentlichen, M11.4 ONNX, R-013 Privacy
+**Erledigt (Phase 0, 2026-07-15):** R-BRANCHPROT; Dependabot #106–#111; pnpm 11 Audit-Gate  
+**Nächster Sprint:** R-012 Draft **v0.2.4** veröffentlichen, M11.4 ONNX, R-013 Privacy, Coverage ≥82 %
 
 ## Definition of Done (Backlog-Item)
 

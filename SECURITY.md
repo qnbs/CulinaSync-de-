@@ -7,7 +7,7 @@ Sicherheitsrelevante Meldungen sind besonders willkommen fuer:
 - Datenpersistenz und IndexedDB-/Dexie-Zugriffe
 - API-Key-Handhabung und KI-Integrationen
 - Export-, Import- und Dateidownload-Pfade
-- GitHub Actions, Deployment und Build-Pipeline (CI: `validate.yml` mit lint, type-check, test:coverage, build, bundle-budget, `pnpm audit --audit-level=high`; lokal: `pnpm run check:all`)
+- GitHub Actions, Deployment und Build-Pipeline (CI: `validate.yml` mit lint, type-check, test:coverage, build, bundle-budget, `pnpm audit --audit-level=high`; lokal: `pnpm run check:all`). Ab 2026-07-15 erfordert `pnpm audit` **pnpm ≥11** (npm Legacy-Audit-Endpoints retired; Bulk-Advisory-API).
 - XSS-, Injection-, Prototype-Pollution- und Deserialisierungsrisiken
 
 ## Bitte nicht oeffentlich posten
