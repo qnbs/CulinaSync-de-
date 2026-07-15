@@ -4,6 +4,7 @@ import { logAppError } from './errorLoggingService';
 import type { ResolvedSyncTarget } from './syncTarget';
 import { downloadEncryptedBlob, uploadEncryptedBlob } from './syncTransport';
 import type { FullBackupData } from '../types';
+import { parseFullBackupData } from './backupSchemas';
 
 export type SyncRestoreMode = 'replace' | 'merge';
 
@@ -76,7 +77,8 @@ export async function decryptBackup(blob: Uint8Array, password: string): Promise
     key,
     ciphertext
   );
-  return JSON.parse(dec.decode(decrypted));
+  const raw: unknown = JSON.parse(dec.decode(decrypted));
+  return parseFullBackupData(raw);
 }
 
 // --- High-level Sync-API (generic WebDAV URL + Nextcloud via ResolvedSyncTarget) ---

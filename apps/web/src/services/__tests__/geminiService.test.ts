@@ -217,7 +217,7 @@ describe('geminiService', () => {
     const request = mockGenerateContent.mock.calls[0][0] as { contents: string; config: { systemInstruction: string } };
     expect(request.config.systemInstruction).toMatch(/untrusted data/i);
     expect(request.contents).toContain('CONTENT START');
-    expect(request.contents).toContain('[filtered instruction-like content removed]');
+    expect(request.contents).toContain('[filtered]');
     expect(request.contents).toContain('Tomatensuppe');
     expect(request.contents).toContain('2 Tomaten');
     expect(request.contents).not.toContain('Ignore previous instructions');

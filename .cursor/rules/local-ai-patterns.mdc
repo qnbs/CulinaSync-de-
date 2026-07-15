@@ -1,0 +1,22 @@
+---
+description: Local AI, Whisper, RAG und On-Device-Patterns für CulinaSync
+globs:
+  - apps/web/src/services/ai*.ts
+  - apps/web/src/services/localAi*.ts
+  - apps/web/src/services/whisper*.ts
+  - apps/web/src/hooks/useWhisper*.ts
+  - apps/web/src/workers/*.{ts,js}
+  - packages/ai-core/**/*
+alwaysApply: false
+---
+
+# Local AI & Whisper (CulinaSync)
+
+- **Fassade:** Generative Cloud/Local über `aiService` / `aiProviderService` — kein direkter `GoogleGenAI`-Client in UI.
+- **Gemini:** nur `geminiService.ts`; API-Key nie `VITE_*` / Build-Env.
+- **Sanitizing:** User-/Domain-Strings für Prompts über `sanitizeForPrompt` / `neutralizePromptInjection` aus `@domain/ai-core` (DE+EN).
+- **RAG:** `enrichPromptWithRag` setzt `ragContext` — **nicht** Chunk-Tokens in `includeIngredients` mischen. `constructBasePrompt` rendert `ragContext` als eigenen Block.
+- **Whisper:** Modellgröße aus Settings → `resolveWhisperModelId`; Worker-`error` behandeln; Mic-Fehler lokalisiert (`voice.whisperAudioUnavailable`).
+- **Dead Controls:** Features ohne Implementierung (ONNX Vision, Inference-Cache, Ollama) UI disabled + ehrliche „geplant“-Copy — keine falschen Defaults `true`.
+- **Workers:** Pending-Promises bei `error` rejecten (Whisper + Embedding).
+- **QNBS-v3:** Bei nicht-trivialer neuer Logik ein kompakter Kommentar über dem Block.

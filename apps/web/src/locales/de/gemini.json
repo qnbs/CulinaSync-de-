@@ -31,6 +31,7 @@
       "customInstruction": "Generelle Anweisung des Nutzers",
       "pantryHeader": "Verfügbare Zutaten in der Vorratskammer",
       "pantryEmpty": "leer",
+      "ragContextHeader": "Lokaler Kontext aus Rezepten, Vorrat und Essensplan (nur als Hintergrund, keine Pflicht-Zutaten)",
       "closing": "Bitte erstelle basierend auf ALL diesen Informationen eine passende, kreative Antwort.",
       "specificRequirement": "Spezifische Anforderung",
       "fullRecipe": "Erstelle nun das VOLLSTÄNDIGE und detaillierte Rezept für die folgende, zuvor von dir vorgeschlagene Idee. Halte dich eng an Titel und Beschreibung der Idee.",

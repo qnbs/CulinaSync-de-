@@ -68,6 +68,14 @@ export const PrivacyPanel: React.FC<PrivacyPanelProps> = ({ settings, onChange }
         <div>
           <p className="text-sm text-zinc-300 font-medium">{t('settings.privacy.localFirstTitle')}</p>
           <p className="text-xs text-zinc-500 mt-1">{t('settings.privacy.localFirstDesc')}</p>
+          <a
+            className="inline-block mt-2 text-xs font-medium text-[var(--color-accent-400)] hover:underline"
+            href="https://github.com/qnbs/CulinaSync-de-/blob/main/docs/legal/DATENSCHUTZ.md"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t('settings.privacy.policyLink')}
+          </a>
         </div>
       </section>
 

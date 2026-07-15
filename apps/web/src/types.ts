@@ -227,6 +227,8 @@ export interface StructuredPrompt {
   includeIngredients: string[];
   excludeIngredients: string[];
   modifiers: string[];
+  /** Hybrid-RAG Kontextblock (Rezepte/Vorrat/Plan) — nicht als Zutaten-Tokens missbrauchen */
+  ragContext?: string;
 }
 
 export interface RecipeIdea {

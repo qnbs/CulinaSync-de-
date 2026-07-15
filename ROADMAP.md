@@ -1,7 +1,8 @@
 # CulinaSync — Roadmap
 
-> **Stand:** 4. Juni 2026 (`main`: PR #66 + #67) · M5+, M9–M11.3 ✅ · Basis: Audit April 2026 + Follow-ups Mai/Juni 2026  
-> **Format:** Milestones geordnet nach Priorität. Jedes Item mit Herkunft (AUDIT-Referenz), Aufwandsschätzung und Status.
+> **Stand:** 15. Juli 2026 (`main`: Phase 0 + Master-Perfection Phase 1–2) · M5+, M9–M11.3 ✅ · Coverage-Lines ≥82 % · ONNX M11.4 offen  
+> **Format:** Milestones geordnet nach Priorität. Jedes Item mit Herkunft (AUDIT-Referenz), Aufwandsschätzung und Status.  
+> **Follow-up:** [`docs/TODO-MASTER-PERFECTION.md`](docs/TODO-MASTER-PERFECTION.md)
 
 ---
 

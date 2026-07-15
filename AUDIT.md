@@ -6,6 +6,18 @@
 
 ---
 
+## Status-Update 2026-07-15 (`main` — Master Perfection Phase 1–2)
+
+- **Gesamt:** **~9,7/10** (Phase 0 + Trust/Security/Test-Hebel; ONNX Vision & Branch-82 % bleiben gestaffelt).
+- **Umgesetzt:** RAG-Kontext korrekt im Prompt (`ragContext`); Gemini/Web-Import Sanitizer über
+  `@domain/ai-core` (DE+EN); Whisper `whisperModelSize` → Model-ID; Embedding-Worker-`error`;
+  Backup Zod nach Decrypt + Klartext-Import; Sync-Credential-Tests; Dead Controls disabled;
+  R-013 Privacy Policy; SBOM-Artifact in CI; Coverage **~82 % lines** / Thresholds **82/80/75/64**;
+  `docs/RELEASE-PROCESS.md`; `.cursor/rules/local-ai-patterns.mdc`.
+- **Offen (TODO):** M11.4 ONNX Vision; Branch-Coverage → 82 %; Inference-Cache/Ollama verdrahten;
+  Model-Download-UX; Tauri Draft Release (R-012); Intro-Gates für v1.0.
+- **Tracking:** [`docs/TODO-MASTER-PERFECTION.md`](docs/TODO-MASTER-PERFECTION.md).
+
 ## Status-Update 2026-07-15 (`main` — Phase 0 Complete)
 
 - **Phase 0 (Master Perfection):** Dependabot-Cluster abgearbeitet + kritisches Toolchain-Fix.

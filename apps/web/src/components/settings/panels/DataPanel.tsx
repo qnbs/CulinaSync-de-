@@ -3,8 +3,9 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import Dexie from 'dexie';
 import { AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { BeforeInstallPromptEvent, FullBackupData } from '../../../types';
+import { BeforeInstallPromptEvent } from '../../../types';
 import { db } from '../../../services/dbInstance';
+import { parseFullBackupData } from '../../../services/backupSchemas';
 import { importData } from '../../../services/repositories/dataRepository';
 import { logAppError } from '../../../services/errorLoggingService';
 import { updateSettings } from '../../../store/slices/settingsSlice';
@@ -112,7 +113,7 @@ export const DataPanel: React.FC<DataPanelProps> = ({
     const reader = new FileReader();
     reader.onload = async () => {
       try {
-        const data = JSON.parse(reader.result as string) as FullBackupData;
+        const data = parseFullBackupData(JSON.parse(reader.result as string));
         await importData(data);
         if (data.settings) dispatch(updateSettings(data.settings));
         addToast(t('settings.data.toast.importSuccess'), 'success');

@@ -180,7 +180,7 @@ describe('localAiRagService', () => {
     expect(context.chunks).toHaveLength(0);
   });
 
-  it('enrichPromptWithRag erweitert includeIngredients', () => {
+  it('enrichPromptWithRag setzt ragContext statt Zutaten-Tokens', () => {
     const enriched = enrichPromptWithRag(
       {
         craving: 'Pasta',
@@ -190,12 +190,14 @@ describe('localAiRagService', () => {
       },
       {
         chunks: [],
-        promptBlock: '- Tomaten 2 Stk',
+        promptBlock: '- Tomaten 2 Stk\n- MealPlan Curry',
         retrievalMode: 'keyword',
       },
     );
 
-    expect(enriched.includeIngredients).toContain('tomaten');
+    expect(enriched.includeIngredients).toEqual(['Basilikum']);
+    expect(enriched.ragContext).toMatch(/Tomaten/);
+    expect(enriched.ragContext).toMatch(/MealPlan/);
   });
 
   it('enrichPromptWithRag laesst Prompt unveraendert ohne RAG-Block', () => {

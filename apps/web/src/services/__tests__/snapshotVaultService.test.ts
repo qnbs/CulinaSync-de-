@@ -26,13 +26,17 @@ vi.mock('../pantryMatcherService', () => ({
   updatePantryMatches,
 }));
 
+const getFullData = vi.fn();
+const encryptBackup = vi.fn();
+const decryptBackup = vi.fn();
+
 vi.mock('../exportService', () => ({
-  getFullData: vi.fn(),
+  getFullData: (...args: unknown[]) => getFullData(...args),
 }));
 
 vi.mock('../syncService', () => ({
-  encryptBackup: vi.fn(),
-  decryptBackup: vi.fn(),
+  encryptBackup: (...args: unknown[]) => encryptBackup(...args),
+  decryptBackup: (...args: unknown[]) => decryptBackup(...args),
 }));
 
 describe('snapshotVaultService mergeVaultPayload', () => {
@@ -107,5 +111,49 @@ describe('snapshotVaultService mergeVaultPayload', () => {
 
     expect(pantryPut).not.toHaveBeenCalled();
     expect(result.skippedOlderPantry).toBe(1);
+  });
+});
+
+describe('snapshotVaultService download/merge encrypted', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('downloadEncryptedVault erzeugt Download-Anchor', async () => {
+    getFullData.mockResolvedValue({ pantry: [], recipes: [] });
+    encryptBackup.mockResolvedValue(new Uint8Array([1, 2, 3]));
+    const click = vi.fn();
+    const revoke = vi.fn();
+    vi.stubGlobal('URL', {
+      createObjectURL: vi.fn(() => 'blob:vault'),
+      revokeObjectURL: revoke,
+    });
+    const createElement = vi.spyOn(document, 'createElement').mockReturnValue({
+      href: '',
+      download: '',
+      click,
+    } as unknown as HTMLAnchorElement);
+
+    const { downloadEncryptedVault } = await import('../snapshotVaultService');
+    await downloadEncryptedVault('secret', 'test.csb');
+
+    expect(encryptBackup).toHaveBeenCalled();
+    expect(click).toHaveBeenCalled();
+    expect(revoke).toHaveBeenCalledWith('blob:vault');
+    createElement.mockRestore();
+  });
+
+  it('mergeEncryptedVaultFile entschluesselt und merged', async () => {
+    decryptBackup.mockResolvedValue({
+      pantry: [],
+      recipes: [],
+      mealPlan: [],
+      shoppingList: [],
+    });
+    const file = new File([new Uint8Array([9, 9])], 'vault.csb');
+    const { mergeEncryptedVaultFile } = await import('../snapshotVaultService');
+    const result = await mergeEncryptedVaultFile(file, 'secret');
+    expect(decryptBackup).toHaveBeenCalled();
+    expect(result).toBeDefined();
   });
 });

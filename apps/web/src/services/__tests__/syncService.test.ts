@@ -110,6 +110,12 @@ describe('syncService backup encryption', () => {
     const encrypted = await encryptBackup(sampleBackup, 'correct');
     await expect(decryptBackup(encrypted, 'wrong')).rejects.toThrow();
   });
+
+  it('lehnt entschlüsselte Payloads ohne Backup-Shape ab (Zod-Gate)', async () => {
+    const encrypted = await encryptBackup({ pantry: 'broken' } as unknown as FullBackupData, 'pw');
+    // encryptBackup stringifies without validating — decrypt must reject via Zod
+    await expect(decryptBackup(encrypted, 'pw')).rejects.toThrow(/invalid-backup-payload/);
+  });
 });
 
 describe('syncService high-level API', () => {
