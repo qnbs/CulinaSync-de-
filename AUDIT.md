@@ -22,6 +22,7 @@
 - **Lokal verifiziert:** lint · type-check · **517** Vitest · test:scripts · i18n · build ·
   bundle-budget (**script 182,2 KB** / 185) · `pnpm audit --audit-level=high` (0 high/critical).
 - **glib (#23):** weiterhin tracked (`R-GLIB`) — kein In-Range-Fix.
+- **Follow-up:** Rest der Master-Perfection-Arbeit in [`docs/TODO-MASTER-PERFECTION.md`](docs/TODO-MASTER-PERFECTION.md).
 
 ## Status-Update 2026-07-12 (`main` — Gates/Security/Toolchain-Housekeeping)
 

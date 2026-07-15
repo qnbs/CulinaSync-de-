@@ -9,6 +9,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### DevOps / Dependencies
 
+- **Follow-up-To-Do:** [`docs/TODO-MASTER-PERFECTION.md`](docs/TODO-MASTER-PERFECTION.md) — Phase 1–3 für spätere Ausführung (Post Phase 0).
+
 - **pnpm 11.13 (P0 — Audit-Gate):** `packageManager` `pnpm@10.0.0 → pnpm@11.13.0`.
   Am 2026-07-15 hat npm die Legacy-Endpoints `/-/npm/v1/security/audits{,/quick}` final
   retired (HTTP 410); pnpm ≤10 kann `pnpm audit` nicht mehr ausführen. pnpm 11 nutzt
