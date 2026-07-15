@@ -2,6 +2,22 @@ import { tryImportTransformers } from '../optionalMlImports.js';
 
 export const WHISPER_MODEL_ID = 'Xenova/whisper-tiny';
 
+export type WhisperModelSize = 'tiny' | 'base' | 'small';
+
+/** Maps settings size → HuggingFace transformers model id (Xenova Whisper). */
+export const WHISPER_MODEL_BY_SIZE: Record<WhisperModelSize, string> = {
+  tiny: 'Xenova/whisper-tiny',
+  base: 'Xenova/whisper-base',
+  small: 'Xenova/whisper-small',
+};
+
+export const resolveWhisperModelId = (size?: string): string => {
+  if (size === 'tiny' || size === 'base' || size === 'small') {
+    return WHISPER_MODEL_BY_SIZE[size];
+  }
+  return WHISPER_MODEL_ID;
+};
+
 type AsrOptions = {
   language?: string;
   task?: 'transcribe' | 'translate';

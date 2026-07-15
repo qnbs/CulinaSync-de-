@@ -17,7 +17,7 @@
 | R-010 | Low | `chore(deps): resolve moderate audit findings` | Supply chain | S | 3 moderate offen | Dependabot | ✅ turbo 2.9.16 + pnpm overrides |
 | R-011 | Low | `feat(demo): seed or try-without-data for Pages` | Onboarding | M | Erstbesucher GitHub Pages | ✅ `?demo=1` / `?try=1`, Pages-Banner |
 | R-012 | Medium | `release(tauri): M8 first tagged desktop build` | Desktop | L | ROADMAP M8 | CI GTK image | 🟨 Tag **v0.2.4** — Draft Release nach grünem Tauri-Workflow |
-| R-013 | Low | `docs(legal): privacy policy DE` | Launch DE | M | Öffentliche Veröffentlichung | — |
+| R-013 | Low | `docs(legal): privacy policy DE` | Launch DE | M | Öffentliche Veröffentlichung | — | ✅ 2026-07-15 — `docs/legal/DATENSCHUTZ.md` + Settings-Link |
 | R-014 | Info | `chore(graphify): update after code sessions` | Agent DX | S | Team policy | — |
 | R-GLIB | Medium | `chore(sec): track glib 0.18.5 VariantStrIter unsoundness (GH #23)` | Security (Desktop) | S | Transitiv via Tauri/gtk-rs 0.18; Fix erst glib 0.20.10 (semver-major, durch wry/webkit2gtk gepinnt); `cargo update -p glib` = 0 changes | wry/webkit2gtk → gtk-rs 0.20 | 🟨 tracked — Dependabot(cargo) + SECURITY.md; Re-Eval bei gtk-rs 0.20 |
 | R-BRANCHPROT | Low | `chore(ci): enable branch protection + require main-guard/validate` | Enforcement | S | Ruleset `mainrules` aktiv (Required Checks + PR + linear + no force-push); klassische Protection-API bleibt 404 | WS-GUARD ✅ | ✅ 2026-07-15 — verifiziert + Runbook sync |
@@ -26,7 +26,8 @@
 
 **Erledigt (PR #66 + #67):** R-001–R-007 (R-007 Doku), M5.8, M11.1–11.3, E2E Cook-Mode, ESLint typed  
 **Erledigt (Phase 0, 2026-07-15):** R-BRANCHPROT; Dependabot #106–#111; pnpm 11 Audit-Gate  
-**Nächster Sprint:** R-012 Draft **v0.2.4** veröffentlichen, M11.4 ONNX, R-013 Privacy, Coverage ≥82 %
+**Erledigt (Phase 1–2, 2026-07-15):** R-013; RAG/Sanitizer/Whisper/Backup-Zod/SBOM/Coverage-Lines-82  
+**Nächster Sprint:** R-012 Draft **v0.2.4**; M11.4 ONNX; Branch-Coverage ≥82 %; Inference-Cache/Ollama
 
 ## Definition of Done (Backlog-Item)
 

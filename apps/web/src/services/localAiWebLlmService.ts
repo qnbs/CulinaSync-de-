@@ -1,4 +1,9 @@
-import { buildLocalAiRuntimeConfig, completeWebLlmChat, resolveGenerativeModel } from '@domain/ai-core';
+import {
+  buildLocalAiRuntimeConfig,
+  completeWebLlmChat,
+  resolveGenerativeModel,
+  sanitizeForPrompt,
+} from '@domain/ai-core';
 import i18next from 'i18next';
 import type { AppSettings, PantryItem, Recipe, RecipeIdea, StructuredPrompt } from '../types';
 import { parseAiJsonWithSchema, recipeAiSchema, recipeIdeasResponseSchema } from './aiJsonParse';
@@ -69,8 +74,8 @@ export const generateRecipeWithWebLlm = async (
   try {
     let userContent = constructBasePrompt(prompt, pantryItems, aiPreferences);
     userContent += `\n\n**${i18next.t('gemini.prompt.specificRequirement')}:**\n${i18next.t('gemini.prompt.fullRecipe')}`;
-    userContent += `\n- ${i18next.t('gemini.prompt.titleLabel')}: "${chosenIdea.recipeTitle}"`;
-    userContent += `\n- ${i18next.t('gemini.prompt.descriptionLabel')}: "${chosenIdea.shortDescription}"`;
+    userContent += `\n- ${i18next.t('gemini.prompt.titleLabel')}: "${sanitizeForPrompt(chosenIdea.recipeTitle)}"`;
+    userContent += `\n- ${i18next.t('gemini.prompt.descriptionLabel')}: "${sanitizeForPrompt(chosenIdea.shortDescription)}"`;
 
     const jsonText = await completeWebLlmChat({
       modelId,

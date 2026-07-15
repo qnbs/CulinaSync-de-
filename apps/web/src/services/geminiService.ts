@@ -20,6 +20,7 @@ import {
   recipeIdeasResponseSchema,
   shoppingListGenerationSchema,
 } from './aiJsonParse';
+import { neutralizePromptInjection, sanitizeForPrompt } from '@domain/ai-core';
 import { constructBasePrompt, geminiSystem } from './aiPromptBuilder';
 
 // --- Dynamic AI Client (loaded from secure IndexedDB, never from env/build) ---
@@ -35,7 +36,6 @@ const SchemaType = {
 } as const;
 
 const MAX_WEB_CONTENT_CHARS = 24000;
-const PROMPT_INJECTION_PATTERN = /(ignore\s+(all|any|the|these)?\s*(previous|prior|above)?\s*instructions|system\s+prompt|developer\s+message|follow\s+these\s+instructions|assistant:|user:|role:|tool\s+call|function\s+call)/i;
 
 const getGenAIModule = async () => {
     if (!_genAiModulePromise) {
@@ -48,13 +48,14 @@ const getGenAIModule = async () => {
 const sanitizeWebContentForPrompt = (webContent: string): string => {
     // Strip all HTML safely via the shared DOMPurify wrapper — regex-based stripping misses
     // edge cases like </script foo="bar"> which browsers accept as valid end tags (CodeQL js/bad-tag-filter)
+    // QNBS-v3: Injection-Defense über ai-core (DE+EN) statt divergierendem gemini-lokalem Pattern
     const stripped = sanitizeHtml(webContent, 'text');
 
     const normalizedLines = stripped
         .split(/\r?\n/)
         .map((line) => line.replace(/\s+/g, ' ').trim())
         .filter(Boolean)
-        .map((line) => (PROMPT_INJECTION_PATTERN.test(line) ? '[filtered instruction-like content removed]' : line));
+        .map((line) => neutralizePromptInjection(line));
 
     return normalizedLines.join('\n').slice(0, MAX_WEB_CONTENT_CHARS);
 };
@@ -185,8 +186,8 @@ export const generateRecipe = async (
         const model = "gemini-2.5-flash";
         let fullPrompt = constructBasePrompt(prompt, pantryItems, aiPreferences);
         fullPrompt += `\n\n**${geminiPrompt('specificRequirement')}:**\n${geminiPrompt('fullRecipe')}`;
-        fullPrompt += `\n- ${geminiPrompt('titleLabel')}: "${chosenIdea.recipeTitle}"`;
-        fullPrompt += `\n- ${geminiPrompt('descriptionLabel')}: "${chosenIdea.shortDescription}"`;
+        fullPrompt += `\n- ${geminiPrompt('titleLabel')}: "${sanitizeForPrompt(chosenIdea.recipeTitle)}"`;
+        fullPrompt += `\n- ${geminiPrompt('descriptionLabel')}: "${sanitizeForPrompt(chosenIdea.shortDescription)}"`;
         const systemInstruction = geminiSystem('recipe');
         const response = await ai.models.generateContent({
                 model: model,
@@ -256,11 +257,15 @@ export const generateShoppingList = async (
     try {
         const ai = await getAIClient();
         const model = "gemini-2.5-flash";
-        const pantryList = pantryItems.map(item => item.name).join(', ') || geminiPrompt('none');
-        const currentShoppingList = currentListItems.map(item => item.name).join(', ') || geminiPrompt('none');
+        const pantryList = sanitizeForPrompt(
+            pantryItems.map((item) => item.name).join(', ') || geminiPrompt('none'),
+        );
+        const currentShoppingList = sanitizeForPrompt(
+            currentListItems.map((item) => item.name).join(', ') || geminiPrompt('none'),
+        );
         const fullPrompt = [
             geminiPrompt('shoppingAssistant'),
-            `${geminiPrompt('shoppingRequest')}: "${prompt}".`,
+            `${geminiPrompt('shoppingRequest')}: "${sanitizeForPrompt(prompt)}".`,
             '',
             `${geminiPrompt('shoppingContext')}:`,
             `1.  **${geminiPrompt('shoppingPantry')}:** ${geminiPrompt('shoppingPantryItems')}: ${pantryList}.`,
@@ -328,7 +333,7 @@ export const generateShoppingList = async (
 export const generateRecipeImage = async (recipeTitle: string): Promise<string> => {
     const ai = await getAIClient();
     const model = "imagen-4.0-generate-001";
-    const prompt = `High quality, professional food photography of ${recipeTitle}, studio lighting, delicious, appetizing, 4k resolution, photorealistic, overhead shot, plated elegantly`;
+    const prompt = `High quality, professional food photography of ${sanitizeForPrompt(recipeTitle)}, studio lighting, delicious, appetizing, 4k resolution, photorealistic, overhead shot, plated elegantly`;
     
     try {
         const response = await ai.models.generateImages({
@@ -430,13 +435,13 @@ export const verifyNutritionAndAllergensWithGemini = async (
 
     const prompt = [
         'Validate nutrition/allergen estimate for this recipe.',
-        `Recipe title: ${recipe.recipeTitle}`,
-        `Servings: ${recipe.servings}`,
+        `Recipe title: ${sanitizeForPrompt(recipe.recipeTitle)}`,
+        `Servings: ${sanitizeForPrompt(String(recipe.servings ?? ''))}`,
         'Ingredients:',
-        ingredientPreview,
+        sanitizeForPrompt(ingredientPreview),
         '',
         `Local estimate kcal/protein/fat/carbs per serving: ${Math.round(localEstimate.calories)} / ${Math.round(localEstimate.protein)}g / ${Math.round(localEstimate.fat)}g / ${Math.round(localEstimate.carbs)}g`,
-        `Local allergens: ${localEstimate.allergens.join(', ') || 'none detected'}`,
+        `Local allergens: ${sanitizeForPrompt(localEstimate.allergens.join(', ') || 'none detected')}`,
         '',
         'Return concise verification summary and warnings (if uncertain ingredients or allergens).',
     ].join('\n');

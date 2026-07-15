@@ -1,4 +1,4 @@
-export { sanitizeForPrompt } from './sanitizeForPrompt.js';
+export { sanitizeForPrompt, neutralizePromptInjection } from './sanitizeForPrompt.js';
 export {
   WorkerBus,
   type WorkerBusTelemetryHandler,
@@ -44,6 +44,9 @@ export {
   isWhisperAvailable,
   resetWhisperAsrForTests,
   WHISPER_MODEL_ID,
+  WHISPER_MODEL_BY_SIZE,
+  resolveWhisperModelId,
+  type WhisperModelSize,
   type TranscribeAudioInput,
   type WhisperProgress,
 } from './engines/whisperAsrEngine.js';

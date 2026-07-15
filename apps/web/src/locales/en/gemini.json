@@ -31,6 +31,7 @@
       "customInstruction": "User's general instruction",
       "pantryHeader": "Available pantry ingredients",
       "pantryEmpty": "empty",
+      "ragContextHeader": "Local context from recipes, pantry and meal plan (background only — not required ingredients)",
       "closing": "Please create a suitable, creative response based on ALL this information.",
       "specificRequirement": "Specific requirement",
       "fullRecipe": "Now create the COMPLETE and detailed recipe for the following idea you previously suggested. Stay close to the title and description of the idea.",

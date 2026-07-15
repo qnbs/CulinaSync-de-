@@ -33,6 +33,14 @@ const getWorker = (): Worker | null => {
         pending.resolve(event.data.vector ?? null);
       },
     );
+    // QNBS-v3: Worker-Crash pending Promises resolven | analog Whisper (audit P1-2)
+    worker.addEventListener('error', (event: ErrorEvent) => {
+      const message = event.message || 'embedding-worker-error';
+      for (const [id, pending] of pendingRequests) {
+        pending.reject(new Error(message));
+        pendingRequests.delete(id);
+      }
+    });
   }
 
   return worker;

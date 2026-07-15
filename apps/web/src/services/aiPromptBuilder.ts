@@ -32,6 +32,12 @@ export const constructBasePrompt = (
     userPromptParts.push(`- ${geminiPrompt('modifiers')}: ${sanitizeForPrompt(prompt.modifiers.join(', '))}`);
   }
 
+  // QNBS-v3: RAG-Kontext als eigener Prompt-Block | verhindert Token-Noise in mustInclude (audit P0-1)
+  if (prompt.ragContext?.trim()) {
+    userPromptParts.push(`\n**${geminiPrompt('ragContextHeader')}:**`);
+    userPromptParts.push(sanitizeForPrompt(prompt.ragContext));
+  }
+
   userPromptParts.push(`\n**${geminiPrompt('globalSettings')}:**`);
   if (aiPreferences.dietaryRestrictions.length > 0) {
     userPromptParts.push(

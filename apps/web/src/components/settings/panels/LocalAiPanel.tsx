@@ -178,6 +178,7 @@ export const LocalAiPanel: React.FC<LocalAiPanelProps> = ({ settings, onChange }
           label={t('settings.localAi.visionLabel')}
           description={t('settings.localAi.visionDesc')}
           checked={localAi.enableVision}
+          disabled
           onToggle={() => onChange('localAi.enableVision', !localAi.enableVision)}
         />
         <SettingsToggle
@@ -190,9 +191,10 @@ export const LocalAiPanel: React.FC<LocalAiPanelProps> = ({ settings, onChange }
           label={t('settings.localAi.cacheLabel')}
           description={t('settings.localAi.cacheDesc')}
           checked={localAi.enableInferenceCache}
+          disabled
           onToggle={() => onChange('localAi.enableInferenceCache', !localAi.enableInferenceCache)}
         />
-        <div className="p-4 glass-card rounded-xl">
+        <div className="p-4 glass-card rounded-xl opacity-50">
           <div className="flex justify-between mb-2">
             <span className="font-bold text-zinc-200">{t('settings.localAi.cacheTtlLabel')}</span>
             <span className="font-mono text-[var(--color-accent-400)]">
@@ -204,14 +206,16 @@ export const LocalAiPanel: React.FC<LocalAiPanelProps> = ({ settings, onChange }
             min={1}
             max={168}
             value={localAi.cacheTtlHours}
+            disabled
             onChange={(e) => onChange('localAi.cacheTtlHours', parseInt(e.target.value, 10))}
-            className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[var(--color-accent-500)]"
+            className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-not-allowed accent-[var(--color-accent-500)]"
           />
         </div>
         <SettingsToggle
           label={t('settings.localAi.stripExifLabel')}
           description={t('settings.localAi.stripExifDesc')}
           checked={localAi.stripExifOnVision}
+          disabled
           onToggle={() => onChange('localAi.stripExifOnVision', !localAi.stripExifOnVision)}
         />
       </section>
@@ -248,20 +252,9 @@ export const LocalAiPanel: React.FC<LocalAiPanelProps> = ({ settings, onChange }
           label={t('settings.localAi.ollamaEnabledLabel')}
           description={t('settings.localAi.ollamaEnabledDesc')}
           checked={localAi.ollamaEnabled}
+          disabled
           onToggle={() => onChange('localAi.ollamaEnabled', !localAi.ollamaEnabled)}
         />
-        {localAi.ollamaEnabled && (
-          <div className="p-4 glass-card rounded-xl">
-            <label className="block text-sm font-bold text-zinc-300 mb-2">{t('settings.localAi.ollamaUrlLabel')}</label>
-            <input
-              type="url"
-              value={localAi.ollamaBaseUrl}
-              onChange={(e) => onChange('localAi.ollamaBaseUrl', e.target.value)}
-              className="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 outline-none font-mono text-sm"
-              placeholder="http://127.0.0.1:11434"
-            />
-          </div>
-        )}
       </section>
 
       <section className="rounded-xl border border-[var(--color-accent-500)]/20 bg-[var(--color-accent-500)]/5 p-4 flex gap-3">

@@ -153,11 +153,9 @@ export const enrichPromptWithRag = (
     return prompt;
   }
 
-  const ragTokens = tokenize(rag.promptBlock).slice(0, 8);
-  const mergedIncludes = [...new Set([...prompt.includeIngredients, ...ragTokens])];
-
+  // QNBS-v3: promptBlock als ragContext injizieren | früher wurden Chunk-Tokens fälschlich zu includeIngredients
   return {
     ...prompt,
-    includeIngredients: mergedIncludes,
+    ragContext: rag.promptBlock.slice(0, 2000),
   };
 };

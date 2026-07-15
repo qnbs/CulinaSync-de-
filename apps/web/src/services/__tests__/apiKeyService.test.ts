@@ -163,6 +163,23 @@ describe('apiKeyService', () => {
     await expect(fresh.loadApiKey()).resolves.toBe('AIza-passphrase-test');
   });
 
+  it('bleibt unlocked wenn parallele unlock-Aufrufe gemischt sind (Race)', async () => {
+    const indexedDbMock = createIndexedDbMock();
+    vi.stubGlobal('indexedDB', indexedDbMock.indexedDB);
+
+    const service = await import('../apiKeyService');
+    await service.saveApiKey('AIza-race-key', 'correct horse battery');
+
+    vi.resetModules();
+    const fresh = await import('../apiKeyService');
+    const [wrong, right] = await Promise.all([
+      fresh.unlockApiKey('wrong passphrase'),
+      fresh.unlockApiKey('correct horse battery'),
+    ]);
+    expect(wrong || right).toBe(true);
+    await expect(fresh.loadApiKey()).resolves.toBe('AIza-race-key');
+  });
+
   it('surfaces a decryption failure instead of returning garbage', async () => {
     const indexedDbMock = createIndexedDbMock();
     vi.stubGlobal('indexedDB', indexedDbMock.indexedDB);

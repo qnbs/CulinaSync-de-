@@ -28,8 +28,9 @@ const redactPhones = (input: string): string =>
 // ReDoS-safe: the verb→noun gap is a bounded {0,3} repetition of "word + required space"
 // rather than adjacent optional \s* groups, so there is no catastrophic backtracking on
 // long whitespace/filler runs (CodeRabbit #3562409597).
+// QNBS-v3: DE+EN Injection-Phrasen | CulinaSync ist DE-first; bounded {0,3} bleibt ReDoS-sicher
 const PROMPT_INJECTION_PATTERN =
-  /(?:(?:ignore|disregard|forget|override)\s+(?:(?:all|any|the|these|previous|prior|above|earlier)\s+){0,3}(?:instructions|prompts?|rules?)|system\s+prompt|developer\s+message|(?:^|\s)(?:assistant|system|user|role|tool\s+call|function\s+call)\s*:|follow\s+these\s+instructions|you\s+are\s+now\b)/giu;
+  /(?:(?:ignore|disregard|forget|override|ignoriere|vergiss|missachte|überschreibe|ueberschreibe)\s+(?:(?:all|any|the|these|previous|prior|above|earlier|alle|jede|die|vorherigen|bisherigen|obigen)\s+){0,3}(?:instructions|prompts?|rules?|anweisungen|regeln|vorgaben)|system\s+prompt|developer\s+message|(?:^|\s)(?:assistant|system|user|role|tool\s+call|function\s+call)\s*:|follow\s+these\s+instructions|befolgee?\s+diese\s+anweisungen|you\s+are\s+now\b|du\s+bist\s+jetzt\b)/giu;
 
 export const neutralizePromptInjection = (input: string): string =>
   input.replaceAll(PROMPT_INJECTION_PATTERN, '[filtered]');

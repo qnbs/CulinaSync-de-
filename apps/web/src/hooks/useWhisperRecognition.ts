@@ -1,5 +1,7 @@
+import { resolveWhisperModelId } from '@domain/ai-core';
 import { useState, useRef } from 'react';
 import i18next from 'i18next';
+import { useAppSelector } from '../store/hooks';
 import { WhisperResult } from '../services/whisperService';
 import { getAppServices } from '../services/serviceRegistry';
 
@@ -18,6 +20,7 @@ export const useWhisperRecognition = (): WhisperRecognitionHook => {
   const [error, setError] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
+  const whisperModelSize = useAppSelector((state) => state.settings.speechRecognition.whisperModelSize);
 
   const hasWhisperSupport = typeof Worker !== 'undefined';
 
@@ -35,13 +38,14 @@ export const useWhisperRecognition = (): WhisperRecognitionHook => {
       mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
         try {
-          const result: WhisperResult = await getAppServices().whisper.transcribeWithWhisper(audioBlob);
+          // QNBS-v3: whisperModelSize aus Settings → Model-ID | Dead-Control-Fix (audit P0-3)
+          const model = resolveWhisperModelId(whisperModelSize);
+          const result: WhisperResult = await getAppServices().whisper.transcribeWithWhisper(audioBlob, {
+            model,
+          });
           setTranscript(result.text);
-        } catch (error) {
-          // Map technical failures (model/host unavailable, worker load error) to a clear,
-          // localized message instead of leaking raw error strings; suggests using dictation
-          // (Web Speech) mode instead of silently failing.
-          const message = error instanceof Error ? error.message : '';
+        } catch (err) {
+          const message = err instanceof Error ? err.message : '';
           const key = /unavailable|worker-error|context|fetch|network|load/i.test(message)
             ? 'voice.whisperModelUnavailable'
             : 'voice.whisperTranscriptionFailed';
@@ -50,8 +54,9 @@ export const useWhisperRecognition = (): WhisperRecognitionHook => {
       };
       mediaRecorder.start();
       setIsListening(true);
-    } catch (error) {
-      setError(error instanceof Error ? error.message : i18next.t('voice.whisperAudioUnavailable'));
+    } catch {
+      // QNBS-v3: Mic-Denied immer lokalisiert | keine rohen DOMException-Messages
+      setError(i18next.t('voice.whisperAudioUnavailable'));
     }
   };
 
@@ -59,8 +64,7 @@ export const useWhisperRecognition = (): WhisperRecognitionHook => {
     const recorder = mediaRecorderRef.current;
     if (recorder) {
       recorder.stop();
-      // MediaStream-Tracks stoppen um Mikrofon freizugeben
-      recorder.stream?.getTracks().forEach(t => t.stop());
+      recorder.stream?.getTracks().forEach((t) => t.stop());
     }
     setIsListening(false);
   };
