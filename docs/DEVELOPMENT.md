@@ -5,7 +5,7 @@ Aktueller Ueberblick: **[STATUS-2026-05-04.md](./STATUS-2026-05-04.md)** (Vorgae
 ## Voraussetzungen
 
 - Node.js 22+ (lokal); **GitHub Actions** nutzen fuer Setup-Jobs **Node.js 24** (`validate.yml`, `ci.yml`).
-- pnpm 10+ **oder** npm mit `npx pnpm@10` / `npm run …` wo dokumentiert
+- pnpm 11+ (`packageManager`: `pnpm@11.13.0`) **oder** npm mit `npx pnpm@11` / `npm run …` wo dokumentiert
 
 ## Installation
 

@@ -7,6 +7,24 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### DevOps / Dependencies
+
+- **pnpm 11.13 (P0 — Audit-Gate):** `packageManager` `pnpm@10.0.0 → pnpm@11.13.0`.
+  Am 2026-07-15 hat npm die Legacy-Endpoints `/-/npm/v1/security/audits{,/quick}` final
+  retired (HTTP 410); pnpm ≤10 kann `pnpm audit` nicht mehr ausführen. pnpm 11 nutzt
+  `/-/npm/v1/security/advisories/bulk`. Settings aus `package.json#pnpm` nach
+  `pnpm-workspace.yaml` migriert (`overrides`, `peerDependencyRules`,
+  `allowedDeprecatedVersions`, `legacyPeerDeps`) plus explizites `allowBuilds` für
+  postinstall-kritische Pakete (esbuild, sharp, msw, protobufjs, …). DevContainer auf
+  `pnpm@11.13.0`. `pnpm audit --audit-level=high` wieder grün (0 high/critical).
+- **Dependabot-Bumps (Phase 0):** `turbo` 2.10.5, `typescript-eslint` 8.64.0,
+  `dompurify` 3.4.12, `postcss` ^8.5.17 (lock → 8.5.19); Tauri `2.11.5` +
+  `tauri-build` 2.6.3 bereits via #106 auf `main`.
+- **Branch Protection:** Ruleset `mainrules` verifiziert aktiv (Required Checks:
+  `validate / validate`, `i18n-check`, GitGuardian, Socket, CodeQL Analyze;
+  linear history, no force-push, PR required). Backlog `R-BRANCHPROT` geschlossen;
+  Runbook an Ist-Zustand angeglichen.
+
 ### Sicherheit
 
 - **glib-Unsoundness (Tauri-Desktop, transitiv) dokumentiert & getrackt (GitHub-Alert #23):**

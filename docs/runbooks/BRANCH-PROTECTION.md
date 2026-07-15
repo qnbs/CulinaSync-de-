@@ -4,15 +4,28 @@ Governs the `main` branch via a GitHub **repository ruleset** named `mainrules`
 (target: default branch). This is the merge gate for everything that reaches
 production (GitHub Pages deploy triggers on push to `main`).
 
+## Status (verified 2026-07-15)
+
+Ruleset **`mainrules`** (id `18769260`) is **`enforcement: active`** on `~DEFAULT_BRANCH`.
+Classic branch-protection API (`/branches/main/protection`) returns 404 — that is expected;
+enforcement is via **repository rulesets**, not the legacy protection endpoint.
+Backlog **R-BRANCHPROT** is closed.
+
+Verify:
+
+```bash
+gh api repos/qnbs/CulinaSync-de-/rulesets/18769260 --jq '{name, enforcement, rules: [.rules[].type]}'
+```
+
 ## Design goals
 
 1. Nothing reaches `main` except through a reviewed, green PR.
-2. "Reviewed" = CodeRabbit review present **and** all threads resolved.
+2. "Reviewed" = review threads resolved (CodeRabbit/humans); approvals count is **0** for solo-dev.
 3. "Green" = the real CI gate passed, not just the review bot.
 4. History stays linear and signed; the branch can't be force-pushed or deleted.
 5. The repo admin retains an escape hatch (bypass) for emergencies.
 
-## Rules (canonical)
+## Rules (canonical — matches live ruleset 2026-07-15)
 
 | Rule | Setting | Why |
 |------|---------|-----|
@@ -20,25 +33,22 @@ production (GitHub Pages deploy triggers on push to `main`).
 | `non_fast_forward` | block | no force-push / history rewrite |
 | `required_linear_history` | on | squash/rebase only — clean history |
 | `required_signatures` | on | every commit on `main` must be signed |
-| `code_quality` | severity: warnings | GitHub code-quality gate |
-| `code_scanning` | CodeQL, high_or_higher / errors_and_warnings | block on new high+ alerts |
-| `pull_request` | PR required; approvals **0**; dismiss-stale on push; **thread resolution required**; merge methods: squash, rebase | forces the reviewed-PR flow and ties the CodeRabbit correction loop to merge |
+| `pull_request` | PR required; approvals **0**; dismiss-stale on push; **thread resolution required**; merge methods: squash, rebase | forces the reviewed-PR flow |
 | `required_status_checks` | strict (up-to-date) + contexts below | the real green-CI gate |
-| bypass | Repository admin (role) — always | emergency escape hatch |
 
-### Required status-check contexts
+### Required status-check contexts (live)
 
 | Context | Source | Always runs on PRs? |
 |---------|--------|---------------------|
-| `CodeRabbit / Review` | CodeRabbit app | yes |
 | `validate / validate` | CI workflow (lint, tsgo, tests, coverage, build, audit, bundle-budget) | yes |
 | `i18n-check` | CI workflow (locale key/baseline/changed parity) | yes |
 | `GitGuardian Security Checks` | GitGuardian app | yes |
 | `Socket Security: Pull Request Alerts` | Socket app | yes |
+| `Analyze (javascript)` | CodeQL workflow | yes |
 
-CodeQL is enforced by the `code_scanning` rule (a stronger mechanism than a
-status check), so `Analyze (javascript)` is intentionally **not** duplicated as a
-required status check.
+**Note:** CodeRabbit review is process-mandatory (see `.cursor/rules/300-pr-review-automation.mdc`)
+but is **not** currently a required status-check context on the live ruleset (avoids pending-forever
+when the app is slow/offline). Thread resolution remains required via the `pull_request` rule.
 
 ### Deliberately NOT required (would block unrelated PRs)
 

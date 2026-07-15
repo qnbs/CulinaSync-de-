@@ -13,7 +13,7 @@ Danke fuer Beitraege zu CulinaSync. Dieses Dokument beschreibt den erwarteten Ar
 ## Voraussetzungen
 
 - Node.js 22+
-- pnpm 10+
+- pnpm 11+ (`packageManager`: `pnpm@11.13.0`)
 
 ## Lokales Setup
 

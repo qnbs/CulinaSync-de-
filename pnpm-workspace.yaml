@@ -1,3 +1,47 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+
+# QNBS-v3: pnpm 11 liest Settings nur noch aus pnpm-workspace.yaml (nicht package.json#pnpm)
+# Security-Overrides + Peer-Rules hier kanonisch — nötig für audit-Gate nach npm-Legacy-Endpoint-Retirement (2026-07-15).
+legacyPeerDeps: true
+
+peerDependencyRules:
+  allowAny:
+    - react
+    - react-dom
+    - eslint
+    - vite
+    - esbuild
+
+allowedDeprecatedVersions:
+  deep-diff: '*'
+  glob: '*'
+  node-domexception: '*'
+  popper.js: '*'
+
+overrides:
+  glob: '^11.0.0'
+  serialize-javascript: '^7.0.5'
+  source-map: '^0.7.4'
+  sourcemap-codec: 'npm:@jridgewell/sourcemap-codec@^1.4.15'
+  uuid: '^14.0.0'
+  vitest: '4.1.10'
+  '@vitest/utils': '4.1.10'
+  protobufjs: 'npm:protobufjs@^7.6.1'
+  undici: 'npm:undici@^7.28.0'
+  '@babel/plugin-transform-modules-systemjs': '^7.29.4'
+  fast-uri: '^3.1.2'
+  tmp: '>=0.2.6'
+  brace-expansion: '>=5.0.6'
+  ws: '>=8.20.1'
+  cookie: '>=0.7.0'
+
+allowBuilds:
+  '@google/genai': true
+  core-js: true
+  esbuild: true
+  msw: true
+  protobufjs: true
+  sharp: true
+  tesseract.js: true

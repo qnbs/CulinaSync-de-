@@ -16,7 +16,7 @@ Das Repository verwendet GitHub Actions fuer CI, Deploy und CodeQL.
 ### CI
 
 - Checkout
-- pnpm 10 einrichten
+- pnpm 11 einrichten (`packageManager`: `pnpm@11.13.0`)
 - **Node.js 24** einrichten (`actions/setup-node`, siehe `validate.yml` / `ci.yml`)
 - `pnpm install --frozen-lockfile`
 - Lint
