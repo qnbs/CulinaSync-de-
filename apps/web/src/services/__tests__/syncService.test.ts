@@ -87,8 +87,43 @@ describe('syncService backup encryption', () => {
   it('round-trips encrypted backups with the new salted format', async () => {
     const encrypted = await encryptBackup(sampleBackup, 's3cure-password');
 
-    expect(Array.from(encrypted.slice(0, 4))).toEqual([67, 83, 66, 50]);
+    expect(Array.from(encrypted.slice(0, 4))).toEqual([67, 83, 66, 51]); // CSB3
     await expect(decryptBackup(encrypted, 's3cure-password')).resolves.toEqual(sampleBackup);
+  });
+
+  it('keeps decrypting CSB2 backups (100k PBKDF2)', async () => {
+    const enc = new TextEncoder();
+    const salt = window.crypto.getRandomValues(new Uint8Array(16));
+    const keyMaterial = await window.crypto.subtle.importKey(
+      'raw',
+      enc.encode('csb2-password'),
+      { name: 'PBKDF2' },
+      false,
+      ['deriveKey'],
+    );
+    const key = await window.crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt, iterations: 100_000, hash: 'SHA-256' },
+      keyMaterial,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['encrypt', 'decrypt'],
+    );
+    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+    const ciphertext = new Uint8Array(
+      await window.crypto.subtle.encrypt(
+        { name: 'AES-GCM', iv },
+        key,
+        enc.encode(JSON.stringify(sampleBackup)),
+      ),
+    );
+    const header = new Uint8Array([67, 83, 66, 50]);
+    const blob = new Uint8Array(header.length + salt.length + iv.length + ciphertext.length);
+    blob.set(header, 0);
+    blob.set(salt, header.length);
+    blob.set(iv, header.length + salt.length);
+    blob.set(ciphertext, header.length + salt.length + iv.length);
+
+    await expect(decryptBackup(blob, 'csb2-password')).resolves.toEqual(sampleBackup);
   });
 
   it('uses a fresh salt so repeated exports differ for the same payload', async () => {

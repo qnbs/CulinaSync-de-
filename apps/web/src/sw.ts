@@ -48,7 +48,7 @@ registerRoute(
 
 registerRoute(
   ({ url }) =>
-    /\/assets\/(vendor-scanner-|vendor-tour-|vendor-faker-|vendor-workbox-|vendor-export-|vendor-misc-|vendor-webllm-|vendor-transformers-).+\.js$/.test(
+    /\/assets\/(vendor-scanner-|vendor-tour-|vendor-faker-|vendor-workbox-|vendor-export-|vendor-misc-|vendor-webllm-|vendor-transformers-|vendor-onnx-).+\.js$/.test(
       url.pathname,
     ),
   new CacheFirst({
@@ -68,7 +68,7 @@ registerRoute(
     request.destination === 'script' &&
     url.pathname.includes('/assets/') &&
     url.pathname.endsWith('.js') &&
-    !/\/assets\/(jspdf\.es\.min-|html2canvas\.esm-|papaparse\.min-|index\.es-|vendor-scanner-|vendor-tour-|vendor-faker-|vendor-workbox-|vendor-export-|vendor-misc-|vendor-webllm-|vendor-transformers-)/.test(
+    !/\/assets\/(jspdf\.es\.min-|html2canvas\.esm-|papaparse\.min-|index\.es-|vendor-scanner-|vendor-tour-|vendor-faker-|vendor-workbox-|vendor-export-|vendor-misc-|vendor-webllm-|vendor-transformers-|vendor-onnx-)/.test(
       url.pathname,
     ),
   new StaleWhileRevalidate({

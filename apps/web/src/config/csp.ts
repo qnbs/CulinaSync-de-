@@ -6,17 +6,15 @@
  * - `TAURI_CSP` is mirrored into `src-tauri/tauri.conf.json`; a unit test
  *   (`__tests__/csp.test.ts`) fails if the two drift apart.
  *
- * connect-src is intentionally `'self' https:` (all HTTPS, no http/ws/other
- * schemes). An explicit host allowlist is NOT feasible here because several core
- * features connect to USER-CONFIGURED endpoints that cannot be enumerated:
- *   - WebDAV / Nextcloud sync → arbitrary user server (deviceSync)
- *   - IPFS gateway            → user-configurable gateway (communityShareService)
- * and on top of that the on-device AI stack pulls model weights/WASM from
- * multiple CDNs (HuggingFace, jsDelivr, GitHub-raw) plus Gemini and the jina
- * reader. `upgrade-insecure-requests` forces https, so plain http is excluded.
+ * connect-src is `'self' https:` plus explicit loopback HTTP for Ollama.
+ * An explicit host allowlist for sync/IPFS is NOT feasible (user-configured
+ * endpoints). On-device AI pulls model weights from HTTPS CDNs. Browser builds
+ * add `upgrade-insecure-requests` (may still interfere with loopback http).
  */
 
-const CONNECT_SRC = "'self' https:";
+// Loopback HTTP for optional Ollama connector (Tauri/desktop). Browser builds also
+// set upgrade-insecure-requests, which may still block plain http://127.0.0.1.
+const CONNECT_SRC = "'self' https: http://127.0.0.1:* http://localhost:* http://[::1]:*";
 
 // Ordered so the serialized policy is deterministic (drift test compares strings).
 const DIRECTIVES: ReadonlyArray<readonly [string, string]> = [

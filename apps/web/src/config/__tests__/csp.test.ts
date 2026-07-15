@@ -14,10 +14,13 @@ describe('Content-Security-Policy single source', () => {
     expect(TAURI_CSP).toContain("script-src 'self' 'wasm-unsafe-eval'");
   });
 
-  it('keeps connect-src at self+https (user-configured WebDAV/IPFS/model hosts preclude an allowlist)', () => {
-    expect(WEB_CSP).toMatch(/connect-src 'self' https:(;|$)/);
-    // but no insecure schemes are permitted
-    expect(WEB_CSP).not.toMatch(/connect-src[^;]*(\shttp:|\sws:|\s\*)/);
+  it('keeps connect-src at self+https plus loopback for Ollama', () => {
+    expect(WEB_CSP).toContain(
+      "connect-src 'self' https: http://127.0.0.1:* http://localhost:* http://[::1]:*",
+    );
+    expect(TAURI_CSP).toContain('http://127.0.0.1:*');
+    // no websocket scheme
+    expect(WEB_CSP).not.toMatch(/connect-src[^;]*\sws:/);
   });
 
   it('keeps upgrade-insecure-requests for web but not for the Tauri webview', () => {

@@ -30,4 +30,9 @@ export async function runProviderChain<T>(
   );
 }
 
-export const layerOrderForGenerative = (): LocalAiLayerId[] => ['webllm', 'transformers', 'heuristic'];
+export const layerOrderForGenerative = (): LocalAiLayerId[] => [
+  'ollama',
+  'webllm',
+  'transformers',
+  'heuristic',
+];

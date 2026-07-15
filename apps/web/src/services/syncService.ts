@@ -5,16 +5,26 @@ import type { ResolvedSyncTarget } from './syncTarget';
 import { downloadEncryptedBlob, uploadEncryptedBlob } from './syncTransport';
 import type { FullBackupData } from '../types';
 import { parseFullBackupData } from './backupSchemas';
+import {
+  PBKDF2_ITERATIONS_BACKUP_LEGACY,
+  PBKDF2_ITERATIONS_CURRENT,
+} from './cryptoConstants';
 
 export type SyncRestoreMode = 'replace' | 'merge';
 
 const LEGACY_SALT = new TextEncoder().encode('culinasync-salt');
-const BACKUP_FORMAT_HEADER = new Uint8Array([67, 83, 66, 50]);
+/** CSB2: random salt + 100k PBKDF2 (legacy versioned). */
+const BACKUP_FORMAT_HEADER_V2 = new Uint8Array([67, 83, 66, 50]);
+/** CSB3: random salt + OWASP 600k PBKDF2 (current). */
+const BACKUP_FORMAT_HEADER_V3 = new Uint8Array([67, 83, 66, 51]);
 const BACKUP_SALT_LENGTH = 16;
 const BACKUP_IV_LENGTH = 12;
 
-// Crypto helpers (AES-GCM, passwortbasiert)
-async function getKeyFromPassword(password: string, salt: Uint8Array): Promise<CryptoKey> {
+async function getKeyFromPassword(
+  password: string,
+  salt: Uint8Array,
+  iterations: number,
+): Promise<CryptoKey> {
   const enc = new TextEncoder();
   const normalizedSalt = salt.slice();
   const keyMaterial = await window.crypto.subtle.importKey(
@@ -22,60 +32,71 @@ async function getKeyFromPassword(password: string, salt: Uint8Array): Promise<C
     enc.encode(password),
     { name: 'PBKDF2' },
     false,
-    ['deriveKey']
+    ['deriveKey'],
   );
   return window.crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
       salt: normalizedSalt,
-      iterations: 100_000,
+      iterations,
       hash: 'SHA-256',
     },
     keyMaterial,
     { name: 'AES-GCM', length: 256 },
     false,
-    ['encrypt', 'decrypt']
+    ['encrypt', 'decrypt'],
   );
 }
 
-const hasVersionedBackupHeader = (blob: Uint8Array) => BACKUP_FORMAT_HEADER.every((value, index) => blob[index] === value);
+const headerMatches = (blob: Uint8Array, header: Uint8Array) =>
+  header.every((value, index) => blob[index] === value);
 
 export async function encryptBackup(data: FullBackupData, password: string): Promise<Uint8Array> {
   const salt = window.crypto.getRandomValues(new Uint8Array(BACKUP_SALT_LENGTH));
-  const key = await getKeyFromPassword(password, salt);
+  const key = await getKeyFromPassword(password, salt, PBKDF2_ITERATIONS_CURRENT);
   const iv = window.crypto.getRandomValues(new Uint8Array(BACKUP_IV_LENGTH));
   const enc = new TextEncoder();
   const json = JSON.stringify(data);
   const ciphertext = new Uint8Array(
-    await window.crypto.subtle.encrypt(
-      { name: 'AES-GCM', iv },
-      key,
-      enc.encode(json)
-    )
+    await window.crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(json)),
   );
-  // Format v2: [CSB2 header (4 bytes)] + [Salt (16 bytes)] + [IV (12 bytes)] + [Ciphertext]
-  const result = new Uint8Array(BACKUP_FORMAT_HEADER.length + salt.length + iv.length + ciphertext.length);
-  result.set(BACKUP_FORMAT_HEADER, 0);
-  result.set(salt, BACKUP_FORMAT_HEADER.length);
-  result.set(iv, BACKUP_FORMAT_HEADER.length + salt.length);
-  result.set(ciphertext, BACKUP_FORMAT_HEADER.length + salt.length + iv.length);
+  // QNBS-v3: CSB3 — 600k PBKDF2 | CSB2/Legacy bleiben decrypt-fähig
+  const header = BACKUP_FORMAT_HEADER_V3;
+  const result = new Uint8Array(header.length + salt.length + iv.length + ciphertext.length);
+  result.set(header, 0);
+  result.set(salt, header.length);
+  result.set(iv, header.length + salt.length);
+  result.set(ciphertext, header.length + salt.length + iv.length);
   return result;
 }
 
 export async function decryptBackup(blob: Uint8Array, password: string): Promise<FullBackupData> {
-  const isVersionedBackup = blob.length > BACKUP_FORMAT_HEADER.length + BACKUP_SALT_LENGTH + BACKUP_IV_LENGTH && hasVersionedBackupHeader(blob);
-  const saltOffset = isVersionedBackup ? BACKUP_FORMAT_HEADER.length : 0;
+  const isV3 =
+    blob.length > BACKUP_FORMAT_HEADER_V3.length + BACKUP_SALT_LENGTH + BACKUP_IV_LENGTH &&
+    headerMatches(blob, BACKUP_FORMAT_HEADER_V3);
+  const isV2 =
+    !isV3 &&
+    blob.length > BACKUP_FORMAT_HEADER_V2.length + BACKUP_SALT_LENGTH + BACKUP_IV_LENGTH &&
+    headerMatches(blob, BACKUP_FORMAT_HEADER_V2);
+  const isVersionedBackup = isV2 || isV3;
+  const headerLen = isV3
+    ? BACKUP_FORMAT_HEADER_V3.length
+    : isV2
+      ? BACKUP_FORMAT_HEADER_V2.length
+      : 0;
+  const saltOffset = isVersionedBackup ? headerLen : 0;
   const salt = isVersionedBackup ? blob.slice(saltOffset, saltOffset + BACKUP_SALT_LENGTH) : LEGACY_SALT;
   const ivOffset = isVersionedBackup ? saltOffset + BACKUP_SALT_LENGTH : 0;
   const ciphertextOffset = ivOffset + BACKUP_IV_LENGTH;
-  const key = await getKeyFromPassword(password, salt);
+  const iterations = isV3 ? PBKDF2_ITERATIONS_CURRENT : PBKDF2_ITERATIONS_BACKUP_LEGACY;
+  const key = await getKeyFromPassword(password, salt, iterations);
   const iv = blob.slice(ivOffset, ciphertextOffset);
   const ciphertext = blob.slice(ciphertextOffset);
   const dec = new TextDecoder();
   const decrypted = await window.crypto.subtle.decrypt(
     { name: 'AES-GCM', iv },
     key,
-    ciphertext
+    ciphertext,
   );
   const raw: unknown = JSON.parse(dec.decode(decrypted));
   return parseFullBackupData(raw);
@@ -102,8 +123,8 @@ export async function syncDownload(
   mode: SyncRestoreMode = 'replace',
 ) {
   try {
-    const encrypted = await downloadEncryptedBlob(target.url, target.auth);
-    const data = await decryptBackup(encrypted, password);
+    const blob = await downloadEncryptedBlob(target.url, target.auth);
+    const data = await decryptBackup(blob, password);
     if (mode === 'merge') {
       await mergeBackupWithConflictResolution(data);
     } else {
@@ -118,7 +139,7 @@ export async function syncDownload(
   }
 }
 
-export const getLastSyncTimestamp = (): number | null => {
+export function getLastSyncTimestamp(): number | null {
   if (typeof window === 'undefined') {
     return null;
   }
@@ -128,4 +149,4 @@ export const getLastSyncTimestamp = (): number | null => {
   }
   const parsed = Number(raw);
   return Number.isFinite(parsed) ? parsed : null;
-};
+}

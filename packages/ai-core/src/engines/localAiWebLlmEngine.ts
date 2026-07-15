@@ -42,5 +42,14 @@ export const isWebLlmLayerEnabled = (config: LocalAiRuntimeConfig): boolean =>
   config.preferWebGpu &&
   !shouldSkipWebGpuLayer(config.resolvedGpuTier);
 
-export { completeWebLlmChat, resetWebLlmEngineForTests, unloadWebLlmEngine } from './webLlmEngineManager.js';
-export type { WebLlmChatMessage, WebLlmCompletionOptions } from './webLlmEngineManager.js';
+export {
+  completeWebLlmChat,
+  preloadWebLlmModel,
+  resetWebLlmEngineForTests,
+  unloadWebLlmEngine,
+} from './webLlmEngineManager.js';
+export type {
+  WebLlmChatMessage,
+  WebLlmCompletionOptions,
+  WebLlmInitProgress,
+} from './webLlmEngineManager.js';

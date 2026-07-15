@@ -3,12 +3,17 @@
  * Server/user/path stay in sessionStorage only — see useDataPanelSync.
  */
 import { retry } from './retryUtils';
+import {
+  PBKDF2_ITERATIONS_CURRENT,
+  PBKDF2_ITERATIONS_SYNC_CREDENTIALS_V2,
+} from './cryptoConstants';
 
 const DB_NAME = 'culinasync_secure';
 const STORE_NAME = 'keys';
 const KEY_ID = 'nextcloud_app_password';
-const ENCRYPTION_VERSION = 2;
-const PBKDF2_ITERATIONS = 250000;
+/** v3 = 600k PBKDF2; v2 blobs remain decryptable with 250k. */
+const ENCRYPTION_VERSION = 3;
+const ENCRYPTION_VERSION_LEGACY = 2;
 
 type EncryptedPayload = {
   version: number;
@@ -40,7 +45,7 @@ const fromBase64 = (value: string): Uint8Array => {
 const toArrayBuffer = (value: Uint8Array): ArrayBuffer =>
   value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength) as ArrayBuffer;
 
-const deriveEncryptionKey = async (salt: Uint8Array): Promise<CryptoKey> => {
+const deriveEncryptionKey = async (salt: Uint8Array, iterations: number): Promise<CryptoKey> => {
   const keyMaterial = await crypto.subtle.importKey(
     'raw',
     textEncoder.encode(getFingerprint()),
@@ -53,7 +58,7 @@ const deriveEncryptionKey = async (salt: Uint8Array): Promise<CryptoKey> => {
     {
       name: 'PBKDF2',
       salt: toArrayBuffer(salt),
-      iterations: PBKDF2_ITERATIONS,
+      iterations,
       hash: 'SHA-256',
     },
     keyMaterial,
@@ -66,7 +71,7 @@ const deriveEncryptionKey = async (salt: Uint8Array): Promise<CryptoKey> => {
 const encryptSecret = async (plaintext: string): Promise<string> => {
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const key = await deriveEncryptionKey(salt);
+  const key = await deriveEncryptionKey(salt, PBKDF2_ITERATIONS_CURRENT);
   const ciphertext = await crypto.subtle.encrypt(
     { name: 'AES-GCM', iv: toArrayBuffer(iv) },
     key,
@@ -84,13 +89,20 @@ const encryptSecret = async (plaintext: string): Promise<string> => {
 const decryptSecret = async (storedValue: string): Promise<string | null> => {
   try {
     const parsed = JSON.parse(storedValue) as EncryptedPayload;
-    if (!hasWebCrypto() || parsed.version !== ENCRYPTION_VERSION) {
+    if (
+      !hasWebCrypto() ||
+      (parsed.version !== ENCRYPTION_VERSION && parsed.version !== ENCRYPTION_VERSION_LEGACY)
+    ) {
       return null;
     }
     const salt = fromBase64(parsed.salt);
     const iv = fromBase64(parsed.iv);
     const ciphertext = fromBase64(parsed.ciphertext);
-    const key = await deriveEncryptionKey(salt);
+    const iterations =
+      parsed.version === ENCRYPTION_VERSION
+        ? PBKDF2_ITERATIONS_CURRENT
+        : PBKDF2_ITERATIONS_SYNC_CREDENTIALS_V2;
+    const key = await deriveEncryptionKey(salt, iterations);
     const decrypted = await crypto.subtle.decrypt(
       { name: 'AES-GCM', iv: toArrayBuffer(iv) },
       key,

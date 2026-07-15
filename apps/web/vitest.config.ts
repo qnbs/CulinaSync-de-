@@ -26,12 +26,12 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
       reportsDirectory: './coverage',
-      // QNBS-v3: Master-Perfection Stufe — Lines ≥82; stmts/funcs angehoben; Branches weiter Richtung 82 % (M5.9 → 88 %)
+      // QNBS-v3: Master-Perfection Stufe — Lines ≥82; Branches gestaffelt Richtung 82 % (M5.9 → 88 %)
       thresholds: {
         lines: 82,
         statements: 80,
         functions: 75,
-        branches: 64,
+        branches: 68,
       },
     },
   },

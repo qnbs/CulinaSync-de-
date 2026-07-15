@@ -6,12 +6,18 @@ export type WebLlmChatMessage = {
   content: string;
 };
 
+export type WebLlmInitProgress = {
+  progress: number;
+  text: string;
+};
+
 export type WebLlmCompletionOptions = {
   modelId: string;
   messages: WebLlmChatMessage[];
   temperature?: number;
   maxTokens?: number;
   jsonMode?: boolean;
+  onProgress?: (report: WebLlmInitProgress) => void;
 };
 
 type WebLlmEngine = {
@@ -42,22 +48,44 @@ export const resetWebLlmEngineForTests = (): void => {
   loadedModelId = null;
 };
 
-const loadEngine = async (modelId: string): Promise<WebLlmEngine | null> => {
+const loadEngine = async (
+  modelId: string,
+  onProgress?: (report: WebLlmInitProgress) => void,
+): Promise<WebLlmEngine | null> => {
   const mod = (await tryImportWebLlm()) as WebLlmModule | null;
   if (!mod?.CreateMLCEngine) {
     return null;
   }
 
   if (loadedModelId !== modelId || !enginePromise) {
-    enginePromise = mod.CreateMLCEngine(modelId);
+    // QNBS-v3: Download-UX — initProgressCallback für Settings/Prepare-Model
+    enginePromise = mod.CreateMLCEngine(modelId, {
+      initProgressCallback: onProgress
+        ? (report) => {
+            onProgress({
+              progress: typeof report.progress === 'number' ? report.progress : 0,
+              text: report.text ?? '',
+            });
+          }
+        : undefined,
+    });
     loadedModelId = modelId;
   }
 
   return enginePromise;
 };
 
+/** Lädt ein WebLLM-Modell (Download/Cache) ohne Chat — für Prepare-Model in Settings. */
+export const preloadWebLlmModel = async (
+  modelId: string,
+  onProgress?: (report: WebLlmInitProgress) => void,
+): Promise<boolean> => {
+  const engine = await loadEngine(modelId, onProgress);
+  return engine != null;
+};
+
 export const completeWebLlmChat = async (options: WebLlmCompletionOptions): Promise<string> => {
-  const engine = await loadEngine(options.modelId);
+  const engine = await loadEngine(options.modelId, options.onProgress);
   if (!engine) {
     throw new Error('webllm-module-unavailable');
   }
