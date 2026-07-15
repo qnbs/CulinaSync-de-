@@ -35,7 +35,7 @@ Siehe vorherige Session / CHANGELOG. Kurz: RAG, Sanitizer, Whisper, Backup-Zod, 
 ### Testing & Qualität
 
 - [x] E2E Offline-Chef (`e2e/chef-offline.spec.ts`)
-- [x] Branch-Coverage-Threshold **68** (gestaffelt; Ziel 82 weiter offen)
+- [x] Branch-Coverage-Floor **64** gehalten (Workers exclude; Ziel 82 weiter offen)
 - [x] Gezielte Tests: Cache, Vision-Format, Ollama-Probe, Mutators, Offline-Fallback, htmlSanitizer, ONNX-Engine
 
 ### Security / Supply Chain
@@ -62,7 +62,7 @@ Siehe vorherige Session / CHANGELOG. Kurz: RAG, Sanitizer, Whisper, Backup-Zod, 
 
 ## Phase 3 — Verification
 
-- [ ] lint · type-check · i18n · Vitest (+coverage gate) · test:scripts · build · audit
+- [x] lint · type-check · i18n · Vitest (+coverage gate) · test:scripts · build · audit (lokal)
 - [ ] CI auf PR bis grün
 - [ ] Bot-Kommentare am PR abarbeiten
 

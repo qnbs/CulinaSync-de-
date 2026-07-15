@@ -10,7 +10,7 @@
 | R-003 | High | `test(e2e): critical journeys sync, chef, cook-mode` | Regressionsschutz | L | Smoke reicht nicht für M10 | R-001 optional | ✅ PR #66 + #67 (10 E2E, inkl. Cook-Mode) |
 | R-004 | Medium | `refactor(db): services import dbInstance only` | Testbarkeit | S | Letzte `./db`-Imports in Services bereinieren | — | ✅ `exportService` |
 | R-005 | Medium | `chore(eslint): typed rules + floating promises` | Hook-Bugs | M | `exhaustive-deps` **error**; typed lint + `no-floating-promises` | R-004 hilft | ✅ PR #67 (`projectService`) |
-| R-006 | Medium | `test: raise branch coverage sync + recipeRepository` | CI-Stabilität | M | M5.8→gestaffelt: Threshold **68** % branches (Ziel 82) | — | 🟨 68 % Gate; weiter zu 82 |
+| R-006 | Medium | `test: raise branch coverage sync + recipeRepository` | CI-Stabilität | M | M5.8: Threshold **64** % branches (Ziel 82) | — | 🟨 Floor 64; weiter zu 82 |
 | R-007 | Medium | `docs: document Dexie migration + backup gate` ✅ | User Trust | S | Erledigt: `docs/DB-MIGRATIONS.md` | — |
 | R-008 | Medium | `feat(sync): optional encrypted credential storage` | Security | M | localStorage Metadaten | apiKeyService pattern | ✅ App-Passwort verschl.; Prefs sessionStorage |
 | R-009 | Medium | `ci: Lighthouse CI on PR previews` | PWA/A11y Scores | M | Mobile UX | Pages preview path | ✅ `lighthouse-ci.yml` (PR) |

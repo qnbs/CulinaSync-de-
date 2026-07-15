@@ -17,11 +17,11 @@ vi.mock('../aiProviderService', () => ({
   generateRecipeIdeas: registryMocks.generateRecipeIdeas,
   generateRecipe: registryMocks.generateRecipe,
   generateShoppingList: registryMocks.generateShoppingList,
+  extractPantryItemsFromImage: registryMocks.extractPantryItemsFromImage,
 }));
 
 vi.mock('../geminiService', () => ({
   generateRecipeImage: registryMocks.generateRecipeImage,
-  extractPantryItemsFromImage: registryMocks.extractPantryItemsFromImage,
 }));
 
 vi.mock('../scannerService', () => ({

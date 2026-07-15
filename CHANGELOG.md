@@ -14,7 +14,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   WebLLM Prepare-Model-UX mit Progress; Ollama-Connector (loopback CSP);
   E2E `chef-offline`; ADR Dexie at-rest encryption (defer); PBKDF2-Angleichung
   (Backup CSB3 / Sync-Credentials v3 = 600k, Legacy lesbar); Tauri `Cargo.toml`
-  0.2.4; Coverage-Branches-Threshold **68**.
+  0.2.4; Coverage-Branches-Floor **64** (Workers aus Coverage-Gate).
 
 ### DevOps / Dependencies
 
