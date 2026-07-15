@@ -1,6 +1,15 @@
 import { test, expect } from '@playwright/test';
 import { seedDismissedAppModals } from './helpers/appStorage';
-import { goToAiChef, openSettingsSection } from './helpers/navigation';
+import { goToAiChef } from './helpers/navigation';
+
+async function dismissLocalAiSetupIfOpen(page: import('@playwright/test').Page): Promise<void> {
+  // LocalAiSetupHost öffnet auf der Chef-Seite wenn setupWizardCompleted=false
+  const later = page.getByRole('button', { name: /später|later/i });
+  if (await later.isVisible({ timeout: 3_000 }).catch(() => false)) {
+    await later.click();
+    await expect(later).toBeHidden({ timeout: 10_000 });
+  }
+}
 
 test.describe('KI-Chef — Offline', () => {
   test.beforeEach(async ({ page }) => {
@@ -10,6 +19,7 @@ test.describe('KI-Chef — Offline', () => {
   test('Offline-Banner und AI-Hinweis auf KI-Chef', async ({ page, baseURL, context }) => {
     await page.goto(baseURL ?? '/');
     await goToAiChef(page);
+    await dismissLocalAiSetupIfOpen(page);
     await expect(page.getByRole('button', { name: /chef fragen/i })).toBeVisible();
 
     await context.setOffline(true);
@@ -28,21 +38,13 @@ test.describe('KI-Chef — Offline', () => {
   test('Chef fragen offline liefert lokale Ideen ohne Crash', async ({ page, baseURL, context }) => {
     test.setTimeout(60_000);
     await page.goto(baseURL ?? '/');
-    await openSettingsSection(page, /lokale ki/i);
-    const localOnly = page.getByRole('switch', { name: /nur lokal/i });
-    if (await localOnly.isVisible().catch(() => false)) {
-      const checked = await localOnly.getAttribute('aria-checked');
-      if (checked !== 'true') {
-        await localOnly.click();
-      }
-    }
-
     await goToAiChef(page);
+    await dismissLocalAiSetupIfOpen(page);
+
     const askButton = page.getByRole('button', { name: /chef fragen/i });
     await expect(askButton).toBeVisible();
 
-    // Button ist disabled ohne Craving-Text
-    const cravingInput = page.getByRole('textbox').first();
+    const cravingInput = page.locator('textarea').first();
     await cravingInput.fill('Pasta mit Tomaten');
     await expect(askButton).toBeEnabled({ timeout: 10_000 });
 
