@@ -17,6 +17,9 @@ alwaysApply: false
 - **Sanitizing:** User-/Domain-Strings für Prompts über `sanitizeForPrompt` / `neutralizePromptInjection` aus `@domain/ai-core` (DE+EN).
 - **RAG:** `enrichPromptWithRag` setzt `ragContext` — **nicht** Chunk-Tokens in `includeIngredients` mischen. `constructBasePrompt` rendert `ragContext` als eigenen Block.
 - **Whisper:** Modellgröße aus Settings → `resolveWhisperModelId`; Worker-`error` behandeln; Mic-Fehler lokalisiert (`voice.whisperAudioUnavailable`).
-- **Dead Controls:** Features ohne Implementierung (ONNX Vision, Inference-Cache, Ollama) UI disabled + ehrliche „geplant“-Copy — keine falschen Defaults `true`.
-- **Workers:** Pending-Promises bei `error` rejecten (Whisper + Embedding).
+- **Vision (M11.4):** `localAiVisionService` + `vision.worker` + `classifyPantryImage` (CLIP via transformers/ONNX). Routing in `aiProviderService.extractPantryItemsFromImage` (lokal → Gemini). EXIF-Strip optional.
+- **Inference-Cache:** Dexie `aiInferenceCache` über `localAiInferenceCacheService`; Toggle/`cacheTtlHours` in LocalAiPanel.
+- **WebLLM Download-UX:** `preloadWebLlmModel` / `prepareWebLlmModel` mit Progress; `downloadedModels` markieren.
+- **Ollama:** `localAiOllamaService` (loopback); CSP erlaubt `127.0.0.1`/`localhost`/`[::1]` — Browser `upgrade-insecure-requests` kann stören, Tauri bevorzugt.
+- **Workers:** Pending-Promises bei `error` rejecten (Whisper + Embedding + Vision).
 - **QNBS-v3:** Bei nicht-trivialer neuer Logik ein kompakter Kommentar über dem Block.

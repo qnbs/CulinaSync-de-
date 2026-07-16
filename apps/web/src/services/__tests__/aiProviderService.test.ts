@@ -6,7 +6,9 @@ import { resetGpuTierCacheForTests } from '@domain/ai-core';
 const mockGenerateRecipeIdeas = vi.fn();
 const mockGenerateRecipe = vi.fn();
 const mockGenerateShoppingList = vi.fn();
+const mockExtractPantry = vi.fn();
 const mockLoadSettings = vi.fn();
+const mockLocalVision = vi.fn();
 
 vi.mock('../settingsService', () => ({
   loadSettings: () => mockLoadSettings(),
@@ -17,6 +19,11 @@ vi.mock('../geminiService', () => ({
   generateRecipeIdeas: (...args: unknown[]) => mockGenerateRecipeIdeas(...args),
   generateRecipe: (...args: unknown[]) => mockGenerateRecipe(...args),
   generateShoppingList: (...args: unknown[]) => mockGenerateShoppingList(...args),
+  extractPantryItemsFromImage: (...args: unknown[]) => mockExtractPantry(...args),
+}));
+
+vi.mock('../localAiVisionService', () => ({
+  extractPantryItemsFromImageLocal: (...args: unknown[]) => mockLocalVision(...args),
 }));
 
 const pantryItems: PantryItem[] = [
@@ -125,5 +132,41 @@ describe('aiProviderService', () => {
 
     const { generateShoppingList } = await import('../aiProviderService');
     await expect(generateShoppingList('x', pantryItems, [])).rejects.toThrow('validation');
+  });
+
+  it('extractPantryItemsFromImage bevorzugt lokalen Vision-Pfad', async () => {
+    mockLocalVision.mockResolvedValueOnce('Tomate, Milch');
+    const { extractPantryItemsFromImage } = await import('../aiProviderService');
+    await expect(
+      extractPantryItemsFromImage(new File(['x'], 'a.jpg', { type: 'image/jpeg' })),
+    ).resolves.toBe('Tomate, Milch');
+    expect(mockExtractPantry).not.toHaveBeenCalled();
+  });
+
+  it('extractPantryItemsFromImage fällt auf Gemini zurück', async () => {
+    mockLocalVision.mockResolvedValueOnce(null);
+    mockExtractPantry.mockResolvedValueOnce('Karotte');
+    const settings: AppSettings = {
+      ...getDefaultSettings(),
+      aiPreferences: { ...getDefaultSettings().aiPreferences, routingMode: 'cloud-first' },
+    };
+    mockLoadSettings.mockReturnValue(settings);
+    const { extractPantryItemsFromImage } = await import('../aiProviderService');
+    await expect(
+      extractPantryItemsFromImage(new File(['x'], 'a.jpg', { type: 'image/jpeg' })),
+    ).resolves.toBe('Karotte');
+  });
+
+  it('extractPantryItemsFromImage wirft bei local-only ohne lokalen Hit', async () => {
+    mockLocalVision.mockResolvedValueOnce(null);
+    const settings: AppSettings = {
+      ...getDefaultSettings(),
+      localAi: { ...getDefaultSettings().localAi, localOnlyMode: true },
+    };
+    mockLoadSettings.mockReturnValue(settings);
+    const { extractPantryItemsFromImage } = await import('../aiProviderService');
+    await expect(
+      extractPantryItemsFromImage(new File(['x'], 'a.jpg', { type: 'image/jpeg' })),
+    ).rejects.toThrow('local-vision-unavailable');
   });
 });

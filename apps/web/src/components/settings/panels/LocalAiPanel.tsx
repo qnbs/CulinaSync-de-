@@ -1,8 +1,13 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Cpu, Database, HardDrive, Layers, Shield, Sparkles, WifiOff, Wand2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { AppSettings } from '../../../types';
 import { useTransientUiStore } from '../../../store/transientUiStore';
+import {
+  markModelDownloaded,
+  prepareWebLlmModel,
+} from '../../../services/localAiModelDownloadService';
+import { probeOllamaHealth } from '../../../services/localAiOllamaService';
 import { Button } from '../../ui';
 import { SettingsToggle } from '../SettingsToggle';
 
@@ -15,6 +20,10 @@ export const LocalAiPanel: React.FC<LocalAiPanelProps> = ({ settings, onChange }
   const { t } = useTranslation();
   const { localAi, aiPreferences } = settings;
   const requestLocalAiSetup = useTransientUiStore((s) => s.requestLocalAiSetup);
+  const [downloadPercent, setDownloadPercent] = useState<number | null>(null);
+  const [downloadText, setDownloadText] = useState('');
+  const [downloadBusy, setDownloadBusy] = useState(false);
+  const [ollamaStatus, setOllamaStatus] = useState<'idle' | 'ok' | 'fail'>('idle');
 
   const gpuLabel = useMemo(
     () => t(`settings.localAi.gpuTier.${localAi.gpuTierPreference}`),
@@ -25,6 +34,33 @@ export const LocalAiPanel: React.FC<LocalAiPanelProps> = ({ settings, onChange }
     () => t(`settings.localAi.models.${localAi.preferredGenerativeModel}`),
     [localAi.preferredGenerativeModel, t],
   );
+
+  const handlePrepareModel = async () => {
+    setDownloadBusy(true);
+    setDownloadPercent(0);
+    setDownloadText(t('settings.localAi.prepareModelStarting'));
+    try {
+      const modelId = await prepareWebLlmModel(settings, (progress) => {
+        setDownloadPercent(Math.round((progress.progress || 0) * 100));
+        setDownloadText(progress.text || t('settings.localAi.prepareModelProgress'));
+      });
+      if (modelId) {
+        onChange('localAi.downloadedModels', markModelDownloaded(localAi.downloadedModels, modelId));
+        setDownloadText(t('settings.localAi.prepareModelDone'));
+        setDownloadPercent(100);
+      } else {
+        setDownloadText(t('settings.localAi.prepareModelFailed'));
+        setDownloadPercent(null);
+      }
+    } finally {
+      setDownloadBusy(false);
+    }
+  };
+
+  const handleProbeOllama = async () => {
+    const ok = await probeOllamaHealth(localAi.ollamaBaseUrl);
+    setOllamaStatus(ok ? 'ok' : 'fail');
+  };
 
   return (
     <div className="space-y-8 page-fade-in">
@@ -154,6 +190,44 @@ export const LocalAiPanel: React.FC<LocalAiPanelProps> = ({ settings, onChange }
           disabled={!localAi.enabled || localAi.preferredGenerativeModel === 'heuristic-only'}
           onToggle={() => onChange('localAi.enableWebLlmInference', !localAi.enableWebLlmInference)}
         />
+        <div className="p-4 glass-card rounded-xl space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p className="font-bold text-zinc-200">{t('settings.localAi.prepareModelLabel')}</p>
+              <p className="text-xs text-zinc-500 mt-1">{t('settings.localAi.prepareModelDesc')}</p>
+            </div>
+            <Button
+              type="button"
+              onClick={() => void handlePrepareModel()}
+              disabled={
+                downloadBusy ||
+                !localAi.enabled ||
+                !localAi.enableWebLlmInference ||
+                localAi.preferredGenerativeModel === 'heuristic-only'
+              }
+            >
+              {downloadBusy ? t('settings.localAi.prepareModelBusy') : t('settings.localAi.prepareModelAction')}
+            </Button>
+          </div>
+          {downloadPercent != null && (
+            <div
+              className="space-y-1"
+              role="progressbar"
+              aria-valuenow={downloadPercent}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={t('settings.localAi.prepareModelLabel')}
+            >
+              <div className="h-2 rounded-full bg-zinc-800 overflow-hidden">
+                <div
+                  className="h-full bg-[var(--color-accent-500)] transition-all duration-300"
+                  style={{ width: `${downloadPercent}%` }}
+                />
+              </div>
+              <p className="text-xs text-zinc-500">{downloadText}</p>
+            </div>
+          )}
+        </div>
         <div className="p-4 glass-card rounded-xl">
           <div className="flex justify-between mb-2">
             <span className="font-bold text-zinc-200">{t('settings.localAi.maxJobsLabel')}</span>
@@ -178,7 +252,7 @@ export const LocalAiPanel: React.FC<LocalAiPanelProps> = ({ settings, onChange }
           label={t('settings.localAi.visionLabel')}
           description={t('settings.localAi.visionDesc')}
           checked={localAi.enableVision}
-          disabled
+          disabled={!localAi.enabled}
           onToggle={() => onChange('localAi.enableVision', !localAi.enableVision)}
         />
         <SettingsToggle
@@ -191,10 +265,10 @@ export const LocalAiPanel: React.FC<LocalAiPanelProps> = ({ settings, onChange }
           label={t('settings.localAi.cacheLabel')}
           description={t('settings.localAi.cacheDesc')}
           checked={localAi.enableInferenceCache}
-          disabled
+          disabled={!localAi.enabled}
           onToggle={() => onChange('localAi.enableInferenceCache', !localAi.enableInferenceCache)}
         />
-        <div className="p-4 glass-card rounded-xl opacity-50">
+        <div className={`p-4 glass-card rounded-xl ${localAi.enableInferenceCache ? '' : 'opacity-50'}`}>
           <div className="flex justify-between mb-2">
             <span className="font-bold text-zinc-200">{t('settings.localAi.cacheTtlLabel')}</span>
             <span className="font-mono text-[var(--color-accent-400)]">
@@ -206,16 +280,16 @@ export const LocalAiPanel: React.FC<LocalAiPanelProps> = ({ settings, onChange }
             min={1}
             max={168}
             value={localAi.cacheTtlHours}
-            disabled
+            disabled={!localAi.enableInferenceCache}
             onChange={(e) => onChange('localAi.cacheTtlHours', parseInt(e.target.value, 10))}
-            className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-not-allowed accent-[var(--color-accent-500)]"
+            className="w-full h-2 bg-zinc-800 rounded-lg appearance-none accent-[var(--color-accent-500)] disabled:cursor-not-allowed cursor-pointer"
           />
         </div>
         <SettingsToggle
           label={t('settings.localAi.stripExifLabel')}
           description={t('settings.localAi.stripExifDesc')}
           checked={localAi.stripExifOnVision}
-          disabled
+          disabled={!localAi.enableVision}
           onToggle={() => onChange('localAi.stripExifOnVision', !localAi.stripExifOnVision)}
         />
       </section>
@@ -252,9 +326,38 @@ export const LocalAiPanel: React.FC<LocalAiPanelProps> = ({ settings, onChange }
           label={t('settings.localAi.ollamaEnabledLabel')}
           description={t('settings.localAi.ollamaEnabledDesc')}
           checked={localAi.ollamaEnabled}
-          disabled
+          disabled={!localAi.enabled}
           onToggle={() => onChange('localAi.ollamaEnabled', !localAi.ollamaEnabled)}
         />
+        <div className={`p-4 glass-card rounded-xl space-y-3 ${localAi.ollamaEnabled ? '' : 'opacity-50'}`}>
+          <label className="block text-sm font-bold text-zinc-300" htmlFor="ollama-base-url">
+            {t('settings.localAi.ollamaUrlLabel')}
+          </label>
+          <input
+            id="ollama-base-url"
+            type="url"
+            value={localAi.ollamaBaseUrl}
+            disabled={!localAi.ollamaEnabled}
+            onChange={(e) => onChange('localAi.ollamaBaseUrl', e.target.value)}
+            className="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent-500)] disabled:cursor-not-allowed"
+            placeholder="http://127.0.0.1:11434"
+          />
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              onClick={() => void handleProbeOllama()}
+              disabled={!localAi.ollamaEnabled}
+            >
+              {t('settings.localAi.ollamaProbeAction')}
+            </Button>
+            {ollamaStatus === 'ok' && (
+              <span className="text-xs text-emerald-400">{t('settings.localAi.ollamaProbeOk')}</span>
+            )}
+            {ollamaStatus === 'fail' && (
+              <span className="text-xs text-rose-400">{t('settings.localAi.ollamaProbeFail')}</span>
+            )}
+          </div>
+        </div>
       </section>
 
       <section className="rounded-xl border border-[var(--color-accent-500)]/20 bg-[var(--color-accent-500)]/5 p-4 flex gap-3">

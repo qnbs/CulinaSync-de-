@@ -16,3 +16,11 @@ export async function tryImportTransformers(): Promise<unknown> {
     return null;
   }
 }
+
+export async function tryImportOnnx(): Promise<unknown> {
+  try {
+    return await import('onnxruntime-web');
+  } catch {
+    return null;
+  }
+}

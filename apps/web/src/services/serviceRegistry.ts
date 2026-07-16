@@ -57,8 +57,8 @@ const defaultServices: AppServices = {
       return geminiService.generateRecipeImage(recipeTitle);
     },
     extractPantryItemsFromImage: async (imageFile) => {
-      const geminiService = await import('./geminiService');
-      return geminiService.extractPantryItemsFromImage(imageFile);
+      const aiProvider = await import('./aiProviderService');
+      return aiProvider.extractPantryItemsFromImage(imageFile);
     },
   },
   scanner: {

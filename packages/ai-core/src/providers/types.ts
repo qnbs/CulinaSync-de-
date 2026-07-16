@@ -1,7 +1,7 @@
 import type { GenerativeModelId } from '../config/modelRegistry.js';
 import type { GpuTier, GpuTierPreference } from '../config/gpuTier.js';
 
-export type LocalAiLayerId = 'webllm' | 'transformers' | 'heuristic';
+export type LocalAiLayerId = 'ollama' | 'webllm' | 'transformers' | 'heuristic';
 
 export type AiGenerativeTask = 'recipe-ideas' | 'recipe' | 'shopping-list';
 

@@ -1,6 +1,6 @@
 [package]
 name = "culinasync"
-version = "0.2.2"
+version = "0.2.4"
 description = "CulinaSync — local-first kitchen hub"
 authors = ["qnbs"]
 edition = "2021"

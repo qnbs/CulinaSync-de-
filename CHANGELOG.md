@@ -7,6 +7,15 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Added
+
+- **Master Perfection Phase 3 (2026-07-15):** M11.4 lokale Vision (CLIP/ONNX via
+  transformers + `vision.worker`); Inference-Cache (Dexie `aiInferenceCache`);
+  WebLLM Prepare-Model-UX mit Progress; Ollama-Connector (loopback CSP);
+  E2E `chef-offline`; ADR Dexie at-rest encryption (defer); PBKDF2-Angleichung
+  (Backup CSB3 / Sync-Credentials v3 = 600k, Legacy lesbar); Tauri `Cargo.toml`
+  0.2.4; Coverage-Branches-Floor **64** (Workers aus Coverage-Gate).
+
 ### DevOps / Dependencies
 
 - **Follow-up-To-Do:** [`docs/TODO-MASTER-PERFECTION.md`](docs/TODO-MASTER-PERFECTION.md) — Phase 1–3 für spätere Ausführung (Post Phase 0).

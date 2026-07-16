@@ -115,6 +115,19 @@ export interface AiEmbeddingRecord {
   updatedAt: number;
 }
 
+/** TTL-Cache für lokale KI-Antworten (M11 Inference-Cache). */
+export interface AiInferenceCacheRecord {
+  id?: number;
+  /** SHA-256 über task + prompt + modelId */
+  hash: string;
+  task: string;
+  modelId: string;
+  /** JSON-serialisierte Antwort */
+  responseJson: string;
+  createdAt: number;
+  expiresAt: number;
+}
+
 export interface AppSettings {
   language: 'de' | 'en';
   displayName: string;

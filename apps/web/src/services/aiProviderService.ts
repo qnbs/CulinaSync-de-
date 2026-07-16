@@ -22,9 +22,20 @@ import { shouldAllowCloudAi, shouldPreferLocalAi, getActiveSettingsForAi } from 
 import { buildLocalAiRagContext, enrichPromptWithRag } from './localAiRagService';
 import { generateRecipeIdeasWithWebLlm, generateRecipeWithWebLlm } from './localAiWebLlmService';
 import {
+  generateRecipeIdeasWithOllama,
+  generateRecipeWithOllama,
+} from './localAiOllamaService';
+import {
+  buildInferenceCacheHash,
+  getCachedInference,
+  setCachedInference,
+} from './localAiInferenceCacheService';
+import { extractPantryItemsFromImageLocal } from './localAiVisionService';
+import {
   generateRecipe as generateRecipeWithGemini,
   generateRecipeIdeas as generateRecipeIdeasWithGemini,
   generateShoppingList as generateShoppingListWithGemini,
+  extractPantryItemsFromImage as extractPantryItemsFromImageWithGemini,
 } from './geminiService';
 
 const toRuntimeInput = (settings: AppSettings) => ({
@@ -45,16 +56,63 @@ type LocalGenerativeContext = {
   chosenIdea?: RecipeIdea;
 };
 
-// QNBS-v3: M11.1/11.2 — Provider-Kette L1 WebLLM → L3 Transformers → L4 Heuristik
+const promptCacheKey = (prompt: StructuredPrompt, extra = ''): string =>
+  JSON.stringify({
+    craving: prompt.craving,
+    include: prompt.includeIngredients,
+    exclude: prompt.excludeIngredients,
+    modifiers: prompt.modifiers,
+    rag: prompt.ragContext ?? '',
+    extra,
+  });
+
+// QNBS-v3: M11 — Provider-Kette Ollama → WebLLM → Transformers → Heuristik + Inference-Cache
 const runLocalGenerative = async <T>(
   ctx: LocalGenerativeContext,
   runHeuristic: () => T,
-): Promise<{ data: T; layer: 'webllm' | 'transformers' | 'heuristic' }> => {
+): Promise<{ data: T; layer: 'ollama' | 'webllm' | 'transformers' | 'heuristic' | 'cache' }> => {
   const { task, settings } = ctx;
   const runtime = await buildLocalAiRuntimeConfig(toRuntimeInput(settings));
   const model = resolveGenerativeModel(settings.localAi.preferredGenerativeModel, runtime.resolvedGpuTier);
+  const modelId = model.webLlmModelId ?? model.id;
+  const cacheExtra = ctx.chosenIdea?.recipeTitle ?? '';
+  const cacheHash = settings.localAi.enableInferenceCache
+    ? await buildInferenceCacheHash(task, promptCacheKey(ctx.prompt, cacheExtra), modelId)
+    : null;
+
+  if (cacheHash) {
+    const cached = await getCachedInference<T>(cacheHash);
+    if (cached != null) {
+      return { data: cached, layer: 'cache' };
+    }
+  }
+
   const webLlmStatus = await getWebLlmEngineStatus(runtime, model);
   const transformersStatus = await getTransformersEngineStatus(runtime);
+
+  const runOllama = async (): Promise<T | null> => {
+    if (!settings.localAi.ollamaEnabled) {
+      return null;
+    }
+    if (task === 'recipe-ideas') {
+      return (await generateRecipeIdeasWithOllama(
+        ctx.prompt,
+        ctx.pantryItems,
+        ctx.aiPreferences,
+        settings,
+      )) as T | null;
+    }
+    if (task === 'recipe' && ctx.chosenIdea) {
+      return (await generateRecipeWithOllama(
+        ctx.prompt,
+        ctx.pantryItems,
+        ctx.aiPreferences,
+        ctx.chosenIdea,
+        settings,
+      )) as T | null;
+    }
+    return null;
+  };
 
   const runWebLlm = async (): Promise<T | null> => {
     if (!webLlmStatus.available) {
@@ -80,7 +138,12 @@ const runLocalGenerative = async <T>(
     return null;
   };
 
-  return runProviderChain([
+  const result = await runProviderChain([
+    {
+      layer: 'ollama',
+      enabled: settings.localAi.ollamaEnabled,
+      run: runOllama,
+    },
     {
       layer: 'webllm',
       enabled: isWebLlmLayerEnabled(runtime),
@@ -107,6 +170,18 @@ const runLocalGenerative = async <T>(
         }),
     },
   ]);
+
+  if (cacheHash && result.data != null) {
+    await setCachedInference(
+      cacheHash,
+      task,
+      modelId,
+      result.data,
+      settings.localAi.cacheTtlHours,
+    );
+  }
+
+  return result;
 };
 
 const withRag = async (
@@ -220,6 +295,21 @@ export const generateShoppingList = async (
     const { data } = await runLocalGenerative(ctx, runLocal);
     return data;
   }
+};
+
+/** Vision: lokal (ONNX/CLIP) wenn aktiv, sonst Gemini. */
+export const extractPantryItemsFromImage = async (imageFile: File): Promise<string> => {
+  const settings = getActiveSettingsForAi();
+  const local = await extractPantryItemsFromImageLocal(imageFile);
+  if (local) {
+    return local;
+  }
+
+  if (!shouldAllowCloudAi(settings)) {
+    throw new Error('local-vision-unavailable');
+  }
+
+  return extractPantryItemsFromImageWithGemini(imageFile);
 };
 
 export const buildRuntimeConfigForTests = async (

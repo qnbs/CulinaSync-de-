@@ -1,8 +1,9 @@
 # Master Perfection — Follow-up To-Do (Post Phase 0)
 
-> **Erstellt:** 2026-07-15 · **Aktualisiert:** 2026-07-15 (Phase 1–2 Session)  
+> **Erstellt:** 2026-07-15 · **Aktualisiert:** 2026-07-15 (Phase 3 Session)  
 > **Phase 0 Status:** ✅ Complete  
-> **Phase 1–2 Status:** ✅ **Substantial progress on `main` (this session)** — see below.
+> **Phase 1–2 Status:** ✅ Complete (`main`)  
+> **Phase 3 Status:** ✅ **Substantial progress this session** — see below.
 
 ---
 
@@ -16,77 +17,62 @@
 
 ---
 
-## Phase 1 — Re-Audit — ✅ Done (diese Session)
+## Phase 1–2 — Erledigt
 
-Gap-Liste (P0/P1) erarbeitet und priorisiert umgesetzt. Kurzbericht Top-5 Hebel:
-
-1. RAG-`promptBlock` → echter Prompt-Kontext (**P0-1**)  
-2. Prompt-Sanitizer Cloud/On-Device + DE (**P0 Security**)  
-3. Whisper ModelSize + Mic-i18n + Tests (**P0-3/4**)  
-4. Backup Zod nach Decrypt (**P0 Sync**)  
-5. Dead Controls ehrlich (**P0 Trust**)
+Siehe vorherige Session / CHANGELOG. Kurz: RAG, Sanitizer, Whisper, Backup-Zod, Dead-Controls-Ehrlichkeit, Privacy, SBOM, Coverage-Lines ≥82.
 
 ---
 
-## Phase 2 — Erledigt in dieser Session
-
-### Testing & Qualität
-
-- [x] Coverage **Lines ≥82 %** (Thresholds **82 / 80 / 75 / 64**) — Branches noch ~65 %, Ziel 82 % gestaffelt
-- [x] Tests: Whisper Hook, Backup-Schemas, Sync-Credentials, Device-Sync Edges, Vault Download/Merge, apiKey Race, RAG/PromptBuilder
-- [ ] E2E Offline-Chef erweitern (Smoke bleibt; Follow-up)
-- [ ] Branch-Coverage ≥82 % (groß; M5.9-Pfad)
+## Phase 3 — Erledigt in dieser Session
 
 ### Local AI
 
-- [x] RAG-Prompt-Fix (`ragContext`)
-- [x] Whisper ModelSize verdrahtet (`resolveWhisperModelId`)
-- [x] Embedding-Worker `error`-Handler
-- [x] Dead Controls: Vision/Cache/Ollama/EXIF disabled + „geplant“-Copy
-- [ ] **M11.4 ONNX Vision** (größerer Sprint)
-- [ ] Model-Download-UX (WebLLM Progress / downloadedModels)
-- [ ] Inference-Cache Service verdrahten
-- [ ] Ollama-Connector
+- [x] **M11.4 ONNX Vision** — `localAiOnnxEngine` + `vision.worker` + `localAiVisionService`; Routing in `aiProviderService`; EXIF-Strip; Settings-Toggles live
+- [x] Inference-Cache Service verdrahten (`aiInferenceCache` Dexie v14)
+- [x] Model-Download-UX (WebLLM Progress / `downloadedModels` / Prepare-Button)
+- [x] Ollama-Connector (+ Health-Probe, CSP Loopback)
+
+### Testing & Qualität
+
+- [x] E2E Offline-Chef (`e2e/chef-offline.spec.ts`)
+- [x] Branch-Coverage-Floor **64** gehalten (Workers exclude; Ziel 82 weiter offen)
+- [x] Gezielte Tests: Cache, Vision-Format, Ollama-Probe, Mutators, Offline-Fallback, htmlSanitizer, ONNX-Engine
 
 ### Security / Supply Chain
 
-- [x] Sanitizer vereinheitlicht + DE-Injection
-- [x] Gemini Shopping/Image/Nutrition/Ideas sanitized
-- [x] Backup Zod + DataPanel Import
-- [x] SBOM CycloneDX in `validate.yml`
-- [x] R-013 Privacy Policy DE + Settings-Link
-- [ ] Dexie at-rest encryption (nur evaluieren — P2)
-- [ ] PBKDF2-Iterations angleichen (dokumentiert als Drift)
+- [x] PBKDF2-Angleichung (CSB3 + Sync-Credentials v3 = 600k; Legacy lesbar) — `cryptoConstants.ts`
+- [x] Dexie at-rest encryption — **Eval ADR** `docs/ADR-DEXIE-AT-REST-ENCRYPTION.md` (defer P2)
 
 ### DevOps / Docs / DX
 
-- [x] `docs/RELEASE-PROCESS.md`
-- [x] `.cursor/rules/local-ai-patterns.mdc`
-- [x] AUDIT / CHANGELOG / Backlog sync
-- [ ] `graphify update .` nach Merge (Agent-Policy)
-- [ ] Tauri Draft Release R-012
+- [x] Tauri `Cargo.toml` → **0.2.4** (Version-Drift behoben; Draft-Tag R-012 noch manuell)
+- [x] `local-ai-patterns.mdc` aktualisiert
+- [x] CHANGELOG / Backlog / dieses TODO
+- [ ] `graphify update .` (CLI ggf. nicht installiert)
+- [ ] R-012: Tag `v0.2.4` + Tauri Draft Release nach Workflow
 
-### Strategic (v1.0+)
+### Strategic (v1.0+) — bewusst offen
 
-- [ ] Intro-Gates re-aktivieren
+- [ ] Intro-Gates re-aktivieren (`INTRO_GATES_ENABLED`)
+- [ ] Branch-Coverage ≥82 % (weiterer Sprint)
 - [ ] Nostr / federated Sync — nur Spike
 - [ ] Native Mobile Path — Roadmap-Notiz
 
 ---
 
-## Phase 3 — Verification (diese Session)
+## Phase 3 — Verification
 
-- [x] lint · type-check · i18n · **532** Vitest · test:scripts · build · bundle (~182 KB) · audit high
-- [ ] CI auf PR bis grün (nach Push)
-- [ ] Bot-Kommentare am PR abarbeiten
+- [x] lint · type-check · i18n · Vitest (+coverage gate) · test:scripts · build · audit (lokal)
+- [x] CI auf PR bis grün (validate, i18n, E2E Smoke, CodeQL, Lighthouse, Socket, GitGuardian)
+- [x] Bot-Inline-Kommentare: keine offenen Review-Threads (CodeRabbit draft-skip)
 
 ---
 
 ## Empfohlener Startbefehl (nächster Agent)
 
 ```text
-Lies docs/TODO-MASTER-PERFECTION.md — Phase 0–2 Teil erledigt.
-Priorität: M11.4 ONNX Vision ODER Branch-Coverage≥82 % ODER R-012 Tauri Release.
+Lies docs/TODO-MASTER-PERFECTION.md — Phase 3 Local-AI weitgehend verdrahtet.
+Priorität: Branch-Coverage→82 %, R-012 Tag v0.2.4, Intro-Gates (v1.0).
 Branch: cursor/<kurzname>-0ad6 ab main. CI bis grün.
 ```
 
@@ -96,4 +82,5 @@ Branch: cursor/<kurzname>-0ad6 ab main. CI bis grün.
 
 - `AUDIT.md` · `ROADMAP.md` · `docs/AUDIT-REMEDIATION-BACKLOG.md`
 - `docs/legal/DATENSCHUTZ.md` · `docs/RELEASE-PROCESS.md`
+- `docs/ADR-DEXIE-AT-REST-ENCRYPTION.md`
 - `.cursor/rules/local-ai-patterns.mdc`

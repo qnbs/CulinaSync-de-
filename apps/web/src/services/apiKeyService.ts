@@ -1,5 +1,6 @@
 import { retry } from "./retryUtils";
 import { logAppError } from "./errorLoggingService";
+import { PBKDF2_ITERATIONS_CURRENT } from './cryptoConstants';
 /**
  * API Key Management Service
  *
@@ -20,7 +21,7 @@ const DB_NAME = 'culinasync_secure';
 const STORE_NAME = 'keys';
 const KEY_ID = 'gemini_api_key';
 const ENCRYPTION_VERSION = 3;
-const PBKDF2_ITERATIONS = 600000; // OWASP 2023 baseline for PBKDF2-HMAC-SHA256
+const PBKDF2_ITERATIONS = PBKDF2_ITERATIONS_CURRENT;
 
 type KeyMode = 'device' | 'passphrase';
 

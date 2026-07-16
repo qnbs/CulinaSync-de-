@@ -42,6 +42,11 @@ const version13Stores: MigrationTableMap = {
   aiEmbeddings: '++id, sourceType, sourceId, [sourceType+sourceId], updatedAt, modelId',
 };
 
+const version14Stores: MigrationTableMap = {
+  ...version13Stores,
+  aiInferenceCache: '++id, hash, task, expiresAt, modelId',
+};
+
 export const DB_MIGRATION_HISTORY: MigrationDefinition[] = [
   {
     version: 8,
@@ -101,6 +106,11 @@ export const DB_MIGRATION_HISTORY: MigrationDefinition[] = [
     version: 13,
     description: 'Fuegt aiEmbeddings fuer lokales semantisches RAG (M11.3) hinzu.',
     stores: version13Stores,
+  },
+  {
+    version: 14,
+    description: 'Fuegt aiInferenceCache fuer TTL-Inference-Cache (Master Perfection) hinzu.',
+    stores: version14Stores,
   },
 ];
 

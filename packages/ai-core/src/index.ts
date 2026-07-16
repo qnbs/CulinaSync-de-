@@ -5,7 +5,7 @@ export {
   type WorkerJobPriority,
 } from './workerBus.js';
 export { createLocalAiFacade, type LocalAiFacade } from './localAiFacade.js';
-export { tryImportTransformers, tryImportWebLlm } from './optionalMlImports.js';
+export { tryImportOnnx, tryImportTransformers, tryImportWebLlm } from './optionalMlImports.js';
 
 export {
   detectGpuTier,
@@ -55,12 +55,22 @@ export {
   completeWebLlmChat,
   getWebLlmEngineStatus,
   isWebLlmLayerEnabled,
+  preloadWebLlmModel,
   resetWebLlmEngineForTests,
   unloadWebLlmEngine,
   type WebLlmChatMessage,
   type WebLlmCompletionOptions,
   type WebLlmEngineStatus,
+  type WebLlmInitProgress,
 } from './engines/localAiWebLlmEngine.js';
+export {
+  classifyPantryImage,
+  isOnnxRuntimeAvailable,
+  resetOnnxVisionForTests,
+  PANTRY_VISION_CANDIDATE_LABELS,
+  VISION_MODEL_ID,
+  type VisionClassificationHit,
+} from './engines/localAiOnnxEngine.js';
 export {
   embedText,
   embedTexts,
