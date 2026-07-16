@@ -12,9 +12,9 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **Intro-Gates v1.0 (2026-07-16):** `INTRO_GATES_ENABLED=true` — dismissible Onboarding
   (Escape/Backdrop/X/Skip, Demo „Weiter mit Demo“), What's-New erst nach First-Run;
   i18n DE/EN; Vitest für Onboarding + Intro-Gates.
-- **Coverage-Sprint:** Branch-Floor **64 → 73** (Ist ~73,2 %; Service-Matrizen: settingsMutators,
-  voiceCommands inkl. Timer-Regex-Fix, recipeImport, utils, nutrition/scanner/whisper,
-  recipe/shopping repositories, aiProvider Cache/Ollama); Ziel 82 % weiter offen.
+- **Coverage-Sprint:** Branch-Floor **64 → 74** (Ist ~74,5 %; Service-Matrizen: settingsMutators,
+  voiceCommands, recipeImport, utils, nutrition/scanner/whisper, repositories, aiProvider
+  Cache/Ollama/WebLLM, embeddings, export PDF/ICS); Ziel 82 % weiter offen.
 
 ### Security
 

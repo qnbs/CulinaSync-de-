@@ -5,7 +5,7 @@ Stand nach Sprint Coverage / Intro / Tauri (2026-07-16).
 ## Erledigt in diesem Sprint
 
 - [x] Intro-Gates re-aktiviert (`INTRO_GATES_ENABLED=true`) — dismissible Onboarding (Escape/Backdrop/X/Skip), What's-New erst nach First-Run, i18n DE/EN, Tests
-- [x] Branch-Coverage Floor **64 → 73** (Ist ~73,2 %); Ziel **82 %** bleibt Folge-Sprint (kein UI-Exclude-Cheat)
+- [x] Branch-Coverage Floor **64 → 74** (Ist ~74,5 %); Ziel **82 %** bleibt Folge-Sprint (kein UI-Exclude-Cheat)
 - [x] Dependabot #117 `serde_with` 3.21.0 (Security) gemerged
 - [x] R-012: Tag `v0.2.4` + Draft-Release mit Desktop-Assets **bereits vorhanden** (Workflow grün 2026-06-05) — Publish der Draft-Release ist manueller Owner-Schritt
 - [x] Voice-Timer-Regex Fix (`starten|starte|start`)
@@ -35,7 +35,7 @@ Stand nach Sprint Coverage / Intro / Tauri (2026-07-16).
 
 ```text
 Lies docs/TODO-MASTER-PERFECTION.md.
-Priorität: Branch-Coverage 73→82 % (Service/Hook-Hotspots), optional Draft v0.2.4 publishen.
+Priorität: Branch-Coverage 74→82 % (Service/Hook-Hotspots), optional Draft v0.2.4 publishen.
 Branch: cursor/<kurzname>-0ad6 ab main. CI bis grün.
 ```
 

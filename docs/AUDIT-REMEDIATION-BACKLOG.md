@@ -10,7 +10,7 @@
 | R-003 | High | `test(e2e): critical journeys sync, chef, cook-mode` | Regressionsschutz | L | Smoke reicht nicht für M10 | R-001 optional | ✅ PR #66 + #67 (10 E2E, inkl. Cook-Mode) |
 | R-004 | Medium | `refactor(db): services import dbInstance only` | Testbarkeit | S | Letzte `./db`-Imports in Services bereinieren | — | ✅ `exportService` |
 | R-005 | Medium | `chore(eslint): typed rules + floating promises` | Hook-Bugs | M | `exhaustive-deps` **error**; typed lint + `no-floating-promises` | R-004 hilft | ✅ PR #67 (`projectService`) |
-| R-006 | Medium | `test: raise branch coverage sync + recipeRepository` | CI-Stabilität | M | Floor **73** % branches (Ziel 82) | — | 🟨 Floor 73; weiter zu 82 |
+| R-006 | Medium | `test: raise branch coverage sync + recipeRepository` | CI-Stabilität | M | Floor **74** % branches (Ziel 82) | — | 🟨 Floor 74; weiter zu 82 |
 | R-007 | Medium | `docs: document Dexie migration + backup gate` | User Trust | S | Erledigt: `docs/DB-MIGRATIONS.md` | — | ✅ |
 | R-008 | Medium | `feat(sync): optional encrypted credential storage` | Security | M | localStorage Metadaten | apiKeyService pattern | ✅ App-Passwort verschl.; Prefs sessionStorage |
 | R-009 | Medium | `ci: Lighthouse CI on PR previews` | PWA/A11y Scores | M | Mobile UX | Pages preview path | ✅ `lighthouse-ci.yml` (PR) |
@@ -28,7 +28,7 @@
 **Erledigt (Phase 0, 2026-07-15):** R-BRANCHPROT; Dependabot #106–#111; pnpm 11 Audit-Gate  
 **Erledigt (Phase 1–2, 2026-07-15):** R-013; RAG/Sanitizer/Whisper/Backup-Zod/SBOM/Coverage-Lines-82  
 **Erledigt (Phase 3, 2026-07-15):** M11.4 Vision; Inference-Cache; WebLLM Download-UX; Ollama; PBKDF2 CSB3; ADR Dexie-Encrypt; E2E Offline-Chef  
-**Nächster Sprint:** Branch-Coverage 73→≥82 %; Draft `v0.2.4` publishen (Owner); M5.9 Richtung 88 %
+**Nächster Sprint:** Branch-Coverage 74→≥82 %; Draft `v0.2.4` publishen (Owner); M5.9 Richtung 88 %
 
 ## Definition of Done (Backlog-Item)
 

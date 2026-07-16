@@ -21,14 +21,34 @@ vi.mock('papaparse', () => ({
 }));
 
 // QNBS-v3: jspdf nur für Download-Pfade testen (kein Bundle in UI-Tests nötig)
+const jsPdfInstances = vi.hoisted(() => [] as Array<{ addPage: ReturnType<typeof vi.fn>; save: ReturnType<typeof vi.fn> }>);
+
 vi.mock('jspdf', () => {
   const jsPDF = vi.fn(function (this: unknown) {
-    return {
+    const addPage = vi.fn();
+    const save = vi.fn();
+    const instance = {
       setFontSize: vi.fn(),
+      setFont: vi.fn(),
       text: vi.fn(),
-      addPage: vi.fn(),
+      addPage,
+      save,
+      // Lange Texte → viele Zeilen, damit Recipe-PDF Pagination (y > 280) greift
+      splitTextToSize: vi.fn((text: string) => {
+        if (text.length > 30) {
+          return Array.from({ length: 25 }, (_, i) => `${text.slice(0, 12)}-${i}`);
+        }
+        return [text];
+      }),
+      internal: {
+        pageSize: {
+          getWidth: () => 210,
+        },
+      },
       output: vi.fn(() => new Blob(['mock-pdf'])),
     };
+    jsPdfInstances.push(instance);
+    return instance;
   });
   return { jsPDF };
 });
@@ -41,6 +61,7 @@ import {
   exportFullDataAsTxt,
   exportMealPlanWeekToIcs,
   exportRecipeToCsv,
+  exportRecipeToPdf,
   exportShoppingListToCsv,
   exportShoppingListToJson,
   exportShoppingListToMarkdown,
@@ -48,7 +69,7 @@ import {
   exportShoppingListToTxt,
   sanitizeCsvCell,
 } from '../exportService';
-import type { MealPlanItem, Recipe } from '../../types';
+import type { MealPlanItem, Recipe, ShoppingListItem } from '../../types';
 
 describe('exportService CSV hardening', () => {
   const createObjectUrlMock = vi.fn(() => 'blob:mock');
@@ -167,6 +188,52 @@ describe('exportService shopping-list exports', () => {
     expect(URL.createObjectURL).toHaveBeenCalled();
   });
 
+  it('exportShoppingListToCsv maps isChecked yes/no and keeps empty category', async () => {
+    const createdBlobs: Blob[] = [];
+    URL.createObjectURL = vi.fn((blob: Blob) => {
+      createdBlobs.push(blob);
+      return 'blob:csv';
+    });
+
+    const checked: ShoppingListItem = {
+      ...SAMPLE_SHOPPING_ITEM,
+      id: 2,
+      name: 'Brot',
+      isChecked: true,
+      category: '',
+    };
+    await exportShoppingListToCsv([SAMPLE_SHOPPING_ITEM, checked]);
+
+    expect(createdBlobs).toHaveLength(1);
+    const csvPayload = await createdBlobs[0].text();
+    expect(csvPayload).toMatch(/"Erledigt":"(Nein|No)"/);
+    expect(csvPayload).toMatch(/"Erledigt":"(Ja|Yes)"/);
+    expect(csvPayload).toContain('"Artikel":"Brot"');
+  });
+
+  it('exportShoppingListToTxt/Markdown group empty category as Sonstiges', async () => {
+    const createdBlobs: Blob[] = [];
+    URL.createObjectURL = vi.fn((blob: Blob) => {
+      createdBlobs.push(blob);
+      return 'blob:txt';
+    });
+
+    // Leere category ist falsy → getGroupedShoppingList fällt auf „Sonstiges“ zurück
+    const uncategorized: ShoppingListItem = {
+      ...SAMPLE_SHOPPING_ITEM,
+      id: 3,
+      name: 'Kerze',
+      category: '',
+    };
+
+    exportShoppingListToTxt([uncategorized]);
+    expect(await createdBlobs[0].text()).toContain('Sonstiges');
+    expect(await createdBlobs[0].text()).toContain('Kerze');
+
+    exportShoppingListToMarkdown([uncategorized]);
+    expect(await createdBlobs[1].text()).toContain('Sonstiges');
+  });
+
   it('exportShoppingListToPdf paginates and downloads', async () => {
     const many = Array.from({ length: 50 }, (_, i) => ({
       ...SAMPLE_SHOPPING_ITEM,
@@ -266,6 +333,82 @@ describe('exportMealPlanWeekToIcs', () => {
     exportMealPlanWeekToIcs([monday], {}, new Map());
     expect(URL.createObjectURL).toHaveBeenCalled();
   });
+
+  it('ICS: Rezept ohne shortDescription und meal.servings-Fallback', async () => {
+    const monday = new Date(Date.UTC(2026, 4, 4));
+    const dateKey = monday.toISOString().split('T')[0];
+    const mealsByDate: Record<string, MealPlanItem> = {
+      [`${dateKey}-Abendessen`]: {
+        id: 7,
+        date: dateKey,
+        mealType: 'Abendessen',
+        recipeId: 42,
+        // servings absichtlich weggelassen → recipe.servings
+      },
+    };
+    const recipe: Recipe = {
+      id: 42,
+      recipeTitle: 'Toast',
+      shortDescription: '',
+      prepTime: '1',
+      cookTime: '2',
+      totalTime: '3',
+      servings: '1',
+      difficulty: 'Einfach',
+      ingredients: [],
+      instructions: [],
+      nutritionPerServing: { calories: '', protein: '', fat: '', carbs: '' },
+      tags: { course: [], cuisine: [], occasion: [], mainIngredient: [], prepMethod: [], diet: [] },
+      expertTips: [],
+      isFavorite: false,
+      updatedAt: Date.now(),
+    };
+
+    exportMealPlanWeekToIcs([monday], mealsByDate, new Map([[42, recipe]]));
+
+    const blob = (URL.createObjectURL as ReturnType<typeof vi.fn>).mock.calls[0][0] as Blob;
+    const ics = await blob.text();
+    expect(ics).toContain('DESCRIPTION:');
+    expect(ics).toContain('Portionen: 1');
+    expect(ics).toContain('SUMMARY:');
+    expect(ics).toContain('Toast');
+  });
+
+  it('ICS: Notiz-Fallback wenn kein Rezept und keine note', async () => {
+    const monday = new Date(Date.UTC(2026, 4, 4));
+    const dateKey = monday.toISOString().split('T')[0];
+    const mealsByDate: Record<string, MealPlanItem> = {
+      [`${dateKey}-Mittagessen`]: {
+        id: 8,
+        date: dateKey,
+        mealType: 'Mittagessen',
+        // weder recipeId noch note → mealNoteFallback
+      },
+    };
+
+    exportMealPlanWeekToIcs([monday], mealsByDate, new Map());
+
+    const blob = (URL.createObjectURL as ReturnType<typeof vi.fn>).mock.calls[0][0] as Blob;
+    const ics = await blob.text();
+    expect(ics).toContain('BEGIN:VEVENT');
+    // de: „Mahlzeit-Notiz“ / en: „Meal note“
+    expect(ics).toMatch(/SUMMARY:.*(?:Mahlzeit-Notiz|Meal note)/);
+  });
+
+  it('ICS: leere weekDates nutzt Filename-Fallback week_week', () => {
+    const clickSpy = vi.fn();
+    HTMLAnchorElement.prototype.click = clickSpy;
+    const appendSpy = vi.spyOn(document.body, 'appendChild');
+
+    exportMealPlanWeekToIcs([], {}, new Map());
+
+    expect(URL.createObjectURL).toHaveBeenCalled();
+    const link = appendSpy.mock.calls
+      .map((call) => call[0])
+      .find((node): node is HTMLAnchorElement => node instanceof HTMLAnchorElement);
+    expect(link?.download).toBe('mealplan_week_week.ics');
+    appendSpy.mockRestore();
+  });
 });
 
 describe('exportService recipe format branches', () => {
@@ -331,5 +474,44 @@ describe('exportService recipe format branches', () => {
     exportRecipeToTxt(recipe);
     exportRecipeToMarkdown(recipe);
     expect(URL.createObjectURL).toHaveBeenCalled();
+  });
+
+  it('exportRecipeToPdf paginiert bei langem Rezept (addPage)', async () => {
+    jsPdfInstances.length = 0;
+    const longStep =
+      'Diesen Schritt sehr ausführlich beschreiben, damit splitTextToSize viele Zeilen liefert und die Pagination greift.';
+    const recipe: Recipe = {
+      id: 3,
+      recipeTitle: 'Langes Rezept mit Pagination',
+      shortDescription: 'Eine etwas längere Kurzbeschreibung für den PDF-Export-Testfall.',
+      prepTime: '10',
+      cookTime: '40',
+      totalTime: '50',
+      servings: '4',
+      difficulty: 'Mittel',
+      ingredients: [
+        {
+          sectionTitle: 'Hauptzutaten',
+          items: Array.from({ length: 12 }, (_, i) => ({
+            name: `Zutat Nummer ${i} mit etwas längerem Namen`,
+            quantity: `${i + 1}`,
+            unit: 'g',
+          })),
+        },
+      ],
+      instructions: Array.from({ length: 8 }, (_, i) => `${longStep} Schritt ${i + 1}.`),
+      nutritionPerServing: { calories: '', protein: '', fat: '', carbs: '' },
+      tags: { course: [], cuisine: [], occasion: [], mainIngredient: [], prepMethod: [], diet: [] },
+      expertTips: [],
+      isFavorite: false,
+      updatedAt: Date.now(),
+    };
+
+    await exportRecipeToPdf(recipe);
+
+    expect(jsPdfInstances.length).toBeGreaterThan(0);
+    const doc = jsPdfInstances[jsPdfInstances.length - 1];
+    expect(doc.addPage).toHaveBeenCalled();
+    expect(doc.save).toHaveBeenCalled();
   });
 });

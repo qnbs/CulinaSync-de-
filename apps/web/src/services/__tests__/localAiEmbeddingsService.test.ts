@@ -4,9 +4,17 @@ import { getDefaultSettings } from '../settingsMerge';
 
 const mockEmbedText = vi.fn();
 const mockGetTransformersEngineStatus = vi.fn();
+const mockEnqueue = vi.fn((fn: () => Promise<void>) => {
+  void fn();
+  return Promise.resolve();
+});
 
 vi.mock('../embeddingWorkerService', () => ({
   embedTextInWorker: (text: string) => mockEmbedText(text),
+}));
+
+vi.mock('../localAiWorkerBus', () => ({
+  getLocalAiWorkerBus: () => ({ enqueue: mockEnqueue }),
 }));
 
 vi.mock('@domain/ai-core', async (importOriginal) => {
@@ -23,6 +31,8 @@ describe('localAiEmbeddingsService', () => {
     vi.clearAllMocks();
     await db.aiEmbeddings.clear();
     await db.mealPlan.clear();
+    await db.recipes.clear();
+    await db.pantry.clear();
     mockGetTransformersEngineStatus.mockResolvedValue({ available: true });
     mockEmbedText.mockImplementation(async (text: string) => {
       if (text.includes('Tomaten')) {
@@ -378,5 +388,252 @@ describe('localAiEmbeddingsService', () => {
       ingredients: [],
     } as never);
     expect(mockEmbedText).not.toHaveBeenCalled();
+  });
+
+  it('searchSemanticRagChunks liefert leer bei null query vector', async () => {
+    mockEmbedText.mockResolvedValueOnce(null);
+    const { searchSemanticRagChunks } = await import('../localAiEmbeddingsService');
+    const chunks = await searchSemanticRagChunks({
+      queryText: 'Tomaten',
+      settings: getDefaultSettings(),
+      limit: 5,
+    });
+    expect(chunks).toEqual([]);
+  });
+
+  it('indexPantryEmbedding aktualisiert bestehenden Eintrag bei neuem contentHash', async () => {
+    const id = await db.pantry.add({
+      name: 'Tomaten',
+      quantity: 1,
+      unit: 'Stk',
+      category: 'Gemüse',
+      createdAt: 1,
+      updatedAt: 1,
+    });
+
+    const { indexPantryEmbedding } = await import('../localAiEmbeddingsService');
+    await indexPantryEmbedding({
+      id,
+      name: 'Tomaten',
+      quantity: 1,
+      unit: 'Stk',
+      category: 'Gemüse',
+      createdAt: 1,
+      updatedAt: 1,
+    });
+
+    mockEmbedText.mockResolvedValueOnce([0.2, 0.8, 0]);
+    await indexPantryEmbedding({
+      id,
+      name: 'Tomaten',
+      quantity: 5,
+      unit: 'Stk',
+      category: 'Gemüse',
+      createdAt: 1,
+      updatedAt: 2,
+    });
+
+    const stored = await db.aiEmbeddings.where('[sourceType+sourceId]').equals(['pantry', id]).first();
+    expect(stored?.vector).toEqual([0.2, 0.8, 0]);
+    expect(mockEmbedText).toHaveBeenCalledTimes(2);
+    expect(await db.aiEmbeddings.count()).toBe(1);
+  });
+
+  it('indexPantryEmbedding ueberspringt Eintraege ohne id', async () => {
+    const { indexPantryEmbedding } = await import('../localAiEmbeddingsService');
+    await indexPantryEmbedding({
+      name: 'OhneId',
+      quantity: 1,
+      unit: 'Stk',
+      category: 'Gemüse',
+      createdAt: 1,
+      updatedAt: 1,
+    });
+    expect(mockEmbedText).not.toHaveBeenCalled();
+  });
+
+  it('indexRecipeEmbedding ueberspringt Rezepte ohne id', async () => {
+    const { indexRecipeEmbedding } = await import('../localAiEmbeddingsService');
+    await indexRecipeEmbedding({
+      recipeTitle: 'Ohne Id',
+      shortDescription: 'x',
+      prepTime: '1',
+      cookTime: '1',
+      totalTime: '2',
+      servings: '1',
+      difficulty: 'leicht',
+      ingredients: [{ sectionTitle: '', items: [{ name: 'Salz', quantity: '1', unit: 'g' }] }],
+      instructions: ['rühren'],
+      nutritionPerServing: { calories: '0', protein: '0', fat: '0', carbs: '0' },
+      tags: { course: [], cuisine: [], occasion: [], mainIngredient: [], prepMethod: [], diet: [] },
+      expertTips: [],
+      isFavorite: false,
+      updatedAt: 1,
+    });
+    expect(mockEmbedText).not.toHaveBeenCalled();
+  });
+
+  it('reindexAllEmbeddings bricht ab wenn Semantic RAG nicht verfuegbar', async () => {
+    // enableEmbeddings:false → Early-Return ohne Engine-Status; kein mockResolvedValueOnce (sonst Leak)
+    const { reindexAllEmbeddings } = await import('../localAiEmbeddingsService');
+    await reindexAllEmbeddings({
+      ...getDefaultSettings(),
+      localAi: { ...getDefaultSettings().localAi, enableEmbeddings: false },
+    });
+    expect(mockEmbedText).not.toHaveBeenCalled();
+    expect(mockGetTransformersEngineStatus).not.toHaveBeenCalled();
+  });
+
+  it('indexMealPlanEmbedding bricht ab wenn embedText null liefert', async () => {
+    mockEmbedText.mockResolvedValueOnce(null);
+    const mealId = await db.mealPlan.add({
+      date: '2026-06-20',
+      mealType: 'Frühstück',
+      note: 'Joghurt',
+    });
+    const { indexMealPlanEmbedding } = await import('../localAiEmbeddingsService');
+    await indexMealPlanEmbedding({
+      id: mealId,
+      date: '2026-06-20',
+      mealType: 'Frühstück',
+      note: 'Joghurt',
+    });
+    expect(await db.aiEmbeddings.count()).toBe(0);
+  });
+
+  it('indexMealPlanEmbedding ueberspringt bei gleichem contentHash', async () => {
+    const mealId = await db.mealPlan.add({
+      date: '2026-06-21',
+      mealType: 'Mittagessen',
+      note: 'Bowl',
+    });
+    const item = {
+      id: mealId,
+      date: '2026-06-21',
+      mealType: 'Mittagessen' as const,
+      note: 'Bowl',
+    };
+    const { indexMealPlanEmbedding } = await import('../localAiEmbeddingsService');
+    await indexMealPlanEmbedding(item);
+    await indexMealPlanEmbedding(item);
+    expect(mockEmbedText).toHaveBeenCalledTimes(1);
+  });
+
+  it('searchSemanticRagChunks laedt Recipe- und MealPlan-Kontexttexte', async () => {
+    const recipeId = await db.recipes.add({
+      recipeTitle: 'Pasta Tomaten',
+      shortDescription: 'x',
+      prepTime: '5',
+      cookTime: '10',
+      totalTime: '15',
+      servings: '2',
+      difficulty: 'leicht',
+      ingredients: [{ sectionTitle: 'H', items: [{ name: 'Tomaten', quantity: '1', unit: 'Stk' }] }],
+      instructions: ['kochen'],
+      nutritionPerServing: { calories: '0', protein: '0', fat: '0', carbs: '0' },
+      tags: { course: [], cuisine: [], occasion: [], mainIngredient: [], prepMethod: [], diet: [] },
+      expertTips: [],
+      isFavorite: false,
+      updatedAt: 1,
+    });
+
+    const mealId = await db.mealPlan.add({
+      date: '2026-06-22',
+      mealType: 'Abendessen',
+      recipeId,
+      note: 'Reste',
+    });
+
+    await db.aiEmbeddings.bulkAdd([
+      {
+        sourceType: 'recipe',
+        sourceId: recipeId,
+        contentHash: 'r1',
+        modelId: 'Xenova/all-MiniLM-L6-v2',
+        vector: [1, 0, 0],
+        updatedAt: Date.now(),
+      },
+      {
+        sourceType: 'mealPlan',
+        sourceId: mealId,
+        contentHash: 'm1',
+        modelId: 'Xenova/all-MiniLM-L6-v2',
+        vector: [0.95, 0.05, 0],
+        updatedAt: Date.now(),
+      },
+    ]);
+
+    // Query-Vektor explizit setzen (mockImplementation wuerde sonst erneut greifen)
+    mockEmbedText.mockReset();
+    mockEmbedText.mockResolvedValue([1, 0, 0]);
+
+    const { searchSemanticRagChunks } = await import('../localAiEmbeddingsService');
+    const settings = {
+      ...getDefaultSettings(),
+      localAi: { ...getDefaultSettings().localAi, enableEmbeddings: true },
+      aiPreferences: {
+        ...getDefaultSettings().aiPreferences,
+        useRecipeHistoryContext: true,
+        usePantryContext: false,
+        useMealPlanContext: true,
+      },
+    };
+
+    const chunks = await searchSemanticRagChunks({
+      queryText: 'Pasta Tomaten',
+      settings,
+      limit: 5,
+    });
+
+    expect(chunks.map((chunk) => chunk.sourceType).sort()).toEqual(['mealPlan', 'recipe']);
+    expect(chunks.every((chunk) => chunk.text.length > 0)).toBe(true);
+  });
+
+  it('searchSemanticRagChunks ignoriert Embeddings mit leerem Vektor', async () => {
+    const pantryId = await db.pantry.add({
+      name: 'Tomaten',
+      quantity: 1,
+      unit: 'Stk',
+      category: 'Gemüse',
+      createdAt: 1,
+      updatedAt: 1,
+    });
+
+    await db.aiEmbeddings.add({
+      sourceType: 'pantry',
+      sourceId: pantryId,
+      contentHash: 'empty-vec',
+      modelId: 'Xenova/all-MiniLM-L6-v2',
+      vector: [],
+      updatedAt: Date.now(),
+    });
+
+    mockEmbedText.mockResolvedValueOnce([1, 0, 0]);
+
+    const { searchSemanticRagChunks } = await import('../localAiEmbeddingsService');
+    const chunks = await searchSemanticRagChunks({
+      queryText: 'Tomaten',
+      settings: {
+        ...getDefaultSettings(),
+        aiPreferences: {
+          ...getDefaultSettings().aiPreferences,
+          useRecipeHistoryContext: false,
+          useMealPlanContext: false,
+        },
+      },
+      limit: 5,
+    });
+
+    expect(chunks).toEqual([]);
+  });
+
+  it('debouncedReindexAllEmbeddings enqueued nach Timeout', async () => {
+    vi.useFakeTimers();
+    const { debouncedReindexAllEmbeddings } = await import('../localAiEmbeddingsService');
+    debouncedReindexAllEmbeddings(getDefaultSettings());
+    expect(mockEnqueue).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(mockEnqueue).toHaveBeenCalled();
+    vi.useRealTimers();
   });
 });

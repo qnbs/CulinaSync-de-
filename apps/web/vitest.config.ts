@@ -26,7 +26,7 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
       reportsDirectory: './coverage',
-      // QNBS-v3: Lines ≥82; Branches Floor 73 (Richtung 82 % / M5.9 → 88 %) — Workers aus Gate
+      // QNBS-v3: Lines ≥82; Branches Floor 74 (Richtung 82 % / M5.9 → 88 %) — Workers aus Gate
       exclude: [
         '**/node_modules/**',
         '**/dist/**',
@@ -40,7 +40,7 @@ export default defineConfig({
         lines: 82,
         statements: 80,
         functions: 75,
-        branches: 73,
+        branches: 74,
       },
     },
   },

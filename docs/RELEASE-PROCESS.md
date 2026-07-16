@@ -19,7 +19,7 @@
 ## v1.0 readiness (tracked)
 
 - `INTRO_GATES_ENABLED` re-enabled (dismissible onboarding; What's New after first-run).
-- Coverage path toward M5.9 (≥88 % long-term); interim branch floor **73** (Ziel 82) in `vitest.config.ts`.
+- Coverage path toward M5.9 (≥88 % long-term); interim branch floor **74** (Ziel 82) in `vitest.config.ts`.
 - Privacy policy linked from Help/Settings (`docs/legal/DATENSCHUTZ.md`).
 - Desktop R-012: Tag/Draft `v0.2.4` existiert — Draft bei Bedarf publishen.
 - Optional Changesets tooling can be added later; until then this runbook is canonical.
