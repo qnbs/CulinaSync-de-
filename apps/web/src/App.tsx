@@ -39,7 +39,7 @@ const BottomNav = lazy(() => import('./components/BottomNav'));
 const Onboarding = lazy(() => import('./components/Onboarding'));
 const VoiceControlUI = lazy(() => import('./components/VoiceControlUI'));
 const CommandPalette = lazy(() => import('./components/CommandPalette').then(m => ({ default: m.CommandPalette })));
-// QNBS-v3: bedingt gerenderte Nicht-First-Paint-Komponenten lazy | WhatsNew/DemoBanner hängen an INTRO_GATES_ENABLED (aktuell false) und lagen ungenutzt im Entry-Chunk; SetupHost zeigt nur den Wizard bei Bedarf → raus aus dem Initial-Load-Budget.
+// QNBS-v3: bedingt gerenderte Nicht-First-Paint-Komponenten lazy | WhatsNew/DemoBanner an INTRO_GATES_ENABLED; SetupHost nur bei Bedarf → raus aus dem Initial-Load-Budget.
 const WhatsNewModal = lazy(() => import('./components/WhatsNewModal').then(m => ({ default: m.WhatsNewModal })));
 const LocalAiSetupHost = lazy(() => import('./components/local-ai/LocalAiSetupHost').then(m => ({ default: m.LocalAiSetupHost })));
 const DemoModeBanner = lazy(() => import('./components/DemoModeBanner').then(m => ({ default: m.DemoModeBanner })));
@@ -67,7 +67,7 @@ const App: React.FC = () => {
   const closeOnboarding = useTransientUiStore((s) => s.closeOnboarding);
 
   const [appVersion] = useState<string>(APP_VERSION || 'N/A');
-  // QNBS-v3: Intro-Gates (Onboarding/Tour/Demo/What's-New) bis ~v1.0 abgeschaltet | störender, nicht-wegklickbarer Tour/Demo-Eingang | INTRO_GATES_ENABLED
+  // QNBS-v3: Intro-Gates v1.0 — dismissible Onboarding; What's-New erst nach First-Run
   const showOnboarding =
     INTRO_GATES_ENABLED &&
     (onboardingOpen ||
@@ -77,20 +77,26 @@ const App: React.FC = () => {
   useAccentTheme();
   usePwaLaunchHandlers();
 
+  // QNBS-v3: Intro-Abschluss zentral | Demo-Query und Onboarding setzen Version, damit What's-New nicht sofort stapelt
+  const markIntroComplete = useCallback(() => {
+    localStorage.setItem('culinaSyncOnboarded', 'true');
+    localStorage.setItem('culinasync_version', APP_VERSION || appVersion);
+    closeOnboarding();
+  }, [appVersion, closeOnboarding]);
+
   const handleDemoEntryResolved = useCallback(
     (mode: DemoEntryResult) => {
       if (!mode) {
         return;
       }
-      localStorage.setItem('culinaSyncOnboarded', 'true');
-      closeOnboarding();
+      markIntroComplete();
       if (mode === 'demo') {
         dispatch(addToastAction({ message: t('demo.entry.loaded'), type: 'success' }));
       } else {
         dispatch(addToastAction({ message: t('demo.entry.try'), type: 'info' }));
       }
     },
-    [closeOnboarding, dispatch, t],
+    [dispatch, markIntroComplete, t],
   );
   useDemoEntryQuery(handleDemoEntryResolved, INTRO_GATES_ENABLED);
 
@@ -133,8 +139,7 @@ const App: React.FC = () => {
   ]);
 
   const handleOnboardingComplete = () => {
-    localStorage.setItem('culinaSyncOnboarded', 'true');
-    closeOnboarding();
+    markIntroComplete();
   };
 
   const removeToast = useCallback((id: string) => {
@@ -316,7 +321,7 @@ const App: React.FC = () => {
 
   return (
     <GlobalErrorBoundary>
-      {INTRO_GATES_ENABLED && (
+      {INTRO_GATES_ENABLED && !showOnboarding && (
         <Suspense fallback={null}>
           <WhatsNewModal />
         </Suspense>

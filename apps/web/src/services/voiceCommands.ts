@@ -105,7 +105,8 @@ export const processCommand = (transcript: string, currentPage: Page): CommandAc
     if (command.includes('beende kochmodus') || command.includes('kochmodus beenden') || command.includes('exit cook mode') || command.includes('stop cook mode')) return { type: 'EXIT_COOK_MODE' };
     if ((command.includes('starte kochmodus') || command.includes('start cook mode')) && currentPage === 'recipes') return { type: 'START_COOK_MODE' };
 
-    const timerStartMatch = command.match(/timer (start|starte|starten)(?:\s+(?:für|fuer)\s+(\d+)\s*(sekunden|sekunde|minuten|minute))?/);
+    // QNBS-v3: Längere Alternativen zuerst — sonst matched `start` in `starte` und verschluckt die Dauer
+    const timerStartMatch = command.match(/timer (starten|starte|start)(?:\s+(?:für|fuer)\s+(\d+)\s*(sekunden|sekunde|minuten|minute))?/);
     if (timerStartMatch) {
         const amount = timerStartMatch[2] ? parseInt(timerStartMatch[2], 10) : 0;
         const unit = timerStartMatch[3] || '';

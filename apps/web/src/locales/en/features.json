@@ -248,13 +248,14 @@
       "description": "Fills your pantry with sample items so you can test immediately.",
       "load": "Load demo",
       "loading": "Loading demo...",
-      "loaded": "Demo loaded"
+      "continue": "Continue with demo"
     },
     "localAi": {
       "title": "Local AI (default)",
       "description": "Recipe ideas and RAG run local-first — cloud optional via Gemini API key."
     },
     "skip": "Skip",
+    "dismissAria": "Dismiss introduction",
     "joyride": {
       "back": "Back",
       "close": "Close",
