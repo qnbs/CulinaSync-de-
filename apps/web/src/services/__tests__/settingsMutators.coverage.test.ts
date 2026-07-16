@@ -98,4 +98,135 @@ describe('settingsMutators coverage sweep', () => {
     expect(draft.appearance.accentColor).toBe('sky');
     expect(draft.policies.minPantryStock[0]?.name).toBe('Milch');
   });
+
+  it('weist ungültige Werte ab (Reject-Zweige)', () => {
+    const draft = structuredClone(getDefaultSettings());
+    const language = draft.language;
+    const creativity = draft.aiPreferences.creativityLevel;
+    const servings = draft.defaultServings;
+    const gpu = draft.localAi.gpuTierPreference;
+    const model = draft.localAi.preferredGenerativeModel;
+    const stock = draft.policies.minPantryStock;
+
+    const rejects: Array<[SettingsPath, unknown]> = [
+      ['language', 'fr'],
+      ['displayName', 12],
+      ['defaultServings', Number.NaN],
+      ['defaultServings', '3'],
+      ['weekStart', 'Friday'],
+      ['aiPreferences.creativityLevel', Number.NaN],
+      ['aiPreferences.dietaryRestrictions', [1, 2]],
+      ['aiPreferences.preferredCuisines', 'italienisch'],
+      ['aiPreferences.customInstruction', false],
+      ['aiPreferences.routingMode', 'hybrid'],
+      ['aiPreferences.responseStyle', 'verbose'],
+      ['aiPreferences.usePantryContext', 'yes'],
+      ['aiPreferences.maxRagChunks', Number.POSITIVE_INFINITY],
+      ['localAi.enabled', 1],
+      ['localAi.gpuTierPreference', 'ultra'],
+      ['localAi.preferredGenerativeModel', 'gpt-4'],
+      ['localAi.cacheTtlHours', '48'],
+      ['localAi.maxConcurrentJobs', 0],
+      ['localAi.maxModelStorageMb', Number.NaN],
+      ['localAi.downloadedModels', ['ok', 2]],
+      ['localAi.ollamaBaseUrl', 123],
+      ['localAi.ollamaBaseUrl', 'x'.repeat(300)],
+      ['privacy.analyticsEnabled', 'no'],
+      ['pantry.defaultSort', 'price'],
+      ['pantry.unitSystem', 'us'],
+      ['pantry.expiryWarningDays', -1],
+      ['recipeBook.defaultSort', 'rating'],
+      ['recipeBook.defaultView', 'cards'],
+      ['shoppingList.defaultSort', 'recent'],
+      ['shoppingList.autoCategorize', 'true'],
+      ['mealPlanner.avoidRepeatWithinDays', '5'],
+      ['speechSynthesis.rate', 'fast'],
+      ['speechRecognition.mode', 'azure'],
+      ['speechRecognition.whisperModelSize', 'large'],
+      ['appearance.accentColor', 'purple'],
+      ['policies.avoidAllergens', 'nüsse'],
+      ['policies.minPantryStock', [{ name: 'Milch', min: -1 }]],
+      ['policies.minPantryStock', [{ name: 1, min: 1 }]],
+      ['policies.minPantryStock', [null]],
+      ['policies.strictAllergenEnforcement', 'yes'],
+    ];
+
+    for (const [path, value] of rejects) {
+      expect(applySettingsChange(draft, path, value), path).toBe(true);
+    }
+
+    expect(draft.language).toBe(language);
+    expect(draft.aiPreferences.creativityLevel).toBe(creativity);
+    expect(draft.defaultServings).toBe(servings);
+    expect(draft.localAi.gpuTierPreference).toBe(gpu);
+    expect(draft.localAi.preferredGenerativeModel).toBe(model);
+    expect(draft.policies.minPantryStock).toEqual(stock);
+  });
+
+  it('clampInt/clampFloat begrenzt Grenzwerte', () => {
+    const draft = structuredClone(getDefaultSettings());
+    expect(applySettingsChange(draft, 'defaultServings', 100)).toBe(true);
+    expect(draft.defaultServings).toBe(24);
+    expect(applySettingsChange(draft, 'aiPreferences.creativityLevel', -0.5)).toBe(true);
+    expect(draft.aiPreferences.creativityLevel).toBe(0);
+    expect(applySettingsChange(draft, 'aiPreferences.creativityLevel', 1.5)).toBe(true);
+    expect(draft.aiPreferences.creativityLevel).toBe(1);
+    expect(applySettingsChange(draft, 'localAi.maxConcurrentJobs', 9)).toBe(true);
+    expect(draft.localAi.maxConcurrentJobs).toBe(4);
+  });
+
+  it('deckt alle Enum-OR-Arme und unknown path ab', () => {
+    const draft = structuredClone(getDefaultSettings());
+    expect(applySettingsChange(draft, 'not.a.path', true)).toBe(false);
+
+    for (const lang of ['de', 'en'] as const) {
+      expect(applySettingsChange(draft, 'language', lang)).toBe(true);
+      expect(draft.language).toBe(lang);
+    }
+    for (const week of ['Monday', 'Sunday'] as const) {
+      expect(applySettingsChange(draft, 'weekStart', week)).toBe(true);
+    }
+    for (const mode of ['local-only', 'local-first', 'cloud-first'] as const) {
+      expect(applySettingsChange(draft, 'aiPreferences.routingMode', mode)).toBe(true);
+    }
+    for (const style of ['concise', 'balanced', 'detailed'] as const) {
+      expect(applySettingsChange(draft, 'aiPreferences.responseStyle', style)).toBe(true);
+    }
+    for (const tier of ['auto', 'high', 'balanced', 'efficient'] as const) {
+      expect(applySettingsChange(draft, 'localAi.gpuTierPreference', tier)).toBe(true);
+    }
+    for (const model of [
+      'auto',
+      'webllm-qwen-2.5-1.5b',
+      'webllm-phi-3.5',
+      'webllm-llama-3.2-1b',
+      'heuristic-only',
+    ] as const) {
+      expect(applySettingsChange(draft, 'localAi.preferredGenerativeModel', model)).toBe(true);
+    }
+    for (const mode of ['browser', 'whisper'] as const) {
+      expect(applySettingsChange(draft, 'speechRecognition.mode', mode)).toBe(true);
+    }
+    for (const size of ['tiny', 'base', 'small'] as const) {
+      expect(applySettingsChange(draft, 'speechRecognition.whisperModelSize', size)).toBe(true);
+    }
+    for (const sort of ['name', 'expiryDate', 'updatedAt', 'createdAt'] as const) {
+      expect(applySettingsChange(draft, 'pantry.defaultSort', sort)).toBe(true);
+    }
+    for (const sort of ['newest', 'favorites', 'a-z', 'z-a'] as const) {
+      expect(applySettingsChange(draft, 'recipeBook.defaultSort', sort)).toBe(true);
+    }
+    for (const sort of ['category', 'alpha'] as const) {
+      expect(applySettingsChange(draft, 'shoppingList.defaultSort', sort)).toBe(true);
+    }
+    for (const unit of ['metric', 'imperial'] as const) {
+      expect(applySettingsChange(draft, 'pantry.unitSystem', unit)).toBe(true);
+    }
+    for (const view of ['grid', 'list'] as const) {
+      expect(applySettingsChange(draft, 'recipeBook.defaultView', view)).toBe(true);
+    }
+    for (const accent of ['amber', 'rose', 'sky', 'emerald'] as const) {
+      expect(applySettingsChange(draft, 'appearance.accentColor', accent)).toBe(true);
+    }
+  });
 });

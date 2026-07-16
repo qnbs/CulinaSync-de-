@@ -238,4 +238,74 @@ describe('shoppingListRepository', () => {
     expect(out.added).toBe(1);
     expect(out.updated).toBe(1);
   });
+
+  it('generateListFromMealPlan: pantry/existing/qty0/missing recipe', async () => {
+    const upcomingMeals = [
+      { date: '2026-06-02', recipeId: 1, isCooked: false, mealType: 'Mittagessen' as const, servings: 4 },
+      { date: '2026-06-03', recipeId: 99, isCooked: false, mealType: 'Abendessen' as const },
+    ];
+    const mealPlanBetween = vi.fn(() => ({
+      filter: vi.fn(() => ({ toArray: vi.fn().mockResolvedValue(upcomingMeals) })),
+    }));
+    const { db } = await import('../dbInstance');
+    vi.mocked(db.mealPlan.where).mockReturnValue({
+      between: mealPlanBetween,
+    } as unknown as ReturnType<typeof db.mealPlan.where>);
+
+    vi.mocked(db.recipes.where).mockReturnValue({
+      anyOf: vi.fn(() => ({
+        toArray: vi.fn().mockResolvedValue([
+          {
+            id: 1,
+            servings: '2',
+            ingredients: [
+              {
+                sectionTitle: 'Haupt',
+                items: [
+                  { name: 'Pasta', quantity: '200', unit: 'g' },
+                  { name: 'Salz', quantity: '0', unit: 'g' },
+                  { name: 'Milch', quantity: '1', unit: 'l' },
+                ],
+              },
+            ],
+          },
+        ]),
+      })),
+    } as unknown as ReturnType<typeof db.recipes.where>);
+
+    vi.mocked(db.pantry.toArray).mockResolvedValue([
+      { id: 1, name: 'Pasta', quantity: 500, unit: 'g', category: 'x', createdAt: 1, updatedAt: 1 },
+    ]);
+
+    isCheckedEquals.mockReturnValue({
+      toArray: vi.fn().mockResolvedValue([{ id: 3, name: 'Milch', isChecked: false }]),
+    });
+
+    const { generateListFromMealPlan } = await import('../repositories/shoppingListRepository');
+    const out = await generateListFromMealPlan();
+    expect(out.existing).toBeGreaterThanOrEqual(1);
+    expect(out.added).toBe(0);
+  });
+
+  it('moveCheckedToPantry merged bestehende Pantry-Menge', async () => {
+    isCheckedEquals.mockReturnValue({
+      toArray: vi.fn().mockResolvedValue([
+        { id: 9, name: 'Milch', quantity: 1, unit: 'l', category: 'Milchprodukte', isChecked: true },
+      ]),
+    });
+    pantryFirst.mockResolvedValueOnce({
+      id: 2,
+      name: 'Milch',
+      quantity: 2,
+      unit: 'l',
+      category: 'Milchprodukte',
+      createdAt: 1,
+      updatedAt: 1,
+    });
+    const { moveCheckedToPantry } = await import('../repositories/shoppingListRepository');
+    const moved = await moveCheckedToPantry();
+    expect(moved).toBe(1);
+    expect(pantryUpdate).toHaveBeenCalled();
+    expect(pantryAdd).not.toHaveBeenCalled();
+  });
 });

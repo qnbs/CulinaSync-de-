@@ -260,4 +260,76 @@ describe('exportMealPlanWeekToIcs', () => {
     const blobArg = (URL.createObjectURL as ReturnType<typeof vi.fn>).mock.calls[0][0] as Blob;
     expect(blobArg).toBeInstanceOf(Blob);
   });
+
+  it('schreibt leere Woche und überspringt Slots ohne Inhalt', () => {
+    const monday = new Date(Date.UTC(2026, 4, 4));
+    exportMealPlanWeekToIcs([monday], {}, new Map());
+    expect(URL.createObjectURL).toHaveBeenCalled();
+  });
+});
+
+describe('exportService recipe format branches', () => {
+  beforeEach(() => {
+    URL.createObjectURL = vi.fn(() => 'blob:recipe');
+    URL.revokeObjectURL = vi.fn();
+    HTMLAnchorElement.prototype.click = vi.fn();
+  });
+
+  it('exportRecipeToTxt/Markdown mit Section, Tips und leeren Mengen', async () => {
+    const { exportRecipeToTxt, exportRecipeToMarkdown, exportRecipeToJson } = await import('../exportService');
+    const recipe: Recipe = {
+      id: 1,
+      recipeTitle: 'Soup/Test',
+      shortDescription: 'Warm',
+      prepTime: '5',
+      cookTime: '10',
+      totalTime: '15',
+      servings: '2',
+      difficulty: 'Einfach',
+      ingredients: [
+        {
+          sectionTitle: 'Basis',
+          items: [
+            { name: 'Wasser', quantity: '', unit: '' },
+            { name: 'Salz', quantity: '1', unit: 'Prise' },
+          ],
+        },
+        { sectionTitle: '', items: [{ name: 'Pfeffer', quantity: '1', unit: 'Prise' }] },
+      ],
+      instructions: ['Kochen'],
+      nutritionPerServing: { calories: '', protein: '', fat: '', carbs: '' },
+      tags: { course: [], cuisine: [], occasion: [], mainIngredient: [], prepMethod: [], diet: [] },
+      expertTips: [{ title: 'Tipp', content: 'Nicht zu lange' }],
+      isFavorite: false,
+      updatedAt: Date.now(),
+    };
+    exportRecipeToJson(recipe);
+    exportRecipeToTxt(recipe);
+    exportRecipeToMarkdown(recipe);
+    expect(URL.createObjectURL).toHaveBeenCalled();
+  });
+
+  it('exportRecipe ohne Tips und ohne SectionTitle', async () => {
+    const { exportRecipeToTxt, exportRecipeToMarkdown } = await import('../exportService');
+    const recipe: Recipe = {
+      id: 2,
+      recipeTitle: 'Plain',
+      shortDescription: '',
+      prepTime: '',
+      cookTime: '',
+      totalTime: '',
+      servings: '1',
+      difficulty: 'Einfach',
+      ingredients: [{ sectionTitle: '', items: [{ name: 'X', quantity: '1', unit: 'g' }] }],
+      instructions: ['Y'],
+      nutritionPerServing: { calories: '', protein: '', fat: '', carbs: '' },
+      tags: { course: [], cuisine: [], occasion: [], mainIngredient: [], prepMethod: [], diet: [] },
+      expertTips: [],
+      isFavorite: false,
+      updatedAt: Date.now(),
+    };
+    exportRecipeToTxt(recipe);
+    exportRecipeToMarkdown(recipe);
+    expect(URL.createObjectURL).toHaveBeenCalled();
+  });
 });

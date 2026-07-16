@@ -1,78 +1,40 @@
-# Master Perfection — Follow-up To-Do (Post Phase 0)
+# TODO — Master Perfection (Follow-up)
 
-> **Erstellt:** 2026-07-15 · **Aktualisiert:** 2026-07-15 (Phase 3 Session)  
-> **Phase 0 Status:** ✅ Complete  
-> **Phase 1–2 Status:** ✅ Complete (`main`)  
-> **Phase 3 Status:** ✅ **Substantial progress this session** — see below.
+Stand nach Sprint Coverage / Intro / Tauri (2026-07-16).
 
----
+## Erledigt in diesem Sprint
 
-## Phase 0 — Erledigt (nicht erneut tun)
-
-| Item | Ergebnis |
-|------|----------|
-| Dependabot #106–#111 / #112 | ✅ via #106 + #113 |
-| pnpm 11.13 Audit-Gate | ✅ |
-| R-BRANCHPROT | ✅ |
-
----
-
-## Phase 1–2 — Erledigt
-
-Siehe vorherige Session / CHANGELOG. Kurz: RAG, Sanitizer, Whisper, Backup-Zod, Dead-Controls-Ehrlichkeit, Privacy, SBOM, Coverage-Lines ≥82.
-
----
-
-## Phase 3 — Erledigt in dieser Session
-
-### Local AI
-
-- [x] **M11.4 ONNX Vision** — `localAiOnnxEngine` + `vision.worker` + `localAiVisionService`; Routing in `aiProviderService`; EXIF-Strip; Settings-Toggles live
-- [x] Inference-Cache Service verdrahten (`aiInferenceCache` Dexie v14)
-- [x] Model-Download-UX (WebLLM Progress / `downloadedModels` / Prepare-Button)
-- [x] Ollama-Connector (+ Health-Probe, CSP Loopback)
-
-### Testing & Qualität
-
-- [x] E2E Offline-Chef (`e2e/chef-offline.spec.ts`)
-- [x] Branch-Coverage-Floor **64** gehalten (Workers exclude; Ziel 82 weiter offen)
-- [x] Gezielte Tests: Cache, Vision-Format, Ollama-Probe, Mutators, Offline-Fallback, htmlSanitizer, ONNX-Engine
-
-### Security / Supply Chain
-
-- [x] PBKDF2-Angleichung (CSB3 + Sync-Credentials v3 = 600k; Legacy lesbar) — `cryptoConstants.ts`
-- [x] Dexie at-rest encryption — **Eval ADR** `docs/ADR-DEXIE-AT-REST-ENCRYPTION.md` (defer P2)
-
-### DevOps / Docs / DX
-
-- [x] Tauri `Cargo.toml` → **0.2.4** (Version-Drift behoben; Draft-Tag R-012 noch manuell)
-- [x] `local-ai-patterns.mdc` aktualisiert
+- [x] Intro-Gates re-aktiviert (`INTRO_GATES_ENABLED=true`) — dismissible Onboarding (Escape/Backdrop/X/Skip), What's-New erst nach First-Run, i18n DE/EN, Tests
+- [x] Branch-Coverage Floor **64 → 70** (Ist ~70,5 %); Ziel **82 %** bleibt Folge-Sprint (kein UI-Exclude-Cheat)
+- [x] R-012: Tag `v0.2.4` + Draft-Release mit Desktop-Assets **bereits vorhanden** (Workflow grün 2026-06-05) — Publish der Draft-Release ist manueller Owner-Schritt
+- [x] Voice-Timer-Regex Fix (`starten|starte|start`)
 - [x] CHANGELOG / Backlog / dieses TODO
+
+## Offen (nächster Sprint)
+
+### Coverage
+
+- [ ] Branch-Coverage ≥**82 %** (Hotspots: `useShoppingList`, `exportService`, `dbMigrations`, `aiProviderService`, Hooks/UI)
+- [ ] Danach Threshold in `vitest.config.ts` auf gemessenen Ist-Wert anheben
+
+### Release / Desktop
+
+- [ ] Draft `CulinaSync v0.2.4` auf GitHub **publishen** (Owner) wenn Desktop-QA ok
 - [ ] `graphify update .` (CLI ggf. nicht installiert)
-- [ ] R-012: Tag `v0.2.4` + Tauri Draft Release nach Workflow
 
-### Strategic (v1.0+) — bewusst offen
+### Strategic (v1.0+)
 
-- [ ] Intro-Gates re-aktivieren (`INTRO_GATES_ENABLED`)
-- [ ] Branch-Coverage ≥82 % (weiterer Sprint)
 - [ ] Nostr / federated Sync — nur Spike
 - [ ] Native Mobile Path — Roadmap-Notiz
-
----
-
-## Phase 3 — Verification
-
-- [x] lint · type-check · i18n · Vitest (+coverage gate) · test:scripts · build · audit (lokal)
-- [x] CI auf PR bis grün (validate, i18n, E2E Smoke, CodeQL, Lighthouse, Socket, GitGuardian)
-- [x] Bot-Inline-Kommentare: keine offenen Review-Threads (CodeRabbit draft-skip)
+- [ ] M5.9 Coverage → 88 %
 
 ---
 
 ## Empfohlener Startbefehl (nächster Agent)
 
 ```text
-Lies docs/TODO-MASTER-PERFECTION.md — Phase 3 Local-AI weitgehend verdrahtet.
-Priorität: Branch-Coverage→82 %, R-012 Tag v0.2.4, Intro-Gates (v1.0).
+Lies docs/TODO-MASTER-PERFECTION.md.
+Priorität: Branch-Coverage 70→82 % (Service/Hook-Hotspots), optional Draft v0.2.4 publishen.
 Branch: cursor/<kurzname>-0ad6 ab main. CI bis grün.
 ```
 

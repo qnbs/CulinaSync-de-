@@ -7,7 +7,7 @@ import i18n from './i18n';
 import { createTestStore } from './test/createTestStore';
 
 // Force the intro gates ON to exercise the flag's truthy branches (onboarding /
-// What's-New / demo banner) — the App.smoke suite covers the default (off) path.
+// What's-New / demo banner) — the App.smoke suite covers the default path.
 vi.mock('./config/featureFlags', () => ({ INTRO_GATES_ENABLED: true }));
 
 vi.mock('./hooks/useSpeechRecognition', () => ({
@@ -40,8 +40,8 @@ vi.mock('./services/db', () => ({}));
 
 describe('App intro gates (INTRO_GATES_ENABLED = true)', () => {
   beforeEach(() => {
-    // No onboarded flag → onboarding should show when gates are enabled.
     window.localStorage.removeItem('culinaSyncOnboarded');
+    window.localStorage.removeItem('culinasync_version');
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
       configurable: true,
@@ -58,7 +58,7 @@ describe('App intro gates (INTRO_GATES_ENABLED = true)', () => {
     });
   });
 
-  it('renders onboarding, What\'s-New and the demo banner when gates are enabled', async () => {
+  it('shows onboarding without stacking What\'s-New on first run', async () => {
     render(
       <Provider store={createTestStore()}>
         <I18nextProvider i18n={i18n}>
@@ -68,7 +68,24 @@ describe('App intro gates (INTRO_GATES_ENABLED = true)', () => {
     );
 
     expect(await screen.findByTestId('onboarding')).toBeInTheDocument();
-    expect(screen.getByTestId('whats-new')).toBeInTheDocument();
+    expect(screen.queryByTestId('whats-new')).not.toBeInTheDocument();
     expect(screen.getByTestId('demo-banner')).toBeInTheDocument();
+  });
+
+  it('shows What\'s-New after onboarding is completed', async () => {
+    window.localStorage.setItem('culinaSyncOnboarded', 'true');
+    // Force What's New open by mismatching version key
+    window.localStorage.setItem('culinasync_version', '0.0.0-old');
+
+    render(
+      <Provider store={createTestStore()}>
+        <I18nextProvider i18n={i18n}>
+          <App />
+        </I18nextProvider>
+      </Provider>,
+    );
+
+    expect(screen.queryByTestId('onboarding')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('whats-new')).toBeInTheDocument();
   });
 });

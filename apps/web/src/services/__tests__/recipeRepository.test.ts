@@ -151,4 +151,59 @@ describe('recipeRepository', () => {
       expect.objectContaining({ name: 'Gurke', recipeId: 1 }),
     );
   });
+
+  it('addMissingIngredientsToShoppingList: qty0 / pantry ausreichend / bereits auf Liste', async () => {
+    recipesGet.mockResolvedValueOnce({
+      id: 1,
+      recipeTitle: 'Mix',
+      ingredients: [
+        {
+          sectionTitle: '',
+          items: [
+            { name: 'Salz', quantity: '0', unit: 'g' },
+            { name: 'Mehl', quantity: '100', unit: 'g' },
+            { name: 'Milch', quantity: '1', unit: 'l' },
+          ],
+        },
+      ],
+    });
+    pantryToArray.mockResolvedValueOnce([
+      { id: 1, name: 'Mehl', quantity: 500, unit: 'g', category: 'x', createdAt: 1, updatedAt: 1 },
+    ]);
+    shoppingListToArray.mockResolvedValueOnce([{ id: 2, name: 'Milch', isChecked: false }]);
+
+    const { addMissingIngredientsToShoppingList } = await import('../repositories/recipeRepository');
+    const { addShoppingListItem } = await import('../repositories/shoppingListRepository');
+    const count = await addMissingIngredientsToShoppingList(1);
+    expect(count).toBe(0);
+    expect(addShoppingListItem).not.toHaveBeenCalled();
+  });
+
+  it('syncSeedRecipes ohne neue Seeds und mit neuen Seeds', async () => {
+    vi.resetModules();
+    vi.doMock('../../data/recipes/index', () => ({
+      allSeedRecipes: [
+        { seedId: 'seed-a', recipeTitle: 'A', ingredients: [], instructions: [] },
+        { seedId: 'seed-b', recipeTitle: 'B', ingredients: [], instructions: [] },
+      ],
+    }));
+
+    const { db } = await import('../dbInstance');
+    const { updatePantryMatches } = await import('../pantryMatcherService');
+    vi.mocked(db.recipes.toArray).mockResolvedValueOnce([
+      { id: 1, seedId: 'seed-a', recipeTitle: 'A' },
+      { id: 2, seedId: 'seed-b', recipeTitle: 'B' },
+    ] as never);
+
+    const { syncSeedRecipes } = await import('../repositories/recipeRepository');
+    await syncSeedRecipes();
+    expect(updatePantryMatches).not.toHaveBeenCalled();
+
+    vi.mocked(db.recipes.toArray).mockResolvedValueOnce([
+      { id: 1, seedId: 'seed-a', recipeTitle: 'A' },
+    ] as never);
+    vi.mocked(db.recipes.bulkAdd).mockResolvedValueOnce([12] as never);
+    await syncSeedRecipes();
+    expect(updatePantryMatches).toHaveBeenCalledWith([12]);
+  });
 });

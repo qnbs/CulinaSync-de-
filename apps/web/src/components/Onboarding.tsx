@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Joyride, STATUS, type EventData, type Step } from 'react-joyride';
-import { ChefHat, FlaskConical, Sparkles, PlayCircle, Check, Bot } from 'lucide-react';
+import { ChefHat, FlaskConical, Sparkles, PlayCircle, Check, Bot, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useModalA11y } from '../hooks/useModalA11y';
 import { loadDemoPantrySeed } from '../services/demoSeedService';
@@ -46,9 +46,10 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
     const modalRef = React.useRef<HTMLDivElement>(null);
     const startButtonRef = React.useRef<HTMLButtonElement>(null);
 
+    // QNBS-v3: Intro v1.0 — Escape/Backdrop schließen; kein Scroll-Lock während Joyride
     useModalA11y({
-        isOpen: true,
-        onClose: () => {},
+        isOpen: !runTour,
+        onClose: onComplete,
         containerRef: modalRef,
         initialFocusRef: startButtonRef,
     });
@@ -90,8 +91,31 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
                 locale={joyrideLocale}
             />
             {!runTour && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 page-fade-in glass-overlay">
-                    <div ref={modalRef} className="w-full max-w-lg text-center rounded-2xl p-8 space-y-6 modal-fade-in glass-modal" role="dialog" aria-modal="true" aria-labelledby="onboarding-title" aria-describedby="onboarding-description" tabIndex={-1}>
+                <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center p-4 page-fade-in glass-overlay"
+                    onClick={(event) => {
+                        if (event.target === event.currentTarget) {
+                            onComplete();
+                        }
+                    }}
+                >
+                    <div
+                        ref={modalRef}
+                        className="relative w-full max-w-lg text-center rounded-2xl p-8 space-y-6 modal-fade-in glass-modal"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="onboarding-title"
+                        aria-describedby="onboarding-description"
+                        tabIndex={-1}
+                    >
+                    <button
+                        type="button"
+                        onClick={onComplete}
+                        className="absolute top-4 right-4 p-2 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/80"
+                        aria-label={t('onboarding.dismissAria')}
+                    >
+                        <X size={18} aria-hidden />
+                    </button>
                     <div className="flex justify-center items-center gap-4 text-[var(--color-accent-400)]">
                        <ChefHat size={32} aria-hidden />
                               <h2 id="onboarding-title" className="text-2xl font-bold text-zinc-100">{t('onboarding.title')}</h2>
@@ -132,21 +156,32 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
                         >
                             <Sparkles size={18} aria-hidden /> {t('onboarding.startTour')}
                         </button>
-                        <button
-                            type="button"
-                            disabled={seedLoading || seedDone}
-                            onClick={handleSeedData}
-                            className="flex-1 flex items-center justify-center gap-2 bg-zinc-800 text-zinc-100 font-bold py-3 px-4 rounded-md border border-zinc-700 hover:bg-zinc-700 disabled:opacity-50"
-                        >
-                            {seedDone ? <Check size={18} aria-hidden /> : <FlaskConical size={18} aria-hidden />}
-                            {seedDone ? t('onboarding.demo.loaded') : (seedLoading ? t('onboarding.demo.loading') : t('onboarding.demo.load'))}
-                        </button>
+                        {seedDone ? (
+                            <button
+                                type="button"
+                                onClick={onComplete}
+                                className="flex-1 flex items-center justify-center gap-2 bg-emerald-600/90 text-zinc-100 font-bold py-3 px-4 rounded-md hover:bg-emerald-500"
+                            >
+                                <Check size={18} aria-hidden />
+                                {t('onboarding.demo.continue')}
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                disabled={seedLoading}
+                                onClick={() => void handleSeedData()}
+                                className="flex-1 flex items-center justify-center gap-2 bg-zinc-800 text-zinc-100 font-bold py-3 px-4 rounded-md border border-zinc-700 hover:bg-zinc-700 disabled:opacity-50"
+                            >
+                                <FlaskConical size={18} aria-hidden />
+                                {seedLoading ? t('onboarding.demo.loading') : t('onboarding.demo.load')}
+                            </button>
+                        )}
                     </div>
 
                     <button
                         type="button"
                         onClick={onComplete}
-                        className="text-sm text-zinc-500 hover:text-zinc-300"
+                        className="w-full py-2.5 rounded-md border border-zinc-700/80 text-sm font-semibold text-zinc-200 hover:bg-zinc-800/80"
                     >
                         {t('onboarding.skip')}
                     </button>
