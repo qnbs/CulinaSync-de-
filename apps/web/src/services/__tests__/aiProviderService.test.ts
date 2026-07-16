@@ -9,6 +9,11 @@ const mockGenerateShoppingList = vi.fn();
 const mockExtractPantry = vi.fn();
 const mockLoadSettings = vi.fn();
 const mockLocalVision = vi.fn();
+const mockGetCached = vi.fn();
+const mockSetCached = vi.fn();
+const mockBuildCacheHash = vi.fn();
+const mockOllamaIdeas = vi.fn();
+const mockOllamaRecipe = vi.fn();
 
 vi.mock('../settingsService', () => ({
   loadSettings: () => mockLoadSettings(),
@@ -24,6 +29,17 @@ vi.mock('../geminiService', () => ({
 
 vi.mock('../localAiVisionService', () => ({
   extractPantryItemsFromImageLocal: (...args: unknown[]) => mockLocalVision(...args),
+}));
+
+vi.mock('../localAiInferenceCacheService', () => ({
+  buildInferenceCacheHash: (...args: unknown[]) => mockBuildCacheHash(...args),
+  getCachedInference: (...args: unknown[]) => mockGetCached(...args),
+  setCachedInference: (...args: unknown[]) => mockSetCached(...args),
+}));
+
+vi.mock('../localAiOllamaService', () => ({
+  generateRecipeIdeasWithOllama: (...args: unknown[]) => mockOllamaIdeas(...args),
+  generateRecipeWithOllama: (...args: unknown[]) => mockOllamaRecipe(...args),
 }));
 
 const pantryItems: PantryItem[] = [
@@ -168,5 +184,70 @@ describe('aiProviderService', () => {
     await expect(
       extractPantryItemsFromImage(new File(['x'], 'a.jpg', { type: 'image/jpeg' })),
     ).rejects.toThrow('local-vision-unavailable');
+  });
+
+  it('nutzt Inference-Cache Hit und Ollama bei local-first', async () => {
+    mockBuildCacheHash.mockResolvedValue('hash-1');
+    mockGetCached.mockResolvedValueOnce([{ recipeTitle: 'Cached', shortDescription: 'c' }]);
+    const settings: AppSettings = {
+      ...getDefaultSettings(),
+      aiPreferences: { ...getDefaultSettings().aiPreferences, routingMode: 'local-first' },
+      localAi: {
+        ...getDefaultSettings().localAi,
+        enabled: true,
+        enableInferenceCache: true,
+        ollamaEnabled: true,
+      },
+    };
+    mockLoadSettings.mockReturnValue(settings);
+    const { generateRecipeIdeas } = await import('../aiProviderService');
+    const cached = await generateRecipeIdeas(prompt, pantryItems, settings.aiPreferences);
+    expect(cached[0]?.recipeTitle).toBe('Cached');
+    expect(mockOllamaIdeas).not.toHaveBeenCalled();
+
+    mockGetCached.mockResolvedValueOnce(null);
+    mockOllamaIdeas.mockResolvedValueOnce([{ recipeTitle: 'Ollama', shortDescription: 'o' }]);
+    const ideas = await generateRecipeIdeas(prompt, pantryItems, settings.aiPreferences);
+    expect(ideas[0]?.recipeTitle).toBe('Ollama');
+    expect(mockSetCached).toHaveBeenCalled();
+  });
+
+  it('generateRecipe via Ollama bei local-first', async () => {
+    mockBuildCacheHash.mockResolvedValue('hash-2');
+    mockGetCached.mockResolvedValue(null);
+    mockOllamaRecipe.mockResolvedValueOnce({
+      recipeTitle: 'Ollama-Rezept',
+      shortDescription: 'x',
+      prepTime: '',
+      cookTime: '',
+      totalTime: '',
+      servings: '2',
+      difficulty: 'Einfach',
+      ingredients: [],
+      instructions: ['A'],
+      nutritionPerServing: { calories: '', protein: '', fat: '', carbs: '' },
+      tags: { course: [], cuisine: [], occasion: [], mainIngredient: [], prepMethod: [], diet: [] },
+      expertTips: [],
+    });
+    const settings: AppSettings = {
+      ...getDefaultSettings(),
+      aiPreferences: { ...getDefaultSettings().aiPreferences, routingMode: 'local-first' },
+      localAi: {
+        ...getDefaultSettings().localAi,
+        enabled: true,
+        enableInferenceCache: true,
+        ollamaEnabled: true,
+      },
+    };
+    mockLoadSettings.mockReturnValue(settings);
+    const { generateRecipe } = await import('../aiProviderService');
+    const recipe = await generateRecipe(
+      prompt,
+      pantryItems,
+      settings.aiPreferences,
+      { recipeTitle: 'Idee', shortDescription: 'd' },
+    );
+    expect(recipe.recipeTitle).toBe('Ollama-Rezept');
+    expect(mockOllamaRecipe).toHaveBeenCalled();
   });
 });

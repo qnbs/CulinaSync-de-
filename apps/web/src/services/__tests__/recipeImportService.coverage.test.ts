@@ -71,6 +71,64 @@ describe('recipeImportService branch coverage', () => {
     expect(recipe.recipeTitle).toBe('Aus Liste');
   });
 
+  it('deckt isoDuration/Instructions/Graph-Miss-Zweige ab', () => {
+    expect(() =>
+      importRecipeFromJsonString(
+        JSON.stringify({
+          '@type': 'Recipe',
+          name: 'Minuten',
+          cookTime: 'PT20M',
+          prepTime: 'PT0M',
+          recipeIngredient: ['Mehl', '2 Eier'],
+          recipeInstructions: 'nicht-array',
+          recipeYield: [''],
+        }),
+      ),
+    ).toThrow(/incomplete/i);
+
+    expect(() =>
+      importRecipeFromJsonString(
+        JSON.stringify({
+          '@graph': [{ '@type': 'WebPage', name: 'Nur Seite' }],
+          itemListElement: [null, { '@type': 'Article' }],
+        }),
+      ),
+    ).toThrow(/No supported recipe format/i);
+
+    const typed = importRecipeFromJsonString(
+      JSON.stringify({
+        '@type': ['HowTo', 'Recipe'],
+        name: 'Array-Type',
+        recipeIngredient: ['1 EL Öl'],
+        recipeInstructions: [{ text: '' }, { name: 'Schritt' }, { junk: true }],
+      }),
+    );
+    expect(typed.recipeTitle).toBe('Array-Type');
+    expect(typed.instructions).toEqual(['Schritt']);
+  });
+
+  it('URL-Import: Proxy-Fallback wenn Direktfetch fehlschlägt', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response('fail', { status: 500 }))
+      .mockResolvedValueOnce(
+        new Response(
+          `<html><script type="application/ld+json">${JSON.stringify({
+            '@type': 'Recipe',
+            name: 'Via Proxy',
+            recipeIngredient: ['1 Tomate'],
+            recipeInstructions: ['Step'],
+          })}</script></html>`,
+          { status: 200 },
+        ),
+      );
+    vi.stubGlobal('fetch', fetchMock);
+    const recipe = await importRecipeFromUrl('https://example.com/proxy-recipe');
+    expect(recipe.recipeTitle).toBe('Via Proxy');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    vi.unstubAllGlobals();
+  });
+
   it('findet Rezept in @graph und PT1H30M', () => {
     const recipe = importRecipeFromJsonString(
       JSON.stringify({

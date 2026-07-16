@@ -175,6 +175,64 @@ describe('settingsMutators coverage sweep', () => {
     expect(draft.localAi.maxConcurrentJobs).toBe(4);
   });
 
+  it('weist alle boolean-Pfade bei Nicht-Boolean ab', () => {
+    const draft = structuredClone(getDefaultSettings());
+    const snapshot = structuredClone(draft);
+    const booleanPaths: SettingsPath[] = [
+      'aiPreferences.usePantryContext',
+      'aiPreferences.useMealPlanContext',
+      'aiPreferences.useRecipeHistoryContext',
+      'aiPreferences.structuredOutputStrict',
+      'localAi.enabled',
+      'localAi.localOnlyMode',
+      'localAi.allowCloudFallback',
+      'localAi.enableWebLlmInference',
+      'localAi.preferWebGpu',
+      'localAi.enableVision',
+      'localAi.enableEmbeddings',
+      'localAi.enableInferenceCache',
+      'localAi.stripExifOnVision',
+      'localAi.ollamaEnabled',
+      'localAi.setupWizardCompleted',
+      'privacy.analyticsEnabled',
+      'privacy.shareDiagnostics',
+      'privacy.persistAiPromptsLocally',
+      'privacy.autoClearInferenceCache',
+      'privacy.redactPiiInLogs',
+      'pantry.isGrouped',
+      'pantry.showExpiryBadges',
+      'pantry.highlightLowStock',
+      'recipeBook.showNutritionPreview',
+      'shoppingList.groupCheckedAtBottom',
+      'shoppingList.autoCategorize',
+      'shoppingList.smartMergeDuplicates',
+      'shoppingList.suggestQuantitiesFromRecipes',
+      'mealPlanner.preferVariety',
+      'mealPlanner.respectExpiryDates',
+      'mealPlanner.suggestFromPantry',
+      'cookMode.aiAssistantEnabled',
+      'cookMode.autoAdvanceSteps',
+      'cookMode.timerSoundEnabled',
+      'cookMode.keepScreenAwake',
+      'cookMode.showIngredientChecklist',
+      'speechRecognition.continuousListening',
+      'speechRecognition.confirmDestructiveCommands',
+      'appearance.highContrast',
+      'appearance.kitchenMode',
+      'appearance.largeText',
+      'appearance.reducedMotion',
+      'appearance.compactDensity',
+      'appearance.showNutritionBadges',
+      'policies.strictAllergenEnforcement',
+    ];
+    for (const path of booleanPaths) {
+      expect(applySettingsChange(draft, path, 'yes'), path).toBe(true);
+      expect(applySettingsChange(draft, path, 1), path).toBe(true);
+      expect(applySettingsChange(draft, path, null), path).toBe(true);
+    }
+    expect(draft).toEqual(snapshot);
+  });
+
   it('deckt alle Enum-OR-Arme und unknown path ab', () => {
     const draft = structuredClone(getDefaultSettings());
     expect(applySettingsChange(draft, 'not.a.path', true)).toBe(false);

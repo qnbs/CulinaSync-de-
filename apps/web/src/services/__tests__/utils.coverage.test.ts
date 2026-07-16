@@ -45,10 +45,15 @@ describe('utils category + quantity branches', () => {
   it('skaliert Fraktionen und kleine Werte (scaleFactor ≠ 1)', () => {
     expect(scaleIngredientQuantity('1/8', 1)).toBe('1/8');
     expect(scaleIngredientQuantity('', 2)).toBe('');
+    expect(scaleIngredientQuantity('0', 2)).toBe('0');
     expect(scaleIngredientQuantity('0.25', 2)).toBe('1/2');
     expect(scaleIngredientQuantity('0.5', 2)).toBe('1');
     expect(scaleIngredientQuantity('1/4', 3)).toBe('3/4');
     expect(scaleIngredientQuantity('1/3', 2)).toBe('2/3');
+    expect(scaleIngredientQuantity('1/8', 2)).toBe('1/4');
+    expect(scaleIngredientQuantity('1/16', 2)).toBe('1/8');
+    expect(scaleIngredientQuantity('0.05', 2)).toBe('0.1');
+    expect(scaleIngredientQuantity('1.5', 2)).toBe('3');
     expect(scaleIngredientQuantity('3', 2)).toBe('6');
     expect(scaleIngredientQuantity('12', 2)).toBe('24');
     expect(scaleIngredientQuantity('2-3', 2)).toBe('4-6');
@@ -76,5 +81,7 @@ describe('utils category + quantity branches', () => {
       quantity: 1,
     });
     expect(parseShoppingItemString('1/0 kg X').quantity).toBe(1);
+    expect(parseShoppingItemString('2 Mehl')).toMatchObject({ name: 'Mehl', quantity: 2 });
+    expect(parseShoppingItemString('Mehl 2')).toMatchObject({ name: 'Mehl', quantity: 2 });
   });
 });

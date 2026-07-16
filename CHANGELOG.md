@@ -12,9 +12,14 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **Intro-Gates v1.0 (2026-07-16):** `INTRO_GATES_ENABLED=true` — dismissible Onboarding
   (Escape/Backdrop/X/Skip, Demo „Weiter mit Demo“), What's-New erst nach First-Run;
   i18n DE/EN; Vitest für Onboarding + Intro-Gates.
-- **Coverage-Sprint:** Branch-Floor **64 → 70** (Service-Matrizen: settingsMutators,
+- **Coverage-Sprint:** Branch-Floor **64 → 70+** (Service-Matrizen: settingsMutators,
   voiceCommands inkl. Timer-Regex-Fix, recipeImport, utils, nutrition/scanner/whisper,
-  recipe/shopping repositories); Ziel 82 % weiter offen.
+  recipe/shopping repositories, aiProvider Cache/Ollama); Ziel 82 % weiter offen.
+
+### Security
+
+- **serde_with 3.21.0** (Cargo/Tauri, Dependabot #117): Fix GHSA-7gcf-g7xr-8hxj
+  (KeyValueMap Allocation-Panic); nur `src-tauri/Cargo.lock`.
 
 - **Master Perfection Phase 3 (2026-07-15):** M11.4 lokale Vision (CLIP/ONNX via
   transformers + `vision.worker`); Inference-Cache (Dexie `aiInferenceCache`);

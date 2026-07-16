@@ -1,4 +1,19 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+vi.mock('i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('i18next')>();
+  return {
+    default: {
+      ...actual.default,
+      t: vi.fn((key: string, opts?: { returnObjects?: boolean }) => {
+        if (opts?.returnObjects) return 'not-an-object';
+        return key;
+      }),
+    },
+  };
+});
+
+import i18next from 'i18next';
 import {
   buildLocalRecipe,
   buildLocalRecipeIdeas,
@@ -21,6 +36,23 @@ const pantry: PantryItem[] = [
 ];
 
 describe('aiOfflineFallback', () => {
+  beforeEach(() => {
+    vi.mocked(i18next.t).mockImplementation((key: string | string[], opts?: unknown) => {
+      const k = Array.isArray(key) ? key[0] : key;
+      const options = opts as { returnObjects?: boolean } | undefined;
+      if (options?.returnObjects) {
+        if (k === 'aiOffline.recipeTemplates') {
+          return { a: 'Pfanne', b: 'Ofen', c: 'Topf' };
+        }
+        if (k === 'aiOffline.shoppingCatalog') {
+          return { breakfast: ['Brot', 'Milch', 'Eier'], grill: ['Kohle'] };
+        }
+        return {};
+      }
+      return k;
+    });
+  });
+
   it('shouldUseOfflineFallback erkennt Offline und typische Fehler', () => {
     const original = Object.getOwnPropertyDescriptor(navigator, 'onLine');
     Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false });
@@ -30,6 +62,7 @@ describe('aiOfflineFallback', () => {
     Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => true });
     expect(shouldUseOfflineFallback(new Error('network failed'))).toBe(true);
     expect(shouldUseOfflineFallback(new Error('429 rate'))).toBe(true);
+    expect(shouldUseOfflineFallback('fetch_error')).toBe(true);
     expect(shouldUseOfflineFallback(new Error('other'))).toBe(false);
   });
 
@@ -51,5 +84,28 @@ describe('aiOfflineFallback', () => {
 
     const list = buildLocalShoppingList('grill abend', pantry, []);
     expect(Array.isArray(list)).toBe(true);
+  });
+
+  it('degradiert bei nicht-objekt i18n und leerem Pantry/Prompt', () => {
+    vi.mocked(i18next.t).mockImplementation((key: string | string[], opts?: unknown) => {
+      const k = Array.isArray(key) ? key[0] : key;
+      if ((opts as { returnObjects?: boolean } | undefined)?.returnObjects) return 'broken';
+      return k;
+    });
+    const prefs = { ...getDefaultSettings().aiPreferences, preferredCuisines: [] as string[] };
+    const emptyPrompt = {
+      craving: '',
+      includeIngredients: [] as string[],
+      excludeIngredients: [] as string[],
+      modifiers: [] as string[],
+    };
+    expect(buildLocalRecipeIdeas(emptyPrompt, [], prefs)).toEqual([]);
+    const recipe = buildLocalRecipe(emptyPrompt, [], {
+      recipeTitle: 'X',
+      shortDescription: 'Y',
+    });
+    expect(recipe.ingredients[0].items.length).toBeGreaterThan(0);
+    // catalog broken → keine breakfast-Fallback-Items; leerer Prompt → leere Liste
+    expect(buildLocalShoppingList('ab', pantry, [])).toEqual([]);
   });
 });
