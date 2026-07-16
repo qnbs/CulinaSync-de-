@@ -248,7 +248,6 @@
       "description": "Fuellt deinen Vorrat mit Beispielartikeln, damit du direkt testen kannst.",
       "load": "Demo laden",
       "loading": "Lade Demo...",
-      "loaded": "Demo geladen",
       "continue": "Weiter mit Demo"
     },
     "localAi": {

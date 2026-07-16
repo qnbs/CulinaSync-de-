@@ -35,7 +35,7 @@ Stand nach Sprint Coverage / Intro / Tauri (2026-07-16).
 
 ```text
 Lies docs/TODO-MASTER-PERFECTION.md.
-Priorität: Branch-Coverage 70→82 % (Service/Hook-Hotspots), optional Draft v0.2.4 publishen.
+Priorität: Branch-Coverage 73→82 % (Service/Hook-Hotspots), optional Draft v0.2.4 publishen.
 Branch: cursor/<kurzname>-0ad6 ab main. CI bis grün.
 ```
 

@@ -28,7 +28,7 @@
 **Erledigt (Phase 0, 2026-07-15):** R-BRANCHPROT; Dependabot #106–#111; pnpm 11 Audit-Gate  
 **Erledigt (Phase 1–2, 2026-07-15):** R-013; RAG/Sanitizer/Whisper/Backup-Zod/SBOM/Coverage-Lines-82  
 **Erledigt (Phase 3, 2026-07-15):** M11.4 Vision; Inference-Cache; WebLLM Download-UX; Ollama; PBKDF2 CSB3; ADR Dexie-Encrypt; E2E Offline-Chef  
-**Nächster Sprint:** Branch-Coverage 70→≥82 %; Draft `v0.2.4` publishen (Owner); M5.9 Richtung 88 %
+**Nächster Sprint:** Branch-Coverage 73→≥82 %; Draft `v0.2.4` publishen (Owner); M5.9 Richtung 88 %
 
 ## Definition of Done (Backlog-Item)
 

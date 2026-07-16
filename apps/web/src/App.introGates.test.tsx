@@ -73,9 +73,8 @@ describe('App intro gates (INTRO_GATES_ENABLED = true)', () => {
   });
 
   it('shows What\'s-New after onboarding is completed', async () => {
+    // WhatsNewModal is stubbed; this asserts App mounts it once onboarding is done.
     window.localStorage.setItem('culinaSyncOnboarded', 'true');
-    // Force What's New open by mismatching version key
-    window.localStorage.setItem('culinasync_version', '0.0.0-old');
 
     render(
       <Provider store={createTestStore()}>

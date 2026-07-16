@@ -305,7 +305,10 @@ describe('shoppingListRepository', () => {
     const { moveCheckedToPantry } = await import('../repositories/shoppingListRepository');
     const moved = await moveCheckedToPantry();
     expect(moved).toBe(1);
-    expect(pantryUpdate).toHaveBeenCalled();
+    expect(pantryUpdate).toHaveBeenCalledWith(
+      2,
+      expect.objectContaining({ quantity: 3, updatedAt: expect.any(Number) }),
+    );
     expect(pantryAdd).not.toHaveBeenCalled();
   });
 });

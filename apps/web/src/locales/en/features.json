@@ -248,7 +248,6 @@
       "description": "Fills your pantry with sample items so you can test immediately.",
       "load": "Load demo",
       "loading": "Loading demo...",
-      "loaded": "Demo loaded",
       "continue": "Continue with demo"
     },
     "localAi": {

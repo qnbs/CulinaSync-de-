@@ -45,8 +45,8 @@ describe('processCommand coverage matrix', () => {
     ['lies einkaufsliste', 'chef', 'READ_LIST', 'shopping-list'],
     ['read pantry', 'chef', 'READ_LIST', 'pantry'],
     ['was habe ich liste', 'shopping-list', 'READ_LIST', 'shopping-list'],
-    ['erhöhe milch um 2', 'pantry', 'ADJUST_PANTRY_QUANTITY', undefined],
-    ['verringere milch um 1', 'pantry', 'ADJUST_PANTRY_QUANTITY', undefined],
+    ['erhöhe milch um 2', 'pantry', 'ADJUST_PANTRY_QUANTITY', { name: 'milch', amount: 2 }],
+    ['verringere milch um 1', 'pantry', 'ADJUST_PANTRY_QUANTITY', { name: 'milch', amount: -1 }],
     ['suche nach pasta', 'recipes', 'SEARCH', 'pasta'],
     ['hake milch von der liste ab', 'shopping-list', 'CHECK_SHOPPING_ITEM', 'milch'],
     ['koche pasta', 'chef', 'GENERATE_RECIPE', 'koche pasta'],
@@ -55,7 +55,7 @@ describe('processCommand coverage matrix', () => {
     const result = processCommand(cmd, page);
     expect(result.type).toBe(type);
     if (type === 'ADJUST_PANTRY_QUANTITY') {
-      expect(result.payload).toMatchObject({ name: expect.any(String), amount: expect.any(Number) });
+      expect(result.payload).toEqual(payload);
     } else if (payload !== undefined) {
       expect(result.payload).toBe(payload);
     }
