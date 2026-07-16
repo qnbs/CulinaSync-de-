@@ -1,19 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('i18next', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('i18next')>();
-  return {
-    default: {
-      ...actual.default,
-      t: vi.fn((key: string, opts?: { returnObjects?: boolean }) => {
-        if (opts?.returnObjects) return 'not-an-object';
-        return key;
-      }),
-    },
-  };
-});
+const tMock = vi.fn();
 
-import i18next from 'i18next';
+vi.mock('i18next', () => ({
+  default: {
+    t: (...args: unknown[]) => tMock(...args),
+    language: 'de',
+  },
+}));
+
 import {
   buildLocalRecipe,
   buildLocalRecipeIdeas,
@@ -37,10 +32,10 @@ const pantry: PantryItem[] = [
 
 describe('aiOfflineFallback', () => {
   beforeEach(() => {
-    vi.mocked(i18next.t).mockImplementation((key: string | string[], opts?: unknown) => {
-      const k = Array.isArray(key) ? key[0] : key;
-      const options = opts as { returnObjects?: boolean } | undefined;
-      if (options?.returnObjects) {
+    tMock.mockReset();
+    tMock.mockImplementation((key: unknown, opts?: { returnObjects?: boolean }) => {
+      const k = Array.isArray(key) ? String(key[0]) : String(key);
+      if (opts?.returnObjects) {
         if (k === 'aiOffline.recipeTemplates') {
           return { a: 'Pfanne', b: 'Ofen', c: 'Topf' };
         }
@@ -87,10 +82,9 @@ describe('aiOfflineFallback', () => {
   });
 
   it('degradiert bei nicht-objekt i18n und leerem Pantry/Prompt', () => {
-    vi.mocked(i18next.t).mockImplementation((key: string | string[], opts?: unknown) => {
-      const k = Array.isArray(key) ? key[0] : key;
-      if ((opts as { returnObjects?: boolean } | undefined)?.returnObjects) return 'broken';
-      return k;
+    tMock.mockImplementation((key: unknown, opts?: { returnObjects?: boolean }) => {
+      if (opts?.returnObjects) return 'broken';
+      return Array.isArray(key) ? String(key[0]) : String(key);
     });
     const prefs = { ...getDefaultSettings().aiPreferences, preferredCuisines: [] as string[] };
     const emptyPrompt = {
@@ -105,7 +99,6 @@ describe('aiOfflineFallback', () => {
       shortDescription: 'Y',
     });
     expect(recipe.ingredients[0].items.length).toBeGreaterThan(0);
-    // catalog broken → keine breakfast-Fallback-Items; leerer Prompt → leere Liste
     expect(buildLocalShoppingList('ab', pantry, [])).toEqual([]);
   });
 });
