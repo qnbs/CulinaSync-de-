@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { importRecipeFromJsonString, importRecipeFromUrl } from '../recipeImportService';
 
 const mockExtractRecipeFromWebContent = vi.fn();
@@ -7,7 +7,12 @@ vi.mock('../geminiService', () => ({
   extractRecipeFromWebContent: (...args: unknown[]) => mockExtractRecipeFromWebContent(...args),
 }));
 
+// QNBS-v3: Branch-Coverage JSON-LD/URL-Import | isoDuration, Graph, Proxy, Gemini-Fallback
 describe('recipeImportService branch coverage', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockExtractRecipeFromWebContent.mockResolvedValue({

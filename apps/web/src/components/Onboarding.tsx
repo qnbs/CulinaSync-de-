@@ -166,6 +166,7 @@ const Onboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
                                 {t('onboarding.demo.continue')}
                             </button>
                         ) : (
+                            // QNBS-v3: Demo laden → danach „Weiter mit Demo“ | klarer First-Run ohne Zwangstour
                             <button
                                 type="button"
                                 disabled={seedLoading}

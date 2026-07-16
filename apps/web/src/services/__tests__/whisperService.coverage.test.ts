@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const transcribeAudio = vi.fn();
 
@@ -7,9 +7,20 @@ vi.mock('@domain/ai-core', () => ({
 }));
 
 describe('whisperService coverage (Vitest inline path)', () => {
+  let previousAudioContext: typeof window.AudioContext | undefined;
+
   beforeEach(() => {
     vi.resetModules();
     transcribeAudio.mockReset();
+    previousAudioContext = window.AudioContext;
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    if (previousAudioContext) {
+      Object.defineProperty(window, 'AudioContext', { configurable: true, value: previousAudioContext });
+    }
+    Object.defineProperty(window, 'webkitAudioContext', { configurable: true, value: undefined });
   });
 
   it('initWhisper ist no-op ohne Worker', async () => {
@@ -56,19 +67,14 @@ describe('whisperService coverage (Vitest inline path)', () => {
 
     transcribeAudio.mockResolvedValueOnce(null);
     await expect(transcribeWithWhisper(blob)).rejects.toThrow('whisper-unavailable');
-
-    vi.unstubAllGlobals();
   });
 
   it('wirft ohne AudioContext', async () => {
-    const prev = window.AudioContext;
     Object.defineProperty(window, 'AudioContext', { configurable: true, value: undefined });
     Object.defineProperty(window, 'webkitAudioContext', { configurable: true, value: undefined });
 
     const { transcribeWithWhisper } = await import('../whisperService');
     const blob = new Blob([new Uint8Array([1])], { type: 'audio/webm' });
     await expect(transcribeWithWhisper(blob)).rejects.toThrow('audio-context-unavailable');
-
-    Object.defineProperty(window, 'AudioContext', { configurable: true, value: prev });
   });
 });

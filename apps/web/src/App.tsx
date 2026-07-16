@@ -77,20 +77,26 @@ const App: React.FC = () => {
   useAccentTheme();
   usePwaLaunchHandlers();
 
+  // QNBS-v3: Intro-Abschluss zentral | Demo-Query und Onboarding setzen Version, damit What's-New nicht sofort stapelt
+  const markIntroComplete = useCallback(() => {
+    localStorage.setItem('culinaSyncOnboarded', 'true');
+    localStorage.setItem('culinasync_version', APP_VERSION || appVersion);
+    closeOnboarding();
+  }, [appVersion, closeOnboarding]);
+
   const handleDemoEntryResolved = useCallback(
     (mode: DemoEntryResult) => {
       if (!mode) {
         return;
       }
-      localStorage.setItem('culinaSyncOnboarded', 'true');
-      closeOnboarding();
+      markIntroComplete();
       if (mode === 'demo') {
         dispatch(addToastAction({ message: t('demo.entry.loaded'), type: 'success' }));
       } else {
         dispatch(addToastAction({ message: t('demo.entry.try'), type: 'info' }));
       }
     },
-    [closeOnboarding, dispatch, t],
+    [dispatch, markIntroComplete, t],
   );
   useDemoEntryQuery(handleDemoEntryResolved, INTRO_GATES_ENABLED);
 
@@ -133,10 +139,7 @@ const App: React.FC = () => {
   ]);
 
   const handleOnboardingComplete = () => {
-    localStorage.setItem('culinaSyncOnboarded', 'true');
-    // Avoid stacking What's New immediately after first-run skip/complete.
-    localStorage.setItem('culinasync_version', APP_VERSION || appVersion);
-    closeOnboarding();
+    markIntroComplete();
   };
 
   const removeToast = useCallback((id: string) => {

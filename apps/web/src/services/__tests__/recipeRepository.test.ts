@@ -152,6 +152,7 @@ describe('recipeRepository', () => {
     );
   });
 
+  // QNBS-v3: Shopping-List-Edges aus Rezept | qty0, Pantry-Deckung, Duplikat auf Liste
   it('addMissingIngredientsToShoppingList: qty0 / pantry ausreichend / bereits auf Liste', async () => {
     recipesGet.mockResolvedValueOnce({
       id: 1,

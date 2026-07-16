@@ -101,12 +101,7 @@ describe('settingsMutators coverage sweep', () => {
 
   it('weist ungültige Werte ab (Reject-Zweige)', () => {
     const draft = structuredClone(getDefaultSettings());
-    const language = draft.language;
-    const creativity = draft.aiPreferences.creativityLevel;
-    const servings = draft.defaultServings;
-    const gpu = draft.localAi.gpuTierPreference;
-    const model = draft.localAi.preferredGenerativeModel;
-    const stock = draft.policies.minPantryStock;
+    const snapshot = structuredClone(draft);
 
     const rejects: Array<[SettingsPath, unknown]> = [
       ['language', 'fr'],
@@ -126,7 +121,7 @@ describe('settingsMutators coverage sweep', () => {
       ['localAi.gpuTierPreference', 'ultra'],
       ['localAi.preferredGenerativeModel', 'gpt-4'],
       ['localAi.cacheTtlHours', '48'],
-      ['localAi.maxConcurrentJobs', 0],
+      ['localAi.maxConcurrentJobs', 'nine'],
       ['localAi.maxModelStorageMb', Number.NaN],
       ['localAi.downloadedModels', ['ok', 2]],
       ['localAi.ollamaBaseUrl', 123],
@@ -134,7 +129,7 @@ describe('settingsMutators coverage sweep', () => {
       ['privacy.analyticsEnabled', 'no'],
       ['pantry.defaultSort', 'price'],
       ['pantry.unitSystem', 'us'],
-      ['pantry.expiryWarningDays', -1],
+      ['pantry.expiryWarningDays', Number.NaN],
       ['recipeBook.defaultSort', 'rating'],
       ['recipeBook.defaultView', 'cards'],
       ['shoppingList.defaultSort', 'recent'],
@@ -155,12 +150,7 @@ describe('settingsMutators coverage sweep', () => {
       expect(applySettingsChange(draft, path, value), path).toBe(true);
     }
 
-    expect(draft.language).toBe(language);
-    expect(draft.aiPreferences.creativityLevel).toBe(creativity);
-    expect(draft.defaultServings).toBe(servings);
-    expect(draft.localAi.gpuTierPreference).toBe(gpu);
-    expect(draft.localAi.preferredGenerativeModel).toBe(model);
-    expect(draft.policies.minPantryStock).toEqual(stock);
+    expect(draft).toEqual(snapshot);
   });
 
   it('clampInt/clampFloat begrenzt Grenzwerte', () => {

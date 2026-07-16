@@ -1,4 +1,26 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('../../data/usdaLocal', () => ({
+  usdaLocalFoods: [
+    {
+      key: 'milch',
+      caloriesPer100g: 64,
+      proteinPer100g: 3.3,
+      fatPer100g: 3.6,
+      carbsPer100g: 4.8,
+      allergens: ['milk'],
+    },
+    {
+      key: 'testdummy',
+      caloriesPer100g: 10,
+      proteinPer100g: 1,
+      fatPer100g: 0,
+      carbsPer100g: 1,
+      allergens: ['unknown_allergen_xyz'],
+    },
+  ],
+}));
+
 import { analyzeRecipeNutritionAndAllergens } from '../nutritionAllergyService';
 import type { Recipe } from '../../types';
 
@@ -29,13 +51,14 @@ const baseRecipe = (overrides: Partial<Recipe> = {}): Recipe =>
     ...overrides,
   }) as Recipe;
 
+// QNBS-v3: Branch-Coverage Nutrition/Allergene | Einheiten + Raw-Allergen-Fallback ohne USDA-Label
 describe('nutritionAllergyService coverage', () => {
   it('rechnet Einheiten und Allergene pro Portion', () => {
     const report = analyzeRecipeNutritionAndAllergens(baseRecipe());
     expect(report.totalIngredients).toBe(4);
     expect(report.matchedIngredients).toBeGreaterThan(0);
     expect(report.calories).toBeGreaterThan(0);
-    expect(report.allergens.some((a) => /milch|gluten|milk/i.test(a))).toBe(true);
+    expect(report.allergens.some((a) => /milch|milk/i.test(a))).toBe(true);
   });
 
   it('servings NaN → Divisor 1; mg/cl/l/stk-Zweige', () => {
@@ -59,13 +82,21 @@ describe('nutritionAllergyService coverage', () => {
     expect(report.matchedIngredients).toBeGreaterThan(0);
   });
 
-  it('unbekannte Allergen-Keys bleiben raw', () => {
-    const report = analyzeRecipeNutritionAndAllergens(
+  it('unbekannte Allergen-Keys bleiben raw; unmatched Ingredient ohne Match', () => {
+    const unmatched = analyzeRecipeNutritionAndAllergens(
       baseRecipe({
         ingredients: [{ sectionTitle: '', items: [{ name: 'xyz-never', quantity: '1', unit: 'g' }] }],
       }),
     );
-    expect(report.matchedIngredients).toBe(0);
-    expect(report.allergens).toEqual([]);
+    expect(unmatched.matchedIngredients).toBe(0);
+    expect(unmatched.allergens).toEqual([]);
+
+    const raw = analyzeRecipeNutritionAndAllergens(
+      baseRecipe({
+        ingredients: [{ sectionTitle: '', items: [{ name: 'testdummy food', quantity: '100', unit: 'g' }] }],
+      }),
+    );
+    expect(raw.matchedIngredients).toBe(1);
+    expect(raw.allergens).toContain('unknown_allergen_xyz');
   });
 });
