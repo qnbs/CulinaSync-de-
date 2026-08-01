@@ -9,6 +9,12 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Added
 
+- **Post-PR #118 CI:** `check:version-drift` in `validate.yml`; GitHub Actions pinned to
+  immutable SHAs across core workflows; `pnpm run generate:release-evidence`.
+- **Release evidence:** `release-evidence/0.2.4/evidence.json` scaffold at merge SHA `cf5ae56`.
+
+### Changed
+
 - **Audit remediation (2026-08-01):** Baseline evidence `docs/audit/evidence/2026-08-01-baseline.md`;
   full audit `docs/audit/CULINASYNC-FULL-AUDIT-2026-08-01.md`; `pnpm run verify:release`
   (coverage + optional `cargo audit`); `pnpm run check:version-drift`; `check:all` now
