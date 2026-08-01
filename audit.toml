@@ -1,0 +1,8 @@
+# Cargo audit policy — transitive Tauri/plist quick-xml (RUSTSEC-2026-0194/0195)
+# Review: 2026-09-01 — upgrade when tauri/plist pulls quick-xml >= 0.41.0
+
+[advisories]
+ignore = [
+  "RUSTSEC-2026-0194",
+  "RUSTSEC-2026-0195",
+]
