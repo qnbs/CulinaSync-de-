@@ -52,6 +52,9 @@ jobs:
       - name: Check README version matches package.json
         run: pnpm run check:readme-version
 
+      - name: Check README repo-truth (tests, thresholds)
+        run: pnpm run check:repo-truth
+
       - name: Lint
         run: pnpm run lint
 
@@ -89,6 +92,15 @@ jobs:
 
       - name: Dependency audit (high+)
         run: pnpm audit --audit-level=high
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4 # stable
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --version 0.21.2 --locked
+
+      - name: Rust advisory scan (Tauri lockfile)
+        run: cargo audit --file src-tauri/Cargo.lock
 
       # QNBS-v3: CycloneDX-SBOM für Supply-Chain-Transparenz (Master Perfection P1)
       - name: Generate SBOM (CycloneDX)

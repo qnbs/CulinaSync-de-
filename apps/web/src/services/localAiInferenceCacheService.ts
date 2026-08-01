@@ -70,6 +70,18 @@ export const setCachedInference = async (
   }
 };
 
+export const setCachedInferenceWithQuota = async (
+  hash: string,
+  task: string,
+  modelId: string,
+  response: unknown,
+  ttlHours: number,
+  maxStorageMb: number,
+): Promise<void> => {
+  await setCachedInference(hash, task, modelId, response, ttlHours);
+  await enforceInferenceCacheQuota(maxStorageMb);
+};
+
 export const clearInferenceCache = async (): Promise<void> => {
   try {
     await db.aiInferenceCache.clear();
@@ -83,6 +95,39 @@ export const purgeExpiredInferenceCache = async (): Promise<number> => {
     return await db.aiInferenceCache.where('expiresAt').belowOrEqual(Date.now()).delete();
   } catch (error) {
     void logAppError(error, 'localAiInferenceCache.purge');
+    return 0;
+  }
+};
+
+/** Sum stored JSON payload bytes (UTF-8 estimate) for quota enforcement. */
+export const estimateInferenceCacheBytes = async (): Promise<number> => {
+  try {
+    const rows = await db.aiInferenceCache.toArray();
+    return rows.reduce((sum, row) => sum + row.responseJson.length, 0);
+  } catch (error) {
+    void logAppError(error, 'localAiInferenceCache.estimateBytes');
+    return 0;
+  }
+};
+
+// QNBS-v3: Enforce local AI inference cache quota from settings maxModelStorageMb
+export const enforceInferenceCacheQuota = async (maxStorageMb: number): Promise<number> => {
+  const maxBytes = Math.max(1, Math.floor(maxStorageMb * 1024 * 1024));
+  try {
+    const rows = await db.aiInferenceCache.toArray();
+    rows.sort((a, b) => a.createdAt - b.createdAt);
+    let total = rows.reduce((sum, row) => sum + row.responseJson.length, 0);
+    let removed = 0;
+    while (total > maxBytes && rows.length > 0) {
+      const oldest = rows.shift();
+      if (!oldest?.id) break;
+      await db.aiInferenceCache.delete(oldest.id);
+      total -= oldest.responseJson.length;
+      removed += 1;
+    }
+    return removed;
+  } catch (error) {
+    void logAppError(error, 'localAiInferenceCache.enforceQuota');
     return 0;
   }
 };

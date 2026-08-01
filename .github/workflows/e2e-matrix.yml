@@ -1,0 +1,39 @@
+name: E2E Matrix
+
+# Optional cross-browser matrix (Firefox + WebKit). Default PR CI uses Chromium-only smoke.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6
+
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build web
+        run: pnpm run build
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install chromium firefox webkit
+
+      - name: E2E matrix (Chromium, Firefox, WebKit)
+        run: CI=true E2E_MATRIX=1 pnpm run test:e2e
+        env:
+          CI: true
+          E2E_MATRIX: '1'

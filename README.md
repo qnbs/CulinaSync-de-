@@ -56,7 +56,7 @@ Snapshot: **[docs/audit/evidence/2026-08-01-post-pr118.md](./docs/audit/evidence
 
 | Bereich | Stand |
 |---------|--------|
-| **Tests** | 665 Vitest-Tests (143 Dateien); Coverage-Schwellen **82/80/75/74** (lines/statements/functions/branches) |
+| **Tests** | Vitest (145 files); coverage thresholds **82/80/75/74** — see `docs/generated/repo-status.json` |
 | **Release-Check** | `pnpm run verify:release` · `pnpm run check:version-drift` |
 | **i18n** | de/en; `core` · `settings` · `features` · `gemini` · **`aiChef`**; Baseline-Scan **0** Hardcoded in Prod |
 | **PWA** | Manifest, Share Target, Badges, SW-Update, Datei-Handler — [docs/PWA.md](./docs/PWA.md) |

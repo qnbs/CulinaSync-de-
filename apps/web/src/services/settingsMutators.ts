@@ -8,6 +8,7 @@ import type {
   SpeechRecognitionMode,
   WhisperModelSize,
 } from '../types';
+import { isAllowedOllamaBaseUrl } from '../config/networkEndpointPolicy';
 
 export type SettingsPath =
   | 'language'
@@ -240,7 +241,9 @@ export const settingsMutators: Record<SettingsPath, (draft: AppSettings, value: 
     if (typeof value === 'boolean') draft.localAi.ollamaEnabled = value;
   },
   'localAi.ollamaBaseUrl': (draft, value) => {
-    if (typeof value === 'string' && value.length <= 256) draft.localAi.ollamaBaseUrl = value;
+    if (typeof value === 'string' && value.length <= 256 && isAllowedOllamaBaseUrl(value)) {
+      draft.localAi.ollamaBaseUrl = value;
+    }
   },
   'localAi.setupWizardCompleted': (draft, value) => {
     if (typeof value === 'boolean') draft.localAi.setupWizardCompleted = value;

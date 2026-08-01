@@ -23,7 +23,16 @@ export default defineConfig({
     video: 'off',
     screenshot: 'off',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: (process.env.E2E_MATRIX === '1'
+    ? [
+        { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+        { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+        { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+      ]
+    : [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }]) as Array<{
+    name: string;
+    use: Record<string, unknown>;
+  }>,
   webServer: isCi
     ? {
         // QNBS-v3: Cloud-CI — kein `vite dev`/Turbo-Server; nur statisches Preview nach `pnpm run build`

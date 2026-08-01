@@ -3,6 +3,7 @@
  * Generate release-evidence/<version>/evidence.json + README.md from repo state.
  * Usage: node scripts/generate-release-evidence.mjs [--version X.Y.Z] [--sha COMMIT]
  */
+import { createHash } from 'node:crypto';
 import { execSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -22,6 +23,12 @@ function gitSha() {
   } catch {
     return 'unknown';
   }
+}
+
+function sha256File(path) {
+  if (!existsSync(path)) return null;
+  const data = readFileSync(path);
+  return createHash('sha256').update(data).digest('hex');
 }
 
 function parseVitestThresholds() {
@@ -53,6 +60,10 @@ const evidence = {
   nodeEngine: readJson(join(root, 'package.json')).engines?.node,
   packageManager: readJson(join(root, 'package.json')).packageManager,
   coverageThresholds: parseVitestThresholds(),
+  artifactHashes: {
+    sbomCycloneDxSha256: sha256File(join(root, 'sbom.cdx.json')),
+    lcovSha256: sha256File(join(root, 'apps/web/coverage/lcov.info')),
+  },
   validationCommands: [
     'pnpm run verify:release',
     'pnpm run check:version-drift',
