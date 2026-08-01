@@ -8,7 +8,7 @@
 
 ## Checklist before a release tag
 
-1. `pnpm run check:all` (requires **pnpm ≥11** for audit).
+1. `pnpm run verify:release` (or `pnpm run check:all` — includes `test:coverage` gates).
 2. E2E Smoke green on `main` (path-filtered when `apps/web/**` changes).
 3. Bundle budget: `script` < 185 KB (sustain <190).
 4. CHANGELOG: move `[Unreleased]` bullets into `## [x.y.z] — YYYY-MM-DD`.

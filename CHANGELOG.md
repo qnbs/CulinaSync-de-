@@ -9,12 +9,22 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Added
 
+- **Audit remediation (2026-08-01):** Baseline evidence `docs/audit/evidence/2026-08-01-baseline.md`;
+  full audit `docs/audit/CULINASYNC-FULL-AUDIT-2026-08-01.md`; `pnpm run verify:release`
+  (coverage + optional `cargo audit`); `pnpm run check:version-drift`; `check:all` now
+  runs `test:coverage` instead of plain `test`.
 - **Intro-Gates v1.0 (2026-07-16):** `INTRO_GATES_ENABLED=true` — dismissible Onboarding
   (Escape/Backdrop/X/Skip, Demo „Weiter mit Demo“), What's-New erst nach First-Run;
   i18n DE/EN; Vitest für Onboarding + Intro-Gates.
 - **Coverage-Sprint:** Branch-Floor **64 → 74** (Ist ~74,5 %; Service-Matrizen: settingsMutators,
   voiceCommands, recipeImport, utils, nutrition/scanner/whisper, repositories, aiProvider
   Cache/Ollama/WebLLM, embeddings, export PDF/ICS); Ziel 82 % weiter offen.
+
+### Fixed
+
+- **PR #118 review threads:** Migration harness rejects unknown table names; export CSV/Markdown
+  assertions; anchor `click` spy restore; embedding mock isolation; fake-timer `try/finally`;
+  QNBS-v3 comments on non-trivial test blocks.
 
 ### Security
 
