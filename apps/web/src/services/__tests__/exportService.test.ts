@@ -188,6 +188,7 @@ describe('exportService shopping-list exports', () => {
     expect(URL.createObjectURL).toHaveBeenCalled();
   });
 
+  // QNBS-v3: CSV/Markdown-Formatzweige — isChecked-Mapping und leere Kategorie → Sonstiges
   it('exportShoppingListToCsv maps isChecked yes/no and keeps empty category', async () => {
     const createdBlobs: Blob[] = [];
     URL.createObjectURL = vi.fn((blob: Blob) => {
@@ -209,6 +210,7 @@ describe('exportService shopping-list exports', () => {
     expect(csvPayload).toMatch(/"Erledigt":"(Nein|No)"/);
     expect(csvPayload).toMatch(/"Erledigt":"(Ja|Yes)"/);
     expect(csvPayload).toContain('"Artikel":"Brot"');
+    expect(csvPayload).toContain('"Kategorie":""');
   });
 
   it('exportShoppingListToTxt/Markdown group empty category as Sonstiges', async () => {
@@ -232,6 +234,7 @@ describe('exportService shopping-list exports', () => {
 
     exportShoppingListToMarkdown([uncategorized]);
     expect(await createdBlobs[1].text()).toContain('Sonstiges');
+    expect(await createdBlobs[1].text()).toContain('Kerze');
   });
 
   it('exportShoppingListToPdf paginates and downloads', async () => {
@@ -276,6 +279,7 @@ describe('exportService full backup helpers', () => {
   });
 });
 
+// QNBS-v3: ICS-Fallback-Pfade — Rezept ohne Beschreibung, Notiz-Fallback, leere weekDates
 describe('exportMealPlanWeekToIcs', () => {
   beforeEach(() => {
     URL.createObjectURL = vi.fn(() => 'blob:ics');
@@ -396,8 +400,9 @@ describe('exportMealPlanWeekToIcs', () => {
   });
 
   it('ICS: leere weekDates nutzt Filename-Fallback week_week', () => {
-    const clickSpy = vi.fn();
-    HTMLAnchorElement.prototype.click = clickSpy;
+    const clickSpy = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => undefined);
     const appendSpy = vi.spyOn(document.body, 'appendChild');
 
     exportMealPlanWeekToIcs([], {}, new Map());
@@ -408,6 +413,7 @@ describe('exportMealPlanWeekToIcs', () => {
       .find((node): node is HTMLAnchorElement => node instanceof HTMLAnchorElement);
     expect(link?.download).toBe('mealplan_week_week.ics');
     appendSpy.mockRestore();
+    clickSpy.mockRestore();
   });
 });
 
@@ -476,6 +482,7 @@ describe('exportService recipe format branches', () => {
     expect(URL.createObjectURL).toHaveBeenCalled();
   });
 
+  // QNBS-v3: PDF-Pagination via stateful jsPDF-Mock — addPage bei langen Rezepttexten
   it('exportRecipeToPdf paginiert bei langem Rezept (addPage)', async () => {
     jsPdfInstances.length = 0;
     const longStep =

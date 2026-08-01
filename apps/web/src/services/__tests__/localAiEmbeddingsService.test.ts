@@ -29,6 +29,13 @@ vi.mock('@domain/ai-core', async (importOriginal) => {
 describe('localAiEmbeddingsService', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
+    mockEmbedText.mockReset();
+    mockGetTransformersEngineStatus.mockReset();
+    mockEnqueue.mockReset();
+    mockEnqueue.mockImplementation((fn: () => Promise<void>) => {
+      void fn();
+      return Promise.resolve();
+    });
     await db.aiEmbeddings.clear();
     await db.mealPlan.clear();
     await db.recipes.clear();
@@ -474,7 +481,6 @@ describe('localAiEmbeddingsService', () => {
   });
 
   it('reindexAllEmbeddings bricht ab wenn Semantic RAG nicht verfuegbar', async () => {
-    // enableEmbeddings:false → Early-Return ohne Engine-Status; kein mockResolvedValueOnce (sonst Leak)
     const { reindexAllEmbeddings } = await import('../localAiEmbeddingsService');
     await reindexAllEmbeddings({
       ...getDefaultSettings(),
@@ -563,9 +569,7 @@ describe('localAiEmbeddingsService', () => {
       },
     ]);
 
-    // Query-Vektor explizit setzen (mockImplementation wuerde sonst erneut greifen)
-    mockEmbedText.mockReset();
-    mockEmbedText.mockResolvedValue([1, 0, 0]);
+    mockEmbedText.mockResolvedValueOnce([1, 0, 0]);
 
     const { searchSemanticRagChunks } = await import('../localAiEmbeddingsService');
     const settings = {
@@ -629,11 +633,14 @@ describe('localAiEmbeddingsService', () => {
 
   it('debouncedReindexAllEmbeddings enqueued nach Timeout', async () => {
     vi.useFakeTimers();
-    const { debouncedReindexAllEmbeddings } = await import('../localAiEmbeddingsService');
-    debouncedReindexAllEmbeddings(getDefaultSettings());
-    expect(mockEnqueue).not.toHaveBeenCalled();
-    await vi.advanceTimersByTimeAsync(2000);
-    expect(mockEnqueue).toHaveBeenCalled();
-    vi.useRealTimers();
+    try {
+      const { debouncedReindexAllEmbeddings } = await import('../localAiEmbeddingsService');
+      debouncedReindexAllEmbeddings(getDefaultSettings());
+      expect(mockEnqueue).not.toHaveBeenCalled();
+      await vi.advanceTimersByTimeAsync(2000);
+      expect(mockEnqueue).toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

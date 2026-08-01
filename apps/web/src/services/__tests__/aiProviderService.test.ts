@@ -272,6 +272,7 @@ describe('aiProviderService', () => {
     expect(mockOllamaRecipe).toHaveBeenCalled();
   });
 
+  // QNBS-v3: WebLLM- und Offline-Fallback-Zweige — Provider-Routing ohne Cloud-Key
   it('nutzt WebLLM-Pfad wenn Layer verfuegbar (ohne Ollama)', async () => {
     mockGetWebLlmEngineStatus.mockResolvedValue({
       available: true,

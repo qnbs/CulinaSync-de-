@@ -129,6 +129,7 @@ vi.mock('dexie', async () => {
 
 import { DB_MIGRATION_HISTORY, ensureMigrationBackup } from '../dbMigrations';
 
+// QNBS-v3: Migration-Callback-Harness mit expliziten Tabellen — verhindert stille Typos in Upgrade-Pfaden
 describe('dbMigrations upgrade callbacks', () => {
   it('v8/v9/v10 setzen fehlende Felder und lassen gesetzte unverändert', async () => {
     const pantryRows = [
@@ -159,9 +160,16 @@ describe('dbMigrations upgrade callbacks', () => {
     });
 
     const tx = {
-      table: (name: string) => ({
-        toCollection: () => makeCollection(name === 'pantry' ? pantryRows : recipeRows),
-      }),
+      table: (name: string) => {
+        const rows =
+          name === 'pantry'
+            ? pantryRows
+            : name === 'recipes'
+              ? recipeRows
+              : null;
+        if (!rows) throw new Error(`Unexpected migration table: ${name}`);
+        return { toCollection: () => makeCollection(rows) };
+      },
     };
 
     const v8 = DB_MIGRATION_HISTORY.find((m) => m.version === 8);
@@ -182,6 +190,18 @@ describe('dbMigrations upgrade callbacks', () => {
     expect(recipeRows[1].pantryMatchPercentage).toBe(40);
     expect(recipeRows[1].ingredientCount).toBe(2);
     expect(recipeRows[1].imageUrl).toBe('keep.png');
+  });
+
+  it('lehnt unbekannte Migration-Tabellennamen im Harness ab', () => {
+    const tx = {
+      table: (name: string) => {
+        if (name !== 'pantry' && name !== 'recipes') {
+          throw new Error(`Unexpected migration table: ${name}`);
+        }
+        return { toCollection: () => ({ modify: async () => undefined }) };
+      },
+    };
+    expect(() => tx.table('recipe')).toThrow(/Unexpected migration table: recipe/);
   });
 });
 
