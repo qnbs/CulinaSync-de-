@@ -28,6 +28,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Security
 
+- **Dependency overrides (2026-08-01):** `brace-expansion` ≥5.0.8, `fast-uri` ≥3.1.4, `sharp` ≥0.35.0
+  in `pnpm-workspace.yaml` — clears high audit findings (GHSA-mh99, GHSA-v2hh, GHSA-f88m).
 - **serde_with 3.21.0** (Cargo/Tauri, Dependabot #117): Fix GHSA-7gcf-g7xr-8hxj
   (KeyValueMap Allocation-Panic); nur `src-tauri/Cargo.lock`.
 
