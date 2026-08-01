@@ -31,6 +31,14 @@ const getWorker = () => {
 
       pending.resolve(event.data.result as NutritionAllergyReport);
     });
+    // QNBS-v3: Worker crash must reject pending nutrition jobs | parity with embedding/whisper audit matrix
+    worker.addEventListener('error', (event: ErrorEvent) => {
+      const message = event.message || 'nutrition-worker-error';
+      for (const [id, pending] of pendingRequests) {
+        pending.reject(new Error(message));
+        pendingRequests.delete(id);
+      }
+    });
   }
 
   return worker;
@@ -47,4 +55,11 @@ export const analyzeRecipeNutritionInWorker = async (recipe: Recipe): Promise<Nu
     pendingRequests.set(id, { resolve, reject });
     activeWorker.postMessage({ id, recipe });
   });
+};
+
+export const resetNutritionWorkerForTests = (): void => {
+  worker?.terminate();
+  worker = null;
+  pendingRequests.clear();
+  requestId = 0;
 };
