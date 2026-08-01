@@ -23,6 +23,7 @@
     "verify:release": "node scripts/verify-release.mjs",
     "check:version-drift": "node scripts/check-version-drift.mjs",
     "check:readme-version": "node scripts/check-readme-version.mjs",
+    "check:repo-truth": "node scripts/check-repo-truth.mjs",
     "derive:repo-status": "node scripts/derive-repo-status.mjs --write",
     "generate:release-evidence": "node scripts/generate-release-evidence.mjs",
     "i18n:scan": "node scripts/scan-i18n-hardcoded.mjs",

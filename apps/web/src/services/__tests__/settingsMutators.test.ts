@@ -23,6 +23,10 @@ describe('settingsMutators', () => {
     expect(applySettingsChange(draft, 'localAi.ollamaBaseUrl', 'http://127.0.0.1:11434')).toBe(true);
     expect(draft.localAi.ollamaBaseUrl).toBe('http://127.0.0.1:11434');
 
+    const remote = 'https://evil.example:11434';
+    expect(applySettingsChange(draft, 'localAi.ollamaBaseUrl', remote)).toBe(true);
+    expect(draft.localAi.ollamaBaseUrl).not.toBe(remote);
+
     expect(applySettingsChange(draft, 'privacy.autoClearInferenceCache', true)).toBe(true);
     expect(draft.privacy.autoClearInferenceCache).toBe(true);
   });

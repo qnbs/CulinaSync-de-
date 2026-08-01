@@ -1,4 +1,5 @@
 import { extractJsonPayload, sanitizeForPrompt } from '@domain/ai-core';
+import { assertAllowedEndpoint } from '../config/networkEndpointPolicy';
 import type { AppSettings, PantryItem, Recipe, RecipeIdea, StructuredPrompt } from '../types';
 import { parseAiJsonWithSchema, recipeAiSchema, recipeIdeasResponseSchema } from './aiJsonParse';
 import { constructBasePrompt, geminiSystem } from './aiPromptBuilder';
@@ -20,6 +21,7 @@ export const probeOllamaHealth = async (
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
+    assertAllowedEndpoint(baseUrl, 'ollama_loopback');
     const response = await fetch(`${normalizeBaseUrl(baseUrl)}/api/tags`, {
       method: 'GET',
       signal: controller.signal,
@@ -37,6 +39,7 @@ const chatWithOllama = async (
   system: string,
   user: string,
 ): Promise<string> => {
+  assertAllowedEndpoint(baseUrl, 'ollama_loopback');
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
   try {

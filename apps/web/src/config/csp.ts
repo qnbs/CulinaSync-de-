@@ -6,15 +6,22 @@
  * - `TAURI_CSP` is mirrored into `src-tauri/tauri.conf.json`; a unit test
  *   (`__tests__/csp.test.ts`) fails if the two drift apart.
  *
- * connect-src is `'self' https:` plus explicit loopback HTTP for Ollama.
- * An explicit host allowlist for sync/IPFS is NOT feasible (user-configured
- * endpoints). On-device AI pulls model weights from HTTPS CDNs. Browser builds
- * add `upgrade-insecure-requests` (may still interfere with loopback http).
+ * connect-src is `'self' https:` plus explicit AI/Gemini hosts and loopback HTTP for Ollama.
+ * Runtime validation: `networkEndpointPolicy.ts` (Ollama loopback, model CDN allowlist).
  */
+
+import { CSP_EXPLICIT_CONNECT_HOSTS } from './networkEndpointPolicy';
 
 // Loopback HTTP for optional Ollama connector (Tauri/desktop). Browser builds also
 // set upgrade-insecure-requests, which may still block plain http://127.0.0.1.
-const CONNECT_SRC = "'self' https: http://127.0.0.1:* http://localhost:* http://[::1]:*";
+const CONNECT_SRC = [
+  "'self'",
+  'https:',
+  'http://127.0.0.1:*',
+  'http://localhost:*',
+  'http://[::1]:*',
+  ...CSP_EXPLICIT_CONNECT_HOSTS,
+].join(' ');
 
 // Ordered so the serialized policy is deterministic (drift test compares strings).
 const DIRECTIVES: ReadonlyArray<readonly [string, string]> = [

@@ -10,6 +10,18 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ### Added
 
 - Worker verification matrix tests (embedding, nutrition, whisper): invalid id, error payload, crash, cleanup.
+- **Network endpoint policy** (`networkEndpointPolicy.ts`) with Ollama loopback gate, AI CDN allowlist, CSP threat model doc.
+- **Repo-truth CI:** `check:repo-truth` validates README test counts and coverage thresholds.
+- **Release evidence:** SBOM/lcov SHA-256 fields in `generate-release-evidence.mjs`.
+- **Inference cache quota:** `enforceInferenceCacheQuota` + `setCachedInferenceWithQuota`.
+- **E2E matrix workflow** (optional Chromium/Firefox/WebKit via `E2E_MATRIX=1`).
+- **Cargo audit** in CI validate + `docs/security/CARGO-AUDIT-EXCEPTIONS.md`.
+- Governance docs: branch cleanup, encryption review, intro-gates sign-off, desktop signing.
+
+### Changed
+
+- CSP `connect-src` lists explicit Gemini and Hugging Face CDN hosts (alongside `https:` fallback).
+- Ollama base URL settings reject non-loopback endpoints.
 
 ## [0.3.0] — 2026-08-01
 

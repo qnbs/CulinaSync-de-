@@ -3,9 +3,12 @@ import { db } from '../db';
 import {
   buildInferenceCacheHash,
   clearInferenceCache,
+  enforceInferenceCacheQuota,
+  estimateInferenceCacheBytes,
   getCachedInference,
   purgeExpiredInferenceCache,
   setCachedInference,
+  setCachedInferenceWithQuota,
 } from '../localAiInferenceCacheService';
 
 describe('localAiInferenceCacheService', () => {
@@ -49,5 +52,34 @@ describe('localAiInferenceCacheService', () => {
     expect(await purgeExpiredInferenceCache()).toBe(1);
     await clearInferenceCache();
     expect(await db.aiInferenceCache.count()).toBe(0);
+  });
+
+  it('enforces quota by evicting oldest entries', async () => {
+    await db.aiInferenceCache.add({
+      hash: 'a',
+      task: 't',
+      modelId: 'm',
+      responseJson: 'x'.repeat(2000),
+      createdAt: 1,
+      expiresAt: Date.now() + 60_000,
+    });
+    await db.aiInferenceCache.add({
+      hash: 'b',
+      task: 't',
+      modelId: 'm',
+      responseJson: 'y'.repeat(2000),
+      createdAt: 2,
+      expiresAt: Date.now() + 60_000,
+    });
+    expect(await estimateInferenceCacheBytes()).toBeGreaterThanOrEqual(4000);
+    const removed = await enforceInferenceCacheQuota(0.001); // ~1 KB
+    expect(removed).toBeGreaterThan(0);
+    expect(await db.aiInferenceCache.count()).toBeLessThan(2);
+  });
+
+  it('setCachedInferenceWithQuota trims after insert', async () => {
+    const hash = await buildInferenceCacheHash('recipe', 'quota', 'm');
+    await setCachedInferenceWithQuota(hash, 'recipe', 'm', { big: 'z'.repeat(5000) }, 24, 0.001);
+    expect(await db.aiInferenceCache.count()).toBeLessThanOrEqual(1);
   });
 });

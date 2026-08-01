@@ -15,10 +15,10 @@ describe('Content-Security-Policy single source', () => {
   });
 
   it('keeps connect-src at self+https plus loopback for Ollama', () => {
-    expect(WEB_CSP).toContain(
-      "connect-src 'self' https: http://127.0.0.1:* http://localhost:* http://[::1]:*",
-    );
-    expect(TAURI_CSP).toContain('http://127.0.0.1:*');
+    expect(WEB_CSP).toContain("connect-src 'self' https:");
+    expect(WEB_CSP).toContain('http://127.0.0.1:*');
+    expect(WEB_CSP).toContain('https://huggingface.co');
+    expect(WEB_CSP).toContain('https://generativelanguage.googleapis.com');
     // no websocket scheme
     expect(WEB_CSP).not.toMatch(/connect-src[^;]*\sws:/);
   });
