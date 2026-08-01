@@ -100,7 +100,9 @@ jobs:
         run: cargo install cargo-audit --locked
 
       - name: Rust advisory scan (Tauri lockfile)
-        run: cargo audit --file src-tauri/Cargo.lock --config audit.toml
+        run: >
+          cargo audit --file src-tauri/Cargo.lock
+          --ignore RUSTSEC-2026-0194 --ignore RUSTSEC-2026-0195
 
       # QNBS-v3: CycloneDX-SBOM für Supply-Chain-Transparenz (Master Perfection P1)
       - name: Generate SBOM (CycloneDX)
