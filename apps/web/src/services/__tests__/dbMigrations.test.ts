@@ -127,7 +127,83 @@ vi.mock('dexie', async () => {
   };
 });
 
-import { ensureMigrationBackup } from '../dbMigrations';
+import { DB_MIGRATION_HISTORY, ensureMigrationBackup } from '../dbMigrations';
+
+// QNBS-v3: Migration-Callback-Harness mit expliziten Tabellen — verhindert stille Typos in Upgrade-Pfaden
+describe('dbMigrations upgrade callbacks', () => {
+  it('v8/v9/v10 setzen fehlende Felder und lassen gesetzte unverändert', async () => {
+    const pantryRows = [
+      { createdAt: 100, updatedAt: undefined as number | undefined },
+      { createdAt: 200, updatedAt: 250 },
+    ];
+    const recipeRows = [
+      {
+        ingredients: [{ sectionTitle: '', items: [{ name: 'A', quantity: '1', unit: 'g' }] }],
+        updatedAt: undefined as number | undefined,
+        pantryMatchPercentage: undefined as number | undefined,
+        ingredientCount: undefined as number | undefined,
+        imageUrl: undefined as string | undefined,
+      },
+      {
+        ingredients: [{ sectionTitle: '', items: [{ name: 'B', quantity: '1', unit: 'g' }, { name: 'C', quantity: '1', unit: 'g' }] }],
+        updatedAt: 9,
+        pantryMatchPercentage: 40,
+        ingredientCount: 2,
+        imageUrl: 'keep.png',
+      },
+    ];
+
+    const makeCollection = (rows: Record<string, unknown>[]) => ({
+      modify: async (fn: (item: Record<string, unknown>) => void) => {
+        rows.forEach((row) => fn(row));
+      },
+    });
+
+    const tx = {
+      table: (name: string) => {
+        const rows =
+          name === 'pantry'
+            ? pantryRows
+            : name === 'recipes'
+              ? recipeRows
+              : null;
+        if (!rows) throw new Error(`Unexpected migration table: ${name}`);
+        return { toCollection: () => makeCollection(rows) };
+      },
+    };
+
+    const v8 = DB_MIGRATION_HISTORY.find((m) => m.version === 8);
+    const v9 = DB_MIGRATION_HISTORY.find((m) => m.version === 9);
+    const v10 = DB_MIGRATION_HISTORY.find((m) => m.version === 10);
+    expect(v8?.upgrade && v9?.upgrade && v10?.upgrade).toBeTruthy();
+    await v8!.upgrade!(tx as never);
+    await v9!.upgrade!(tx as never);
+    await v10!.upgrade!(tx as never);
+
+    expect(pantryRows[0].updatedAt).toBe(100);
+    expect(pantryRows[1].updatedAt).toBe(250);
+    expect(recipeRows[0].updatedAt).toEqual(expect.any(Number));
+    expect(recipeRows[0].pantryMatchPercentage).toBe(0);
+    expect(recipeRows[0].ingredientCount).toBe(1);
+    expect(recipeRows[0].imageUrl).toBeUndefined();
+    expect(recipeRows[1].updatedAt).toBe(9);
+    expect(recipeRows[1].pantryMatchPercentage).toBe(40);
+    expect(recipeRows[1].ingredientCount).toBe(2);
+    expect(recipeRows[1].imageUrl).toBe('keep.png');
+  });
+
+  it('lehnt unbekannte Migration-Tabellennamen im Harness ab', () => {
+    const tx = {
+      table: (name: string) => {
+        if (name !== 'pantry' && name !== 'recipes') {
+          throw new Error(`Unexpected migration table: ${name}`);
+        }
+        return { toCollection: () => ({ modify: async () => undefined }) };
+      },
+    };
+    expect(() => tx.table('recipe')).toThrow(/Unexpected migration table: recipe/);
+  });
+});
 
 describe('dbMigrations backup retention', () => {
   beforeEach(() => {

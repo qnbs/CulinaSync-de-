@@ -10,15 +10,15 @@
 | R-003 | High | `test(e2e): critical journeys sync, chef, cook-mode` | Regressionsschutz | L | Smoke reicht nicht für M10 | R-001 optional | ✅ PR #66 + #67 (10 E2E, inkl. Cook-Mode) |
 | R-004 | Medium | `refactor(db): services import dbInstance only` | Testbarkeit | S | Letzte `./db`-Imports in Services bereinieren | — | ✅ `exportService` |
 | R-005 | Medium | `chore(eslint): typed rules + floating promises` | Hook-Bugs | M | `exhaustive-deps` **error**; typed lint + `no-floating-promises` | R-004 hilft | ✅ PR #67 (`projectService`) |
-| R-006 | Medium | `test: raise branch coverage sync + recipeRepository` | CI-Stabilität | M | M5.8: Threshold **64** % branches (Ziel 82) | — | 🟨 Floor 64; weiter zu 82 |
-| R-007 | Medium | `docs: document Dexie migration + backup gate` ✅ | User Trust | S | Erledigt: `docs/DB-MIGRATIONS.md` | — |
+| R-006 | Medium | `test: raise branch coverage sync + recipeRepository` | CI-Stabilität | M | Floor **74** % branches (Ziel 82) | — | 🟨 Floor 74; weiter zu 82 |
+| R-007 | Medium | `docs: document Dexie migration + backup gate` | User Trust | S | Erledigt: `docs/DB-MIGRATIONS.md` | — | ✅ |
 | R-008 | Medium | `feat(sync): optional encrypted credential storage` | Security | M | localStorage Metadaten | apiKeyService pattern | ✅ App-Passwort verschl.; Prefs sessionStorage |
 | R-009 | Medium | `ci: Lighthouse CI on PR previews` | PWA/A11y Scores | M | Mobile UX | Pages preview path | ✅ `lighthouse-ci.yml` (PR) |
 | R-010 | Low | `chore(deps): resolve moderate audit findings` | Supply chain | S | 3 moderate offen | Dependabot | ✅ turbo 2.9.16 + pnpm overrides |
-| R-011 | Low | `feat(demo): seed or try-without-data for Pages` | Onboarding | M | Erstbesucher GitHub Pages | ✅ `?demo=1` / `?try=1`, Pages-Banner |
-| R-012 | Medium | `release(tauri): M8 first tagged desktop build` | Desktop | L | ROADMAP M8 | CI GTK image | 🟨 Cargo+tauri.conf **0.2.4**; Tag/Draft Release noch ausstehend |
+| R-011 | Low | `feat(demo): seed or try-without-data for Pages` | Onboarding | M | Erstbesucher GitHub Pages | — | ✅ `?demo=1` / `?try=1`, Pages-Banner |
+| R-012 | Medium | `release(tauri): M8 first tagged desktop build` | Desktop | L | ROADMAP M8 | CI GTK image | ✅ Tag+Draft `v0.2.4` mit Assets; Publish optional Owner |
 | R-013 | Low | `docs(legal): privacy policy DE` | Launch DE | M | Öffentliche Veröffentlichung | — | ✅ 2026-07-15 — `docs/legal/DATENSCHUTZ.md` + Settings-Link |
-| R-014 | Info | `chore(graphify): update after code sessions` | Agent DX | S | Team policy | — |
+| R-014 | Info | `chore(graphify): update after code sessions` | Agent DX | S | Team policy | — | 🟨 optional |
 | R-GLIB | Medium | `chore(sec): track glib 0.18.5 VariantStrIter unsoundness (GH #23)` | Security (Desktop) | S | Transitiv via Tauri/gtk-rs 0.18; Fix erst glib 0.20.10 (semver-major, durch wry/webkit2gtk gepinnt); `cargo update -p glib` = 0 changes | wry/webkit2gtk → gtk-rs 0.20 | 🟨 tracked — Dependabot(cargo) + SECURITY.md; Re-Eval bei gtk-rs 0.20 |
 | R-BRANCHPROT | Low | `chore(ci): enable branch protection + require main-guard/validate` | Enforcement | S | Ruleset `mainrules` aktiv (Required Checks + PR + linear + no force-push); klassische Protection-API bleibt 404 | WS-GUARD ✅ | ✅ 2026-07-15 — verifiziert + Runbook sync |
 
@@ -28,7 +28,7 @@
 **Erledigt (Phase 0, 2026-07-15):** R-BRANCHPROT; Dependabot #106–#111; pnpm 11 Audit-Gate  
 **Erledigt (Phase 1–2, 2026-07-15):** R-013; RAG/Sanitizer/Whisper/Backup-Zod/SBOM/Coverage-Lines-82  
 **Erledigt (Phase 3, 2026-07-15):** M11.4 Vision; Inference-Cache; WebLLM Download-UX; Ollama; PBKDF2 CSB3; ADR Dexie-Encrypt; E2E Offline-Chef  
-**Nächster Sprint:** R-012 Tag/Draft **v0.2.4**; Branch-Coverage ≥82 %; Intro-Gates v1.0
+**Nächster Sprint:** Branch-Coverage 74→≥82 %; Draft `v0.2.4` publishen (Owner); M5.9 Richtung 88 %
 
 ## Definition of Done (Backlog-Item)
 

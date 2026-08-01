@@ -8,7 +8,7 @@
 
 ## Checklist before a release tag
 
-1. `pnpm run check:all` (requires **pnpm ≥11** for audit).
+1. `pnpm run verify:release` (or `pnpm run check:all` — includes `test:coverage` gates).
 2. E2E Smoke green on `main` (path-filtered when `apps/web/**` changes).
 3. Bundle budget: `script` < 185 KB (sustain <190).
 4. CHANGELOG: move `[Unreleased]` bullets into `## [x.y.z] — YYYY-MM-DD`.
@@ -18,7 +18,8 @@
 
 ## v1.0 readiness (tracked)
 
-- Re-enable `INTRO_GATES_ENABLED` after onboarding polish.
-- Coverage path toward M5.9 (≥88 % long-term); interim thresholds in `vitest.config.ts`.
+- `INTRO_GATES_ENABLED` re-enabled (dismissible onboarding; What's New after first-run).
+- Coverage path toward M5.9 (≥88 % long-term); interim branch floor **74** (Ziel 82) in `vitest.config.ts`.
 - Privacy policy linked from Help/Settings (`docs/legal/DATENSCHUTZ.md`).
+- Desktop R-012: Tag/Draft `v0.2.4` existiert — Draft bei Bedarf publishen.
 - Optional Changesets tooling can be added later; until then this runbook is canonical.
