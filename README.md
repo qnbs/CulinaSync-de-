@@ -6,7 +6,7 @@
 |---|---|
 | **Live (GitHub Pages)** | [qnbs.github.io/CulinaSync-de-](https://qnbs.github.io/CulinaSync-de-/) |
 | **Vercel Production** | [culina-sync-de-web](https://culina-sync-de-web.vercel.app/) |
-| **Version** | `0.2.4` |
+| **Version** | `0.3.0` |
 | **Stack** | React 19 · Vite 8 · TypeScript (`tsgo`) · Dexie · Redux (UI) · PWA · Local-AI-Routing |
 
 [Architektur](./docs/ARCHITECTURE.md) · [Entwicklung](./docs/DEVELOPMENT.md) · [Deployment](./docs/DEPLOYMENT.md) · [PWA](./docs/PWA.md) · [Local AI](./docs/LOCAL-AI-ARCHITECTURE.md) · [Design-System](./docs/DESIGN-SYSTEM.md) · [Testing](./docs/TESTING.md) · [Roadmap](./ROADMAP.md)
@@ -50,20 +50,21 @@ flowchart TB
 
 ---
 
-## Aktueller Stand (Juni 2026)
+## Aktueller Stand (August 2026)
 
-Snapshot: **[docs/STATUS-2026-06-03.md](./docs/STATUS-2026-06-03.md)** · Änderungen: [CHANGELOG.md](./CHANGELOG.md)
+Snapshot: **[docs/audit/evidence/2026-08-01-post-pr118.md](./docs/audit/evidence/2026-08-01-post-pr118.md)** · Änderungen: [CHANGELOG.md](./CHANGELOG.md)
 
 | Bereich | Stand |
 |---------|--------|
-| **Tests** | 380+ Vitest-Tests; Coverage v8 ~79 % lines (Schwellen 77/79/72/62) |
+| **Tests** | 665 Vitest-Tests (143 Dateien); Coverage-Schwellen **82/80/75/74** (lines/statements/functions/branches) |
+| **Release-Check** | `pnpm run verify:release` · `pnpm run check:version-drift` |
 | **i18n** | de/en; `core` · `settings` · `features` · `gemini` · **`aiChef`**; Baseline-Scan **0** Hardcoded in Prod |
 | **PWA** | Manifest, Share Target, Badges, SW-Update, Datei-Handler — [docs/PWA.md](./docs/PWA.md) |
 | **Local AI** | 4-Layer-Stack, Routing, Ollama-URL, GPU/Modell-Prefs — [docs/LOCAL-AI-ARCHITECTURE.md](./docs/LOCAL-AI-ARCHITECTURE.md) |
 | **Help** | 12 FAQs, Pro-Tipps, Einstellungs-Deep-Links, Live-Systemstatus |
 | **Einstellungen** | 12 Bereiche + Kontext-Intros (`SettingsPanelIntro`) |
 | **Sync** | QR-Gerät, verschlüsselter Vault, WebDAV/Nextcloud, JSON/MD/CSV/PDF |
-| **CI** | validate + E2E-Smoke (Playwright **v1.60.0**) + CodeQL; Deploy Pages + Vercel |
+| **CI** | validate (coverage + version drift + audit) + E2E-Smoke + CodeQL; Actions SHA-pinned; Deploy Pages + Vercel |
 
 ---
 

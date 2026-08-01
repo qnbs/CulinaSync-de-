@@ -1,23 +1,23 @@
-## Beschreibung
+## Description
 
-<!-- Kurze Zusammenfassung der Änderungen und warum sie nötig waren. -->
+<!-- Brief summary of changes and why they were needed. -->
 
-## Art der Änderung
+## Type of change
 
-- [ ] Bug Fix (non-breaking change, behebt ein Problem)
-- [ ] Neues Feature (non-breaking change, fügt Funktionalität hinzu)
-- [ ] Breaking Change (Änderung, die bestehende Funktionalität beeinflusst)
-- [ ] Dokumentation / Infra / Refactoring (kein Funktionsänderung)
+- [ ] Bug fix (non-breaking change that fixes an issue)
+- [ ] New feature (non-breaking change that adds functionality)
+- [ ] Breaking change (change that affects existing behavior)
+- [ ] Documentation / infra / refactoring (no functional change)
 
-## Checkliste
+## Checklist
 
-- [ ] Relevante Tests wurden hinzugefügt oder aktualisiert (`pnpm run test`)
-- [ ] TypeScript-Check bestanden (`pnpm run type-check`)
-- [ ] Lint fehlerfrei (`pnpm run lint`)
-- [ ] i18n: Neue Strings in `src/locales/de/` **und** `src/locales/en/` gepflegt
-- [ ] Barrierefreiheit: Modals nutzen `useModalA11y`, interaktive Elemente haben `aria-label`
-- [ ] `CHANGELOG.md` wurde aktualisiert (Format: [keepachangelog](https://keepachangelog.com/de/1.1.0/))
+- [ ] Relevant tests added or updated (`pnpm run test`)
+- [ ] TypeScript check passed (`pnpm run type-check`)
+- [ ] Lint clean (`pnpm run lint`)
+- [ ] i18n: new strings in `src/locales/de/` **and** `src/locales/en/`
+- [ ] Accessibility: modals use `useModalA11y`; interactive elements have `aria-label`
+- [ ] `CHANGELOG.md` updated ([keepachangelog](https://keepachangelog.com/en/1.1.0/) format)
 
-## Verwandte Issues
+## Related issues
 
 <!-- Closes #XX -->

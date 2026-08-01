@@ -69,7 +69,7 @@ jobs:
           echo "CHROME_PATH=${CHROME_PATH}" >> "$GITHUB_ENV"
 
       - name: Lighthouse CI (desktop)
-        uses: treosh/lighthouse-ci-action@v12
+        uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18 # v12
         with:
           configPath: ./lighthouserc.json
           uploadArtifacts: true
@@ -104,7 +104,7 @@ jobs:
           echo "CHROME_PATH=$(find "$HOME/.cache/ms-playwright" -name chrome -type f | head -1)" >> "$GITHUB_ENV"
 
       - name: Lighthouse CI (mobile)
-        uses: treosh/lighthouse-ci-action@v12
+        uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18 # v12
         with:
           configPath: ./lighthouserc.mobile.json
           uploadArtifacts: true

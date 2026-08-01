@@ -9,9 +9,20 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Added
 
+- None yet.
+
+## [0.3.0] — 2026-08-01
+
+### Added
+
+- **Release identity 0.3.0:** synchronisiert root/web/Tauri mit dem Feature-Stand seit v0.2.2
+  (Local-AI Phase 3, Intro-Gates, Audit-Remediation, CI-Hardening).
 - **Post-PR #118 CI:** `check:version-drift` in `validate.yml`; GitHub Actions pinned to
   immutable SHAs across core workflows; `pnpm run generate:release-evidence`.
-- **Release evidence:** `release-evidence/0.2.4/evidence.json` scaffold at merge SHA `cf5ae56`.
+- **Release evidence:** `release-evidence/0.2.4/evidence.json` scaffold at merge SHA `cf5ae56`;
+  `release-evidence/0.3.0/` scaffold at merge SHA `bb5026b`.
+- **Generated repo truth:** `scripts/derive-repo-status.mjs` → `docs/generated/repo-status.json`;
+  `scripts/check-readme-version.mjs` in CI validate pipeline.
 
 ### Changed
 
@@ -565,7 +576,8 @@ Die folgenden Eintraege dokumentieren die Arbeit zwischen **v0.1.0** und **v0.2.
 - CI-Pipeline mit Lint, TypeScript-Check, Tests und Bundle-Budget
 - CodeQL Security Analysis
 
-[Unreleased]: https://github.com/qnbs/CulinaSync-de-/compare/v0.2.4...HEAD
+[Unreleased]: https://github.com/qnbs/CulinaSync-de-/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/qnbs/CulinaSync-de-/compare/v0.2.4...v0.3.0
 [0.2.4]: https://github.com/qnbs/CulinaSync-de-/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/qnbs/CulinaSync-de-/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/qnbs/CulinaSync-de-/compare/v0.2.1...v0.2.2
