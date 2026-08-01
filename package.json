@@ -22,6 +22,7 @@
     "check:all": "pnpm run lint && pnpm run type-check && pnpm run test:coverage && pnpm run test:scripts && pnpm run i18n:check && pnpm run build && pnpm run check:bundle-budget && pnpm audit --audit-level=high",
     "verify:release": "node scripts/verify-release.mjs",
     "check:version-drift": "node scripts/check-version-drift.mjs",
+    "generate:release-evidence": "node scripts/generate-release-evidence.mjs",
     "i18n:scan": "node scripts/scan-i18n-hardcoded.mjs",
     "i18n:scan:all": "node scripts/scan-i18n-hardcoded.mjs --include-tests",
     "i18n:check": "node scripts/check-i18n-locale-keys.mjs && node scripts/check-i18n-baseline.mjs",
