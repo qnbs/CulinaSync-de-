@@ -1,5 +1,5 @@
 name: Bug Report
-description: Einen Fehler in CulinaSync melden
+description: Report a bug in CulinaSync
 title: '[Bug]: '
 labels:
   - bug
@@ -7,43 +7,43 @@ body:
   - type: markdown
     attributes:
       value: |
-        Danke, dass du dir die Zeit nimmst, diesen Fehler zu melden!
+        Thanks for taking the time to report this bug!
 
   - type: textarea
     id: description
     attributes:
-      label: Fehlerbeschreibung
-      description: Eine klare und präzise Beschreibung des Fehlers.
-      placeholder: Was ist passiert?
+      label: Bug description
+      description: A clear and concise description of the bug.
+      placeholder: What happened?
     validations:
       required: true
 
   - type: textarea
     id: steps
     attributes:
-      label: Schritte zum Reproduzieren
-      description: Wie kann der Fehler reproduziert werden?
+      label: Steps to reproduce
+      description: How can the bug be reproduced?
       placeholder: |
-        1. Gehe zu '...'
-        2. Klicke auf '...'
-        3. Scrolle zu '...'
-        4. Fehler tritt auf
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll to '...'
+        4. See error
     validations:
       required: true
 
   - type: textarea
     id: expected
     attributes:
-      label: Erwartetes Verhalten
-      description: Was hätte passieren sollen?
+      label: Expected behavior
+      description: What should have happened?
     validations:
       required: true
 
   - type: textarea
     id: actual
     attributes:
-      label: Tatsächliches Verhalten
-      description: Was ist stattdessen passiert?
+      label: Actual behavior
+      description: What happened instead?
     validations:
       required: true
 
@@ -56,18 +56,18 @@ body:
         - Firefox
         - Safari
         - Edge
-        - Andere
+        - Other
     validations:
       required: true
 
   - type: input
     id: os
     attributes:
-      label: Betriebssystem
-      placeholder: z. B. Windows 11, macOS 14, Ubuntu 24.04
+      label: Operating system
+      placeholder: e.g. Windows 11, macOS 14, Ubuntu 24.04
 
   - type: textarea
     id: context
     attributes:
-      label: Zusätzlicher Kontext
-      description: Screenshots, Fehlermeldungen aus der Konsole oder weitere Hinweise.
+      label: Additional context
+      description: Screenshots, console errors, or other details.

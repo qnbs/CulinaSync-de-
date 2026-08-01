@@ -1,5 +1,5 @@
 name: Feature Request
-description: Eine neue Funktion oder Verbesserung vorschlagen
+description: Suggest a new feature or improvement
 title: '[Feature]: '
 labels:
   - enhancement
@@ -7,49 +7,49 @@ body:
   - type: markdown
     attributes:
       value: |
-        Danke für deinen Vorschlag! Bitte beschreibe deine Idee so genau wie möglich.
+        Thanks for your suggestion! Please describe your idea as clearly as possible.
 
   - type: textarea
     id: problem
     attributes:
-      label: Problembeschreibung
-      description: Welches Problem löst diese Funktion? Was fehlt dir aktuell?
-      placeholder: Ich bin frustriert, wenn ich... / Es wäre hilfreich, wenn...
+      label: Problem description
+      description: What problem does this solve? What is missing today?
+      placeholder: I'm frustrated when... / It would help if...
     validations:
       required: true
 
   - type: textarea
     id: solution
     attributes:
-      label: Gewünschte Lösung
-      description: Wie sollte die Funktion deiner Meinung nach funktionieren?
+      label: Proposed solution
+      description: How should this feature work?
     validations:
       required: true
 
   - type: textarea
     id: alternatives
     attributes:
-      label: Alternativlösungen
-      description: Hast du andere Ansätze oder Workarounds in Betracht gezogen?
+      label: Alternatives considered
+      description: Other approaches or workarounds you considered.
 
   - type: dropdown
     id: area
     attributes:
-      label: Bereich
-      description: Welchen Bereich der App betrifft dein Vorschlag?
+      label: Area
+      description: Which part of the app does this affect?
       options:
-        - Vorratsverwaltung (Pantry)
-        - Rezeptbuch
-        - Wochenplanung
-        - Einkaufsliste
-        - KI-Assistent (AiChef)
-        - Einstellungen
-        - PWA / Installation
-        - Barrierefreiheit
-        - Sonstiges
+        - Pantry
+        - Recipe book
+        - Meal planner
+        - Shopping list
+        - AI assistant (AiChef)
+        - Settings
+        - PWA / installation
+        - Accessibility
+        - Other
 
   - type: textarea
     id: context
     attributes:
-      label: Zusätzlicher Kontext
-      description: Mockups, Skizzen oder weitere Informationen.
+      label: Additional context
+      description: Mockups, sketches, or other information.
