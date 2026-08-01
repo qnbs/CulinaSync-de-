@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const decodeSingle = vi.fn();
 const recognize = vi.fn();
@@ -16,6 +16,12 @@ describe('scannerService coverage', () => {
     vi.restoreAllMocks();
     decodeSingle.mockReset();
     recognize.mockReset();
+    // @ts-expect-error test override
+    delete window.BarcodeDetector;
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
     // @ts-expect-error test override
     delete window.BarcodeDetector;
   });

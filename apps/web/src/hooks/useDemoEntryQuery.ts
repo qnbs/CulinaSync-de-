@@ -6,6 +6,7 @@ import {
 } from '../services/demoSeedService';
 
 const ONBOARDED_KEY = 'culinaSyncOnboarded';
+const VERSION_KEY = 'culinasync_version';
 
 function stripQueryParams(keys: string[]): void {
   const url = new URL(window.location.href);
@@ -54,6 +55,7 @@ export function useDemoEntryQuery(
 
     if (tryMode) {
       localStorage.setItem(ONBOARDED_KEY, 'true');
+      localStorage.setItem(VERSION_KEY, __APP_VERSION__);
       sessionStorage.setItem(TRY_MODE_SESSION_KEY, '1');
       stripQueryParams(['try']);
       onResolved?.('try');
@@ -61,6 +63,7 @@ export function useDemoEntryQuery(
     }
 
     localStorage.setItem(ONBOARDED_KEY, 'true');
+    localStorage.setItem(VERSION_KEY, __APP_VERSION__);
     sessionStorage.setItem(DEMO_MODE_SESSION_KEY, '1');
     stripQueryParams(['demo']);
     void loadDemoPantrySeed()

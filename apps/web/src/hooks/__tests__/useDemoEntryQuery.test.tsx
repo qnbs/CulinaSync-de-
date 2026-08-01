@@ -29,6 +29,7 @@ describe('useDemoEntryQuery', () => {
 
     await waitFor(() => expect(loadDemoPantrySeed).toHaveBeenCalled());
     expect(localStorage.getItem('culinaSyncOnboarded')).toBe('true');
+    expect(localStorage.getItem('culinasync_version')).toBe(__APP_VERSION__);
     expect(sessionStorage.getItem('culinaSyncDemoMode')).toBe('1');
     expect(onResolved).toHaveBeenCalledWith('demo');
     expect(window.location.search).not.toContain('demo=1');

@@ -42,13 +42,18 @@ for (const [label, cmd] of steps) {
 
 const cargoToml = join(root, 'src-tauri/Cargo.toml');
 if (!skipCargo && existsSync(cargoToml)) {
-  const cargoAudit = spawnSync('cargo audit --version', { cwd: root, shell: true, encoding: 'utf8' });
-  if (cargoAudit.status === 0) {
-    run('cargo audit', 'cargo audit --file src-tauri/Cargo.lock');
+  const cargoAvailable = spawnSync('cargo --version', { cwd: root, shell: true, encoding: 'utf8' });
+  if (cargoAvailable.status !== 0) {
+    console.warn('\n⚠ cargo not installed — skipping Rust check and advisory scan');
   } else {
-    console.warn('\n⚠ cargo-audit not installed — skipping Rust advisory scan (install: cargo install cargo-audit)');
+    const cargoAudit = spawnSync('cargo audit --version', { cwd: root, shell: true, encoding: 'utf8' });
+    if (cargoAudit.status === 0) {
+      run('cargo audit', 'cargo audit --file src-tauri/Cargo.lock');
+    } else {
+      console.warn('\n⚠ cargo-audit not installed — skipping Rust advisory scan (install: cargo install cargo-audit)');
+    }
+    run('cargo check (tauri)', 'cargo check --manifest-path src-tauri/Cargo.toml');
   }
-  run('cargo check (tauri)', 'cargo check --manifest-path src-tauri/Cargo.toml');
 }
 
 console.log('\n✓ verify:release completed successfully');
