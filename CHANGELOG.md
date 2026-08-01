@@ -9,7 +9,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Added
 
-- None yet.
+- Worker verification matrix tests (embedding, nutrition, whisper): invalid id, error payload, crash, cleanup.
 
 ## [0.3.0] — 2026-08-01
 

@@ -9,8 +9,11 @@ let worker: Worker | null = null;
 let requestId = 0;
 const pendingRequests = new Map<number, PendingRequest>();
 
+const isWorkerTestsEnabled = (): boolean =>
+  (globalThis as { __ENABLE_WORKER_TESTS__?: boolean }).__ENABLE_WORKER_TESTS__ === true;
+
 const getWorker = (): Worker | null => {
-  if (typeof Worker === 'undefined' || import.meta.env.VITEST) {
+  if (typeof Worker === 'undefined' || (import.meta.env.VITEST && !isWorkerTestsEnabled())) {
     return null;
   }
 

@@ -25,7 +25,9 @@ let whisperWorker: Worker | null = null;
 let requestId = 0;
 
 const isWorkerEnv = (): boolean =>
-  typeof Worker !== 'undefined' && !import.meta.env.VITEST;
+  typeof Worker !== 'undefined' &&
+  (!import.meta.env.VITEST ||
+    (globalThis as { __ENABLE_WORKER_TESTS__?: boolean }).__ENABLE_WORKER_TESTS__ === true);
 
 const getWorker = (): Worker | null => {
   if (!isWorkerEnv()) {
