@@ -49,6 +49,9 @@ jobs:
       - name: Check package version drift
         run: pnpm run check:version-drift
 
+      - name: Check README version matches package.json
+        run: pnpm run check:readme-version
+
       - name: Lint
         run: pnpm run lint
 

@@ -1,0 +1,19 @@
+{
+  "version": "0.3.0",
+  "generatedAtUtc": "2026-08-01T21:25:40.278Z",
+  "sourceSha": null,
+  "vitest": {
+    "testFileCount": 143,
+    "coverageThresholds": {
+      "lines": 82,
+      "statements": 80,
+      "functions": 75,
+      "branches": 74
+    }
+  },
+  "validationCommands": [
+    "pnpm run verify:release",
+    "pnpm run check:version-drift",
+    "pnpm run check:all"
+  ]
+}

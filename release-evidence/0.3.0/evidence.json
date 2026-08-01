@@ -1,0 +1,23 @@
+{
+  "version": "0.3.0",
+  "sourceSha": "bb5026b",
+  "generatedAtUtc": "2026-08-01T21:25:40.306Z",
+  "nodeEngine": ">=24.0.0",
+  "packageManager": "pnpm@11.13.0",
+  "coverageThresholds": {
+    "lines": 82,
+    "statements": 80,
+    "functions": 75,
+    "branches": 74
+  },
+  "validationCommands": [
+    "pnpm run verify:release",
+    "pnpm run check:version-drift",
+    "pnpm run check:all"
+  ],
+  "knownLimitations": [
+    "Workers excluded from aggregate coverage gate",
+    "cargo audit optional in verify:release when tooling missing",
+    "E2E smoke Chromium-only in default CI"
+  ]
+}

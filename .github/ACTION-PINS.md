@@ -18,6 +18,8 @@ Supply-chain policy: prefer full commit SHA with version comment (`# v7`).
 | `dtolnay/rust-toolchain` | `4cda84d5c5c54efe2404f9d843567869ab1699d4` | stable |
 | `tauri-apps/tauri-action` | `1deb371b0cd8bd54025b384f1cd735e725c4060f` | v1 |
 
-**Not yet SHA-pinned:** `treosh/lighthouse-ci-action@v12` (lighthouse-ci.yml).
+| `treosh/lighthouse-ci-action` | `3e7e23fb74242897f95c0ba9cabad3d0227b9b18` | v12 |
+
+All listed actions are pinned in workflows. Update via `gh api repos/<owner>/<repo>/commits/<tag>`.
 
 Update pins when bumping action versions; verify with `gh api repos/<owner>/<repo>/commits/<tag>`.
