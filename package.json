@@ -59,7 +59,7 @@
     "globals": "^17.7.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.0.8",
-    "rollup-plugin-visualizer": "^7.0.1",
+    "rollup-plugin-visualizer": "^7.1.1",
     "sharp": "^0.35.3",
     "turbo": "^2.10.5",
     "typescript": "~6.0.3",
