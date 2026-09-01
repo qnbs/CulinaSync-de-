@@ -285,4 +285,89 @@ describe('useRecipeDetail', () => {
     });
     expect(result.current.isCookMode).toBe(false);
   });
+
+  it('handleGeminiNutritionCheck zeigt Fehler-Toast bei Exception', async () => {
+    verifyNutritionAndAllergensWithGemini.mockRejectedValueOnce(new Error('fail'));
+    const recipe = { ...minimalRecipe(), id: 1 };
+    const store = createTestStore();
+    const localWrapper = ({ children }: { children: React.ReactNode }) => (
+      <Provider store={store}>
+        <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
+      </Provider>
+    );
+    const { result } = renderHook(() => useRecipeDetail(recipe, onBack), { wrapper: localWrapper });
+
+    await waitFor(() => expect(result.current.nutritionResult.key).toBeTruthy());
+    await act(async () => {
+      await result.current.handleGeminiNutritionCheck();
+    });
+    expect(store.getState().ui.toasts.some((t) => t.type === 'error')).toBe(true);
+  });
+
+  it('handleSave meldet Fehler wenn addRecipe scheitert', async () => {
+    addRecipe.mockRejectedValueOnce(new Error('db'));
+    const store = createTestStore();
+    const localWrapper = ({ children }: { children: React.ReactNode }) => (
+      <Provider store={store}>
+        <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
+      </Provider>
+    );
+    const { result } = renderHook(() => useRecipeDetail(minimalRecipe(), onBack), { wrapper: localWrapper });
+
+    await waitFor(() => expect(result.current.nutritionResult.key).toBeTruthy());
+    await act(async () => {
+      await result.current.handleSave();
+    });
+    expect(store.getState().ui.toasts.some((t) => t.type === 'error')).toBe(true);
+  });
+
+  it('handleAddMissingToShoppingList ohne fehlende Zutaten', async () => {
+    addMissingIngredientsToShoppingList.mockResolvedValueOnce(0);
+    const store = createTestStore();
+    const localWrapper = ({ children }: { children: React.ReactNode }) => (
+      <Provider store={store}>
+        <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
+      </Provider>
+    );
+    const recipe = { ...minimalRecipe(), id: 1 };
+    const { result } = renderHook(() => useRecipeDetail(recipe, onBack), { wrapper: localWrapper });
+
+    await waitFor(() => expect(result.current.nutritionResult.key).toBeTruthy());
+    await act(async () => {
+      await result.current.handleAddMissingToShoppingList();
+    });
+    expect(store.getState().ui.toasts[store.getState().ui.toasts.length - 1]?.type).toBe('info');
+  });
+
+  it('handleConfirmPendingAction export nutzt pending format', async () => {
+    const recipe = { ...minimalRecipe(), id: 1 };
+    const { result } = renderHook(() => useRecipeDetail(recipe, onBack), { wrapper });
+
+    await waitFor(() => expect(result.current.nutritionResult.key).toBeTruthy());
+    act(() => {
+      result.current.setPendingAction({ type: 'export', format: 'pdf' });
+    });
+    await act(async () => {
+      await result.current.handleConfirmPendingAction();
+    });
+    expect(exportRecipeToPdf).toHaveBeenCalled();
+  });
+
+  it('handleToggleFavorite meldet Fehler', async () => {
+    setRecipeFavorite.mockRejectedValueOnce(new Error('fail'));
+    const store = createTestStore();
+    const localWrapper = ({ children }: { children: React.ReactNode }) => (
+      <Provider store={store}>
+        <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
+      </Provider>
+    );
+    const recipe = { ...minimalRecipe(), id: 3, isFavorite: false };
+    const { result } = renderHook(() => useRecipeDetail(recipe, onBack), { wrapper: localWrapper });
+
+    await waitFor(() => expect(result.current.nutritionResult.key).toBeTruthy());
+    await act(async () => {
+      await result.current.handleToggleFavorite();
+    });
+    expect(store.getState().ui.toasts.some((t) => t.type === 'error')).toBe(true);
+  });
 });

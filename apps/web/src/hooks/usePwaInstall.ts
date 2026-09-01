@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { BeforeInstallPromptEvent } from '../types';
 import { canShowNativeInstall, isIosSafari } from '../utils/pwaCapabilities';
@@ -17,10 +17,26 @@ const isStandaloneMode = (): boolean => {
   );
 };
 
-export const usePwaInstall = (addToast: (message: string, type?: 'success' | 'error' | 'info') => void) => {
+const canShowInstallReminderNow = (): boolean => {
+  const dismissedUntil = Number(window.localStorage.getItem(REMIND_KEY) || '0');
+  const permanentlyDismissed = window.localStorage.getItem(DISMISS_KEY) === 'true';
+  return !permanentlyDismissed && Date.now() >= dismissedUntil;
+};
+
+type UsePwaInstallOptions = {
+  /** When true (intro gates visible), defer install reminder until gates dismiss. */
+  deferForIntro?: boolean;
+};
+
+export const usePwaInstall = (
+  addToast: (message: string, type?: 'success' | 'error' | 'info') => void,
+  options?: UsePwaInstallOptions,
+) => {
+  const deferForIntro = options?.deferForIntro ?? false;
   const { t } = useTranslation();
   const [installPromptEvent, setInstallPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallReminder, setShowInstallReminder] = useState(false);
+  const [installPromptDeferred, setInstallPromptDeferred] = useState(false);
   const [isStandalone] = useState(isStandaloneMode);
   const [isIos] = useState(isIosSafari);
 
@@ -29,18 +45,30 @@ export const usePwaInstall = (addToast: (message: string, type?: 'success' | 'er
       e.preventDefault();
       setInstallPromptEvent(e as BeforeInstallPromptEvent);
 
-      const dismissedUntil = Number(window.localStorage.getItem(REMIND_KEY) || '0');
-      const permanentlyDismissed = window.localStorage.getItem(DISMISS_KEY) === 'true';
-      const now = Date.now();
+      if (isStandaloneMode() || !canShowInstallReminderNow()) {
+        return;
+      }
 
-      if (!isStandaloneMode() && !permanentlyDismissed && now >= dismissedUntil) {
+      if (deferForIntro) {
+        setInstallPromptDeferred(true);
+      } else {
         setShowInstallReminder(true);
       }
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-  }, []);
+  }, [deferForIntro]);
+
+  const showInstallDialog = useMemo(() => {
+    if (!installPromptEvent || isStandalone || !canShowNativeInstall() || !canShowInstallReminderNow()) {
+      return false;
+    }
+    if (deferForIntro) {
+      return false;
+    }
+    return showInstallReminder || installPromptDeferred;
+  }, [deferForIntro, installPromptDeferred, installPromptEvent, isStandalone, showInstallReminder]);
 
   const handleInstallPWA = useCallback(async () => {
     if (!installPromptEvent) {
@@ -55,9 +83,11 @@ export const usePwaInstall = (addToast: (message: string, type?: 'success' | 'er
         window.localStorage.removeItem(REMIND_KEY);
         window.localStorage.removeItem(DISMISS_KEY);
         setShowInstallReminder(false);
+        setInstallPromptDeferred(false);
       } else {
         window.localStorage.setItem(REMIND_KEY, String(Date.now() + 3 * 24 * 60 * 60 * 1000));
         setShowInstallReminder(false);
+        setInstallPromptDeferred(false);
       }
       setInstallPromptEvent(null);
     } catch (error) {
@@ -69,15 +99,14 @@ export const usePwaInstall = (addToast: (message: string, type?: 'success' | 'er
   const handleInstallRemindLater = useCallback(() => {
     window.localStorage.setItem(REMIND_KEY, String(Date.now() + 3 * 24 * 60 * 60 * 1000));
     setShowInstallReminder(false);
+    setInstallPromptDeferred(false);
   }, []);
 
   const handleInstallDismiss = useCallback(() => {
     window.localStorage.setItem(DISMISS_KEY, 'true');
     setShowInstallReminder(false);
+    setInstallPromptDeferred(false);
   }, []);
-
-  const showInstallDialog =
-    showInstallReminder && !!installPromptEvent && !isStandalone && canShowNativeInstall();
 
   return {
     installPromptEvent,

@@ -15,7 +15,7 @@ Stand nach Sprint Coverage / Intro / Tauri (2026-07-16).
 
 ### Coverage
 
-- [ ] Branch-Coverage ≥**82 %** (Hotspots: `useShoppingList`, `exportService`, `dbMigrations`, Hooks/UI)
+- [ ] Branch-Coverage ≥**82 %** (Ist ~**78 %** nach 2026-09-01-Sprint; Hotspots: App, MealPlanner, useRecipeDetail, geminiService)
 - [ ] Danach Threshold in `vitest.config.ts` auf gemessenen Ist-Wert anheben
 
 ### Release / Desktop

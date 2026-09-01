@@ -158,9 +158,11 @@ const App: React.FC = () => {
     handleInstallPWA,
     handleInstallRemindLater,
     handleInstallDismiss,
-  } = usePwaInstall(addToast);
+  } = usePwaInstall(addToast, { deferForIntro: showOnboarding });
 
-  const { showUpdateReadyNotice, handleReloadForUpdate, dismissUpdateNotice } = usePwaUpdate();
+  const { showUpdateReadyNotice, handleReloadForUpdate, dismissUpdateNotice } = usePwaUpdate({
+    deferForIntro: showOnboarding,
+  });
 
   useEffect(() => {
     if (toasts.length > 0) {

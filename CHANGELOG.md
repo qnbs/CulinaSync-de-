@@ -9,7 +9,15 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Added
 
-- Worker verification matrix tests (embedding, nutrition, whisper): invalid id, error payload, crash, cleanup.
+- **First-run chrome sequencing:** PWA update toast and install reminder defer until intro gates dismiss (`usePwaUpdate` / `usePwaInstall`).
+- **Model download integrity:** `localAiModelIntegrity.ts` — allowlisted CDN fetch with optional Content-Length/ETag guard; fails closed to heuristic layer.
+- **Gemini runtime policy:** `assertAllowedEndpoint` before `GoogleGenAI` client init.
+- **Tests:** expanded hook/service coverage toward branch floor 82 % (Ist ~78 %); PWA, recipe-detail, vision, voice, modal a11y suites.
+- **Docs:** `docs/STATUS-2026-09-01.md`; CSP/network threat-model note in `SECURITY.md`.
+
+### Changed
+
+- Branch coverage Ist **~78 %** (floor remains **74** until Ist ≥ 82 %).
 - **Network endpoint policy** (`networkEndpointPolicy.ts`) with Ollama loopback gate, AI CDN allowlist, CSP threat model doc.
 - **Repo-truth CI:** `check:repo-truth` validates README test counts and coverage thresholds.
 - **Release evidence:** SBOM/lcov SHA-256 fields in `generate-release-evidence.mjs`.

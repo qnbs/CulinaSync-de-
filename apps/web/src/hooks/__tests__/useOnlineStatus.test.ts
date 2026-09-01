@@ -1,47 +1,49 @@
-import { describe, expect, it, vi, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { useOnlineStatus } from '../useOnlineStatus';
 
 describe('useOnlineStatus', () => {
+  beforeEach(() => {
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: true });
+  });
+
   afterEach(() => {
-    vi.unstubAllGlobals();
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: true });
   });
 
-  it('liest den initialen navigator.onLine-Wert', () => {
-    vi.stubGlobal('navigator', { onLine: false });
+  it('startet mit navigator.onLine', () => {
     const { result } = renderHook(() => useOnlineStatus());
-    expect(result.current).toBe(false);
+    expect(result.current).toBe(true);
   });
 
-  it('reagiert auf online- und offline-Events', () => {
-    vi.stubGlobal('navigator', { onLine: true });
+  it('reagiert auf offline/online Events', () => {
     const { result } = renderHook(() => useOnlineStatus());
 
     act(() => {
+      Object.defineProperty(navigator, 'onLine', { configurable: true, value: false });
       window.dispatchEvent(new Event('offline'));
     });
     expect(result.current).toBe(false);
 
     act(() => {
+      Object.defineProperty(navigator, 'onLine', { configurable: true, value: true });
       window.dispatchEvent(new Event('online'));
     });
     expect(result.current).toBe(true);
   });
 
-  it('synchronisiert den Status nach visibilitychange und bfcache-pageshow', () => {
-    vi.stubGlobal('navigator', { onLine: true });
+  it('synchronisiert bei visibilitychange und pageshow persisted', () => {
     const { result } = renderHook(() => useOnlineStatus());
 
-    vi.stubGlobal('navigator', { onLine: false });
-    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' });
-
     act(() => {
+      Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' });
+      Object.defineProperty(navigator, 'onLine', { configurable: true, value: false });
       document.dispatchEvent(new Event('visibilitychange'));
     });
     expect(result.current).toBe(false);
 
-    vi.stubGlobal('navigator', { onLine: true });
     act(() => {
+      Object.defineProperty(navigator, 'onLine', { configurable: true, value: true });
       window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
     });
     expect(result.current).toBe(true);

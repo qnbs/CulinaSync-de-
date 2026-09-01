@@ -104,6 +104,11 @@ describe('processCommand', () => {
   it('parses timer and ingredient check in cook mode', () => {
     expect(processCommand('timer starte 5 minuten', 'recipes').type).toBe('START_COOK_TIMER');
     expect(processCommand('zutat tomaten abhaken', 'recipes').type).toBe('CHECK_COOK_INGREDIENT');
+    expect(processCommand('zutat tomaten zurücksetzen', 'recipes').type).toBe('UNCHECK_COOK_INGREDIENT');
+    expect(processCommand('timer pause', 'recipes').type).toBe('PAUSE_COOK_TIMER');
+    expect(processCommand('start cook mode', 'recipes').type).toBe('START_COOK_MODE');
+    expect(processCommand('suche nach milch', 'pantry').type).toBe('SEARCH');
+    expect(processCommand('hake milch ab', 'shopping-list').type).toBe('CHECK_SHOPPING_ITEM');
   });
 });
 

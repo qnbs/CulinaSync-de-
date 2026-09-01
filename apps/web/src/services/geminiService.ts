@@ -10,6 +10,7 @@ import { sanitizeHtml } from './htmlSanitizer';
 import { AppSettings, PantryItem, Recipe, StructuredPrompt, ShoppingListItem, RecipeIdea } from "../types";
 import { loadApiKeyState } from "./apiKeyService";
 import { logAppError } from './errorLoggingService';
+import { assertAllowedEndpoint, GEMINI_API_HOST } from '../config/networkEndpointPolicy';
 import { buildLocalRecipeIdeas } from './aiOfflineFallback';
 import i18next from 'i18next';
 import { buildRecipeIdeasSchema, buildRecipeSchema, buildShoppingListSchema } from './geminiSchemas';
@@ -92,6 +93,8 @@ const getAIClient = async (): Promise<GoogleGenAI> => {
   const key = state.key;
   const keyHash = simpleHash(key);
   if (!_aiClient || _lastKeyHash !== keyHash) {
+    // QNBS-v3: Runtime endpoint policy — Gemini host must match allowlist before client init
+    assertAllowedEndpoint(`https://${GEMINI_API_HOST}/v1beta/models`, 'gemini_api');
         const { GoogleGenAI } = await getGenAIModule();
     _aiClient = new GoogleGenAI({ apiKey: key });
     _lastKeyHash = keyHash;
