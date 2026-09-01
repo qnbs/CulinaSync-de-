@@ -13,8 +13,10 @@ describe('localAiModelIntegrity', () => {
   it('verifyModelDownloadResponse enforces minBytes when content-length is present', () => {
     const ok = new Response(null, { status: 200, headers: { 'content-length': '5000' } });
     const short = new Response(null, { status: 200, headers: { 'content-length': '10' } });
+    const missing = new Response(null, { status: 200 });
     expect(verifyModelDownloadResponse(ok, { minBytes: 1000 })).toBe(true);
     expect(verifyModelDownloadResponse(short, { minBytes: 1000 })).toBe(false);
+    expect(verifyModelDownloadResponse(missing, { minBytes: 1000 })).toBe(false);
   });
 
   it('verifyModelDownloadResponse rejects etag mismatch when etag header is present', () => {
@@ -24,6 +26,11 @@ describe('localAiModelIntegrity', () => {
     });
     expect(verifyModelDownloadResponse(response, { etag: '"expected"' })).toBe(false);
     expect(verifyModelDownloadResponse(response, { etag: '"stale"' })).toBe(true);
+  });
+
+  it('verifyModelDownloadResponse rejects missing etag when expectation requires one', () => {
+    const response = new Response(null, { status: 200 });
+    expect(verifyModelDownloadResponse(response, { etag: '"expected"' })).toBe(false);
   });
 
   it('fetchModelArtifact blocks disallowed hosts', async () => {

@@ -19,7 +19,10 @@ export const verifyModelDownloadResponse = (
   }
 
   const contentLength = response.headers.get('content-length');
-  if (expectation?.minBytes != null && contentLength != null) {
+  if (expectation?.minBytes != null) {
+    if (contentLength == null) {
+      return false;
+    }
     const length = Number(contentLength);
     if (!Number.isFinite(length) || length < expectation.minBytes) {
       return false;
@@ -28,7 +31,7 @@ export const verifyModelDownloadResponse = (
 
   if (expectation?.etag) {
     const etag = response.headers.get('etag');
-    if (etag && etag !== expectation.etag) {
+    if (!etag || etag !== expectation.etag) {
       return false;
     }
   }
@@ -43,7 +46,7 @@ export const fetchModelArtifact = async (
 ): Promise<Response | null> => {
   try {
     assertAllowedEndpoint(url, 'ai_model_cdn');
-    const response = await fetch(url);
+    const response = await fetch(url, { redirect: 'error' });
     if (!verifyModelDownloadResponse(response, expectation)) {
       return null;
     }

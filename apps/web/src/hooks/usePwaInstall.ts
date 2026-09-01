@@ -18,7 +18,8 @@ const isStandaloneMode = (): boolean => {
 };
 
 const canShowInstallReminderNow = (): boolean => {
-  const dismissedUntil = Number(window.localStorage.getItem(REMIND_KEY) || '0');
+  const raw = Number(window.localStorage.getItem(REMIND_KEY) || '0');
+  const dismissedUntil = Number.isFinite(raw) ? raw : 0;
   const permanentlyDismissed = window.localStorage.getItem(DISMISS_KEY) === 'true';
   return !permanentlyDismissed && Date.now() >= dismissedUntil;
 };
@@ -45,7 +46,12 @@ export const usePwaInstall = (
       e.preventDefault();
       setInstallPromptEvent(e as BeforeInstallPromptEvent);
 
-      if (isStandaloneMode() || !canShowInstallReminderNow()) {
+      if (isStandaloneMode()) {
+        return;
+      }
+
+      if (!canShowInstallReminderNow()) {
+        setInstallPromptDeferred(true);
         return;
       }
 

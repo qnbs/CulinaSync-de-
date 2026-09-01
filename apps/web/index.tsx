@@ -29,7 +29,6 @@ const updateSW = registerSW({
     });
   },
   onNeedRefresh() {
-    store.dispatch(addToastAction({ message: i18n.t('app.pwa.updateReady'), type: 'info' }));
     emitPwaEvent('culinasync:pwa-update-ready');
   },
   onOfflineReady() {

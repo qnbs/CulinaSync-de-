@@ -13,9 +13,17 @@ export const usePwaUpdate = (options?: UsePwaUpdateOptions) => {
   const [showUpdateReadyNotice, setShowUpdateReadyNotice] = useState(false);
   const [queuedUpdate, setQueuedUpdate] = useState(false);
   const deferredByIntroRef = useRef(false);
+  const showNoticeRef = useRef(false);
+
+  useEffect(() => {
+    showNoticeRef.current = showUpdateReadyNotice;
+  }, [showUpdateReadyNotice]);
 
   useEffect(() => {
     const handleUpdateReady = () => {
+      if (showNoticeRef.current) {
+        return;
+      }
       if (deferForIntro) {
         deferredByIntroRef.current = true;
       }
@@ -47,7 +55,10 @@ export const usePwaUpdate = (options?: UsePwaUpdateOptions) => {
     await applyPwaUpdate(true);
   }, []);
 
-  const dismissUpdateNotice = useCallback(() => setShowUpdateReadyNotice(false), []);
+  const dismissUpdateNotice = useCallback(() => {
+    setShowUpdateReadyNotice(false);
+    setQueuedUpdate(false);
+  }, []);
 
   return {
     showUpdateReadyNotice,
