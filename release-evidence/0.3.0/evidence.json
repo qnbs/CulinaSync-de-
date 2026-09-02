@@ -1,7 +1,7 @@
 {
   "version": "0.3.0",
-  "sourceSha": "92bd4a02cc3d7bc976ff617fe0fafa0faf4cdcdc",
-  "generatedAtUtc": "2026-09-02T17:03:26.555Z",
+  "sourceSha": "4b063f7",
+  "generatedAtUtc": "2026-09-02T20:01:37.306Z",
   "nodeEngine": ">=24.0.0",
   "packageManager": "pnpm@11.25.0",
   "coverageThresholds": {
@@ -11,9 +11,9 @@
     "branches": 82
   },
   "artifactHashes": {
-    "sbomCycloneDxSha256": "3af02cdf124b9b1c0e30a53eef4ed28ee7382955d8a31c27f3672572b4a10eaf",
-    "sbomRustCycloneDxSha256": "70d7f134e7b1dde92eca56c428612e97a72db542c118e4b86fea7ad58f4fb992",
-    "lcovSha256": "eb8429b1fb87d4d0cdd935359c16c1f23370815d25fa0ea256c80027c3fc7ed2"
+    "sbomCycloneDxSha256": "8906acdcd92b6bcd5888756a1a39f7bfe3f4cebc0cef2ea368fff429eddc91bb",
+    "sbomRustCycloneDxSha256": "e060ebb5958cdbfe9dc974412fb8c9ae710085ff24a8f1b665090f2126d310e5",
+    "lcovSha256": "5f5d25c6c9fcad47137fec4a7c907d9f3757bf047eb9cda15659ab18b11cbad6"
   },
   "validationCommands": [
     "pnpm run verify:release",

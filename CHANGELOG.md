@@ -24,7 +24,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ### Changed
 
 - **fast-uri override** `^3.1.6` restores `pnpm audit --audit-level=high` gate (GHSA-jqff-g426-hqxp).
-- **Release evidence** regenerated for merge SHA `92bd4a0` (SBOM + lcov hashes on `main`).
+- **Release evidence** regenerated for merge SHA `4b063f7` (SBOM + lcov hashes on `main`, PR #164).
 - Branch coverage Ist **~82 %** (floor raised to **82**; M5.9-Ziel erreicht).
 - **Network endpoint policy** (`networkEndpointPolicy.ts`) with Ollama loopback gate, AI CDN allowlist, CSP threat model doc.
 - **Repo-truth CI:** `check:repo-truth` validates README test counts and coverage thresholds.
@@ -33,7 +33,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Documentation
 
-- `docs/STATUS-2026-09-02.md` — post-merge handoff snapshot; stale `cursor/*` branches removed.
+- `docs/STATUS-2026-09-02.md` — post-#164 handoff; release evidence `4b063f7`; 16 E2E / 11 Specs.
+- `docs/TODO-MASTER-PERFECTION.md`, `ROADMAP.md`, `AUDIT-REMEDIATION-BACKLOG.md` — E2E/coverage repo-truth sync.
 - **Inference cache quota:** `enforceInferenceCacheQuota` + `setCachedInferenceWithQuota`.
 - **E2E matrix workflow** (optional Chromium/Firefox/WebKit via `E2E_MATRIX=1`).
 - **Cargo audit** in CI validate + `docs/security/CARGO-AUDIT-EXCEPTIONS.md`.
