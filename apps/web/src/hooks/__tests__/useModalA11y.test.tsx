@@ -53,4 +53,51 @@ describe('useModalA11y', () => {
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
+
+  it('fängt Tab am Ende des Modals ab', async () => {
+    const user = userEvent.setup();
+    render(<ModalHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'second' }));
+    await user.keyboard('{Tab}');
+
+    expect(screen.getByRole('button', { name: 'first' })).toHaveFocus();
+  });
+
+  it('fängt Shift+Tab am Anfang des Modals ab', async () => {
+    const user = userEvent.setup();
+    render(<ModalHarness />);
+
+    const first = screen.getByRole('button', { name: 'first' });
+    first.focus();
+    await user.tab({ shift: true });
+
+    expect(screen.getByRole('button', { name: 'second' })).toHaveFocus();
+  });
+
+  it('fängt Tab ab wenn keine fokussierbaren Elemente', async () => {
+    function EmptyModalHarness() {
+      const [open, setOpen] = useState(true);
+      const containerRef = useRef<HTMLDivElement>(null);
+      useModalA11y({
+        isOpen: open,
+        onClose: () => setOpen(false),
+        containerRef,
+        closeOnEscape: false,
+      });
+      if (!open) return <div data-testid="closed" />;
+      return (
+        <div ref={containerRef} role="dialog" tabIndex={-1}>
+          <p>leer</p>
+        </div>
+      );
+    }
+
+    const user = userEvent.setup();
+    render(<EmptyModalHarness />);
+    const dialog = screen.getByRole('dialog');
+    dialog.focus();
+    await user.keyboard('{Tab}');
+    expect(dialog).toHaveFocus();
+  });
 });

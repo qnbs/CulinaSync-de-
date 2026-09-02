@@ -335,4 +335,57 @@ describe('geminiService', () => {
 
     vi.unstubAllGlobals();
   });
+
+  it('generateRecipeImage wirft bei leerer Antwort', async () => {
+    mockLoadApiKey.mockResolvedValueOnce('AIzaValidLookingKey');
+    mockGenerateImages.mockResolvedValueOnce({ generatedImages: [] });
+
+    await expect(generateRecipeImage('Test')).rejects.toThrow(/Empty|Invalid|Unexpected/i);
+  });
+
+  it('generateRecipeImage wirft bei API-Fehler', async () => {
+    mockLoadApiKey.mockResolvedValueOnce('AIzaValidLookingKey');
+    mockGenerateImages.mockRejectedValueOnce(new Error('image failed'));
+
+    await expect(generateRecipeImage('Test')).rejects.toThrow(/Unexpected|image failed/i);
+  });
+
+  it('extractPantryItemsFromImage wirft bei FileReader-Fehler', async () => {
+    mockLoadApiKey.mockResolvedValueOnce('AIzaValidLookingKey');
+
+    class MockFileReader {
+      onload: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      readAsDataURL() {
+        this.onerror?.();
+      }
+    }
+    vi.stubGlobal('FileReader', MockFileReader);
+
+    const file = new File(['x'], 'pantry.jpg', { type: 'image/jpeg' });
+    await expect(extractPantryItemsFromImage(file)).rejects.toThrow();
+
+    vi.unstubAllGlobals();
+  });
+
+  it('extractRecipeFromWebContent wirft bei leerer AI-Antwort', async () => {
+    mockLoadApiKey.mockResolvedValueOnce('AIzaValidLookingKey');
+    mockGenerateContent.mockResolvedValueOnce({ text: '' });
+
+    await expect(
+      extractRecipeFromWebContent('https://example.test/r', 'Tomaten'),
+    ).rejects.toThrow(/Empty|Invalid|Unexpected/i);
+  });
+
+  it('verifyNutritionAndAllergensWithGemini wirft bei Parse-Fehler', async () => {
+    mockLoadApiKey.mockResolvedValueOnce('AIzaValidLookingKey');
+    mockGenerateContent.mockResolvedValueOnce({ text: '{"summary": 1}' });
+
+    await expect(
+      verifyNutritionAndAllergensWithGemini(
+        { ...validRecipePayload, id: 1 } as never,
+        { calories: 1, protein: 1, fat: 1, carbs: 1, allergens: [] },
+      ),
+    ).rejects.toThrow(/Invalid|Unexpected/i);
+  });
 });

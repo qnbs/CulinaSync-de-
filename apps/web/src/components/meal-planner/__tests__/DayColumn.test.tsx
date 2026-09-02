@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nextProvider } from 'react-i18next';
 import { DayColumn } from '../DayColumn';
@@ -95,5 +95,50 @@ describe('DayColumn', () => {
     await user.click(confirm);
 
     expect(onMealAction).toHaveBeenCalledWith('remove', meal);
+  });
+
+  it('zeigt Platzierungs-Hinweis im placement mode', () => {
+    const date = new Date(Date.UTC(2026, 4, 4, 12, 0, 0));
+
+    render(
+      <I18nextProvider i18n={i18n}>
+        <DayColumn
+          date={date}
+          isToday={true}
+          meals={emptyMeals()}
+          recipesById={new Map()}
+          onDrop={vi.fn()}
+          onSlotClick={vi.fn()}
+          onMealAction={vi.fn()}
+          isPlacementMode
+        />
+      </I18nextProvider>,
+    );
+
+    expect(screen.getAllByText(/Hier einfuegen/i).length).toBeGreaterThan(0);
+  });
+
+  it('ruft onDrop bei Drag-and-Drop auf', () => {
+    const onDrop = vi.fn();
+    const date = new Date(Date.UTC(2026, 4, 4, 12, 0, 0));
+
+    render(
+      <I18nextProvider i18n={i18n}>
+        <DayColumn
+          date={date}
+          isToday={false}
+          meals={emptyMeals()}
+          recipesById={new Map()}
+          onDrop={onDrop}
+          onSlotClick={vi.fn()}
+          onMealAction={vi.fn()}
+        />
+      </I18nextProvider>,
+    );
+
+    const slot = screen.getAllByTitle('Notiz hinzufügen')[0]!.closest('[class*="min-h-[100px]"]');
+    fireEvent.dragOver(slot!, { dataTransfer: { dropEffect: 'copy' } });
+    fireEvent.drop(slot!, { dataTransfer: { getData: () => '5' } });
+    expect(onDrop).toHaveBeenCalled();
   });
 });

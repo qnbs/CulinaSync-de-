@@ -225,4 +225,106 @@ describe('App (coverage branches)', () => {
     expect(await screen.findByTestId('page-chef')).toBeInTheDocument();
     expect(store.getState().ui.currentPage).toBe('chef');
   });
+
+  it('PWA-Install-Dialog: Installieren ruft handleInstallPWA auf', async () => {
+    pwaMocks.showInstallDialog = true;
+    const user = userEvent.setup();
+    renderApp();
+    const installBtn = await screen.findByRole('button', { name: /Installieren|install/i });
+    await user.click(installBtn);
+    expect(pwaMocks.handleInstallPWA).toHaveBeenCalled();
+  });
+
+  it('PWA-Install-Dialog: Spaeter ruft handleInstallRemindLater auf', async () => {
+    pwaMocks.showInstallDialog = true;
+    const user = userEvent.setup();
+    renderApp();
+    const laterBtn = await screen.findByRole('button', { name: /Spaeter/i });
+    await user.click(laterBtn);
+    expect(pwaMocks.handleInstallRemindLater).toHaveBeenCalled();
+  });
+
+  it('PWA-Update-Dialog: Neu laden ruft handleReloadForUpdate auf', async () => {
+    pwaMocks.showUpdateReadyNotice = true;
+    const user = userEvent.setup();
+    renderApp();
+    const reloadBtn = await screen.findByRole('button', { name: /Neu laden/i });
+    await user.click(reloadBtn);
+    expect(pwaMocks.handleReloadForUpdate).toHaveBeenCalled();
+  });
+
+  it('PWA-Update-Dialog: Spaeter ruft dismissUpdateNotice auf', async () => {
+    pwaMocks.showUpdateReadyNotice = true;
+    const user = userEvent.setup();
+    renderApp();
+    const laterBtn = await screen.findByRole('button', { name: /Später/i });
+    await user.click(laterBtn);
+    expect(pwaMocks.dismissUpdateNotice).toHaveBeenCalled();
+  });
+
+  it('PWA-Install-Dialog: Nicht mehr erinnern ruft handleInstallDismiss auf', async () => {
+    pwaMocks.showInstallDialog = true;
+    const user = userEvent.setup();
+    renderApp();
+    const dismissBtn = await screen.findByRole('button', { name: /Nicht mehr erinnern/i });
+    await user.click(dismissBtn);
+    expect(pwaMocks.handleInstallDismiss).toHaveBeenCalled();
+  });
+
+  it('zeigt Offline-Banner wenn nicht online', async () => {
+    onlineStatus = false;
+    renderApp();
+    expect(await screen.findByRole('status')).toBeInTheDocument();
+    onlineStatus = true;
+  });
+
+  it('Settings-Seite rendert mit installPromptEvent', async () => {
+    pwaMocks.showInstallDialog = false;
+    const store = createTestStore({ ui: { ...uiBase, currentPage: 'settings' } });
+    renderApp(store);
+    expect(await screen.findByTestId('page-settings')).toBeInTheDocument();
+  });
+
+  it('rendert Toast-Typen und manuelles Schliessen', async () => {
+    const user = userEvent.setup();
+    const store = createTestStore({
+      ui: {
+        ...uiBase,
+        toasts: [
+          { id: 's', message: 'OK', type: 'success' },
+          { id: 'e', message: 'Fehler', type: 'error' },
+          { id: 'i', message: 'Info', type: 'info' },
+        ],
+      },
+    });
+    renderApp(store);
+    expect(screen.getByText('OK')).toBeInTheDocument();
+    expect(screen.getByText('Fehler')).toBeInTheDocument();
+    expect(screen.getByText('Info')).toBeInTheDocument();
+    const closeButtons = screen.getAllByLabelText(/Schließen|close/i);
+    await user.click(closeButtons[0]!);
+    expect(store.getState().ui.toasts).toHaveLength(2);
+  });
+
+  it('geht offline ohne Back-Online Toast', async () => {
+    onlineStatus = true;
+    const store = createTestStore();
+    const { rerender } = render(
+      <Provider store={store}>
+        <I18nextProvider i18n={i18n}>
+          <App />
+        </I18nextProvider>
+      </Provider>,
+    );
+    onlineStatus = false;
+    rerender(
+      <Provider store={store}>
+        <I18nextProvider i18n={i18n}>
+          <App />
+        </I18nextProvider>
+      </Provider>,
+    );
+    expect(store.getState().ui.toasts.some((t) => t.message.match(/online|Online/i))).toBe(false);
+    onlineStatus = true;
+  });
 });
