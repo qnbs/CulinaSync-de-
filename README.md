@@ -50,9 +50,9 @@ flowchart TB
 
 ---
 
-## Aktueller Stand (August 2026)
+## Aktueller Stand (September 2026)
 
-Snapshot: **[docs/audit/evidence/2026-08-01-post-pr118.md](./docs/audit/evidence/2026-08-01-post-pr118.md)** · Änderungen: [CHANGELOG.md](./CHANGELOG.md)
+Snapshot: **[docs/STATUS-2026-09-02.md](./docs/STATUS-2026-09-02.md)** · Änderungen: [CHANGELOG.md](./CHANGELOG.md)
 
 | Bereich | Stand |
 |---------|--------|
@@ -196,7 +196,7 @@ Jeder Bereich zeigt ein **Kontext-Intro** mit Kurztipps (`SettingsPanelIntro`). 
 ### Voraussetzungen
 
 - **Node.js 24**
-- **pnpm 11+** (`packageManager`: `pnpm@11.13.0`)
+- **pnpm 11+** (`packageManager`: `pnpm@11.25.0`)
 
 ### Installation & Dev
 

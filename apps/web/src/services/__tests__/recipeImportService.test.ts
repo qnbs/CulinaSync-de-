@@ -132,6 +132,30 @@ describe('recipeImportService', () => {
     vi.unstubAllGlobals();
   });
 
+  it('importRecipeFromUrl nutzt Jina-Reader mit vollständiger Ziel-URL im Proxy-Pfad', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: false,
+        text: async () => '',
+        headers: { get: () => 'text/html' },
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        text: async () => '<html><title>Rezept</title><p>Keine strukturierten Daten</p></html>',
+        headers: { get: () => 'text/html' },
+      });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await importRecipeFromUrl('https://chef.example/recipe');
+    expect(fetchMock).toHaveBeenNthCalledWith(1, 'https://chef.example/recipe', { method: 'GET' });
+    expect(fetchMock).toHaveBeenNthCalledWith(2, 'https://r.jina.ai/https://chef.example/recipe', {
+      method: 'GET',
+    });
+
+    vi.unstubAllGlobals();
+  });
+
   it('importRecipeFromUrl wirft bei ungueltiger URL', async () => {
     await expect(importRecipeFromUrl('not-a-url')).rejects.toThrow(/Invalid URL/i);
   });

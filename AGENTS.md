@@ -46,7 +46,7 @@ Standard commands (full list in `CLAUDE.md` / README):
 
 - `pnpm run lint`
 - `pnpm run type-check` (tsgo; Turbo builds `@domain/ai-core` first)
-- `pnpm run test` (Vitest + jsdom; ~**517** tests across ~**118** files as of 2026-07)
+- `pnpm run test` (Vitest + jsdom; **156** test files — see `docs/generated/repo-status.json`)
 - `pnpm run test:scripts` (15 node --test cases for deploy-verify + prune-deployments)
 - `pnpm run i18n:check` (de/en parity + baseline 0)
 - `pnpm run build`

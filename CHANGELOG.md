@@ -7,6 +7,11 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **First-run PWA chrome:** Offline-ready and update-downloading toasts defer until intro gates dismiss (`pwaIntroDeferral`, `index.tsx`, `App.tsx`).
+- **Recipe import proxy:** Jina reader URL uses full target URL (`https://r.jina.ai/https://…`), not a broken `http/host` concat.
+
 ### Added
 
 - **SBOM (#135):** `pnpm run generate:sbom` (pnpm + Rust CycloneDX), `prepare:release-evidence`, SBOM copies in `release-evidence/0.3.0/`; Tauri release workflow uploads evidence assets.

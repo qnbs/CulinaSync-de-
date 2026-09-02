@@ -75,7 +75,7 @@ const evidence = {
   knownLimitations: [
     'Workers excluded from aggregate coverage gate',
     'cargo audit optional in verify:release when tooling missing',
-    'E2E Smoke: Chromium blocking on PR/main; E2E Matrix: all browsers parallel on PR/main',
+    'E2E Smoke: Chromium blocking on PR/main; E2E Matrix: Chromium+Firefox on PR/main; WebKit weekly/manual',
     'connect-src https: fallback remains for BYO user sync endpoints',
   ],
 };

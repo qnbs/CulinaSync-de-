@@ -1,5 +1,5 @@
 import { sanitizeHtml } from './htmlSanitizer';
-import { assertAllowedEndpoint } from '../config/networkEndpointPolicy';
+import { assertAllowedEndpoint, RECIPE_IMPORT_PROXY_HOST } from '../config/networkEndpointPolicy';
 import type { Recipe, IngredientItem } from '../types';
 
 const defaultRecipe = (): Recipe => ({
@@ -167,6 +167,12 @@ const toAbsoluteUrl = (url: string): string => {
   }
 };
 
+const buildRecipeImportProxyUrl = (targetUrl: string): string => {
+  const target = new URL(targetUrl);
+  const proxyOrigin = `https://${RECIPE_IMPORT_PROXY_HOST}`;
+  return `${proxyOrigin}/${target.href}`;
+};
+
 const fetchWithFallback = async (url: string): Promise<{ content: string; contentType: string; sourceUrl: string }> => {
   assertAllowedEndpoint(url, 'general_https');
   const direct = await fetch(url, { method: 'GET' }).catch(() => null);
@@ -178,7 +184,7 @@ const fetchWithFallback = async (url: string): Promise<{ content: string; conten
     };
   }
 
-  const proxyUrl = `https://r.jina.ai/http://${url.replace(/^https?:\/\//, '')}`;
+  const proxyUrl = buildRecipeImportProxyUrl(url);
   assertAllowedEndpoint(proxyUrl, 'recipe_import_proxy');
   const proxy = await fetch(proxyUrl, { method: 'GET' }).catch(() => null);
   if (proxy?.ok) {

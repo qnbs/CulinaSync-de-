@@ -1,6 +1,6 @@
 # CulinaSync — Roadmap
 
-> **Stand:** 15. Juli 2026 (`main`: Phase 0 + Master-Perfection Phase 1–2) · M5+, M9–M11.3 ✅ · Coverage-Lines ≥82 % · ONNX M11.4 offen  
+> **Stand:** September 2026 (`main`: Audit-Perfection + SBOM/CSP/E2E) · M11.4 ✅ (PR #116) · Branch-Coverage-Floor **82** · Nächste Schwerpunkte: M7 TS7 GA, M8 signed Desktop, M5.9 88 % langfristig  
 > **Format:** Milestones geordnet nach Priorität. Jedes Item mit Herkunft (AUDIT-Referenz), Aufwandsschätzung und Status.  
 > **Follow-up:** [`docs/TODO-MASTER-PERFECTION.md`](docs/TODO-MASTER-PERFECTION.md)
 
