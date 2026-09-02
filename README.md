@@ -56,7 +56,7 @@ Snapshot: **[docs/STATUS-2026-09-02.md](./docs/STATUS-2026-09-02.md)** · Änder
 
 | Bereich | Stand |
 |---------|--------|
-| **Tests** | Vitest (156 files); coverage thresholds **82/80/75/82** — see `docs/generated/repo-status.json` |
+| **Tests** | Vitest (157 files); coverage thresholds **82/80/75/82** — see `docs/generated/repo-status.json` |
 | **Release-Check** | `pnpm run verify:release` · `pnpm run check:version-drift` |
 | **i18n** | de/en; `core` · `settings` · `features` · `gemini` · **`aiChef`**; Baseline-Scan **0** Hardcoded in Prod |
 | **PWA** | Manifest, Share Target, Badges, SW-Update, Datei-Handler — [docs/PWA.md](./docs/PWA.md) |
