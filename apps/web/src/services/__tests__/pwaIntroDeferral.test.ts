@@ -36,4 +36,25 @@ describe('pwaIntroDeferral', () => {
     expect(emitted).toEqual(['update-download']);
     expect(isFirstRunIntroPending()).toBe(false);
   });
+
+  it('flushDeferredPwaToasts is noop when queue is empty', () => {
+    const emitted: string[] = [];
+    flushDeferredPwaToasts((toast) => emitted.push(toast.message));
+    expect(emitted).toEqual([]);
+  });
+
+  it('does not defer when intro gates feature flag is disabled', async () => {
+    vi.resetModules();
+    vi.doMock('../../config/featureFlags', () => ({ INTRO_GATES_ENABLED: false }));
+    const mod = await import('../pwaIntroDeferral');
+    expect(mod.isFirstRunIntroPending()).toBe(false);
+    const emitted: string[] = [];
+    mod.deferOrEmitPwaToast((toast) => emitted.push(toast.message), {
+      message: 'immediate',
+      type: 'info',
+    });
+    expect(emitted).toEqual(['immediate']);
+    vi.doUnmock('../../config/featureFlags');
+    vi.resetModules();
+  });
 });
