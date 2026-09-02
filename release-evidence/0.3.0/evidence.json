@@ -1,14 +1,18 @@
 {
   "version": "0.3.0",
-  "sourceSha": "bb5026b",
-  "generatedAtUtc": "2026-08-01T21:25:40.306Z",
+  "sourceSha": "90315612e059996095d39ea35f51311c2629a72a",
+  "generatedAtUtc": "2026-09-02T06:48:57.650Z",
   "nodeEngine": ">=24.0.0",
-  "packageManager": "pnpm@11.13.0",
+  "packageManager": "pnpm@11.25.0",
   "coverageThresholds": {
     "lines": 82,
     "statements": 80,
     "functions": 75,
-    "branches": 74
+    "branches": 82
+  },
+  "artifactHashes": {
+    "sbomCycloneDxSha256": null,
+    "lcovSha256": "4448ed96d6f2b268ec3cfeab2c470c04568915146d52e60d7dbab2d53b8796b9"
   },
   "validationCommands": [
     "pnpm run verify:release",
