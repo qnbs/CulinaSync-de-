@@ -1,9 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { seedDismissedAppModals } from './helpers/appStorage';
+import { gotoApp } from './helpers/gotoApp';
 import { goToAiChef } from './helpers/navigation';
 
 async function dismissLocalAiSetupIfOpen(page: import('@playwright/test').Page): Promise<void> {
-  // LocalAiSetupHost öffnet auf der Chef-Seite wenn setupWizardCompleted=false
   const later = page.getByRole('button', { name: /später|later/i });
   if (await later.isVisible({ timeout: 3_000 }).catch(() => false)) {
     await later.click();
@@ -12,12 +11,8 @@ async function dismissLocalAiSetupIfOpen(page: import('@playwright/test').Page):
 }
 
 test.describe('KI-Chef — Offline', () => {
-  test.beforeEach(async ({ page }) => {
-    await seedDismissedAppModals(page);
-  });
-
   test('Offline-Banner und AI-Hinweis auf KI-Chef', async ({ page, baseURL, context }) => {
-    await page.goto(baseURL ?? '/');
+    await gotoApp(page, baseURL);
     await goToAiChef(page);
     await dismissLocalAiSetupIfOpen(page);
     await expect(page.getByRole('button', { name: /chef fragen/i })).toBeVisible();
@@ -37,7 +32,7 @@ test.describe('KI-Chef — Offline', () => {
 
   test('Chef fragen offline liefert lokale Ideen ohne Crash', async ({ page, baseURL, context }) => {
     test.setTimeout(60_000);
-    await page.goto(baseURL ?? '/');
+    await gotoApp(page, baseURL);
     await goToAiChef(page);
     await dismissLocalAiSetupIfOpen(page);
 

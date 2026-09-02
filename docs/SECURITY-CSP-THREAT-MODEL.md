@@ -1,7 +1,7 @@
 # CSP & Network Endpoint Threat Model
 
-**Status:** 2026-08-01 · CulinaSync v0.3.0+  
-**Related issues:** #133
+**Status:** 2026-09-02 · CulinaSync v0.3.0+  
+**Related issues:** #133 (runtime hardening shipped; full `https:` removal deferred)
 
 ## Assets
 
@@ -24,21 +24,31 @@
 
 | Layer | Mechanism |
 |-------|-----------|
-| CSP meta (web) | `default-src 'self'`; `script-src` + `wasm-unsafe-eval`; explicit `connect-src` hosts + `https:` fallback |
-| CSP (Tauri) | Same core policy without `upgrade-insecure-requests` |
-| Runtime policy | `networkEndpointPolicy.ts` — Ollama loopback, Gemini host, AI CDN allowlist |
+| CSP meta (web) | `apps/web/src/config/csp.ts` → Vite inject + **Vercel `Content-Security-Policy` header** (`pnpm run sync:vercel-csp`) |
+| CSP (Tauri) | `TAURI_CSP` mirrored in `src-tauri/tauri.conf.json` (drift test) |
+| Runtime policy | `networkEndpointPolicy.ts` — purposes: `ollama_loopback`, `gemini_api`, `ai_model_cdn`, `user_sync`, `community_share`, `recipe_import_proxy`, `general_https` |
+| Service gates | `syncTransport`, `nextcloudSyncAdapter`, `communityShareService`, `recipeImportService` call `assertAllowedEndpoint` before `fetch` |
 | Settings gate | `localAi.ollamaBaseUrl` validated on save |
 | AI JSON | Zod via `parseAiJsonWithSchema` — no silent fabrication |
 | API key | Never in build; `apiKeyService` only |
 
+## Explicit `connect-src` hosts (beyond `https:` fallback)
+
+- Gemini API, AI model CDNs (Hugging Face, jsDelivr)
+- Community share: `ipfs.infura.io`, `ipfs.io`
+- Recipe import proxy: `r.jina.ai`
+- Loopback HTTP for Ollama: `127.0.0.1`, `localhost`, `[::1]`
+
 ## Residual risk
 
-- **`connect-src https:`** remains for Gemini, user sync, and unknown CDNs — runtime CDN allowlist narrows model paths.
+- **`connect-src https:`** remains for BYO sync (arbitrary user WebDAV/Nextcloud hosts). Runtime `user_sync` allows HTTP(S) but rejects other schemes.
 - **Local-first plaintext** in IndexedDB — see `docs/ENCRYPTION-AT-REST-REVIEW.md`.
 - **Workers excluded** from aggregate coverage gate — dedicated worker matrix tests (#130).
 
 ## Validation
 
-- `apps/web/src/config/__tests__/csp.test.ts` — WEB vs TAURI drift
+- `apps/web/src/config/__tests__/csp.test.ts` — WEB vs TAURI drift, Vercel export hook
 - `apps/web/src/config/__tests__/networkEndpointPolicy.test.ts`
+- `apps/web/src/services/__tests__/syncTransport.test.ts`
+- `pnpm run sync:vercel-csp` after CSP changes
 - `pnpm run check:repo-truth` — README thresholds vs `vitest.config.ts`

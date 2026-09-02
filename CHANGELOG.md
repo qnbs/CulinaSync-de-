@@ -7,21 +7,24 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **First-run PWA chrome:** Offline-ready and update-downloading toasts defer until intro gates dismiss (`pwaIntroDeferral`, `index.tsx`, `App.tsx`).
+- **Recipe import proxy:** Jina reader URL uses full target URL (`https://r.jina.ai/https://…`), not a broken `http/host` concat.
+
 ### Added
 
-- **First-run chrome sequencing:** PWA update toast and install reminder defer until intro gates dismiss (`usePwaUpdate` / `usePwaInstall`).
-- **Model download integrity:** `localAiModelIntegrity.ts` — allowlisted CDN fetch with optional Content-Length/ETag guard; fails closed to heuristic layer.
-- **Gemini runtime policy:** `assertAllowedEndpoint` before `GoogleGenAI` client init.
-- **Tests:** expanded hook/service coverage; branch Ist **~82 %** (floor **82**); PWA, recipe-detail, App coverage, voice matrix suites.
-- **Tests:** `foodDatabaseLabels.test.ts` und `useWakeLock` visibility-Branch — stabile Branch-Coverage **≥82 %** in CI.
-- **Docs:** `docs/STATUS-2026-09-01.md`; CSP/network threat-model note in `SECURITY.md`.
+- **SBOM (#135):** `pnpm run generate:sbom` (pnpm + Rust CycloneDX), `prepare:release-evidence`, SBOM copies in `release-evidence/0.3.0/`; Tauri release workflow uploads evidence assets.
+- **CSP runtime gates (#133):** `community_share`, `recipe_import_proxy`, `user_sync` HTTP(S) in `assertAllowedEndpoint`; wired in sync, Nextcloud, IPFS share, recipe import; explicit hosts in CSP + Tauri; `pnpm run sync:vercel-csp` for Vercel header.
+- **E2E matrix (#138):** Playwright Chromium/Firefox blocking on PR/main; WebKit weekly/manual (`continue-on-error`, SPA mount issue in Playwright WebKit CI).
 
 ### Changed
 
 - Branch coverage Ist **~82 %** (floor raised to **82**; M5.9-Ziel erreicht).
 - **Network endpoint policy** (`networkEndpointPolicy.ts`) with Ollama loopback gate, AI CDN allowlist, CSP threat model doc.
 - **Repo-truth CI:** `check:repo-truth` validates README test counts and coverage thresholds.
-- **Release evidence:** `release-evidence/0.3.0/` regenerated for merge SHA `9031561` (lcov SHA, thresholds 82/80/75/82).
+- **Release evidence:** `release-evidence/0.3.0/` with SBOM hashes (pnpm + Rust), `verify:release` runs `generate:sbom` first.
+- **E2E preview builds:** `VITE_E2E=true` on Playwright CI builds skips PersistGate + service-worker registration (`index.tsx`) for WebKit matrix stability; Playwright `serviceWorkers: 'block'`.
 
 ### Documentation
 

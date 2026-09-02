@@ -8,13 +8,14 @@
 
 ## Checklist before a release tag
 
-1. `pnpm run verify:release` (or `pnpm run check:all` — includes `test:coverage` gates).
-2. E2E Smoke green on `main` (path-filtered when `apps/web/**` changes).
-3. Bundle budget: `script` < 185 KB (sustain <190).
-4. CHANGELOG: move `[Unreleased]` bullets into `## [x.y.z] — YYYY-MM-DD`.
-5. Bump `version` in root + `apps/web/package.json` (+ Tauri if desktop).
-6. Tag `vX.Y.Z` and push; observe Deploy + CodeQL.
-7. Desktop (R-012): after green `tauri-release` workflow, publish GitHub Release assets from the draft.
+1. `pnpm run verify:release` (includes `generate:sbom`, coverage gates, audit).
+2. `pnpm run prepare:release-evidence` (SBOM + `release-evidence/<version>/` with hashes).
+3. E2E Smoke + E2E Matrix green on `main` (when `apps/web/**` changes).
+4. Bundle budget: `script` < 185 KB (sustain <190).
+5. CHANGELOG: move `[Unreleased]` bullets into `## [x.y.z] — YYYY-MM-DD`.
+6. Bump `version` in root + `apps/web/package.json` (+ Tauri if desktop).
+7. `pnpm run sync:vercel-csp` if `csp.ts` changed.
+8. Tag `vX.Y.Z` and push; observe Deploy, CodeQL, **Tauri release** (draft + SBOM assets).
 
 ## v1.0 readiness (tracked)
 

@@ -28,6 +28,12 @@ describe('syncTransport', () => {
     await expect(downloadEncryptedBlob('https://example.com/x')).rejects.toThrow(/download-failed/);
   });
 
+  it('lehnt unsichere Sync-URLs ab', async () => {
+    await expect(uploadEncryptedBlob('ftp://example.com/x', new Uint8Array([1]), undefined)).rejects.toThrow(
+      'network-endpoint-invalid:user_sync',
+    );
+  });
+
   it('downloadEncryptedBlob liefert ArrayBuffer als Uint8Array', async () => {
     const bytes = new Uint8Array([9, 8, 7]);
     vi.stubGlobal(

@@ -1,14 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { seedDismissedAppModals } from './helpers/appStorage';
+import { gotoApp } from './helpers/gotoApp';
 import { goToSettingsData } from './helpers/navigation';
 
 test.describe('Settings — Sync & Device', () => {
-  test.beforeEach(async ({ page }) => {
-    await seedDismissedAppModals(page);
-  });
-
   test('Daten-Panel zeigt Geräte-Sync und öffnet QR-Modal', async ({ page, baseURL }) => {
-    await page.goto(baseURL ?? '/');
+    await gotoApp(page, baseURL);
     await goToSettingsData(page);
 
     await expect(page.getByText(/qr-sync|geräte/i).first()).toBeVisible();
@@ -30,7 +26,7 @@ test.describe('Settings — Sync & Device', () => {
       await route.continue();
     });
 
-    await page.goto(baseURL ?? '/');
+    await gotoApp(page, baseURL);
     await goToSettingsData(page);
 
     await page.getByRole('radio', { name: /nextcloud/i }).check();

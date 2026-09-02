@@ -24,6 +24,7 @@ import { useAppBadge } from './hooks/useAppBadge';
 import { Button, Spinner } from './components/ui';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './services/dbInstance';
+import { flushDeferredPwaToasts } from './services/pwaIntroDeferral';
 
 const APP_VERSION = __APP_VERSION__;
 
@@ -82,7 +83,8 @@ const App: React.FC = () => {
     localStorage.setItem('culinaSyncOnboarded', 'true');
     localStorage.setItem('culinasync_version', APP_VERSION || appVersion);
     closeOnboarding();
-  }, [appVersion, closeOnboarding]);
+    flushDeferredPwaToasts((toast) => dispatch(addToastAction(toast)));
+  }, [appVersion, closeOnboarding, dispatch]);
 
   const handleDemoEntryResolved = useCallback(
     (mode: DemoEntryResult) => {

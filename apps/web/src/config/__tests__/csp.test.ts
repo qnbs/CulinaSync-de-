@@ -19,8 +19,21 @@ describe('Content-Security-Policy single source', () => {
     expect(WEB_CSP).toContain('http://127.0.0.1:*');
     expect(WEB_CSP).toContain('https://huggingface.co');
     expect(WEB_CSP).toContain('https://generativelanguage.googleapis.com');
+    expect(WEB_CSP).toContain('https://ipfs.infura.io');
+    expect(WEB_CSP).toContain('https://r.jina.ai');
     // no websocket scheme
     expect(WEB_CSP).not.toMatch(/connect-src[^;]*\sws:/);
+  });
+
+  it('exports WEB_CSP for deployment headers when EXPORT_VERCEL_CSP=1', async () => {
+    if (process.env.EXPORT_VERCEL_CSP !== '1') {
+      return;
+    }
+    const { mkdirSync, writeFileSync } = await import('node:fs');
+    const { resolve } = await import('node:path');
+    const outDir = resolve(process.cwd(), 'generated');
+    mkdirSync(outDir, { recursive: true });
+    writeFileSync(resolve(outDir, 'web-csp-header.txt'), WEB_CSP);
   });
 
   it('keeps upgrade-insecure-requests for web but not for the Tauri webview', () => {

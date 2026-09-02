@@ -2,7 +2,9 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 export async function goToSettings(page: Page): Promise<void> {
-  await page.getByRole('button', { name: /einstellungen/i }).first().click();
+  const btn = page.getByRole('button', { name: /einstellungen/i }).first();
+  await expect(btn).toBeVisible({ timeout: 15_000 });
+  await btn.click();
   await expect(page.locator('#main-content')).toBeVisible();
 }
 
@@ -21,21 +23,29 @@ export async function goToSettingsData(page: Page): Promise<void> {
 }
 
 export async function goToPantry(page: Page): Promise<void> {
-  await page.getByRole('button', { name: /vorrat/i }).first().click();
+  const btn = page.getByRole('button', { name: /vorrat/i }).first();
+  await expect(btn).toBeVisible({ timeout: 15_000 });
+  await btn.click();
   await expect(page.locator('#main-content')).toBeVisible();
 }
 
 export async function goToRecipes(page: Page): Promise<void> {
   const bottomNav = page.getByRole('navigation', { name: /hauptnavigation/i });
   if (await bottomNav.isVisible().catch(() => false)) {
-    await bottomNav.getByRole('button', { name: /^rezepte$/i }).click();
+    const mobileBtn = bottomNav.getByRole('button', { name: /^rezepte$/i });
+    await expect(mobileBtn).toBeVisible({ timeout: 15_000 });
+    await mobileBtn.click();
   } else {
-    await page.getByRole('button', { name: /rezept/i }).first().click();
+    const btn = page.getByRole('button', { name: /rezept/i }).first();
+    await expect(btn).toBeVisible({ timeout: 15_000 });
+    await btn.click();
   }
   await expect(page.locator('#main-content')).toBeVisible();
 }
 
 export async function goToAiChef(page: Page): Promise<void> {
-  await page.getByRole('button', { name: /ki-chef|ki koch/i }).first().click();
+  const btn = page.getByRole('button', { name: /ki-chef|ki koch/i }).first();
+  await expect(btn).toBeVisible({ timeout: 15_000 });
+  await btn.click();
   await expect(page.locator('#main-content')).toBeVisible();
 }

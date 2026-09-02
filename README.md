@@ -50,13 +50,13 @@ flowchart TB
 
 ---
 
-## Aktueller Stand (August 2026)
+## Aktueller Stand (September 2026)
 
-Snapshot: **[docs/audit/evidence/2026-08-01-post-pr118.md](./docs/audit/evidence/2026-08-01-post-pr118.md)** · Änderungen: [CHANGELOG.md](./CHANGELOG.md)
+Snapshot: **[docs/STATUS-2026-09-02.md](./docs/STATUS-2026-09-02.md)** · Änderungen: [CHANGELOG.md](./CHANGELOG.md)
 
 | Bereich | Stand |
 |---------|--------|
-| **Tests** | Vitest (156 files); coverage thresholds **82/80/75/82** — see `docs/generated/repo-status.json` |
+| **Tests** | Vitest (157 files); coverage thresholds **82/80/75/82** — see `docs/generated/repo-status.json` |
 | **Release-Check** | `pnpm run verify:release` · `pnpm run check:version-drift` |
 | **i18n** | de/en; `core` · `settings` · `features` · `gemini` · **`aiChef`**; Baseline-Scan **0** Hardcoded in Prod |
 | **PWA** | Manifest, Share Target, Badges, SW-Update, Datei-Handler — [docs/PWA.md](./docs/PWA.md) |
@@ -196,7 +196,7 @@ Jeder Bereich zeigt ein **Kontext-Intro** mit Kurztipps (`SettingsPanelIntro`). 
 ### Voraussetzungen
 
 - **Node.js 24**
-- **pnpm 11+** (`packageManager`: `pnpm@11.13.0`)
+- **pnpm 11+** (`packageManager`: `pnpm@11.25.0`)
 
 ### Installation & Dev
 

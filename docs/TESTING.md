@@ -24,7 +24,8 @@ pnpm run test:coverage
 pnpm run test:scripts   # Deploy-Verify (node --test, auch in CI validate)
 pnpm run i18n:check
 pnpm run check:all
-pnpm run test:e2e   # Playwright (lokal: vorher `pnpm exec playwright install chromium`)
+pnpm run test:e2e        # alle Browser (Chromium, Firefox, WebKit)
+pnpm run test:e2e:smoke  # Chromium-only (wie CI E2E Smoke)
 ```
 
 **E2E-Specs (`apps/web/e2e/`):**
@@ -36,7 +37,12 @@ pnpm run test:e2e   # Playwright (lokal: vorher `pnpm exec playwright install ch
 | `sync-settings.spec.ts` | Daten-Panel, QR-Modal, Nextcloud-Probe (mock WebDAV) |
 | `chef-local.spec.ts` | Local-AI Strict-Toggle, KI-Chef erreichbar |
 | `pantry-cook.spec.ts` | Vorratskammer: Artikel anlegen |
-| `helpers/appStorage.ts`, `helpers/navigation.ts` | Onboarding aus, Navigation |
+| `helpers/appStorage.ts`, `helpers/navigation.ts`, `helpers/gotoApp.ts` | Onboarding aus, Navigation, App-Boot |
+| `cook-mode.spec.ts`, `chef-offline.spec.ts` | Kochmodus, KI-Chef offline |
+
+E2E CI builds set `VITE_E2E=true` (skips PersistGate + SW in `index.tsx`); Playwright `serviceWorkers: 'block'`.
+
+**WebKit (bekannte Limitation):** In Playwright Docker + `vite preview` + GitHub-Pages-`base` mountet die SPA in WebKit nicht (`#main-content` fehlt). Chromium/Firefox sind blockierend; WebKit läuft nur weekly/`workflow_dispatch` (`matrix-webkit`, `continue-on-error`).
 
 **E2E lokal (wie CI / GitHub Pages):**
 
@@ -45,7 +51,14 @@ CI=true GITHUB_ACTIONS=true pnpm run build
 cd apps/web && CI=true pnpm exec playwright test
 ```
 
-**E2E in GitHub Actions:** Workflow [`.github/workflows/e2e-smoke.yml`](../.github/workflows/e2e-smoke.yml) — Container **`mcr.microsoft.com/playwright:v1.60.0-noble`** (muss zur `@playwright/test`-Version in `package.json` passen); bei Push/PR auf `apps/web/**` und wöchentlich; manuell unter **Actions → E2E Smoke → Run workflow**.
+**E2E in GitHub Actions:**
+
+| Workflow | Browser | Trigger |
+|----------|---------|---------|
+| [e2e-smoke.yml](../.github/workflows/e2e-smoke.yml) | Chromium (blocking) | PR/push `apps/web/**`, weekly |
+| [e2e-matrix.yml](../.github/workflows/e2e-matrix.yml) | Chromium + Firefox (blocking); WebKit weekly/manual | PR/push `apps/web/**`, weekly, `workflow_dispatch` |
+
+Container: **`mcr.microsoft.com/playwright:v1.61.1-noble`** (digest-pinned; muss zu `@playwright/test` in `package.json` passen).
 
 Ohne globales pnpm (z. B. Windows): `npm run test`, `npm run check:all` oder `npx pnpm@11 run test`.
 

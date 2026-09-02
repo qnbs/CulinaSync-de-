@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import {
   assertAllowedEndpoint,
   isAllowedAiModelCdnUrl,
+  isAllowedCommunityShareUrl,
   isAllowedOllamaBaseUrl,
+  isAllowedRecipeImportProxyUrl,
   parseHttpUrl,
 } from '../networkEndpointPolicy';
 
@@ -30,9 +32,19 @@ describe('networkEndpointPolicy', () => {
       'network-endpoint-ollama-loopback-only',
     );
     assertAllowedEndpoint('https://user-sync.example/ipfs', 'user_sync');
+    assertAllowedEndpoint('http://192.168.0.10/remote.php/dav/files/user/backup', 'user_sync');
     expect(() => assertAllowedEndpoint('http://insecure.example', 'general_https')).toThrow(
       'network-endpoint-https-only',
     );
     expect(() => assertAllowedEndpoint('not-a-url', 'gemini_api')).toThrow('network-endpoint-invalid');
+  });
+
+  it('allows community share and recipe import proxy hosts only', () => {
+    expect(isAllowedCommunityShareUrl('https://ipfs.infura.io:5001/api/v0/add')).toBe(true);
+    expect(isAllowedCommunityShareUrl('https://evil.example/ipfs')).toBe(false);
+    expect(isAllowedRecipeImportProxyUrl('https://r.jina.ai/http://example.com/recipe')).toBe(true);
+    expect(isAllowedRecipeImportProxyUrl('https://evil.example/proxy')).toBe(false);
+    assertAllowedEndpoint('https://ipfs.infura.io:5001/api/v0/add', 'community_share');
+    assertAllowedEndpoint('https://r.jina.ai/http://chef.example/recipe', 'recipe_import_proxy');
   });
 });
