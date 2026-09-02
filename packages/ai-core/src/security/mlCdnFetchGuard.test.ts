@@ -71,6 +71,9 @@ describe('mlCdnFetchGuard', () => {
     restoreMlCdnFetchGuardForTests();
     installMlCdnFetchGuard();
     expect(isMlCdnFetchGuardInstalled()).toBe(true);
+    const firstGuard = globalThis.fetch;
+    installMlCdnFetchGuard();
+    expect(globalThis.fetch).toBe(firstGuard);
     restoreMlCdnFetchGuardForTests();
     expect(isMlCdnFetchGuardInstalled()).toBe(false);
   });

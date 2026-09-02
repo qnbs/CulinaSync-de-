@@ -39,16 +39,30 @@ export const createGuardedMlFetch = (baseFetch: typeof fetch): typeof fetch => {
   return guardedFetch;
 };
 
+const GUARD_MARKER = Symbol.for('culinasync.mlCdnFetchGuard');
+
+type MarkedFetch = typeof fetch & { [GUARD_MARKER]?: true };
+
 let installed = false;
 let nativeFetch: typeof fetch | undefined;
 
 /** Patches global fetch so WebLLM/MLC and transformers.js downloads hit the CDN allowlist. */
 export const installMlCdnFetchGuard = (): void => {
-  if (installed || typeof globalThis.fetch !== 'function') {
+  if (typeof globalThis.fetch !== 'function') {
     return;
   }
-  nativeFetch = globalThis.fetch.bind(globalThis);
-  globalThis.fetch = createGuardedMlFetch(nativeFetch);
+  const current = globalThis.fetch as MarkedFetch;
+  if (current[GUARD_MARKER]) {
+    installed = true;
+    return;
+  }
+  if (installed) {
+    return;
+  }
+  nativeFetch = current.bind(globalThis);
+  const guarded = createGuardedMlFetch(nativeFetch) as MarkedFetch;
+  guarded[GUARD_MARKER] = true;
+  globalThis.fetch = guarded;
   installed = true;
 };
 
