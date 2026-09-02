@@ -35,6 +35,9 @@ jobs:
   matrix:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    env:
+      # QNBS-v3: Playwright Firefox/WebKit in GHA container need root-owned HOME (pwuser vs runner)
+      HOME: /root
     strategy:
       fail-fast: false
       matrix:
