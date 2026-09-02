@@ -20,6 +20,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Changed
 
+- **fast-uri override** `^3.1.6` restores `pnpm audit --audit-level=high` gate (GHSA-jqff-g426-hqxp).
+- **Release evidence** regenerated for merge SHA `92bd4a0` (SBOM + lcov hashes on `main`).
 - Branch coverage Ist **~82 %** (floor raised to **82**; M5.9-Ziel erreicht).
 - **Network endpoint policy** (`networkEndpointPolicy.ts`) with Ollama loopback gate, AI CDN allowlist, CSP threat model doc.
 - **Repo-truth CI:** `check:repo-truth` validates README test counts and coverage thresholds.
