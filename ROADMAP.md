@@ -215,7 +215,7 @@ _Vorbedingung: M1 (DevContainer mit Rust), Tauri 2 stabil_
 
 | # | Maßnahme | Datei(en) | Aufwand | Status |
 |---|---|---|---|---|
-| 10.5 | E2E: Sync, Chef, Pantry, Cook-Mode (**10** Tests) | `apps/web/e2e/*.spec.ts` | Mittel | ✅ PR #66 + #67 |
+| 10.5 | E2E: Sync, Chef, Pantry, Cook-Mode, First-Run (**16** Tests, **11** Specs) | `apps/web/e2e/*.spec.ts` | Mittel | ✅ PR #66+#67, #163+#164 |
 
 ---
 
@@ -232,7 +232,7 @@ _Vorbedingung: M9 Bundle-Budget; Architekturvertrag [`docs/LOCAL-AI-ARCHITECTURE
 | 11.2 | WebLLM (L1) Feature-Flag: Rezept-Ideen/Rezept | `localAiWebLlmService`, `vendor-webllm` | Hoch | ✅ PR #67 |
 | 11.3 | Transformers.js Embeddings + Hybrid-RAG (Dexie v13) | `localAiEmbeddingsService`, `aiEmbeddings` | Hoch | ✅ PR #67 |
 | 11.4 | ONNX Vision Pantry-Foto (L2) | Vision-Worker, Budget-Gate | Hoch | 🔲 |
-| 11.5 | E2E „Chef ohne Netz“ + MSW | `e2e/chef-local.spec.ts` erweitern | Mittel | 🟨 Basis in PR #66 |
+| 11.5 | E2E „Chef ohne Netz“ + MSW | `e2e/chef-local.spec.ts`, `chef-offline.spec.ts` | Mittel | ✅ Basis PR #66; erweitert #163+#164 |
 
 **Gesamtaufwand Milestone 11:** groß (mehrere PRs); nicht mit M5-Coverage-Ziel verwechseln.
 
