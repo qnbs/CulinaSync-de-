@@ -49,7 +49,8 @@ Fuer nicht-sensitive Sicherheitsverbesserungen oder harte Konfigurationsthemen o
 | `csp.ts` + Vercel CSP header (`sync:vercel-csp`) | Ein CSP-String für Meta + Vercel | GitHub Pages weiterhin Meta-CSP |
 | `connect-src` + IPFS/Jina explizit | Community share + Recipe-Import-Proxy | BYO Sync braucht `https:` Fallback |
 | `networkEndpointPolicy.ts` | Runtime-Gate: Gemini, Ollama, AI-CDN, `user_sync`, `community_share`, `recipe_import_proxy`, `general_https` | Sync/Import/Community rufen `assertAllowedEndpoint` vor `fetch` |
-| `localAiModelIntegrity.ts` | CDN-Artifact-Integrität | WebLLM-interne Downloads über MLC |
+| `installMlCdnFetchGuard` (`@domain/ai-core`) | WebLLM/MLC + transformers.js `fetch` → CDN-Allowlist, `redirect: error` | Deckt interne MLC-Pfade ab (#134) |
+| `localAiModelIntegrity.ts` | Direkte CDN-Fetches + Header-Checks | Ergänzt globalen Guard für App-eigene Downloads |
 | `wasm-unsafe-eval` | WebLLM/ONNX/Whisper WASM (kein JS-`eval`) | Bewusst dokumentiert in CSP-Drift-Tests |
 
 Ollama: nur `127.0.0.1` / `localhost` / `[::1]`. Gemini: nur `generativelanguage.googleapis.com`.

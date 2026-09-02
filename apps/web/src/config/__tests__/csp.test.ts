@@ -18,6 +18,7 @@ describe('Content-Security-Policy single source', () => {
     expect(WEB_CSP).toContain("connect-src 'self' https:");
     expect(WEB_CSP).toContain('http://127.0.0.1:*');
     expect(WEB_CSP).toContain('https://huggingface.co');
+    expect(WEB_CSP).toContain('https://raw.githubusercontent.com');
     expect(WEB_CSP).toContain('https://generativelanguage.googleapis.com');
     expect(WEB_CSP).toContain('https://ipfs.infura.io');
     expect(WEB_CSP).toContain('https://r.jina.ai');
