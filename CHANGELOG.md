@@ -25,6 +25,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **E2E matrix workflow** (optional Chromium/Firefox/WebKit via `E2E_MATRIX=1`).
 - **Cargo audit** in CI validate + `docs/security/CARGO-AUDIT-EXCEPTIONS.md`.
 - Governance docs: branch cleanup, encryption review, intro-gates sign-off, desktop signing.
+- **Dependabot sprint:** `@google/genai` 2.14, `dompurify` 3.4.13, `lucide-react` 1.27, `postcss` 8.5.23, `react-i18next` 17.0.11; GitHub Actions `setup-node` v7, `pnpm/action-setup` v6.0.10, CodeQL v4.37.9.
 - CSP `connect-src` lists explicit Gemini and Hugging Face CDN hosts (alongside `https:` fallback).
 - Ollama base URL settings reject non-loopback endpoints.
 
