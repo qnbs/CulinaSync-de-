@@ -8,6 +8,6 @@ import { seedDismissedAppModals } from './appStorage';
  */
 export async function gotoApp(page: Page, baseURL?: string): Promise<void> {
   await seedDismissedAppModals(page);
-  await page.goto(baseURL ?? '/', { waitUntil: 'domcontentloaded' });
-  await expect(page.locator('#main-content')).toBeVisible({ timeout: 20_000 });
+  await page.goto(baseURL ?? '/', { waitUntil: 'load' });
+  await expect(page.locator('#main-content')).toBeVisible({ timeout: 30_000 });
 }

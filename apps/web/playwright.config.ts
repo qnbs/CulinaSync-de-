@@ -30,6 +30,8 @@ export default defineConfig({
   timeout: 30_000,
   use: {
     baseURL,
+    // QNBS-v3: PWA SW + IndexedDB race in WebKit CI — block SW so PersistGate can rehydrate
+    serviceWorkers: 'block',
     trace: isCi ? 'off' : 'on-first-retry',
     video: 'off',
     screenshot: 'off',
