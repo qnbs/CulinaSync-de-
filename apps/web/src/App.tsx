@@ -68,11 +68,12 @@ const App: React.FC = () => {
   const closeOnboarding = useTransientUiStore((s) => s.closeOnboarding);
 
   const [appVersion] = useState<string>(APP_VERSION || 'N/A');
+  const [introCompleted, setIntroCompleted] = useState(
+    () => typeof window !== 'undefined' && Boolean(window.localStorage.getItem('culinaSyncOnboarded')),
+  );
   // QNBS-v3: Intro-Gates v1.0 — dismissible Onboarding; What's-New erst nach First-Run
   const showOnboarding =
-    INTRO_GATES_ENABLED &&
-    (onboardingOpen ||
-      (typeof window !== 'undefined' && !window.localStorage.getItem('culinaSyncOnboarded')));
+    INTRO_GATES_ENABLED && (onboardingOpen || !introCompleted);
   const isOnline = useOnlineStatus();
   useDeepLinkNavigation();
   useAccentTheme();
@@ -82,6 +83,7 @@ const App: React.FC = () => {
   const markIntroComplete = useCallback(() => {
     localStorage.setItem('culinaSyncOnboarded', 'true');
     localStorage.setItem('culinasync_version', APP_VERSION || appVersion);
+    setIntroCompleted(true);
     closeOnboarding();
     flushDeferredPwaToasts((toast) => dispatch(addToastAction(toast)));
   }, [appVersion, closeOnboarding, dispatch]);

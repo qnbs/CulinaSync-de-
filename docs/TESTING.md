@@ -33,6 +33,8 @@ pnpm run test:e2e:smoke  # Chromium-only (wie CI E2E Smoke)
 | Datei | Abdeckung |
 |-------|-----------|
 | `smoke.spec.ts` | Startseite lädt |
+| `first-run.spec.ts` | Erstbesuch: Welcome ohne PWA-Toasts → Skip → Vorrats-Artikel + Reload |
+| `local-ai-settings.spec.ts` | Lokale-KI-Panel, Ollama loopback-only |
 | `navigation-offline.spec.ts` | Navigation Desktop/Mobile, Offline-Banner |
 | `sync-settings.spec.ts` | Daten-Panel, QR-Modal, Nextcloud-Probe (mock WebDAV) |
 | `chef-local.spec.ts` | Local-AI Strict-Toggle, KI-Chef erreichbar |
