@@ -10,6 +10,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ### Fixed
 
 - **#134 WebLLM/MLC downloads:** `installMlCdnFetchGuard` in `@domain/ai-core` patches `fetch` for Hugging Face, jsDelivr, and `raw.githubusercontent.com/mlc-ai/*` before WebLLM/transformers/ONNX load; `redirect: error` on ML CDN requests.
+- **Tauri CSP drift:** `src-tauri/tauri.conf.json` mirrors `TAURI_CSP` including `https://raw.githubusercontent.com` for MLC wasm.
 - **First-run PWA chrome:** Offline-ready and update-downloading toasts defer until intro gates dismiss (`pwaIntroDeferral`, `index.tsx`, `App.tsx`).
 - **Recipe import proxy:** Jina reader URL uses full target URL (`https://r.jina.ai/https://…`), not a broken `http/host` concat.
 
