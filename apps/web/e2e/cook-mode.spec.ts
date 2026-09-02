@@ -1,17 +1,13 @@
 import { test, expect } from '@playwright/test';
-import { seedDismissedAppModals } from './helpers/appStorage';
+import { gotoApp } from './helpers/gotoApp';
 import { goToRecipes } from './helpers/navigation';
 
 /** Bekanntes Seed-Rezept (german-austrian.ts de-01) — stabil nach DB-Populate. */
 const SEED_RECIPE_TITLE = /bayerischer schweinebraten/i;
 
 test.describe('Kochmodus — Kernflow', () => {
-  test.beforeEach(async ({ page }) => {
-    await seedDismissedAppModals(page);
-  });
-
   test('Rezeptbuch → Kochmodus → Schritt weiter → Beenden', async ({ page, baseURL }) => {
-    await page.goto(baseURL ?? '/');
+    await gotoApp(page, baseURL);
     await goToRecipes(page);
 
     // QNBS-v3: seed recipes populate async on first load; on a cold/loaded CI

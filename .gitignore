@@ -7,8 +7,8 @@ src-tauri/gen/
 
 # Generated output
 coverage/
-sbom.cdx.json
-sbom-rust.cdx.json
+/sbom.cdx.json
+/sbom-rust.cdx.json
 apps/web/generated/web-csp-header.txt
 reports/
 test-results/

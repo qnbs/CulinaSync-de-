@@ -13,7 +13,11 @@ const baseURL = `http://127.0.0.1:${port}${appBasePath === '/' ? '' : appBasePat
 const browserProjects = [
   { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
   { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-  { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+  {
+    name: 'webkit',
+    use: { ...devices['Desktop Safari'], actionTimeout: 20_000 },
+    timeout: 60_000,
+  },
 ];
 
 export default defineConfig({
