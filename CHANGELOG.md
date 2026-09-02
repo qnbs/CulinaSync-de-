@@ -21,7 +21,11 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - Branch coverage Ist **~82 %** (floor raised to **82**; M5.9-Ziel erreicht).
 - **Network endpoint policy** (`networkEndpointPolicy.ts`) with Ollama loopback gate, AI CDN allowlist, CSP threat model doc.
 - **Repo-truth CI:** `check:repo-truth` validates README test counts and coverage thresholds.
-- **Release evidence:** SBOM/lcov SHA-256 fields in `generate-release-evidence.mjs`.
+- **Release evidence:** `release-evidence/0.3.0/` regenerated for merge SHA `9031561` (lcov SHA, thresholds 82/80/75/82).
+
+### Documentation
+
+- `docs/STATUS-2026-09-02.md` — post-merge handoff snapshot; stale `cursor/*` branches removed.
 - **Inference cache quota:** `enforceInferenceCacheQuota` + `setCachedInferenceWithQuota`.
 - **E2E matrix workflow** (optional Chromium/Firefox/WebKit via `E2E_MATRIX=1`).
 - **Cargo audit** in CI validate + `docs/security/CARGO-AUDIT-EXCEPTIONS.md`.

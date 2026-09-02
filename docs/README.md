@@ -4,9 +4,9 @@ Dieser Ordner sammelt die projektbezogene Fach- und Betriebsdokumentation für C
 
 ## Aktueller Stand
 
-**[STATUS-2026-09-01.md](./STATUS-2026-09-01.md)** — Audit-Perfection-Sprint: Coverage ~78 % branches, PWA first-run sequencing, model integrity.
+**[STATUS-2026-09-02.md](./STATUS-2026-09-02.md)** — PR #159 merged: Coverage 82 % branches, Dependabot-Sprint, Release-Evidence 0.3.0.
 
-Vorgänger: [STATUS-2026-06-03.md](./STATUS-2026-06-03.md) — M10 Nextcloud, Tauri-2-Workspace, PWA-Erweiterung, Vercel/Deploy-Fixes, i18n Gates.
+Vorgänger: [STATUS-2026-09-01.md](./STATUS-2026-09-01.md) — Audit-Perfection-Sprint (pre-merge).
 
 Vorgänger: [STATUS-2026-06-02.md](./STATUS-2026-06-02.md) (M5 Coverage abgeschlossen).
 
@@ -14,7 +14,8 @@ Vorgänger: [STATUS-2026-06-02.md](./STATUS-2026-06-02.md) (M5 Coverage abgeschl
 
 | Dokument | Inhalt |
 |----------|--------|
-| [STATUS-2026-09-01.md](./STATUS-2026-09-01.md) | **aktuell** — Audit-Sprint, Coverage 78 % branches, PWA/Security |
+| [STATUS-2026-09-02.md](./STATUS-2026-09-02.md) | **aktuell** — Merge #159, Coverage 82 %, Release-Evidence |
+| [STATUS-2026-09-01.md](./STATUS-2026-09-01.md) | Audit-Sprint (pre-merge) |
 | [STATUS-2026-06-03.md](./STATUS-2026-06-03.md) | Sync, PWA, Deploy, Validierung |
 | [STATUS-2026-06-02.md](./STATUS-2026-06-02.md) | M5 done, Coverage, offene Milestones |
 | [PWA.md](./PWA.md) | Manifest, Service Worker, Install, Share Target |
