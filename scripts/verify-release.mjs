@@ -12,6 +12,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const skipCargo = process.argv.includes('--skip-cargo');
 
 const steps = [
+  ['generate:sbom', 'pnpm run generate:sbom'],
   ['lint', 'pnpm run lint'],
   ['type-check', 'pnpm run type-check'],
   ['test:coverage', 'pnpm run test:coverage'],

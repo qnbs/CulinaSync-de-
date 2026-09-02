@@ -9,11 +9,18 @@ const port = isCi ? previewPort : devPort;
 const appBasePath = isCi ? '/CulinaSync-de-/' : '/';
 const baseURL = `http://127.0.0.1:${port}${appBasePath === '/' ? '' : appBasePath.replace(/\/$/, '')}/`;
 
+// QNBS-v3: Drei Browser-Projekte — CI Smoke nutzt --project=chromium; Matrix ein Job pro Browser
+const browserProjects = [
+  { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+  { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+  { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+];
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
   forbidOnly: isCi,
-  retries: 0,
+  retries: isCi ? 1 : 0,
   workers: isCi ? 1 : undefined,
   reporter: isCi ? 'github' : 'list',
   timeout: 30_000,
@@ -23,19 +30,12 @@ export default defineConfig({
     video: 'off',
     screenshot: 'off',
   },
-  projects: (process.env.E2E_MATRIX === '1'
-    ? [
-        { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-        { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-        { name: 'webkit', use: { ...devices['Desktop Safari'] } },
-      ]
-    : [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }]) as Array<{
+  projects: browserProjects as Array<{
     name: string;
     use: Record<string, unknown>;
   }>,
   webServer: isCi
     ? {
-        // QNBS-v3: Cloud-CI — kein `vite dev`/Turbo-Server; nur statisches Preview nach `pnpm run build`
         command: `GITHUB_ACTIONS=true pnpm exec vite preview --host 127.0.0.1 --strictPort --port ${previewPort}`,
         url: baseURL,
         reuseExistingServer: false,

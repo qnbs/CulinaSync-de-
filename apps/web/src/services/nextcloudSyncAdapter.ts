@@ -1,4 +1,5 @@
 import { SYNC_ERROR_CODES } from './syncErrorCodes';
+import { assertAllowedEndpoint } from '../config/networkEndpointPolicy';
 import type { SyncAuth } from './syncTransport';
 
 export type NextcloudSyncConfig = {
@@ -49,6 +50,7 @@ export const validateNextcloudConfig = (config: NextcloudSyncConfig): void => {
 export const probeNextcloudConnection = async (config: NextcloudSyncConfig): Promise<boolean> => {
   validateNextcloudConfig(config);
   const url = buildNextcloudBackupUrl(config);
+  assertAllowedEndpoint(url, 'user_sync');
   const encoded = btoa(`${config.username.trim()}:${config.appPassword}`);
   const res = await fetch(url, {
     method: 'PROPFIND',

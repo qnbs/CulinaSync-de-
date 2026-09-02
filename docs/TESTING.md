@@ -24,7 +24,8 @@ pnpm run test:coverage
 pnpm run test:scripts   # Deploy-Verify (node --test, auch in CI validate)
 pnpm run i18n:check
 pnpm run check:all
-pnpm run test:e2e   # Playwright (lokal: vorher `pnpm exec playwright install chromium`)
+pnpm run test:e2e        # alle Browser (Chromium, Firefox, WebKit)
+pnpm run test:e2e:smoke  # Chromium-only (wie CI E2E Smoke)
 ```
 
 **E2E-Specs (`apps/web/e2e/`):**
@@ -45,7 +46,14 @@ CI=true GITHUB_ACTIONS=true pnpm run build
 cd apps/web && CI=true pnpm exec playwright test
 ```
 
-**E2E in GitHub Actions:** Workflow [`.github/workflows/e2e-smoke.yml`](../.github/workflows/e2e-smoke.yml) — Container **`mcr.microsoft.com/playwright:v1.60.0-noble`** (muss zur `@playwright/test`-Version in `package.json` passen); bei Push/PR auf `apps/web/**` und wöchentlich; manuell unter **Actions → E2E Smoke → Run workflow**.
+**E2E in GitHub Actions:**
+
+| Workflow | Browser | Trigger |
+|----------|---------|---------|
+| [e2e-smoke.yml](../.github/workflows/e2e-smoke.yml) | Chromium (blocking) | PR/push `apps/web/**`, weekly |
+| [e2e-matrix.yml](../.github/workflows/e2e-matrix.yml) | Chromium, Firefox, WebKit (parallel jobs) | PR/push `apps/web/**`, weekly, `workflow_dispatch` |
+
+Container: **`mcr.microsoft.com/playwright:v1.61.1-noble`** (digest-pinned; muss zu `@playwright/test` in `package.json` passen).
 
 Ohne globales pnpm (z. B. Windows): `npm run test`, `npm run check:all` oder `npx pnpm@11 run test`.
 

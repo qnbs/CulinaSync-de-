@@ -1,4 +1,5 @@
 import { SYNC_ERROR_CODES } from './syncErrorCodes';
+import { assertAllowedEndpoint } from '../config/networkEndpointPolicy';
 
 export type SyncAuth =
   | { type: 'bearer'; token: string }
@@ -17,6 +18,8 @@ const buildAuthHeader = (auth?: SyncAuth): Record<string, string> => {
 
 // QNBS-v3: Einheitlicher WebDAV-Transport für Generic-URL und Nextcloud (Basic/App-Passwort)
 export async function uploadEncryptedBlob(url: string, data: Uint8Array, auth?: SyncAuth): Promise<void> {
+  // QNBS-v3: Runtime gate vor fetch — BYO Sync-URLs (HTTP/S), CSP connect-src https: bleibt Fallback
+  assertAllowedEndpoint(url, 'user_sync');
   const uploadBuffer = new Uint8Array(data);
   const res = await fetch(url, {
     method: 'PUT',
@@ -32,6 +35,7 @@ export async function uploadEncryptedBlob(url: string, data: Uint8Array, auth?: 
 }
 
 export async function downloadEncryptedBlob(url: string, auth?: SyncAuth): Promise<Uint8Array> {
+  assertAllowedEndpoint(url, 'user_sync');
   const res = await fetch(url, {
     method: 'GET',
     headers: buildAuthHeader(auth),

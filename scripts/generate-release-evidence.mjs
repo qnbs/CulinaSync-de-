@@ -5,7 +5,7 @@
  */
 import { createHash } from 'node:crypto';
 import { execSync } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { copyFileSync, mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -62,17 +62,21 @@ const evidence = {
   coverageThresholds: parseVitestThresholds(),
   artifactHashes: {
     sbomCycloneDxSha256: sha256File(join(root, 'sbom.cdx.json')),
+    sbomRustCycloneDxSha256: sha256File(join(root, 'sbom-rust.cdx.json')),
     lcovSha256: sha256File(join(root, 'apps/web/coverage/lcov.info')),
   },
   validationCommands: [
     'pnpm run verify:release',
     'pnpm run check:version-drift',
     'pnpm run check:all',
+    'pnpm run generate:sbom',
+    'pnpm run prepare:release-evidence',
   ],
   knownLimitations: [
     'Workers excluded from aggregate coverage gate',
     'cargo audit optional in verify:release when tooling missing',
-    'E2E smoke Chromium-only in default CI',
+    'E2E Smoke: Chromium blocking on PR/main; E2E Matrix: all browsers parallel on PR/main',
+    'connect-src https: fallback remains for BYO user sync endpoints',
   ],
 };
 
@@ -81,6 +85,15 @@ mkdirSync(outDir, { recursive: true });
 
 const jsonPath = join(outDir, 'evidence.json');
 writeFileSync(jsonPath, `${JSON.stringify(evidence, null, 2)}\n`);
+
+const sbomRoot = join(root, 'sbom.cdx.json');
+if (existsSync(sbomRoot)) {
+  copyFileSync(sbomRoot, join(outDir, 'sbom.cdx.json'));
+}
+const sbomRustRoot = join(root, 'sbom-rust.cdx.json');
+if (existsSync(sbomRustRoot)) {
+  copyFileSync(sbomRustRoot, join(outDir, 'sbom-rust.cdx.json'));
+}
 
 const readme = `# Release evidence — ${version}
 

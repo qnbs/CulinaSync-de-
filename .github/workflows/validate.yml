@@ -106,7 +106,7 @@ jobs:
 
       # QNBS-v3: CycloneDX-SBOM für Supply-Chain-Transparenz (Master Perfection P1)
       - name: Generate SBOM (CycloneDX)
-        run: pnpm dlx -y @cyclonedx/cdxgen@11.4.4 -o sbom.cdx.json -t pnpm --spec-version 1.6
+        run: pnpm run generate:sbom
 
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7

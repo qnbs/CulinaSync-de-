@@ -25,10 +25,9 @@ Stand nach Merge **PR #159** auf `main` (2026-09-02).
 
 ### Security / Quality
 
-- [ ] #133 CSP `connect-src` Redesign (Runtime-Policy interim)
-- [ ] #134 WebLLM MLC-interne Download-Pfade
-- [ ] #139 Tauri Signing (Owner-Secrets)
-- [ ] #138 Cross-browser E2E Matrix
+- [x] Release-Evidence 0.3.0 mit SBOM (pnpm + Rust) in `release-evidence/0.3.0/`
+- [x] #133 CSP runtime gates (sync, import, community) + Vercel CSP header
+- [x] #138 E2E Matrix (Chromium/Firefox/WebKit) auf PR/main
 
 ### Strategic (v1.0+)
 

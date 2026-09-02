@@ -1,24 +1,56 @@
 name: E2E Matrix
 
-# Optional cross-browser matrix (Firefox + WebKit). Default PR CI uses Chromium-only smoke.
+# Cross-browser Playwright matrix (Chromium, Firefox, WebKit).
+# Complements blocking E2E Smoke (Chromium-only on PR/main).
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   workflow_dispatch:
   schedule:
     - cron: '0 6 * * 1'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/web/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/e2e-matrix.yml'
+  pull_request:
+    paths:
+      - 'apps/web/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/e2e-matrix.yml'
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-matrix-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   matrix:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-noble@sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48
+
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: pnpm
@@ -26,14 +58,24 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build web
+      - name: Build
         run: pnpm run build
-
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install chromium firefox webkit
-
-      - name: E2E matrix (Chromium, Firefox, WebKit)
-        run: CI=true E2E_MATRIX=1 pnpm run test:e2e
         env:
           CI: true
-          E2E_MATRIX: '1'
+          GITHUB_ACTIONS: true
+
+      - name: E2E matrix (${{ matrix.browser }})
+        run: pnpm --filter web exec playwright test --project=${{ matrix.browser }}
+        env:
+          CI: true
+          GITHUB_ACTIONS: true
+
+      - name: Upload Playwright report (on failure)
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: playwright-report-${{ matrix.browser }}
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          retention-days: 7

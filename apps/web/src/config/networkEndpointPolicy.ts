@@ -8,7 +8,15 @@ export type NetworkEndpointPurpose =
   | 'gemini_api'
   | 'ai_model_cdn'
   | 'user_sync'
-  | 'general_https';
+  | 'general_https'
+  | 'community_share'
+  | 'recipe_import_proxy';
+
+/** Hostnames allowed for IPFS community recipe sharing. */
+export const COMMUNITY_SHARE_HOSTS = ['ipfs.infura.io', 'ipfs.io'] as const;
+
+/** Read-only recipe import proxy (CORS fallback). */
+export const RECIPE_IMPORT_PROXY_HOST = 'r.jina.ai';
 
 /** Hostnames allowed for on-device model weights and WASM runtimes. */
 export const AI_MODEL_CDN_HOSTS = [
@@ -58,9 +66,23 @@ export const isAllowedGeminiApiUrl = (raw: string): boolean => {
   return url.hostname.toLowerCase() === GEMINI_API_HOST;
 };
 
+export const isAllowedCommunityShareUrl = (raw: string): boolean => {
+  const url = parseHttpUrl(raw);
+  if (!url || url.protocol !== 'https:') return false;
+  const host = url.hostname.toLowerCase();
+  return COMMUNITY_SHARE_HOSTS.some((allowed) => host === allowed || host.endsWith(`.${allowed}`));
+};
+
+export const isAllowedRecipeImportProxyUrl = (raw: string): boolean => {
+  const url = parseHttpUrl(raw);
+  if (!url || url.protocol !== 'https:') return false;
+  return url.hostname.toLowerCase() === RECIPE_IMPORT_PROXY_HOST;
+};
+
 /**
  * Throws when URL is not permitted for the given purpose.
- * `user_sync` and `general_https` accept any HTTPS origin (user-configured sync/IPFS).
+ * `user_sync` accepts user-configured HTTP(S) sync endpoints (BYO WebDAV/Nextcloud).
+ * `general_https` is HTTPS-only (recipe URLs from the web).
  */
 export const assertAllowedEndpoint = (raw: string, purpose: NetworkEndpointPurpose): void => {
   const url = parseHttpUrl(raw);
@@ -85,6 +107,20 @@ export const assertAllowedEndpoint = (raw: string, purpose: NetworkEndpointPurpo
       }
       return;
     case 'user_sync':
+      if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+        throw new Error('network-endpoint-sync-http-or-https-only');
+      }
+      return;
+    case 'community_share':
+      if (!isAllowedCommunityShareUrl(raw)) {
+        throw new Error('network-endpoint-community-share');
+      }
+      return;
+    case 'recipe_import_proxy':
+      if (!isAllowedRecipeImportProxyUrl(raw)) {
+        throw new Error('network-endpoint-recipe-import-proxy');
+      }
+      return;
     case 'general_https':
       if (url.protocol !== 'https:') {
         throw new Error('network-endpoint-https-only');
@@ -99,4 +135,6 @@ export const assertAllowedEndpoint = (raw: string, purpose: NetworkEndpointPurpo
 export const CSP_EXPLICIT_CONNECT_HOSTS = [
   `https://${GEMINI_API_HOST}`,
   ...AI_MODEL_CDN_HOSTS.map((host) => `https://${host}`),
+  ...COMMUNITY_SHARE_HOSTS.map((host) => `https://${host}`),
+  `https://${RECIPE_IMPORT_PROXY_HOST}`,
 ] as const;

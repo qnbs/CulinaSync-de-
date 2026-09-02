@@ -1,5 +1,5 @@
 // Community-Features: Rezept-Sharing via IPFS oder Nostr (opt-in, privacy-first)
-// Minimaler Einstieg: IPFS-HTTP-API und nostr-tools (optional, kein Zwangs-Upload)
+import { assertAllowedEndpoint } from '../config/networkEndpointPolicy';
 import { Recipe } from '../types';
 
 export type ShareBackend = 'ipfs' | 'nostr';
@@ -12,8 +12,8 @@ export interface ShareOptions {
 
 // --- IPFS ---
 export const shareRecipeToIpfs = async (recipe: Recipe): Promise<string> => {
-  // IPFS HTTP API (public gateway, z.B. infura.io)
   const endpoint = 'https://ipfs.infura.io:5001/api/v0/add';
+  assertAllowedEndpoint(endpoint, 'community_share');
   const formData = new FormData();
   formData.append('file', new Blob([JSON.stringify(recipe, null, 2)], { type: 'application/json' }), `${recipe.recipeTitle}.json`);
   const res = await fetch(endpoint, { method: 'POST', body: formData });

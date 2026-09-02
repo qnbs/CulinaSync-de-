@@ -110,3 +110,43 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+
+  release-evidence:
+    needs: build
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - id: release-meta
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate SBOM + release evidence
+        run: |
+          pnpm run generate:sbom
+          node scripts/generate-release-evidence.mjs --version "${{ steps.release-meta.outputs.version }}" --sha "${GITHUB_SHA}"
+
+      - name: Upload release evidence assets
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
+        with:
+          tag_name: ${{ github.ref_name }}
+          fail_on_unmatched_files: false
+          files: |
+            sbom.cdx.json
+            sbom-rust.cdx.json
+            release-evidence/${{ steps.release-meta.outputs.version }}/evidence.json
+            release-evidence/${{ steps.release-meta.outputs.version }}/sbom.cdx.json
+            release-evidence/${{ steps.release-meta.outputs.version }}/sbom-rust.cdx.json

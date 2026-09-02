@@ -1,7 +1,7 @@
 {
   "version": "0.3.0",
-  "sourceSha": "90315612e059996095d39ea35f51311c2629a72a",
-  "generatedAtUtc": "2026-09-02T06:48:57.650Z",
+  "sourceSha": "aa44c9cd59d5d642ceede7a9aa937020eb40b59e",
+  "generatedAtUtc": "2026-09-02T09:15:08.233Z",
   "nodeEngine": ">=24.0.0",
   "packageManager": "pnpm@11.25.0",
   "coverageThresholds": {
@@ -11,17 +11,21 @@
     "branches": 82
   },
   "artifactHashes": {
-    "sbomCycloneDxSha256": null,
+    "sbomCycloneDxSha256": "e000d19409815ca27ccfae978a4f3f5b7ed6f4454fff96c13da0fd6066ded443",
+    "sbomRustCycloneDxSha256": "9333f224ecaec243d54eb3342b7aa4084acc91b443c87d986206d8a3441203cf",
     "lcovSha256": "4448ed96d6f2b268ec3cfeab2c470c04568915146d52e60d7dbab2d53b8796b9"
   },
   "validationCommands": [
     "pnpm run verify:release",
     "pnpm run check:version-drift",
-    "pnpm run check:all"
+    "pnpm run check:all",
+    "pnpm run generate:sbom",
+    "pnpm run prepare:release-evidence"
   ],
   "knownLimitations": [
     "Workers excluded from aggregate coverage gate",
     "cargo audit optional in verify:release when tooling missing",
-    "E2E smoke Chromium-only in default CI"
+    "E2E Smoke: Chromium blocking on PR/main; E2E Matrix: all browsers parallel on PR/main",
+    "connect-src https: fallback remains for BYO user sync endpoints"
   ]
 }
