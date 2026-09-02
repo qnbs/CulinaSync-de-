@@ -232,4 +232,15 @@ describe('dbMigrations backup retention', () => {
     expect(backups.some((backup) => backup.id === 'old-1')).toBe(false);
     expect(backups.some((backup) => backup.sourceDbName === 'CulinaSyncDataDB' && backup.fromVersion === 1 && backup.toVersion === 2)).toBe(true);
   });
+
+  it('ensureMigrationBackup ist No-Op wenn DB bereits auf Zielversion', async () => {
+    const indexedDbMock = createIndexedDbMock();
+    vi.stubGlobal('indexedDB', indexedDbMock.indexedDB);
+    indexedDbMock.seedStore('CulinaSyncDataDB', 2, 'pantry', [{ id: 1, name: 'A' }]);
+
+    await ensureMigrationBackup('CulinaSyncDataDB', 2, ['pantry']);
+
+    const backups = indexedDbMock.readStore<MigrationBackupRecord>('CulinaSyncMigrationBackups', 'backups');
+    expect(backups).toHaveLength(0);
+  });
 });

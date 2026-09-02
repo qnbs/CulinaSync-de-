@@ -36,4 +36,11 @@ describe('demoSeedService', () => {
     expect(isGitHubPagesHost()).toBe(true);
     vi.unstubAllGlobals();
   });
+
+  it('isGitHubPagesHost false auf localhost', async () => {
+    vi.stubGlobal('window', { location: { hostname: 'localhost' } });
+    const { isGitHubPagesHost } = await import('../demoSeedService');
+    expect(isGitHubPagesHost()).toBe(false);
+    vi.unstubAllGlobals();
+  });
 });

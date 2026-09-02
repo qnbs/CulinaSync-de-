@@ -94,4 +94,73 @@ describe('PlannedMealCard (Smoke)', () => {
     await user.click(screen.getByRole('button', { name: /Rezept ansehen/i }));
     expect(onAction).toHaveBeenCalledWith('view', recipe);
   });
+
+  it('markiert gekocht und startet Kochmodus', async () => {
+    const user = userEvent.setup();
+    const onAction = vi.fn();
+
+    render(
+      <I18nextProvider i18n={i18n}>
+        <PlannedMealCard
+          meal={meal}
+          recipe={recipe}
+          pantryStatus={{ status: 'ok', have: 5, total: 5 }}
+          onAction={onAction}
+        />
+      </I18nextProvider>,
+    );
+
+    const row = screen.getByText('Gemüse-Curry').closest('.flex.justify-between') as HTMLElement;
+    await user.click(within(row).getByRole('button'));
+    await user.click(screen.getByRole('button', { name: /Kochmodus/i }));
+    expect(onAction).toHaveBeenCalledWith('cook', recipe);
+
+    await user.click(within(row).getByRole('button'));
+    await user.click(screen.getByRole('button', { name: /Als gekocht/i }));
+    expect(onAction).toHaveBeenCalledWith('cooked', meal);
+  });
+
+  it('blendet markCooked aus wenn bereits gekocht', async () => {
+    const user = userEvent.setup();
+    const cookedMeal = { ...meal, isCooked: true };
+
+    render(
+      <I18nextProvider i18n={i18n}>
+        <PlannedMealCard
+          meal={cookedMeal}
+          recipe={recipe}
+          pantryStatus={{ status: 'ok', have: 5, total: 5 }}
+          onAction={vi.fn()}
+        />
+      </I18nextProvider>,
+    );
+
+    const row = screen.getByText('Gemüse-Curry').closest('.flex.justify-between') as HTMLElement;
+    await user.click(within(row).getByRole('button'));
+    expect(screen.queryByRole('button', { name: /Als gekocht/i })).not.toBeInTheDocument();
+  });
+
+  it('schliesst Menue bei Klick ausserhalb', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <I18nextProvider i18n={i18n}>
+        <div>
+          <button type="button">outside</button>
+          <PlannedMealCard
+            meal={meal}
+            recipe={recipe}
+            pantryStatus={{ status: 'missing', have: 0, total: 2 }}
+            onAction={vi.fn()}
+          />
+        </div>
+      </I18nextProvider>,
+    );
+
+    const row = screen.getByText('Gemüse-Curry').closest('.flex.justify-between') as HTMLElement;
+    await user.click(within(row).getByRole('button'));
+    expect(screen.getByRole('button', { name: /Entfernen/i })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'outside' }));
+    expect(screen.queryByRole('button', { name: /Entfernen/i })).not.toBeInTheDocument();
+  });
 });

@@ -153,4 +153,40 @@ describe('mealPlanRepository', () => {
     expect(out.changes.deleted).toHaveLength(1);
     expect(pantryDelete).toHaveBeenCalledWith(21);
   });
+
+  it('markMealAsCooked ohne Rezept markiert gekocht wenn recipe fehlt', async () => {
+    mealPlanGet.mockResolvedValueOnce({
+      id: 7,
+      date: '2026-06-03',
+      mealType: 'Mittagessen',
+      recipeId: 99,
+    });
+    recipesGet.mockResolvedValueOnce(undefined);
+    const { markMealAsCooked } = await import('../repositories/mealPlanRepository');
+    const out = await markMealAsCooked(7);
+    expect(out.success).toBe(true);
+    expect(mealPlanUpdate).toHaveBeenCalledWith(7, expect.objectContaining({ isCooked: true }));
+  });
+
+  it('markMealAsCooked ueberspringt Zutaten mit Menge 0 und fehlendem Vorrat', async () => {
+    const { scaleIngredientQuantity } = await import('../utils');
+    vi.mocked(scaleIngredientQuantity).mockReturnValueOnce('0');
+    mealPlanGet.mockResolvedValueOnce({
+      id: 8,
+      date: '2026-06-03',
+      mealType: 'Abendessen',
+      recipeId: 12,
+    });
+    recipesGet.mockResolvedValueOnce({
+      id: 12,
+      servings: '1',
+      ingredients: [{ sectionTitle: 'Haupt', items: [{ name: 'Salz', quantity: '0', unit: 'g' }] }],
+    });
+    pantryFirst.mockResolvedValueOnce(undefined);
+    const { markMealAsCooked } = await import('../repositories/mealPlanRepository');
+    const out = await markMealAsCooked(8);
+    expect(out.success).toBe(true);
+    expect(pantryUpdate).not.toHaveBeenCalled();
+    expect(pantryDelete).not.toHaveBeenCalled();
+  });
 });

@@ -30,5 +30,9 @@ describe('networkEndpointPolicy', () => {
       'network-endpoint-ollama-loopback-only',
     );
     assertAllowedEndpoint('https://user-sync.example/ipfs', 'user_sync');
+    expect(() => assertAllowedEndpoint('http://insecure.example', 'general_https')).toThrow(
+      'network-endpoint-https-only',
+    );
+    expect(() => assertAllowedEndpoint('not-a-url', 'gemini_api')).toThrow('network-endpoint-invalid');
   });
 });

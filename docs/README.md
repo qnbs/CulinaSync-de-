@@ -4,7 +4,9 @@ Dieser Ordner sammelt die projektbezogene Fach- und Betriebsdokumentation für C
 
 ## Aktueller Stand
 
-**[STATUS-2026-06-03.md](./STATUS-2026-06-03.md)** — M10 Nextcloud, Tauri-2-Workspace, PWA-Erweiterung, Vercel/Deploy-Fixes, i18n Gates.
+**[STATUS-2026-09-01.md](./STATUS-2026-09-01.md)** — Audit-Perfection-Sprint: Coverage ~78 % branches, PWA first-run sequencing, model integrity.
+
+Vorgänger: [STATUS-2026-06-03.md](./STATUS-2026-06-03.md) — M10 Nextcloud, Tauri-2-Workspace, PWA-Erweiterung, Vercel/Deploy-Fixes, i18n Gates.
 
 Vorgänger: [STATUS-2026-06-02.md](./STATUS-2026-06-02.md) (M5 Coverage abgeschlossen).
 
@@ -12,7 +14,8 @@ Vorgänger: [STATUS-2026-06-02.md](./STATUS-2026-06-02.md) (M5 Coverage abgeschl
 
 | Dokument | Inhalt |
 |----------|--------|
-| [STATUS-2026-06-03.md](./STATUS-2026-06-03.md) | **aktuell** — Sync, PWA, Deploy, Validierung |
+| [STATUS-2026-09-01.md](./STATUS-2026-09-01.md) | **aktuell** — Audit-Sprint, Coverage 78 % branches, PWA/Security |
+| [STATUS-2026-06-03.md](./STATUS-2026-06-03.md) | Sync, PWA, Deploy, Validierung |
 | [STATUS-2026-06-02.md](./STATUS-2026-06-02.md) | M5 done, Coverage, offene Milestones |
 | [PWA.md](./PWA.md) | Manifest, Service Worker, Install, Share Target |
 | [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md) | UI-Kit, Tokens, Komponenten-Migrationen |
@@ -37,7 +40,7 @@ Vorgänger: [STATUS-2026-06-02.md](./STATUS-2026-06-02.md) (M5 Coverage abgeschl
 
 ## Einstieg je nach Aufgabe
 
-- **Handoff / Stand:** [STATUS-2026-06-03.md](./STATUS-2026-06-03.md)
+- **Handoff / Stand:** [STATUS-2026-09-01.md](./STATUS-2026-09-01.md)
 - **Was kommt als Nächstes?:** [ROADMAP.md](../ROADMAP.md) M7–M10
 - **Neues Feature:** [DEVELOPMENT.md](./DEVELOPMENT.md), [ARCHITECTURE.md](./ARCHITECTURE.md), [PRD.md](../PRD.md)
 - **PWA / Offline:** [PWA.md](./PWA.md)

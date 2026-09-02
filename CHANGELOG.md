@@ -9,7 +9,16 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Added
 
-- Worker verification matrix tests (embedding, nutrition, whisper): invalid id, error payload, crash, cleanup.
+- **First-run chrome sequencing:** PWA update toast and install reminder defer until intro gates dismiss (`usePwaUpdate` / `usePwaInstall`).
+- **Model download integrity:** `localAiModelIntegrity.ts` — allowlisted CDN fetch with optional Content-Length/ETag guard; fails closed to heuristic layer.
+- **Gemini runtime policy:** `assertAllowedEndpoint` before `GoogleGenAI` client init.
+- **Tests:** expanded hook/service coverage; branch Ist **~82 %** (floor **82**); PWA, recipe-detail, App coverage, voice matrix suites.
+- **Tests:** `foodDatabaseLabels.test.ts` und `useWakeLock` visibility-Branch — stabile Branch-Coverage **≥82 %** in CI.
+- **Docs:** `docs/STATUS-2026-09-01.md`; CSP/network threat-model note in `SECURITY.md`.
+
+### Changed
+
+- Branch coverage Ist **~82 %** (floor raised to **82**; M5.9-Ziel erreicht).
 - **Network endpoint policy** (`networkEndpointPolicy.ts`) with Ollama loopback gate, AI CDN allowlist, CSP threat model doc.
 - **Repo-truth CI:** `check:repo-truth` validates README test counts and coverage thresholds.
 - **Release evidence:** SBOM/lcov SHA-256 fields in `generate-release-evidence.mjs`.
@@ -17,9 +26,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **E2E matrix workflow** (optional Chromium/Firefox/WebKit via `E2E_MATRIX=1`).
 - **Cargo audit** in CI validate + `docs/security/CARGO-AUDIT-EXCEPTIONS.md`.
 - Governance docs: branch cleanup, encryption review, intro-gates sign-off, desktop signing.
-
-### Changed
-
+- **Dependabot sprint:** `@google/genai` 2.14, `dompurify` 3.4.13, `lucide-react` 1.27, `postcss` 8.5.23, `react-i18next` 17.0.11; GitHub Actions `setup-node` v7, `pnpm/action-setup` v6.0.10, CodeQL v4.37.9; `packageManager` pnpm 11.25 (11.13 broken with setup-node v7).
 - CSP `connect-src` lists explicit Gemini and Hugging Face CDN hosts (alongside `https:` fallback).
 - Ollama base URL settings reject non-loopback endpoints.
 

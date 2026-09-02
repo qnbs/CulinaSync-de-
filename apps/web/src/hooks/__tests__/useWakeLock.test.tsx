@@ -65,4 +65,93 @@ describe('useWakeLock', () => {
     expect(result.current[0]).toBe(false);
     consoleSpy.mockRestore();
   });
+
+  it('setzt isLocked false wenn release-Event feuert', async () => {
+    const release = vi.fn().mockResolvedValue(undefined);
+    let releaseHandler: (() => void) | null = null;
+    const sentinel = {
+      released: false,
+      type: 'screen' as const,
+      release,
+      addEventListener: vi.fn((event: string, handler: () => void) => {
+        if (event === 'release') releaseHandler = handler;
+      }),
+    };
+
+    Object.defineProperty(navigator, 'wakeLock', {
+      configurable: true,
+      value: { request: vi.fn().mockResolvedValue(sentinel) },
+    });
+
+    const { result } = renderHook(() => useWakeLock());
+
+    await act(async () => {
+      await result.current[1]();
+    });
+    expect(result.current[0]).toBe(true);
+
+    act(() => {
+      releaseHandler?.();
+    });
+    expect(result.current[0]).toBe(false);
+  });
+
+  it('released Lock beim Unmount', async () => {
+    const release = vi.fn().mockResolvedValue(undefined);
+    const sentinel = {
+      released: false,
+      type: 'screen' as const,
+      release,
+      addEventListener: vi.fn(),
+    };
+
+    Object.defineProperty(navigator, 'wakeLock', {
+      configurable: true,
+      value: { request: vi.fn().mockResolvedValue(sentinel) },
+    });
+
+    const { result, unmount } = renderHook(() => useWakeLock());
+    await act(async () => {
+      await result.current[1]();
+    });
+
+    unmount();
+    expect(release).toHaveBeenCalled();
+  });
+
+  it('tut nichts wenn wakeLock API fehlt', async () => {
+    const { result } = renderHook(() => useWakeLock());
+    await act(async () => {
+      await result.current[1]();
+    });
+    expect(result.current[0]).toBe(false);
+  });
+
+  it('reagiert auf visibilitychange wenn Lock aktiv und Tab sichtbar', async () => {
+    const release = vi.fn().mockResolvedValue(undefined);
+    const request = vi.fn().mockResolvedValue({
+      released: false,
+      type: 'screen' as const,
+      release,
+      addEventListener: vi.fn(),
+    });
+
+    Object.defineProperty(navigator, 'wakeLock', {
+      configurable: true,
+      value: { request },
+    });
+
+    const { result } = renderHook(() => useWakeLock());
+
+    await act(async () => {
+      await result.current[1]();
+    });
+
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(result.current[0]).toBe(true);
+  });
 });

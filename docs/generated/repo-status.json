@@ -1,14 +1,14 @@
 {
   "version": "0.3.0",
-  "generatedAtUtc": "2026-08-01T21:55:00.127Z",
+  "generatedAtUtc": "2026-09-02T02:15:40.903Z",
   "sourceSha": null,
   "vitest": {
-    "testFileCount": 145,
+    "testFileCount": 156,
     "coverageThresholds": {
       "lines": 82,
       "statements": 80,
       "functions": 75,
-      "branches": 74
+      "branches": 82
     }
   },
   "validationCommands": [

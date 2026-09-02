@@ -105,4 +105,82 @@ describe('useCookModeController', () => {
       expect(result.current.checkedIngredients).toContain('Tomate');
     });
   });
+
+  it('PREVIOUS_STEP und Timer-Voice-Actions', async () => {
+    const { result } = renderHook(() => useCookModeController(recipe, vi.fn()), { wrapper });
+
+    act(() => {
+      store.dispatch(setVoiceAction({ type: 'NEXT_STEP', payload: '' }));
+    });
+    await waitFor(() => expect(result.current.currentStep).toBe(1));
+
+    act(() => {
+      store.dispatch(setVoiceAction({ type: 'PREVIOUS_STEP', payload: '' }));
+    });
+    await waitFor(() => expect(result.current.currentStep).toBe(0));
+
+    act(() => {
+      store.dispatch(setVoiceAction({ type: 'START_COOK_TIMER', payload: '90#' }));
+    });
+    await waitFor(() => expect(result.current.timerSeconds).toBe(90));
+
+    act(() => {
+      store.dispatch(setVoiceAction({ type: 'PAUSE_COOK_TIMER', payload: '' }));
+    });
+    expect(result.current.timerRunning).toBe(false);
+  });
+
+  it('UNCHECK_COOK_INGREDIENT entfernt Zutat wieder', async () => {
+    const { result } = renderHook(() => useCookModeController(recipe, vi.fn()), { wrapper });
+
+    act(() => {
+      result.current.toggleIngredient('Tomate');
+    });
+    expect(result.current.checkedIngredients).toContain('Tomate');
+
+    act(() => {
+      store.dispatch(setVoiceAction({ type: 'UNCHECK_COOK_INGREDIENT', payload: 'tomate#' }));
+    });
+    await waitFor(() => {
+      expect(result.current.checkedIngredients).not.toContain('Tomate');
+    });
+  });
+
+  it('Timer-Steuerung und Speech-Repeat', () => {
+    vi.useFakeTimers();
+    const { result } = renderHook(() => useCookModeController(recipe, vi.fn()), { wrapper });
+
+    act(() => {
+      result.current.onResetTimerShort();
+      result.current.onAddThirty();
+      result.current.onTimerToggle();
+    });
+    expect(result.current.timerRunning).toBe(true);
+
+    act(() => {
+      result.current.setIsSpeechEnabled(true);
+      result.current.handleRepeat();
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    vi.useRealTimers();
+  });
+
+  it('versteckt UI nach Inaktivitaet und zeigt bei Mausbewegung wieder', () => {
+    vi.useFakeTimers();
+    const { result } = renderHook(() => useCookModeController(recipe, vi.fn()), { wrapper });
+
+    act(() => {
+      vi.advanceTimersByTime(4000);
+    });
+    expect(result.current.isUiVisible).toBe(false);
+
+    act(() => {
+      window.dispatchEvent(new Event('mousemove'));
+    });
+    expect(result.current.isUiVisible).toBe(true);
+    vi.useRealTimers();
+  });
 });

@@ -51,4 +51,11 @@ describe('CookModeView (Smoke)', () => {
     expect(screen.getByText('Smoke-Rezept')).toBeInTheDocument();
     expect(screen.getByText('cookMode.label')).toBeInTheDocument();
   });
+
+  it('rendert Hintergrundbild wenn imageUrl gesetzt', () => {
+    const { container } = render(
+      <CookModeView recipe={{ ...recipe, imageUrl: 'https://example.test/img.jpg' }} onExit={vi.fn()} />,
+    );
+    expect(container.querySelector('img[src="https://example.test/img.jpg"]')).toBeTruthy();
+  });
 });

@@ -7,7 +7,7 @@
     "node": ">=24.0.0",
     "pnpm": ">=11.0.0"
   },
-  "packageManager": "pnpm@11.13.0",
+  "packageManager": "pnpm@11.25.0",
   "scripts": {
     "dev": "turbo run dev --filter=web",
     "build": "turbo run build",

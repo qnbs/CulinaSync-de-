@@ -165,4 +165,132 @@ describe('usePantryManager', () => {
       expect(addPantryItemsToShoppingList).toHaveBeenCalledWith([1]);
     });
   });
+
+  it('handleAddToShoppingList meldet bereits auf der Liste', async () => {
+    const { addPantryItemsToShoppingList } = await import('../../services/repositories/pantryRepository');
+    vi.mocked(addPantryItemsToShoppingList).mockResolvedValueOnce(0);
+    const { result } = renderHook(() => usePantryManager(), { wrapper });
+    await act(async () => {
+      await result.current.handleAddToShoppingList(mockPantry[0]);
+    });
+    expect(store.getState().ui.toasts[store.getState().ui.toasts.length - 1]?.type).toBe('info');
+  });
+
+  it('handleSaveItem zeigt Toast bei added und updated', async () => {
+    const { addOrUpdatePantryItem } = await import('../../services/repositories/pantryRepository');
+    vi.mocked(addOrUpdatePantryItem)
+      .mockResolvedValueOnce({
+        status: 'added',
+        item: { id: 9, name: 'Honig', quantity: 1, unit: 'g', category: 'x', createdAt: 1, updatedAt: 1 },
+      })
+      .mockResolvedValueOnce({
+        status: 'updated',
+        item: { id: 1, name: 'Apfel', quantity: 2, unit: 'Stk', category: 'Obst', createdAt: 1, updatedAt: 2 },
+      });
+
+    const { result } = renderHook(() => usePantryManager(), { wrapper });
+    await act(async () => {
+      await result.current.handleSaveItem(mockPantry[0]);
+      await result.current.handleSaveItem({ ...mockPantry[0], quantity: 2 });
+    });
+    expect(store.getState().ui.toasts.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('handleSaveItem und handleQuickAdd melden Fehler', async () => {
+    const { addOrUpdatePantryItem } = await import('../../services/repositories/pantryRepository');
+    vi.mocked(addOrUpdatePantryItem).mockRejectedValue(new Error('fail'));
+    const { result } = renderHook(() => usePantryManager(), { wrapper });
+
+    await act(async () => {
+      await result.current.handleSaveItem(mockPantry[0]);
+    });
+    expect(store.getState().ui.toasts.some((t) => t.type === 'error')).toBe(true);
+
+    const errorCountAfterSave = store.getState().ui.toasts.filter((t) => t.type === 'error').length;
+
+    await act(async () => {
+      await result.current.handleQuickAdd('fail');
+    });
+    expect(store.getState().ui.toasts.filter((t) => t.type === 'error').length).toBeGreaterThan(errorCountAfterSave);
+  });
+
+  it('adjustQuantity erhoeht Menge und ignoriert negative Ergebnisse', async () => {
+    const { result } = renderHook(() => usePantryManager(), { wrapper });
+    await act(async () => {
+      await result.current.adjustQuantity(mockPantry[2], 1);
+      await result.current.adjustQuantity(mockPantry[2], -10);
+    });
+    expect(pantryDbMocks.pantryUpdate).toHaveBeenCalled();
+    expect(result.current.pendingAction).toBeNull();
+  });
+
+  it('handleDeleteSelected und confirmPendingAction bulkDelete', async () => {
+    const { result } = renderHook(() => usePantryManager(), { wrapper });
+    act(() => {
+      result.current.toggleSelectItem(1);
+    });
+    act(() => {
+      result.current.toggleSelectItem(2);
+    });
+    act(() => {
+      void result.current.handleDeleteSelected();
+    });
+    expect(result.current.confirmationDialog?.title).toBe('pantry.confirm.deleteSelectedTitle');
+
+    await act(async () => {
+      await result.current.confirmPendingAction();
+    });
+    expect(pantryDbMocks.bulkDelete).toHaveBeenCalledWith([1, 2]);
+  });
+
+  it('handleAddSelectedToShoppingList meldet alreadyOnShoppingList', async () => {
+    const { addPantryItemsToShoppingList } = await import('../../services/repositories/pantryRepository');
+    vi.mocked(addPantryItemsToShoppingList).mockResolvedValueOnce(0);
+    const { result } = renderHook(() => usePantryManager(), { wrapper });
+
+    act(() => {
+      result.current.toggleSelectItem(1);
+    });
+    await act(async () => {
+      await result.current.handleAddSelectedToShoppingList();
+    });
+    expect(store.getState().ui.toasts[store.getState().ui.toasts.length - 1]?.type).toBe('info');
+  });
+
+  it('oeffnet Modal bei focusAction addItem und initialSelectedId', () => {
+    store = createTestStore({
+      ui: {
+        currentPage: 'pantry',
+        toasts: [],
+        focusAction: 'addItem',
+        initialSelectedId: 2,
+        voiceAction: null,
+      },
+    });
+    const { result } = renderHook(() => usePantryManager(), { wrapper });
+    expect(result.current.modalState.isOpen).toBe(true);
+    expect(result.current.modalState.item?.id).toBe(2);
+  });
+
+  it('filtert nach nearing expiry', () => {
+    vi.mocked(useLiveQuery).mockReturnValue([
+      { ...mockPantry[0], expiryDate: 'NEAR' },
+      mockPantry[1],
+    ]);
+    const { result } = renderHook(() => usePantryManager(), { wrapper });
+    act(() => {
+      result.current.setExpiryFilter('nearing');
+    });
+    expect(result.current.filteredItems).toHaveLength(1);
+  });
+
+  it('setSortOrder und toggleSelectMode', () => {
+    const { result } = renderHook(() => usePantryManager(), { wrapper });
+    act(() => {
+      result.current.setSortOrder('name');
+      result.current.toggleSelectMode();
+      result.current.toggleSelectMode();
+    });
+    expect(result.current.isSelectMode).toBe(false);
+  });
 });

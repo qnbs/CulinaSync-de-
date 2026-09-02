@@ -110,6 +110,9 @@ describe('useShoppingList', () => {
   beforeEach(() => {
     store = createTestStore();
     vi.clearAllMocks();
+    slTest.db.shoppingList.orderBy = () => ({
+      toArray: () => slTest.mockItems,
+    });
   });
 
   const wrapper = ({ children }: { children: ReactNode }) => <Provider store={store}>{children}</Provider>;
@@ -315,5 +318,240 @@ describe('useShoppingList', () => {
     });
 
     expect(result.current.quickAddItem).toBe('');
+  });
+
+  it('handleQuickAdd ignoriert leere Eingabe', async () => {
+    const { addShoppingListItem } = await import('@/services/repositories/shoppingListRepository');
+    const { result } = renderHook(() => useShoppingList(), { wrapper });
+
+    await act(async () => {
+      await result.current.handleQuickAdd({
+        preventDefault: vi.fn(),
+      } as unknown as React.FormEvent);
+    });
+
+    expect(addShoppingListItem).not.toHaveBeenCalled();
+  });
+
+  it('CHECK_SHOPPING_ITEM meldet nicht gefunden wenn kein offener Eintrag passt', async () => {
+    renderHook(() => useShoppingList(), { wrapper });
+
+    act(() => {
+      store.dispatch(setVoiceAction({ type: 'CHECK_SHOPPING_ITEM', payload: 'unbekannt#' }));
+    });
+
+    await waitFor(() => {
+      expect(store.getState().ui.voiceAction).toBeNull();
+    });
+  });
+
+  it('handleGenerateFromPlan zeigt Info-Toast wenn nichts fehlt', async () => {
+    const { result } = renderHook(() => useShoppingList(), { wrapper });
+
+    await act(async () => {
+      await result.current.handleGenerateFromPlan();
+    });
+
+    const toasts = store.getState().ui.toasts;
+    const toast = toasts[toasts.length - 1];
+    expect(toast?.type).toBe('info');
+  });
+
+  it('handleAiAdd und handleBulkAdd zeigen Erfolgs-Toast', async () => {
+    const { result } = renderHook(() => useShoppingList(), { wrapper });
+
+    await act(async () => {
+      await result.current.handleAiAdd([{ name: 'X', quantity: 1, unit: 'Stk', recipeId: undefined }]);
+      await result.current.handleBulkAdd([{ name: 'Y', quantity: 2, unit: 'Stk', recipeId: undefined }]);
+    });
+
+    expect(store.getState().ui.toasts.length).toBeGreaterThan(0);
+  });
+
+  it('handleRenameCategory bricht bei leerem oder gleichem Namen ab', async () => {
+    const { renameShoppingListCategory } = await import('@/services/repositories/shoppingListRepository');
+    const { result } = renderHook(() => useShoppingList(), { wrapper });
+
+    act(() => {
+      store.dispatch(setEditingCategory({ oldName: 'Kühlung', newName: '   ' }));
+    });
+    await act(async () => {
+      await result.current.handleRenameCategory();
+    });
+    expect(renameShoppingListCategory).not.toHaveBeenCalled();
+
+    act(() => {
+      store.dispatch(setEditingCategory({ oldName: 'Kühlung', newName: 'Kühlung' }));
+    });
+    await act(async () => {
+      await result.current.handleRenameCategory();
+    });
+    expect(renameShoppingListCategory).not.toHaveBeenCalled();
+  });
+
+  it('handleClearList ist No-Op bei leerer Liste', () => {
+    slTest.db.shoppingList.orderBy = () => ({
+      toArray: () => [],
+    });
+    const { result } = renderHook(() => useShoppingList(), { wrapper });
+
+    act(() => {
+      void result.current.handleClearList();
+    });
+    expect(result.current.pendingAction).toBeNull();
+  });
+
+  it('handleExport ist No-Op bei leerer Liste', async () => {
+    slTest.db.shoppingList.orderBy = () => ({
+      toArray: () => [],
+    });
+    const { result } = renderHook(() => useShoppingList(), { wrapper });
+
+    await act(async () => {
+      await result.current.handleExport('csv');
+    });
+    expect(result.current.pendingAction).toBeNull();
+  });
+
+  it('onCategoryDrop verschiebt Item in andere Kategorie', async () => {
+    const { result } = renderHook(() => useShoppingList(), { wrapper });
+    const milk = slTest.mockItems[0];
+
+    act(() => {
+      result.current.handleDragStart(
+        { dataTransfer: { effectAllowed: '', setData: vi.fn() } } as unknown as React.DragEvent,
+        milk,
+      );
+    });
+
+    await act(async () => {
+      await result.current.onCategoryDrop('Backwaren');
+    });
+    expect(result.current.draggedItem).toBe(milk);
+  });
+
+  it('focusAction addItem fokussiert Eingabe und generate startet Plan-Import', async () => {
+    const { result } = renderHook(() => useShoppingList(), { wrapper });
+    const input = document.createElement('input');
+    result.current.addItemInputRef.current = input;
+    const focusSpy = vi.spyOn(input, 'focus');
+
+    act(() => {
+      store.dispatch(setFocusAction('addItem'));
+    });
+    expect(focusSpy).toHaveBeenCalled();
+
+    act(() => {
+      store.dispatch(setFocusAction('generate'));
+    });
+    await waitFor(() => {
+      expect(store.getState().ui.focusAction).toBeNull();
+    });
+  });
+
+  it('deleteItem confirmationDialog nutzt itemName wenn vorhanden', () => {
+    const { result } = renderHook(() => useShoppingList(), { wrapper });
+    act(() => {
+      result.current.deleteItem(1);
+    });
+    expect(result.current.confirmationDialog?.description).toBe(
+      'shoppingList.confirm.deleteItemDescriptionNamed',
+    );
+  });
+
+  it('handleGenerateFromPlan zeigt Erfolgs-Toast wenn Zutaten hinzugefuegt', async () => {
+    const { generateListFromMealPlan } = await import('@/services/repositories/shoppingListRepository');
+    vi.mocked(generateListFromMealPlan).mockResolvedValueOnce({ added: 2, existing: 1 });
+    const { result } = renderHook(() => useShoppingList(), { wrapper });
+
+    await act(async () => {
+      await result.current.handleGenerateFromPlan();
+    });
+    expect(store.getState().ui.toasts[store.getState().ui.toasts.length - 1]?.type).toBe('success');
+  });
+
+  it('handleQuickAdd zeigt Toast bei Mengen-Update', async () => {
+    const { addShoppingListItem } = await import('@/services/repositories/shoppingListRepository');
+    vi.mocked(addShoppingListItem).mockResolvedValueOnce({
+      status: 'updated',
+      item: slTest.mockItems[0],
+    });
+    const { result } = renderHook(() => useShoppingList(), { wrapper });
+
+    act(() => {
+      result.current.setQuickAddItem('Milch');
+    });
+    await act(async () => {
+      await result.current.handleQuickAdd({ preventDefault: vi.fn() } as unknown as React.FormEvent);
+    });
+    expect(store.getState().ui.toasts.length).toBeGreaterThan(0);
+  });
+
+  it('handleDragOver ignoriert gleiches Item', () => {
+    const { result } = renderHook(() => useShoppingList(), { wrapper });
+    const milk = slTest.mockItems[0];
+
+    act(() => {
+      result.current.handleDragStart(
+        { dataTransfer: { effectAllowed: '', setData: vi.fn() } } as unknown as React.DragEvent,
+        milk,
+      );
+    });
+    act(() => {
+      result.current.handleDragOver(
+        { preventDefault: vi.fn() } as unknown as React.DragEvent,
+        milk,
+      );
+    });
+    expect(result.current.dropTargetInfo).toBeNull();
+  });
+
+  it('handleDrop und onCategoryDrop sind No-Op bei gleichem Ziel', async () => {
+    const { result } = renderHook(() => useShoppingList(), { wrapper });
+    const milk = slTest.mockItems[0];
+
+    act(() => {
+      result.current.handleDragStart(
+        { dataTransfer: { effectAllowed: '', setData: vi.fn() } } as unknown as React.DragEvent,
+        milk,
+      );
+    });
+
+    await act(async () => {
+      await result.current.handleDrop(
+        { preventDefault: vi.fn() } as unknown as React.DragEvent,
+        milk,
+      );
+    });
+    await act(async () => {
+      await result.current.onCategoryDrop(milk.category);
+    });
+    expect(result.current.draggedItem).toBe(milk);
+  });
+
+  it('focusAction clear bei leerer Liste setzt Fokus zurueck', () => {
+    slTest.db.shoppingList.orderBy = () => ({ toArray: () => [] });
+    const { result } = renderHook(() => useShoppingList(), { wrapper });
+
+    act(() => {
+      store.dispatch(setFocusAction('clear'));
+    });
+    expect(store.getState().ui.focusAction).toBeNull();
+    expect(result.current.confirmationDialog).toBeNull();
+  });
+
+  it('confirmPendingAction clear ohne geloeschte Items zeigt keinen Erfolgs-Toast', async () => {
+    const { clearShoppingList } = await import('@/services/repositories/shoppingListRepository');
+    vi.mocked(clearShoppingList).mockResolvedValueOnce(0);
+    const { result } = renderHook(() => useShoppingList(), { wrapper });
+
+    act(() => {
+      void result.current.handleClearList();
+    });
+    const toastCountBefore = store.getState().ui.toasts.length;
+    await act(async () => {
+      await result.current.confirmPendingAction();
+    });
+    expect(store.getState().ui.toasts.length).toBe(toastCountBefore);
   });
 });

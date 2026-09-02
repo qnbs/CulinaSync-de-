@@ -42,6 +42,17 @@ Fuer nicht-sensitive Sicherheitsverbesserungen oder harte Konfigurationsthemen o
 - Persistente Strukturupdates sollten auf erlaubte Felder begrenzt sein.
 - Workflows sollen auf aktuelle Actions-Versionen und reproduzierbare Installationen ausgerichtet bleiben.
 
+## Netzwerk-Threat-Model (CSP + Runtime-Policy, 2026-09-01)
+
+| Kontrolle | Zweck | Restrisiko |
+|-----------|--------|------------|
+| `connect-src 'self' https:` + explizite Gemini/HF-Hosts (`csp.ts`) | App-kontrollierte APIs und Model-CDNs enumerieren | User-konfigurierte Sync (WebDAV, IPFS, Nextcloud) braucht generisches `https:` |
+| `networkEndpointPolicy.ts` | Runtime-Gate vor `fetch()` für Gemini, Ollama (loopback-only), AI-CDN | Kompensiert breites `connect-src`; bricht kein User-Sync |
+| `localAiModelIntegrity.ts` | Content-Length/ETag-Check bei direkten CDN-Artifact-Fetches | WebLLM-interne Downloads nutzen MLC-Engine; Wrapper fail-closed → Heuristik |
+| `wasm-unsafe-eval` | WebLLM/ONNX/Whisper WASM (kein JS-`eval`) | Bewusst dokumentiert in CSP-Drift-Tests |
+
+Ollama: nur `127.0.0.1` / `localhost` / `[::1]`. Gemini: nur `generativelanguage.googleapis.com`.
+
 ## Bekannte, akzeptierte Risiken (transitiv, kein kompatibler In-Range-Fix)
 
 - **RUSTSEC — `glib` `VariantStrIter`/`DoubleEndedIterator` Unsoundness (moderat; GitHub-Alert #23).**
