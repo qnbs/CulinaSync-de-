@@ -10,6 +10,7 @@ import i18n from './src/i18n';
 import App from './src/App';
 import { installGlobalErrorLogging, logAppError } from './src/services/errorLoggingService';
 import { setPwaUpdateHandler } from './src/services/pwaRegistration';
+import { deferOrEmitPwaToast } from './src/services/pwaIntroDeferral';
 
 installGlobalErrorLogging();
 
@@ -29,7 +30,10 @@ if (!isE2ePreviewBuild) {
       }
 
       registration.addEventListener('updatefound', () => {
-        store.dispatch(addToastAction({ message: i18n.t('app.pwa.updateDownloading'), type: 'info' }));
+        deferOrEmitPwaToast(
+          (toast) => store.dispatch(addToastAction(toast)),
+          { message: i18n.t('app.pwa.updateDownloading'), type: 'info' },
+        );
         emitPwaEvent('culinasync:pwa-update-found');
       });
     },
@@ -37,7 +41,10 @@ if (!isE2ePreviewBuild) {
       emitPwaEvent('culinasync:pwa-update-ready');
     },
     onOfflineReady() {
-      store.dispatch(addToastAction({ message: i18n.t('app.pwa.offlineReady'), type: 'info' }));
+      deferOrEmitPwaToast(
+        (toast) => store.dispatch(addToastAction(toast)),
+        { message: i18n.t('app.pwa.offlineReady'), type: 'info' },
+      );
     },
     onRegisterError(error) {
       void logAppError(error, 'service-worker.register');

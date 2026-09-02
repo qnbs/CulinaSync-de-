@@ -70,6 +70,8 @@ describe('App intro gates (INTRO_GATES_ENABLED = true)', () => {
     expect(await screen.findByTestId('onboarding')).toBeInTheDocument();
     expect(screen.queryByTestId('whats-new')).not.toBeInTheDocument();
     expect(screen.getByTestId('demo-banner')).toBeInTheDocument();
+    expect(screen.queryByText(/offline.*bereit|offline mode is ready/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/update.*herunterladen|update is downloading/i)).not.toBeInTheDocument();
   });
 
   it('shows What\'s-New after onboarding is completed', async () => {
