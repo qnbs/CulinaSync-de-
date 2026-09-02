@@ -91,6 +91,15 @@ const minimalRecipe = (): Recipe => ({
 describe('useRecipeDetail', () => {
   const onBack = vi.fn();
 
+  const renderWithStore = (store = createTestStore()) => {
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <Provider store={store}>
+        <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
+      </Provider>
+    );
+    return { store, wrapper };
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -261,19 +270,16 @@ describe('useRecipeDetail', () => {
 
   it('voiceAction aktiviert Kochmodus', async () => {
     const recipe = { ...minimalRecipe(), id: 1 };
-    const store = createTestStore({
-      ui: {
-        currentPage: 'recipes',
-        toasts: [],
-        focusAction: null,
-        initialSelectedId: null,
-        voiceAction: { type: 'START_COOK_MODE', payload: '' },
-      },
-    });
-    const localWrapper = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>
-        <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
-      </Provider>
+    const { wrapper: localWrapper } = renderWithStore(
+      createTestStore({
+        ui: {
+          currentPage: 'recipes',
+          toasts: [],
+          focusAction: null,
+          initialSelectedId: null,
+          voiceAction: { type: 'START_COOK_MODE', payload: '' },
+        },
+      }),
     );
 
     const { result } = renderHook(() => useRecipeDetail(recipe, onBack), { wrapper: localWrapper });
@@ -289,12 +295,8 @@ describe('useRecipeDetail', () => {
   it('handleGeminiNutritionCheck zeigt Fehler-Toast bei Exception', async () => {
     verifyNutritionAndAllergensWithGemini.mockRejectedValueOnce(new Error('fail'));
     const recipe = { ...minimalRecipe(), id: 1 };
-    const store = createTestStore();
-    const localWrapper = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>
-        <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
-      </Provider>
-    );
+    const { store, wrapper: localWrapper } = renderWithStore();
+
     const { result } = renderHook(() => useRecipeDetail(recipe, onBack), { wrapper: localWrapper });
 
     await waitFor(() => expect(result.current.nutritionResult.key).toBeTruthy());
@@ -369,5 +371,27 @@ describe('useRecipeDetail', () => {
       await result.current.handleToggleFavorite();
     });
     expect(store.getState().ui.toasts.some((t) => t.type === 'error')).toBe(true);
+  });
+
+  it('handleDelete ohne Rezept-ID ist No-Op', async () => {
+    const { result } = renderHook(() => useRecipeDetail(minimalRecipe(), onBack), { wrapper });
+    await waitFor(() => expect(result.current.nutritionResult.key).toBeTruthy());
+    await act(async () => {
+      await result.current.handleDelete();
+    });
+    expect(deleteRecipe).not.toHaveBeenCalled();
+  });
+
+  it('handleDelete meldet Fehler bei Repository-Ausfall', async () => {
+    deleteRecipe.mockRejectedValueOnce(new Error('db'));
+    const { store, wrapper: localWrapper } = renderWithStore();
+    const recipe = { ...minimalRecipe(), id: 8 };
+    const { result } = renderHook(() => useRecipeDetail(recipe, onBack), { wrapper: localWrapper });
+    await waitFor(() => expect(result.current.nutritionResult.key).toBeTruthy());
+    await act(async () => {
+      await result.current.handleDelete();
+    });
+    expect(store.getState().ui.toasts.some((t) => t.type === 'error')).toBe(true);
+    expect(onBack).not.toHaveBeenCalled();
   });
 });

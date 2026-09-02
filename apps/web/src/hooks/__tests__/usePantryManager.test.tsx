@@ -203,9 +203,15 @@ describe('usePantryManager', () => {
 
     await act(async () => {
       await result.current.handleSaveItem(mockPantry[0]);
-      await result.current.handleQuickAdd('fail');
     });
     expect(store.getState().ui.toasts.some((t) => t.type === 'error')).toBe(true);
+
+    const errorCountAfterSave = store.getState().ui.toasts.filter((t) => t.type === 'error').length;
+
+    await act(async () => {
+      await result.current.handleQuickAdd('fail');
+    });
+    expect(store.getState().ui.toasts.filter((t) => t.type === 'error').length).toBeGreaterThan(errorCountAfterSave);
   });
 
   it('adjustQuantity erhoeht Menge und ignoriert negative Ergebnisse', async () => {

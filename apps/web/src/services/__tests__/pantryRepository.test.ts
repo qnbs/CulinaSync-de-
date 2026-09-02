@@ -69,6 +69,14 @@ describe('pantryRepository addOrUpdatePantryItem', () => {
     expect(pantryAdd).toHaveBeenCalled();
     expect(out.item.id).toBe(55);
   });
+
+  it('nutzt getCategoryForItem wenn keine Kategorie gesetzt', async () => {
+    pantryFirst.mockResolvedValue(undefined);
+    const { getCategoryForItem } = await import('../utils');
+    const { addOrUpdatePantryItem } = await import('../repositories/pantryRepository');
+    await addOrUpdatePantryItem({ name: 'Brot', quantity: 1, unit: 'Stk' });
+    expect(getCategoryForItem).toHaveBeenCalledWith('Brot');
+  });
 });
 
 describe('pantryRepository weitere Operationen', () => {
@@ -111,5 +119,43 @@ describe('pantryRepository weitere Operationen', () => {
     const { addPantryItemsToShoppingList } = await import('../repositories/pantryRepository');
     const count = await addPantryItemsToShoppingList([3]);
     expect(count).toBe(1);
+  });
+
+  it('addPantryItemsToShoppingList nutzt minQuantity wenn unter Mindestbestand', async () => {
+    const pantryItems = [
+      { id: 4, name: 'Milch', quantity: 1, minQuantity: 3, unit: 'l', category: 'Milch', createdAt: 1, updatedAt: 1 },
+    ];
+    whereMock.mockImplementation(((field: string) => {
+      if (field === 'id') {
+        return {
+          anyOf: vi.fn(() => ({ toArray: vi.fn().mockResolvedValue(pantryItems) })),
+        };
+      }
+      return { equalsIgnoreCase: vi.fn(() => ({ first: pantryFirst })) };
+    }) as typeof whereMock);
+    shoppingListToArray.mockResolvedValueOnce([]);
+    const { addShoppingListItem } = await import('../repositories/shoppingListRepository');
+    const { addPantryItemsToShoppingList } = await import('../repositories/pantryRepository');
+    await addPantryItemsToShoppingList([4]);
+    expect(addShoppingListItem).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Milch', quantity: 3 }),
+    );
+  });
+
+  it('addPantryItemsToShoppingList ueberspringt bereits gelistete Artikel', async () => {
+    const pantryItems = [
+      { id: 5, name: 'Butter', quantity: 1, unit: 'Stk', category: 'Milch', createdAt: 1, updatedAt: 1 },
+    ];
+    whereMock.mockImplementation(((field: string) => {
+      if (field === 'id') {
+        return {
+          anyOf: vi.fn(() => ({ toArray: vi.fn().mockResolvedValue(pantryItems) })),
+        };
+      }
+      return { equalsIgnoreCase: vi.fn(() => ({ first: pantryFirst })) };
+    }) as typeof whereMock);
+    shoppingListToArray.mockResolvedValueOnce([{ name: 'Butter' }]);
+    const { addPantryItemsToShoppingList } = await import('../repositories/pantryRepository');
+    expect(await addPantryItemsToShoppingList([5])).toBe(0);
   });
 });

@@ -40,7 +40,7 @@ Vorgänger: [STATUS-2026-06-02.md](./STATUS-2026-06-02.md) (M5 Coverage abgeschl
 
 ## Einstieg je nach Aufgabe
 
-- **Handoff / Stand:** [STATUS-2026-06-03.md](./STATUS-2026-06-03.md)
+- **Handoff / Stand:** [STATUS-2026-09-01.md](./STATUS-2026-09-01.md)
 - **Was kommt als Nächstes?:** [ROADMAP.md](../ROADMAP.md) M7–M10
 - **Neues Feature:** [DEVELOPMENT.md](./DEVELOPMENT.md), [ARCHITECTURE.md](./ARCHITECTURE.md), [PRD.md](../PRD.md)
 - **PWA / Offline:** [PWA.md](./PWA.md)

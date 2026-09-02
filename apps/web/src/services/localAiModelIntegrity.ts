@@ -10,6 +10,7 @@ export type ModelDownloadIntegrityExpectation = {
  * Validates CDN model download response headers when the provider exposes them.
  * Fails closed (returns false) — callers should fall back to heuristic AI layer.
  */
+// QNBS-v3: Model CDN integrity — fail-closed on missing ETag/Content-Length; no redirect follow
 export const verifyModelDownloadResponse = (
   response: Response,
   expectation?: ModelDownloadIntegrityExpectation,

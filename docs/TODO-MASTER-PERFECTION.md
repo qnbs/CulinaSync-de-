@@ -1,6 +1,6 @@
 # TODO — Master Perfection (Follow-up)
 
-Stand nach Sprint Coverage / Intro / Tauri (2026-07-16).
+Stand nach Sprint Coverage / Intro / Tauri (2026-09-01).
 
 ## Erledigt in diesem Sprint
 
@@ -15,8 +15,8 @@ Stand nach Sprint Coverage / Intro / Tauri (2026-07-16).
 
 ### Coverage
 
-- [ ] Branch-Coverage ≥**82 %** (Ist ~**78 %** nach 2026-09-01-Sprint; Hotspots: App, MealPlanner, useRecipeDetail, geminiService)
-- [ ] Danach Threshold in `vitest.config.ts` auf gemessenen Ist-Wert anheben
+- [ ] Branch-Coverage ≥**82 %** (Ist ~**80 %** nach Review-/Coverage-Sprint; Hotspots: MealPlanner-Aktionen, geminiService)
+- [x] Floor in `vitest.config.ts` auf **79** angehoben (vorher 74)
 
 ### Release / Desktop
 

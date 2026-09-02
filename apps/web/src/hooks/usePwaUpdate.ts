@@ -19,6 +19,7 @@ export const usePwaUpdate = (options?: UsePwaUpdateOptions) => {
     showNoticeRef.current = showUpdateReadyNotice;
   }, [showUpdateReadyNotice]);
 
+  // QNBS-v3: Ignore duplicate update-ready events while dialog visible; clear queue on dismiss
   useEffect(() => {
     const handleUpdateReady = () => {
       if (showNoticeRef.current) {

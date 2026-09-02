@@ -53,6 +53,20 @@ describe('localAiModelIntegrity', () => {
     expect(result).toBe(response);
   });
 
+  it('verifyModelDownloadResponse rejects malformed content-length', () => {
+    const response = new Response(null, { status: 200, headers: { 'content-length': 'abc' } });
+    expect(verifyModelDownloadResponse(response, { minBytes: 100 })).toBe(false);
+  });
+
+  it('fetchModelArtifact uses redirect error mode', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response('ok', { status: 200, headers: { 'content-length': '2' } }),
+    );
+
+    await fetchModelArtifact('https://cdn.jsdelivr.net/pkg/model.bin', { minBytes: 1 });
+    expect(fetchSpy).toHaveBeenCalledWith('https://cdn.jsdelivr.net/pkg/model.bin', { redirect: 'error' });
+  });
+
   it('fetchModelArtifact returns null when integrity check fails', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response('x', { status: 200, headers: { 'content-length': '1' } }),

@@ -51,10 +51,22 @@ describe('processCommand coverage matrix', () => {
     ['hake milch von der liste ab', 'shopping-list', 'CHECK_SHOPPING_ITEM', 'milch'],
     ['koche pasta', 'chef', 'GENERATE_RECIPE', 'koche pasta'],
     ['cook pasta', 'pantry', 'UNKNOWN', 'cook pasta'],
+    ['gehe zu vorrat', 'chef', 'NAVIGATE', 'pantry'],
+    ['öffne vorratskammer', 'chef', 'NAVIGATE', 'pantry'],
+    ['go to pantry', 'chef', 'NAVIGATE', 'pantry'],
+    ['gehe zu planer', 'chef', 'NAVIGATE', 'meal-planner'],
+    ['open meal planner', 'chef', 'NAVIGATE', 'meal-planner'],
+    ['nächster schritt', 'recipes', 'NEXT_STEP', undefined],
+    ['beende kochmodus', 'recipes', 'EXIT_COOK_MODE', undefined],
+    ['zutat salz abhaken', 'recipes', 'CHECK_COOK_INGREDIENT', 'salz'],
+    ['entferne milch aus dem vorrat', 'pantry', 'REMOVE_PANTRY_ITEM', 'milch'],
+    ['füge 2 kg reis in den vorrat hinzu', 'pantry', 'ADD_PANTRY_ITEM', { name: 'reis', quantity: 2, unit: 'kg' }],
+    ['lies vorrat', 'chef', 'READ_LIST', 'pantry'],
+    ['was habe ich im vorrat', 'chef', 'READ_LIST', 'pantry'],
   ] as const)('%s on %s → %s', (cmd, page, type, payload) => {
     const result = processCommand(cmd, page);
     expect(result.type).toBe(type);
-    if (type === 'ADJUST_PANTRY_QUANTITY') {
+    if (type === 'ADJUST_PANTRY_QUANTITY' || type === 'ADD_PANTRY_ITEM') {
       expect(result.payload).toEqual(payload);
     } else if (payload !== undefined) {
       expect(result.payload).toBe(payload);

@@ -12,12 +12,12 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **First-run chrome sequencing:** PWA update toast and install reminder defer until intro gates dismiss (`usePwaUpdate` / `usePwaInstall`).
 - **Model download integrity:** `localAiModelIntegrity.ts` — allowlisted CDN fetch with optional Content-Length/ETag guard; fails closed to heuristic layer.
 - **Gemini runtime policy:** `assertAllowedEndpoint` before `GoogleGenAI` client init.
-- **Tests:** expanded hook/service coverage toward branch floor 82 % (Ist ~78 %); PWA, recipe-detail, vision, voice, modal a11y suites.
+- **Tests:** expanded hook/service coverage; branch Ist **~80 %** (floor **79**); PWA, recipe-detail, App coverage, voice matrix suites.
 - **Docs:** `docs/STATUS-2026-09-01.md`; CSP/network threat-model note in `SECURITY.md`.
 
 ### Changed
 
-- Branch coverage Ist **~78 %** (floor remains **74** until Ist ≥ 82 %).
+- Branch coverage Ist **~80 %** (floor raised to **79**; Ziel **82 %** bleibt Folge-Sprint).
 - **Network endpoint policy** (`networkEndpointPolicy.ts`) with Ollama loopback gate, AI CDN allowlist, CSP threat model doc.
 - **Repo-truth CI:** `check:repo-truth` validates README test counts and coverage thresholds.
 - **Release evidence:** SBOM/lcov SHA-256 fields in `generate-release-evidence.mjs`.
@@ -25,9 +25,6 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **E2E matrix workflow** (optional Chromium/Firefox/WebKit via `E2E_MATRIX=1`).
 - **Cargo audit** in CI validate + `docs/security/CARGO-AUDIT-EXCEPTIONS.md`.
 - Governance docs: branch cleanup, encryption review, intro-gates sign-off, desktop signing.
-
-### Changed
-
 - CSP `connect-src` lists explicit Gemini and Hugging Face CDN hosts (alongside `https:` fallback).
 - Ollama base URL settings reject non-loopback endpoints.
 

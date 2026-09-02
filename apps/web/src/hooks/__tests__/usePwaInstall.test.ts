@@ -75,4 +75,47 @@ describe('usePwaInstall', () => {
     expect(localStorage.getItem('culinaSyncInstallDismissed')).toBe('true');
     expect(result.current.showInstallDialog).toBe(false);
   });
+
+  it('treats invalid remind-later timestamp as expired', () => {
+    localStorage.setItem('culinaSyncInstallRemindAfter', 'not-a-number');
+    const { result } = renderHook(() => usePwaInstall(addToast, { deferForIntro: false }));
+
+    act(() => {
+      dispatchInstallPrompt();
+    });
+    expect(result.current.showInstallDialog).toBe(true);
+  });
+
+  it('handleInstallPWA clears state on accepted install', async () => {
+    const promptEvent = makeInstallEvent();
+    const { result } = renderHook(() => usePwaInstall(addToast, { deferForIntro: false }));
+
+    act(() => {
+      const event = new Event('beforeinstallprompt', { cancelable: true }) as Event & BeforeInstallPromptEvent;
+      Object.assign(event, promptEvent);
+      window.dispatchEvent(event);
+    });
+
+    await act(async () => {
+      await result.current.handleInstallPWA();
+    });
+
+    expect(promptEvent.prompt).toHaveBeenCalled();
+    expect(addToast).toHaveBeenCalledWith('app.install.success', 'success');
+    expect(result.current.installPromptEvent).toBeNull();
+  });
+
+  it('handleInstallRemindLater sets deferred reminder', () => {
+    const { result } = renderHook(() => usePwaInstall(addToast, { deferForIntro: false }));
+
+    act(() => {
+      dispatchInstallPrompt();
+    });
+    act(() => {
+      result.current.handleInstallRemindLater();
+    });
+
+    expect(localStorage.getItem('culinaSyncInstallRemindAfter')).toBeTruthy();
+    expect(result.current.showInstallDialog).toBe(false);
+  });
 });

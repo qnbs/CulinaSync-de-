@@ -31,6 +31,18 @@ describe('nextcloudSyncAdapter', () => {
     expect(() =>
       validateNextcloudConfig({ serverUrl: '', username: 'a', appPassword: 'b' }),
     ).toThrow('nextcloud-missing-server');
+    expect(() =>
+      validateNextcloudConfig({ serverUrl: 'https://x.com', username: '', appPassword: 'b' }),
+    ).toThrow('nextcloud-missing-user');
+    expect(() =>
+      validateNextcloudConfig({ serverUrl: 'https://x.com', username: 'a', appPassword: '' }),
+    ).toThrow('nextcloud-missing-password');
+    expect(() =>
+      validateNextcloudConfig({ serverUrl: 'ftp://x.com', username: 'a', appPassword: 'b' }),
+    ).toThrow('nextcloud-invalid-url');
+    expect(() =>
+      validateNextcloudConfig({ serverUrl: 'not-a-url', username: 'a', appPassword: 'b' }),
+    ).toThrow('nextcloud-invalid-url');
   });
 
   it('probeNextcloudConnection akzeptiert 404', async () => {
@@ -46,5 +58,20 @@ describe('nextcloudSyncAdapter', () => {
         appPassword: 'p',
       }),
     ).resolves.toBe(true);
+  });
+
+  it('probeNextcloudConnection wirft bei fehlgeschlagenem Probe', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: false, status: 401 }),
+    );
+    const { probeNextcloudConnection } = await import('../nextcloudSyncAdapter');
+    await expect(
+      probeNextcloudConnection({
+        serverUrl: 'https://cloud.example.com',
+        username: 'u',
+        appPassword: 'p',
+      }),
+    ).rejects.toThrow('nextcloud-probe-failed');
   });
 });

@@ -175,4 +175,64 @@ describe('MealPlanner (Smoke)', () => {
 
     expect(screen.getByText('Plan-Rezept')).toBeInTheDocument();
   });
+
+  it('Platzierungsmodus: Rezept waehlen und Slot klicken plant Mahlzeit', async () => {
+    const user = userEvent.setup();
+    const { addRecipeToMealPlan } = await import('@/services/repositories/mealPlanRepository');
+
+    render(
+      <Provider store={store}>
+        <I18nextProvider i18n={i18n}>
+          <MealPlanner />
+        </I18nextProvider>
+      </Provider>,
+    );
+
+    await user.click(screen.getByText('Plan-Rezept'));
+    await user.click(screen.getAllByText(/Hier einf/i)[0]!);
+
+    expect(addRecipeToMealPlan).toHaveBeenCalledWith(
+      expect.objectContaining({ recipeId: 1 }),
+    );
+  });
+
+  it('Notiz-Modal speichert freie Mahlzeit', async () => {
+    const user = userEvent.setup();
+    const { addRecipeToMealPlan } = await import('@/services/repositories/mealPlanRepository');
+
+    render(
+      <Provider store={store}>
+        <I18nextProvider i18n={i18n}>
+          <MealPlanner />
+        </I18nextProvider>
+      </Provider>,
+    );
+
+    const addNoteButtons = screen.getAllByTitle('Notiz hinzufügen');
+    await user.click(addNoteButtons[0]!);
+    const textarea = screen.getByPlaceholderText(/Essen gehen|Reste/i);
+    await user.type(textarea, 'Reste');
+    await user.click(screen.getByRole('button', { name: /Speichern|Save/i }));
+
+    expect(addRecipeToMealPlan).toHaveBeenCalledWith(
+      expect.objectContaining({ note: 'Reste' }),
+    );
+  });
+
+  it('Auto-Vorschlag ohne Rezepte zeigt Info-Toast', async () => {
+    plannerTest.ctx.recipes = [];
+    const user = userEvent.setup();
+
+    render(
+      <Provider store={store}>
+        <I18nextProvider i18n={i18n}>
+          <MealPlanner />
+        </I18nextProvider>
+      </Provider>,
+    );
+
+    await user.click(screen.getByRole('button', { name: /Auto-Vorschlag/i }));
+    expect(store.getState().ui.toasts[0]?.type).toBe('info');
+    plannerTest.ctx.recipes = [plannerTest.recipe];
+  });
 });

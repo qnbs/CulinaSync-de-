@@ -24,6 +24,7 @@ const canShowInstallReminderNow = (): boolean => {
   return !permanentlyDismissed && Date.now() >= dismissedUntil;
 };
 
+// QNBS-v3: First-run chrome — defer install prompt until intro gates dismiss; remind-later one-shot safety
 type UsePwaInstallOptions = {
   /** When true (intro gates visible), defer install reminder until gates dismiss. */
   deferForIntro?: boolean;
