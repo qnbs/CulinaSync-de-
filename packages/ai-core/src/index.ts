@@ -1,4 +1,11 @@
 export { sanitizeForPrompt, neutralizePromptInjection } from './sanitizeForPrompt.js';
+export { ML_MODEL_CDN_HOSTS, isAllowedMlCdnUrl } from './security/mlCdnHosts.js';
+export {
+  createGuardedMlFetch,
+  installMlCdnFetchGuard,
+  restoreMlCdnFetchGuardForTests,
+  isMlCdnFetchGuardInstalled,
+} from './security/mlCdnFetchGuard.js';
 export {
   WorkerBus,
   type WorkerBusTelemetryHandler,

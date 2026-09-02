@@ -25,7 +25,7 @@ Stand nach Merge **PR #162** auf `main` (2026-09-02).
 
 ### Security / Quality
 
-- [ ] #134 WebLLM/MLC interne Download-Pfade (CDN-Guard ok; enges Follow-up optional)
+- [x] #134 WebLLM/MLC Fetch-Guard (`installMlCdnFetchGuard`, `raw.githubusercontent.com/mlc-ai/*`)
 - [ ] #139 Tauri Signing (Owner-Secrets)
 - [ ] #137 Dexie at-rest Encryption (ADR — deferred)
 

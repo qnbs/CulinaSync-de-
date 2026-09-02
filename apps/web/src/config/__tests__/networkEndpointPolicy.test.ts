@@ -19,6 +19,14 @@ describe('networkEndpointPolicy', () => {
   it('allows known AI model CDN hosts', () => {
     expect(isAllowedAiModelCdnUrl('https://huggingface.co/api/models')).toBe(true);
     expect(isAllowedAiModelCdnUrl('https://cdn.jsdelivr.net/npm/@xenova/')).toBe(true);
+    expect(
+      isAllowedAiModelCdnUrl(
+        'https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/main/web-llm-models/v0/base/model.wasm',
+      ),
+    ).toBe(true);
+    expect(
+      isAllowedAiModelCdnUrl('https://raw.githubusercontent.com/other-org/repo/main/model.wasm'),
+    ).toBe(false);
     expect(isAllowedAiModelCdnUrl('http://huggingface.co/model')).toBe(false);
     expect(isAllowedAiModelCdnUrl('https://evil.example/model')).toBe(false);
   });

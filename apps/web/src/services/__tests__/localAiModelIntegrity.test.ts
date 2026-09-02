@@ -67,6 +67,20 @@ describe('localAiModelIntegrity', () => {
     expect(fetchSpy).toHaveBeenCalledWith('https://cdn.jsdelivr.net/pkg/model.bin', { redirect: 'error' });
   });
 
+  it('fetchModelArtifact returns response for MLC wasm host when integrity passes', async () => {
+    const response = new Response('wasm', {
+      status: 200,
+      headers: { 'content-length': '4' },
+    });
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(response);
+
+    const result = await fetchModelArtifact(
+      'https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/main/web-llm-models/base/model.wasm',
+      { minBytes: 1 },
+    );
+    expect(result).toBe(response);
+  });
+
   it('fetchModelArtifact returns null when integrity check fails', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response('x', { status: 200, headers: { 'content-length': '1' } }),

@@ -3,6 +3,8 @@
  * Complements CSP connect-src — blocks disallowed targets before fetch().
  */
 
+import { ML_MODEL_CDN_HOSTS, isAllowedMlCdnUrl } from '@domain/ai-core';
+
 export type NetworkEndpointPurpose =
   | 'ollama_loopback'
   | 'gemini_api'
@@ -19,13 +21,7 @@ export const COMMUNITY_SHARE_HOSTS = ['ipfs.infura.io', 'ipfs.io'] as const;
 export const RECIPE_IMPORT_PROXY_HOST = 'r.jina.ai';
 
 /** Hostnames allowed for on-device model weights and WASM runtimes. */
-export const AI_MODEL_CDN_HOSTS = [
-  'huggingface.co',
-  'cdn.jsdelivr.net',
-  'cdn-lfs.huggingface.co',
-  'cdn-lfs-us-1.huggingface.co',
-  'cdn-lfs-eu-1.huggingface.co',
-] as const;
+export const AI_MODEL_CDN_HOSTS = ML_MODEL_CDN_HOSTS;
 
 /** Gemini generative language API host. */
 export const GEMINI_API_HOST = 'generativelanguage.googleapis.com';
@@ -53,12 +49,7 @@ export const isAllowedOllamaBaseUrl = (raw: string): boolean => {
   return isLoopbackHost(url.hostname);
 };
 
-export const isAllowedAiModelCdnUrl = (raw: string): boolean => {
-  const url = parseHttpUrl(raw);
-  if (!url || url.protocol !== 'https:') return false;
-  const host = url.hostname.toLowerCase();
-  return AI_MODEL_CDN_HOSTS.some((allowed) => host === allowed || host.endsWith(`.${allowed}`));
-};
+export const isAllowedAiModelCdnUrl = (raw: string): boolean => isAllowedMlCdnUrl(raw);
 
 export const isAllowedGeminiApiUrl = (raw: string): boolean => {
   const url = parseHttpUrl(raw);
