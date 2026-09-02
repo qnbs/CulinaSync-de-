@@ -19,7 +19,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **Network endpoint policy** (`networkEndpointPolicy.ts`) with Ollama loopback gate, AI CDN allowlist, CSP threat model doc.
 - **Repo-truth CI:** `check:repo-truth` validates README test counts and coverage thresholds.
 - **Release evidence:** `release-evidence/0.3.0/` with SBOM hashes (pnpm + Rust), `verify:release` runs `generate:sbom` first.
-- **Vercel:** full `Content-Security-Policy` header synced from `csp.ts` (not only `frame-ancestors`).
+- **E2E preview builds:** `VITE_E2E=true` on Playwright CI builds skips PersistGate + service-worker registration (`index.tsx`) for WebKit matrix stability; Playwright `serviceWorkers: 'block'`.
 
 ### Documentation
 

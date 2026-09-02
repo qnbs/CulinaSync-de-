@@ -66,6 +66,7 @@ jobs:
         env:
           CI: true
           GITHUB_ACTIONS: true
+          VITE_E2E: 'true'
 
       - name: E2E smoke (Playwright + preview)
         run: pnpm --filter web exec playwright test --project=chromium
