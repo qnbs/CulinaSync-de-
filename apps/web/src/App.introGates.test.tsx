@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { I18nextProvider } from 'react-i18next';
 import App from './App';
@@ -30,7 +30,14 @@ vi.mock('./components/ShoppingList', () => ({ __esModule: true, default: () => <
 vi.mock('./components/Settings', () => ({ __esModule: true, default: () => <div data-testid="page-settings" /> }));
 vi.mock('./components/Help', () => ({ __esModule: true, default: () => <div data-testid="page-help" /> }));
 vi.mock('./components/BottomNav', () => ({ __esModule: true, default: () => <div data-testid="bottom-nav" /> }));
-vi.mock('./components/Onboarding', () => ({ __esModule: true, default: () => <div data-testid="onboarding" /> }));
+vi.mock('./components/Onboarding', () => ({
+  __esModule: true,
+  default: ({ onComplete }: { onComplete: () => void }) => (
+    <button type="button" data-testid="onboarding-dismiss" onClick={onComplete}>
+      dismiss
+    </button>
+  ),
+}));
 vi.mock('./components/VoiceControlUI', () => ({ __esModule: true, default: () => <div data-testid="voice-ui" /> }));
 vi.mock('./components/CommandPalette', () => ({ CommandPalette: () => <div data-testid="command-palette" /> }));
 vi.mock('./components/WhatsNewModal', () => ({ WhatsNewModal: () => <div data-testid="whats-new" /> }));
@@ -67,11 +74,25 @@ describe('App intro gates (INTRO_GATES_ENABLED = true)', () => {
       </Provider>,
     );
 
-    expect(await screen.findByTestId('onboarding')).toBeInTheDocument();
+    expect(await screen.findByTestId('onboarding-dismiss')).toBeInTheDocument();
     expect(screen.queryByTestId('whats-new')).not.toBeInTheDocument();
     expect(screen.getByTestId('demo-banner')).toBeInTheDocument();
     expect(screen.queryByText(/offline.*bereit|offline mode is ready/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/update.*herunterladen|update is downloading/i)).not.toBeInTheDocument();
+  });
+
+  it('hides onboarding after dismiss without waiting for unrelated store updates', async () => {
+    render(
+      <Provider store={createTestStore()}>
+        <I18nextProvider i18n={i18n}>
+          <App />
+        </I18nextProvider>
+      </Provider>,
+    );
+
+    fireEvent.click(await screen.findByTestId('onboarding-dismiss'));
+    expect(screen.queryByTestId('onboarding-dismiss')).not.toBeInTheDocument();
+    expect(window.localStorage.getItem('culinaSyncOnboarded')).toBe('true');
   });
 
   it('shows What\'s-New after onboarding is completed', async () => {
@@ -86,7 +107,7 @@ describe('App intro gates (INTRO_GATES_ENABLED = true)', () => {
       </Provider>,
     );
 
-    expect(screen.queryByTestId('onboarding')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('onboarding-dismiss')).not.toBeInTheDocument();
     expect(await screen.findByTestId('whats-new')).toBeInTheDocument();
   });
 });

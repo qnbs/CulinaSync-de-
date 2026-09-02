@@ -9,6 +9,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Fixed
 
+- **Onboarding dismiss:** `introCompleted` state re-renders after Skip/X so Welcome modal actually closes (localStorage alone did not trigger update).
 - **First-run PWA chrome:** Offline-ready and update-downloading toasts defer until intro gates dismiss (`pwaIntroDeferral`, `index.tsx`, `App.tsx`).
 - **Recipe import proxy:** Jina reader URL uses full target URL (`https://r.jina.ai/https://…`), not a broken `http/host` concat.
 
@@ -17,6 +18,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **SBOM (#135):** `pnpm run generate:sbom` (pnpm + Rust CycloneDX), `prepare:release-evidence`, SBOM copies in `release-evidence/0.3.0/`; Tauri release workflow uploads evidence assets.
 - **CSP runtime gates (#133):** `community_share`, `recipe_import_proxy`, `user_sync` HTTP(S) in `assertAllowedEndpoint`; wired in sync, Nextcloud, IPFS share, recipe import; explicit hosts in CSP + Tauri; `pnpm run sync:vercel-csp` for Vercel header.
 - **E2E matrix (#138):** Playwright Chromium/Firefox blocking on PR/main; WebKit weekly/manual (`continue-on-error`, SPA mount issue in Playwright WebKit CI).
+- **E2E journeys:** `first-run.spec.ts` (Welcome → Skip → pantry Dexie persist); `local-ai-settings.spec.ts` (stack + Ollama loopback gate).
 
 ### Changed
 

@@ -14,3 +14,14 @@ export async function seedDismissedAppModals(page: Page): Promise<void> {
     localStorage.setItem('culinasync_version', version);
   }, E2E_APP_VERSION);
 }
+
+/**
+ * Simuliert Erstbesuch: kein Intro-complete Marker (Welcome-Modal beim Laden).
+ * Nicht mit `seedDismissedAppModals` kombinieren.
+ */
+export async function seedFirstRunIntro(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    localStorage.removeItem('culinaSyncOnboarded');
+    localStorage.removeItem('culinasync_version');
+  });
+}
