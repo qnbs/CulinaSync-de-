@@ -38,7 +38,7 @@ pnpm run test:e2e:smoke  # Chromium-only (wie CI E2E Smoke)
 | `chef-local.spec.ts` | Local-AI Strict-Toggle, KI-Chef erreichbar |
 | `pantry-cook.spec.ts` | Vorratskammer: Artikel anlegen |
 | `helpers/appStorage.ts`, `helpers/navigation.ts` | Onboarding aus, Navigation |
-| `helpers/gotoApp.ts` | WebKit-sicheres App-Boot (`#main-content` Gate, SW block, IDB reset) |
+| `helpers/gotoApp.ts` | App-Boot (`#main-content` Gate); Playwright blockiert Service Worker (WebKit-Stabilität) |
 
 **E2E lokal (wie CI / GitHub Pages):**
 
