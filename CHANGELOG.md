@@ -13,6 +13,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **Model download integrity:** `localAiModelIntegrity.ts` — allowlisted CDN fetch with optional Content-Length/ETag guard; fails closed to heuristic layer.
 - **Gemini runtime policy:** `assertAllowedEndpoint` before `GoogleGenAI` client init.
 - **Tests:** expanded hook/service coverage; branch Ist **~82 %** (floor **82**); PWA, recipe-detail, App coverage, voice matrix suites.
+- **Tests:** `foodDatabaseLabels.test.ts` und `useWakeLock` visibility-Branch — stabile Branch-Coverage **≥82 %** in CI.
 - **Docs:** `docs/STATUS-2026-09-01.md`; CSP/network threat-model note in `SECURITY.md`.
 
 ### Changed

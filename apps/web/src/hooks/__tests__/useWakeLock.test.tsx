@@ -126,4 +126,32 @@ describe('useWakeLock', () => {
     });
     expect(result.current[0]).toBe(false);
   });
+
+  it('reagiert auf visibilitychange wenn Lock aktiv und Tab sichtbar', async () => {
+    const release = vi.fn().mockResolvedValue(undefined);
+    const request = vi.fn().mockResolvedValue({
+      released: false,
+      type: 'screen' as const,
+      release,
+      addEventListener: vi.fn(),
+    });
+
+    Object.defineProperty(navigator, 'wakeLock', {
+      configurable: true,
+      value: { request },
+    });
+
+    const { result } = renderHook(() => useWakeLock());
+
+    await act(async () => {
+      await result.current[1]();
+    });
+
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(result.current[0]).toBe(true);
+  });
 });
