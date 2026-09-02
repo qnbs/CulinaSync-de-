@@ -11,7 +11,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 - **SBOM (#135):** `pnpm run generate:sbom` (pnpm + Rust CycloneDX), `prepare:release-evidence`, SBOM copies in `release-evidence/0.3.0/`; Tauri release workflow uploads evidence assets.
 - **CSP runtime gates (#133):** `community_share`, `recipe_import_proxy`, `user_sync` HTTP(S) in `assertAllowedEndpoint`; wired in sync, Nextcloud, IPFS share, recipe import; explicit hosts in CSP + Tauri; `pnpm run sync:vercel-csp` for Vercel header.
-- **E2E matrix (#138):** Playwright Chromium/Firefox/WebKit on PR/main (`e2e-matrix.yml`, parallel jobs, digest-pinned container); `test:e2e:smoke` for Chromium-only.
+- **E2E matrix (#138):** Playwright Chromium/Firefox blocking on PR/main; WebKit weekly/manual (`continue-on-error`, SPA mount issue in Playwright WebKit CI).
 
 ### Changed
 

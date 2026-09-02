@@ -37,8 +37,12 @@ pnpm run test:e2e:smoke  # Chromium-only (wie CI E2E Smoke)
 | `sync-settings.spec.ts` | Daten-Panel, QR-Modal, Nextcloud-Probe (mock WebDAV) |
 | `chef-local.spec.ts` | Local-AI Strict-Toggle, KI-Chef erreichbar |
 | `pantry-cook.spec.ts` | Vorratskammer: Artikel anlegen |
-| `helpers/appStorage.ts`, `helpers/navigation.ts` | Onboarding aus, Navigation |
-E2E builds set `VITE_E2E=true` on the Playwright preview build (skips PersistGate + SW in `index.tsx` for WebKit stability).
+| `helpers/appStorage.ts`, `helpers/navigation.ts`, `helpers/gotoApp.ts` | Onboarding aus, Navigation, App-Boot |
+| `cook-mode.spec.ts`, `chef-offline.spec.ts` | Kochmodus, KI-Chef offline |
+
+E2E CI builds set `VITE_E2E=true` (skips PersistGate + SW in `index.tsx`); Playwright `serviceWorkers: 'block'`.
+
+**WebKit (bekannte Limitation):** In Playwright Docker + `vite preview` + GitHub-Pages-`base` mountet die SPA in WebKit nicht (`#main-content` fehlt). Chromium/Firefox sind blockierend; WebKit läuft nur weekly/`workflow_dispatch` (`matrix-webkit`, `continue-on-error`).
 
 **E2E lokal (wie CI / GitHub Pages):**
 
@@ -52,7 +56,7 @@ cd apps/web && CI=true pnpm exec playwright test
 | Workflow | Browser | Trigger |
 |----------|---------|---------|
 | [e2e-smoke.yml](../.github/workflows/e2e-smoke.yml) | Chromium (blocking) | PR/push `apps/web/**`, weekly |
-| [e2e-matrix.yml](../.github/workflows/e2e-matrix.yml) | Chromium, Firefox, WebKit (parallel jobs) | PR/push `apps/web/**`, weekly, `workflow_dispatch` |
+| [e2e-matrix.yml](../.github/workflows/e2e-matrix.yml) | Chromium + Firefox (blocking); WebKit weekly/manual | PR/push `apps/web/**`, weekly, `workflow_dispatch` |
 
 Container: **`mcr.microsoft.com/playwright:v1.61.1-noble`** (digest-pinned; muss zu `@playwright/test` in `package.json` passen).
 
