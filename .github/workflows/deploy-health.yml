@@ -1,7 +1,7 @@
 # =============================================================================
 # CulinaSync – Deploy Health (manuell / nach Incidents)
 # =============================================================================
-# Prüft GitHub Pages + Vercel Production per HTTP. Kein Build.
+# Prüft GitHub Pages (required) + optional Vercel per HTTP. Kein Build.
 # =============================================================================
 
 name: Deploy Health

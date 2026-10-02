@@ -3,8 +3,17 @@ import assert from 'node:assert/strict';
 import {
   evaluateDeployResponse,
   isVercelProtectionPage,
+  shouldSkipOptionalVercelUnavailable,
   shouldSkipProtectedVercel,
 } from '../lib/deploy-verify-logic.mjs';
+
+describe('shouldSkipOptionalVercelUnavailable', () => {
+  it('skips optional Vercel 404', () => {
+    assert.equal(shouldSkipOptionalVercelUnavailable(404, 'Vercel Production', true), true);
+    assert.equal(shouldSkipOptionalVercelUnavailable(404, 'Vercel Production', false), false);
+    assert.equal(shouldSkipOptionalVercelUnavailable(404, 'GitHub Pages', true), false);
+  });
+});
 
 describe('shouldSkipProtectedVercel', () => {
   it('skips Vercel 401/403', () => {

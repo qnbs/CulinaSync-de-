@@ -9,6 +9,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Fixed
 
+- **Deploy Health:** `verify-live-deployments` treats Vercel as optional (404 SKIP); GitHub Pages remains required. `DEPLOY_VERIFY_REQUIRE_VERCEL=1` restores strict Vercel checks.
+- **Supply chain:** pnpm overrides — `fast-uri` ^3.1.7, `undici` ^7.30, `sharp` >=0.35.4, `brace-expansion` >=5.0.11, `basic-ftp` >=6.2.1 (audit high gate).
 - **#134 WebLLM/MLC downloads:** `installMlCdnFetchGuard` in `@domain/ai-core` patches `fetch` for Hugging Face, jsDelivr, and `raw.githubusercontent.com/mlc-ai/*` before WebLLM/transformers/ONNX load; `redirect: error` on ML CDN requests.
 - **Tauri CSP drift:** `src-tauri/tauri.conf.json` mirrors `TAURI_CSP` including `https://raw.githubusercontent.com` for MLC wasm.
 - **First-run PWA chrome:** Offline-ready and update-downloading toasts defer until intro gates dismiss (`pwaIntroDeferral`, `index.tsx`, `App.tsx`).
@@ -33,6 +35,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Documentation
 
+- `docs/STATUS-2026-10-02.md` + `docs/audit/CULINASYNC-FULL-AUDIT-2026-10-02.md` — Pages canonical; Deploy Health; v0.3.0 publish truth.
 - `docs/STATUS-2026-09-02.md` — post-#164 handoff; release evidence `4b063f7`; 16 E2E / 11 Specs.
 - `docs/TODO-MASTER-PERFECTION.md`, `ROADMAP.md`, `AUDIT-REMEDIATION-BACKLOG.md` — E2E/coverage repo-truth sync.
 - **Inference cache quota:** `enforceInferenceCacheQuota` + `setCachedInferenceWithQuota`.

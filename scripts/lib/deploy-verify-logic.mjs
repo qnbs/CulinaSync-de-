@@ -7,6 +7,16 @@ export const shouldSkipProtectedVercel = (status, targetName) =>
   targetName.includes('Vercel') && (status === 401 || status === 403);
 
 /**
+ * Vercel production is optional when the project is retired or not provisioned.
+ * HTTP 404 on *.vercel.app means "no deployment" — not a Pages outage.
+ * @param {number} status
+ * @param {string} targetName
+ * @param {boolean} [optional]
+ */
+export const shouldSkipOptionalVercelUnavailable = (status, targetName, optional = false) =>
+  optional && targetName.includes('Vercel') && status === 404;
+
+/**
  * Vercel Deployment Protection often answers with a 302 that `fetch` follows to
  * an SSO/auth page returning HTTP 200 — so the status looks OK but the body is
  * the auth wall, not the app. Detect that case so the smoke check can SKIP
