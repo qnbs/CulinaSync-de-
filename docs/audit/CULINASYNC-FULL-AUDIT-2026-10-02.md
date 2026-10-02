@@ -60,7 +60,7 @@
 
 | ID | Finding | Severity |
 |----|---------|----------|
-| LA-1 | `localAiOllamaService.ts` hardcodes `model: 'llama3.2'` — no settings field | P1 |
+| LA-1 | `localAiOllamaService.ts` hardcodes `model: 'llama3.2'` — no settings field | ✅ PR #185 `localAi.ollamaModel` |
 | LA-2 | Transformers generative path in provider chain may return null — verify routing | P1 |
 | LA-3 | WebLLM MLC CDN guard shipped (#164) — re-verify with upstream integrity metadata | P2 |
 | LA-4 | Gemini `gemini-2.5-flash` — capability/cost/BYOK analysis before model churn | P2 |
