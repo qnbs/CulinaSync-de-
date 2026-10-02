@@ -16,6 +16,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **W5 deps:** GitHub Actions pins (pnpm/action-setup 6.1.0, CodeQL 4.38.2, deploy-pages 5.0.1, action-gh-release 3.0.3); `dompurify` 3.4.16, `turbo` 2.11.x, `vitest` 4.1.11.
 - **W6 patch:** Tauri 2.11.6 (`Cargo.lock`); `lint-staged` 17.6.x; ESLint / `typescript-eslint` / `eslint-plugin-react-refresh` minors.
 - **Build tools:** Vite 8.3.x, `@vitejs/plugin-react` 6.1.x, Tailwind/PostCSS/Autoprefixer patches (#170).
+- **Testing stack:** Vitest 5.0.3, MSW 3, jsdom 30, Testing Library 7/jest-dom; `pnpm-workspace.yaml` overrides `vitest` / `@vitest/utils` 5.0.3; scanner tests stub `URL.createObjectURL` for jsdom (#186).
 - **Local AI generative chain:** Ollama → WebLLM → Heuristik — Transformers.js remains embeddings/RAG only (removed no-op generative stub).
 
 ### Fixed

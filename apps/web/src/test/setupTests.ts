@@ -56,7 +56,8 @@ beforeAll(async () => {
       interpolation: { escapeValue: false },
     });
   }
-  server.listen({ onUnhandledRequest: 'error' });
+  // QNBS-v3: MSW 3 — `onUnhandledRequest` renamed to `onUnhandledFrame`
+  server.listen({ onUnhandledFrame: 'error' });
 });
 
 afterEach(() => {
