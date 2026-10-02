@@ -6,11 +6,9 @@ import { visualizer } from 'rollup-plugin-visualizer';
 import { fileURLToPath, URL } from 'url';
 import pkg from './package.json';
 import { buildPwaManifest } from './src/config/buildPwaManifest';
-import { TAURI_CSP, WEB_CSP } from './src/config/csp';
+import { resolveIndexHtmlCsp } from './src/config/csp';
 
-// QNBS-v3: E2E preview serves over http://127.0.0.1 — upgrade-insecure-requests breaks WebKit module load
-const buildCsp = (): string =>
-  process.env.VITE_E2E === 'true' ? TAURI_CSP : WEB_CSP;
+const buildCsp = (): string => resolveIndexHtmlCsp(process.env.VITE_E2E === 'true');
 
 // Inject the Content-Security-Policy from the single source of truth (src/config/csp.ts)
 // so index.html never hardcodes the policy and it can't drift from the Tauri config.

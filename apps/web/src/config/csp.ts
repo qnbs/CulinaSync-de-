@@ -51,3 +51,7 @@ export const WEB_CSP = serialize(['upgrade-insecure-requests']);
 
 /** Tauri webview — `upgrade-insecure-requests` is a no-op there, so it is omitted. */
 export const TAURI_CSP = serialize([]);
+
+/** Vite index.html injection — E2E preview serves http://127.0.0.1 (see vite.config.ts). */
+export const resolveIndexHtmlCsp = (isE2ePreviewBuild: boolean): string =>
+  isE2ePreviewBuild ? TAURI_CSP : WEB_CSP;
