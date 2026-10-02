@@ -87,7 +87,7 @@
 | **W2** | WebKit policy or boot fix | ✅ #188 (webkit job: manual/weekly verify) |
 | **W3** | Ollama model from settings + probe `/api/tags` | ✅ #185 |
 | **W4** | Transformers generative null root cause | ✅ (chain = Ollama → WebLLM → Heuristik) |
-| **W5** | Dependabot batches (CI actions, turbo, safe minors) | Planned |
+| **W5** | Dependabot batches (CI actions, turbo, safe minors) | PR in flight |
 | **W6** | #139 Tauri signing (Owner secrets) | Blocked external |
 
 ---
@@ -111,4 +111,4 @@
 
 ---
 
-*Next update: after W2 merge; then W4 Transformers generative null.*
+*Next update: W5 merge; WebKit weekly; optional `e2e-gate` in ruleset.*

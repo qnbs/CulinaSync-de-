@@ -168,6 +168,37 @@ describe('mealPlanRepository', () => {
     expect(mealPlanUpdate).toHaveBeenCalledWith(7, expect.objectContaining({ isCooked: true }));
   });
 
+  it('markMealAsCooked nutzt Skalierung 1 bei ungueltigen Portionen', async () => {
+    const { scaleIngredientQuantity } = await import('../utils');
+    mealPlanGet.mockResolvedValueOnce({
+      id: 9,
+      date: '2026-06-04',
+      mealType: 'Mittagessen',
+      recipeId: 13,
+      servings: 0,
+    });
+    recipesGet.mockResolvedValueOnce({
+      id: 13,
+      servings: '0',
+      ingredients: [
+        { sectionTitle: 'Haupt', items: [{ name: 'Nudeln', quantity: '100', unit: 'g' }] },
+      ],
+    });
+    pantryFirst.mockResolvedValueOnce({
+      id: 22,
+      name: 'Nudeln',
+      quantity: 200,
+      unit: 'g',
+      category: 'Trocken',
+      createdAt: 1,
+      updatedAt: 1,
+    });
+    const { markMealAsCooked } = await import('../repositories/mealPlanRepository');
+    const out = await markMealAsCooked(9);
+    expect(out.success).toBe(true);
+    expect(scaleIngredientQuantity).toHaveBeenCalledWith('100', 1);
+  });
+
   it('markMealAsCooked ueberspringt Zutaten mit Menge 0 und fehlendem Vorrat', async () => {
     const { scaleIngredientQuantity } = await import('../utils');
     vi.mocked(scaleIngredientQuantity).mockReturnValueOnce('0');
