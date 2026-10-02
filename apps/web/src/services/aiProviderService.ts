@@ -1,13 +1,12 @@
 import {
   buildLocalAiRuntimeConfig,
-  getTransformersEngineStatus,
   getWebLlmEngineStatus,
-  isTransformersLayerEnabled,
   isWebLlmLayerEnabled,
   resolveGenerativeModel,
   runHeuristicEngine,
   runProviderChain,
   type AiGenerativeTask,
+  type GenerativeProviderLayerId,
   type LocalAiRuntimeConfig,
 } from '@domain/ai-core';
 import type { AppSettings, PantryItem, Recipe, RecipeIdea, ShoppingListItem, StructuredPrompt } from '../types';
@@ -66,11 +65,11 @@ const promptCacheKey = (prompt: StructuredPrompt, extra = ''): string =>
     extra,
   });
 
-// QNBS-v3: M11 — Provider-Kette Ollama → WebLLM → Transformers → Heuristik + Inference-Cache
+// QNBS-v3: M11 — Provider-Kette Ollama → WebLLM → Heuristik (+ Inference-Cache); Transformers.js nur Embeddings/RAG
 const runLocalGenerative = async <T>(
   ctx: LocalGenerativeContext,
   runHeuristic: () => T,
-): Promise<{ data: T; layer: 'ollama' | 'webllm' | 'transformers' | 'heuristic' | 'cache' }> => {
+): Promise<{ data: T; layer: GenerativeProviderLayerId | 'cache' }> => {
   const { task, settings } = ctx;
   const runtime = await buildLocalAiRuntimeConfig(toRuntimeInput(settings));
   const model = resolveGenerativeModel(settings.localAi.preferredGenerativeModel, runtime.resolvedGpuTier);
@@ -88,7 +87,6 @@ const runLocalGenerative = async <T>(
   }
 
   const webLlmStatus = await getWebLlmEngineStatus(runtime, model);
-  const transformersStatus = await getTransformersEngineStatus(runtime);
 
   const runOllama = async (): Promise<T | null> => {
     if (!settings.localAi.ollamaEnabled) {
@@ -150,16 +148,6 @@ const runLocalGenerative = async <T>(
       run: runWebLlm,
     },
     {
-      layer: 'transformers',
-      enabled: isTransformersLayerEnabled(runtime) && task === 'recipe-ideas',
-      run: async () => {
-        if (!transformersStatus.available) {
-          return null;
-        }
-        return null;
-      },
-    },
-    {
       layer: 'heuristic',
       enabled: true,
       run: async () =>
@@ -181,7 +169,7 @@ const runLocalGenerative = async <T>(
     );
   }
 
-  return result;
+  return { data: result.data, layer: result.layer as GenerativeProviderLayerId };
 };
 
 const withRag = async (

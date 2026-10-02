@@ -42,8 +42,8 @@
 
 ## 4. CI / governance
 
-- **Ruleset `mainrules`:** validate, i18n, GitGuardian, Socket, CodeQL — observed; E2E **not** in required contexts (hypothesis: policy vs protection drift).
-- **E2E Smoke / Matrix:** run on `apps/web/**` changes; agent/human policy treats as blocking for web — audit whether aggregate gate needed.
+- **Ruleset `mainrules`:** validate, i18n, GitGuardian, Socket, CodeQL — observed; **`e2e-gate`** implemented in `ci.yml` (optional ruleset add — admin UI).
+- **E2E Smoke / Matrix:** path-filtered on `main`; PRs use reusable smoke + **`e2e-gate`** (pass on skip).
 - **Deploy Health:** schedule `0 6 * * *` — will go green after Vercel optional skip.
 
 ---
@@ -61,7 +61,7 @@
 | ID | Finding | Severity |
 |----|---------|----------|
 | LA-1 | `localAiOllamaService.ts` hardcodes `model: 'llama3.2'` — no settings field | ✅ PR #185 `localAi.ollamaModel` |
-| LA-2 | Transformers generative layer in `aiProviderService.ts` is a **stub** (`return null` when `available`) — embeddings-only today | P1 / W4 |
+| LA-2 | Transformers removed from generative chain — embeddings/RAG only (**W4**) | ✅ |
 | LA-3 | WebLLM MLC CDN guard shipped (#164) — re-verify with upstream integrity metadata | P2 |
 | LA-4 | Gemini `gemini-2.5-flash` — capability/cost/BYOK analysis before model churn | P2 |
 
@@ -86,7 +86,7 @@
 | **W1** | Deploy verify + release/status docs + audit artifact | ✅ #183 |
 | **W2** | WebKit policy or boot fix | ✅ #188 (webkit job: manual/weekly verify) |
 | **W3** | Ollama model from settings + probe `/api/tags` | ✅ #185 |
-| **W4** | Transformers generative null root cause | Planned |
+| **W4** | Transformers generative null root cause | ✅ (chain = Ollama → WebLLM → Heuristik) |
 | **W5** | Dependabot batches (CI actions, turbo, safe minors) | Planned |
 | **W6** | #139 Tauri signing (Owner secrets) | Blocked external |
 

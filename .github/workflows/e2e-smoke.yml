@@ -11,6 +11,7 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 on:
+  workflow_call:
   workflow_dispatch:
   schedule:
     - cron: '0 5 * * 1'
@@ -22,12 +23,7 @@ on:
       - 'package.json'
       - 'pnpm-lock.yaml'
       - '.github/workflows/e2e-smoke.yml'
-  pull_request:
-    paths:
-      - 'apps/web/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - '.github/workflows/e2e-smoke.yml'
+  # PR smoke runs via ci.yml `e2e-gate` (path-filtered reusable call) — avoids duplicate runs.
 
 permissions:
   contents: read

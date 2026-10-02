@@ -3,6 +3,9 @@ import type { GpuTier, GpuTierPreference } from '../config/gpuTier.js';
 
 export type LocalAiLayerId = 'ollama' | 'webllm' | 'transformers' | 'heuristic';
 
+/** Layers that may produce generative text (Transformers.js = embeddings only). */
+export type GenerativeProviderLayerId = Exclude<LocalAiLayerId, 'transformers'>;
+
 export type AiGenerativeTask = 'recipe-ideas' | 'recipe' | 'shopping-list';
 
 export type LocalAiRuntimeConfig = {

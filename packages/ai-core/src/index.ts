@@ -39,6 +39,7 @@ export {
 export {
   ProviderChainExhaustedError,
   type AiGenerativeTask,
+  type GenerativeProviderLayerId,
   type LocalAiLayerId,
   type LocalAiRuntimeConfig,
   type ProviderAttempt,

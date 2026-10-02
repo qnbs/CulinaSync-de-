@@ -18,8 +18,6 @@ const mockWebLlmIdeas = vi.fn();
 const mockWebLlmRecipe = vi.fn();
 const mockGetWebLlmEngineStatus = vi.fn();
 const mockIsWebLlmLayerEnabled = vi.fn();
-const mockGetTransformersEngineStatus = vi.fn();
-const mockIsTransformersLayerEnabled = vi.fn();
 
 vi.mock('../settingsService', () => ({
   loadSettings: () => mockLoadSettings(),
@@ -59,8 +57,6 @@ vi.mock('@domain/ai-core', async (importOriginal) => {
     ...actual,
     getWebLlmEngineStatus: (...args: unknown[]) => mockGetWebLlmEngineStatus(...args),
     isWebLlmLayerEnabled: (...args: unknown[]) => mockIsWebLlmLayerEnabled(...args),
-    getTransformersEngineStatus: (...args: unknown[]) => mockGetTransformersEngineStatus(...args),
-    isTransformersLayerEnabled: (...args: unknown[]) => mockIsTransformersLayerEnabled(...args),
   };
 });
 
@@ -91,8 +87,6 @@ describe('aiProviderService', () => {
     // Default: WebLLM aus — bestehende Heuristik-/Ollama-Tests bleiben unberührt
     mockGetWebLlmEngineStatus.mockResolvedValue({ available: false, reason: 'disabled' });
     mockIsWebLlmLayerEnabled.mockReturnValue(false);
-    mockGetTransformersEngineStatus.mockResolvedValue({ available: false, reason: 'disabled' });
-    mockIsTransformersLayerEnabled.mockReturnValue(false);
   });
 
   it('nutzt lokalen Stack bei local-first ohne Gemini', async () => {
@@ -380,27 +374,6 @@ describe('aiProviderService', () => {
     const { generateShoppingList } = await import('../aiProviderService');
     const list = await generateShoppingList('salat', pantryItems, []);
     expect(list.length).toBeGreaterThan(0);
-  });
-
-  it('ueberspringt Transformers-Generative-Stub und faellt auf Heuristik', async () => {
-    const settings: AppSettings = {
-      ...getDefaultSettings(),
-      localAi: {
-        ...getDefaultSettings().localAi,
-        enabled: true,
-        enableEmbeddings: true,
-        ollamaEnabled: false,
-      },
-      aiPreferences: { ...getDefaultSettings().aiPreferences, routingMode: 'local-first' },
-    };
-    mockLoadSettings.mockReturnValue(settings);
-    mockGetTransformersEngineStatus.mockResolvedValue({ available: true });
-    mockIsTransformersLayerEnabled.mockReturnValue(true);
-
-    const { generateRecipeIdeas } = await import('../aiProviderService');
-    const ideas = await generateRecipeIdeas(prompt, pantryItems, settings.aiPreferences);
-    expect(ideas.length).toBeGreaterThan(0);
-    expect(mockOllamaIdeas).not.toHaveBeenCalled();
   });
 
   it('generateRecipeIdeas wirft nicht-offline Cloud-Fehler weiter', async () => {
