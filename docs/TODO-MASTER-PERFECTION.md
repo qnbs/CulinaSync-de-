@@ -43,7 +43,7 @@ Stand nach **Full-Scale Audit 2026-10-02** (siehe `docs/STATUS-2026-10-02.md`).
 
 ```text
 Lies docs/STATUS-2026-09-02.md und docs/TODO-MASTER-PERFECTION.md.
-Priorität: Deploy/WebKit/Local-AI P1 (Audit W2–W4), #139 Tauri Signing, Dependabot-Programm.
+Priorität: W5 Dependabot (safe batch), Deploy Pages grün, `e2e-gate` in ruleset (Owner), WebKit dispatch, #139 Tauri Signing.
 Branch: cursor/<kurzname>-a100 ab main. CI bis grün.
 ```
 

@@ -92,6 +92,7 @@ describe('@domain/ai-core provider chain', () => {
       runProviderChain([{ layer: 'webllm', enabled: true, run: async () => null }]),
     ).rejects.toBeInstanceOf(ProviderChainExhaustedError);
   });
+
 });
 
 describe('@domain/ai-core gpu tier', () => {
