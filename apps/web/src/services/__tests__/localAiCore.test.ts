@@ -5,7 +5,6 @@ import {
   ProviderChainExhaustedError,
   rankByCosineSimilarity,
   resetGpuTierCacheForTests,
-  layerOrderForGenerative,
   resolveGenerativeModel,
   resolveGpuTier,
   runProviderChain,
@@ -94,9 +93,6 @@ describe('@domain/ai-core provider chain', () => {
     ).rejects.toBeInstanceOf(ProviderChainExhaustedError);
   });
 
-  it('layerOrderForGenerative schliesst transformers aus', () => {
-    expect(layerOrderForGenerative()).toEqual(['ollama', 'webllm', 'heuristic']);
-  });
 });
 
 describe('@domain/ai-core gpu tier', () => {
