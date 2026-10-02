@@ -4,8 +4,8 @@
 
 | | |
 |---|---|
-| **Live (GitHub Pages)** | [qnbs.github.io/CulinaSync-de-](https://qnbs.github.io/CulinaSync-de-/) |
-| **Vercel Production** | [culina-sync-de-web](https://culina-sync-de-web.vercel.app/) |
+| **Live (GitHub Pages)** | [qnbs.github.io/CulinaSync-de-](https://qnbs.github.io/CulinaSync-de-/) — **canonical production** |
+| **Vercel** | Optional — `apps/web/vercel.json` for re-deploy; not monitored while unprovisioned |
 | **Version** | `0.3.0` |
 | **Stack** | React 19 · Vite 8 · TypeScript (`tsgo`) · Dexie · Redux (UI) · PWA · Local-AI-Routing |
 
@@ -251,7 +251,7 @@ Mehr: [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) · [PRD.md](./PRD.md)
 | Ziel | URL | Trigger |
 |------|-----|---------|
 | **GitHub Pages** | [qnbs.github.io/CulinaSync-de-](https://qnbs.github.io/CulinaSync-de-/) | Push `main` → `deploy.yml` |
-| **Vercel** | [culina-sync-de-web](https://culina-sync-de-web.vercel.app/) | Push `main` (Git-Integration) |
+| **Vercel** | Optional preview/hosting — see [DEPLOY-PAGES-VERCEL.md](./docs/DEPLOY-PAGES-VERCEL.md) | Git integration when project exists |
 | **Tauri** | — | [tauri-release.yml](./.github/workflows/tauri-release.yml) |
 
 Handbuch: **[docs/DEPLOY-PAGES-VERCEL.md](./docs/DEPLOY-PAGES-VERCEL.md)** · Checks: `pnpm run verify:deploy` · `apps/web/vercel.json`

@@ -1,6 +1,6 @@
 # GitHub Pages & Vercel — Deployment-Handbuch
 
-> **Stand:** 2026-06-03 · Monorepo `apps/web` · Version siehe `apps/web/package.json`
+> **Stand:** 2026-10-02 · Monorepo `apps/web` · **Canonical production: GitHub Pages**
 
 ---
 
@@ -9,10 +9,12 @@
 | Kanal | URL | `base` (Vite) | Trigger |
 |-------|-----|---------------|---------|
 | **GitHub Pages** | https://qnbs.github.io/CulinaSync-de-/ | `/CulinaSync-de-/` wenn `GITHUB_ACTIONS=true` | Push `main` → `deploy.yml` |
-| **Vercel Production** | https://culina-sync-de-web-qnbs-projects.vercel.app | `/` | Git-Integration `main` |
-| **Vercel Preview** | pro PR-Branch | `/` | PR gegen `main` |
+| **Vercel** (optional) | ehem. `culina-sync-de-web*.vercel.app` | `/` | Nur wenn Vercel-Projekt verknüpft — **2026-10-02 nicht provisioniert (404)** |
+| **Vercel Preview** | pro PR-Branch | `/` | PR gegen `main` (optional) |
 
-Beide Hosts liefern dieselbe PWA aus `apps/web/dist`, unterscheiden sich nur im **Asset-Basis-Pfad**.
+Pages und Vercel liefern dieselbe PWA aus `apps/web/dist`; Pages nutzt `base: '/CulinaSync-de-/'`, Vercel nutzt `/`.
+
+**Deploy Health / `verify-live-deployments.mjs`:** GitHub Pages ist **required**; Vercel ist optional (404 → SKIP). `DEPLOY_VERIFY_REQUIRE_VERCEL=1` für striktes Monitoring.
 
 ---
 

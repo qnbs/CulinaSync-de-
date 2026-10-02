@@ -1,24 +1,30 @@
 #!/usr/bin/env node
 /**
- * Smoke-Checks für GitHub Pages und Vercel Production (HTTP 200 + HTML-Snippet).
- * Keine Secrets. Exit 1 bei hartem Fehler.
+ * Smoke-Checks für GitHub Pages (required) und optional Vercel Production.
+ * Canonical production: GitHub Pages. Set DEPLOY_VERIFY_REQUIRE_VERCEL=1 to fail on Vercel outage.
  */
 import {
   evaluateDeployResponse,
   isVercelProtectionPage,
+  shouldSkipOptionalVercelUnavailable,
   shouldSkipProtectedVercel,
 } from './lib/deploy-verify-logic.mjs';
+
+/** Set DEPLOY_VERIFY_REQUIRE_VERCEL=1 to fail when Vercel production is down. */
+const requireVercel = process.env.DEPLOY_VERIFY_REQUIRE_VERCEL === '1';
 
 const targets = [
   {
     name: 'GitHub Pages',
     url: 'https://qnbs.github.io/CulinaSync-de-/',
     mustInclude: ['CulinaSync', 'id="root"'],
+    required: true,
   },
   {
     name: 'Vercel Production',
     url: 'https://culina-sync-de-web.vercel.app/',
     mustInclude: ['CulinaSync', 'id="root"'],
+    required: requireVercel,
   },
 ];
 
@@ -58,20 +64,35 @@ for (const target of targets) {
       );
       continue;
     }
+    if (shouldSkipOptionalVercelUnavailable(res.status, target.name, !target.required)) {
+      console.warn(
+        `[deploy-verify] SKIP (optional): ${target.name} — HTTP ${res.status}; canonical production is GitHub Pages`,
+      );
+      continue;
+    }
     if (!res.ok) {
       console.error(`[deploy-verify] ${target.name}: HTTP ${res.status} — ${target.url}`);
-      failed = true;
+      if (target.required) {
+        failed = true;
+      }
       continue;
     }
     const verdict = evaluateDeployResponse(res.status, body, target.mustInclude);
     if (!verdict.ok) {
       console.error(`[deploy-verify] ${target.name}: Antwort ungültig (${verdict.reason})`);
-      failed = true;
+      if (target.required) {
+        failed = true;
+      }
       continue;
     }
     console.log(`[deploy-verify] OK: ${target.name} (${res.status})`);
   } catch (error) {
-    console.error(`[deploy-verify] ${target.name}: ${error instanceof Error ? error.message : error}`);
+    const message = error instanceof Error ? error.message : String(error);
+    if (!target.required) {
+      console.warn(`[deploy-verify] SKIP (optional): ${target.name} — ${message}`);
+      continue;
+    }
+    console.error(`[deploy-verify] ${target.name}: ${message}`);
     failed = true;
   }
 }

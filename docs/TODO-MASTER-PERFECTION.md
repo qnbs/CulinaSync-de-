@@ -1,6 +1,6 @@
 # TODO — Master Perfection (Follow-up)
 
-Stand nach Merge **PR #164** auf `main` (2026-09-02).
+Stand nach **Full-Scale Audit 2026-10-02** (siehe `docs/STATUS-2026-10-02.md`).
 
 ## Erledigt
 
@@ -21,7 +21,7 @@ Stand nach Merge **PR #164** auf `main` (2026-09-02).
 
 ### Release / Desktop
 
-- [ ] GitHub Release **v0.3.0** publishen (Owner) — Evidence unter `release-evidence/0.3.0/` (`4b063f7`)
+- [x] GitHub Release **v0.3.0** — veröffentlicht 2026-08-01; Evidence-Refresh `4b063f7` / `main` post-release
 - [ ] Draft `CulinaSync v0.2.4` publishen (Owner) wenn Desktop-QA ok
 - [ ] `graphify update .` (CLI ggf. nicht installiert)
 
@@ -43,7 +43,7 @@ Stand nach Merge **PR #164** auf `main` (2026-09-02).
 
 ```text
 Lies docs/STATUS-2026-09-02.md und docs/TODO-MASTER-PERFECTION.md.
-Priorität: Owner Release v0.3.0, #139 Tauri Signing, oder M5.9 Coverage.
+Priorität: Deploy/WebKit/Local-AI P1 (Audit W2–W4), #139 Tauri Signing, Dependabot-Programm.
 Branch: cursor/<kurzname>-a100 ab main. CI bis grün.
 ```
 
