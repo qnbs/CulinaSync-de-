@@ -46,7 +46,7 @@ pnpm run test:e2e:smoke  # Chromium-only (wie CI E2E Smoke)
 
 E2E CI builds set `VITE_E2E=true` (skips PersistGate + SW in `index.tsx`); Playwright `serviceWorkers: 'block'`.
 
-**WebKit (bekannte Limitation):** In Playwright Docker + `vite preview` + GitHub-Pages-`base` mountet die SPA in WebKit nicht (`#main-content` fehlt). Chromium/Firefox sind blockierend; WebKit läuft nur weekly/`workflow_dispatch` (`matrix-webkit`, `continue-on-error`).
+**WebKit:** Playwright WebKit läuft weekly/`workflow_dispatch` (`matrix-webkit`, `continue-on-error`). E2E-Builds setzen `VITE_E2E=true` (ohne `PersistGate`/SW) und nutzen **TAURI_CSP** ohne `upgrade-insecure-requests`, damit `http://127.0.0.1` Preview in WebKit Module laden kann. Chromium/Firefox bleiben auf PR/`main` blockierend.
 
 **E2E lokal (wie CI / GitHub Pages):**
 

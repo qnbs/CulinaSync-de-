@@ -14,7 +14,7 @@
 | **Deploy Health workflow** | Failed daily since 2026-09-07 due to Vercel 404 — **fix in PR wave 1** (optional Vercel) |
 | **Release truth** | v0.3.0 **published** 2026-08-01; September docs wrongly listed publish as TODO — **docs updated** |
 | **Security product** | #134 merged; ML CDN fetch guard active |
-| **E2E** | Chromium/Firefox green; WebKit 16/16 fail at boot — **open P1** |
+| **E2E** | Chromium/Firefox green; WebKit boot fix **W2** (E2E CSP ohne `upgrade-insecure-requests`) — CI pending |
 | **Open issues** | #139 signing, #137 encryption review, #131 glib — revalidate before close |
 | **Dependabot** | 15+ open PRs — program, not bulk merge |
 
@@ -51,8 +51,8 @@
 ## 5. E2E / WebKit
 
 - **Chromium / Firefox:** pass on current `main`.
-- **WebKit:** documented limitation (preview + Pages base); matrix still red 16/16 — `#main-content` timeout.
-- **Disposition:** P1 — fix harness/base/runtime **or** explicit supported-browser policy with non-red advisory signal.
+- **WebKit:** Root cause — E2E `WEB_CSP` + `upgrade-insecure-requests` on `http://127.0.0.1` preview blocked module load (not visibility-only). **Fix (W2):** `VITE_E2E=true` → inject `TAURI_CSP` in `vite.config.ts`; `gotoApp` waits `load`.
+- **Disposition:** Verify `e2e-matrix` WebKit job green; matrix remains `continue-on-error` until stable weekly signal.
 
 ---
 
@@ -83,9 +83,9 @@
 
 | Wave | Scope | Status |
 |------|-------|--------|
-| **W1** | Deploy verify + release/status docs + audit artifact | In progress |
-| **W2** | WebKit policy or boot fix | Planned |
-| **W3** | Ollama model from settings + probe `/api/tags` | Planned |
+| **W1** | Deploy verify + release/status docs + audit artifact | ✅ #183 |
+| **W2** | WebKit policy or boot fix | PR open (`cursor/e2e-webkit-csp-preview-a100`) |
+| **W3** | Ollama model from settings + probe `/api/tags` | ✅ #185 |
 | **W4** | Transformers generative null root cause | Planned |
 | **W5** | Dependabot batches (CI actions, turbo, safe minors) | Planned |
 | **W6** | #139 Tauri signing (Owner secrets) | Blocked external |
@@ -107,8 +107,8 @@
 
 - Vercel project deletion intentional vs accidental — no team API confirmation in agent session.
 - Whether product wants Vercel restored vs Pages-only long term — default: Pages canonical.
-- WebKit fix feasibility in Playwright noble + `vite preview` + subpath base.
+- WebKit weekly green rate after W2 merge (Playwright noble + subpath base).
 
 ---
 
-*Next update: after W1 merge on `main`.*
+*Next update: after W2 merge; then W4 Transformers generative null.*

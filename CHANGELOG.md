@@ -12,6 +12,10 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **Deploy Health:** `verify-live-deployments` treats Vercel as optional (404 SKIP); GitHub Pages remains required. `DEPLOY_VERIFY_REQUIRE_VERCEL=1` restores strict Vercel checks.
 - **Supply chain:** pnpm overrides — `fast-uri` ^3.1.7, `undici` ^7.30, `sharp` >=0.35.4, `brace-expansion` >=5.0.11, `basic-ftp` >=6.2.1 (audit high gate).
 
+### Fixed
+
+- **E2E WebKit:** `VITE_E2E` builds inject `TAURI_CSP` (no `upgrade-insecure-requests`) so Playwright preview on `http://127.0.0.1` mounts the SPA in WebKit.
+
 ### Added
 
 - **Local AI:** configurable `localAi.ollamaModel` (Settings + Ollama `/api/chat`); default `llama3.2`.
