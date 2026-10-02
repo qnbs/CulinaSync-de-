@@ -14,6 +14,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ### Changed
 
 - **W5 deps:** GitHub Actions pins (pnpm/action-setup 6.1.0, CodeQL 4.38.2, deploy-pages 5.0.1, action-gh-release 3.0.3); `dompurify` 3.4.16, `turbo` 2.11.x, `vitest` 4.1.11.
+- **W6 patch:** Tauri 2.11.6 (`Cargo.lock`); `lint-staged` 17.6.x; ESLint / `typescript-eslint` / `eslint-plugin-react-refresh` minors.
 - **Local AI generative chain:** Ollama → WebLLM → Heuristik — Transformers.js remains embeddings/RAG only (removed no-op generative stub).
 
 ### Fixed
