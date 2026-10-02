@@ -88,7 +88,8 @@
 | **W3** | Ollama model from settings + probe `/api/tags` | ✅ #185 |
 | **W4** | Transformers generative null root cause | ✅ (chain = Ollama → WebLLM → Heuristik) |
 | **W5** | Dependabot batches (CI actions, turbo, safe minors) | ✅ #192 |
-| **W6** | #139 Tauri signing (Owner secrets) | Blocked external |
+| **W6** | Tauri 2.11.6 + lint/eslint minors (#178/#169/#171 batch) | PR in flight |
+| **W6b** | #139 Tauri signing (Owner secrets) | Blocked external |
 
 ---
 
