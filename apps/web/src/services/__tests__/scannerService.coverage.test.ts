@@ -16,6 +16,8 @@ describe('scannerService coverage', () => {
     vi.restoreAllMocks();
     decodeSingle.mockReset();
     recognize.mockReset();
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock-scanner-test');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
     // @ts-expect-error test override
     delete window.BarcodeDetector;
   });
