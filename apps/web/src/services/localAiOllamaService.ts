@@ -6,6 +6,17 @@ import { constructBasePrompt, geminiSystem } from './aiPromptBuilder';
 import { logAppError } from './errorLoggingService';
 
 const DEFAULT_TIMEOUT_MS = 45_000;
+// QNBS-v3: Ollama model tag from settings — replaces hardcoded llama3.2 (audit LA-1)
+export const DEFAULT_OLLAMA_MODEL = 'llama3.2';
+const OLLAMA_MODEL_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._:/-]{0,127}$/;
+
+export const resolveOllamaModel = (settings: AppSettings): string => {
+  const raw = settings.localAi.ollamaModel?.trim();
+  if (raw && OLLAMA_MODEL_PATTERN.test(raw)) {
+    return raw;
+  }
+  return DEFAULT_OLLAMA_MODEL;
+};
 
 type OllamaChatResponse = {
   message?: { content?: string };
@@ -36,6 +47,7 @@ export const probeOllamaHealth = async (
 
 const chatWithOllama = async (
   baseUrl: string,
+  model: string,
   system: string,
   user: string,
 ): Promise<string> => {
@@ -48,7 +60,7 @@ const chatWithOllama = async (
       headers: { 'Content-Type': 'application/json' },
       signal: controller.signal,
       body: JSON.stringify({
-        model: 'llama3.2',
+        model,
         stream: false,
         format: 'json',
         messages: [
@@ -90,6 +102,7 @@ export const generateRecipeIdeasWithOllama = async (
     const userContent = constructBasePrompt(prompt, pantryItems, aiPreferences);
     const jsonText = await chatWithOllama(
       settings.localAi.ollamaBaseUrl,
+      resolveOllamaModel(settings),
       geminiSystem('ideas'),
       userContent,
     );
@@ -122,6 +135,7 @@ export const generateRecipeWithOllama = async (
     userContent += `\nDescription: "${sanitizeForPrompt(chosenIdea.shortDescription)}"`;
     const jsonText = await chatWithOllama(
       settings.localAi.ollamaBaseUrl,
+      resolveOllamaModel(settings),
       geminiSystem('recipe'),
       userContent,
     );

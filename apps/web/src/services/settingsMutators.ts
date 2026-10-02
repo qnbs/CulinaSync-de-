@@ -43,6 +43,7 @@ export type SettingsPath =
   | 'localAi.stripExifOnVision'
   | 'localAi.ollamaEnabled'
   | 'localAi.ollamaBaseUrl'
+  | 'localAi.ollamaModel'
   | 'localAi.setupWizardCompleted'
   | 'privacy.analyticsEnabled'
   | 'privacy.shareDiagnostics'
@@ -243,6 +244,15 @@ export const settingsMutators: Record<SettingsPath, (draft: AppSettings, value: 
   'localAi.ollamaBaseUrl': (draft, value) => {
     if (typeof value === 'string' && value.length <= 256 && isAllowedOllamaBaseUrl(value)) {
       draft.localAi.ollamaBaseUrl = value;
+    }
+  },
+  'localAi.ollamaModel': (draft, value) => {
+    if (
+      typeof value === 'string' &&
+      value.length <= 128 &&
+      /^[a-zA-Z0-9][a-zA-Z0-9._:/-]*$/.test(value)
+    ) {
+      draft.localAi.ollamaModel = value;
     }
   },
   'localAi.setupWizardCompleted': (draft, value) => {
