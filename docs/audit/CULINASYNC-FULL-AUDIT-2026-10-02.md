@@ -89,6 +89,7 @@
 | **W4** | Transformers generative null root cause | ✅ (chain = Ollama → WebLLM → Heuristik) |
 | **W5** | Dependabot batches (CI actions, turbo, safe minors) | ✅ #192 |
 | **W6** | Tauri 2.11.6 + lint/eslint minors (#178/#169/#171 batch) | ✅ #194 |
+| **W7** | Testing bundle: Vitest 5, MSW 3, jsdom 30 (#186) | ✅ #197 |
 | **W6b** | #139 Tauri signing (Owner secrets) | Blocked external |
 
 ---
