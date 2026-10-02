@@ -7,6 +7,14 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Added
+
+- **CI `e2e-gate`:** PRs always report a stable E2E gate; Playwright smoke runs via reusable `e2e-smoke.yml` when web/package paths change (safe optional `mainrules` context).
+
+### Changed
+
+- **Local AI generative chain:** Ollama → WebLLM → Heuristik — Transformers.js remains embeddings/RAG only (removed no-op generative stub).
+
 ### Fixed
 
 - **Deploy Health:** `verify-live-deployments` treats Vercel as optional (404 SKIP); GitHub Pages remains required. `DEPLOY_VERIFY_REQUIRE_VERCEL=1` restores strict Vercel checks.

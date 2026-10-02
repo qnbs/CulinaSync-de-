@@ -13,7 +13,7 @@
 | **Routing** | `aiProviderService.ts` — Default **`local-first`** (`settingsMerge`); Cloud optional (BYOK) |
 | **L1 WebLLM** | Implementiert, **opt-in** (`enableWebLlmInference: false` default) |
 | **L2 ONNX** | Nicht implementiert |
-| **L3 Transformers** | Embeddings live (`localAiTransformersEngine`); generative L3 = Stub (`null`) |
+| **L3 Transformers** | Embeddings/RAG live (`localAiTransformersEngine`); **nicht** in der generativen Provider-Kette |
 | **L4 Heuristik** | `aiOfflineFallback` + `runHeuristicEngine` — immer verfügbar |
 | **RAG** | Hybrid semantic + keyword (`localAiRagService`); Quellen: Rezepte, Vorrat, **Essensplan** |
 | **Embeddings** | Dexie v13 `aiEmbeddings`; Indexierung via DB-Hooks; **Worker** `embedding.worker.ts` + `WorkerBus` |

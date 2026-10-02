@@ -30,9 +30,9 @@ export async function runProviderChain<T>(
   );
 }
 
+/** Generative inference order — Transformers.js is embeddings/RAG only, not text generation. */
 export const layerOrderForGenerative = (): LocalAiLayerId[] => [
   'ollama',
   'webllm',
-  'transformers',
   'heuristic',
 ];

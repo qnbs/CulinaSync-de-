@@ -75,3 +75,48 @@ jobs:
 
       - name: i18n changed-lines check
         run: pnpm run i18n:check:changed -- origin/${{ github.base_ref }}
+
+  # QNBS-v3: Path-filtered E2E + always-on gate job — safe to add `e2e-gate` to ruleset `mainrules`
+  web-changes:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      web: ${{ steps.detect.outputs.web }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Detect web / E2E-relevant changes
+        id: detect
+        run: |
+          git fetch --no-tags --prune --depth=1 origin "${{ github.base_ref }}"
+          if git diff --name-only "origin/${{ github.base_ref }}"...HEAD | grep -qE \
+            '^(apps/web/|packages/|package\.json|pnpm-lock\.yaml|\.github/workflows/e2e-smoke\.yml|\.github/workflows/ci\.yml)'; then
+            echo "web=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "web=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  smoke:
+    needs: web-changes
+    if: github.event_name == 'pull_request' && needs.web-changes.outputs.web == 'true'
+    uses: ./.github/workflows/e2e-smoke.yml
+
+  e2e-gate:
+    name: e2e-gate
+    needs: [smoke]
+    if: ${{ always() && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require E2E smoke when applicable
+        run: |
+          result="${{ needs.smoke.result }}"
+          if [ "$result" = "failure" ]; then
+            echo "E2E smoke failed"
+            exit 1
+          fi
+          echo "e2e-gate OK (smoke: ${result:-skipped})"

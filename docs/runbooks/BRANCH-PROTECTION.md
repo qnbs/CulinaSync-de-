@@ -50,15 +50,28 @@ gh api repos/qnbs/CulinaSync-de-/rulesets/18769260 --jq '{name, enforcement, rul
 but is **not** currently a required status-check context on the live ruleset (avoids pending-forever
 when the app is slow/offline). Thread resolution remains required via the `pull_request` rule.
 
-### Deliberately NOT required (would block unrelated PRs)
+### E2E on PRs (`e2e-gate` — implemented 2026-10-02)
 
-- **`smoke` (E2E Playwright)** — the `E2E Smoke` workflow is **path-filtered**
-  (`apps/web/**`, `package.json`, `pnpm-lock.yaml`, `e2e-smoke.yml`). A required
-  check that doesn't run stays *pending forever* and blocks the merge, so a
-  docs-only PR would be stuck. It still runs (and must pass) on any code PR.
-  **To require it safely** add an always-running gate job (shim) that reports one
-  stable check name regardless of paths — see *Requiring a path-filtered check*
-  below.
+The **CI** workflow (`ci.yml`) exposes a stable check context **`e2e-gate`** on every
+pull request:
+
+| Job | Behavior |
+|-----|----------|
+| `web-changes` | Detects `apps/web/`, `packages/`, lockfile, or E2E workflow edits |
+| `smoke` | Reuses `e2e-smoke.yml` via `workflow_call` when `web-changes` is true |
+| `e2e-gate` | Always runs on PRs; **fails** only if `smoke` failed; **passes** on success or skip |
+
+Post-merge E2E still runs from **`E2E Smoke`** / **`E2E Matrix`** on `push` to `main`
+(path-filtered) plus weekly schedules.
+
+**Optional ruleset step (repo admin):** add **`e2e-gate`** to `required_status_checks`
+in `mainrules` so merges cannot bypass a failed Playwright smoke. The agent token
+cannot PATCH rulesets (`404`); use GitHub UI or an admin PAT (see below).
+
+### Deliberately NOT required (legacy / redundant)
+
+- **`smoke` (E2E Smoke workflow job name)** — do **not** require the path-filtered
+  workflow job directly (pending-forever on docs-only PRs). Use **`e2e-gate`** instead.
 - **`DeepSource: JavaScript`** — DeepSource is currently **inactive** (disabled
   2026-07-10; see the DeepSource runbook). It was never required regardless
   (conditional on JS changes → pending-forever risk).
