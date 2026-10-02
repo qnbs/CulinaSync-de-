@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, it, expect } from 'vitest';
-import { WEB_CSP, TAURI_CSP } from '../csp';
+import { WEB_CSP, TAURI_CSP, resolveIndexHtmlCsp } from '../csp';
 
 // Vitest runs with cwd = apps/web; the Tauri config lives at the repo root.
 const tauriConf = JSON.parse(
@@ -44,5 +44,11 @@ describe('Content-Security-Policy single source', () => {
 
   it('stays in sync with src-tauri/tauri.conf.json (drift guard)', () => {
     expect(tauriConf.app.security.csp).toBe(TAURI_CSP);
+  });
+
+  it('resolveIndexHtmlCsp uses TAURI_CSP for E2E preview builds only', () => {
+    expect(resolveIndexHtmlCsp(false)).toBe(WEB_CSP);
+    expect(resolveIndexHtmlCsp(true)).toBe(TAURI_CSP);
+    expect(resolveIndexHtmlCsp(true)).not.toContain('upgrade-insecure-requests');
   });
 });

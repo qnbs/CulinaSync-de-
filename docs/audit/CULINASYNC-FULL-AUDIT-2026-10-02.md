@@ -14,7 +14,7 @@
 | **Deploy Health workflow** | Failed daily since 2026-09-07 due to Vercel 404 — **fix in PR wave 1** (optional Vercel) |
 | **Release truth** | v0.3.0 **published** 2026-08-01; September docs wrongly listed publish as TODO — **docs updated** |
 | **Security product** | #134 merged; ML CDN fetch guard active |
-| **E2E** | Chromium/Firefox green; WebKit boot fix **W2** (E2E CSP ohne `upgrade-insecure-requests`) — CI pending |
+| **E2E** | Chromium/Firefox green; WebKit boot fix **#188** — weekly `matrix-webkit` zur Bestätigung |
 | **Open issues** | #139 signing, #137 encryption review, #131 glib — revalidate before close |
 | **Dependabot** | 15+ open PRs — program, not bulk merge |
 
@@ -61,7 +61,7 @@
 | ID | Finding | Severity |
 |----|---------|----------|
 | LA-1 | `localAiOllamaService.ts` hardcodes `model: 'llama3.2'` — no settings field | ✅ PR #185 `localAi.ollamaModel` |
-| LA-2 | Transformers generative path in provider chain may return null — verify routing | P1 |
+| LA-2 | Transformers generative layer in `aiProviderService.ts` is a **stub** (`return null` when `available`) — embeddings-only today | P1 / W4 |
 | LA-3 | WebLLM MLC CDN guard shipped (#164) — re-verify with upstream integrity metadata | P2 |
 | LA-4 | Gemini `gemini-2.5-flash` — capability/cost/BYOK analysis before model churn | P2 |
 
@@ -84,7 +84,7 @@
 | Wave | Scope | Status |
 |------|-------|--------|
 | **W1** | Deploy verify + release/status docs + audit artifact | ✅ #183 |
-| **W2** | WebKit policy or boot fix | PR open (`cursor/e2e-webkit-csp-preview-a100`) |
+| **W2** | WebKit policy or boot fix | ✅ #188 (webkit job: manual/weekly verify) |
 | **W3** | Ollama model from settings + probe `/api/tags` | ✅ #185 |
 | **W4** | Transformers generative null root cause | Planned |
 | **W5** | Dependabot batches (CI actions, turbo, safe minors) | Planned |

@@ -2,7 +2,7 @@ name: E2E Matrix
 
 # Cross-browser Playwright matrix.
 # PR/main (blocking): Chromium + Firefox — complements E2E Smoke (Chromium).
-# WebKit: weekly + manual only (Playwright WebKit + Vite preview + GitHub Pages base — SPA mount fails in GHA; tracked in TESTING.md).
+# WebKit: weekly + manual only (E2E build uses TAURI_CSP — see TESTING.md / #188).
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
