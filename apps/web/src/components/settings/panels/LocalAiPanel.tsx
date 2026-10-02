@@ -342,6 +342,21 @@ export const LocalAiPanel: React.FC<LocalAiPanelProps> = ({ settings, onChange }
             className="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent-500)] disabled:cursor-not-allowed"
             placeholder="http://127.0.0.1:11434"
           />
+          <label className="block text-sm font-bold text-zinc-300" htmlFor="ollama-model">
+            {t('settings.localAi.ollamaModelLabel')}
+          </label>
+          <input
+            id="ollama-model"
+            type="text"
+            value={localAi.ollamaModel ?? 'llama3.2'}
+            disabled={!localAi.ollamaEnabled}
+            onChange={(e) => onChange('localAi.ollamaModel', e.target.value)}
+            className="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent-500)] disabled:cursor-not-allowed font-mono text-sm"
+            placeholder="llama3.2"
+            autoComplete="off"
+            spellCheck={false}
+          />
+          <p className="text-xs text-zinc-500">{t('settings.localAi.ollamaModelDesc')}</p>
           <div className="flex items-center gap-3">
             <Button
               type="button"

@@ -63,6 +63,44 @@ describe('localAiOllamaService generate*', () => {
     expect(ideas?.[0]?.recipeTitle).toBe('Pasta');
   });
 
+  it('sendet konfiguriertes Ollama-Modell an /api/chat', async () => {
+    const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+      if (String(url).endsWith('/api/tags')) {
+        return new Response('{}', { status: 200 });
+      }
+      const body = JSON.parse(String(init?.body)) as { model: string };
+      expect(body.model).toBe('mistral:latest');
+      return new Response(
+        JSON.stringify({
+          message: {
+            content: JSON.stringify({
+              ideas: [{ recipeTitle: 'M', shortDescription: 'N' }],
+            }),
+          },
+        }),
+        { status: 200 },
+      );
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const settings = {
+      ...getDefaultSettings(),
+      localAi: {
+        ...getDefaultSettings().localAi,
+        ollamaEnabled: true,
+        ollamaBaseUrl: 'http://127.0.0.1:11434',
+        ollamaModel: 'mistral:latest',
+      },
+    };
+    const { generateRecipeIdeasWithOllama } = await import('../localAiOllamaService');
+    await generateRecipeIdeasWithOllama(
+      { craving: 'pasta', includeIngredients: [], excludeIngredients: [], modifiers: [] },
+      [],
+      settings.aiPreferences,
+      settings,
+    );
+  });
+
   it('generateRecipeWithOllama bei healthy server', async () => {
     vi.stubGlobal(
       'fetch',

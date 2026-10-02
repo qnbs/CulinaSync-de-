@@ -164,6 +164,8 @@ export interface AppSettings {
     stripExifOnVision: boolean;
     ollamaEnabled: boolean;
     ollamaBaseUrl: string;
+    /** Ollama model tag (e.g. llama3.2, qwen2.5:7b). */
+    ollamaModel: string;
     setupWizardCompleted: boolean;
   };
   privacy: {

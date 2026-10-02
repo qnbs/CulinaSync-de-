@@ -575,6 +575,8 @@
       "ollamaEnabledLabel": "Ollama-Connector",
       "ollamaEnabledDesc": "Nutzt einen lokalen Ollama-Server (Standard: 127.0.0.1). Im Browser kann HTTPS-Upgrade Loopback blockieren — Desktop/Tauri empfohlen.",
       "ollamaUrlLabel": "Ollama-Basis-URL",
+      "ollamaModelLabel": "Ollama-Modell",
+      "ollamaModelDesc": "Modell-Tag wie von `ollama list` (z. B. llama3.2, qwen2.5:7b).",
       "ollamaProbeAction": "Verbindung prüfen",
       "ollamaProbeOk": "Ollama erreichbar.",
       "ollamaProbeFail": "Ollama nicht erreichbar.",
