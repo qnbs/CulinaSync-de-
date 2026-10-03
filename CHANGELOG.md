@@ -11,6 +11,10 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 - **CI `e2e-gate`:** PRs always report a stable E2E gate; Playwright smoke runs via reusable `e2e-smoke.yml` when web/package paths change (safe optional `mainrules` context).
 
+### Added
+
+- **M5.9 S1:** RTL-Coverage für UI-Primitives, `DemoModeBanner`, `PantryHeader`; `docs/M5.9-COVERAGE-PROGRAM.md`; M8-Signing-Owner-Checklist.
+
 ### Changed
 
 - **Docs:** `TESTING.md` Vitest 5 / MSW 3 stack; audit handoff (W7, #131 cargo audit, TODO-MASTER refresh).

@@ -35,7 +35,7 @@ Stand nach **Full-Scale Audit 2026-10-02** und Abschluss **W7 Testing** (#197). 
 
 - [ ] Nostr / federated Sync — Spike
 - [ ] Native Mobile Path — Roadmap
-- [ ] M5.9 Coverage → 88 %
+- [ ] M5.9 Coverage → 88 % (`docs/M5.9-COVERAGE-PROGRAM.md`, S1 UI-Tests ✅)
 
 ---
 
