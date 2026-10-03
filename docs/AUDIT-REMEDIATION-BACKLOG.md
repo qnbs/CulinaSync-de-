@@ -19,7 +19,7 @@
 | R-012 | Medium | `release(tauri): M8 first tagged desktop build` | Desktop | L | ROADMAP M8 | CI GTK image | ✅ Tag+Draft `v0.2.4` mit Assets; Publish optional Owner |
 | R-013 | Low | `docs(legal): privacy policy DE` | Launch DE | M | Öffentliche Veröffentlichung | — | ✅ 2026-07-15 — `docs/legal/DATENSCHUTZ.md` + Settings-Link |
 | R-014 | Info | `chore(graphify): update after code sessions` | Agent DX | S | Team policy | — | 🟨 optional |
-| R-GLIB | Medium | `chore(sec): track glib 0.18.5 VariantStrIter unsoundness (GH #23)` | Security (Desktop) | S | Transitiv via Tauri/gtk-rs 0.18; Fix erst glib 0.20.10 (semver-major, durch wry/webkit2gtk gepinnt); `cargo update -p glib` = 0 changes | wry/webkit2gtk → gtk-rs 0.20 | 🟨 tracked — Dependabot(cargo) + SECURITY.md; Re-Eval bei gtk-rs 0.20 |
+| R-GLIB | Medium | `chore(sec): track glib 0.18.5 VariantStrIter unsoundness (GH #23)` | Security (Desktop) | S | Transitiv via Tauri/gtk-rs 0.18; Fix erst glib 0.20.10 (semver-major); CI `cargo audit` + `CARGO-AUDIT-EXCEPTIONS.md`; #131 closed | wry/webkit2gtk → gtk-rs 0.20 | ✅ tracked — Re-Eval bei gtk-rs 0.20 |
 | R-BRANCHPROT | Low | `chore(ci): enable branch protection + require main-guard/validate` | Enforcement | S | Ruleset `mainrules` aktiv (Required Checks + PR + linear + no force-push); klassische Protection-API bleibt 404 | WS-GUARD ✅ | ✅ 2026-07-15 — verifiziert + Runbook sync |
 
 ## Sprint-Vorschlag (aktuell)
