@@ -1,9 +1,9 @@
 {
   "version": "0.3.0",
-  "generatedAtUtc": "2026-10-02T22:16:50.369Z",
+  "generatedAtUtc": "2026-10-03T09:09:20.763Z",
   "sourceSha": null,
   "vitest": {
-    "testFileCount": 157,
+    "testFileCount": 163,
     "coverageThresholds": {
       "lines": 82,
       "statements": 80,
