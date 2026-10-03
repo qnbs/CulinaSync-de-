@@ -1,11 +1,16 @@
 # Testing
 
-## Test-Stack
+## Test-Stack (2026-10, #197)
 
-- Vitest
-- Testing Library
-- MSW
-- jsdom
+| Paket | Version | Hinweise |
+|-------|---------|----------|
+| Vitest | **5.0.3** | Pin + `pnpm-workspace.yaml` override `vitest` / `@vitest/utils` |
+| `@vitest/coverage-v8` | **5.0.3** | Muss dieselbe Major wie Vitest sein |
+| MSW | **3.x** | `server.listen({ onUnhandledFrame: 'error' })` in `setupTests.ts` |
+| jsdom | **30.x** | Scanner-Tests: `URL.createObjectURL` / `revokeObjectURL` stubben |
+| Testing Library | jest-dom **7**, react **16**, user-event **14** | `@testing-library/jest-dom/vitest` Import |
+
+Coverage-Floors in `apps/web/vitest.config.ts`: **82 %** lines/branches (siehe `docs/generated/repo-status.json`).
 
 ## Relevante Testorte
 
@@ -112,18 +117,18 @@ pnpm run check:bundle-budget
 - Voice- und Navigationstrigger
 - Datenbanknahe Cross-Feature-Operationen
 
-## Aktueller Validierungsstand 2026-06-04 (`main` nach PR #67)
+## Aktueller Validierungsstand 2026-10-03 (`main` nach #197)
 
-- **Vitest:** **470** Tests in **109** Dateien (`pnpm run test`); u. a. Local AI (`aiProviderService`, embeddings, WebLLM), `data-panel/`, Device-Sync (Zod).
-- **Scripts:** **`pnpm run test:scripts`** — 5 Node-Tests für `scripts/lib/deploy-verify-logic.mjs` (auch in CI validate).
-- **Coverage (v8):** ca. **79,6 %** Statements / **81,1 %** Lines / **64,0 %** Branches / **75,1 %** Functions — Thresholds **80 / 78 / 73 / 64** in `apps/web/vitest.config.ts`; Langfrist-Ziel **88 %** siehe `ROADMAP.md` M5.9.
-- **E2E:** **10** Playwright-Tests in **6** Specs (`CI=true pnpm run test:e2e` nach `pnpm run build`).
+- **Vitest:** **861** Tests in **157** Dateien (`pnpm run test`); u. a. Local AI (`aiProviderService`, embeddings, WebLLM), `data-panel/`, Device-Sync (Zod).
+- **Scripts:** **`pnpm run test:scripts`** — 21 Node-Tests (deploy-verify, prune-deployments, repo-truth helpers).
+- **Coverage (v8):** ca. **91 %** Statements / **92 %** Lines / **~82 %** Branches / **87 %** Functions — Floors **82 / 80 / 75 / 82** in `apps/web/vitest.config.ts`; Langfrist-Ziel **88 %** siehe `ROADMAP.md` M5.9.
+- **E2E:** **16** Playwright-Tests in **11** Specs; PR-Gate **`e2e-gate`** (smoke bei Web-Änderungen).
 - **Lighthouse CI (R-009):** PR-Workflow **`lighthouse-ci.yml`** — baut mit `GITHUB_ACTIONS=true`, audit per `vite preview` auf `/CulinaSync-de-/` (wie Pages). Lokal: nach Build `pnpm exec playwright install chromium`, dann `CHROME_PATH=$(find ~/.cache/ms-playwright -name chrome -type f | head -1) GITHUB_ACTIONS=true pnpm run lighthouse:ci`. Mobile optional: `pnpm run lighthouse:ci:mobile` oder `workflow_dispatch` mit `include_mobile`.
 - **CI:** `validate.yml` — lint → type-check → test:coverage → **test:scripts** → build → bundle-budget → audit. Playwright **v1.60.0** in **`e2e-smoke.yml`**. PRs: **`i18n:check`** in `ci.yml`. Artefakt **coverage-lcov** (14 Tage).
 - **i18n lokal:** `pnpm run i18n:check` vor PR; Vollscan `pnpm run i18n:scan` (Report unter `reports/`, gitignored); nach bereinigten Hardcoded-Strings `pnpm run i18n:baseline:update`.
 - **Gemini:** Integrationstests + Zod (`geminiMsw.test.ts`, `geminiService.test.ts`); Schema-Änderungen in `geminiService.ts` mit Tests mitziehen.
 - **Wartung:** `db.ts` nicht isoliert testbar (Import-Side-Effects) — Cross-Feature- und Repository-Tests bevorzugen.
-- Aktueller Snapshot: [STATUS-2026-06-03.md](./STATUS-2026-06-03.md); Vorgänger: [STATUS-2026-06-02.md](./STATUS-2026-06-02.md).
+- Aktueller Snapshot: [STATUS-2026-10-02.md](./STATUS-2026-10-02.md).
 - `pnpm run lint` mit **`--max-warnings 0`**; `react-hooks/exhaustive-deps`, `no-explicit-any`, **`no-floating-promises`** (projectService) sind **`error`**; `no-console` erlaubt nur warn/error/debug (siehe `301-strict-quality-gates.mdc`).
 - Vor Release empfohlen: **`pnpm run check:all`** oder mindestens lint, test, build und bei Bundle-Aenderungen `pnpm run check:bundle-budget`.
 

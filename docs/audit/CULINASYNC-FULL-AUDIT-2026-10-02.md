@@ -15,7 +15,7 @@
 | **Release truth** | v0.3.0 **published** 2026-08-01; September docs wrongly listed publish as TODO — **docs updated** |
 | **Security product** | #134 merged; ML CDN fetch guard active |
 | **E2E** | Chromium/Firefox green; WebKit boot fix **#188** — weekly `matrix-webkit` zur Bestätigung |
-| **Open issues** | #139 signing, #137 encryption review, #131 glib — revalidate before close |
+| **Open issues** | #139 signing (Owner); #137 Dexie encrypt (ADR deferred); #131 glib ✅ CI + exceptions |
 | **Dependabot** | 15+ open PRs — program, not bulk merge |
 
 ---
